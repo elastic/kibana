@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { EuiDualRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+import { MAX_SIZE, MIN_SIZE } from '../../vector_style_defaults';
 
 interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
   minSize: number;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { getFileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
+import { i18n } from '@kbn/i18n';
+import type { ResultLinks } from '../common/app';
 import {
-  featureTitle,
   FILE_DATA_VIS_TAB_ID,
   applicationPath,
   featureId,
+  featureTitle,
 } from '../common/constants';
-import type { ResultLinks } from '../common/app';
+import { getFileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 
 export function registerHomeAddData(home: HomePublicPluginSetup, resultsLinks: ResultLinks) {
   home.addData.registerAddDataTab({

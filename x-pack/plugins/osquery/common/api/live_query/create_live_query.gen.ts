@@ -17,11 +17,11 @@ import { z } from 'zod';
  */
 
 import {
-  QueryOrUndefined,
   ArrayQueries,
-  SavedQueryIdOrUndefined,
   ECSMappingOrUndefined,
   PackIdOrUndefined,
+  QueryOrUndefined,
+  SavedQueryIdOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
 export type CreateLiveQueryRequestBody = z.infer<typeof CreateLiveQueryRequestBody>;

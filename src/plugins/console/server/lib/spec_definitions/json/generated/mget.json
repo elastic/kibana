@@ -13,18 +13,10 @@
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],
-      "stored_fields": [
-        "false"
-      ]
+      "stored_fields": ["false"]
     },
-    "methods": [
-      "GET",
-      "POST"
-    ],
-    "patterns": [
-      "_mget",
-      "{index}/_mget"
-    ],
+    "methods": ["GET", "POST"],
+    "patterns": ["_mget", "{index}/_mget"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html",
     "availability": {
       "stack": true,

@@ -8,9 +8,9 @@ import { parse, stringify } from 'query-string';
 
 import type {
   CreatePackagePolicyRouteState,
+  OnSaveQueryParamKeys,
   OnSaveQueryParamOpts,
   PackagePolicy,
-  OnSaveQueryParamKeys,
 } from '../../../../types';
 
 export function appendOnSaveQueryParamsToPath({

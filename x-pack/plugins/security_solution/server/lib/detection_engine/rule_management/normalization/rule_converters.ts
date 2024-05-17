@@ -7,10 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { stringifyZodError } from '@kbn/zod-helpers';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { stringifyZodError } from '@kbn/zod-helpers';
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import {
@@ -19,7 +19,6 @@ import {
   SERVER_APP_ID,
 } from '../../../../../common/constants';
 
-import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -33,11 +32,12 @@ import {
   MachineLearningRulePatchFields,
   NewTermsRulePatchFields,
   QueryRulePatchFields,
+  RuleResponse,
   SavedQueryRulePatchFields,
   ThreatMatchRulePatchFields,
   ThresholdRulePatchFields,
-  RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 
 import {
   transformAlertToRuleAction,
@@ -53,38 +53,38 @@ import {
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 
+import { convertObjectKeysToSnakeCase } from '../../../../utils/object_case_converters';
+import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type {
-  InternalRuleCreate,
-  RuleParams,
-  TypeSpecificRuleParams,
   BaseRuleParams,
   EqlRuleParams,
   EqlSpecificRuleParams,
   EsqlRuleParams,
   EsqlSpecificRuleParams,
-  ThreatRuleParams,
-  ThreatSpecificRuleParams,
-  QueryRuleParams,
-  QuerySpecificRuleParams,
-  SavedQuerySpecificRuleParams,
-  SavedQueryRuleParams,
-  ThresholdRuleParams,
-  ThresholdSpecificRuleParams,
+  InternalRuleCreate,
+  InternalRuleUpdate,
   MachineLearningRuleParams,
   MachineLearningSpecificRuleParams,
-  InternalRuleUpdate,
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
+  QueryRuleParams,
+  QuerySpecificRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+  SavedQuerySpecificRuleParams,
+  ThreatRuleParams,
+  ThreatSpecificRuleParams,
+  ThresholdRuleParams,
+  ThresholdSpecificRuleParams,
+  TypeSpecificRuleParams,
 } from '../../rule_schema';
-import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import {
   convertAlertSuppressionToCamel,
   convertAlertSuppressionToSnake,
   migrateLegacyInvestigationFields,
 } from '../utils/utils';
-import { createRuleExecutionSummary } from '../../rule_monitoring';
-import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
-import { convertObjectKeysToSnakeCase } from '../../../../utils/object_case_converters';
+import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;

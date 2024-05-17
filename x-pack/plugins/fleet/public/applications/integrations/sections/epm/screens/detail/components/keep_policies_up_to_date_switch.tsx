@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import React from 'react';
 
 interface Props {
   checked: boolean;

@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { createTypeFilter, createQuery } from './create_query';
+import { createQuery, createTypeFilter } from './create_query';
 
 describe('Create Type Filter', () => {
   it('Builds a type filter syntax', () => {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
+import { TimeUnitChar, formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   Comparator,
   ComparatorToi18nSymbolsMap,

@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import {
   EmptyStringArray,
   EmptyStringArrayDecoded,
   NonEmptyStringArray,
   StringToPositiveNumber,
 } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 import {
   DefaultNamespaceArray,
   DefaultNamespaceArrayTypeDecoded,
 } from '../../common/default_namespace_array';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { search } from '../../common/search';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
-import { search } from '../../common/search';
 
 export const findExceptionListItemSchema = t.intersection([
   t.exact(

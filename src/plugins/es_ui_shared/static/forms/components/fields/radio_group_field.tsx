@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import React from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

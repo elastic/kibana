@@ -7,18 +7,18 @@
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
+import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s, getPackageInfoMock } from './mocks';
 import {
-  getMaxPackageName,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
+  findVariableDef,
   getCspmCloudShellDefaultValue,
-  isBelowMinVersion,
   getDefaultAwsCredentialsType,
   getDefaultAzureCredentialsType,
   getDefaultGcpHiddenVars,
-  findVariableDef,
+  getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  isBelowMinVersion,
 } from './utils';
-import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS, getPackageInfoMock } from './mocks';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [

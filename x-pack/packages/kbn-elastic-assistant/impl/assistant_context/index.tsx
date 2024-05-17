@@ -6,26 +6,27 @@
  */
 
 import { EuiCommentProps } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { IToasts } from '@kbn/core-notifications-browser';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage, useSessionStorage } from 'react-use';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { updatePromptContexts } from './helpers';
+import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import type {
   PromptContext,
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
-import type { Conversation } from './types';
-import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
-import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { QuickPrompt } from '../assistant/quick_prompts/types';
+import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { KnowledgeBaseConfig, Prompt, TraceOptions } from '../assistant/types';
+import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
+import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -37,10 +38,9 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+import { updatePromptContexts } from './helpers';
+import type { Conversation } from './types';
 import { AssistantAvailability, AssistantTelemetry } from './types';
-import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
-import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;

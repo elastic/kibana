@@ -8,8 +8,8 @@
 import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
 import {
   IndicesGetResponse,
-  SecurityHasPrivilegesPrivileges,
   IndicesStatsIndicesStats,
+  SecurityHasPrivilegesPrivileges,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 

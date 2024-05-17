@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import supertest from 'supertest';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { createHttpService, createCoreContext } from '@kbn/core-http-server-mocks';
+import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
-  coreUsageStatsClientMock,
-  coreUsageDataServiceMock,
-} from '@kbn/core-usage-data-server-mocks';
-import { contextServiceMock, coreMock } from '../../../mocks';
-import {
-  registerGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
+  registerGetRoute,
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageDataServiceMock,
+  coreUsageStatsClientMock,
+} from '@kbn/core-usage-data-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import supertest from 'supertest';
+import { contextServiceMock, coreMock } from '../../../mocks';
 import { setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');

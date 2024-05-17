@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { importExceptionsListSchema, ImportExceptionsListSchema } from '.';
+import { ImportExceptionsListSchema, importExceptionsListSchema } from '.';
 import {
-  getImportExceptionsListSchemaMock,
   getImportExceptionsListSchemaDecodedMock,
+  getImportExceptionsListSchemaMock,
 } from './index.mock';
 
 describe('import_list_item_schema', () => {

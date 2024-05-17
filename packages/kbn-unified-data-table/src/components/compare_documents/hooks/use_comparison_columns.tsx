@@ -132,14 +132,14 @@ export const useComparisonColumns = ({
                 values: { documentId: doc.raw._id },
               })
           : isPlainRecord
-          ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
-              defaultMessage: 'Comparison result: {resultNumber}',
-              values: { resultNumber },
-            })
-          : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
-              defaultMessage: 'Comparison document: {documentId}',
-              values: { documentId: doc.raw._id },
-            });
+            ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
+                defaultMessage: 'Comparison result: {resultNumber}',
+                values: { resultNumber },
+              })
+            : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
+                defaultMessage: 'Comparison document: {documentId}',
+                values: { documentId: doc.raw._id },
+              });
 
       currentColumns.push({
         id: docId,

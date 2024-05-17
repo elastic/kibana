@@ -7,15 +7,15 @@
  */
 
 import type { Filter, PhraseFilter, ScriptedPhraseFilter } from '@kbn/es-query';
-import { get } from 'lodash';
 import {
-  getPhraseFilterValue,
-  getPhraseFilterField,
   FILTERS,
-  isScriptedPhraseFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
   isPhraseFilter,
+  isScriptedPhraseFilter,
 } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { get } from 'lodash';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);

@@ -20,10 +20,10 @@ import {
   transformOutput,
 } from '@kbn/securitysolution-list-hooks';
 
+import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
-import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

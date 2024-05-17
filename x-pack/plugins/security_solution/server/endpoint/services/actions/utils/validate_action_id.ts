@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
 import { NotFoundError } from '../../../errors';
 import { catchAndWrapError } from '../../../utils';
-import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 
 /**
  * Validates that a given action ID is a valid Endpoint action

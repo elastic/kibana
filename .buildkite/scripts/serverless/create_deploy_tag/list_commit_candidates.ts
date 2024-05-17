@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, COMMIT_INFO_CTX, CommitWithStatuses, SELECTED_COMMIT_META_KEY } from './shared';
+import { BuildkiteInputStep } from '#pipeline-utils';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
   makeCommitInfoWithBuildResultsHtml,
 } from './info_sections/build_info';
-import { getRecentCommits, GitCommitExtract } from './info_sections/commit_info';
-import { BuildkiteInputStep } from '#pipeline-utils';
+import { GitCommitExtract, getRecentCommits } from './info_sections/commit_info';
+import { COMMIT_INFO_CTX, CommitWithStatuses, SELECTED_COMMIT_META_KEY, buildkite } from './shared';
 
 async function main(commitCountArg: string) {
   console.log('--- Listing commits');

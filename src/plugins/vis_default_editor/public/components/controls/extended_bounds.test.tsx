@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
+import React from 'react';
 
-import { ExtendedBoundsParamEditor, Bounds } from './extended_bounds';
 import { AggParamEditorProps } from '../agg_param_props';
+import { Bounds, ExtendedBoundsParamEditor } from './extended_bounds';
 
 describe('ExtendedBoundsParamEditor', () => {
   let defaultProps: Partial<AggParamEditorProps<Bounds>>;

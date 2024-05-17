@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiDataGridSorting } from '@elastic/eui';
 import { TopNFunctionSortField, TopNFunctions } from '@kbn/profiling-utils';
 import React, { useState } from 'react';
-import { EuiDataGridSorting } from '@elastic/eui';
 import { TopNFunctionsGrid } from '../../components/topn_functions';
 
 interface Props {

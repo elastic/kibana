@@ -8,8 +8,8 @@
 import { set } from '@kbn/safer-lodash-set';
 import { pipe } from 'lodash/fp';
 
-import { InputsModelId } from '../../../store/inputs/constants';
 import { mockGlobalState } from '../../../mock';
+import { InputsModelId } from '../../../store/inputs/constants';
 
 const filters = [
   {

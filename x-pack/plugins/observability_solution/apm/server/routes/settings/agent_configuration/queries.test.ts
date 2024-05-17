@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
+import { getAllEnvironments } from '../../environments/get_all_environments';
+import { findExactConfiguration } from './find_exact_configuration';
 import { getExistingEnvironmentsForService } from './get_environments/get_existing_environments_for_service';
 import { listConfigurations } from './list_configurations';
 import { searchConfigurations } from './search_configurations';
-import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
-import { findExactConfiguration } from './find_exact_configuration';
-import { getAllEnvironments } from '../../environments/get_all_environments';
 
 describe('agent configuration queries', () => {
   let mock: SearchParamsMock;

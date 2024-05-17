@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
+import React, { memo } from 'react';
 import { InvestigationGuide } from '../components/investigation_guide';
 import { INVESTIGATION_TAB_CONTENT_TEST_ID } from './test_ids';
 

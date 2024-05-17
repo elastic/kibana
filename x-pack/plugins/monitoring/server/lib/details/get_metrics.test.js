@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getMetrics } from './get_metrics';
 import sinon from 'sinon';
+import { getMetrics } from './get_metrics';
 
-import nonDerivMetricsBuckets from './__fixtures__/non_deriv_metrics_buckets.json';
-import derivMetricsBuckets from './__fixtures__/deriv_metrics_buckets.json';
 import aggMetricsBuckets from './__fixtures__/agg_metrics_buckets.json';
+import derivMetricsBuckets from './__fixtures__/deriv_metrics_buckets.json';
+import nonDerivMetricsBuckets from './__fixtures__/non_deriv_metrics_buckets.json';
 
 // max / min window that accepts the above buckets/results
 const min = 1498968000000; // 2017-07-02T04:00:00.000Z

@@ -1,3 +1,7 @@
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +10,16 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
-import { DiscoverMainApp } from './discover_main_app';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 import {
-  createCustomizationService,
   DiscoverCustomizationService,
+  createCustomizationService,
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
-import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
+import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 

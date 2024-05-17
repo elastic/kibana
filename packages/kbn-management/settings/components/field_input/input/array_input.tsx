@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getFieldInputValue } from '@kbn/management-settings-utilities';
 import { useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
+import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { useServices } from '../services';
 import { InputProps } from '../types';
-import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 /**
  * Props for an {@link ArrayFieldInput} component.

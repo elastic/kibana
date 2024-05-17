@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimelineFilter } from '../objects/timeline';
 import { getDataTestSubjectSelector } from '../helpers/common';
+import type { TimelineFilter } from '../objects/timeline';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 

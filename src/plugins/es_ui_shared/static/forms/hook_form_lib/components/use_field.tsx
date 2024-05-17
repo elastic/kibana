@@ -8,8 +8,8 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { FieldHook, FieldConfig, FormData } from '../types';
 import { useFieldFromProps } from '../hooks';
+import { FieldConfig, FieldHook, FormData } from '../types';
 
 export interface Props<T, FormType = FormData, I = T> {
   path: string;

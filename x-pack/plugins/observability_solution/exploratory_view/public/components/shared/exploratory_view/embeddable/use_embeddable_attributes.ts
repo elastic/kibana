@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useKibanaSpace, useTheme } from '@kbn/observability-shared-plugin/public';
-import { ExploratoryEmbeddableComponentProps } from './embeddable';
+import { useMemo } from 'react';
+import { ReportTypes } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
+import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
-import { ReportTypes } from '../../../..';
-import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
-import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
+import { ExploratoryEmbeddableComponentProps } from './embeddable';
 
 export const useEmbeddableAttributes = ({
   attributes,

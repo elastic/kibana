@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Ping } from '../../../../common/runtime_types/ping';
+import React, { useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { OVERVIEW_ROUTE } from '../../../../common/constants';
 import { MonitorSummary } from '../../../../common/runtime_types/monitor';
-import { useFilterUpdate } from '../../hooks/use_filter_update';
+import { Ping } from '../../../../common/runtime_types/ping';
 import { useGetUrlParams } from '../../hooks';
+import { useFilterUpdate } from '../../hooks/use_filter_update';
 import { parseCurrentFilters } from '../overview/monitor_list/columns/monitor_name_col';
 import { EXPAND_TAGS_LABEL } from '../overview/monitor_list/columns/translations';
-import { OVERVIEW_ROUTE } from '../../../../common/constants';
 
 interface Props {
   ping?: Ping | null;

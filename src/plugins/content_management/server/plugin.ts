@@ -9,21 +9,21 @@
 import type {
   CoreSetup,
   CoreStart,
+  Logger,
   Plugin,
   PluginInitializerContext,
-  Logger,
 } from '@kbn/core/server';
+import { procedureNames } from '../common/rpc';
 import { Core } from './core';
-import { initRpcRoutes, registerProcedures, RpcService } from './rpc';
+import { EventStreamService } from './event_stream';
+import { RpcService, initRpcRoutes, registerProcedures } from './rpc';
 import type { Context as RpcContext } from './rpc';
 import {
   ContentManagementServerSetup,
-  ContentManagementServerStart,
   ContentManagementServerSetupDependencies,
+  ContentManagementServerStart,
   ContentManagementServerStartDependencies,
 } from './types';
-import { EventStreamService } from './event_stream';
-import { procedureNames } from '../common/rpc';
 
 export class ContentManagementPlugin
   implements

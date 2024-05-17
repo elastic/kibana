@@ -12,7 +12,7 @@ const initialize = <T extends NoDataPagePublicSetup>() => {
   return () =>
     ({
       getAnalyticsNoDataPageFlavor: () => 'kibana',
-    } as T);
+    }) as T;
 };
 
 export const noDataPagePublicMock = {

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiCode, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiCode, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { DomainDeprecationDetails } from '@kbn/core/public';
+import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import {
-  WithPrivileges,
+  GlobalFlyout,
   MissingPrivileges,
   SectionLoading,
-  GlobalFlyout,
+  WithPrivileges,
 } from '../../../shared_imports';
-import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
-import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
-import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
-import { KibanaDeprecationsTable } from './kibana_deprecations_table';
+import { UIM_KIBANA_DEPRECATIONS_PAGE_LOAD, uiMetricService } from '../../lib/ui_metric';
+import { DeprecationCount, DeprecationsPageLoadingError, NoDeprecationsPrompt } from '../shared';
 import {
   DeprecationDetailsFlyout,
   DeprecationDetailsFlyoutProps,
 } from './deprecation_details_flyout';
+import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 
 const { useGlobalFlyout } = GlobalFlyout;
 

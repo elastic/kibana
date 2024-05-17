@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
+import React, { FocusEventHandler } from 'react';
 
 type DataViewOption = Pick<DataView, 'id' | 'name' | 'title'>;
 

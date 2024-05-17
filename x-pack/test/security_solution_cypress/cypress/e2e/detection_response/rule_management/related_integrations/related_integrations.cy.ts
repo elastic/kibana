@@ -9,43 +9,43 @@ import {
   PerformRuleInstallationResponseBody,
   RelatedIntegration,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { generateEvent } from '../../../../objects/event';
-import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { INTEGRATION_LINK, INTEGRATION_STATUS } from '../../../../screens/rule_details';
+import { generateEvent } from '../../../../objects/event';
 import {
   INTEGRATIONS_POPOVER,
   INTEGRATIONS_POPOVER_TITLE,
   RULE_NAME,
 } from '../../../../screens/alerts_detection_rules';
-import {
-  installPrebuiltRuleAssets,
-  installSpecificPrebuiltRulesRequest,
-  SAMPLE_PREBUILT_RULE,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanFleet } from '../../../../tasks/api_calls/fleet';
-import {
-  disableRelatedIntegrations,
-  enableRelatedIntegrations,
-} from '../../../../tasks/api_calls/kibana_advanced_settings';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { login } from '../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import {
-  installIntegrations,
-  PackagePolicyWithoutAgentPolicyId,
-} from '../../../../tasks/api_calls/integrations';
+import { INTEGRATION_LINK, INTEGRATION_STATUS } from '../../../../screens/rule_details';
 import {
   disableAutoRefresh,
   openIntegrationsPopover,
 } from '../../../../tasks/alerts_detection_rules';
 import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
+import { cleanFleet } from '../../../../tasks/api_calls/fleet';
+import {
+  PackagePolicyWithoutAgentPolicyId,
+  installIntegrations,
+} from '../../../../tasks/api_calls/integrations';
+import {
+  disableRelatedIntegrations,
+  enableRelatedIntegrations,
+} from '../../../../tasks/api_calls/kibana_advanced_settings';
+import {
+  SAMPLE_PREBUILT_RULE,
+  installPrebuiltRuleAssets,
+  installSpecificPrebuiltRulesRequest,
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { login } from '../../../../tasks/login';
 import {
   clickEnableRuleSwitch,
   visitRuleDetailsPage,
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
 // https://github.com/elastic/kibana/issues/179943
 

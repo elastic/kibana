@@ -7,18 +7,18 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -31,7 +31,7 @@ import {
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { MultiInputRows } from '../../multi_input_rows';
 
-import { SYNONYM_CREATE_TITLE, SYNONYM_UPDATE_TITLE, DELETE_CONFIRMATION } from '../constants';
+import { DELETE_CONFIRMATION, SYNONYM_CREATE_TITLE, SYNONYM_UPDATE_TITLE } from '../constants';
 
 export const SynonymModal: React.FC = () => {
   const { isModalOpen, modalLoading, activeSynonymSet } = useValues(SynonymsLogic);

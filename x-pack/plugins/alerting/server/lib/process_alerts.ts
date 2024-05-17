@@ -7,14 +7,14 @@
 
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { cloneDeep } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
-import { updateFlappingHistory } from './flapping_utils';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import { Alert } from '../alert';
+import { AlertInstanceContext, AlertInstanceState } from '../types';
+import { updateFlappingHistory } from './flapping_utils';
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 > {
   alerts: Record<string, Alert<State, Context>>;
   existingAlerts: Record<string, Alert<State, Context>>;
@@ -30,7 +30,7 @@ interface ProcessAlertsResult<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
@@ -43,7 +43,7 @@ export function processAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   alerts,
   existingAlerts,
@@ -85,7 +85,7 @@ function processAlertsHelper<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
@@ -181,7 +181,7 @@ function processAlertsLimitReached<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
@@ -273,7 +273,7 @@ export function updateAlertFlappingHistory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,

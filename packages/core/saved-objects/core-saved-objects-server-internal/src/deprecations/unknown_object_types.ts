@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  getAggregatedTypesDocuments,
   addExcludedTypesToBoolQuery,
+  getAggregatedTypesDocuments,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { i18n } from '@kbn/i18n';
 
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;

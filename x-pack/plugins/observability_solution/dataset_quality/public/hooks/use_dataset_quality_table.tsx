@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { Primitive } from '@elastic/eui/src/services/sort/comparators';
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import type { Primitive } from '@elastic/eui/src/services/sort/comparators';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, NONE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
-import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
+import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';

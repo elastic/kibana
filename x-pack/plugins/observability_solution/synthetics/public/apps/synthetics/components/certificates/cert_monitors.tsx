@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
-import { MonitorPageLink } from './monitor_page_link';
+import React from 'react';
 import { CertMonitor } from '../../../../../common/runtime_types';
+import { MonitorPageLink } from './monitor_page_link';
 
 interface Props {
   monitors: CertMonitor[];

@@ -42,9 +42,7 @@
         "tags": [],
         "label": "AppId",
         "description": [],
-        "signature": [
-          "\"securitySolutionUI\""
-        ],
+        "signature": ["\"securitySolutionUI\""],
         "path": "packages/deeplinks/security/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -87,9 +85,7 @@
         "tags": [],
         "label": "SECURITY_APP_ID",
         "description": [],
-        "signature": [
-          "\"securitySolutionUI\""
-        ],
+        "signature": ["\"securitySolutionUI\""],
         "path": "packages/deeplinks/security/index.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, of, ReplaySubject } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { ReplaySubject, firstValueFrom, of } from 'rxjs';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 describe('registerAnalyticsContextProvider', () => {

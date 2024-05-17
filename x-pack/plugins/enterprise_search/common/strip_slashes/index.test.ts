@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stripTrailingSlash, stripLeadingSlash } from '.';
+import { stripLeadingSlash, stripTrailingSlash } from '.';
 
 describe('Strip Trailing Slash helper', () => {
   it('strips trailing slashes', () => {

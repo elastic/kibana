@@ -7,7 +7,7 @@
 
 import type { EuiComboBox } from '@elastic/eui';
 
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
  * This hook is used to imperatively reset an `EuiComboBox`. When users trigger

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ShardDetailsTreeNode } from './shard_details_tree_node';
+import React from 'react';
 import { Index, Operation, Shard } from '../../../types';
+import { ShardDetailsTreeNode } from './shard_details_tree_node';
 
 export interface Props {
   data: Operation;

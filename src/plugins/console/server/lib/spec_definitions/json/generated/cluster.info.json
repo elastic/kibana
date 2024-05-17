@@ -7,20 +7,10 @@
       "pretty": "__flag__"
     },
     "url_components": {
-      "target": [
-        "_all",
-        "http",
-        "ingest",
-        "thread_pool",
-        "script"
-      ]
+      "target": ["_all", "http", "ingest", "thread_pool", "script"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_info/{target}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_info/{target}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-info.html",
     "availability": {
       "stack": true,

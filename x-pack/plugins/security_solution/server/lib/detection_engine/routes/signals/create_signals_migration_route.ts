@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { transformError, BadRequestError, getIndexAliases } from '@kbn/securitysolution-es-utils';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { SetupPlugins } from '../../../../plugin';
-import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
+import { BadRequestError, getIndexAliases, transformError } from '@kbn/securitysolution-es-utils';
 import { createSignalsMigrationSchema } from '../../../../../common/api/detection_engine/signals_migration';
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
+import type { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 
-import { getTemplateVersion } from '../index/check_template_version';
-import { signalsMigrationService } from '../../migrations/migration_service';
-import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
-import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
+import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
+import { signalsMigrationService } from '../../migrations/migration_service';
+import { getTemplateVersion } from '../index/check_template_version';
+import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
 export const createSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,

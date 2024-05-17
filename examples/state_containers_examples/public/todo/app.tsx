@@ -7,11 +7,11 @@
  */
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
-import React from 'react';
 import { createHashHistory } from 'history';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { ExampleLink, StateContainersExamplesPage } from '../common/example_page';
 import { TodoAppPage } from './todo';
-import { StateContainersExamplesPage, ExampleLink } from '../common/example_page';
 
 export interface AppOptions {
   appTitle: string;

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import type { EMSClient } from '@elastic/ems-client';
-import { MapsEmsPlugin } from './plugin';
-import type { MapConfig } from '../config';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { EMSSettings } from '../common';
+import type { MapConfig } from '../config';
+import { MapsEmsPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);

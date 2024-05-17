@@ -7,10 +7,10 @@
 
 import type { ActionConnector, ActionTypeConnector } from '../../../../common/types/domain';
 
+import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../../common/types/api';
+import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
 import type { ApiProps, CasesConfigurationUI } from '../../types';
 import { casesConfigurationsMock } from '../mock';
-import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
-import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../../common/types/api';
 
 export const getSupportedActionConnectors = async ({
   signal,

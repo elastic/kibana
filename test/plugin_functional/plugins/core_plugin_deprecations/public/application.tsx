@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { AppMountParameters } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from '@kbn/core/public';
 
 const DeprecationsApp = () => <div>Deprcations App</div>;
 

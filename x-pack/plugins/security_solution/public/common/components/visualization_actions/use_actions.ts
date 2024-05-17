@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
 import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
+import { useCallback, useMemo } from 'react';
 
+import type { LensProps } from '@kbn/cases-plugin/public/types';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import type { LensProps } from '@kbn/cases-plugin/public/types';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
 import { useSaveToLibrary } from './use_save_to_library';
 
-import { VisualizationContextMenuActions } from './types';
-import type { LensAttributes } from './types';
 import {
   ADDED_TO_LIBRARY,
   ADD_TO_EXISTING_CASE,
@@ -25,6 +23,8 @@ import {
   INSPECT,
   OPEN_IN_LENS,
 } from './translations';
+import { VisualizationContextMenuActions } from './types';
+import type { LensAttributes } from './types';
 
 export const DEFAULT_ACTIONS: VisualizationContextMenuActions[] = [
   VisualizationContextMenuActions.inspect,

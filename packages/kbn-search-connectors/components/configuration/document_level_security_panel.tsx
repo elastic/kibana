@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiSplitPanel, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiSplitPanel, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

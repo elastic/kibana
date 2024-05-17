@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BenchmarksSection } from './benchmarks_section';
-import { getMockDashboardData, getBenchmarkMockData } from '../mock';
-import { TestProvider } from '../../../test/test_provider';
+import React from 'react';
 import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
+import { TestProvider } from '../../../test/test_provider';
+import { getBenchmarkMockData, getMockDashboardData } from '../mock';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
+import { BenchmarksSection } from './benchmarks_section';
 
 describe('<BenchmarksSection />', () => {
   const renderBenchmarks = (alterMockData = {}) =>

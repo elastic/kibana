@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiTitle,
   EuiButton,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
-  useIsWithinBreakpoints,
-  EuiHorizontalRule,
+  EuiTitle,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
-import { RuleErrorLogWithApi } from './rule_error_log';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
+import { RuleErrorLogWithApi } from './rule_error_log';
 import { RefreshToken } from './types';
 
 export interface RuleActionErrorLogFlyoutProps {

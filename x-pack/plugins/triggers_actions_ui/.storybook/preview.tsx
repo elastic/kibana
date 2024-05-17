@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Description, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs';
+import { DecoratorFn, addDecorator } from '@storybook/react';
 import React from 'react';
-import { addDecorator, DecoratorFn } from '@storybook/react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs';
 import { StorybookContextDecorator } from './decorator';
 
 const decorator: DecoratorFn = (story, context) => {

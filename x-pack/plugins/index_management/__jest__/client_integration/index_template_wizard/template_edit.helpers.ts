@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { AsyncTestBedConfig, registerTestBed } from '@kbn/test-jest-helpers';
 import { TemplateEdit } from '../../../public/application/sections/template_edit';
 import { WithAppDependencies } from '../helpers';
 
-import { formSetup, TestSubjects } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
+import { TestSubjects, formSetup } from './template_form.helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { firstValueFrom } from 'rxjs';
 
 import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {

@@ -1,3 +1,5 @@
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
+import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +7,14 @@
  * 2.0.
  */
 import {
-  ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
-import { getSeverityType } from '@kbn/ml-anomaly-utils';
-import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
-import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { Ping } from '../../../../common/runtime_types/ping';
+import { durationAnomalyAlertFactory } from './duration_anomaly';
+import { bootstrapDependencies, createRuleTypeMocks } from './test_utils';
 
 interface MockAnomaly {
   severity: MlAnomaliesTableRecord['severity'];

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo } from 'react';
 import moment from 'moment';
+import { useCallback, useMemo, useState } from 'react';
 
 export function useScheduleDateTime(now?: string) {
   const initialDatetime = useMemo(() => moment(now), [now]);

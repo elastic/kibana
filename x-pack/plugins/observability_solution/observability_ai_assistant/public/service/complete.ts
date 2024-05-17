@@ -6,26 +6,26 @@
  */
 
 import {
+  Observable,
   catchError,
   combineLatest,
   filter,
   isObservable,
   last,
   map,
-  Observable,
   of,
   shareReplay,
   toArray,
 } from 'rxjs';
 import {
-  MessageRole,
-  StreamingChatResponseEventType,
   type BufferFlushEvent,
   type ConversationCreateEvent,
   type ConversationUpdateEvent,
   type Message,
   type MessageAddEvent,
+  MessageRole,
   type StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
 } from '../../common';
 import { ObservabilityAIAssistantScreenContext } from '../../common/types';

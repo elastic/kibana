@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { OnlyEsqlQueryRuleParams } from '../types';
+import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { EsqlTable, toEsQueryHits } from '../../../../common';
+import { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;

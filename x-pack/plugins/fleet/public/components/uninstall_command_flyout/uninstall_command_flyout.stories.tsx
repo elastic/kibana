@@ -7,13 +7,13 @@
 
 import { useEffect } from 'react';
 
-import React, { useState } from 'react';
 import type { Meta } from '@storybook/react';
+import React, { useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 
-import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UNINSTALL_COMMAND_TARGETS } from './types';
+import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 
 export default {

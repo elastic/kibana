@@ -7,11 +7,11 @@
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import {
-  Plugin,
-  ExploratoryViewPublicPluginsStart,
   ExploratoryViewPublicPluginsSetup,
-  ExploratoryViewPublicStart,
+  ExploratoryViewPublicPluginsStart,
   ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+  Plugin,
 } from './plugin';
 export type {
   ExploratoryViewPublicSetup,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { mockTimelineResults } from '../../../../common/mock/timeline_results';
-import type { OpenTimelineResult } from '../types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
+import { mockTimelineResults } from '../../../../common/mock/timeline_results';
+import type { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
 
-import * as i18n from '../translations';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import * as i18n from '../translations';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 

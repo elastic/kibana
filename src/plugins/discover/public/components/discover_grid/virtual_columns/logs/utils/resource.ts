@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getFieldFromDoc, LogDocument, ResourceFields } from '@kbn/discover-utils/src';
+import { LogDocument, ResourceFields, getFieldFromDoc } from '@kbn/discover-utils/src';
 import * as constants from '../../../../../../common/data_types/logs/constants';
 
 export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields => {

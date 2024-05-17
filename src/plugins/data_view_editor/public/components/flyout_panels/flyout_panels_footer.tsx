@@ -1,3 +1,4 @@
+import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 

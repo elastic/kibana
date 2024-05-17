@@ -7,8 +7,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
+  isDataFrameAnalyticsConfigs,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';

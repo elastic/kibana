@@ -11,17 +11,17 @@ import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
 } from '../../../common/types/api';
-import { flattenCommentSavedObjects } from '../../common/utils';
-import { createCaseError, generateCaseErrorResponse } from '../../common/error';
-import type { CasesClientArgs } from '../types';
+import type { AttachmentAttributes } from '../../../common/types/domain';
 import { Operations } from '../../authorization';
-import type { BulkGetArgs } from './types';
-import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
-import type { CasesClient } from '../client';
-import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
+import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
-import type { AttachmentAttributes } from '../../../common/types/domain';
+import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
+import { flattenCommentSavedObjects } from '../../common/utils';
+import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
+import type { BulkGetArgs } from './types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 

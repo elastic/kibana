@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import { Global, css } from '@emotion/react';
+import classNames from 'classnames';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
-import classNames from 'classnames';
-import { css, Global } from '@emotion/react';
 import {
   Diff,
-  useSourceExpansion,
-  useMinCollapsedLines,
   parseDiff,
   tokenize,
+  useMinCollapsedLines,
+  useSourceExpansion,
 } from 'react-diff-view';
 import 'react-diff-view/style/index.css';
+import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
 import type {
-  RenderGutter,
-  HunkData,
-  TokenizeOptions,
   DiffProps,
+  HunkData,
   HunkTokens,
+  RenderGutter,
+  TokenizeOptions,
 } from 'react-diff-view';
 import unidiff from 'unidiff';
-import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
-import { Hunks } from './hunks';
-import { markEdits, DiffMethod } from './mark_edits';
 import {
-  TABLE_CLASS_NAME,
   CODE_CLASS_NAME,
-  GUTTER_CLASS_NAME,
-  DARK_THEME_CLASS_NAME,
   COLORS,
+  DARK_THEME_CLASS_NAME,
+  GUTTER_CLASS_NAME,
+  TABLE_CLASS_NAME,
 } from './constants';
+import { Hunks } from './hunks';
+import { DiffMethod, markEdits } from './mark_edits';
 
 interface UseExpandReturn {
   expandRange: (start: number, end: number) => void;

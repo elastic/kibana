@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import { PublicContract } from '@kbn/utility-types';
-import { IRuleDataClient } from '../rule_data_client';
+import { chunk } from 'lodash';
 import {
   ALERT_RULE_UUID,
   ALERT_UUID,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
+import { IRuleDataClient } from '../rule_data_client';
 
 const CHUNK_SIZE = 10000;
 

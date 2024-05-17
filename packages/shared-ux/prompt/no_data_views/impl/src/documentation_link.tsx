@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 interface Props {
   href: string;

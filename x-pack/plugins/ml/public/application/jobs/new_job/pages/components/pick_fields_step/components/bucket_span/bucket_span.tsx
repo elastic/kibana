@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { BucketSpanInput } from './bucket_span_input';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Description } from './description';
 import { BucketSpanEstimator } from '../bucket_span_estimator';
+import { BucketSpanInput } from './bucket_span_input';
+import { Description } from './description';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

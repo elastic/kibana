@@ -9,7 +9,7 @@
 import path from 'path';
 import globby from 'globby';
 
-import { getFileHash, write, GlobalTask } from '../lib';
+import { GlobalTask, getFileHash, write } from '../lib';
 
 export const WriteShaSums: GlobalTask = {
   global: true,

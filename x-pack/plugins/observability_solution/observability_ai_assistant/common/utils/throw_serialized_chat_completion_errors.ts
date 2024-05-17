@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { filter, OperatorFunction, tap } from 'rxjs';
+import { OperatorFunction, filter, tap } from 'rxjs';
 import {
+  BufferFlushEvent,
   ChatCompletionError,
   ChatCompletionErrorCode,
+  type ChatCompletionErrorEvent,
   type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
-  type ChatCompletionErrorEvent,
-  BufferFlushEvent,
 } from '../conversation_complete';
 
 export function throwSerializedChatCompletionErrors<
-  T extends StreamingChatResponseEvent | BufferFlushEvent
+  T extends StreamingChatResponseEvent | BufferFlushEvent,
 >(): OperatorFunction<T, Exclude<T, ChatCompletionErrorEvent>> {
   return (source$) =>
     source$.pipe(

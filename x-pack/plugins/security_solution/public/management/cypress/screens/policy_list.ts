@@ -6,10 +6,10 @@
  */
 
 import type { DeepReadonly } from 'utility-types';
-import type { EndpointManagementPageMap } from './page_reference';
-import { getEndpointManagementPageMap } from './page_reference';
 import { getNoPrivilegesPage } from './common';
 import { visitEndpointList } from './endpoint_list';
+import type { EndpointManagementPageMap } from './page_reference';
+import { getEndpointManagementPageMap } from './page_reference';
 import type { UserAuthzAccessLevel } from './types';
 
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();

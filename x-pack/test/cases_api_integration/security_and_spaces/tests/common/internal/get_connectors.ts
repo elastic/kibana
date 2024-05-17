@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createCase, deleteAllCaseItems } from '../../../../common/lib/api';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { getConnectors } from '../../../../common/lib/api';
+import { getPostCaseRequest } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

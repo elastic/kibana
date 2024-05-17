@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DashboardStartDependencies } from '../../../plugin';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DashboardStartDependencies } from '../../../plugin';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;

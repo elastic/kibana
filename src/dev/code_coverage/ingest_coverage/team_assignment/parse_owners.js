@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { fromEvent, map, filter, takeUntil } from 'rxjs';
-import { lineRead, pathAndTeams, dropCCDelim } from './parse_owners_helpers';
+import { filter, fromEvent, map, takeUntil } from 'rxjs';
 import { pipe } from '../utils';
+import { dropCCDelim, lineRead, pathAndTeams } from './parse_owners_helpers';
 
 const allLines$ = (lineReader) =>
   fromEvent(lineReader, 'line').pipe(

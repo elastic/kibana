@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Router } from '@kbn/shared-ux-router';
 import { DashboardView } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

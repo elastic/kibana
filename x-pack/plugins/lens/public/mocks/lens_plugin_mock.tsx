@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { createFormulaPublicApi } from '../async_services';
 import { LensPublicStart } from '..';
+import { createFormulaPublicApi } from '../async_services';
 import { visualizationTypes } from '../visualizations/xy/types';
 import { mockAllSuggestions } from './suggestions_mock';
 

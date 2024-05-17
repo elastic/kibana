@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FieldOption } from '../types';
 
 const DATA_API_ROOT = '/internal/triggers_actions_ui/data';

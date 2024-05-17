@@ -7,10 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
-import type { RightPanelTabType } from './tabs';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import type { RightPanelTabType } from './tabs';
+import { FLYOUT_BODY_TEST_ID } from './test_ids';
 
 export interface PanelContentProps {
   /**

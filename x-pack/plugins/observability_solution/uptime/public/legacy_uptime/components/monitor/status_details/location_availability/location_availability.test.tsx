@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
+import { MonitorLocations } from '../../../../../../common/runtime_types';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { LocationAvailability } from './location_availability';
-import { MonitorLocations } from '../../../../../../common/runtime_types';
 
 // Note For shallow test, we need absolute time strings
 describe('LocationAvailability component', () => {

@@ -8,10 +8,10 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { KibanaContextProvider, KibanaRenderContextProvider } from './shared_imports';
 import { GrokDebugger } from './components/grok_debugger';
-import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
 import { InactiveLicenseSlate } from './components/inactive_license';
+import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
+import { KibanaContextProvider, KibanaRenderContextProvider } from './shared_imports';
 
 export function renderApp(license, element, coreStart, theme$) {
   const content = license.isActive ? (

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { call, put } from 'redux-saga/effects';
-import { PayloadAction } from '@reduxjs/toolkit';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { ErrorToastOptions } from '@kbn/core-notifications-browser';
-import { toastTitle } from '../monitor_list/toast_title';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { call, put } from 'redux-saga/effects';
 import { kibanaService } from '../../../../utils/kibana_service';
+import { toastTitle } from '../monitor_list/toast_title';
 import { IHttpSerializedFetchError, serializeHttpFetchError } from './http_error';
 
 interface ToastParams<MessageType> {

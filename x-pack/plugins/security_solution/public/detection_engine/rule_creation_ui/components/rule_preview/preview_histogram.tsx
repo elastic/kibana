@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import styled from 'styled-components';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import React, { useEffect, useMemo } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import styled from 'styled-components';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
-import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import * as i18n from './translations';
-import { isNoisy } from './helpers';
-import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { Panel } from '../../../../common/components/panel';
+import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
+import { isNoisy } from './helpers';
+import * as i18n from './translations';
 
-import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
+import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { useKibana } from '../../../../common/lib/kibana';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
+import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
-import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { useKibana } from '../../../../common/lib/kibana';
-import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
-import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};

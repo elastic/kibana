@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { resolve, join } from 'path';
+import { join, resolve } from 'path';
+import { arrayify, checkConfigNamespacePrefix } from '..';
 import { I18N_RC } from '../constants';
-import { checkConfigNamespacePrefix, arrayify } from '..';
 import { I18nCheckTaskContext } from '../types';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {

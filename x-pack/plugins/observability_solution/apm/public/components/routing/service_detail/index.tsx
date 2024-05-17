@@ -21,25 +21,25 @@ import {
 } from '../../../../common/latency_aggregation_types';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
+import { ALERT_STATUS_ALL, AlertsOverview } from '../../app/alerts_overview';
 import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ErrorGroupOverview } from '../../app/error_group_overview';
 import { InfraOverview } from '../../app/infra_overview';
 import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { Metrics } from '../../app/metrics';
 import { MetricsDetails } from '../../app/metrics_details';
+import { ProfilingOverview } from '../../app/profiling_overview';
+import { ServiceDashboards } from '../../app/service_dashboards';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { ServiceMapServiceDetail } from '../../app/service_map';
 import { ServiceOverview } from '../../app/service_overview';
 import { TransactionDetails } from '../../app/transaction_details';
 import { TransactionOverview } from '../../app/transaction_overview';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
-import { ProfilingOverview } from '../../app/profiling_overview';
-import { SearchBar } from '../../shared/search_bar/search_bar';
-import { ServiceDashboards } from '../../app/service_dashboards';
 
 function page({
   title,

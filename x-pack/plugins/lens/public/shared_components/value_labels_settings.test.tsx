@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { ValueLabelsSettings, VisualOptionsProps } from './value_labels_settings';
 
 describe('Value labels Settings', () => {

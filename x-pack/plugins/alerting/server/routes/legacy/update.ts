@@ -7,18 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from '../lib/error_handler';
-import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
-  RuleNotifyWhenType,
   LEGACY_BASE_ALERT_API_PATH,
+  RuleNotifyWhenType,
   validateNotifyWhenType,
 } from '../../../common';
+import { validateDurationSchema } from '../../lib';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { ILicenseState } from '../../lib/license_state';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import type { AlertingRouter } from '../../types';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 
 const paramSchema = schema.object({
   id: schema.string(),

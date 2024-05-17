@@ -7,8 +7,8 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { injectMetaAttributes } from './inject_meta_attributes';
 import { managementMock } from '../services/management.mock';
+import { injectMetaAttributes } from './inject_meta_attributes';
 
 describe('injectMetaAttributes', () => {
   let managementService: ReturnType<typeof managementMock.create>;

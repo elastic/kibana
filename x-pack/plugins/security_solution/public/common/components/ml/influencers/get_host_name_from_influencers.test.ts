@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getHostNameFromInfluencers } from './get_host_name_from_influencers';
 import { mockAnomalies } from '../mock';
+import { getHostNameFromInfluencers } from './get_host_name_from_influencers';
 
 describe('get_host_name_from_influencers', () => {
   test('returns host names from influencers from the mock', () => {

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import expect from '@kbn/expect';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import expect from '@kbn/expect';
 import {
   enableInfrastructureContainerAssetView,
   enableInfrastructureProfilingIntegration,
@@ -17,15 +16,16 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
+import moment from 'moment';
+import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
-  NODE_DETAILS_PATH,
   DATE_PICKER_FORMAT,
   DATE_WITH_DOCKER_DATA_FROM,
   DATE_WITH_DOCKER_DATA_TO,
+  NODE_DETAILS_PATH,
 } from './constants';
-import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 import { generateDockerContainersData } from './helpers';
 
 const START_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
@@ -210,9 +210,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
-                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                  metric
-                );
+                const tileValue =
+                  await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                 expect(tileValue).to.eql(value);
               });
             });
@@ -562,9 +561,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ].forEach(({ metric, value }) => {
               it(`${metric} tile should show ${value}`, async () => {
                 await retry.tryForTime(3 * 1000, async () => {
-                  const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                    metric
-                  );
+                  const tileValue =
+                    await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                   expect(tileValue).to.eql(value);
                 });
               });
@@ -664,9 +662,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
-              const charts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
-                metric
-              );
+              const charts =
+                await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });
           });

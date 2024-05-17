@@ -9,8 +9,8 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 import { RENDERER_ID } from './expression_renderer';
+import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 
 interface ChoroplethChartRender {
   type: 'render';

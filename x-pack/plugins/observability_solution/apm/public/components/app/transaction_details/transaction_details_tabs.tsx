@@ -11,11 +11,14 @@ import { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { isJavaAgentName } from '../../../../common/agent_name';
 import { maybe } from '../../../../common/utils/maybe';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTransactionProfilingSetting } from '../../../hooks/use_profiling_integration_setting';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import {
   TraceSamplesFetchResult,
@@ -27,9 +30,6 @@ import { failedTransactionsCorrelationsTab } from './failed_transactions_correla
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { profilingTab } from './profiling_tab';
 import { traceSamplesTab } from './trace_samples_tab';
-import { useTransactionProfilingSetting } from '../../../hooks/use_profiling_integration_setting';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { isJavaAgentName } from '../../../../common/agent_name';
 
 export interface TabContentProps {
   clearChartSelection: () => void;

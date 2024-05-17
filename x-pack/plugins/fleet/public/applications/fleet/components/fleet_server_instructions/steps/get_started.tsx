@@ -13,14 +13,14 @@ import {
   EuiButton,
   EuiCallOut,
   EuiCode,
+  EuiFieldText,
   EuiForm,
   EuiFormErrorText,
+  EuiFormRow,
   EuiLink,
   EuiSpacer,
-  EuiText,
-  EuiFormRow,
-  EuiFieldText,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,8 +29,8 @@ import { MultiRowInput } from '../../../sections/settings/components/multi_row_i
 
 import { useAuthz, useLink } from '../../../hooks';
 
-import type { QuickStartCreateForm } from '../hooks';
 import { FleetServerHostSelect } from '../components';
+import type { QuickStartCreateForm } from '../hooks';
 
 export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps {
   return {

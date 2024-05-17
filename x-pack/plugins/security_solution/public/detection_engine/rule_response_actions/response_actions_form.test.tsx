@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { ResponseActionsForm } from './response_actions_form';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
+import { ResponseActionsForm } from './response_actions_form';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts

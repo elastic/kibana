@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 import * as i18n from './translations';
 

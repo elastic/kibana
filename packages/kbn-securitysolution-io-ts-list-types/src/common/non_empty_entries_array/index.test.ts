@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { EntriesArray } from '../entries';
-import { nonEmptyEntriesArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { getEntryMatchMock } from '../entry_match/index.mock';
-import { getEntryMatchAnyMock } from '../entry_match_any/index.mock';
-import { getEntryExistsMock } from '../entries_exist/index.mock';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { nonEmptyEntriesArray } from '.';
+import { EntriesArray } from '../entries';
 import {
   getEntriesArrayMock,
   getListAndNonListEntriesArrayMock,
   getListEntriesArrayMock,
 } from '../entries/index.mock';
+import { getEntryExistsMock } from '../entries_exist/index.mock';
+import { getEntryMatchMock } from '../entry_match/index.mock';
+import { getEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEntryNestedMock } from '../entry_nested/index.mock';
 
 describe('non_empty_entries_array', () => {

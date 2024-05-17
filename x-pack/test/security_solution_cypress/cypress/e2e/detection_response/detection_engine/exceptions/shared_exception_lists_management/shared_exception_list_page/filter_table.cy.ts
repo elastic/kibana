@@ -8,15 +8,15 @@
 import { getExceptionList } from '../../../../../../objects/exception';
 import { getNewRule } from '../../../../../../objects/rule';
 import {
-  EXCEPTIONS_TABLE_SHOWING_LISTS,
   EXCEPTIONS_TABLE_LIST_NAME,
+  EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../../../screens/exceptions';
 import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
-  waitForExceptionsTableToBeLoaded,
-  searchForExceptionList,
   clearSearchSelection,
+  searchForExceptionList,
+  waitForExceptionsTableToBeLoaded,
 } from '../../../../../../tasks/exceptions_table';
 import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';

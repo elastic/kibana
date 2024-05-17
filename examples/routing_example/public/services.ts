@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { CoreStart } from '@kbn/core/public';
 import {
-  RANDOM_NUMBER_ROUTE_PATH,
-  RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
-  POST_MESSAGE_ROUTE_PATH,
   INTERNAL_GET_MESSAGE_BY_ID_ROUTE,
+  POST_MESSAGE_ROUTE_PATH,
+  RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
+  RANDOM_NUMBER_ROUTE_PATH,
 } from '../common';
 
 export interface Services {

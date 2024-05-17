@@ -13,16 +13,16 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteMigrations, getIndexNameFromLoad } from '../../../../../utils';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../../../../common/services/security_solution';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
 } from '../../../../../../../../common/utils/security_solution';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../../common/services/security_solution';
+import { deleteMigrations, getIndexNameFromLoad } from '../../../../../utils';
 
 interface StatusResponse {
   index: string;

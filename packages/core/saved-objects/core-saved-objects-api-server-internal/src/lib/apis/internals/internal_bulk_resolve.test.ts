@@ -8,35 +8,35 @@
 
 import {
   mockGetSavedObjectFromSource,
-  mockRawDocExistsInNamespace,
   mockIsNotFoundFromUnsupportedServer,
+  mockRawDocExistsInNamespace,
 } from './internal_bulk_resolve.test.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
-  SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
+  SavedObjectsBulkResolveObject,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
-  SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
+  SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
-import { normalizeNamespace } from '../utils';
 import {
   type ISavedObjectsSecurityExtension,
   type SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { type ApiExecutionContextMock, apiContextMock } from '../../../mocks';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 import {
   enforceError,
   setupAuthorizeAndRedactInternalBulkResolveFailure,
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
 } from '../../../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
-import { apiContextMock, type ApiExecutionContextMock } from '../../../mocks';
+import { normalizeNamespace } from '../utils';
+import { type InternalBulkResolveParams, internalBulkResolve } from './internal_bulk_resolve';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';

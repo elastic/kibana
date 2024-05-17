@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { makeKQLUsageCollector } from './make_kql_usage_collector';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { makeKQLUsageCollector } from './make_kql_usage_collector';
 
 describe('makeKQLUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;

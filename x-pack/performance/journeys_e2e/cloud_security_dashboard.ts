@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Journey } from '@kbn/journeys';
 import expect from '@kbn/expect';
+import { Journey } from '@kbn/journeys';
 
 export const journey = new Journey({
   beforeSteps: async ({ kibanaServer, retry }) => {

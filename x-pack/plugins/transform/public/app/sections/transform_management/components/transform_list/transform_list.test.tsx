@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, type UseQueryResult } from '@tanstack/react-query';
 import * as ReactQuery from '@tanstack/react-query';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 

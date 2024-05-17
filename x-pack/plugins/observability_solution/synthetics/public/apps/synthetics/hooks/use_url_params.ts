@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { parse, stringify } from 'query-string';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
 
 function getParsedParams(search: string) {

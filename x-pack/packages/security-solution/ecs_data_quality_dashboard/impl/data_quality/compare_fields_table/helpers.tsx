@@ -9,11 +9,11 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
+import { CodeSuccess } from '../styles';
+import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../types';
 import { EcsAllowedValues } from './ecs_allowed_values';
 import { IndexInvalidValues } from './index_invalid_values';
-import { CodeSuccess } from '../styles';
 import * as i18n from './translations';
-import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../types';
 
 export const EMPTY_PLACEHOLDER = '--';
 

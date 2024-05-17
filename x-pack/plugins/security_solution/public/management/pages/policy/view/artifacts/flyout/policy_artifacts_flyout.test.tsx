@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import type { PolicyData } from '../../../../../../../common/endpoint/types';
-import { MANAGEMENT_DEFAULT_PAGE } from '../../../../../common/constants';
-import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
-import { MAX_ALLOWED_RESULTS, PolicyArtifactsFlyout } from './policy_artifacts_flyout';
-import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
-import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import type {
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
+import { act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { MANAGEMENT_DEFAULT_PAGE } from '../../../../../common/constants';
+import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
+import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
+import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
+import { MAX_ALLOWED_RESULTS, PolicyArtifactsFlyout } from './policy_artifacts_flyout';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 const apiVersion = '2023-10-31';

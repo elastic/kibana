@@ -6,25 +6,25 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
+  DETECTION_ENGINE_RULES_BULK_DELETE,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_BULK_UPDATE,
-  DETECTION_ENGINE_RULES_BULK_DELETE,
-  DETECTION_ENGINE_RULES_BULK_CREATE,
-  DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
   PREBUILT_RULES_STATUS_URL,
@@ -50,8 +50,8 @@ import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 
-import { requestMock } from './request';
 import type { HapiReadableStream } from '../../../../types';
+import { requestMock } from './request';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],

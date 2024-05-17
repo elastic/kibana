@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
 import { dateRangeFunction } from './date_range';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#dateRange', () => {
   const fn = functionWrapper(dateRangeFunction);

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { endpointEntryMatch } from '../entry_match';
 import { endpointEntryMatchAny } from '../entry_match_any';
-import { endpointEntryNested } from '../entry_nested';
 import { endpointEntryMatchWildcard } from '../entry_match_wildcard';
+import { endpointEntryNested } from '../entry_nested';
 
 export const endpointEntriesArray = t.array(
   t.union([

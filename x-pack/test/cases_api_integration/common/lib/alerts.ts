@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import type SuperTest from 'supertest';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ToolingLog } from '@kbn/tooling-log';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
 import { AttachmentType, Case } from '@kbn/cases-plugin/common';
+import expect from '@kbn/expect';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 import {
-  getRuleForAlertTesting,
   createRule,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
   getAlertsByIds,
   getQueryAlertIds,
+  getRuleForAlertTesting,
+  waitForAlertsToBePresent,
+  waitForRuleSuccess,
 } from '../../../common/utils/security_solution';
-import { superUser } from './authentication/users';
-import { User } from './authentication/types';
-import { getSpaceUrlPrefix } from './api/helpers';
-import { createCase, deleteCases } from './api/case';
 import { createComment, deleteAllComments } from './api';
+import { createCase, deleteCases } from './api/case';
+import { getSpaceUrlPrefix } from './api/helpers';
+import { User } from './authentication/types';
+import { superUser } from './authentication/users';
 import { postCaseReq } from './mock';
 
 export const createSecuritySolutionAlerts = async (

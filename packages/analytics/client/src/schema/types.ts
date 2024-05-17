@@ -34,11 +34,11 @@ export type AllowedSchemaTypes =
 export type PossibleSchemaTypes<Value> = Value extends string | Date
   ? AllowedSchemaStringTypes
   : Value extends number
-  ? AllowedSchemaNumberTypes
-  : Value extends boolean
-  ? AllowedSchemaBooleanTypes
-  : // allow any schema type from the union if typescript is unable to resolve the exact U type
-    AllowedSchemaTypes;
+    ? AllowedSchemaNumberTypes
+    : Value extends boolean
+      ? AllowedSchemaBooleanTypes
+      : // allow any schema type from the union if typescript is unable to resolve the exact U type
+        AllowedSchemaTypes;
 
 /**
  * Schema to define a primitive value
@@ -73,13 +73,13 @@ export type SchemaValue<Value> =
       ? // If the Value is unknown (TS can't infer the type), allow any type of schema
         SchemaArray<unknown, Value> | SchemaObject<Value> | SchemaChildValue<Value>
       : // Otherwise, try to infer the type and enforce the schema
-      NonNullable<Value> extends Array<infer U> | ReadonlyArray<infer U>
-      ? SchemaArray<U, Value>
-      : NonNullable<Value> extends Date
-      ? SchemaChildValue<Value>
-      : NonNullable<Value> extends object
-      ? SchemaObject<Value>
-      : SchemaChildValue<Value>);
+        NonNullable<Value> extends Array<infer U> | ReadonlyArray<infer U>
+        ? SchemaArray<U, Value>
+        : NonNullable<Value> extends Date
+          ? SchemaChildValue<Value>
+          : NonNullable<Value> extends object
+            ? SchemaObject<Value>
+            : SchemaChildValue<Value>);
 
 /**
  * Enforces { optional: true } if the value can be undefined
@@ -87,8 +87,8 @@ export type SchemaValue<Value> =
 export type SchemaMetaOptional<Value> = unknown extends Value
   ? { optional?: boolean }
   : undefined extends Value
-  ? { optional: true }
-  : { optional?: false };
+    ? { optional: true }
+    : { optional?: false };
 
 /**
  * Schema meta with optional description

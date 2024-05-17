@@ -10,10 +10,10 @@ import { Blob } from 'buffer';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import {
-  ExecutionContextContainer,
-  getParentContextFrom,
   BAGGAGE_HEADER,
   BAGGAGE_MAX_PER_NAME_VALUE_PAIRS,
+  ExecutionContextContainer,
+  getParentContextFrom,
 } from './execution_context_container';
 
 describe('KibanaExecutionContext', () => {

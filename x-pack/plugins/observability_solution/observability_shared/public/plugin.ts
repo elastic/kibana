@@ -19,6 +19,14 @@ import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import {
+  type ServiceOverviewLocator,
+  ServiceOverviewLocatorDefinition,
+} from './locators/apm/service_overview_locator';
+import {
+  type TransactionDetailsByNameLocator,
+  TransactionDetailsByNameLocatorDefinition,
+} from './locators/apm/transaction_details_by_name_locator';
+import {
   type AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorDefinition,
 } from './locators/infra/asset_details_flyout_locator';
@@ -39,15 +47,7 @@ import {
   type TopNFunctionsLocator,
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
-import {
-  type ServiceOverviewLocator,
-  ServiceOverviewLocatorDefinition,
-} from './locators/apm/service_overview_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  type TransactionDetailsByNameLocator,
-  TransactionDetailsByNameLocatorDefinition,
-} from './locators/apm/transaction_details_by_name_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }

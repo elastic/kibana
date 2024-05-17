@@ -7,7 +7,7 @@
  */
 
 import { has } from 'lodash';
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import type { Filter, FilterMeta } from './types';
 
 /** @public */

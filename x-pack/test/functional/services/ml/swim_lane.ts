@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
 import { DebugState } from '@elastic/charts';
 import { DebugStateAxis } from '@elastic/charts/dist/state/types';
+import expect from '@kbn/expect';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'>>;

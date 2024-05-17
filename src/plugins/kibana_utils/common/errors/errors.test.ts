@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DuplicateField, SavedObjectNotFound, KbnError } from './errors';
+import { DuplicateField, KbnError, SavedObjectNotFound } from './errors';
 
 describe('errors', () => {
   const errors = [new DuplicateField('dupfield'), new SavedObjectNotFound('dashboard', '123')];

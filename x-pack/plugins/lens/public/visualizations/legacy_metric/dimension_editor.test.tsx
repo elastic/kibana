@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { MetricDimensionEditor } from './dimension_editor';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
+  CustomPaletteParams,
   CustomizablePalette,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams,
 } from '@kbn/coloring';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import { MetricDimensionEditor } from './dimension_editor';
 
-import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LegacyMetricState } from '../../../common/types';
 import { DatasourcePublicAPI } from '../..';
+import type { LegacyMetricState } from '../../../common/types';
+import { PalettePanelContainer } from '../../shared_components';
 
 function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
   return expect.objectContaining({

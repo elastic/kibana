@@ -9,8 +9,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
 import {
-  ASSET_CRITICALITY_STATUS_URL,
   APP_ID,
+  ASSET_CRITICALITY_STATUS_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';

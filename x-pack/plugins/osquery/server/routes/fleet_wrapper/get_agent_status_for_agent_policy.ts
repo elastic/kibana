@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
+import { PLUGIN_ID } from '../../../common';
 import type {
   GetAgentStatusForAgentPolicyRequestParamsSchema,
   GetAgentStatusForAgentPolicyRequestQuerySchema,
 } from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
-import { PLUGIN_ID } from '../../../common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
   getAgentStatusForAgentPolicyRequestParamsSchema,
   getAgentStatusForAgentPolicyRequestQuerySchema,
 } from '../../../common/api';
+import { API_VERSIONS } from '../../../common/constants';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 
 export const getAgentStatusForAgentPolicyRoute = (
   router: IRouter,

@@ -7,13 +7,13 @@
 
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { SPACES } from '../lib/spaces';
 import {
   createRequest,
   expectResponses,
-  getUrlPrefix,
   getTestTitle,
+  getUrlPrefix,
 } from '../lib/saved_object_test_utils';
+import { SPACES } from '../lib/spaces';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface GetTestDefinition extends TestDefinition {

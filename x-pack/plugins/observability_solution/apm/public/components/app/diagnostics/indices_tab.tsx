@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -16,6 +15,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import React from 'react';
 import { type IndiciesItem } from '../../../../server/routes/diagnostics/route';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';

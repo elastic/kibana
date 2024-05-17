@@ -8,21 +8,21 @@
 
 import Path from 'path';
 
+import fs from 'fs';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
-import fs from 'fs';
 
+import zlib from 'zlib';
+import { ToolingLog } from '@kbn/tooling-log';
+import del from 'del';
+import globby from 'globby';
 import gulpBrotli from 'gulp-brotli';
 // @ts-expect-error
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
-import { ToolingLog } from '@kbn/tooling-log';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
-import globby from 'globby';
-import del from 'del';
-import zlib from 'zlib';
 
 import { Task, write } from '../lib';
 

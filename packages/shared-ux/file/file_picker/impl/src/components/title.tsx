@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { EuiTitle } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';
 
 interface Props {

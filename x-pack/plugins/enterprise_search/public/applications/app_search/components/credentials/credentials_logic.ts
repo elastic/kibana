@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
 import {
   clearFlashMessages,
-  flashSuccessToast,
   flashAPIErrors,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
@@ -21,7 +21,7 @@ import { AppLogic } from '../../app_logic';
 import { Engine } from '../../types';
 import { formatApiName } from '../../utils/format_api_name';
 
-import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
+import { ApiTokenTypes, CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE } from './constants';
 
 import { ApiToken, CredentialsDetails, TokenReadWrite } from './types';
 

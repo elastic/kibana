@@ -82,9 +82,7 @@
             "tags": [],
             "label": "build_flavor",
             "description": [],
-            "signature": [
-              "\"serverless\" | \"traditional\""
-            ],
+            "signature": ["\"serverless\" | \"traditional\""],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -225,9 +223,7 @@
             "tags": [],
             "label": "level",
             "description": [],
-            "signature": [
-              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
-            ],
+            "signature": ["\"degraded\" | \"unavailable\" | \"available\" | \"critical\""],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,
             "trackAdoption": false

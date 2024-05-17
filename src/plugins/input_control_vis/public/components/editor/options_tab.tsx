@@ -9,8 +9,8 @@
 import React, { PureComponent } from 'react';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { InputControlVisParams } from '../../types';

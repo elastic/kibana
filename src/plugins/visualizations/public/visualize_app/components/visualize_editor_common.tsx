@@ -8,30 +8,30 @@
 
 import './visualize_editor.scss';
 import { EventEmitter } from 'events';
-import React, { RefObject, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisualizeTopNav } from './visualize_top_nav';
-import { ExperimentalVisInfo } from './experimental_vis_info';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
-import { VizChartWarning } from './viz_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
-  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../types';
 import {
   CHARTS_CONFIG_TOKENS,
-  CHARTS_WITHOUT_SMALL_MULTIPLES,
   CHARTS_TO_BE_DEPRECATED,
+  CHARTS_WITHOUT_SMALL_MULTIPLES,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { ExperimentalVisInfo } from './experimental_vis_info';
+import { VisualizeTopNav } from './visualize_top_nav';
+import { VizChartWarning } from './viz_chart_warning';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;

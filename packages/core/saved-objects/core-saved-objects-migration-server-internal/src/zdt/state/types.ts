@@ -7,17 +7,17 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  SavedObjectsRawDoc,
-  SavedObjectsMappingProperties,
-  SavedObjectTypeExcludeFromUpgradeFilterHook,
-} from '@kbn/core-saved-objects-server';
 import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
-import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
-import type { ControlState } from '../../state_action_machine';
-import type { BulkOperationBatch } from '../../model/create_batches';
+import type {
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectsMappingProperties,
+  SavedObjectsRawDoc,
+} from '@kbn/core-saved-objects-server';
 import type { AliasAction } from '../../actions';
 import type { TransformErrorObjects } from '../../core';
+import type { BulkOperationBatch } from '../../model/create_batches';
+import type { ControlState } from '../../state_action_machine';
+import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
-import { isArray } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isArray } from 'lodash';
+import moment from 'moment-timezone';
 
 import { RangeFilter } from '@kbn/es-query';
+import { AggConfig, AggConfigs, GenericBucket, getTime } from '../../..';
 import { AggGroupNames } from '../agg_groups';
-import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../..';
 import { IBucketAggConfig } from '../buckets';
 
 /**

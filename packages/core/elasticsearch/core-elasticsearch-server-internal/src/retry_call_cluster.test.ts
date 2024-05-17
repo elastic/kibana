@@ -8,7 +8,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
+import { migrationRetryCallCluster, retryCallCluster } from './retry_call_cluster';
 
 const dummyBody: any = { foo: 'bar' };
 const createErrorReturn = (err: any) =>

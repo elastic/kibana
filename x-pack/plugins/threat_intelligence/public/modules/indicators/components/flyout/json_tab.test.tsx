@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { Indicator, generateMockIndicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutJson } from './json_tab';
 import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
+import { IndicatorsFlyoutJson } from './json_tab';
 import { CODE_BLOCK_TEST_ID } from './test_ids';
 
 const mockIndicator: Indicator = generateMockIndicator();

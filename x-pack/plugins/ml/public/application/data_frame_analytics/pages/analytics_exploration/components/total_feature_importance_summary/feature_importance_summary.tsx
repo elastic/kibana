@@ -8,33 +8,33 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
-import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
+import type { AxisStyle, BarSeriesProps, PartialTheme, RecursivePartial } from '@elastic/charts';
 import {
-  Chart,
-  Settings,
   Axis,
-  ScaleType,
-  Position,
   BarSeries,
+  Chart,
   LEGACY_LIGHT_THEME,
+  Position,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
+import { EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  type ClassificationTotalFeatureImportance,
+  type DataFrameAnalyticsConfig,
+  type FeatureImportanceClassName,
+  type RegressionTotalFeatureImportance,
+  type TotalFeatureImportance,
   getAnalysisType,
   isClassificationAnalysis,
   isClassificationTotalFeatureImportance,
   isRegressionAnalysis,
   isRegressionTotalFeatureImportance,
-  type DataFrameAnalyticsConfig,
-  type TotalFeatureImportance,
-  type RegressionTotalFeatureImportance,
-  type ClassificationTotalFeatureImportance,
-  type FeatureImportanceClassName,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 

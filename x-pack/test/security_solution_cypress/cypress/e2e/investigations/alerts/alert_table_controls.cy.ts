@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-import {
-  switchAlertTableToEventRenderedView,
-  switchAlertTableToGridView,
-  waitForAlerts,
-} from '../../../tasks/alerts';
-import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
-import {
-  addsFields,
-  clearFieldsBrowser,
-  closeFieldsBrowser,
-  filterFieldsBrowser,
-  removeField,
-} from '../../../tasks/fields_browser';
-import { FIELDS_BROWSER_CONTAINER } from '../../../screens/fields_browser';
 import { getNewRule } from '../../../objects/rule';
 import {
   DATA_GRID_COLUMN_ORDER_BTN,
@@ -27,13 +13,27 @@ import {
   GET_DATA_GRID_HEADER,
   GET_DATA_GRID_HEADER_CELL_ACTION_GROUP,
 } from '../../../screens/common/data_grid';
-import { createRule } from '../../../tasks/api_calls/rules';
+import { FIELDS_BROWSER_CONTAINER } from '../../../screens/fields_browser';
+import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
+import { DATAGRID_HEADER } from '../../../screens/timeline';
+import {
+  switchAlertTableToEventRenderedView,
+  switchAlertTableToGridView,
+  waitForAlerts,
+} from '../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import {
+  addsFields,
+  clearFieldsBrowser,
+  closeFieldsBrowser,
+  filterFieldsBrowser,
+  removeField,
+} from '../../../tasks/fields_browser';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
-import { DATAGRID_HEADER } from '../../../screens/timeline';
 
 /*
  *

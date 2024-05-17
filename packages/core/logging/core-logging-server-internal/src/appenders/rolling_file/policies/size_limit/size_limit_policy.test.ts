@@ -7,9 +7,9 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { LogRecord, LogLevel } from '@kbn/logging';
-import { SizeLimitTriggeringPolicy } from './size_limit_policy';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { RollingFileContext } from '../../rolling_file_context';
+import { SizeLimitTriggeringPolicy } from './size_limit_policy';
 
 describe('SizeLimitTriggeringPolicy', () => {
   let context: RollingFileContext;

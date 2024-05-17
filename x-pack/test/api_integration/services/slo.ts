@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CreateSLOInput, FindSLODefinitionsResponse } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
+import { CreateSLOInput, FindSLODefinitionsResponse } from '@kbn/slo-schema';
 import { waitForIndexToBeEmpty } from '../apis/slos/helper/wait_for_index_state';
 import { FtrProviderContext } from '../ftr_provider_context';
 

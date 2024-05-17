@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { startCase } from 'lodash/fp';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import { startCase } from 'lodash/fp';
+import React from 'react';
 
 const ActionsDescription = ({ actions }: { actions: RuleAction[] }) => {
   if (!actions.length) return null;

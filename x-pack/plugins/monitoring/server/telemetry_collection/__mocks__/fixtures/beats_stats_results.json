@@ -3,12 +3,12 @@
     "hits": {
       "hits": [
         {
-          "_source" : {
+          "_source": {
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "type": "beats_state",
-            "beats_state" : {
-              "state" : {
-                "functionbeat" : {
+            "beats_state": {
+              "state": {
+                "functionbeat": {
                   "functions": {
                     "count": 1
                   }
@@ -21,12 +21,12 @@
           }
         },
         {
-          "_source" : {
+          "_source": {
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "type": "beats_state",
-            "beats_state" : {
-              "state" : {
-                "functionbeat" : {
+            "beats_state": {
+              "state": {
+                "functionbeat": {
                   "functions": {
                     "count": 3
                   }
@@ -39,26 +39,26 @@
           }
         },
         {
-          "_source" : {
+          "_source": {
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "type": "beats_state",
-            "beats_state" : {
-            "state" : {
-              "heartbeat" : {
-                  "endpoints" : 2,
-                  "http" : {
-                    "endpoints" : 1,
-                    "monitors" : 1
+            "beats_state": {
+              "state": {
+                "heartbeat": {
+                  "endpoints": 2,
+                  "http": {
+                    "endpoints": 1,
+                    "monitors": 1
                   },
-                  "icmp" : {
-                    "monitors" : 0,
-                    "endpoints" : 0
+                  "icmp": {
+                    "monitors": 0,
+                    "endpoints": 0
                   },
-                  "tcp" : {
-                    "monitors" : 1,
-                    "endpoints" : 1
+                  "tcp": {
+                    "monitors": 1,
+                    "endpoints": 1
                   },
-                  "monitors" : 2
+                  "monitors": 2
                 },
                 "queue": {
                   "name": "spool"
@@ -68,26 +68,26 @@
           }
         },
         {
-          "_source" : {
+          "_source": {
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "type": "beats_state",
-            "beats_state" : {
-            "state" : {
-              "heartbeat" : {
-                  "endpoints" : 2,
-                  "http" : {
-                    "endpoints" : 0,
-                    "monitors" : 0
+            "beats_state": {
+              "state": {
+                "heartbeat": {
+                  "endpoints": 2,
+                  "http": {
+                    "endpoints": 0,
+                    "monitors": 0
                   },
-                  "icmp" : {
-                    "monitors" : 0,
-                    "endpoints" : 0
+                  "icmp": {
+                    "monitors": 0,
+                    "endpoints": 0
                   },
-                  "tcp" : {
-                    "monitors" : 1,
-                    "endpoints" : 2
+                  "tcp": {
+                    "monitors": 1,
+                    "endpoints": 2
                   },
-                  "monitors" : 1
+                  "monitors": 1
                 }
               }
             }
@@ -99,14 +99,12 @@
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_state": {
               "beat": {
-                 "type": "car"
+                "type": "car"
               },
               "state": {
                 "module": {
                   "count": 1,
-                  "names": [
-                    "ferrari"
-                  ]
+                  "names": ["ferrari"]
                 }
               }
             }
@@ -120,9 +118,7 @@
               "state": {
                 "input": {
                   "count": 1,
-                  "names": [
-                    "firehose"
-                  ]
+                  "names": ["firehose"]
                 }
               }
             }
@@ -169,24 +165,24 @@
                     }
                   }
                 },
-                "heartbeat" : {
-                  "http" : {
-                    "endpoint_starts" : 1,
-                    "endpoint_stops" : 0,
-                    "monitor_starts" : 1,
-                    "monitor_stops" : 0
+                "heartbeat": {
+                  "http": {
+                    "endpoint_starts": 1,
+                    "endpoint_stops": 0,
+                    "monitor_starts": 1,
+                    "monitor_stops": 0
                   },
-                  "icmp" : {
-                    "endpoint_starts" : 0,
-                    "endpoint_stops" : 0,
-                    "monitor_starts" : 0,
-                    "monitor_stops" : 0
+                  "icmp": {
+                    "endpoint_starts": 0,
+                    "endpoint_stops": 0,
+                    "monitor_starts": 0,
+                    "monitor_stops": 0
                   },
-                  "tcp" : {
-                    "endpoint_starts" : 1,
-                    "endpoint_stops" : 0,
-                    "monitor_starts" : 1,
-                    "monitor_stops" : 0
+                  "tcp": {
+                    "endpoint_starts": 1,
+                    "endpoint_stops": 0,
+                    "monitor_starts": 1,
+                    "monitor_stops": 0
                   }
                 }
               }

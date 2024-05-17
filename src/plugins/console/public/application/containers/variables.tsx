@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { DevToolsVariablesFlyout, DevToolsVariable } from '../components';
-import { useServicesContext } from '../contexts';
-import { StorageKeys } from '../../services';
 import { DEFAULT_VARIABLES } from '../../../common/constants';
+import { StorageKeys } from '../../services';
+import { DevToolsVariable, DevToolsVariablesFlyout } from '../components';
+import { useServicesContext } from '../contexts';
 
 interface VariablesProps {
   onClose: () => void;

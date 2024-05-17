@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
-  EuiContextMenuPanel,
+  EuiButtonIcon,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';

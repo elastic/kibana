@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { API_VERSIONS } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
-import { pagePathGetters } from '../common/page_paths';
-import { SAVED_QUERIES_ID, SAVED_QUERY_ID } from './constants';
+import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { useKibana } from '../common/lib/kibana';
+import { pagePathGetters } from '../common/page_paths';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
+import { SAVED_QUERIES_ID, SAVED_QUERY_ID } from './constants';
 
 interface UseUpdateSavedQueryProps {
   savedQueryId: string;

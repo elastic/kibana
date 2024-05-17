@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import type { ResponseProvidersInterface } from '../../../common/mock/endpoint/http_handler_mock_factory';
-import {
-  composeHttpHandlerMocks,
-  httpHandlerMockFactory,
-} from '../../../common/mock/endpoint/http_handler_mock_factory';
-import type {
-  HostInfo,
-  HostPolicyResponse,
-  MetadataListResponse,
-} from '../../../../common/endpoint/types';
-import { HostStatus } from '../../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { TRANSFORM_STATES } from '../../../../common/constants';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import type {
+  HostInfo,
+  HostPolicyResponse,
+  MetadataListResponse,
+} from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
 import type { PendingActionsHttpMockInterface } from '../../../common/lib/endpoint_pending_actions/mocks';
 import { pendingActionsHttpMock } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { TRANSFORM_STATES } from '../../../../common/constants';
-import type { TransformStatsResponse } from './types';
+import type { ResponseProvidersInterface } from '../../../common/mock/endpoint/http_handler_mock_factory';
+import {
+  composeHttpHandlerMocks,
+  httpHandlerMockFactory,
+} from '../../../common/mock/endpoint/http_handler_mock_factory';
 import type {
   FleetGetAgentPolicyListHttpMockInterface,
   FleetGetAgentStatusHttpMockInterface,
@@ -36,14 +35,15 @@ import type {
   FleetGetPackageListHttpMockInterface,
 } from '../../mocks';
 import {
+  fleetBulkGetAgentPolicyListHttpMock,
+  fleetBulkGetPackagePoliciesListHttpMock,
   fleetGetAgentPolicyListHttpMock,
   fleetGetCheckPermissionsHttpMock,
-  fleetGetPackageListHttpMock,
   fleetGetPackageHttpMock,
-  fleetBulkGetPackagePoliciesListHttpMock,
-  fleetBulkGetAgentPolicyListHttpMock,
+  fleetGetPackageListHttpMock,
   fleetGetPackagePoliciesListHttpMock,
 } from '../../mocks';
+import type { TransformStatsResponse } from './types';
 
 export type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => MetadataListResponse;

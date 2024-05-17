@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { Router } from '@kbn/shared-ux-router';
+import type { QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import type { History } from 'history';
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import { Provider } from 'react-redux';
-import { Router } from '@kbn/shared-ux-router';
-import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { UpsellingProvider } from '../../components/upselling_provider';
 import { ConsoleManager } from '../../../management/components/console';
-import { MockAssistantProvider } from '../mock_assistant_provider';
-import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins, StartServices } from '../../../types';
+import { RouteCapture } from '../../components/endpoint/route_capture';
+import { UpsellingProvider } from '../../components/upselling_provider';
+import { MockAssistantProvider } from '../mock_assistant_provider';
 
 /**
  * Provides the context for rendering the endpoint app

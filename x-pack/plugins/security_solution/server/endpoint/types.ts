@@ -8,10 +8,10 @@
 import type { LoggerFactory } from '@kbn/core/server';
 
 import type { DeepReadonly } from 'utility-types';
-import type { ConfigType } from '../config';
-import type { EndpointAppContextService } from './endpoint_app_context_services';
 import type { HostMetadata } from '../../common/endpoint/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ConfigType } from '../config';
+import type { EndpointAppContextService } from './endpoint_app_context_services';
 
 /**
  * The context for Endpoint apps.

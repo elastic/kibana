@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { orderDataStreamsAndIndices } from '../../../../../lib';
+import React from 'react';
 import { DataStreamBadge } from '../../../../../data_stream_badge';
+import { orderDataStreamsAndIndices } from '../../../../../lib';
 
 export const mapSelectionToIndicesOptions = ({
   allSelected,

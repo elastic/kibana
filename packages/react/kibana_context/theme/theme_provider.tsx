@@ -19,9 +19,9 @@ import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning'
 import { KibanaEuiProvider } from '@kbn/react-kibana-context-root';
 
 import {
-  getColorMode,
-  defaultTheme,
   type ThemeServiceStart,
+  defaultTheme,
+  getColorMode,
 } from '@kbn/react-kibana-context-common';
 
 // Extract the `theme` from `EuiThemeProviderProps` as a type.

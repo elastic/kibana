@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import _ from 'lodash';
 import { generateMockDetailItemData } from '../mock';
 import { isAlertFromEndpointAlert, isAlertFromEndpointEvent } from './endpoint_alert_check';
 

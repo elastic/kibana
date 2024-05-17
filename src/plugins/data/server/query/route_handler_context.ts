@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { badRequest, internal, conflict } from '@hapi/boom';
+import { badRequest, conflict, internal } from '@hapi/boom';
 import type {
   CustomRequestHandlerContext,
   RequestHandlerContext,
@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { escapeKuery, escapeQuotes, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { isQuery, SavedQueryAttributes } from '../../common';
+import { SavedQueryAttributes, isQuery } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 import type { SavedQueryRestResponse } from './route_types';
 
@@ -201,7 +201,11 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     return total;
   };
 
-  const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}): Promise<{
+  const findSavedQueries = async ({
+    page = 1,
+    perPage = 50,
+    search = '',
+  } = {}): Promise<{
     total: number;
     savedQueries: SavedQueryRestResponse[];
   }> => {

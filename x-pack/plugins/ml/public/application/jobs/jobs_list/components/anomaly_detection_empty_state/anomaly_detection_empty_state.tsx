@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
-import adImage from './anomaly_detection_kibana.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
+import adImage from './anomaly_detection_kibana.png';
 
 export const AnomalyDetectionEmptyState: FC = () => {
   const canCreateJob = usePermissionCheck('canCreateJob');

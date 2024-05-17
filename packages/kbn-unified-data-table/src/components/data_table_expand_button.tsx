@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { UnifiedDataTableContext } from '../table_context';
 import { DataTableRowControl } from './data_table_row_control';
 

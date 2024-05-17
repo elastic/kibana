@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
-import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 import {
   CommonFields,
   ConfigKey,
   MonitorFields,
   SourceType,
 } from '../../../../common/runtime_types';
+import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
+import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
 
 export type FormattedValue =
   | boolean

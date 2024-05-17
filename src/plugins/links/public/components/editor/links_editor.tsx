@@ -15,7 +15,6 @@ import {
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
   EuiDragDropContext,
-  euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
   EuiFlexGroup,
@@ -27,14 +26,15 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  Link,
-  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
+  Link,
+  LinksLayoutType,
 } from '../../../common/content_management';
 import { focusMainFlyout, memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';

@@ -10,20 +10,20 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { IndexSettings } from '@kbn/index-management-plugin/common';
 
 import {
-  PolicyFromES,
-  SerializedPolicy,
   ListNodesRouteResponse,
   ListSnapshotReposResponse,
+  PolicyFromES,
+  SerializedPolicy,
 } from '../../../common/types';
 import {
-  UIM_POLICY_DELETE,
+  UIM_INDEX_RETRY_STEP,
   UIM_POLICY_ATTACH_INDEX,
   UIM_POLICY_ATTACH_INDEX_TEMPLATE,
+  UIM_POLICY_DELETE,
   UIM_POLICY_DETACH_INDEX,
-  UIM_INDEX_RETRY_STEP,
 } from '../constants';
+import { sendDelete, sendGet, sendPost, useRequest } from './http';
 import { trackUiMetric } from './ui_metric';
-import { sendGet, sendPost, sendDelete, useRequest } from './http';
 
 export const useLoadNodes = () => {
   return useRequest<ListNodesRouteResponse>({

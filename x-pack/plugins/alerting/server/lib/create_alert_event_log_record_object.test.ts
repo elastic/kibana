@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createAlertEventLogRecordObject } from './create_alert_event_log_record_object';
+import { schema } from '@kbn/config-schema';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
-import { schema } from '@kbn/config-schema';
+import { createAlertEventLogRecordObject } from './create_alert_event_log_record_object';
 
 const MAINTENANCE_WINDOW_IDS = ['test-1', 'test-2'];
 

@@ -7,8 +7,8 @@
  */
 
 import { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 import { createType } from '../test_helpers/saved_object_type';
+import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 
 const dummyModelVersion: SavedObjectsModelVersion = {
   changes: [],

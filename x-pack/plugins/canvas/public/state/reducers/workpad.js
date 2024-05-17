@@ -7,17 +7,17 @@
 
 import { handleActions } from 'redux-actions';
 import { pluginServices } from '../../services';
-import { getDefaultWorkpad } from '../defaults';
 import {
-  setWorkpad,
-  sizeWorkpad,
+  resetWorkpad,
   setColors,
   setName,
-  setWriteable,
+  setWorkpad,
   setWorkpadCSS,
   setWorkpadVariables,
-  resetWorkpad,
+  setWriteable,
+  sizeWorkpad,
 } from '../actions/workpad';
+import { getDefaultWorkpad } from '../defaults';
 
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 

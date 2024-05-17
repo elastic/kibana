@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import { schema } from '@kbn/config-schema';
+import { ElasticsearchClient } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
   name: schema.string(),

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
+import http from 'http';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
-import http from 'http';
+import httpProxy from 'http-proxy';
 
-import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 

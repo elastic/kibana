@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { JsonObject } from '@kbn/utility-types';
-import { subtractMillisecondsFromDate } from '../../../../common/utils';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -15,24 +14,25 @@ import {
 import { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import {
   LogViewColumnConfiguration,
-  logViewFieldColumnConfigurationRT,
   LogViewReference,
   ResolvedLogView,
+  logViewFieldColumnConfigurationRT,
 } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { subtractMillisecondsFromDate } from '../../../../common/utils';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import {
   CompiledLogMessageFormattingRule,
-  compileFormattingRules,
   Fields,
   Highlights,
+  compileFormattingRules,
 } from '../../../services/log_entries/message/message';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
 import { LogsSharedBackendLibs } from '../../logs_shared_types';
 import {
   CompositeDatasetKey,
-  createLogEntryDatasetsQuery,
   LogEntryDatasetBucket,
+  createLogEntryDatasetsQuery,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_datasets';
 

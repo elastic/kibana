@@ -7,11 +7,7 @@
     "id": "uiActionsExplorer",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "uiActions",
-      "uiActionsExamples",
-      "developerExamples"
-    ],
+    "requiredPlugins": ["uiActions", "uiActionsExamples", "developerExamples"],
     "requiredBundles": []
   }
 }

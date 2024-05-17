@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RequestDiagnosticsAdditionalMetrics } from '../../../../../../../common/types';
-import type { Agent } from '../../../../types';
 import {
-  sendPostRequestDiagnostics,
   sendPostBulkRequestDiagnostics,
-  useStartServices,
+  sendPostRequestDiagnostics,
   useLink,
+  useStartServices,
 } from '../../../../hooks';
+import type { Agent } from '../../../../types';
 
 interface Props {
   onClose: () => void;

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  useGeneratedHtmlId,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { getAttackDiscoveryMarkdown } from '../../../get_attack_discovery_markdown/get_attack_discovery_markdown';
-import * as i18n from './translations';
 import type { AttackDiscovery } from '../../../types';
+import { useViewInAiAssistant } from '../../view_in_ai_assistant/use_view_in_ai_assistant';
 import { useAddToNewCase } from '../use_add_to_case';
 import { useAddToExistingCase } from '../use_add_to_existing_case';
-import { useViewInAiAssistant } from '../../view_in_ai_assistant/use_view_in_ai_assistant';
+import * as i18n from './translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

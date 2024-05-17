@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { type Observable, combineLatest, ReplaySubject, firstValueFrom, startWith } from 'rxjs';
-import { schema } from '@kbn/config-schema';
 import type { PackageInfo } from '@kbn/config';
+import { schema } from '@kbn/config-schema';
 import type { PluginName } from '@kbn/core-base-common';
 import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
-import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
-import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { type CoreStatus, type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { StatusResponse } from '@kbn/core-status-common-internal';
-import { calculateLegacyStatus, type LegacyStatusInfo } from '../legacy_status';
-import { statusResponse, type RedactedStatusHttpBody } from './status_response_schemas';
+import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
+import { type Observable, ReplaySubject, combineLatest, firstValueFrom, startWith } from 'rxjs';
+import { type LegacyStatusInfo, calculateLegacyStatus } from '../legacy_status';
+import { type RedactedStatusHttpBody, statusResponse } from './status_response_schemas';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import LatencyChart from '../../../components/alerting/ui_components/alert_details_app_section/latency_chart';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useAlertingProps } from '../use_alerting_props';
+import LatencyChart from '../../../components/alerting/ui_components/alert_details_app_section/latency_chart';
+import { ServiceNameCallout } from '../service_name_callout';
 import { TimeRangeCallout } from '../time_range_callout';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
-import { ServiceNameCallout } from '../service_name_callout';
+import { useAlertingProps } from '../use_alerting_props';
 
 export function APMAlertingLatencyChart({
   rule,

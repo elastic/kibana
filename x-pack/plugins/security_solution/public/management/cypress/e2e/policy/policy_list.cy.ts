@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import { setCustomProtectionUpdatesManifestVersion } from '../../tasks/endpoint_policy';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { setCustomProtectionUpdatesManifestVersion } from '../../tasks/endpoint_policy';
 
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { login } from '../../tasks/login';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
+import { login } from '../../tasks/login';
 
 describe(
   'Policy List',

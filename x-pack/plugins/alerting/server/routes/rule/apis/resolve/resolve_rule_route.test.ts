@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
-import { resolveRuleRoute } from './resolve_rule_route';
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { pick } from 'lodash';
+import { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
+import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { resolveRuleRoute } from './resolve_rule_route';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

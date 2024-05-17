@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import type { Logger } from '@kbn/core/server';
+import { cloneDeep } from 'lodash';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
 import {
   batchTelemetryRecords,
-  templateExceptionList,
-  newTelemetryLogger,
   createUsageCounterLabel,
+  newTelemetryLogger,
   safeValue,
+  templateExceptionList,
 } from '../helpers';
-import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ExceptionListItem, RuleSearchResult } from '../types';
+import type { ITelemetryEventsSender } from '../sender';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
+import type { ExceptionListItem, RuleSearchResult } from '../types';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution Detection Rule Lists Telemetry';

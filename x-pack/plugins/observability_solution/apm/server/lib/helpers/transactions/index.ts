@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { APMConfig } from '../../..';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
+import { ApmDocumentType } from '../../../../common/document_type';
 import {
-  TRANSACTION_DURATION,
-  TRANSACTION_DURATION_HISTOGRAM,
-  TRANSACTION_ROOT,
-  PARENT_ID,
   METRICSET_INTERVAL,
   METRICSET_NAME,
+  PARENT_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_DURATION_SUMMARY,
+  TRANSACTION_ROOT,
 } from '../../../../common/es_fields/apm';
-import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../../common/document_type';
 
 export async function getHasTransactionsEvents({
   start,

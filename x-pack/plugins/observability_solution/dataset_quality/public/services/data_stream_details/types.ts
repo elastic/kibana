@@ -7,10 +7,10 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  GetDataStreamSettingsParams,
+  DataStreamDetails,
   DataStreamSettings,
   GetDataStreamDetailsParams,
-  DataStreamDetails,
+  GetDataStreamSettingsParams,
   GetIntegrationDashboardsParams,
   GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockGlobalState } from '../../../../../common/mock/global_state';
 import { timelineBodySelector } from '.';
 import { TimelineId } from '../../../../../../common/types/timeline';
+import { mockGlobalState } from '../../../../../common/mock/global_state';
 
 describe('selectors', () => {
   describe('timelineBodySelector', () => {

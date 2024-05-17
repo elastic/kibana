@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { useInterpret, useSelector } from '@xstate/react';
+import { useCallback } from 'react';
 import { isAllDatasetSelection } from '../../../../common/data_source_selection';
 import {
   ChangePanelHandler,
-  DatasetSelectionHandler,
   DataSourceSelectorSearchHandler,
   DataViewFilterHandler,
   DataViewSelectionHandler,
+  DatasetSelectionHandler,
   PanelId,
 } from '../types';
 import { createDataSourceSelectorStateMachine } from './state_machine';

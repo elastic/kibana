@@ -7,14 +7,14 @@
  */
 
 import { Serializable } from '@kbn/utility-types';
-import { Filter, FILTERS } from './types';
+import { FILTERS, Filter } from './types';
 
-import { buildPhraseFilter, PhraseFilterValue } from './phrase_filter';
-import { buildPhrasesFilter } from './phrases_filter';
-import { buildRangeFilter, RangeFilterParams } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
+import { PhraseFilterValue, buildPhraseFilter } from './phrase_filter';
+import { buildPhrasesFilter } from './phrases_filter';
+import { RangeFilterParams, buildRangeFilter } from './range_filter';
 
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { FilterStateStore } from './types';
 
 /**

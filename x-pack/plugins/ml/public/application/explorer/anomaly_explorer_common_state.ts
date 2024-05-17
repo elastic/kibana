@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import { isEqual } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs';
-import { isEqual } from 'lodash';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs';
+import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
+import { StateService } from '../services/state_service';
+import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
 import type { ExplorerJob } from './explorer_utils';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
-import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
-import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
-import { StateService } from '../services/state_service';
 
 export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];

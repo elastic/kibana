@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { JSXElementConstructor, ReactElement } from 'react';
+import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
+import type { SearchSessionState } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   KibanaContextProvider,
   type KibanaReactContextValue,
 } from '@kbn/kibana-react-plugin/public';
-import { Observable, of } from 'rxjs';
-import { action } from '@storybook/addon-actions';
-import type { DecoratorFn } from '@storybook/react';
-import { useParameter } from '@storybook/addons';
-import type { DeepPartial } from 'utility-types';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
-import type { SearchSessionState } from '@kbn/data-plugin/public';
-import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
-import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
-import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
+import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
+import { action } from '@storybook/addon-actions';
+import { useParameter } from '@storybook/addons';
+import type { DecoratorFn } from '@storybook/react';
+import React, { JSXElementConstructor, ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { Observable, of } from 'rxjs';
+import type { DeepPartial } from 'utility-types';
+import type { InfraConfig } from '../../../../server';
+import { SourceProvider } from '../../../containers/metrics_source';
 import { PluginConfigProvider } from '../../../containers/plugin_config_context';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
-import { SourceProvider } from '../../../containers/metrics_source';
-import { getHttp } from './context/http';
-import { assetDetailsProps, getLogEntries } from './context/fixtures';
 import { ContextProviders } from '../context_providers';
 import { DataViewsProvider } from '../hooks/use_data_views';
-import type { InfraConfig } from '../../../../server';
+import { assetDetailsProps, getLogEntries } from './context/fixtures';
+import { getHttp } from './context/http';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
@@ -90,7 +90,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       },
     },
     uiSettings: {
-      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+      get: () => ({ key: 'mock', defaultOverride: undefined }) as any,
     },
     triggersActionsUi: {
       getAlertSummaryWidget: AlertSummaryWidget as (
@@ -99,7 +99,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     charts: {
       theme: {
-        useChartsBaseTheme: () => ({} as Theme),
+        useChartsBaseTheme: () => ({}) as Theme,
       },
     },
     settings: {
@@ -125,7 +125,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
               navigate: async () => {
                 return Promise.resolve();
               },
-            } as unknown as LocatorPublic<any>),
+            }) as unknown as LocatorPublic<any>,
         },
       },
     },

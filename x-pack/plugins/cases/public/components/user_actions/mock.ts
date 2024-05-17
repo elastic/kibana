@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { UserActionActions } from '../../../common/types/domain';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { UserActionBuilderArgs } from './types';
-import { casesConfigurationsMock } from '../../containers/configure/mock';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const userAction = getUserAction('title', UserActionActions.update);

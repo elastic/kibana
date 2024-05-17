@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { mount } from 'enzyme';
+import React from 'react';
 import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');

@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
+  EuiButton,
+  EuiCode,
+  EuiComboBox,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiCode,
-  EuiFlexGroup,
-  EuiComboBox,
-  EuiFlexItem,
-  EuiButton,
-  EuiLink,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { queryClient } from '..';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   sendGetAgentPolicies,
   sendResetAllPreconfiguredAgentPolicies,
@@ -29,8 +31,6 @@ import {
   useLink,
   useStartServices,
 } from '../../../hooks';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
-import { queryClient } from '..';
 
 import { CodeBlock } from './code_block';
 

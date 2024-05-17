@@ -1,3 +1,8 @@
+import { Readable } from 'stream';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +11,9 @@
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ToolingLog } from '@kbn/tooling-log';
 import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { Readable } from 'stream';
-import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

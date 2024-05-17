@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { Type, schema } from '@kbn/config-schema';
 
 // TODO: remove once this is merged:  https://github.com/elastic/kibana/pull/41728
 

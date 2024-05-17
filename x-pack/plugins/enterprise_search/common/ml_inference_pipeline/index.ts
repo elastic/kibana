@@ -13,18 +13,18 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  BUILT_IN_MODEL_TAG,
   SUPPORTED_PYTORCH_TASKS,
   TRAINED_MODEL_TYPE,
-  BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
 
 import { MlModel } from '../types/ml';
 
 import {
-  MlInferencePipeline,
   CreateMLInferencePipeline,
-  TrainedModelState,
   InferencePipelineInferenceConfig,
+  MlInferencePipeline,
+  TrainedModelState,
 } from '../types/pipelines';
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;

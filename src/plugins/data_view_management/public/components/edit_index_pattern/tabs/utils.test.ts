@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { getPath } from './utils';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 test('getPath() should encode "fieldName"', () => {
   expect(

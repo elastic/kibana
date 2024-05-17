@@ -1,3 +1,14 @@
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
+import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
+import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
+import { render, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +16,29 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { useParams } from 'react-router-dom';
 import {
-  CspPolicyTemplateForm,
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
-  GCP_ORGANIZATION_ACCOUNT,
-  GCP_SINGLE_ACCOUNT,
-} from './policy_template_form';
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+} from '../../../common/constants';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
+import {
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
+  CIS_AZURE_OPTION_TEST_SUBJ,
+  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  CIS_GCP_OPTION_TEST_SUBJ,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+} from '../test_subjects';
 import {
   getMockAgentlessAgentPolicy,
   getMockPackageInfo,
@@ -30,38 +54,14 @@ import {
   getMockPolicyVulnMgmtAWS,
   getPackageInfoMock,
 } from './mocks';
-import type {
-  AgentPolicy,
-  NewPackagePolicy,
-  PackageInfo,
-  PackagePolicy,
-} from '@kbn/fleet-plugin/common';
+import {
+  AWS_ORGANIZATION_ACCOUNT,
+  AWS_SINGLE_ACCOUNT,
+  CspPolicyTemplateForm,
+  GCP_ORGANIZATION_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
+} from './policy_template_form';
 import { getPosturePolicy } from './utils';
-import {
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_GCP,
-} from '../../../common/constants';
-import { useParams } from 'react-router-dom';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import {
-  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-  CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
-  CIS_AZURE_OPTION_TEST_SUBJ,
-  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
-  CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
-  CIS_GCP_OPTION_TEST_SUBJ,
-  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
-  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
-} from '../test_subjects';
-import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
-import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({

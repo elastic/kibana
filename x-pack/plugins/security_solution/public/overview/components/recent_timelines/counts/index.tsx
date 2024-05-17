@@ -10,8 +10,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {
-  getPinnedEventCount,
   getNotesCount,
+  getPinnedEventCount,
 } from '../../../../timelines/components/open_timeline/helpers';
 import type { OpenTimelineResult } from '../../../../timelines/components/open_timeline/types';
 

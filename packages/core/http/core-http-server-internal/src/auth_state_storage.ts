@@ -7,9 +7,9 @@
  */
 
 import { Request } from '@hapi/hapi';
-import type { KibanaRequest, IsAuthenticated } from '@kbn/core-http-server';
-import { AuthStatus } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import type { IsAuthenticated, KibanaRequest } from '@kbn/core-http-server';
+import { AuthStatus } from '@kbn/core-http-server';
 
 /** @internal */
 export class AuthStateStorage {
@@ -27,8 +27,8 @@ export class AuthStateStorage {
     const status: AuthStatus = this.storage.has(key)
       ? AuthStatus.authenticated
       : this.canBeAuthenticated()
-      ? AuthStatus.unauthenticated
-      : AuthStatus.unknown;
+        ? AuthStatus.unauthenticated
+        : AuthStatus.unknown;
 
     return { status, state };
   };

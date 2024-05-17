@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
-import type { Dispatch, SetStateAction } from 'react';
 import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
-import type { PromptObservableState } from './types';
+import type { Dispatch, SetStateAction } from 'react';
+import { Observable, concatMap, delay, finalize, of, scan, timestamp } from 'rxjs';
 import { API_ERROR } from '../translations';
+import type { PromptObservableState } from './types';
 const MIN_DELAY = 35;
 
 interface StreamObservable {

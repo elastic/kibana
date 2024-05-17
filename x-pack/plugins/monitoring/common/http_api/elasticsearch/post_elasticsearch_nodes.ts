@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { clusterUuidRT, ccsRT, timeRangeRT, paginationRT, sortingRT } from '../shared';
+import { ccsRT, clusterUuidRT, paginationRT, sortingRT, timeRangeRT } from '../shared';
 
 export const postElasticsearchNodesRequestParamsRT = rt.type({
   clusterUuid: clusterUuidRT,

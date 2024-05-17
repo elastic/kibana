@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Semver from 'semver';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import Semver from 'semver';
 import { assertValidModelVersion, modelVersionToVirtualVersion } from './conversion';
 
 /**

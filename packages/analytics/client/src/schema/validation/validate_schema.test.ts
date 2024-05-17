@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { validateSchema } from './validate_schema';
 import { schemaToIoTs } from './schema_to_io_ts';
+import { validateSchema } from './validate_schema';
 
 describe('validateSchema', () => {
   describe('successful', () => {

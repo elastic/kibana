@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
-import { AggSelect } from './agg_select';
-import { FieldSelect } from './field_select';
-import { AggRow } from './agg_row';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { createNumberHandler } from '../lib/create_number_handler';
 import {
-  htmlIdGenerator,
-  EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
+  EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { Percentiles, newPercentile } from './percentile_ui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { useEffect } from 'react';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
 import { PercentileHdr } from './percentile_hdr';
+import { Percentiles, newPercentile } from './percentile_ui';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 

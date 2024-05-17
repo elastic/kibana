@@ -7,8 +7,8 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 import { transformDefaultIndex } from './transforms';
 

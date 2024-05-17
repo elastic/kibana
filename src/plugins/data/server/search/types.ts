@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import type {
+  CustomRequestHandlerContext,
   IRouter,
   IScopedClusterClient,
   IUiSettingsClient,
-  SavedObjectsClientContract,
   KibanaRequest,
-  CustomRequestHandlerContext,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type {
-  ISearchClient,
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-  IEsSearchResponse,
   IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchClient,
+  ISearchOptions,
 } from '@kbn/search-types';
+import { Observable } from 'rxjs';
 
 import { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
@@ -46,7 +46,7 @@ export interface ISearchSetup {
    */
   registerSearchStrategy: <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -66,7 +66,7 @@ export interface ISearchSetup {
  */
 export interface ISearchStrategy<
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 > {
   search: (
     request: SearchStrategyRequest,
@@ -95,7 +95,7 @@ export interface IScopedSearchClient extends ISearchClient {
 
 export interface ISearchStart<
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 > {
   aggs: AggsStart;
   /**

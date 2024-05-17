@@ -9,11 +9,11 @@
 import React, { ChangeEvent, useCallback } from 'react';
 
 import {
-  EuiFormRow,
   EuiFieldNumber,
   EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSwitch,
   EuiSwitchEvent,
   EuiSwitchProps,

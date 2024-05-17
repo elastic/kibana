@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment-timezone';
 
 export function useKibanaTimeZoneSetting() {
   const [kibanaTimeZone] = useUiSetting$<string>(UI_SETTINGS.DATEFORMAT_TZ);

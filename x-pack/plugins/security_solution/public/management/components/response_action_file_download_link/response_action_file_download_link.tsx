@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type CSSProperties } from 'react';
 import {
   EuiButtonEmpty,
-  EuiSkeletonText,
-  EuiText,
-  EuiSpacer,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo, type CSSProperties } from 'react';
 import styled from 'styled-components';
+import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
-import { FormattedError } from '../formatted_error';
-import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
-import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { FormattedError } from '../formatted_error';
 
 const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
   fontFamily: 'inherit',

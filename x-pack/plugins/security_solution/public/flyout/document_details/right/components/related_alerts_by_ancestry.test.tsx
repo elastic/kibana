@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import {
-  SUMMARY_ROW_ICON_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
-  SUMMARY_ROW_LOADING_TEST_ID,
-  CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
-} from './test_ids';
-import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import React from 'react';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import {
+  CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
+  SUMMARY_ROW_ICON_TEST_ID,
+  SUMMARY_ROW_LOADING_TEST_ID,
+  SUMMARY_ROW_VALUE_TEST_ID,
+} from './test_ids';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 

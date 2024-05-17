@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback } from 'react';
 
 import { useNotifyService, useWorkpadService } from '../../../services';
 

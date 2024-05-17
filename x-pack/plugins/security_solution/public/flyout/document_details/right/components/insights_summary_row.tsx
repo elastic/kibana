@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ReactElement, VFC } from 'react';
-import React from 'react';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIcon,
   EuiSkeletonText,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { ReactElement, VFC } from 'react';
+import React from 'react';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 
 export interface InsightsSummaryRowProps {

@@ -10,8 +10,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { StateProvider } from '../../../mappings_state_context';
 
-import { SearchResultItem } from './search_result_item';
 import type { SearchResult } from '../../../types';
+import { SearchResultItem } from './search_result_item';
 
 describe('SearchResultItem', () => {
   const item = {

@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { addBasePath } from '..';
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '..';
+import { doesTemplateExist, saveTemplate } from './lib';
 import { templateSchema } from './validate_schemas';
-import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 const paramsSchema = schema.object({

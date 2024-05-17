@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Story } from '@storybook/react';
 import { css } from '@emotion/react';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { InsightsSummaryRow } from './insights_summary_row';
 
 export default {

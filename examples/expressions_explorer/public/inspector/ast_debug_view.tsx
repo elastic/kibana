@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiCodeBlock, EuiDescriptionList, EuiSpacer, EuiText, EuiTreeView } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiTreeView, EuiDescriptionList, EuiCodeBlock, EuiText, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   ast: any;

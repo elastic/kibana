@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
 import path from 'path';
-import { createTestConfig, CreateTestConfig } from '../common/config';
+import { mapValues } from 'lodash';
+import { CreateTestConfig, createTestConfig } from '../common/config';
 
 export const observabilityAIAssistantDebugLogger = {
   name: 'plugins.observabilityAIAssistant',

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { FILTER_REQUESTS_LABEL, SEARCH_REQUESTS_LABEL } from '../translations';
 import { NetworkRequestsTotal } from './network_requests_total';
 

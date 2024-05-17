@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { lazyLoadModules } from '../lazy_load_bundle';
+import React from 'react';
 import { IndexNameFormProps } from '..';
+import { lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
   IndexNameForm: React.ComponentType<IndexNameFormProps> | null;

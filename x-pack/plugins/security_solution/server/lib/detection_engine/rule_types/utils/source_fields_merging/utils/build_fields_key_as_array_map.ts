@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPlainObject, isArray } from 'lodash';
+import { isArray, isPlainObject } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 

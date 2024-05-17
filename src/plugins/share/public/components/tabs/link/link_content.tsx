@@ -7,7 +7,6 @@
  */
 
 import {
-  copyToClipboard,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -104,8 +104,8 @@ export const LinkContent = ({
       urlToCopy = delegatedShareUrlHandler
         ? delegatedShareUrlHandler?.()
         : allowShortUrl
-        ? await createShortUrl()
-        : getSnapshotUrl();
+          ? await createShortUrl()
+          : getSnapshotUrl();
     }
 
     copyToClipboard(urlToCopy);

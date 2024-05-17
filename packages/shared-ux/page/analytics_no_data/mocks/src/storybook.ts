@@ -8,13 +8,13 @@
 
 import { action } from '@storybook/addon-actions';
 
-import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
+import type {
+  AnalyticsNoDataPageProps,
+  AnalyticsNoDataPageServices,
+} from '@kbn/shared-ux-page-analytics-no-data-types';
 import { KibanaNoDataPageStorybookMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana-no-data-mocks';
-import type {
-  AnalyticsNoDataPageServices,
-  AnalyticsNoDataPageProps,
-} from '@kbn/shared-ux-page-analytics-no-data-types';
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { of } from 'rxjs';
 
 type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink' | 'customBranding'>;

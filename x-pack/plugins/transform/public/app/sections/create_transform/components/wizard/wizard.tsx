@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
 import { pick } from 'lodash';
+import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
 
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSteps } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { UrlStateProvider } from '@kbn/ml-url-state';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 
-import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { useEnabledFeatures } from '../../../../serverless_context';
 
+import { useAppDependencies } from '../../../../app_dependencies';
 import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
-import { useAppDependencies } from '../../../../app_dependencies';
 
+import { StepCreateForm, StepCreateSummary, getDefaultStepCreateState } from '../step_create';
 import type { StepDefineExposedState } from '../step_define';
 import {
-  applyTransformConfigToDefineState,
-  getDefaultStepDefineState,
   StepDefineForm,
   StepDefineSummary,
+  applyTransformConfigToDefineState,
+  getDefaultStepDefineState,
 } from '../step_define';
-import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
 import {
-  applyTransformConfigToDetailsState,
-  getDefaultStepDetailsState,
   StepDetailsForm,
   StepDetailsSummary,
+  applyTransformConfigToDetailsState,
+  getDefaultStepDetailsState,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
 

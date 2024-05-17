@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import {
-  RuleTagBadgeProps,
-  RuleTagBadgeOptions,
-} from '../application/sections/rules_list/components/rule_tag_badge';
 import { RuleTagBadge } from '../application/sections';
+import {
+  RuleTagBadgeOptions,
+  RuleTagBadgeProps,
+} from '../application/sections/rules_list/components/rule_tag_badge';
 export const getRuleTagBadgeLazy = <T extends RuleTagBadgeOptions = 'default'>(
   props: RuleTagBadgeProps<T>
 ) => {

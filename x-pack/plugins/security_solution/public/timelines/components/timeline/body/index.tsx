@@ -10,31 +10,31 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
+  FIRST_ARIA_INDEX,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
-import { getActionsColumnWidth } from '../../../../common/components/header_actions';
-import type { ControlColumnProps } from '../../../../../common/types';
-import type { CellValueElementProps } from '../cell_rendering';
-import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import type { RowRenderer, TimelineTabs } from '../../../../../common/types/timeline';
 import { RowRendererCount } from '../../../../../common/api/timeline';
-import type { BrowserFields } from '../../../../common/containers/source';
 import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
-import type { inputsModel, State } from '../../../../common/store';
+import type { ControlColumnProps } from '../../../../../common/types';
+import type { RowRenderer, TimelineTabs } from '../../../../../common/types/timeline';
+import { getActionsColumnWidth } from '../../../../common/components/header_actions';
+import type { BrowserFields } from '../../../../common/containers/source';
+import { useLicense } from '../../../../common/hooks/use_license';
+import type { State, inputsModel } from '../../../../common/store';
 import { timelineActions } from '../../../store';
+import { selectTimelineById } from '../../../store/selectors';
+import type { CellValueElementProps } from '../cell_rendering';
 import type { OnRowSelected, OnSelectAll } from '../events';
-import { getColumnHeaders } from './column_headers/helpers';
-import { getEventIdToDataMapping } from './helpers';
-import type { Sort } from './sort';
-import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
+import { getColumnHeaders } from './column_headers/helpers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import { Events } from './events';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { selectTimelineById } from '../../../store/selectors';
+import { getEventIdToDataMapping } from './helpers';
+import { plainRowRenderer } from './renderers/plain_row_renderer';
+import type { Sort } from './sort';
 
 export interface Props {
   activePage: number;

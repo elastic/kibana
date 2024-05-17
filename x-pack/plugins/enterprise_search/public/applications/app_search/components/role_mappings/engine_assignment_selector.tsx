@@ -16,12 +16,12 @@ import { RoleOptionLabel } from '../../../shared/role_mapping';
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 
 import {
-  ENGINE_REQUIRED_ERROR,
-  ALL_ENGINES_LABEL,
   ALL_ENGINES_DESCRIPTION,
-  SPECIFIC_ENGINES_LABEL,
-  SPECIFIC_ENGINES_DESCRIPTION,
+  ALL_ENGINES_LABEL,
   ENGINE_ASSIGNMENT_LABEL,
+  ENGINE_REQUIRED_ERROR,
+  SPECIFIC_ENGINES_DESCRIPTION,
+  SPECIFIC_ENGINES_LABEL,
 } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
 

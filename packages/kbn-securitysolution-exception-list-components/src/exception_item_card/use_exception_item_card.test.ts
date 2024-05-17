@@ -8,10 +8,10 @@
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
-import { useExceptionItemCard } from './use_exception_item_card';
-import * as i18n from './translations';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
+import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
+import * as i18n from './translations';
+import { useExceptionItemCard } from './use_exception_item_card';
 
 const onEditException = jest.fn();
 const onDeleteException = jest.fn();

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
+import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
+import type { DateFieldStats, FieldStatsError } from '../../../../../common/types/field_stats';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
-import type { DateFieldStats, FieldStatsError } from '../../../../../common/types/field_stats';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];

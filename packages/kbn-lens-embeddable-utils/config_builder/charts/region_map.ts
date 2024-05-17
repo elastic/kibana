@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
+import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   BuildDependencies,
   DEFAULT_LAYER_ID,
@@ -23,7 +24,6 @@ import {
   getAdhocDataviews,
   mapToFormula,
 } from '../utils';
-import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 

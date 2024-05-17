@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
+import { IconRegionMap } from '@kbn/chart-icons';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
-import { IconRegionMap } from '@kbn/chart-icons';
+import React from 'react';
+import { RegionKeyEditor } from './region_key_editor';
 import { getSuggestions } from './suggestions';
 import type { ChoroplethChartState } from './types';
-import { RegionKeyEditor } from './region_key_editor';
 
 const REGION_KEY_GROUP_ID = 'region_key';
 const METRIC_GROUP_ID = 'metric';

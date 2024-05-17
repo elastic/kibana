@@ -1,3 +1,4 @@
+import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +6,15 @@
  * 2.0.
  */
 import { v4 as uuidV4 } from 'uuid';
-import { schema } from '@kbn/config-schema';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { unzipFile } from '../../common/unzipt_project_code';
-import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-import { validateMonitor } from './monitor_validation';
-import { getPrivateLocationsForMonitor } from './add_monitor/utils';
+import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import { unzipFile } from '../../common/unzipt_project_code';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { getPrivateLocationsForMonitor } from './add_monitor/utils';
+import { validateMonitor } from './monitor_validation';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',

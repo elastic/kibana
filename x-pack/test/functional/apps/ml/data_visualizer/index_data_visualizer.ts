@@ -7,7 +7,6 @@
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { TestData, MetricFieldVisConfig } from './types';
 import {
   farequoteDataViewTestData,
   farequoteKQLFiltersSearchTestData,
@@ -15,6 +14,7 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data_random_sampler';
+import { MetricFieldVisConfig, TestData } from './types';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');

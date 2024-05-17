@@ -24,10 +24,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import {
-  filteringPolicyToText,
-  filteringRuleToText,
   FilteringRule,
   FilteringRuleRuleValues,
+  filteringPolicyToText,
+  filteringRuleToText,
 } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../../shared/doc_links';

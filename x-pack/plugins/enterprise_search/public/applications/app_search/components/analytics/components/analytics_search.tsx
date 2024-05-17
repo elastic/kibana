@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../shared/kibana';

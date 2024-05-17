@@ -22,10 +22,10 @@ import {
 import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
+import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;

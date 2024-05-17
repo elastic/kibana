@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type {
-  AggsCommonStart,
   AggConfig,
   AggParamsDateHistogram,
   AggParamsHistogram,
+  AggsCommonStart,
   CreateAggConfigParams,
   IAggType,
 } from '../search';

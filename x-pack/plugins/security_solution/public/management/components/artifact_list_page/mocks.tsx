@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { act, waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import userEvent from '@testing-library/user-event';
-import type { ArtifactFormComponentProps } from './types';
-import type { ArtifactListPageProps } from './artifact_list_page';
-import { ArtifactListPage } from './artifact_list_page';
+import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { trustedAppsAllHttpMocks } from '../../mocks';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_client';
+import type { ArtifactListPageProps } from './artifact_list_page';
+import { ArtifactListPage } from './artifact_list_page';
 import { artifactListPageLabels } from './translations';
+import type { ArtifactFormComponentProps } from './types';
 
 export const getFormComponentMock = (): {
   FormComponentMock: jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>;

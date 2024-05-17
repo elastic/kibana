@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
 import { capitalize } from 'lodash';
+import React from 'react';
 
 interface Props {
   licenseType: string;

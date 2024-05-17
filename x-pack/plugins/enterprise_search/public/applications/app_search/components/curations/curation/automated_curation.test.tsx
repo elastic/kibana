@@ -13,7 +13,7 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiBadge, EuiButton, EuiTab } from '@elastic/eui';
 
@@ -28,7 +28,7 @@ import { AutomatedCurationHistory } from './automated_curation_history';
 import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
-import { PromotedDocuments, OrganicDocuments } from './documents';
+import { OrganicDocuments, PromotedDocuments } from './documents';
 
 describe('AutomatedCuration', () => {
   const values = {

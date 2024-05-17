@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
   EuiBadge,
   EuiCallOut,
   EuiCode,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView, DataViewField, DataViewType, RuntimeField } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  SavedObjectRelation,
-  SavedObjectManagementTypeInfo,
-} from '@kbn/saved-objects-management-plugin/public';
-import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import {
+  SavedObjectManagementTypeInfo,
+  SavedObjectRelation,
+} from '@kbn/saved-objects-management-plugin/public';
 import type * as CSS from 'csstype';
+import { pickBy } from 'lodash';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
 import { IndexPatternManagmentContext } from '../../types';
-import { Tabs } from './tabs';
-import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
-import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
+import { IndexHeader } from './index_header';
+import { RemoveDataViewProps, removeDataView } from './remove_data_view';
+import { Tabs } from './tabs';
 
 const codeStyle: CSS.Properties = {
   marginLeft: '8px',

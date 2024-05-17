@@ -7,14 +7,7 @@
     "id": "dataViewEditor",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "dataViews"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils",
-      "esUiShared"
-    ]
+    "requiredPlugins": ["data", "dataViews"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "esUiShared"]
   }
 }

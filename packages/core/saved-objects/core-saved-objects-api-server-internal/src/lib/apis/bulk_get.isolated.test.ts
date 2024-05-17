@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CheckAuthorizationResult, SavedObject } from '@kbn/core-saved-objects-server';
+import { ApiExecutionContextMock, apiContextMock } from '../../mocks';
+import { performBulkGet } from './bulk_get';
 import {
   getSavedObjectFromSourceMock,
   rawDocExistsInNamespaceMock,
 } from './bulk_get.isolated.test.mocks';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObject, CheckAuthorizationResult } from '@kbn/core-saved-objects-server';
-import { apiContextMock, ApiExecutionContextMock } from '../../mocks';
-import { performBulkGet } from './bulk_get';
 
 interface ObjectInfo {
   id: string;

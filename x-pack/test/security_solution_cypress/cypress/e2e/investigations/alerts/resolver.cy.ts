@@ -7,16 +7,16 @@
 
 import { ANALYZER_NODE } from '../../../screens/alerts';
 
-import { openAnalyzerForFirstAlertInTimeline } from '../../../tasks/alerts';
-import { createRule } from '../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../objects/rule';
-import { setStartDate } from '../../../tasks/date_picker';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
+import { openAnalyzerForFirstAlertInTimeline } from '../../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { setStartDate } from '../../../tasks/date_picker';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe.skip('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export type ISavedObjectsManagement = PublicMethodsOf<SavedObjectsManagement>;
 

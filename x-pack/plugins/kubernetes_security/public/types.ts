@@ -1,3 +1,10 @@
+import { EuiIconProps } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { BoolQuery } from '@kbn/es-query';
+import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +12,6 @@
  * 2.0.
  */
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
-import type { SessionViewStart } from '@kbn/session-view-plugin/public';
-import { EuiIconProps } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
 import { EuiVarsColors } from './hooks/use_eui_theme';
 
 export interface StartPlugins {

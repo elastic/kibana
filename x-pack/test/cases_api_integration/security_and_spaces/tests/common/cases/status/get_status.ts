@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { CASE_STATUS_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 import {
   createCase,
-  updateCase,
-  getAllCasesStatuses,
   deleteAllCaseItems,
-  superUserSpace1Auth,
   extractWarningValueFromWarningHeader,
+  getAllCasesStatuses,
+  superUserSpace1Auth,
+  updateCase,
 } from '../../../../../common/lib/api';
 import {
   globalRead,
@@ -28,6 +27,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../../common/lib/authentication/users';
+import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 import { assertWarningHeader } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

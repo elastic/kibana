@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
+import { OnlyEsqlQueryRuleParams } from '../types';
 import { getEsqlQuery } from './fetch_esql_query';
 
 const getTimeRange = () => {

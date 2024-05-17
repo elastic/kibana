@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
 import { DETECTION_RULES_FILTER } from '../rule_objects/filters';
 import { getSpacesAggregation, normalizeSpacesAggregation } from './aggregations/spaces';

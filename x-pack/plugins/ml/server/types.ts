@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { IRouter } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { IRouter } from '@kbn/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import type { ActionsPlugin } from '@kbn/actions-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -26,11 +26,11 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { RouteGuard } from './lib/route_guard';
-import type { ResolveMlCapabilities } from '../common/types/capabilities';
-import type { MlLicense } from '../common/license';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { MlFeatures } from '../common/constants/app';
+import type { MlLicense } from '../common/license';
+import type { ResolveMlCapabilities } from '../common/types/capabilities';
+import type { RouteGuard } from './lib/route_guard';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;

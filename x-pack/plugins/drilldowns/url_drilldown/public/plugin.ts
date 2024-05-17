@@ -7,12 +7,12 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
   urlDrilldownGlobalScopeProvider,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UrlDrilldown } from './lib';
 
 export interface SetupDependencies {

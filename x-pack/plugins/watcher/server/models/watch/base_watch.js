@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { get, map, pick } from 'lodash';
 import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import { get, map, pick } from 'lodash';
 
 import { Action } from '../../../common/models/action';
-import { buildServerWatchStatusModel, buildClientWatchStatusModel } from '../watch_status_model';
 import { WatchErrors } from '../watch_errors';
+import { buildClientWatchStatusModel, buildServerWatchStatusModel } from '../watch_status_model';
 
 export class BaseWatch {
   // This constructor should not be used directly.

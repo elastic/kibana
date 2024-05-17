@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ApiTokenTypes, ALL } from '../constants';
+import { ALL, ApiTokenTypes } from '../constants';
 import { ApiToken } from '../types';
 
 export const getEnginesDisplayText = (apiToken: ApiToken): JSX.Element | string => {

@@ -6,11 +6,11 @@
  */
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
 } from '../../../../common/endpoint/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 /**
  * The Page Size to be used when searching against the Actions indexes (both requests and responses)
  */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAllowed, isAnonymized, isDenied, getIsDataAnonymizable } from '.';
+import { getIsDataAnonymizable, isAllowed, isAnonymized, isDenied } from '.';
 
 const anonymizationFields = [
   { id: 'fieldName1', field: 'fieldName1', allowed: true, anonymized: false },

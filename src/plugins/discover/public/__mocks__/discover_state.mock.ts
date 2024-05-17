@@ -1,3 +1,4 @@
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +8,9 @@
  */
 import { createBrowserHistory } from 'history';
 import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
-import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
-import { discoverServiceMock } from './services';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
+import { savedSearchMock, savedSearchMockWithTimeField } from './saved_search';
+import { discoverServiceMock } from './services';
 
 export function getDiscoverStateMock({
   isTimeBased = true,

@@ -12,8 +12,8 @@ import { Popover } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
-import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
+import { CytoscapeContext } from '../cytoscape';
 
 interface Args {
   nodeData: cytoscape.NodeDataDefinition;

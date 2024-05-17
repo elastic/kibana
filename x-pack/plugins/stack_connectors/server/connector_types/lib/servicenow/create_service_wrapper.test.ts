@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import { createServiceWrapper } from './create_service_wrapper';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import axios from 'axios';
 import { snExternalServiceConfig } from './config';
+import { createServiceWrapper } from './create_service_wrapper';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const connectorTokenClient = connectorTokenClientMock.create();

@@ -7,8 +7,8 @@
 
 import { IRouter } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { RemoteClustersPluginSetup } from '@kbn/remote-clusters-plugin/server';
 import { License, handleEsError } from './shared_imports';
 

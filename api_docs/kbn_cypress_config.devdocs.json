@@ -40,9 +40,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Cypress.ConfigOptions<any> | undefined"
-            ],
+            "signature": ["Cypress.ConfigOptions<any> | undefined"],
             "path": "packages/kbn-cypress-config/index.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { useMlKibana } from './kibana_context';
+import { stringHash } from '@kbn/ml-string-hash';
+import { useCallback } from 'react';
 import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
+import { useMlKibana } from './kibana_context';
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.

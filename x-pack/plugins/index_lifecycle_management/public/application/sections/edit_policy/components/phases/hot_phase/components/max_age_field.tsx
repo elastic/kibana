@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 import { NumericField } from '../../../../../../../shared_imports';
-import { UseField } from '../../../../form';
 import { ROLLOVER_FORM_PATHS, timeUnits } from '../../../../constants';
+import { UseField } from '../../../../form';
 import { UnitField } from '../../shared_fields/unit_field';
 
 export const MaxAgeField: FunctionComponent = () => {

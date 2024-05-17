@@ -24,7 +24,7 @@ export const mockUiSettingsService = (dateFormat: string = '', timezone: string 
       // @ts-expect-error
       return settings[key];
     },
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 /**
  * Mocks date format or timezone for testing.

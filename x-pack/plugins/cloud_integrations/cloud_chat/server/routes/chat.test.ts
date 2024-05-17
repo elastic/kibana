@@ -11,11 +11,11 @@ jest.mock('jsonwebtoken', () => ({
   },
 }));
 
-import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { registerChatRoute } from './chat';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ChatVariant } from '../../common/types';
+import { registerChatRoute } from './chat';
 
 describe('chat route', () => {
   const getChatVariant = async (): Promise<ChatVariant> => 'header';
@@ -52,8 +52,9 @@ describe('chat route', () => {
 
     const [_config, handler] = router.get.mock.calls[0];
 
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
         KibanaResponse {
           "options": Object {
             "body": "User has no email or username",
@@ -89,8 +90,9 @@ describe('chat route', () => {
 
     const [_config, handler] = router.get.mock.calls[0];
 
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
         KibanaResponse {
           "options": Object {
             "body": "Chat can only be started if a trial end date is specified",
@@ -129,8 +131,9 @@ describe('chat route', () => {
 
     const [_config, handler] = router.get.mock.calls[0];
 
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
         KibanaResponse {
           "options": Object {
             "body": "Chat can only be started during trial and trial chat buffer",
@@ -165,8 +168,9 @@ describe('chat route', () => {
       getChatDisabledThroughExperiments: async () => true,
     });
     const [_config, handler] = router.get.mock.calls[0];
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
       KibanaResponse {
         "options": Object {
           "body": "Chat is disabled through experiments",
@@ -201,8 +205,9 @@ describe('chat route', () => {
       getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
       KibanaResponse {
         "options": Object {
           "body": Object {
@@ -242,8 +247,9 @@ describe('chat route', () => {
       getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
       KibanaResponse {
         "options": Object {
           "body": Object {
@@ -288,8 +294,9 @@ describe('chat route', () => {
       getChatDisabledThroughExperiments,
     });
     const [_config, handler] = router.get.mock.calls[0];
-    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+    ).resolves.toMatchInlineSnapshot(`
       KibanaResponse {
         "options": Object {
           "body": Object {

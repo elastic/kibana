@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, buildkiteBuildStateToEmoji, CommitWithStatuses } from '../shared';
-import { GitCommitExtract } from './commit_info';
 import { Build } from '#pipeline-utils/buildkite';
+import { CommitWithStatuses, buildkite, buildkiteBuildStateToEmoji } from '../shared';
+import { GitCommitExtract } from './commit_info';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
 const KIBANA_ARTIFACT_BUILD_SLUG = 'kibana-artifacts-container-image';

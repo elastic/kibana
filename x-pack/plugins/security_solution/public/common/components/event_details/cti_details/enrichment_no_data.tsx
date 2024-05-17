@@ -1,3 +1,5 @@
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +8,8 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
-import * as i18n from './translations';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import * as i18n from './translations';
 
 const InlineBlock = styled.div`
   display: inline-block;

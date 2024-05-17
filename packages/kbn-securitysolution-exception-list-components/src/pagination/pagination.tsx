@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { EuiTablePagination } from '@elastic/eui';
 import React from 'react';
 import type { FC } from 'react';
-import { EuiTablePagination } from '@elastic/eui';
 
 import type { PaginationProps } from '../types';
 import { usePagination } from './use_pagination';

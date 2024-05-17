@@ -7,11 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';
 import type {
-  SavedObjectUnsanitizedDoc,
   SavedObjectModelVersionForwardCompatibilityFn,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
+import { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';
 
 describe('convertModelVersionBackwardConversionSchema', () => {
   const createDoc = (

@@ -7,7 +7,7 @@
 
 import type { Assign } from '@kbn/utility-types';
 import { omit } from 'lodash';
-import { useMemo, useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import type { UrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
 

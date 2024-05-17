@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { debounce, get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -16,13 +13,15 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { RuleTypeParamsExpressionProps, getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FieldOption,
   firstFieldOption,
@@ -30,14 +29,15 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { debounce, get } from 'lodash';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
 import { SourceFields } from '../../components/source_fields_select';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
+import { TestQueryRow } from '../test_query_row';
+import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
-import { TestQueryRow } from '../test_query_row';
-import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>

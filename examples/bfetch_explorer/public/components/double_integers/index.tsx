@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EuiButton, EuiForm, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
-import useList from 'react-use/lib/useList';
 import useCounter from 'react-use/lib/useCounter';
-import { EuiForm, EuiSpacer, EuiTextArea, EuiFormRow, EuiButton } from '@elastic/eui';
+import useList from 'react-use/lib/useList';
+import useMountedState from 'react-use/lib/useMountedState';
 import { ExplorerService } from '../../plugin';
 
 interface ResultItem {

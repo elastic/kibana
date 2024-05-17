@@ -7,6 +7,24 @@
 
 /* eslint-disable complexity */
 
+import {
+  EuiCommentList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
+import deepEqual from 'fast-deep-equal';
 import React, {
   Dispatch,
   SetStateAction,
@@ -17,56 +35,38 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiCommentList,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiText,
-} from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
-import styled from '@emotion/styled';
-import deepEqual from 'fast-deep-equal';
 
-import { find, isEmpty, uniqBy } from 'lodash';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useChatSend } from './chat_send/use_chat_send';
-import { ChatSend } from './chat_send';
-import { BlockBotCallToAction } from './block_bot/cta';
+import { find, isEmpty, uniqBy } from 'lodash';
 import { AssistantHeader } from './assistant_header';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
+import { BlockBotCallToAction } from './block_bot/cta';
+import { ChatSend } from './chat_send';
+import { useChatSend } from './chat_send/use_chat_send';
 import {
-  getDefaultConnector,
   getBlockBotConversation,
+  getDefaultConnector,
   mergeBaseWithPersistedConversations,
 } from './helpers';
+import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 
-import { useAssistantContext, UserAvatar } from '../assistant_context';
-import { ContextPills } from './context_pills';
-import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
-import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
-import { useConversation } from './use_conversation';
-import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
-import { PromptEditor } from './prompt_editor';
-import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { useConnectorSetup } from '../connectorland/connector_setup';
+import { UserAvatar, useAssistantContext } from '../assistant_context';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
+import { useConnectorSetup } from '../connectorland/connector_setup';
+import { useLoadConnectors } from '../connectorland/use_load_connectors';
+import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
+import { AssistantHeaderFlyout } from './assistant_header/assistant_header_flyout';
+import { ContextPills } from './context_pills';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
-import { SystemPrompt } from './prompt_editor/system_prompt';
+import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
+import { PromptEditor } from './prompt_editor';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
-import { AssistantHeaderFlyout } from './assistant_header/assistant_header_flyout';
+import { SystemPrompt } from './prompt_editor/system_prompt';
+import { QuickPrompts } from './quick_prompts/quick_prompts';
 import * as i18n from './translations';
+import { useConversation } from './use_conversation';
+import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -80,16 +80,16 @@ const ModalPromptEditorWrapper = styled.div`
   margin-right: 24px;
 `;
 
-import {
-  FetchConversationsResponse,
-  useFetchCurrentUserConversations,
-  CONVERSATIONS_QUERY_KEYS,
-} from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 import { clearPresentationData } from '../connectorland/connector_setup/helpers';
 import { getGenAiConfig } from '../connectorland/helpers';
-import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import {
+  CONVERSATIONS_QUERY_KEYS,
+  FetchConversationsResponse,
+  useFetchCurrentUserConversations,
+} from './api/conversations/use_fetch_current_user_conversations';
+import { AssistantAnimatedIcon } from './assistant_animated_icon';
 
 export interface Props {
   conversationTitle?: string;

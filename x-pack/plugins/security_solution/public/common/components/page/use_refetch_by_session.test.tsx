@@ -1,3 +1,6 @@
+import type { ISessionService } from '@kbn/data-plugin/public';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,15 +9,12 @@
  */
 import type { MutableRefObject } from 'react';
 import React from 'react';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../mock';
 import { useKibana } from '../../lib/kibana';
-import { InputsModelId } from '../../store/inputs/constants';
-import { useRefetchByRestartingSession } from './use_refetch_by_session';
+import { TestProviders } from '../../mock';
 import { inputsActions } from '../../store/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 import type { Refetch } from '../../store/inputs/model';
-import type { ISessionService } from '@kbn/data-plugin/public';
+import { useRefetchByRestartingSession } from './use_refetch_by_session';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>{children}</TestProviders>

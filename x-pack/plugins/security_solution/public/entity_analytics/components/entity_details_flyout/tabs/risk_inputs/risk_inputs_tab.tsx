@@ -6,36 +6,36 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React, { useMemo, useState } from 'react';
+import { EuiCallOut, EuiInMemoryTable, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { get } from 'lodash/fp';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
+import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { formatRiskScore } from '../../../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
 } from '../../../../hooks/use_risk_contributing_alerts';
 import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
-import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 
-import { useRiskScore } from '../../../../api/hooks/use_risk_score';
+import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 import type { HostRiskScore, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
   buildHostNamesFilter,
   buildUserNamesFilter,
   isUserRiskScore,
 } from '../../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
+import { useRiskScore } from '../../../../api/hooks/use_risk_score';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
-import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
+import { RiskInputsUtilityBar } from '../../components/utility_bar';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
@@ -334,8 +334,11 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
   const totals = !riskScore
     ? { count: 0, score: 0 }
     : isUserRiskScore(riskScore)
-    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
-    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+      ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
+      : {
+          count: riskScore.host.risk.category_1_count,
+          score: riskScore.host.risk.category_1_score,
+        };
 
   const displayed = {
     count: alerts.data?.length || 0,

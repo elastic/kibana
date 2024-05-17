@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
 import { useUpdateTags } from '../hooks';
 

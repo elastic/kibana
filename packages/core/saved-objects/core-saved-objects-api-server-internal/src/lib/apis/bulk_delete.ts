@@ -6,32 +6,20 @@
  * Side Public License, v 1.
  */
 
-import pMap from 'p-map';
-import {
-  AuthorizeUpdateObject,
-  SavedObjectsErrorHelpers,
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-} from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import {
-  errorContent,
-  getBulkOperationError,
-  getExpectedVersionProperties,
-  isLeft,
-  isMgetDoc,
-  rawDocExistsInNamespace,
-  isRight,
-  left,
-  right,
-} from './utils';
-import type { ApiExecutionContext } from './types';
+  AuthorizeUpdateObject,
+  ISavedObjectTypeRegistry,
+  SavedObjectsErrorHelpers,
+  SavedObjectsRawDoc,
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import pMap from 'p-map';
+import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import type {
   BulkDeleteExpectedBulkGetResult,
@@ -42,6 +30,18 @@ import type {
   NewBulkItemResponse,
   ObjectToDeleteAliasesFor,
 } from './internals/repository_bulk_delete_internal_types';
+import type { ApiExecutionContext } from './types';
+import {
+  errorContent,
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  isLeft,
+  isMgetDoc,
+  isRight,
+  left,
+  rawDocExistsInNamespace,
+  right,
+} from './utils';
 
 export interface PerformBulkDeleteParams<T = unknown> {
   objects: SavedObjectsBulkDeleteObject[];

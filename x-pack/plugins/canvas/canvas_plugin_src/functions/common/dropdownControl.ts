@@ -6,8 +6,8 @@
  */
 
 import { uniqBy } from 'lodash';
-import { Datatable, ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { Datatable, ExpressionFunctionDefinition, ExpressionValueRender } from '../../../types';
 
 interface Arguments {
   filterColumn: string;

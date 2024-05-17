@@ -6,8 +6,6 @@
     "id": "kibanaReact",
     "server": false,
     "browser": true,
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Query } from '@kbn/es-query';
 import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { CreateLayerDescriptorParams, MapsStartApi } from '@kbn/maps-plugin/public';
-import type { Query } from '@kbn/es-query';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
+import { isEqual } from 'lodash';
+import memoizeOne from 'memoize-one';
 import { ChartLoader } from '../chart_loader';
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 

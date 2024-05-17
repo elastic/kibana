@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListExamplesPluginSetup {}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { getDefaultMlCapabilities } from '@kbn/ml-plugin/common';
+import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 
 export const emptyMlCapabilities: MlCapabilitiesResponse = {
   capabilities: getDefaultMlCapabilities(),

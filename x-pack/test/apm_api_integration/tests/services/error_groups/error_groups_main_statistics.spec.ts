@@ -1,3 +1,8 @@
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +11,8 @@
  */
 import expect from '@kbn/expect';
 import moment from 'moment';
-import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { generateData, config } from './generate_data';
+import { config, generateData } from './generate_data';
 
 type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;

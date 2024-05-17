@@ -7,33 +7,33 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   KibanaRequest,
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
-  ElasticsearchClient,
 } from '@kbn/core/server';
-import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { debounce } from 'lodash';
+import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
-  SearchSessionsFindResponse,
   SearchSessionStatusResponse,
+  SearchSessionsFindResponse,
 } from '../../../common';
-import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
-import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
 import { getSessionStatus } from './get_session_status';
+import { createRequestHash } from './utils';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Client } from 'langsmith';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { Run } from 'langsmith/schemas';
+import { Dataset } from '@kbn/elastic-assistant-common';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import { Dataset } from '@kbn/elastic-assistant-common';
+import { Client } from 'langsmith';
+import type { Run } from 'langsmith/schemas';
 
 /**
  * Return connector name for the given connectorId/connectors

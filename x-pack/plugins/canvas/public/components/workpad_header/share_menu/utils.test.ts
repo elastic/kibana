@@ -7,8 +7,8 @@
 
 jest.mock('../../../../common/lib/fetch');
 
-import { getPdfJobParams } from './utils';
 import { workpads } from '../../../../__fixtures__/workpads';
+import { getPdfJobParams } from './utils';
 
 const workpadSharingData = { workpad: workpads[0], pageCount: 12 };
 

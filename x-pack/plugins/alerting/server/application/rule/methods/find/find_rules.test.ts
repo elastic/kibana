@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { schema } from '@kbn/config-schema';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { nodeTypes, fromKueryExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RecoveredActionGroup } from '../../../../../common';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RegistryRuleType } from '../../../../rule_type_registry';
-import { schema } from '@kbn/config-schema';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { formatLegacyActions } from '../../../../rules_client/lib';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import {
   enabledRule1,
   enabledRule2,
   siemRule1,
   siemRule2,
 } from '../../../../rules_client/tests/test_helpers';
-import { formatLegacyActions } from '../../../../rules_client/lib';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {

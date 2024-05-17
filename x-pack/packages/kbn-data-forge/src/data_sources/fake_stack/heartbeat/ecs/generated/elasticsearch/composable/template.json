@@ -3,14 +3,8 @@
     "description": "Sample composable template that includes all ECS fields",
     "ecs_version": "8.0.0"
   },
-  "composed_of": [
-    "ecs_8.0.0_base",
-    "ecs_8.0.0_log",
-    "ecs_8.0.0_event"
-  ],
-  "index_patterns": [
-    "kbn-data-forge-fake_stack.heartbeat-*"
-  ],
+  "composed_of": ["ecs_8.0.0_base", "ecs_8.0.0_log", "ecs_8.0.0_event"],
+  "index_patterns": ["kbn-data-forge-fake_stack.heartbeat-*"],
   "priority": 1,
   "template": {
     "mappings": {

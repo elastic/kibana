@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { findObjectByTitle } from './find_object_by_title';
 import { SimpleSavedObject } from '@kbn/core/public';
+import { findObjectByTitle } from './find_object_by_title';
 
 const mockFindContent = jest.fn(async () => ({
   pagination: { total: 0 },

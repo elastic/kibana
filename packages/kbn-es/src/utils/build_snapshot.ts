@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
 import os from 'os';
+import path from 'path';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { createCliError } from '../errors';
-import { findMostRecentlyChanged } from './find_most_recently_changed';
 import { GRADLE_BIN } from '../paths';
+import { findMostRecentlyChanged } from './find_most_recently_changed';
 
 interface BuildSnapshotOptions {
   license: string;

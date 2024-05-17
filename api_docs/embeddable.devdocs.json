@@ -30,9 +30,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -44,9 +42,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -80,10 +76,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "AttributeServiceOptions",
-                  "<SavedObjectAttributes, MetaInfo>"
-                ],
+                "signature": ["AttributeServiceOptions", "<SavedObjectAttributes, MetaInfo>"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -186,9 +179,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "ValType | RefType"
-                ],
+                "signature": ["ValType | RefType"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -218,9 +209,7 @@
                 "tags": [],
                 "label": "newAttributes",
                 "description": [],
-                "signature": [
-                  "SavedObjectAttributes"
-                ],
+                "signature": ["SavedObjectAttributes"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -233,9 +222,7 @@
                 "tags": [],
                 "label": "useRefType",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -248,9 +235,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "ValType | RefType | undefined"
-                ],
+                "signature": ["ValType | RefType | undefined"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -266,9 +251,7 @@
             "tags": [],
             "label": "inputIsRefType",
             "description": [],
-            "signature": [
-              "(input: ValType | RefType) => input is RefType"
-            ],
+            "signature": ["(input: ValType | RefType) => input is RefType"],
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -280,9 +263,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "ValType | RefType"
-                ],
+                "signature": ["ValType | RefType"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -298,9 +279,7 @@
             "tags": [],
             "label": "getInputAsValueType",
             "description": [],
-            "signature": [
-              "(input: ValType | RefType) => Promise<ValType>"
-            ],
+            "signature": ["(input: ValType | RefType) => Promise<ValType>"],
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -312,9 +291,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "ValType | RefType"
-                ],
+                "signature": ["ValType | RefType"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -344,9 +321,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "ValType | RefType"
-                ],
+                "signature": ["ValType | RefType"],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -435,10 +410,7 @@
             "tags": [],
             "label": "children$",
             "description": [],
-            "signature": [
-              "BehaviorSubject",
-              "<{ [key: string]: unknown; }>"
-            ],
+            "signature": ["BehaviorSubject", "<{ [key: string]: unknown; }>"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -450,10 +422,7 @@
             "tags": [],
             "label": "lastSavedState",
             "description": [],
-            "signature": [
-              "Subject",
-              "<void>"
-            ],
+            "signature": ["Subject", "<void>"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -465,9 +434,7 @@
             "tags": [],
             "label": "getLastSavedStateForChild",
             "description": [],
-            "signature": [
-              "() => undefined"
-            ],
+            "signature": ["() => undefined"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -481,9 +448,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -495,9 +460,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "TContainerInput"
-                ],
+                "signature": ["TContainerInput"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -510,9 +473,7 @@
                 "tags": [],
                 "label": "output",
                 "description": [],
-                "signature": [
-                  "TContainerOutput"
-                ],
+                "signature": ["TContainerOutput"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -667,9 +628,7 @@
             "tags": [],
             "label": "removePanel",
             "description": [],
-            "signature": [
-              "(id: string) => void"
-            ],
+            "signature": ["(id: string) => void"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -681,9 +640,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -768,9 +725,7 @@
                 "tags": [],
                 "label": "idToRemove",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -917,9 +872,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -932,9 +885,7 @@
                 "tags": [],
                 "label": "changes",
                 "description": [],
-                "signature": [
-                  "Partial<EEI>"
-                ],
+                "signature": ["Partial<EEI>"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -950,9 +901,7 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1036,9 +985,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1051,9 +998,7 @@
                 "tags": [],
                 "label": "explicitInput",
                 "description": [],
-                "signature": [
-                  "Partial<EEI>"
-                ],
+                "signature": ["Partial<EEI>"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1066,9 +1011,7 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1146,9 +1089,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1161,9 +1102,7 @@
                 "tags": [],
                 "label": "newExplicitInput",
                 "description": [],
-                "signature": [
-                  "Partial<EEI>"
-                ],
+                "signature": ["Partial<EEI>"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1176,9 +1115,7 @@
                 "tags": [],
                 "label": "newType",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1191,9 +1128,7 @@
                 "tags": [],
                 "label": "generateNewId",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1209,9 +1144,7 @@
             "tags": [],
             "label": "removeEmbeddable",
             "description": [],
-            "signature": [
-              "(embeddableId: string) => void"
-            ],
+            "signature": ["(embeddableId: string) => void"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1223,9 +1156,7 @@
                 "tags": [],
                 "label": "embeddableId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1273,9 +1204,7 @@
                 "tags": [],
                 "label": "embeddableId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1291,9 +1220,7 @@
             "tags": [],
             "label": "getChildIds",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1345,9 +1272,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1393,9 +1318,7 @@
                 "tags": [],
                 "label": "embeddableId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1411,11 +1334,7 @@
             "tags": [],
             "label": "getAnyChildOutputChange$",
             "description": [],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<string>"
-            ],
+            "signature": ["() => ", "Observable", "<string>"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1429,9 +1348,7 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1491,9 +1408,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1509,9 +1424,7 @@
             "tags": [],
             "label": "untilReactEmbeddableLoaded",
             "description": [],
-            "signature": [
-              "<ApiType>(id: string) => Promise<ApiType | undefined>"
-            ],
+            "signature": ["<ApiType>(id: string) => Promise<ApiType | undefined>"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1523,9 +1436,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1541,9 +1452,7 @@
             "tags": [],
             "label": "getExplicitInputIsEqual",
             "description": [],
-            "signature": [
-              "(lastInput: TContainerInput) => Promise<boolean>"
-            ],
+            "signature": ["(lastInput: TContainerInput) => Promise<boolean>"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1555,9 +1464,7 @@
                 "tags": [],
                 "label": "lastInput",
                 "description": [],
-                "signature": [
-                  "TContainerInput"
-                ],
+                "signature": ["TContainerInput"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1657,9 +1564,7 @@
                 "tags": [],
                 "label": "partial",
                 "description": [],
-                "signature": [
-                  "Partial<TEmbeddableInput>"
-                ],
+                "signature": ["Partial<TEmbeddableInput>"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1672,9 +1577,7 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1728,9 +1631,7 @@
                 "tags": [],
                 "label": "embeddableId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1748,9 +1649,7 @@
             "description": [
               "\nReturn state that comes from the container and is passed down to the child. For instance, time range and\nfilters are common inherited input state. Note that state stored in `this.input.panels[embeddableId].explicitInput`\nwill override inherited input."
             ],
-            "signature": [
-              "(id: string) => TChildInput"
-            ],
+            "signature": ["(id: string) => TChildInput"],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1762,9 +1661,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1858,9 +1755,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1895,9 +1790,7 @@
                 "tags": [],
                 "label": "otherPanels",
                 "description": [],
-                "signature": [
-                  "TContainerInput[\"panels\"]"
-                ],
+                "signature": ["TContainerInput[\"panels\"]"],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2048,9 +1941,7 @@
             "tags": [],
             "label": "fatalError",
             "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
+            "signature": ["Error | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2062,9 +1953,7 @@
             "tags": [],
             "label": "output",
             "description": [],
-            "signature": [
-              "TEmbeddableOutput"
-            ],
+            "signature": ["TEmbeddableOutput"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2076,9 +1965,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "TEmbeddableInput"
-            ],
+            "signature": ["TEmbeddableInput"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2121,9 +2008,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2135,9 +2020,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "TEmbeddableInput"
-                ],
+                "signature": ["TEmbeddableInput"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2150,9 +2033,7 @@
                 "tags": [],
                 "label": "output",
                 "description": [],
-                "signature": [
-                  "TEmbeddableOutput"
-                ],
+                "signature": ["TEmbeddableOutput"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2228,9 +2109,7 @@
             "tags": [],
             "label": "onEdit",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -4630,9 +4509,7 @@
             "tags": [],
             "label": "linkToLibrary",
             "description": [],
-            "signature": [
-              "(() => Promise<void>) | undefined"
-            ],
+            "signature": ["(() => Promise<void>) | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4808,9 +4685,7 @@
             "tags": [],
             "label": "setPanelTitle",
             "description": [],
-            "signature": [
-              "(newTitle: string | undefined) => void"
-            ],
+            "signature": ["(newTitle: string | undefined) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -4823,9 +4698,7 @@
                 "tags": [],
                 "label": "newTitle",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5367,9 +5240,7 @@
             "tags": [],
             "label": "isEditingEnabled",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -5383,9 +5254,7 @@
             "tags": [],
             "label": "canLinkToLibrary",
             "description": [],
-            "signature": [
-              "(() => Promise<boolean>) | undefined"
-            ],
+            "signature": ["(() => Promise<boolean>) | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5746,9 +5615,7 @@
             "tags": [],
             "label": "unlinkFromLibrary",
             "description": [],
-            "signature": [
-              "(() => Promise<void>) | undefined"
-            ],
+            "signature": ["(() => Promise<void>) | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5827,9 +5694,7 @@
             "tags": [],
             "label": "setHidePanelTitle",
             "description": [],
-            "signature": [
-              "(hide: boolean | undefined) => void"
-            ],
+            "signature": ["(hide: boolean | undefined) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -5842,9 +5707,7 @@
                 "tags": [],
                 "label": "hide",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5858,9 +5721,7 @@
             "tags": [],
             "label": "getTypeDisplayName",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -5874,9 +5735,7 @@
             "tags": [],
             "label": "setPanelDescription",
             "description": [],
-            "signature": [
-              "(newTitle: string | undefined) => void"
-            ],
+            "signature": ["(newTitle: string | undefined) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -5889,9 +5748,7 @@
                 "tags": [],
                 "label": "newTitle",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5905,9 +5762,7 @@
             "tags": [],
             "label": "canUnlinkFromLibrary",
             "description": [],
-            "signature": [
-              "(() => Promise<boolean>) | undefined"
-            ],
+            "signature": ["(() => Promise<boolean>) | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5919,9 +5774,7 @@
             "tags": [],
             "label": "isCompatibleWithUnifiedSearch",
             "description": [],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
+            "signature": ["(() => boolean) | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -6097,9 +5950,7 @@
             "tags": [],
             "label": "getEditHref",
             "description": [],
-            "signature": [
-              "() => Promise<string | undefined>"
-            ],
+            "signature": ["() => Promise<string | undefined>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6137,9 +5988,7 @@
             "tags": [],
             "label": "reportsEmbeddableLoad",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6153,9 +6002,7 @@
             "tags": [],
             "label": "refreshInputFromParent",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6211,9 +6058,7 @@
             "description": [
               "\nReload will be called when there is a request to refresh the data or view, even if the\ninput data did not change.\n\nIn case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called\n\nThe order would be as follows:\ninput$\noutput$\nreload()\n----\nupdated$"
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6247,11 +6092,7 @@
             "tags": [],
             "label": "getInput$",
             "description": [],
-            "signature": [
-              "() => Readonly<",
-              "Observable",
-              "<TEmbeddableInput>>"
-            ],
+            "signature": ["() => Readonly<", "Observable", "<TEmbeddableInput>>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6265,11 +6106,7 @@
             "tags": [],
             "label": "getOutput$",
             "description": [],
-            "signature": [
-              "() => Readonly<",
-              "Observable",
-              "<TEmbeddableOutput>>"
-            ],
+            "signature": ["() => Readonly<", "Observable", "<TEmbeddableOutput>>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6283,9 +6120,7 @@
             "tags": [],
             "label": "getOutput",
             "description": [],
-            "signature": [
-              "() => Readonly<TEmbeddableOutput>"
-            ],
+            "signature": ["() => Readonly<TEmbeddableOutput>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6299,9 +6134,7 @@
             "tags": [],
             "label": "getExplicitInputIsEqual",
             "description": [],
-            "signature": [
-              "(lastExplicitInput: Partial<TEmbeddableInput>) => Promise<boolean>"
-            ],
+            "signature": ["(lastExplicitInput: Partial<TEmbeddableInput>) => Promise<boolean>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6313,9 +6146,7 @@
                 "tags": [],
                 "label": "lastExplicitInput",
                 "description": [],
-                "signature": [
-                  "Partial<TEmbeddableInput>"
-                ],
+                "signature": ["Partial<TEmbeddableInput>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6331,9 +6162,7 @@
             "tags": [],
             "label": "getExplicitInput",
             "description": [],
-            "signature": [
-              "() => TEmbeddableInput"
-            ],
+            "signature": ["() => TEmbeddableInput"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6347,9 +6176,7 @@
             "tags": [],
             "label": "getPersistableInput",
             "description": [],
-            "signature": [
-              "() => TEmbeddableInput"
-            ],
+            "signature": ["() => TEmbeddableInput"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6363,9 +6190,7 @@
             "tags": [],
             "label": "getInput",
             "description": [],
-            "signature": [
-              "() => Readonly<TEmbeddableInput>"
-            ],
+            "signature": ["() => Readonly<TEmbeddableInput>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6379,9 +6204,7 @@
             "tags": [],
             "label": "getTitle",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6395,9 +6218,7 @@
             "tags": [],
             "label": "getDescription",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6477,9 +6298,7 @@
             "tags": [],
             "label": "updateInput",
             "description": [],
-            "signature": [
-              "(changes: Partial<TEmbeddableInput>) => void"
-            ],
+            "signature": ["(changes: Partial<TEmbeddableInput>) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6491,9 +6310,7 @@
                 "tags": [],
                 "label": "changes",
                 "description": [],
-                "signature": [
-                  "Partial<TEmbeddableInput>"
-                ],
+                "signature": ["Partial<TEmbeddableInput>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6509,9 +6326,7 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": [
-              "(el: HTMLElement) => void | TNode"
-            ],
+            "signature": ["(el: HTMLElement) => void | TNode"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6523,9 +6338,7 @@
                 "tags": [],
                 "label": "el",
                 "description": [],
-                "signature": [
-                  "HTMLElement"
-                ],
+                "signature": ["HTMLElement"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6538,9 +6351,7 @@
             "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.getInspectorAdapters",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": ["return"],
             "label": "getInspectorAdapters",
             "description": [
               "\nAn embeddable can return inspector adapters if it want the inspector to be\navailable via the context menu of that panel."
@@ -6560,9 +6371,7 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": [
-              "Inspector adapters that will be used to open an inspector for."
-            ]
+            "returnComment": ["Inspector adapters that will be used to open an inspector for."]
           },
           {
             "parentPluginId": "embeddable",
@@ -6573,9 +6382,7 @@
             "description": [
               "\nCalled when this embeddable is no longer used, this should be the place for\nimplementors to add additional clean up tasks, like un-mounting and unsubscribing."
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6589,9 +6396,7 @@
             "tags": [],
             "label": "untilInitializationFinished",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6607,9 +6412,7 @@
             "description": [
               "\ncommunicate to the parent embeddable that this embeddable's initialization is finished.\nThis only applies to embeddables which defer their loading state with deferEmbeddableLoad."
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6623,9 +6426,7 @@
             "tags": [],
             "label": "updateOutput",
             "description": [],
-            "signature": [
-              "(outputChanges: Partial<TEmbeddableOutput>) => void"
-            ],
+            "signature": ["(outputChanges: Partial<TEmbeddableOutput>) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6637,9 +6438,7 @@
                 "tags": [],
                 "label": "outputChanges",
                 "description": [],
-                "signature": [
-                  "Partial<TEmbeddableOutput>"
-                ],
+                "signature": ["Partial<TEmbeddableOutput>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6657,9 +6456,7 @@
             "description": [
               "\nCall this **only** when your embeddable has encountered a non-recoverable error; recoverable errors\nshould be handled by the individual embeddable types"
             ],
-            "signature": [
-              "(e: Error) => void"
-            ],
+            "signature": ["(e: Error) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6670,12 +6467,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "e",
-                "description": [
-                  "The fatal, unrecoverable Error that was thrown"
-                ],
-                "signature": [
-                  "Error"
-                ],
+                "description": ["The fatal, unrecoverable Error that was thrown"],
+                "signature": ["Error"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6691,9 +6484,7 @@
             "tags": [],
             "label": "supportedTriggers",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -6742,9 +6533,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6756,9 +6545,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6801,9 +6588,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6838,10 +6623,7 @@
                 "tags": [],
                 "label": "currentAppId$",
                 "description": [],
-                "signature": [
-                  "Observable",
-                  "<string | undefined>"
-                ],
+                "signature": ["Observable", "<string | undefined>"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6901,12 +6683,8 @@
             "type": "Function",
             "tags": [],
             "label": "getAppNameFromId",
-            "description": [
-              "\nFetches an internationalized app title when given an appId."
-            ],
-            "signature": [
-              "(appId: string) => string | undefined"
-            ],
+            "description": ["\nFetches an internationalized app title when given an appId."],
+            "signature": ["(appId: string) => string | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6917,12 +6695,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [
-                  "- The id of the app to fetch the title for"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The id of the app to fetch the title for"],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6961,12 +6735,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [
-                  "- The app to fetch incomingEditorState for"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The app to fetch incomingEditorState for"],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6981,9 +6751,7 @@
                 "description": [
                   "- Whether to remove the package state after fetch to prevent duplicates."
                 ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7001,9 +6769,7 @@
             "description": [
               "\nClears the {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id\n"
             ],
-            "signature": [
-              "(appId?: string | undefined) => void"
-            ],
+            "signature": ["(appId?: string | undefined) => void"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7014,12 +6780,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [
-                  "- The app to fetch incomingEditorState for"
-                ],
-                "signature": [
-                  "string | undefined"
-                ],
+                "description": ["- The app to fetch incomingEditorState for"],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7058,12 +6820,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [
-                  "- The app to fetch EmbeddablePackageState for"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The app to fetch EmbeddablePackageState for"],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7078,9 +6836,7 @@
                 "description": [
                   "- Whether to remove the package state after fetch to prevent duplicates."
                 ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7120,9 +6876,7 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7146,9 +6900,7 @@
                     "tags": [],
                     "label": "path",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7160,9 +6912,7 @@
                     "tags": [],
                     "label": "openInNewTab",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7174,9 +6924,7 @@
                     "tags": [],
                     "label": "skipAppLeave",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7237,9 +6985,7 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7263,9 +7009,7 @@
                     "tags": [],
                     "label": "path",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7350,9 +7094,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"error\""
-            ],
+            "signature": ["\"error\""],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -7364,9 +7106,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "string | Error"
-            ],
+            "signature": ["string | Error"],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -7378,9 +7118,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -7392,9 +7130,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "string | Error"
-                ],
+                "signature": ["string | Error"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7469,9 +7205,7 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -7485,9 +7219,7 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
+            "signature": ["() => JSX.Element"],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -7536,9 +7268,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7587,9 +7317,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7778,9 +7506,7 @@
             "tags": [],
             "label": "subscription",
             "description": [],
-            "signature": [
-              "Subscription"
-            ],
+            "signature": ["Subscription"],
             "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7823,9 +7549,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "keyof LegacyInput"
-            ],
+            "signature": ["keyof LegacyInput"],
             "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7838,9 +7562,7 @@
             "tags": [],
             "label": "useExplicitInput",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7907,9 +7629,7 @@
             "tags": [],
             "label": "subscription",
             "description": [],
-            "signature": [
-              "Subscription"
-            ],
+            "signature": ["Subscription"],
             "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7952,9 +7672,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "keyof LegacyOutput"
-            ],
+            "signature": ["keyof LegacyOutput"],
             "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7973,11 +7691,7 @@
         "description": [
           "\nLoads and renders a legacy embeddable.\n\nAncestry chain must use 'key' attribute to reset DOM and state when embeddable changes\nFor example <Parent key={embeddableId}><EmbeddablePanel/></Parent>"
         ],
-        "signature": [
-          "(props: ",
-          "EmbeddablePanelProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["(props: ", "EmbeddablePanelProps", ") => JSX.Element"],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -7989,9 +7703,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "EmbeddablePanelProps"
-            ],
+            "signature": ["EmbeddablePanelProps"],
             "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -8039,9 +7751,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": [
-              "- {@link EmbeddableRendererProps }"
-            ],
+            "description": ["- {@link EmbeddableRendererProps }"],
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -8082,9 +7792,7 @@
             "tags": [],
             "label": "{ embeddable, loading, error, input }",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
+            "signature": ["React.PropsWithChildren<Props>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -8227,9 +7935,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8284,9 +7990,7 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/embeddable/public/lib/embeddables/is_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8403,12 +8107,8 @@
         "type": "Function",
         "tags": [],
         "label": "isFilterableEmbeddable",
-        "description": [
-          "\nEnsure that embeddable supports filtering/querying"
-        ],
-        "signature": [
-          "(incoming: unknown) => boolean"
-        ],
+        "description": ["\nEnsure that embeddable supports filtering/querying"],
+        "signature": ["(incoming: unknown) => boolean"],
         "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8422,9 +8122,7 @@
             "description": [
               "Embeddable that is being tested to check if it is a FilterableEmbeddable"
             ],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8551,9 +8249,7 @@
         "tags": [],
         "label": "isReferenceOrValueEmbeddable",
         "description": [],
-        "signature": [
-          "(incoming: unknown) => boolean"
-        ],
+        "signature": ["(incoming: unknown) => boolean"],
         "path": "src/plugins/embeddable/public/lib/reference_or_value_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8565,9 +8261,7 @@
             "tags": [],
             "label": "incoming",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/embeddable/public/lib/reference_or_value_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8793,9 +8487,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "I"
-            ],
+            "signature": ["I"],
             "path": "src/plugins/embeddable/public/lib/embeddables/diff_embeddable_input.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8872,9 +8564,7 @@
                 "tags": [],
                 "label": "onAddPanel",
                 "description": [],
-                "signature": [
-                  "((id: string) => void) | undefined"
-                ],
+                "signature": ["((id: string) => void) | undefined"],
                 "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8886,9 +8576,7 @@
                     "tags": [],
                     "label": "id",
                     "description": [],
-                    "signature": [
-                      "string"
-                    ],
+                    "signature": ["string"],
                     "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -8904,9 +8592,7 @@
                 "tags": [],
                 "label": "onClose",
                 "description": [],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
+                "signature": ["(() => void) | undefined"],
                 "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8993,9 +8679,7 @@
                 "tags": [],
                 "label": "maybeId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9039,9 +8723,7 @@
                 "tags": [],
                 "label": "parentApi",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9053,9 +8735,7 @@
                 "tags": [],
                 "label": "onApiAvailable",
                 "description": [],
-                "signature": [
-                  "((api: ApiType) => void) | undefined"
-                ],
+                "signature": ["((api: ApiType) => void) | undefined"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9067,9 +8747,7 @@
                     "tags": [],
                     "label": "api",
                     "description": [],
-                    "signature": [
-                      "ApiType"
-                    ],
+                    "signature": ["ApiType"],
                     "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -9107,9 +8785,7 @@
                 "tags": [],
                 "label": "hidePanelChrome",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9227,9 +8903,7 @@
                 "tags": [],
                 "label": "version",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/embeddable/public/lib/factory_migrations/run_factory_migrations.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9283,9 +8957,7 @@
                 "tags": [],
                 "label": "latestVersion",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/embeddable/public/lib/factory_migrations/run_factory_migrations.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9321,10 +8993,7 @@
             "tags": [],
             "label": "updated$",
             "description": [],
-            "signature": [
-              "Observable",
-              "<unknown>"
-            ],
+            "signature": ["Observable", "<unknown>"],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -9337,9 +9006,7 @@
             "tags": [],
             "label": "getInput",
             "description": [],
-            "signature": [
-              "() => TFilterableEmbeddableInput"
-            ],
+            "signature": ["() => TFilterableEmbeddableInput"],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -9390,9 +9057,7 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9405,9 +9070,7 @@
             "tags": [],
             "label": "parentApi",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9507,9 +9170,7 @@
             "tags": [],
             "label": "{\n  input,\n  factory,\n  onInputUpdated,\n}",
             "description": [],
-            "signature": [
-              "EmbeddableRendererWithFactory<I>"
-            ],
+            "signature": ["EmbeddableRendererWithFactory<I>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -9627,9 +9288,7 @@
             "tags": [],
             "label": "[key: string]: any",
             "description": [],
-            "signature": [
-              "[key: string]:  any"
-            ],
+            "signature": ["[key: string]:  any"],
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9672,9 +9331,7 @@
             "tags": [],
             "label": "hidePanelTitles",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9747,9 +9404,7 @@
             "tags": [],
             "label": "embeddableLoaded",
             "description": [],
-            "signature": [
-              "{ [key: string]: boolean; }"
-            ],
+            "signature": ["{ [key: string]: boolean; }"],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9828,9 +9483,7 @@
             "description": [
               "\nIf true, the container will wait for each embeddable to load after creation before loading the next embeddable."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9844,9 +9497,7 @@
             "description": [
               "\nInitialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9858,9 +9509,7 @@
         "parentPluginId": "embeddable",
         "id": "def-public.EmbeddableContext",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "EmbeddableContext",
         "description": [],
         "signature": [
@@ -9898,9 +9547,7 @@
             "tags": [],
             "label": "embeddable",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9939,9 +9586,7 @@
             "tags": [],
             "label": "originatingPath",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9953,9 +9598,7 @@
             "tags": [],
             "label": "embeddableId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9967,9 +9610,7 @@
             "tags": [],
             "label": "valueInput",
             "description": [],
-            "signature": [
-              "object | undefined"
-            ],
+            "signature": ["object | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9983,9 +9624,7 @@
             "description": [
               "\nPass current search session id when navigating to an editor,\nEditors could use it continue previous search session"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9999,9 +9638,7 @@
         "type": "Interface",
         "tags": [],
         "label": "EmbeddableFactory",
-        "description": [
-          "\nEmbeddableFactories create and initialize an embeddable instance"
-        ],
+        "description": ["\nEmbeddableFactories create and initialize an embeddable instance"],
         "signature": [
           {
             "pluginId": "embeddable",
@@ -10041,9 +9678,7 @@
             "description": [
               "\nThe version of this Embeddable factory. This will be used in the client side migration system\nto ensure that input from any source is compatible with the latest version of this embeddable.\nIf the latest version is not defined, all clientside migrations will be skipped. If migrations\nare added to this factory but a latestVersion is not set, an error will be thrown on server start"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10068,9 +9703,7 @@
             "description": [
               "\nReturns whether the current user should be allowed to edit this type of\nembeddable. Most of the time this should be based off the capabilities service, hence it's async."
             ],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
+            "signature": ["() => Promise<boolean>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10143,9 +9776,7 @@
             "description": [
               "\nReturns a display name for this type of embeddable. Used in \"Create new... \" options\nin the add panel for containers."
             ],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10158,12 +9789,8 @@
             "type": "Function",
             "tags": [],
             "label": "getIconType",
-            "description": [
-              "\nReturns an EUI Icon type to be displayed in a menu."
-            ],
-            "signature": [
-              "() => string"
-            ],
+            "description": ["\nReturns an EUI Icon type to be displayed in a menu."],
+            "signature": ["() => string"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10176,12 +9803,8 @@
             "type": "Function",
             "tags": [],
             "label": "getDescription",
-            "description": [
-              "\nReturns a description about the embeddable."
-            ],
-            "signature": [
-              "() => string"
-            ],
+            "description": ["\nReturns a description about the embeddable."],
+            "signature": ["() => string"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10197,9 +9820,7 @@
             "description": [
               "\nIf false, this type of embeddable can't be created with the \"createNew\" functionality. Instead,\nuse createFromSavedObject, where an existing saved object must first exist."
             ],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10215,9 +9836,7 @@
             "description": [
               "\nCan be used to get the default input, to be passed in to during the creation process. Default\ninput will not be stored in a parent container, so all inherited input from a container will trump\ndefault input parameters."
             ],
-            "signature": [
-              "(partial: Partial<TEmbeddableInput>) => Partial<TEmbeddableInput>"
-            ],
+            "signature": ["(partial: Partial<TEmbeddableInput>) => Partial<TEmbeddableInput>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10229,9 +9848,7 @@
                 "tags": [],
                 "label": "partial",
                 "description": [],
-                "signature": [
-                  "Partial<TEmbeddableInput>"
-                ],
+                "signature": ["Partial<TEmbeddableInput>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10289,9 +9906,7 @@
                 "tags": [],
                 "label": "initialInput",
                 "description": [],
-                "signature": [
-                  "Partial<TEmbeddableInput> | undefined"
-                ],
+                "signature": ["Partial<TEmbeddableInput> | undefined"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10344,9 +9959,7 @@
             "type": "Function",
             "tags": [],
             "label": "createFromSavedObject",
-            "description": [
-              "\nCreates a new embeddable instance based off the saved object id."
-            ],
+            "description": ["\nCreates a new embeddable instance based off the saved object id."],
             "signature": [
               "(savedObjectId: string, input: Partial<TEmbeddableInput>, parent?: ",
               {
@@ -10393,9 +10006,7 @@
                 "tags": [],
                 "label": "savedObjectId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10410,9 +10021,7 @@
                 "description": [
                   "- some input may come from a parent, or user, if it's not stored with the saved object. For example, the time\nrange of the parent container."
                 ],
-                "signature": [
-                  "Partial<TEmbeddableInput>"
-                ],
+                "signature": ["Partial<TEmbeddableInput>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10514,9 +10123,7 @@
                 "tags": [],
                 "label": "initialInput",
                 "description": [],
-                "signature": [
-                  "TEmbeddableInput"
-                ],
+                "signature": ["TEmbeddableInput"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10595,9 +10202,7 @@
             "tags": [],
             "label": "savedObjectId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10623,9 +10228,7 @@
             "tags": [],
             "label": "loading",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10637,9 +10240,7 @@
             "tags": [],
             "label": "rendered",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10672,9 +10273,7 @@
             "tags": [],
             "label": "editUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10686,9 +10285,7 @@
             "tags": [],
             "label": "editApp",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10700,9 +10297,7 @@
             "tags": [],
             "label": "editPath",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10714,9 +10309,7 @@
             "tags": [],
             "label": "defaultTitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10728,9 +10321,7 @@
             "tags": [],
             "label": "defaultDescription",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10742,9 +10333,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10756,9 +10345,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10770,9 +10357,7 @@
             "tags": [],
             "label": "editable",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10784,9 +10369,7 @@
             "tags": [],
             "label": "inlineEditable",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10798,9 +10381,7 @@
             "tags": [],
             "label": "editableWithExplicitInput",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10812,9 +10393,7 @@
             "tags": [],
             "label": "savedObjectId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10853,9 +10432,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "object"
-            ],
+            "signature": ["object"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10867,9 +10444,7 @@
             "tags": [],
             "label": "embeddableId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10897,9 +10472,7 @@
             "description": [
               "\nPass current search session id when navigating to an editor,\nEditors could use it continue previous search session"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11232,9 +10805,7 @@
             "type": "Function",
             "tags": [],
             "label": "getFilters",
-            "description": [
-              "\nGets the embeddable's local filters"
-            ],
+            "description": ["\nGets the embeddable's local filters"],
             "signature": [
               "() => ",
               {
@@ -11258,9 +10829,7 @@
             "type": "Function",
             "tags": [],
             "label": "getQuery",
-            "description": [
-              "\nGets the embeddable's local query"
-            ],
+            "description": ["\nGets the embeddable's local query"],
             "signature": [
               "() => ",
               {
@@ -11373,9 +10942,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11415,9 +10982,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11457,9 +11022,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11472,9 +11035,7 @@
                 "tags": [],
                 "label": "changes",
                 "description": [],
-                "signature": [
-                  "Partial<EEI>"
-                ],
+                "signature": ["Partial<EEI>"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11489,9 +11050,7 @@
             "type": "Function",
             "tags": [],
             "label": "getChild",
-            "description": [
-              "\nReturns the child embeddable with the given id."
-            ],
+            "description": ["\nReturns the child embeddable with the given id."],
             "signature": [
               "<E extends ",
               {
@@ -11554,9 +11113,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11635,12 +11192,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "embeddable",
-                "description": [
-                  "- the embeddable to set"
-                ],
-                "signature": [
-                  "E"
-                ],
+                "description": ["- the embeddable to set"],
+                "signature": ["E"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11655,12 +11208,8 @@
             "type": "Function",
             "tags": [],
             "label": "removeEmbeddable",
-            "description": [
-              "\nRemoves the embeddable with the given id."
-            ],
-            "signature": [
-              "(embeddableId: string) => void"
-            ],
+            "description": ["\nRemoves the embeddable with the given id."],
+            "signature": ["(embeddableId: string) => void"],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -11672,9 +11221,7 @@
                 "tags": [],
                 "label": "embeddableId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11762,9 +11309,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11777,9 +11322,7 @@
                 "tags": [],
                 "label": "explicitInput",
                 "description": [],
-                "signature": [
-                  "Partial<EEI>"
-                ],
+                "signature": ["Partial<EEI>"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11792,9 +11335,7 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11872,9 +11413,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11887,9 +11426,7 @@
                 "tags": [],
                 "label": "newExplicitInput",
                 "description": [],
-                "signature": [
-                  "Partial<EEI>"
-                ],
+                "signature": ["Partial<EEI>"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11902,9 +11439,7 @@
                 "tags": [],
                 "label": "newType",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11917,9 +11452,7 @@
                 "tags": [],
                 "label": "generateNewId",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12053,9 +11586,7 @@
             "description": [
               "\nUnique ID an embeddable is assigned each time it is initialized. This ID\nis different for different instances of the same embeddable. For example,\nif the same dashboard is rendered twice on the screen, all embeddable\ninstances will have a unique `runtimeId`."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12066,12 +11597,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "enhancements",
-            "description": [
-              "\nExtra abilities added to Embeddable by `*_enhanced` plugins."
-            ],
-            "signature": [
-              "object | undefined"
-            ],
+            "description": ["\nExtra abilities added to Embeddable by `*_enhanced` plugins."],
+            "signature": ["object | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12085,9 +11612,7 @@
             "description": [
               "\nIf this embeddable has encountered a fatal error, that error will be stored here"
             ],
-            "signature": [
-              "Error | undefined"
-            ],
+            "signature": ["Error | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12101,9 +11626,7 @@
             "description": [
               "\nThis method returns false by default.\nIt should be set to true for any embeddable type that utilizes the `loading` and `rendered`\noutput variables to notify a container of their loading progress. If set to false, a container should assume\nthe embeddable is loaded immediately."
             ],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12161,9 +11684,7 @@
             "description": [
               "\nGet the input used to instantiate this embeddable. The input is a serialized representation of\nthis embeddable instance and can be used to clone or re-instantiate it. Input state:\n\n- Can be updated externally\n- Can change multiple times for a single embeddable instance.\n\nExamples: title, pie slice colors, custom search columns and sort order."
             ],
-            "signature": [
-              "() => Readonly<I>"
-            ],
+            "signature": ["() => Readonly<I>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12179,9 +11700,7 @@
             "description": [
               "\nBecause embeddables can inherit input from their parents, they also need a way to separate their own\ninput from input which is inherited. If the embeddable does not have a parent, getExplicitInput\nand getInput should return the same."
             ],
-            "signature": [
-              "() => Readonly<Partial<I>>"
-            ],
+            "signature": ["() => Readonly<Partial<I>>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12197,9 +11716,7 @@
             "description": [
               "\nSome embeddables contain input that should not be persisted anywhere beyond their own state. This method\nis a way for containers to separate input to store from input which can be ephemeral. In most cases, this\nwill be the same as getExplicitInput"
             ],
-            "signature": [
-              "() => Readonly<Partial<I>>"
-            ],
+            "signature": ["() => Readonly<Partial<I>>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12215,9 +11732,7 @@
             "description": [
               "\nOutput state is:\n\n- State that should not change once the embeddable is instantiated, or\n- State that is derived from the input state, or\n- State that only the embeddable instance itself knows about, or the factory.\n\nExamples: editUrl, title taken from a saved object, if your input state was first name and\n  last name, your output state could be greeting."
             ],
-            "signature": [
-              "() => Readonly<O>"
-            ],
+            "signature": ["() => Readonly<O>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12230,12 +11745,8 @@
             "type": "Function",
             "tags": [],
             "label": "updateInput",
-            "description": [
-              "\nUpdates input state with the given changes."
-            ],
-            "signature": [
-              "(changes: Partial<I>) => void"
-            ],
+            "description": ["\nUpdates input state with the given changes."],
+            "signature": ["(changes: Partial<I>) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12247,9 +11758,7 @@
                 "tags": [],
                 "label": "changes",
                 "description": [],
-                "signature": [
-                  "Partial<I>"
-                ],
+                "signature": ["Partial<I>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12264,12 +11773,8 @@
             "type": "Function",
             "tags": [],
             "label": "updateOutput",
-            "description": [
-              "\nUpdates output state with the given changes."
-            ],
-            "signature": [
-              "(changes: Partial<O>) => void"
-            ],
+            "description": ["\nUpdates output state with the given changes."],
+            "signature": ["(changes: Partial<O>) => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12281,9 +11786,7 @@
                 "tags": [],
                 "label": "changes",
                 "description": [],
-                "signature": [
-                  "Partial<O>"
-                ],
+                "signature": ["Partial<O>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12301,11 +11804,7 @@
             "description": [
               "\nReturns an observable which will be notified when input state changes."
             ],
-            "signature": [
-              "() => Readonly<",
-              "Observable",
-              "<I>>"
-            ],
+            "signature": ["() => Readonly<", "Observable", "<I>>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12321,11 +11820,7 @@
             "description": [
               "\nReturns an observable which will be notified when output state changes."
             ],
-            "signature": [
-              "() => Readonly<",
-              "Observable",
-              "<O>>"
-            ],
+            "signature": ["() => Readonly<", "Observable", "<O>>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12338,12 +11833,8 @@
             "type": "Function",
             "tags": [],
             "label": "getTitle",
-            "description": [
-              "\nReturns the title of this embeddable."
-            ],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "description": ["\nReturns the title of this embeddable."],
+            "signature": ["() => string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12356,12 +11847,8 @@
             "type": "Function",
             "tags": [],
             "label": "getDescription",
-            "description": [
-              "\nReturns the description of this embeddable."
-            ],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "description": ["\nReturns the description of this embeddable."],
+            "signature": ["() => string | undefined"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12440,9 +11927,7 @@
             "type": "Function",
             "tags": [],
             "label": "getAppContext",
-            "description": [
-              "\nReturns the context of this embeddable's container, or undefined."
-            ],
+            "description": ["\nReturns the context of this embeddable's container, or undefined."],
             "signature": [
               "() => ",
               {
@@ -12466,12 +11951,8 @@
             "type": "Function",
             "tags": [],
             "label": "render",
-            "description": [
-              "\nRenders the embeddable at the given node."
-            ],
-            "signature": [
-              "(domNode: HTMLElement | Element) => void | N"
-            ],
+            "description": ["\nRenders the embeddable at the given node."],
+            "signature": ["(domNode: HTMLElement | Element) => void | N"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12483,9 +11964,7 @@
                 "tags": [],
                 "label": "domNode",
                 "description": [],
-                "signature": [
-                  "HTMLElement | Element"
-                ],
+                "signature": ["HTMLElement | Element"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12502,9 +11981,7 @@
             "type": "Function",
             "tags": [],
             "label": "catchError",
-            "description": [
-              "\nRenders a custom embeddable error at the given node."
-            ],
+            "description": ["\nRenders a custom embeddable error at the given node."],
             "signature": [
               "((error: ",
               {
@@ -12548,18 +12025,14 @@
                 "tags": [],
                 "label": "domNode",
                 "description": [],
-                "signature": [
-                  "HTMLElement | Element"
-                ],
+                "signature": ["HTMLElement | Element"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "A React node or callback that will be called on error destroy."
-            ]
+            "returnComment": ["A React node or callback that will be called on error destroy."]
           },
           {
             "parentPluginId": "embeddable",
@@ -12570,9 +12043,7 @@
             "description": [
               "\nReload the embeddable so output and rendering is up to date. Especially relevant\nif the embeddable takes relative time as input (e.g. now to now-15)"
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12583,9 +12054,7 @@
             "parentPluginId": "embeddable",
             "id": "def-public.IEmbeddable.getInspectorAdapters",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": ["return"],
             "label": "getInspectorAdapters",
             "description": [
               "\nAn embeddable can return inspector adapters if it wants the inspector to be\navailable via the context menu of that panel."
@@ -12605,9 +12074,7 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": [
-              "Inspector adapters that will be used to open an inspector for."
-            ]
+            "returnComment": ["Inspector adapters that will be used to open an inspector for."]
           },
           {
             "parentPluginId": "embeddable",
@@ -12618,9 +12085,7 @@
             "description": [
               "\nCleans up subscriptions, destroy nodes mounted from calls to render."
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12633,12 +12098,8 @@
             "type": "Function",
             "tags": [],
             "label": "supportedTriggers",
-            "description": [
-              "\nList of triggers that this embeddable will execute."
-            ],
-            "signature": [
-              "() => string[]"
-            ],
+            "description": ["\nList of triggers that this embeddable will execute."],
+            "signature": ["() => string[]"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12651,12 +12112,8 @@
             "type": "Function",
             "tags": [],
             "label": "getExplicitInputIsEqual",
-            "description": [
-              "\nUsed to diff explicit embeddable input"
-            ],
-            "signature": [
-              "(lastInput: Partial<I>) => Promise<boolean>"
-            ],
+            "description": ["\nUsed to diff explicit embeddable input"],
+            "signature": ["(lastInput: Partial<I>) => Promise<boolean>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12668,9 +12125,7 @@
                 "tags": [],
                 "label": "lastInput",
                 "description": [],
-                "signature": [
-                  "Partial<I>"
-                ],
+                "signature": ["Partial<I>"],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12686,9 +12141,7 @@
             "tags": [],
             "label": "refreshInputFromParent",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12702,9 +12155,7 @@
             "tags": [],
             "label": "untilInitializationFinished",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12788,9 +12239,7 @@
             "tags": [],
             "label": "explicitInput",
             "description": [],
-            "signature": [
-              "Partial<E> & { id: string; }"
-            ],
+            "signature": ["Partial<E> & { id: string; }"],
             "path": "src/plugins/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12860,9 +12309,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/embeddable/public/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12988,9 +12435,7 @@
                 "tags": [],
                 "label": "initialState",
                 "description": [],
-                "signature": [
-                  "RuntimeState"
-                ],
+                "signature": ["RuntimeState"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13028,9 +12473,7 @@
                 "tags": [],
                 "label": "uuid",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13043,9 +12486,7 @@
                 "tags": [],
                 "label": "parentApi",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13086,12 +12527,8 @@
             "type": "Function",
             "tags": [],
             "label": "inputIsRefType",
-            "description": [
-              "\ndetermines whether the input is by value or by reference."
-            ],
-            "signature": [
-              "(input: ValTypeInput | RefTypeInput) => input is RefTypeInput"
-            ],
+            "description": ["\ndetermines whether the input is by value or by reference."],
+            "signature": ["(input: ValTypeInput | RefTypeInput) => input is RefTypeInput"],
             "path": "src/plugins/embeddable/public/lib/reference_or_value_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -13103,9 +12540,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "ValTypeInput | RefTypeInput"
-                ],
+                "signature": ["ValTypeInput | RefTypeInput"],
                 "path": "src/plugins/embeddable/public/lib/reference_or_value_embeddable/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13120,12 +12555,8 @@
             "type": "Function",
             "tags": [],
             "label": "getInputAsValueType",
-            "description": [
-              "\nGets the embeddable's current input as its Value type"
-            ],
-            "signature": [
-              "() => Promise<ValTypeInput>"
-            ],
+            "description": ["\nGets the embeddable's current input as its Value type"],
+            "signature": ["() => Promise<ValTypeInput>"],
             "path": "src/plugins/embeddable/public/lib/reference_or_value_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -13138,12 +12569,8 @@
             "type": "Function",
             "tags": [],
             "label": "getInputAsRefType",
-            "description": [
-              "\nGets the embeddable's current input as its Reference type"
-            ],
-            "signature": [
-              "() => Promise<RefTypeInput>"
-            ],
+            "description": ["\nGets the embeddable's current input as its Reference type"],
+            "signature": ["() => Promise<RefTypeInput>"],
             "path": "src/plugins/embeddable/public/lib/reference_or_value_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -13214,13 +12641,8 @@
             "type": "Function",
             "tags": [],
             "label": "getSelfStyledOptions",
-            "description": [
-              "\nGets the embeddable's style configuration"
-            ],
-            "signature": [
-              "() => ",
-              "SelfStyledOptions"
-            ],
+            "description": ["\nGets the embeddable's style configuration"],
+            "signature": ["() => ", "SelfStyledOptions"],
             "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -13255,9 +12677,7 @@
         "description": [
           "\nThe attribute service is a shared, generic service that embeddables can use to provide the functionality\nrequired to fulfill the requirements of the ReferenceOrValueEmbeddable interface. The attribute_service\ncan also be used as a higher level wrapper to transform an embeddable input shape that references a saved object\ninto an embeddable input shape that contains that saved object's attributes by value."
         ],
-        "signature": [
-          "\"attributes\""
-        ],
+        "signature": ["\"attributes\""],
         "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -13270,9 +12690,7 @@
         "tags": [],
         "label": "CELL_VALUE_TRIGGER",
         "description": [],
-        "signature": [
-          "\"CELL_VALUE_TRIGGER\""
-        ],
+        "signature": ["\"CELL_VALUE_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13361,9 +12779,7 @@
         "tags": [],
         "label": "CONTEXT_MENU_TRIGGER",
         "description": [],
-        "signature": [
-          "\"CONTEXT_MENU_TRIGGER\""
-        ],
+        "signature": ["\"CONTEXT_MENU_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13463,9 +12879,7 @@
         "tags": [],
         "label": "MULTI_VALUE_CLICK_TRIGGER",
         "description": [],
-        "signature": [
-          "\"MULTI_VALUE_CLICK_TRIGGER\""
-        ],
+        "signature": ["\"MULTI_VALUE_CLICK_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13517,9 +12931,7 @@
         "tags": [],
         "label": "PANEL_BADGE_TRIGGER",
         "description": [],
-        "signature": [
-          "\"PANEL_BADGE_TRIGGER\""
-        ],
+        "signature": ["\"PANEL_BADGE_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13532,9 +12944,7 @@
         "tags": [],
         "label": "PANEL_HOVER_TRIGGER",
         "description": [],
-        "signature": [
-          "\"PANEL_HOVER_TRIGGER\""
-        ],
+        "signature": ["\"PANEL_HOVER_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13547,9 +12957,7 @@
         "tags": [],
         "label": "PANEL_NOTIFICATION_TRIGGER",
         "description": [],
-        "signature": [
-          "\"PANEL_NOTIFICATION_TRIGGER\""
-        ],
+        "signature": ["\"PANEL_NOTIFICATION_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13656,9 +13064,7 @@
         "tags": [],
         "label": "SELECT_RANGE_TRIGGER",
         "description": [],
-        "signature": [
-          "\"SELECT_RANGE_TRIGGER\""
-        ],
+        "signature": ["\"SELECT_RANGE_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13671,9 +13077,7 @@
         "tags": [],
         "label": "VALUE_CLICK_TRIGGER",
         "description": [],
-        "signature": [
-          "\"VALUE_CLICK_TRIGGER\""
-        ],
+        "signature": ["\"VALUE_CLICK_TRIGGER\""],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13965,9 +13369,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -14097,9 +13499,7 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "registerSavedObjectToPanelMethod",
           "description": [],
           "signature": [
@@ -14193,9 +13593,7 @@
           "type": "Function",
           "tags": [],
           "label": "registerReactEmbeddableFactory",
-          "description": [
-            "\nRegisters an async {@link ReactEmbeddableFactory} getter."
-          ],
+          "description": ["\nRegisters an async {@link ReactEmbeddableFactory} getter."],
           "signature": [
             "<StateType extends object = object, APIType extends ",
             {
@@ -14234,9 +13632,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -14272,9 +13668,7 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.registerEmbeddableFactory",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "registerEmbeddableFactory",
           "description": [],
           "signature": [
@@ -14425,9 +13819,7 @@
               "tags": [],
               "label": "id",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -14470,9 +13862,7 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.registerEnhancement",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "registerEnhancement",
           "description": [],
           "signature": [
@@ -14541,16 +13931,10 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.setCustomEmbeddableFactoryProvider",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "setCustomEmbeddableFactoryProvider",
           "description": [],
-          "signature": [
-            "(customProvider: ",
-            "EmbeddableFactoryProvider",
-            ") => void"
-          ],
+          "signature": ["(customProvider: ", "EmbeddableFactoryProvider", ") => void"],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
@@ -14568,9 +13952,7 @@
               "tags": [],
               "label": "customProvider",
               "description": [],
-              "signature": [
-                "EmbeddableFactoryProvider"
-              ],
+              "signature": ["EmbeddableFactoryProvider"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -14629,9 +14011,7 @@
           "description": [
             "\nChecks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}"
           ],
-          "signature": [
-            "(type: string) => boolean"
-          ],
+          "signature": ["(type: string) => boolean"],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
@@ -14643,9 +14023,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -14660,9 +14038,7 @@
           "type": "Function",
           "tags": [],
           "label": "getReactEmbeddableSavedObjects",
-          "description": [
-            "\n"
-          ],
+          "description": ["\n"],
           "signature": [
             "<TSavedObjectAttributes extends ",
             {
@@ -14694,9 +14070,7 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableStart.getEmbeddableFactory",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "getEmbeddableFactory",
           "description": [],
           "signature": [
@@ -14887,9 +14261,7 @@
               "tags": [],
               "label": "embeddableFactoryId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -14902,9 +14274,7 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableStart.getEmbeddableFactories",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "getEmbeddableFactories",
           "description": [],
           "signature": [
@@ -15111,9 +14481,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -15126,10 +14494,7 @@
               "tags": [],
               "label": "options",
               "description": [],
-              "signature": [
-                "AttributeServiceOptions",
-                "<A, M>"
-              ],
+              "signature": ["AttributeServiceOptions", "<A, M>"],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -15575,9 +14940,7 @@
                 "tags": [],
                 "label": "embeddableFactoryId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15623,9 +14986,7 @@
                 "tags": [],
                 "label": "enhancementId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/embeddable/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15719,9 +15080,7 @@
             "tags": [],
             "label": "explicitInput",
             "description": [],
-            "signature": [
-              "Partial<E> & { id: string; }"
-            ],
+            "signature": ["Partial<E> & { id: string; }"],
             "path": "src/plugins/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

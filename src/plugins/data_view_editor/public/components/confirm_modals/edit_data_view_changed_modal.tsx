@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { OverlayStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 interface EditDataViewDeps {
   dataViewName: string;

@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import { filter, uniqBy } from 'lodash/fp';
 import {
   EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiPanel,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import { filter, uniqBy } from 'lodash/fp';
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import { TimelineStatus } from '../../../../../../common/api/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { timelineActions } from '../../../../store';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineStatus } from '../../../../../../common/api/timeline';
 import { appSelectors } from '../../../../../common/store/app';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { timelineActions } from '../../../../store';
 import { AddNote } from '../../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../../notes/translations';
-import { PARTICIPANTS } from '../../translations';
 import { NotePreviews } from '../../../open_timeline/note_previews';
 import type { TimelineResultNote } from '../../../open_timeline/types';
-import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../../side_panel';
+import { PARTICIPANTS } from '../../translations';
 import { getScrollToTopSelector } from '../selectors';
-import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FullWidthFlexGroup, VerticalRule } from '../shared/layout';
+import { getTimelineNoteSelector } from './selectors';
 
 const ScrollableDiv = styled.div`
   overflow-x: hidden;

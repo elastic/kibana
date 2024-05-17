@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';

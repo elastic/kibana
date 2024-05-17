@@ -1,3 +1,4 @@
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 
 const getMockArguments = ({
   isDefaultSettings = true,

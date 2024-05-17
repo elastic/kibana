@@ -7,10 +7,10 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import type { Metric, MetricType } from '../../../../common/types';
-import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { addAdditionalArgs } from '.';
+import type { Metric, MetricType } from '../../../../common/types';
 import { AdditionalArgs } from '../../types';
+import { SUPPORTED_METRICS, SupportedMetric, getFormulaFromMetric } from './supported_metrics';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");

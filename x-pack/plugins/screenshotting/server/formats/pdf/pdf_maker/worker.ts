@@ -7,13 +7,13 @@
 
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
-import { isMainThread, MessagePort, workerData } from 'worker_threads';
 import path from 'path';
+import { MessagePort, isMainThread, workerData } from 'worker_threads';
 
+import { assetPath } from './constants';
 import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
-import { assetPath } from './constants';
-import { _, Printer } from './worker_dependencies';
+import { Printer, _ } from './worker_dependencies';
 
 export interface WorkerData {
   port: MessagePort;

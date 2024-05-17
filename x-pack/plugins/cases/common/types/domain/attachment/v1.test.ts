@@ -6,23 +6,23 @@
  */
 
 import {
-  AttachmentAttributesBasicRt,
-  FileAttachmentMetadataRt,
-  SingleFileAttachmentMetadataRt,
-  AttachmentType,
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
-  ExternalReferenceStorageType,
-  ExternalReferenceAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
-  AttachmentRt,
-  UserCommentAttachmentRt,
-  AlertAttachmentRt,
   ActionsAttachmentRt,
-  ExternalReferenceAttachmentRt,
-  PersistableStateAttachmentRt,
+  AlertAttachmentPayloadRt,
+  AlertAttachmentRt,
+  AttachmentAttributesBasicRt,
   AttachmentPatchAttributesRt,
+  AttachmentRt,
+  AttachmentType,
+  ExternalReferenceAttachmentPayloadRt,
+  ExternalReferenceAttachmentRt,
+  ExternalReferenceStorageType,
+  FileAttachmentMetadataRt,
+  PersistableStateAttachmentPayloadRt,
+  PersistableStateAttachmentRt,
+  SingleFileAttachmentMetadataRt,
+  UserCommentAttachmentPayloadRt,
+  UserCommentAttachmentRt,
 } from './v1';
 
 describe('Attachments', () => {

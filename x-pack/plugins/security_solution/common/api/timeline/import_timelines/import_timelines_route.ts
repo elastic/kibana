@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import { BareNoteSchema, SavedTimelineRuntimeType } from '../model/api';
 import { unionWithNullType } from '../../../utility_types';
+import { BareNoteSchema, SavedTimelineRuntimeType } from '../model/api';
 
 import { pinnedEventIds } from '../pinned_events/pinned_events_route';
 

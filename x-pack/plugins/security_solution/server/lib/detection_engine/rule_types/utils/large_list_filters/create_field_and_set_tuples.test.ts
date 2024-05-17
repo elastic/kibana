@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createFieldAndSetTuples } from './create_field_and_set_tuples';
 import { sampleDocWithSortId } from '../../__mocks__/es_results';
+import { createFieldAndSetTuples } from './create_field_and_set_tuples';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { EntryList } from '@kbn/securitysolution-io-ts-list-types';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 

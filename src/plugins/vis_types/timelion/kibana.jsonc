@@ -15,13 +15,7 @@
       "dataViews",
       "fieldFormats"
     ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "visDefaultEditor"
-    ]
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
   }
 }

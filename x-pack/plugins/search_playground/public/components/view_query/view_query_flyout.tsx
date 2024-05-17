@@ -7,9 +7,9 @@
 
 import {
   EuiAccordion,
-  EuiSelectable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,25 +17,25 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
+  EuiLink,
   EuiPanel,
-  EuiSpacer,
+  EuiSelectable,
   EuiSelectableOption,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCheckbox,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useController } from 'react-hook-form';
-import { AnalyticsEvents } from '../../analytics/constants';
 import { docLinks } from '../../../common/doc_links';
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields, IndicesQuerySourceFields } from '../../types';
-import { createQuery, getDefaultQueryFields, IndexFields } from '../../utils/create_query';
+import { IndexFields, createQuery, getDefaultQueryFields } from '../../utils/create_query';
 
 const groupTypeQueryFields = (
   fields: IndicesQuerySourceFields,

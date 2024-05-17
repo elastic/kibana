@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
-import { ActionTypeSelectorModal } from './action_type_selector_modal';
 import { ActionType } from '@kbn/actions-plugin/common';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
+import { ActionTypeSelectorModal } from './action_type_selector_modal';
 const actionTypes = [
   {
     id: '123',

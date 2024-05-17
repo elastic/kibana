@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { EuiPageTemplate } from '@elastic/eui';
+import { Route, BrowserRouter as Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
-import { EuiPageTemplate } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
-import { Sidebar } from './sidebar';
 import { routes } from '../../routes';
+import { Sidebar } from './sidebar';
 
 export const App: React.FC = () => {
   const { appBasePath } = useDeps();

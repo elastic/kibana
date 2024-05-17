@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { PassThrough, Readable, Stream, Writable } from 'stream';
 import { schema } from '../..';
-import { Stream, Readable, Writable, PassThrough } from 'stream';
 
 test('returns value by default', () => {
   const value = new Stream();

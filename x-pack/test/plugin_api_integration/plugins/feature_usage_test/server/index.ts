@@ -12,7 +12,5 @@ import {
   FeatureUsageTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<
-  FeatureUsageTestPluginSetup,
-  FeatureUsageTestPluginStart
-> = async () => new FeatureUsageTestPlugin();
+export const plugin: PluginInitializer<FeatureUsageTestPluginSetup, FeatureUsageTestPluginStart> =
+  async () => new FeatureUsageTestPlugin();

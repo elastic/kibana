@@ -1,3 +1,22 @@
+import {
+  EuiButton,
+  EuiCopy,
+  EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridCustomBodyProps,
+} from '@elastic/eui';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { ReactWrapper } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,33 +25,14 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
-import {
-  EuiButton,
-  EuiCopy,
-  EuiDataGrid,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridCustomBodyProps,
-} from '@elastic/eui';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act } from 'react-dom/test-utils';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { servicesMock } from '../../__mocks__/services';
-import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { servicesMock } from '../../__mocks__/services';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
+import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({

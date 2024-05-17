@@ -29,9 +29,7 @@
         "tags": [],
         "label": "AppId",
         "description": [],
-        "signature": [
-          "\"home\""
-        ],
+        "signature": ["\"home\""],
         "path": "packages/deeplinks/shared/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -44,9 +42,7 @@
         "tags": [],
         "label": "DeepLinkId",
         "description": [],
-        "signature": [
-          "\"home\""
-        ],
+        "signature": ["\"home\""],
         "path": "packages/deeplinks/shared/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,

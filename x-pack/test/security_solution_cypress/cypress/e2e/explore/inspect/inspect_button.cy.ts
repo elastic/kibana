@@ -10,6 +10,8 @@ import {
   INSPECT_MODAL,
   INSPECT_MODAL_INDEX_PATTERN,
 } from '../../../screens/inspect';
+import { postDataView } from '../../../tasks/api_calls/common';
+import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import {
   closesModal,
   openLensVisualizationsInspectModal,
@@ -18,9 +20,7 @@ import {
 } from '../../../tasks/inspect';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { selectDataView } from '../../../tasks/sourcerer';
-import { postDataView } from '../../../tasks/api_calls/common';
 
 const DATA_VIEW = 'auditbeat-*';
 

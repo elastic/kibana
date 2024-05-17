@@ -7,36 +7,36 @@
 
 import expect from '@kbn/expect';
 
-import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  removeServerGeneratedPropertiesFromCase,
+  removeServerGeneratedPropertiesFromSavedObject,
+  resolveCase,
+} from '../../../../common/lib/api';
+import { getUserInfo } from '../../../../common/lib/authentication';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
+import {
   defaultUser,
+  getPostCaseRequest,
   postCaseReq,
   postCaseResp,
   postCommentUserReq,
-  getPostCaseRequest,
 } from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
-  createCase,
-  resolveCase,
-  createComment,
-  removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromSavedObject,
-} from '../../../../common/lib/api';
-import {
-  secOnly,
-  obsOnly,
-  globalRead,
-  superUser,
-  secOnlyRead,
-  obsOnlyRead,
-  obsSecRead,
-  noKibanaPrivileges,
-  obsSec,
-} from '../../../../common/lib/authentication/users';
-import { getUserInfo } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -7,10 +7,10 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { InspectQuery, Refetch, RefetchKql } from './model';
+import type { Filter } from '@kbn/es-query';
 import type { InputsModelId } from './constants';
+import type { InspectQuery, Refetch, RefetchKql } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/inputs');
 

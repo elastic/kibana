@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.top_countries_network.dsl';
 import { networkTopCountries } from '.';
 import {
+  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
-  formattedSearchStrategyResponse,
 } from './__mocks__';
+import * as buildQuery from './query.top_countries_network.dsl';
 
 describe('networkTopCountries search strategy', () => {
   const buildTopCountriesQuery = jest.spyOn(buildQuery, 'buildTopCountriesQuery');

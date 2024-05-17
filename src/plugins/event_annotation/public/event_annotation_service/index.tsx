@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 export type { EventAnnotationServiceType };
 

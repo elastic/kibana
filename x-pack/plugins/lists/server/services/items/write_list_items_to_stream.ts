@@ -11,8 +11,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
-import { findSourceValue } from '../utils/find_source_value';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import { findSourceValue } from '../utils/find_source_value';
 
 /**
  * How many results to page through from the network at a time

@@ -8,10 +8,10 @@ import type { Logger, SavedObjectsFindResponse } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { INTERNAL_TAGS_URL, SECURITY_TAG_NAME } from '../../../../common/constants';
 import {
-  serverMock,
-  requestContextMock,
   mockGetCurrentUser,
+  requestContextMock,
   requestMock,
+  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetTagsResult } from '../__mocks__';
 import { getTagsByNameRoute } from './get_tags_by_name';

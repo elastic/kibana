@@ -17,6 +17,7 @@ jest.mock('@kbn/generate-csv', () => ({
   },
 }));
 
+import { Writable } from 'stream';
 import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
@@ -25,7 +26,6 @@ import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mo
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { setFieldFormats } from '@kbn/reporting-server';
-import { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
 

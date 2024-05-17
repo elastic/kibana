@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { chain } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import moment from 'moment';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chain } from 'fp-ts/lib/Either';
 
 export const TimestampFromString = new rt.Type<number, string>(
   'TimestampFromString',

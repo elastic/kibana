@@ -1,3 +1,11 @@
+import {
+  EuiButtonEmpty,
+  EuiButtonEmptyProps,
+  EuiDataGridColumnCellAction,
+  EuiDataGridColumnCellActionProps,
+} from '@elastic/eui';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +13,6 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiButtonEmptyProps,
-  EuiDataGridColumnCellAction,
-  EuiDataGridColumnCellActionProps,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import { render, screen } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { RowHeightMode } from '../../../../common/types';
 import type { FormatFactory } from '../../../../common/types';

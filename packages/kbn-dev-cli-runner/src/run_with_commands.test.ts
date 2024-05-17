@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 jest.mock('./metrics');
 
 import { FlagsReader } from './flags_reader';

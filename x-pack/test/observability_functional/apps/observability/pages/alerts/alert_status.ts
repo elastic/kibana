@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ALL_ALERTS = 40;

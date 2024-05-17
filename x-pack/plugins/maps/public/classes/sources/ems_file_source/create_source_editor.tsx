@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
+import React, { Component } from 'react';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { sloData } from '../../../api_integration/apis/slos/fixtures/create_slo';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const OVERVIEW_MODE_SELECTOR = 'sloOverviewModeSelector';
 const SLO_CONFIRM_BUTTON = 'sloConfirmButton';

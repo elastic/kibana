@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 import type {
-  ExpressionFunctionDefinition,
-  ExpressionValueBoxed,
   Datatable,
   DatatableColumn,
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
 } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ExpressionValueVisDimension } from './vis_dimension';

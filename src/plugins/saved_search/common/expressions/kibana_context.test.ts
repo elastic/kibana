@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { ExpressionFunctionKibanaContext, KibanaContext } from '@kbn/data-plugin/common';
+import { FILTERS, FilterStateStore, buildFilter } from '@kbn/es-query';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { fromSavedSearchAttributes } from '../service/saved_searches_utils';
-import type { SavedSearchAttributes, SavedSearch } from '../types';
+import type { SavedSearch, SavedSearchAttributes } from '../types';
 
-import { getKibanaContextFn, KibanaContextStartDependencies } from './kibana_context';
+import { KibanaContextStartDependencies, getKibanaContextFn } from './kibana_context';
 
 type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 

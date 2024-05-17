@@ -8,11 +8,11 @@
 
 import fn from './movingstd';
 
-import moment from 'moment';
 import expect from '@kbn/expect';
-import invoke from './test_helpers/invoke_series_fn';
+import moment from 'moment';
 import getSeries from './test_helpers/get_series';
 import getSeriesList from './test_helpers/get_series_list';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('movingstd.js', () => {
   it('computes the moving standard deviation of a list', async () => {

@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  cleanRiskEngine,
-  cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
+  cleanAssetCriticality,
+  cleanRiskEngine,
+  disableAssetCriticalityAdvancedSetting,
+  enableAssetCriticalityAdvancedSetting,
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
-  enableAssetCriticalityAdvancedSetting,
-  disableAssetCriticalityAdvancedSetting,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

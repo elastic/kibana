@@ -1,3 +1,6 @@
+import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 
 export const BETA = i18n.translate('securitySolutionPackages.beta.label', {
   defaultMessage: 'Beta',

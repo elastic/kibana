@@ -1,3 +1,6 @@
+import type { ESFilter } from '@kbn/es-types';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,18 +8,18 @@
  * 2.0.
  */
 import { sumBy } from 'lodash';
-import type { ESFilter } from '@kbn/es-types';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ApmDocumentType } from '../../../common/document_type';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
+import { RollupInterval } from '../../../common/rollup';
 import { NodeStats } from '../../../common/service_map';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -25,10 +28,7 @@ import {
 } from '../../lib/helpers/transactions';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { systemMemory, cgroupMemory } from '../metrics/by_agent/shared/memory';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { cgroupMemory, systemMemory } from '../metrics/by_agent/shared/memory';
 
 interface Options {
   apmEventClient: APMEventClient;

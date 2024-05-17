@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataViewField, DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import { IndexedFieldsTable } from './indexed_fields_table';
-import { getFieldInfo } from '../../utils';
 import { RuntimeField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { ShallowWrapper, shallow } from 'enzyme';
+import React from 'react';
+import { getFieldInfo } from '../../utils';
+import { IndexedFieldsTable } from './indexed_fields_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',

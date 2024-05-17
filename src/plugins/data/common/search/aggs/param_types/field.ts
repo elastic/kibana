@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { DataViewField, isNestedField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
-import { isNestedField, DataViewField } from '@kbn/data-views-plugin/common';
-import { IAggConfig } from '../agg_config';
-import { BaseParamType } from './base';
-import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
+import { IAggConfig } from '../agg_config';
+import { propFilter } from '../utils';
+import { BaseParamType } from './base';
 
 const filterByType = propFilter('type');
 

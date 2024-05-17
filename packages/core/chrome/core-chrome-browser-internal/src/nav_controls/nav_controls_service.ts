@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type {
+  ChromeHelpMenuLink,
+  ChromeNavControl,
+  ChromeNavControls,
+} from '@kbn/core-chrome-browser';
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs';
-import type {
-  ChromeNavControl,
-  ChromeNavControls,
-  ChromeHelpMenuLink,
-} from '@kbn/core-chrome-browser';
 
 /** @internal */
 export class NavControlsService {

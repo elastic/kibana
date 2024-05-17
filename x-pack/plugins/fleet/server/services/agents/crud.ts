@@ -1,3 +1,4 @@
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +6,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -14,22 +14,22 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 
 import { groupBy } from 'lodash';
 
-import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
-import { appContextService, agentPolicyService } from '..';
-import type { AgentStatus, FleetServerAgent } from '../../../common/types';
+import { agentPolicyService, appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeAvailable } from '../../../common/services';
+import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { AGENTS_INDEX } from '../../constants';
 import {
-  FleetError,
-  isESClientError,
   AgentNotFoundError,
+  FleetError,
   FleetUnauthorizedError,
+  isESClientError,
 } from '../../errors';
+import type { Agent, AgentSOAttributes, ListWithKuery } from '../../types';
 
 import { auditLoggingService } from '../audit_logging';
 
-import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
+import { agentSOAttributesToFleetServerAgentDoc, searchHitToAgent } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { DateHistogramIndexPatternColumn } from './date_histogram';
-import { dateHistogramOperation } from '.';
-import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
-import { createMockedIndexPattern } from '../../mocks';
-import type { FormBasedLayer } from '../../types';
-import type { IndexPattern } from '../../../../types';
-import { getFieldByNameFactory } from '../../pure_helpers';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { dateHistogramOperation } from '.';
+import type { IndexPattern } from '../../../../types';
+import { createMockedIndexPattern } from '../../mocks';
+import { getFieldByNameFactory } from '../../pure_helpers';
+import type { FormBasedLayer } from '../../types';
+import type { DateHistogramIndexPatternColumn } from './date_histogram';
 
 const dataStart = dataPluginMock.createStartContract();
 const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();

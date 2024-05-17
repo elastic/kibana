@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { fireEvent } from '@testing-library/react';
+import React, { useState } from 'react';
 import 'jest-canvas-mock';
+import { render } from '../../../../../utils/testing';
 import { MIME_FILTERS, MimeType } from '../../../common/network_data/types';
 import { WaterfallMimeLegend } from './waterfall_mime_legend';
-import { render } from '../../../../../utils/testing';
 
 describe('WaterfallMimeLegend', () => {
   jest.useFakeTimers();

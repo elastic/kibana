@@ -15,10 +15,10 @@ import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
 import type { ExperimentalIndexingFeature } from '../../../common/types';
 import { PackageNotFoundError } from '../../errors';
 import type {
-  NewPackagePolicy,
-  PackagePolicy,
   IndexTemplate,
   IndexTemplateEntry,
+  NewPackagePolicy,
+  PackagePolicy,
 } from '../../types';
 import { appContextService } from '../app_context';
 import { prepareTemplate } from '../epm/elasticsearch/template/install';

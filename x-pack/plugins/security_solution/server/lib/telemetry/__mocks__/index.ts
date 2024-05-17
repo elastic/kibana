@@ -6,22 +6,22 @@
  */
 
 import { URL } from 'url';
-import moment from 'moment';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { TelemetryEventsSender } from '../sender';
-import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
-import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import type { ITaskMetricsService } from '../task_metrics.types';
-import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type UsageCounters } from '@kbn/usage-collection-plugin/common/types';
-import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
-import { stubEndpointMetricsAbstractResponse, stubEndpointMetricsByIdResponse } from './metrics';
-import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import moment from 'moment';
+import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
+import type { TelemetryEventsSender } from '../sender';
+import type { SecurityTelemetryTaskConfig } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { stubFleetAgentResponse } from './fleet_agent_response';
+import { stubEndpointMetricsAbstractResponse, stubEndpointMetricsByIdResponse } from './metrics';
+import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
+import { stubEndpointAlertResponse, stubFetchTimelineEvents, stubProcessTree } from './timeline';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean,

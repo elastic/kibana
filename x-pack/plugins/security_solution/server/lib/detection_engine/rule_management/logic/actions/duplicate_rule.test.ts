@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
 

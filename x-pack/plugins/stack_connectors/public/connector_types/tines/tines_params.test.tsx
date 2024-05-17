@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
-import TinesParamsFields from './tines_params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import React from 'react';
+import TinesParamsFields from './tines_params';
 
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 interface Result {

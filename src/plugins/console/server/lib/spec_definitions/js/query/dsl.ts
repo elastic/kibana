@@ -11,18 +11,18 @@ import _ from 'lodash';
 import { SpecDefinitionsService } from '../../../../services';
 
 import {
-  spanFirstTemplate,
-  spanNearTemplate,
-  spanOrTemplate,
-  spanNotTemplate,
-  spanTermTemplate,
-  spanContainingTemplate,
-  spanWithinTemplate,
-  wildcardTemplate,
   fuzzyTemplate,
   prefixTemplate,
   rangeTemplate,
   regexpTemplate,
+  spanContainingTemplate,
+  spanFirstTemplate,
+  spanNearTemplate,
+  spanNotTemplate,
+  spanOrTemplate,
+  spanTermTemplate,
+  spanWithinTemplate,
+  wildcardTemplate,
 } from './templates';
 
 const matchOptions = {

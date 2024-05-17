@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { AppDeepLink } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
-import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import { FLEET_ROUTING_PATHS } from './constants/page_paths';
 

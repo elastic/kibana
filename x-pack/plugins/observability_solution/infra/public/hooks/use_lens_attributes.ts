@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import useAsync from 'react-use/lib/useAsync';
 import {
   type LensAttributes,
   type LensConfig,
   LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils/config_builder';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useCallback } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export type UseLensAttributesParams = LensConfig;
@@ -56,16 +56,16 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
 
   const openInLensAction = useCallback(
     ({
-        timeRange,
-        query,
-        filters,
-        searchSessionId,
-      }: {
-        timeRange: TimeRange;
-        filters: Filter[];
-        query: Query;
-        searchSessionId?: string;
-      }) =>
+      timeRange,
+      query,
+      filters,
+      searchSessionId,
+    }: {
+      timeRange: TimeRange;
+      filters: Filter[];
+      query: Query;
+      searchSessionId?: string;
+    }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {

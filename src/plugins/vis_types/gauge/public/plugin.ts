@@ -7,14 +7,14 @@
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { GaugePublicConfig } from '../config';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
+import { GaugePublicConfig } from '../config';
+import { setDataViewsStart } from './services';
 import { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';
-import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypeGaugeSetupDependencies {

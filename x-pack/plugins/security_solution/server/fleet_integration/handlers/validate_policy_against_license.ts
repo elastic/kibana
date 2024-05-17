@@ -7,9 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import { capitalize } from 'lodash';
-import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { LicenseService } from '../../../common/license';
+import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
 
 export const validatePolicyAgainstLicense = (
   policyConfig: PolicyConfig,

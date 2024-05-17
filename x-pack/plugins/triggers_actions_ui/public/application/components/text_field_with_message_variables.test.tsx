@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 
 describe('TextFieldWithMessageVariables', () => {

@@ -11,8 +11,8 @@ import host from './generated/elasticsearch/composable/component/host.json';
 import metricset from './generated/elasticsearch/composable/component/metricset.json';
 import system from './generated/elasticsearch/composable/component/system.json';
 
-import template from './generated/elasticsearch/composable/template.json';
 import { IndexTemplateDef } from '../../../types';
+import template from './generated/elasticsearch/composable/template.json';
 
 const ECS_VERSION = template._meta.ecs_version;
 

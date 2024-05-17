@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
 import { App, AppDeepLink, AppStatus } from '@kbn/core-application-browser';
+import { of } from 'rxjs';
 import { getAppInfo } from './get_app_info';
 
 describe('getAppInfo', () => {

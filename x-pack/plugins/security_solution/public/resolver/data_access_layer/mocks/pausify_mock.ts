@@ -6,10 +6,10 @@
  */
 
 import type {
-  ResolverNode,
-  SafeResolverEvent,
-  ResolverRelatedEvents,
   ResolverEntityIndex,
+  ResolverNode,
+  ResolverRelatedEvents,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import type { DataAccessLayer } from '../../types';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { buildIndexMappings, buildIndexMeta } from './build_index_mappings';
 import { createType } from '../test_helpers';
+import { buildIndexMappings, buildIndexMeta } from './build_index_mappings';
 
 const getTestTypes = () => {
   const foo = createType({

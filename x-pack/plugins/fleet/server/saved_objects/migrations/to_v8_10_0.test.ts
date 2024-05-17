@@ -8,8 +8,8 @@
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 
 import {
-  migrateOutputToV8100 as migration,
   migrateOutputEvictionsFromV8100 as eviction,
+  migrateOutputToV8100 as migration,
 } from './to_v8_10_0';
 
 describe('8.10.0 migration', () => {

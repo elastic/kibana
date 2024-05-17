@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 import type {
-  IServiceSettings,
   FileLayer,
+  IServiceSettings,
 } from '../vega_view/vega_map_view/service_settings/service_settings_types';
-import { Data, UrlObject, EmsQueryRequest } from './types';
+import { Data, EmsQueryRequest, UrlObject } from './types';
 
 /**
  * This class processes all Vega spec customizations,

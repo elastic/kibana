@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -13,8 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { Note } from '../../../common/lib/note';
 
-import * as i18n from './translations';
 import { CountBadge } from '../../../common/components/page';
+import * as i18n from './translations';
 
 /** Performs IO to update (or add a new) note */
 export type UpdateNote = (note: Note) => void;

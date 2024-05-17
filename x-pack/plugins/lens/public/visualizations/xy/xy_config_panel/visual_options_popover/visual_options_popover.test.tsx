@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI } from '../../../../types';
-import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
-import { State, XYLayerConfig } from '../../types';
-import { VisualOptionsPopover } from '.';
-import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
-import { MissingValuesOptions } from './missing_values_option';
-import { FillOpacityOption } from './fill_opacity_option';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { VisualOptionsPopover } from '.';
+import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
+import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
+import type { FramePublicAPI } from '../../../../types';
+import { State, XYLayerConfig } from '../../types';
+import { FillOpacityOption } from './fill_opacity_option';
+import { MissingValuesOptions } from './missing_values_option';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;

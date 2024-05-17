@@ -12,11 +12,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { TraceLink } from '.';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
-  mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  mockApmPluginContextValue,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import * as hooks from '../../../hooks/use_fetcher';
 import * as useApmParamsHooks from '../../../hooks/use_apm_params';
+import * as hooks from '../../../hooks/use_fetcher';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

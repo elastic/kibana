@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { type ContentClient, ContentClientProvider } from '@kbn/content-management-plugin/public';
 import React from 'react';
-import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
 import { Todos } from './todos';
 
 export const TodoApp = (props: { contentClient: ContentClient }) => {

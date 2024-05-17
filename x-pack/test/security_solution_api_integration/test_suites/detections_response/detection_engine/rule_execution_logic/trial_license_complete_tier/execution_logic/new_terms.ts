@@ -9,27 +9,27 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
+import { orderBy } from 'lodash';
 
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../../../common/utils/security_solution';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import {
+  dataGeneratorFactory,
   getAlerts,
   getPreviewAlerts,
   previewRule,
-  dataGeneratorFactory,
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
 } from '../../../../utils';
-import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
 const ruleExecutionStart = '2022-10-19T05:00:04.000Z';

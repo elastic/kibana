@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+import { renderHook } from '@testing-library/react-hooks';
 import { useVariation } from './use_variation';
 
 describe('useVariation', () => {

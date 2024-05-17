@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { i18n } from '@kbn/i18n';
 import { applicationPath, featureId, featureTitle } from '../common/constants';
 
 export function registerWithCustomIntegrations(customIntegrations: CustomIntegrationsPluginSetup) {

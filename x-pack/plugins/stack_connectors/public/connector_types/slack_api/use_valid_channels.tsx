@@ -12,12 +12,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
-import { ValidChannelRouteResponse } from '../../../common/slack_api/types';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
+import { ValidChannelRouteResponse } from '../../../common/slack_api/types';
 import * as i18n from './translations';
 
 interface UseValidChannelsProps {

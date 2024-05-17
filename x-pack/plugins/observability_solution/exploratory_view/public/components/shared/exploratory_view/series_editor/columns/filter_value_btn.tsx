@@ -1,3 +1,4 @@
+import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
+import React, { useMemo } from 'react';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { SeriesUrl } from '../../types';

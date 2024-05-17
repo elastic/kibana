@@ -10,9 +10,9 @@ import React from 'react';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { SeverityUserAction } from '../../../common/types/domain';
 import { SET_SEVERITY_TO } from '../create/translations';
+import { severities } from '../severity/config';
 import { createCommonUpdateUserActionBuilder } from './common';
 import type { UserActionBuilder } from './types';
-import { severities } from '../severity/config';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<SeverityUserAction>) => {
   const severity = userAction.payload.severity;

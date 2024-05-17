@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import { isEqual, orderBy } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { orderBy, isEqual } from 'lodash';
 
 import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
-  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
+  EuiIconTip,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiIconTip,
   RIGHT_ALIGNMENT,
-  useEuiTheme,
   euiPaletteColorBlind,
+  useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type GroupTableItem, useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
-import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import { useDataSource } from '../../hooks/use_data_source';
 

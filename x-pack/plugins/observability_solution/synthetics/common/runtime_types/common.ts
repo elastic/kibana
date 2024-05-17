@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
-import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { Either } from 'fp-ts/Either';
+import * as t from 'io-ts';
 import { ConfigKey } from '../constants/monitor_management';
 
 export const NameSpaceString = new t.Type<string, string, unknown>(

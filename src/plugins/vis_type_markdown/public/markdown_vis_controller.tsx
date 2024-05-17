@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect } from 'react';
 import { MarkdownVisParams } from './types';
 
 import './markdown_vis.scss';

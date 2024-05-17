@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DocLinks } from '@kbn/doc-links';
 import type { ConfigDeprecationContext } from '@kbn/config';
+import type { DocLinks } from '@kbn/doc-links';
 
 export type ConfigDeprecationContextMock = ConfigDeprecationContext;
 

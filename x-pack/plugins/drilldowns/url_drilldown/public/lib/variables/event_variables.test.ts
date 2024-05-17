@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ROW_CLICK_TRIGGER, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { createPoint, rowClickData } from '../test/data';
 import {
+  ValueClickTriggerEventScope,
   getEventScopeValues,
   getEventVariableList,
-  ValueClickTriggerEventScope,
 } from './event_variables';
-import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { createPoint, rowClickData } from '../test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {
   describe('supports `points[]`', () => {

@@ -9,14 +9,14 @@ import {
   EuiButton,
   EuiIcon,
   EuiImage,
-  EuiToast,
   EuiPortal,
-  EuiText,
   EuiSpacer,
+  EuiText,
+  EuiToast,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import * as i18n from './translations';
 import theGif from './overview.gif';
+import * as i18n from './translations';
 
 const VIDEO_CONTENT_WIDTH = 250;
 const VIDEO_PAGE = `https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW`;

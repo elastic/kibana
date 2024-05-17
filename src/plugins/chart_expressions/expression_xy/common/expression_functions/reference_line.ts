@@ -10,15 +10,15 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
   AvailableReferenceLineIcons,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
   FillStyles,
   IconPositions,
   LayerTypes,
   LineStyles,
   REFERENCE_LINE,
-  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
-import { ReferenceLineFn } from '../types';
 import { strings } from '../i18n';
+import { ReferenceLineFn } from '../types';
 
 export const referenceLineFunction: ReferenceLineFn = {
   name: REFERENCE_LINE,
@@ -115,8 +115,8 @@ export const referenceLineFunction: ReferenceLineFn = {
       args.name !== undefined && args.textVisibility === undefined
         ? true
         : args.name === undefined
-        ? false
-        : args.textVisibility;
+          ? false
+          : args.textVisibility;
 
     const valueMeta =
       args.forAccessor && table

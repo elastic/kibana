@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockDependencies, MockRouter } from '../../__mocks__';
+import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import { registerWorkplaceSearchRoutes } from '.';
 

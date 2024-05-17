@@ -12,19 +12,19 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import { collectTelemetryData } from './collect_telemetry_data';
 import {
-  CASE_TELEMETRY_SAVED_OBJECT,
   CASES_TELEMETRY_TASK_NAME,
+  CASE_RULES_SAVED_OBJECT,
+  CASE_TELEMETRY_SAVED_OBJECT,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPES,
-  CASE_RULES_SAVED_OBJECT,
 } from '../../common/constants';
-import type { CasesTelemetry } from './types';
+import { collectTelemetryData } from './collect_telemetry_data';
 import { casesSchema } from './schema';
+import type { CasesTelemetry } from './types';
 
 export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';
 

@@ -7,8 +7,8 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
-import { AppClientFactory } from './factory';
 import { AppClient } from './client';
+import { AppClientFactory } from './factory';
 
 jest.mock('./client');
 const mockClient = AppClient as jest.Mock;

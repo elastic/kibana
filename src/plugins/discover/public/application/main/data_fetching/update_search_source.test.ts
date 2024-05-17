@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { updateVolatileSearchSource } from './update_search_source';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { Filter } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { Filter } from '@kbn/es-query';
+import { updateVolatileSearchSource } from './update_search_source';
 
 const getUiSettingsMock = (value: boolean) => {
   return {

@@ -8,11 +8,11 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TestProviders } from '../../../../../../../common/mock';
 import { AlertFieldFlexGroup, DEFAULT_GAP, eventKindMatches, showWith } from '.';
 import { TimelineId } from '../../../../../../../../common/types/timeline';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { TestProviders } from '../../../../../../../common/mock';
 
 describe('helpers', () => {
   describe('eventKindMatches', () => {

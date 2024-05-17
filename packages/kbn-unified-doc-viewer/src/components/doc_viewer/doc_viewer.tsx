@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { DocViewerTab } from './doc_viewer_tab';
+import React from 'react';
 import type { DocView, DocViewRenderProps } from '../../types';
+import { DocViewerTab } from './doc_viewer_tab';
 
 export interface DocViewerProps extends DocViewRenderProps {
   docViews: DocView[];

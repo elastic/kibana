@@ -116,12 +116,8 @@
             "type": "Array",
             "tags": [],
             "label": "values",
-            "description": [
-              "Allowed values to show on the Control Slider"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["Allowed values to show on the Control Slider"],
+            "signature": ["number[]"],
             "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -132,12 +128,8 @@
             "type": "number",
             "tags": [],
             "label": "currentValue",
-            "description": [
-              "Current value set"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["Current value set"],
+            "signature": ["number | undefined"],
             "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -148,12 +140,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "disabled",
-            "description": [
-              "When set will show the control in a disabled state"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["When set will show the control in a disabled state"],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -164,12 +152,8 @@
             "type": "string",
             "tags": [],
             "label": "disabledReason",
-            "description": [
-              "An explanation for the disabled state of the control"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["An explanation for the disabled state of the control"],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -180,12 +164,8 @@
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
-            "description": [
-              "A way to pass the test id parameter"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["A way to pass the test id parameter"],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -196,12 +176,8 @@
             "type": "Function",
             "tags": [],
             "label": "onChange",
-            "description": [
-              "A callback for when the slider value changes"
-            ],
-            "signature": [
-              "(newValue: number) => void"
-            ],
+            "description": ["A callback for when the slider value changes"],
+            "signature": ["(newValue: number) => void"],
             "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -213,9 +189,7 @@
                 "tags": [],
                 "label": "newValue",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -237,9 +211,7 @@
         "tags": [],
         "label": "RandomSamplingIconProps",
         "description": [],
-        "signature": [
-          "React.SVGProps<SVGSVGElement> & CustomProps"
-        ],
+        "signature": ["React.SVGProps<SVGSVGElement> & CustomProps"],
         "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,

@@ -13,8 +13,8 @@
 // @see src/plugins/advanced_settings/public/management_app/components/field/field_code_editor.tsx
 //
 
+import { XJsonLang, monaco } from '@kbn/monaco';
 import React, { useCallback } from 'react';
-import { monaco, XJsonLang } from '@kbn/monaco';
 
 import {
   CodeEditor as KibanaReactCodeEditor,

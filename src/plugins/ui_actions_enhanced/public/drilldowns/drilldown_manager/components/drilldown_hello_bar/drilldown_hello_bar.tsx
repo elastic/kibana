@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
-  EuiText,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
-  EuiButtonEmpty,
-  EuiIcon,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
-import { txtHideHelpButtonLabel, txtHelpText, txtViewDocsLinkLabel } from './i18n';
+import React from 'react';
+import { txtHelpText, txtHideHelpButtonLabel, txtViewDocsLinkLabel } from './i18n';
 
 export interface DrilldownHelloBarProps {
   docsLink?: string;

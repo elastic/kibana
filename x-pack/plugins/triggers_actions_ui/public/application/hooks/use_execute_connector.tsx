@@ -6,9 +6,9 @@
  */
 
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { useRef, useState, useEffect } from 'react';
-import { executeAction } from '../lib/action_connector_api';
+import { useEffect, useRef, useState } from 'react';
 import { useKibana } from '../../common/lib/kibana';
+import { executeAction } from '../lib/action_connector_api';
 
 interface UseExecuteConnectorReturnValue {
   isLoading: boolean;

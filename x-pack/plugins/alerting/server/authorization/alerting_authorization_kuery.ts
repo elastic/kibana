@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EsQueryConfig, KueryNode, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import { remove } from 'lodash';
-import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';

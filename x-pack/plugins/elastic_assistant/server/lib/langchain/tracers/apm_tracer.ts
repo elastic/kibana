@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
-import type { Run } from 'langsmith/schemas';
 import { BaseTracer } from '@langchain/core/tracers/base';
 import agent from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
+import type { Run } from 'langsmith/schemas';
 
 export interface LangChainTracerFields extends BaseCallbackHandlerInput {
   exampleId?: string;

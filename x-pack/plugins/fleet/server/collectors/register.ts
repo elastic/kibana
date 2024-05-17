@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { FleetConfigType } from '..';
 
 import { appContextService } from '../services';
 
-import { getIsAgentsEnabled } from './config_collectors';
-import { getAgentUsage, getAgentData } from './agent_collectors';
-import type { AgentUsage, AgentData } from './agent_collectors';
-import { getInternalClients } from './helpers';
-import { getPackageUsage } from './package_collectors';
-import type { PackageUsage } from './package_collectors';
-import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
-import type { FleetServerUsage } from './fleet_server_collector';
-import { getAgentPoliciesUsage } from './agent_policies';
+import { getAgentData, getAgentUsage } from './agent_collectors';
+import type { AgentData, AgentUsage } from './agent_collectors';
 import type { AgentPanicLogsData } from './agent_logs_panics';
 import { getPanicLogsLastHour } from './agent_logs_panics';
 import { getAgentLogsTopErrors } from './agent_logs_top_errors';
+import { getAgentPoliciesUsage } from './agent_policies';
 import type { AgentsPerOutputType } from './agents_per_output';
 import { getAgentsPerOutput } from './agents_per_output';
+import { getIsAgentsEnabled } from './config_collectors';
+import { getFleetServerConfig, getFleetServerUsage } from './fleet_server_collector';
+import type { FleetServerUsage } from './fleet_server_collector';
+import { getInternalClients } from './helpers';
+import { getPackageUsage } from './package_collectors';
+import type { PackageUsage } from './package_collectors';
 
 export interface Usage {
   agents_enabled: boolean;

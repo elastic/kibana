@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { SampleInput } from '../../types';
 import { DefaultFormatEditor, convertSampleInput } from './default';

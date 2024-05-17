@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import DateMath from '@kbn/datemath';
-import { DurationChartComponent } from './duration_chart';
+import React from 'react';
 import { MonitorDurationResult } from '../../../../../common/types';
 import { render } from '../../../lib/helper/rtl_helpers';
+import { DurationChartComponent } from './duration_chart';
 
 describe('MonitorCharts component', () => {
   let dateMathSpy: any;

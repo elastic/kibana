@@ -1,3 +1,4 @@
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { AutoAbortedHttpService, useAutoAbortedHttpClient } from './use_auto_aborted_http_client';
 

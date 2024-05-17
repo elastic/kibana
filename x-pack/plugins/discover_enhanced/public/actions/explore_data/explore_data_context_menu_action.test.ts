@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode as ViewModeType } from '@kbn/presentation-publishing';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
-  VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeEmbeddableContract,
 } from '@kbn/visualizations-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { Params, PluginDeps } from './abstract_explore_data_action';

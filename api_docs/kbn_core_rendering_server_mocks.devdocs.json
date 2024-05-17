@@ -41,10 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => ",
-              "RenderingServiceMock"
-            ],
+            "signature": ["() => ", "RenderingServiceMock"],
             "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -58,11 +55,7 @@
             "tags": [],
             "label": "createPrebootContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalRenderingServiceSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalRenderingServiceSetup", ">"],
             "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -76,11 +69,7 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalRenderingServiceSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalRenderingServiceSetup", ">"],
             "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

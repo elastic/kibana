@@ -5,15 +5,9 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type {
-  InternalArtifactSchema,
-  InternalManifestSchema,
-  InternalManifestEntrySchema,
-  InternalArtifactCompleteSchema,
-} from '../../schemas/artifacts';
 import type {
   ManifestSchemaVersion,
   SemanticVersion,
@@ -21,10 +15,16 @@ import type {
 import { semanticVersion } from '../../../../common/endpoint/schema/common';
 import type { ManifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { manifestSchema } from '../../../../common/endpoint/schema/manifest';
-import { ManifestEntry } from './manifest_entry';
-import { getArtifactId } from './common';
+import type {
+  InternalArtifactCompleteSchema,
+  InternalArtifactSchema,
+  InternalManifestEntrySchema,
+  InternalManifestSchema,
+} from '../../schemas/artifacts';
 import type { ManifestVersion } from '../../schemas/artifacts/manifest';
 import { manifestVersion } from '../../schemas/artifacts/manifest';
+import { getArtifactId } from './common';
+import { ManifestEntry } from './manifest_entry';
 
 function createInternalManifestEntries(
   artifactIds: string[],

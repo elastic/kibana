@@ -8,8 +8,8 @@
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueSearchContext } from './kibana_context_type';
-import { functionWrapper } from './utils';
 import { kqlFunction } from './kql';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#kql', () => {
   const fn = functionWrapper(kqlFunction);

@@ -7,11 +7,11 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { getSearchTransactionsEvents } from '.';
-import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { APMConfig } from '../../..';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { APMConfig } from '../../..';
+import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getIsUsingTransactionEvents({
   config,

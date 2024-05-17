@@ -7,8 +7,8 @@
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty } from 'lodash/fp';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
 interface CriticalityIdentifier {

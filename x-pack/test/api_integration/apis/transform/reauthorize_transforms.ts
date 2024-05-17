@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/reauthorize_transforms';
-import expect from '@kbn/expect';
-import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import expect from '@kbn/expect';
+import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/reauthorize_transforms';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 

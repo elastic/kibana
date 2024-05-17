@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import { EuiButton, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import {
-  PageLoading,
-  PageError,
   Error,
-  WithPrivileges,
   NotAuthorizedSection,
+  PageError,
+  PageLoading,
+  WithPrivileges,
   useExecutionContext,
 } from '../../../../shared_imports';
 
-import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { SlmPolicy } from '../../../../../common/types';
+import { useAppContext, useServices } from '../../../app_context';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { useAppContext, useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
-import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
+import { PolicyTable } from './policy_table';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];

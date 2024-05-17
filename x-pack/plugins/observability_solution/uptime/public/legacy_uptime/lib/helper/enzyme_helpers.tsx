@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
 import { Router } from '@kbn/shared-ux-router';
-import { MemoryHistory } from 'history/createMemoryHistory';
-import { createMemoryHistory, History } from 'history';
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { MountWithReduxProvider } from './helper_with_redux';
+import { History, createMemoryHistory } from 'history';
+import { MemoryHistory } from 'history/createMemoryHistory';
+import React, { ReactElement } from 'react';
 import { AppState } from '../../state';
 import { mockState } from '../__mocks__/uptime_store.mock';
+import { MountWithReduxProvider } from './helper_with_redux';
 import { KibanaProviderOptions, MockRouter } from './rtl_helpers';
 
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {

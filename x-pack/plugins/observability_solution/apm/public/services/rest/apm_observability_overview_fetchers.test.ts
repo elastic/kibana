@@ -10,8 +10,8 @@ import {
   fetchObservabilityOverviewPageData,
   getHasData,
 } from './apm_observability_overview_fetchers';
-import * as createCallApmApi from './create_call_apm_api';
 import type { CallApmApiSpy } from './call_apm_api_spy';
+import * as createCallApmApi from './create_call_apm_api';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;

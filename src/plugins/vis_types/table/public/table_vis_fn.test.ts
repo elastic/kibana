@@ -7,8 +7,8 @@
  */
 
 import { createTableVisFn } from './table_vis_fn';
-import { tableVisResponseHandler } from './utils';
 import { TableVisConfig } from './types';
+import { tableVisResponseHandler } from './utils';
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';

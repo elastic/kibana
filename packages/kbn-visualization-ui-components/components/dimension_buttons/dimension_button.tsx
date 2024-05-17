@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiButtonIcon,
-  EuiLink,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiToolTip,
   useEuiFontSize,
   useEuiShadow,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
+import { emptyTitleText } from './constants';
 import { DimensionButtonIcon } from './dimension_button_icon';
 import { PaletteIndicator } from './palette_indicator';
 import type { AccessorConfig, Message } from './types';
-import { emptyTitleText } from './constants';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('visualizationUiComponents.dimensionButton.editConfig', {
@@ -90,8 +90,8 @@ function DimensionButtonImpl({
                 message?.severity === 'error'
                   ? 'danger'
                   : message?.severity === 'warning'
-                  ? 'warning'
-                  : 'text'
+                    ? 'warning'
+                    : 'text'
               }
             >
               <DimensionButtonIcon severity={message?.severity} accessorConfig={accessorConfig}>

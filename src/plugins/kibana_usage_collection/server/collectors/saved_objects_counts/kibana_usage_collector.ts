@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { snakeCase } from 'lodash';
-import { SavedObjectsClientContract } from '@kbn/core/server';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 interface KibanaSavedObjectCounts {

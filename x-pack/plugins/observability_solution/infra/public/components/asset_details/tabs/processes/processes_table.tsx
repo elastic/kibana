@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
-import { omit } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiTable,
-  EuiTableHeader,
-  EuiTableBody,
-  EuiTableHeaderCell,
-  EuiTableRowCell,
-  EuiEmptyPrompt,
-  useEuiTheme,
-  EuiText,
-  EuiLink,
   EuiButton,
-  SortableProperties,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
   EuiCode,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiTable,
+  EuiTableBody,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiTableRowCell,
+  EuiText,
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+  SortableProperties,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { EuiTableRow } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { omit } from 'lodash';
+import React, { useMemo, useState, useCallback } from 'react';
 import { FORMATTERS } from '../../../../../common/formatters';
+import type { ProcessListAPIResponse } from '../../../../../common/http_api';
+import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 import type { SortBy } from '../../hooks/use_process_list';
-import type { Process } from './types';
+import { NOT_AVAILABLE_LABEL } from '../../translations';
 import { ProcessRow } from './process_row';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
-import type { ProcessListAPIResponse } from '../../../../../common/http_api';
-import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
-import { NOT_AVAILABLE_LABEL } from '../../translations';
+import type { Process } from './types';
 
 interface TableProps {
   processList: ProcessListAPIResponse['processList'];

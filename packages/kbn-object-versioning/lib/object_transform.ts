@@ -148,10 +148,13 @@ export const initTransform =
 
           const fns = getTransformFns<I, O>(requestVersion, targetVersion, migrationDefinition);
 
-          const value = fns.reduce((acc, fn) => {
-            const res = fn(acc as unknown as I);
-            return res;
-          }, obj as unknown as O);
+          const value = fns.reduce(
+            (acc, fn) => {
+              const res = fn(acc as unknown as I);
+              return res;
+            },
+            obj as unknown as O
+          );
 
           return { value, error: null };
         } catch (e) {
@@ -192,10 +195,13 @@ export const initTransform =
 
           const fns = getTransformFns<I, O>(fromVersion, requestVersion, migrationDefinition);
 
-          const value = fns.reduce((acc, fn) => {
-            const res = fn(acc as unknown as I);
-            return res;
-          }, obj as unknown as O);
+          const value = fns.reduce(
+            (acc, fn) => {
+              const res = fn(acc as unknown as I);
+              return res;
+            },
+            obj as unknown as O
+          );
 
           return { value: value as any, error: null };
         } catch (e) {

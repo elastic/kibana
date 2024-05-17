@@ -5,24 +5,24 @@
  * 2.0.
  */
 import axios from 'axios';
-import * as rx from 'rxjs';
 import _, { cloneDeep } from 'lodash';
+import * as rx from 'rxjs';
 
 import type { Logger } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import type { ITelemetryReceiver } from './receiver';
 import {
   type IAsyncTelemetryEventsSender,
   type QueueConfig,
   type RetryConfig,
 } from './async_sender.types';
-import { TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
+import { newTelemetryLogger } from './helpers';
+import type { ITelemetryReceiver } from './receiver';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { newTelemetryLogger } from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
+import { TelemetryChannel, TelemetryCounter } from './types';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
   bufferTimeSpanMillis: 30 * 1_000,

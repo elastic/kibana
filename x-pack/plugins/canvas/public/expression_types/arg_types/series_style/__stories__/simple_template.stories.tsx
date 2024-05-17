@@ -11,8 +11,8 @@ import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
 
-import { SimpleTemplate } from '../simple_template';
 import { ExpressionAstExpression } from '../../../../../types';
+import { SimpleTemplate } from '../simple_template';
 
 const defaultExpression: ExpressionAstExpression = {
   type: 'expression',

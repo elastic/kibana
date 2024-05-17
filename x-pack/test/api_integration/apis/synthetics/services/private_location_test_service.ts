@@ -1,3 +1,6 @@
+import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
+import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
+import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/saved_objects/private_locations';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +8,8 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/saved_objects/private_locations';
-import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const INSTALLED_VERSION = '1.1.1';
 

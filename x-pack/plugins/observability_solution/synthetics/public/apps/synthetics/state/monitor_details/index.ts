@@ -13,13 +13,13 @@ import { enableMonitorAlertAction } from '../monitor_list/actions';
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
-  getMonitorLastRunAction,
-  updateMonitorLastRunAction,
-  resetMonitorLastRunAction,
-  getMonitorRecentPingsAction,
-  setMonitorDetailsLocationAction,
   getMonitorAction,
+  getMonitorLastRunAction,
+  getMonitorRecentPingsAction,
+  resetMonitorLastRunAction,
+  setMonitorDetailsLocationAction,
   setStatusFilter,
+  updateMonitorLastRunAction,
 } from './actions';
 
 export interface MonitorDetailsState {

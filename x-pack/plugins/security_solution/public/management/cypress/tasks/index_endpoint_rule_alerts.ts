@@ -6,8 +6,8 @@
  */
 
 import type {
-  IndexedEndpointRuleAlerts,
   DeletedIndexedEndpointRuleAlerts,
+  IndexedEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 
 export const indexEndpointRuleAlerts = (options: {

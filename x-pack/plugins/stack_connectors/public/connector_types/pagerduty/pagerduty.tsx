@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
@@ -17,11 +15,13 @@ import {
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPlainObject } from 'lodash';
+import moment from 'moment';
+import { lazy } from 'react';
 import {
+  EventActionOptions,
+  PagerDutyActionParams,
   PagerDutyConfig,
   PagerDutySecrets,
-  PagerDutyActionParams,
-  EventActionOptions,
 } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<

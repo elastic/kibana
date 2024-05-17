@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback, useEffect } from 'react';
 
-import { useKibana, useForm } from '../../../../../shared_imports';
+import { useForm, useKibana } from '../../../../../shared_imports';
 import { useTestPipelineContext } from '../../context';
-import { serialize } from '../../serialize';
 import { DeserializeResult } from '../../deserialize';
+import { serialize } from '../../serialize';
 import { Document } from '../../types';
 import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';

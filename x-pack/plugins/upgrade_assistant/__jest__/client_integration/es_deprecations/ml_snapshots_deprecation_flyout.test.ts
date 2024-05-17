@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import type { MlAction } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
-import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
+import { MOCK_JOB_ID, MOCK_SNAPSHOT_ID, esDeprecationsMockResponse } from './mocked_responses';
 
 describe('Machine learning deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;

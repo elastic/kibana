@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { EventEmitter } from 'events';
 import { AppMountParameters, OverlayRef } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { switchMap } from 'rxjs';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { switchMap } from 'rxjs';
+import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import type {
-  VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../types';
-import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';

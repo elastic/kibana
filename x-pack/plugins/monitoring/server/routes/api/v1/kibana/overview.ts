@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { metricSet } from './metric_set_overview';
-import { handleError } from '../../../../lib/errors';
 import {
   postKibanaOverviewRequestParamsRT,
   postKibanaOverviewRequestPayloadRT,
   postKibanaOverviewResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
-import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { MonitoringCore } from '../../../../types';
 import { getKibanaDataset } from '../../../../lib/cluster/get_index_patterns';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
+import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
+import { metricSet } from './metric_set_overview';
 
 export function kibanaOverviewRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postKibanaOverviewRequestParamsRT);

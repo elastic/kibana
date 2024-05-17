@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SecurityAppStore } from '../../../../common/store/types';
-import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import type { SecurityAppStore } from '../../../../common/store/types';
 
-import { createToggleColumnCellActionFactory } from './toggle_column';
-import { mockGlobalState } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { mockGlobalState } from '../../../../common/mock';
+import { createToggleColumnCellActionFactory } from './toggle_column';
 
 const services = createStartServicesMock();
 const mockAlertConfigGetActions = jest.fn();

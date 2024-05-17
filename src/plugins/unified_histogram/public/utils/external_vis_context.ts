@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';
+import { isEqual } from 'lodash';
 import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 

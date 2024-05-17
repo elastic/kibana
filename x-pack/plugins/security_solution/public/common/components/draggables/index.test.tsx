@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
 
-import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../drag_and_drop/translations';
 import { TestProviders } from '../../mock';
-import { getEmptyString } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../drag_and_drop/translations';
+import { getEmptyString } from '../empty_value';
 
 import {
   DefaultDraggable,

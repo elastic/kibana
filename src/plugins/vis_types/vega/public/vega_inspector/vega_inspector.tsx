@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { Adapters, InspectorViewDescription, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Adapters, RequestAdapter, InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import { VegaAdapter } from './vega_adapter';
 import type { VegaDataInspectorProps } from './vega_data_inspector';
 
@@ -44,7 +44,7 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
         </Suspense>
       </KibanaContextProvider>
     ),
-  } as InspectorViewDescription);
+  }) as InspectorViewDescription;
 
 export const createInspectorAdapters = (): VegaInspectorAdapters => ({
   requests: new RequestAdapter(),

@@ -7,14 +7,14 @@
  */
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import React, { useCallback, ReactNode } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { compressToEncodedURIComponent } from 'lz-string';
 import type { ConnectionRequestParams } from '@elastic/transport';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RequestCodeViewer } from './req_code_viewer';
+import { compressToEncodedURIComponent } from 'lz-string';
+import React, { useCallback, ReactNode } from 'react';
 import type { InspectorKibanaServices } from '../types';
+import { RequestCodeViewer } from './req_code_viewer';
 
 const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel', {
   defaultMessage: 'Open in Console',

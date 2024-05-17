@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import sinon from 'sinon';
 import fs from 'fs';
 import { Agent as HttpsAgent } from 'https';
+import sinon from 'sinon';
 
 import { ProxyConfigCollection } from './proxy_config_collection';
 

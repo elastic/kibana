@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RISK_INPUTS_TAB_TEST_ID } from '../../../entity_analytics/components/entity_details_flyout';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { HostDetailsPanel } from '.';
-import { TestProviders } from '../../../common/mock';
 import type { HostRiskScore } from '../../../../common/search_strategy';
 import { RiskSeverity } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../common/mock';
+import { RISK_INPUTS_TAB_TEST_ID } from '../../../entity_analytics/components/entity_details_flyout';
 
 const riskScore: HostRiskScore = {
   '@timestamp': '2021-08-19T16:00:00.000Z',

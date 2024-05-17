@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { Filter } from '@kbn/es-query';
 import {
   LngLat,
-  Map as MbMap,
   MapGeoJSONFeature,
   MapMouseEvent,
   MapSourceDataEvent,
+  Map as MbMap,
   Point2D,
   PointLike,
 } from '@kbn/mapbox-gl';
-import { v4 as uuidv4 } from 'uuid';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Geometry } from 'geojson';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import _ from 'lodash';
+import React, { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';
-import { TooltipPopover } from './tooltip_popover';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import { TooltipPopover } from './tooltip_popover';
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,

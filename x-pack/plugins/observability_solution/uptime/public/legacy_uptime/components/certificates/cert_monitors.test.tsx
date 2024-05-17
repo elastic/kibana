@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { CertMonitors } from './cert_monitors';
 import { renderWithRouter, shallowWithRouter } from '../../lib';
+import { CertMonitors } from './cert_monitors';
 
 describe('CertMonitors', () => {
   const certMons = [

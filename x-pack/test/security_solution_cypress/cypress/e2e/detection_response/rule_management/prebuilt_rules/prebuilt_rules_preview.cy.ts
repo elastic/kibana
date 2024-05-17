@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
-import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
+import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { omit } from 'lodash';
 
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   INSTALL_PREBUILT_RULE_BUTTON,
   INSTALL_PREBUILT_RULE_PREVIEW,
-  UPDATE_PREBUILT_RULE_PREVIEW,
-  UPDATE_PREBUILT_RULE_BUTTON,
-  PER_FIELD_DIFF_WRAPPER,
   PER_FIELD_DIFF_DEFINITION_SECTION,
+  PER_FIELD_DIFF_WRAPPER,
+  UPDATE_PREBUILT_RULE_BUTTON,
+  UPDATE_PREBUILT_RULE_PREVIEW,
 } from '../../../../screens/alerts_detection_rules';
 import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs';
 import {
-  installPrebuiltRuleAssets,
-  createAndInstallMockedPrebuiltRules,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../../tasks/api_calls/common';
 import { fetchMachineLearningModules } from '../../../../tasks/api_calls/machine_learning';
+import {
+  createAndInstallMockedPrebuiltRules,
+  installPrebuiltRuleAssets,
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
+import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import {
   assertRuleInstallationSuccessToastShown,
+  assertRuleUpgradeSuccessToastShown,
   assertRulesNotPresentInAddPrebuiltRulesTable,
   assertRulesNotPresentInRuleUpdatesTable,
   assertRulesPresentInInstalledRulesTable,
-  assertRuleUpgradeSuccessToastShown,
   clickAddElasticRulesButton,
   clickRuleUpdatesTab,
 } from '../../../../tasks/prebuilt_rules';
@@ -62,12 +68,6 @@ import {
   selectPreviewTab,
 } from '../../../../tasks/prebuilt_rules_preview';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
-import {
-  deleteAlertsAndRules,
-  deleteDataView,
-  postDataView,
-} from '../../../../tasks/api_calls/common';
-import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 
 const TEST_ENV_TAGS = ['@ess', '@serverless'];
 

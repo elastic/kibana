@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { DefaultArray } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const osType = t.keyof({
   linux: null,

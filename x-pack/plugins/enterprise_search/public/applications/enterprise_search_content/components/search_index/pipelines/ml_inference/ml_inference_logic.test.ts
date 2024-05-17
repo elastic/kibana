@@ -24,8 +24,8 @@ import { SimulateExistingMlInterfacePipelineApiLogic } from '../../../../api/pip
 import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
 import {
-  MLInferenceLogic,
   EMPTY_PIPELINE_CONFIGURATION,
+  MLInferenceLogic,
   MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 import { AddInferencePipelineSteps } from './types';

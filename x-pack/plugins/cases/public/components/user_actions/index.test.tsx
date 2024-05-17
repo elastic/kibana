@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { screen, within, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { fireEvent, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { useUpdateComment } from '../../containers/use_update_comment';
-import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import { defaultUseFindCaseUserActions } from '../case_view/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
+import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import { useUpdateComment } from '../../containers/use_update_comment';
+import { defaultUseFindCaseUserActions } from '../case_view/mocks';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { getMockBuilderArgs } from './mock';
 
 const onUpdateField = jest.fn();

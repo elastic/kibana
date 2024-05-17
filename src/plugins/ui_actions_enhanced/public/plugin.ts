@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { Storage, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
-import { UiActionsServiceEnhancements } from './services';
-import { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldowns';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { PublicDrilldownManagerComponent, createPublicDrilldownManager } from './drilldowns';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
+import { UiActionsServiceEnhancements } from './services';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.

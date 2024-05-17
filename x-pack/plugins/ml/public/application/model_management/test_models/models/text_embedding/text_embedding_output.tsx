@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import {
+  EuiButton,
+  EuiCopy,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTextArea,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiTextArea,
-  EuiCopy,
-  EuiButton,
-  EuiHorizontalRule,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
 
 import type { TextEmbeddingInference } from './text_embedding_inference';
 

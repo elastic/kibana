@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
+import { EuiAutoSizer, EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText, EuiAutoSizer } from '@elastic/eui';
-import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
 import { WindowScroller } from 'react-virtualized';
+import { VariableSizeList as List } from 'react-window';
 
 import { Loading } from '../../../../components';
 import type { IntegrationCardItem } from '../../screens/home';

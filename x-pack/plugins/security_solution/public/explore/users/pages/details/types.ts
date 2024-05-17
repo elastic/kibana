@@ -9,11 +9,11 @@ import type { ActionCreator } from 'typescript-fsa';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 
-import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
+import type { UsersQueryProps } from '../types';
 
-import type { UsersDetailsTableType } from '../../store/model';
 import type { usersModel } from '../../store';
+import type { UsersDetailsTableType } from '../../store/model';
 
 interface UsersDetailsComponentReduxProps {
   query: Query;

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
-import { LatencyChart } from '../latency_chart';
-import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
-import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
-import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
-import { TopErrors } from '../../../app/transaction_details/top_errors';
-import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import {
   isMobileAgentName,
   isOpenTelemetryAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
+import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
+import { TopErrors } from '../../../app/transaction_details/top_errors';
+import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
+import { LatencyChart } from '../latency_chart';
+import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
+import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
 
 export function TransactionCharts({
   kuery,

@@ -1,13 +1,13 @@
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useReducer, useMemo, useCallback } from 'react';
-import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
-import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
+import { useCallback, useMemo, useReducer } from 'react';
 import { RuleTableItem, RulesListFilters } from '../../types';
+import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
 
 interface BulkEditSelectionState {
   selectedIds: Set<string>;

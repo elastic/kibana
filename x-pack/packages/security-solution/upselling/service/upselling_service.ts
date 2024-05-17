@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type {
-  SectionUpsellings,
-  PageUpsellings,
-  UpsellingSectionId,
-  UpsellingMessageId,
   MessageUpsellings,
+  PageUpsellings,
+  SectionUpsellings,
+  UpsellingMessageId,
+  UpsellingSectionId,
 } from './types';
 
 export class UpsellingService {

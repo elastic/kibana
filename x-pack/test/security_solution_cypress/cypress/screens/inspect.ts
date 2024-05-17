@@ -24,6 +24,8 @@ import {
 } from './network/flows';
 
 import { DNS_TAB, DNS_TABLE } from './network/dns';
+import { HTTP_TAB, HTTP_TABLE } from './network/http';
+import { TLS_TAB, TLS_TABLE } from './network/tls';
 import {
   ALL_USERS_TAB,
   ALL_USERS_TABLE,
@@ -32,8 +34,6 @@ import {
 } from './users/all_users';
 import { AUTHENTICATIONS_TAB, AUTHENTICATIONS_TABLE } from './users/user_authentications';
 import { EVENTS_HISTOGRAM, EVENTS_TAB } from './users/user_events';
-import { HTTP_TAB, HTTP_TABLE } from './network/http';
-import { TLS_TAB, TLS_TABLE } from './network/tls';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from './users/user_risk_score';
 
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';

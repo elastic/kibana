@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Processor } from '../../../../common/types';
 
-import { getUseField, getFormRow, Field, JsonEditorField } from '../../../shared_imports';
+import { Field, JsonEditorField, getFormRow, getUseField } from '../../../shared_imports';
 
 import {
-  ProcessorsEditorContextProvider,
-  OnUpdateHandler,
   OnDoneLoadJsonHandler,
+  OnUpdateHandler,
   PipelineEditor,
+  ProcessorsEditorContextProvider,
 } from '../pipeline_editor';
 
 interface Props {

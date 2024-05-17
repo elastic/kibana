@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import memoizeOne from 'memoize-one';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
-import { forkJoin, of, Subject } from 'rxjs';
-import { switchMap, map } from 'rxjs';
+import { Subject, forkJoin, of } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 
-import { useCallback, useMemo } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { useCallback, useMemo } from 'react';
+import { useMlKibana } from '../../contexts/kibana';
+import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
+import type { MlResultsService } from '../../services/results_service';
+import { mlResultsServiceProvider } from '../../services/results_service';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
   getDateFormatTz,
@@ -27,15 +32,10 @@ import {
   loadAnnotationsTableData,
   loadAnomaliesTableData,
   loadFilteredTopInfluencers,
-  loadTopInfluencers,
   loadOverallAnnotations,
+  loadTopInfluencers,
 } from '../explorer_utils';
 import type { ExplorerState } from '../reducers';
-import { useMlKibana } from '../../contexts/kibana';
-import type { MlResultsService } from '../../services/results_service';
-import { mlResultsServiceProvider } from '../../services/results_service';
-import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument

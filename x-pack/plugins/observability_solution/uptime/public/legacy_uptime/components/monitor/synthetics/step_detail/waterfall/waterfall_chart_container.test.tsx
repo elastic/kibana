@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallChartContainer } from './waterfall_chart_container';
 

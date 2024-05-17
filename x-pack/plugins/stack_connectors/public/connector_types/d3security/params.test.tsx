@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import D3ParamsFields from './params';
+import React from 'react';
 import { SUB_ACTION } from '../../../common/d3security/constants';
+import D3ParamsFields from './params';
 
 const messageVariables = [
   {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import {
-  MAIN_SAVED_OBJECT_INDEX,
   ANALYTICS_SAVED_OBJECT_INDEX,
+  MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

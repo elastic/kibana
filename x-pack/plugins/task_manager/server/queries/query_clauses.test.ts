@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MustCondition, shouldBeOneOf, mustBeAllOf, matchesClauses } from './query_clauses';
+import { MustCondition, matchesClauses, mustBeAllOf, shouldBeOneOf } from './query_clauses';
 
 describe('matchesClauses', () => {
   test('merges multiple types of Bool Clauses into one', () => {

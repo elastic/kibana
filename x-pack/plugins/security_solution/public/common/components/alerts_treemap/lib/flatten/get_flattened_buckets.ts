@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { FlattenedBucket, RawBucket } from '../../types';
 import { flattenBucket } from './flatten_bucket';
-import type { RawBucket, FlattenedBucket } from '../../types';
 
 export const getFlattenedBuckets = ({
   buckets,

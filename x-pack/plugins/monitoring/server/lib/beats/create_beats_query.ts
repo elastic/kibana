@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { BeatsMetric, BeatsMetricFields } from '../metrics';
-import { createQuery } from '../create_query';
 import { getBeatDataset } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { BeatsMetric, BeatsMetricFields } from '../metrics';
 
 /**
  * {@code createQuery} for all Beats instances.

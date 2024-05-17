@@ -28,9 +28,7 @@
         "description": [
           "\nReturns whether the current navigation is performed by a Synthetics monitor\n(and hence, telemetry should not be collected)."
         ],
-        "signature": [
-          "() => boolean"
-        ],
+        "signature": ["() => boolean"],
         "path": "packages/analytics/utils/analytics_collection_utils/src/is_synthetics_monitor.ts",
         "deprecated": false,
         "trackAdoption": false,

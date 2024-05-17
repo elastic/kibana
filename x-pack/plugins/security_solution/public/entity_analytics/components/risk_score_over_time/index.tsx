@@ -17,8 +17,8 @@ import type {
   RiskScoreEntity,
   UserRiskScore,
 } from '../../../../common/search_strategy';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getRiskScoreOverTimeAreaAttributes } from '../../lens_attributes/risk_score_over_time_area';
 
 export interface RiskScoreOverTimeProps {

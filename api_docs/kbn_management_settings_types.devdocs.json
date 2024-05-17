@@ -82,9 +82,7 @@
             "tags": [],
             "label": "[category: string]: number",
             "description": [],
-            "signature": [
-              "[category: string]:  number"
-            ],
+            "signature": ["[category: string]:  number"],
             "path": "packages/kbn-management/settings/types/category.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -121,12 +119,8 @@
             "type": "Object",
             "tags": [],
             "label": "ariaAttributes",
-            "description": [
-              "UX ARIA attributes derived from the setting."
-            ],
-            "signature": [
-              "{ ariaLabel: string; ariaDescribedBy?: string | undefined; }"
-            ],
+            "description": ["UX ARIA attributes derived from the setting."],
+            "signature": ["{ ariaLabel: string; ariaDescribedBy?: string | undefined; }"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -137,12 +131,8 @@
             "type": "Array",
             "tags": [],
             "label": "categories",
-            "description": [
-              "A list of categories related to the field."
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["A list of categories related to the field."],
+            "signature": ["string[]"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -153,12 +143,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultValue",
-            "description": [
-              "The default value of the field from Kibana."
-            ],
-            "signature": [
-              "V | undefined"
-            ],
+            "description": ["The default value of the field from Kibana."],
+            "signature": ["V | undefined"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,9 +155,7 @@
             "type": "string",
             "tags": [],
             "label": "defaultValueDisplay",
-            "description": [
-              "The text-based display of the default value, for use in the UI."
-            ],
+            "description": ["The text-based display of the default value, for use in the UI."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -180,13 +164,9 @@
             "parentPluginId": "@kbn/management-settings-types",
             "id": "def-common.FieldDefinition.deprecation",
             "type": "Object",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "deprecation",
-            "description": [
-              "\nDeprecation information for the field"
-            ],
+            "description": ["\nDeprecation information for the field"],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-common",
@@ -207,9 +187,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "description",
-            "description": [
-              "A description of the field."
-            ],
+            "description": ["A description of the field."],
             "signature": [
               "string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
@@ -223,9 +201,7 @@
             "type": "string",
             "tags": [],
             "label": "displayName",
-            "description": [
-              "The name of the field suitable for display in the UX."
-            ],
+            "description": ["The name of the field suitable for display in the UX."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -236,9 +212,7 @@
             "type": "string",
             "tags": [],
             "label": "groupId",
-            "description": [
-              "The grouping identifier for the field."
-            ],
+            "description": ["The grouping identifier for the field."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -249,9 +223,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The unique identifier of the field, typically separated by `:`"
-            ],
+            "description": ["The unique identifier of the field, typically separated by `:`"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -262,9 +234,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isCustom",
-            "description": [
-              "True if the field is a custom setting, false otherwise."
-            ],
+            "description": ["True if the field is a custom setting, false otherwise."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -275,9 +245,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isDefaultValue",
-            "description": [
-              "True if the current saved setting matches the default setting."
-            ],
+            "description": ["True if the current saved setting matches the default setting."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -288,9 +256,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isOverridden",
-            "description": [
-              "True if the setting is overridden in Kibana, false otherwise."
-            ],
+            "description": ["True if the setting is overridden in Kibana, false otherwise."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -301,9 +267,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isReadOnly",
-            "description": [
-              "True if the setting is read-only, false otherwise."
-            ],
+            "description": ["True if the setting is read-only, false otherwise."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -314,12 +278,8 @@
             "type": "Object",
             "tags": [],
             "label": "metric",
-            "description": [
-              "Metric information when one interacts with the field."
-            ],
-            "signature": [
-              "{ name?: string | undefined; type?: string | undefined; } | undefined"
-            ],
+            "description": ["Metric information when one interacts with the field."],
+            "signature": ["{ name?: string | undefined; type?: string | undefined; } | undefined"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -330,9 +290,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "The name of the field suitable for use in the UX."
-            ],
+            "description": ["The name of the field suitable for use in the UX."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -343,9 +301,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "Option information if the field represents a `select` setting."
-            ],
+            "description": ["Option information if the field represents a `select` setting."],
             "signature": [
               "{ values: string[] | number[]; labels: Record<string, string>; } | undefined"
             ],
@@ -359,12 +315,8 @@
             "type": "number",
             "tags": [],
             "label": "order",
-            "description": [
-              "A rank order for the field relative to other fields."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["A rank order for the field relative to other fields."],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -388,12 +340,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "savedValue",
-            "description": [
-              "The current saved value of the setting."
-            ],
-            "signature": [
-              "V | undefined"
-            ],
+            "description": ["The current saved value of the setting."],
+            "signature": ["V | undefined"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -402,16 +350,10 @@
             "parentPluginId": "@kbn/management-settings-types",
             "id": "def-common.FieldDefinition.type",
             "type": "Uncategorized",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "type",
-            "description": [
-              "\nThe type of setting the field represents."
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["\nThe type of setting the field represents."],
+            "signature": ["T"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -422,9 +364,7 @@
             "type": "string",
             "tags": [],
             "label": "unsavedFieldId",
-            "description": [
-              "An identifier of the field when it has an unsaved change."
-            ],
+            "description": ["An identifier of the field when it has an unsaved change."],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -469,12 +409,8 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "Options are required when this definition is used."
-            ],
-            "signature": [
-              "{ values: string[] | number[]; labels: Record<string, string>; }"
-            ],
+            "description": ["Options are required when this definition is used."],
+            "signature": ["{ values: string[] | number[]; labels: Record<string, string>; }"],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -500,9 +436,7 @@
             "tags": [],
             "label": "spaceSettings",
             "description": [],
-            "signature": [
-              "SettingCapability"
-            ],
+            "signature": ["SettingCapability"],
             "path": "packages/kbn-management/settings/types/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -514,9 +448,7 @@
             "tags": [],
             "label": "globalSettings",
             "description": [],
-            "signature": [
-              "SettingCapability"
-            ],
+            "signature": ["SettingCapability"],
             "path": "packages/kbn-management/settings/types/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -619,16 +551,10 @@
             "parentPluginId": "@kbn/management-settings-types",
             "id": "def-common.UiSettingMetadata.type",
             "type": "Uncategorized",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "type",
-            "description": [
-              "\nThe type of setting being represented."
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["\nThe type of setting being represented."],
+            "signature": ["T"],
             "path": "packages/kbn-management/settings/types/metadata.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -639,12 +565,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
-            "description": [
-              "The default value in Kibana for the setting."
-            ],
-            "signature": [
-              "V | undefined"
-            ],
+            "description": ["The default value in Kibana for the setting."],
+            "signature": ["V | undefined"],
             "path": "packages/kbn-management/settings/types/metadata.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -655,12 +577,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "userValue",
-            "description": [
-              "The value saved by the user."
-            ],
-            "signature": [
-              "V | undefined"
-            ],
+            "description": ["The value saved by the user."],
+            "signature": ["V | undefined"],
             "path": "packages/kbn-management/settings/types/metadata.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -695,16 +613,10 @@
             "parentPluginId": "@kbn/management-settings-types",
             "id": "def-common.UnsavedFieldChange.type",
             "type": "Uncategorized",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "type",
-            "description": [
-              "\nThe type of setting."
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["\nThe type of setting."],
+            "signature": ["T"],
             "path": "packages/kbn-management/settings/types/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -715,12 +627,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "error",
-            "description": [
-              "An error message, if any, from the change."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
+            "description": ["An error message, if any, from the change."],
+            "signature": ["string | null | undefined"],
             "path": "packages/kbn-management/settings/types/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -731,12 +639,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isInvalid",
-            "description": [
-              "True if the change is invalid for the field, false otherwise."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["True if the change is invalid for the field, false otherwise."],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-management/settings/types/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -747,9 +651,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "unsavedValue",
-            "description": [
-              "The current unsaved value stored in the field."
-            ],
+            "description": ["The current unsaved value stored in the field."],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -803,9 +705,7 @@
         "description": [
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `array` primitive type value."
         ],
-        "signature": [
-          "\"array\""
-        ],
+        "signature": ["\"array\""],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -892,9 +792,7 @@
         "description": [
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `boolean` primitive type value."
         ],
-        "signature": [
-          "\"boolean\""
-        ],
+        "signature": ["\"boolean\""],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1383,9 +1281,7 @@
         "description": [
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `number` primitive type value."
         ],
-        "signature": [
-          "\"number\""
-        ],
+        "signature": ["\"number\""],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1445,9 +1341,7 @@
         "type": "Type",
         "tags": [],
         "label": "OnFieldChangeFn",
-        "description": [
-          "\nAn `onFieldChange` handler when a Field changes."
-        ],
+        "description": ["\nAn `onFieldChange` handler when a Field changes."],
         "signature": [
           "(id: string, change?: ",
           {
@@ -1470,9 +1364,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "A unique id corresponding to the particular setting being changed."
-            ],
+            "description": ["A unique id corresponding to the particular setting being changed."],
             "path": "packages/kbn-management/settings/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1534,9 +1426,7 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The {@link UnsavedFieldChange } passed to the handler."
-            ],
+            "description": ["The {@link UnsavedFieldChange } passed to the handler."],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -1563,9 +1453,7 @@
         "description": [
           "\nA React `ref` that indicates an input can be reset using an\nimperative handle."
         ],
-        "signature": [
-          "{ reset: () => void; } | null"
-        ],
+        "signature": ["{ reset: () => void; } | null"],
         "path": "packages/kbn-management/settings/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1669,9 +1557,7 @@
         "description": [
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `string` primitive type value."
         ],
-        "signature": [
-          "\"string\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\""
-        ],
+        "signature": ["\"string\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\""],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1790,9 +1676,7 @@
         "description": [
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `undefined` type value."
         ],
-        "signature": [
-          "\"undefined\""
-        ],
+        "signature": ["\"undefined\""],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1886,9 +1770,7 @@
         "description": [
           "\nA type representing all possible values corresponding to a given {@link SettingType}."
         ],
-        "signature": [
-          "string | number | boolean | (string | number)[] | null | undefined"
-        ],
+        "signature": ["string | number | boolean | (string | number)[] | null | undefined"],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,
         "trackAdoption": false,

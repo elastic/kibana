@@ -7,38 +7,38 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import {
-  BehaviorSubject,
-  map,
-  Observable,
-  firstValueFrom,
-  concatMap,
-  of,
-  concat,
-  from,
-} from 'rxjs';
 import type {
-  GuideState,
+  GuideConfig,
   GuideId,
+  GuideParams,
+  GuideState,
   GuideStep,
   GuideStepIds,
-  GuideConfig,
-  GuideParams,
 } from '@kbn/guided-onboarding';
+import {
+  BehaviorSubject,
+  Observable,
+  concat,
+  concatMap,
+  firstValueFrom,
+  from,
+  map,
+  of,
+} from 'rxjs';
 
 import { API_BASE_PATH } from '../../common';
 import type { PluginState, PluginStatus } from '../../common';
 import { GuidedOnboardingApi } from '../types';
+import { ConfigService } from './config.service';
 import {
-  getInProgressStepId,
   getCompletedSteps,
+  getInProgressStepId,
+  getStepConfig,
+  isGuideActive,
+  isLastStep,
   isStepInProgress,
   isStepReadyToComplete,
-  isGuideActive,
-  getStepConfig,
-  isLastStep,
 } from './helpers';
-import { ConfigService } from './config.service';
 
 export class ApiService implements GuidedOnboardingApi {
   private _isEnabled: boolean = false;

@@ -1,26 +1,26 @@
+import {
+  mockGrandparentTreeNode,
+  mockParentTreeNode,
+  mockStatsNode,
+  mockStatsNodes,
+  mockStatsNodesHasChildren,
+  mockStatsNodesHasGrandchildren,
+  mockStatsNodesHasGrandparent,
+  mockStatsNodesHasParent,
+  mockTreeNode,
+  mockTreeNodesChildHasMoreDescendants,
+  mockTreeNodesHasChildren,
+  mockTreeNodesHasGrandchildren,
+  mockTreeNodesMoreAncestors,
+  mockTreeNodesMoreDescendants,
+} from '../mocks/mock_analyzer_data';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getTreeNodes, getAncestorTreeNodes, getDescendantTreeNodes } from './analyzer_helpers';
-import {
-  mockStatsNode,
-  mockStatsNodesHasParent,
-  mockStatsNodesHasGrandparent,
-  mockStatsNodesHasChildren,
-  mockStatsNodesHasGrandchildren,
-  mockStatsNodes,
-  mockTreeNode,
-  mockParentTreeNode,
-  mockGrandparentTreeNode,
-  mockTreeNodesMoreAncestors,
-  mockTreeNodesHasChildren,
-  mockTreeNodesHasGrandchildren,
-  mockTreeNodesChildHasMoreDescendants,
-  mockTreeNodesMoreDescendants,
-} from '../mocks/mock_analyzer_data';
+import { getAncestorTreeNodes, getDescendantTreeNodes, getTreeNodes } from './analyzer_helpers';
 
 const childCountLimit = 3;
 const descendantLevel = 1;

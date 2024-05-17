@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 

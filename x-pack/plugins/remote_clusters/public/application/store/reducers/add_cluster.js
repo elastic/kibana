@@ -6,9 +6,9 @@
  */
 
 import {
+  ADD_CLUSTER_FAILURE,
   ADD_CLUSTER_START,
   ADD_CLUSTER_SUCCESS,
-  ADD_CLUSTER_FAILURE,
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
 

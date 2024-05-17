@@ -7,13 +7,13 @@
  */
 
 import type {
-  NoDataConfigPageServices,
   NoDataConfigPageKibanaDependencies,
+  NoDataConfigPageServices,
 } from '@kbn/shared-ux-page-no-data-config-types';
 
 import {
-  getNoDataPageServicesMock,
   getNoDataPageKibanaDependenciesMock,
+  getNoDataPageServicesMock,
 } from '@kbn/shared-ux-page-no-data-mocks';
 
 export const getServicesMock = () => {

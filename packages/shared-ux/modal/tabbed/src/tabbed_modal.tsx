@@ -6,6 +6,18 @@
  * Side Public License, v 1.
  */
 
+import {
+  type CommonProps,
+  EuiButton,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiTab,
+  type EuiTabProps,
+  EuiTabs,
+} from '@elastic/eui';
 import React, {
   useMemo,
   useCallback,
@@ -15,23 +27,11 @@ import React, {
   type ReactElement,
 } from 'react';
 import {
-  EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiTabs,
-  EuiTab,
-  type EuiTabProps,
-  type CommonProps,
-} from '@elastic/eui';
-import {
-  ModalContextProvider,
-  useModalContext,
-  type ITabDeclaration,
   type IDispatchFunction,
   type IModalContextProviderProps,
+  type ITabDeclaration,
+  ModalContextProvider,
+  useModalContext,
 } from './context';
 
 export type IModalTabContent<S> = (props: {

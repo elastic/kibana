@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import mockFs from 'mock-fs';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { toArray } from 'rxjs';
 import { resolve } from 'path';
-import { scanPluginSearchPaths } from './scan_plugin_search_paths';
-import { PluginDiscoveryError } from './plugin_discovery_error';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import mockFs from 'mock-fs';
+import { toArray } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { PluginDiscoveryError } from './plugin_discovery_error';
+import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 
 const KIBANA_ROOT = process.cwd();
 

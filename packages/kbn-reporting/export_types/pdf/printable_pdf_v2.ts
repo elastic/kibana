@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
-import { Writable } from 'stream';
 
 import { Headers } from '@kbn/core/server';
 import {
@@ -21,7 +21,6 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
-import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import {
@@ -29,6 +28,7 @@ import {
   PDF_JOB_TYPE_V2,
   PDF_REPORT_TYPE_V2,
 } from '@kbn/reporting-export-types-pdf-common';
+import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 import { ExportType, decryptJobHeaders, getFullRedirectAppUrl } from '@kbn/reporting-server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 

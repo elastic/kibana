@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useState } from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiButtonEmpty,
   EuiLoadingSpinner,
+  EuiPopover,
 } from '@elastic/eui';
+import React, { Suspense, useCallback, useState } from 'react';
 
 import type { AttachmentAction } from '../../client/attachment_framework/types';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
 import { EuiButtonIcon, EuiHorizontalRule, EuiSpacer, EuiTitle, keys } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { GuideConfig } from '@kbn/guided-onboarding';
+import { i18n } from '@kbn/i18n';
+import React, { ReactElement } from 'react';
 import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutHeader = ({

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Embeddable, EmbeddableInput, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createElement } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
-import { Embeddable, EmbeddableInput, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ButtonEmbeddableComponent } from './button_embeddable_component';
 
 export const BUTTON_EMBEDDABLE = 'BUTTON_EMBEDDABLE';
@@ -20,7 +20,10 @@ export interface ButtonEmbeddableParams {
 export class ButtonEmbeddable extends Embeddable {
   type = BUTTON_EMBEDDABLE;
 
-  constructor(input: EmbeddableInput, private readonly params: ButtonEmbeddableParams) {
+  constructor(
+    input: EmbeddableInput,
+    private readonly params: ButtonEmbeddableParams
+  ) {
     super(input, {});
   }
 

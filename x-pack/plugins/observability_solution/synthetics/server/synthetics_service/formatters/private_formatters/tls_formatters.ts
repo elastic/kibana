@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { ConfigKey, TLSFields } from '../../../../common/runtime_types';
+import { Formatter } from './common_formatters';
 import {
   tlsArrayToYamlFormatter,
   tlsValueToStringFormatter,
   tlsValueToYamlFormatter,
 } from './formatting_utils';
-import { Formatter } from './common_formatters';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;
 

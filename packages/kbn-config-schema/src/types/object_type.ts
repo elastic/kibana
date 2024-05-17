@@ -8,9 +8,9 @@
 
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
-import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, OptionsForUnknowns } from './type';
 import { ValidationError } from '../errors';
+import { internals } from '../internals';
+import { ExtendsDeepOptions, OptionsForUnknowns, Type, TypeOptions } from './type';
 
 export type Props = Record<string, Type<any>>;
 
@@ -21,8 +21,8 @@ export type TypeOrLazyType = Type<any> | (() => Type<any>);
 export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
   ? ReturnType<RT>['type']
   : RT extends Type<any>
-  ? RT['type']
-  : never;
+    ? RT['type']
+    : never;
 
 type OptionalProperties<Base extends Props> = Pick<
   Base,
@@ -163,12 +163,15 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     const extendedProps = Object.entries({
       ...this.props,
       ...newProps,
-    }).reduce((memo, [key, value]) => {
-      if (value !== null && value !== undefined) {
-        (memo as Record<string, unknown>)[key] = value;
-      }
-      return memo;
-    }, {} as ExtendedProps<P, NP>);
+    }).reduce(
+      (memo, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          (memo as Record<string, unknown>)[key] = value;
+        }
+        return memo;
+      },
+      {} as ExtendedProps<P, NP>
+    );
 
     const extendedOptions = {
       ...this.options,

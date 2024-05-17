@@ -10,13 +10,13 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiBasicTable } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
-import { CrawlEvent, CrawlerStatus, CrawlType } from '../types';
+import { CrawlEvent, CrawlType, CrawlerStatus } from '../types';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 

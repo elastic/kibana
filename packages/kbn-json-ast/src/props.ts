@@ -7,10 +7,10 @@
  */
 
 import { getAst } from './ast';
-import { stringify, redentJson } from './json';
-import { snip } from './snip';
 import { T } from './babel';
 import { getEnds, getExpandedEnds } from './ends';
+import { redentJson, stringify } from './json';
+import { snip } from './snip';
 
 export function getProp(obj: T.ObjectExpression, name: string) {
   return obj.properties.find((p): p is T.ObjectProperty & { key: T.StringLiteral } => {

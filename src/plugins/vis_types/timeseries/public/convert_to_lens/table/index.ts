@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Layer, getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { v4 as uuidv4 } from 'uuid';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getColumnState } from '../lib/configurations/table';
+import { Column, Layer as ExtendedLayer, excludeMetaFromColumn } from '../lib/convert';
 import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
-import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
+import { getBucketsColumns, getMetricsColumns } from '../lib/series';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { Layer as ExtendedLayer, excludeMetaFromColumn, Column } from '../lib/convert';
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
   const newLayers: Record<string, Layer> = {};

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createMetricLabel } from './create_metric_label';
 import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import { createMetricLabel } from './create_metric_label';
 
 describe('createMetricLabel()', () => {
   it('should work with metrics with fields', () => {

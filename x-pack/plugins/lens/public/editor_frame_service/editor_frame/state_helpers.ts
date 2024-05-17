@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, DataViewsContract } from '@kbn/data-views-plugin/public';
+import {
+  EVENT_ANNOTATION_GROUP_TYPE,
+  type EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { Ast } from '@kbn/interpreter';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
-import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import {
-  type EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
+import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import { Document } from '../../persistence/saved_object_store';
+import { readFromStorage } from '../../settings_storage';
+import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
+import { getDatasourceLayers } from '../../state_management/utils';
 import type {
   Datasource,
   DatasourceMap,
@@ -28,17 +33,12 @@ import type {
   IndexPatternMap,
   IndexPatternRef,
   InitializationOptions,
+  SuggestionRequest,
   VisualizationMap,
   VisualizeEditorContext,
-  SuggestionRequest,
 } from '../../types';
-import { buildExpression } from './expression_helpers';
-import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
-import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
-import { getDatasourceLayers } from '../../state_management/utils';
+import { buildExpression } from './expression_helpers';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically

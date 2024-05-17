@@ -9,10 +9,10 @@
 
 import Path from 'path';
 
-import webpack from 'webpack';
-import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { isNormalModule, isConcatenatedModule } from '@kbn/optimizer-webpack-helpers';
+import { isConcatenatedModule, isNormalModule } from '@kbn/optimizer-webpack-helpers';
+import { ToolingLog } from '@kbn/tooling-log';
+import webpack from 'webpack';
 
 const IGNORED_EXTNAME = ['.map', '.br', '.gz'];
 

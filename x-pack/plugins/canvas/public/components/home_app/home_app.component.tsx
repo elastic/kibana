@@ -6,8 +6,8 @@
  */
 
 import React, { FC } from 'react';
-import { Home } from '../home';
 import { setDocTitle } from '../../lib/doc_title';
+import { Home } from '../home';
 
 export interface Props {
   onLoad: () => void;

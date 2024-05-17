@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
+import type { CoreSetup, CoreStart, Event, Plugin, TelemetryCounter } from '@kbn/core/server';
+import { BehaviorSubject, ReplaySubject, filter, firstValueFrom } from 'rxjs';
 import { takeWhile, tap, toArray } from 'rxjs';
-import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 import './types';

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { act, renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { DiscoverServices } from '../../../build_services';
-import { FailureReason, LoadingStatus } from '../services/context_query_state';
-import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
 import {
   mockAnchorHit,
   mockPredecessorHits,
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { createContextSearchSourceStub } from '../services/_stubs';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { FailureReason, LoadingStatus } from '../services/context_query_state';
+import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
 
 const mockInterceptedWarning = {
   originalWarning: searchResponseIncompleteWarningLocalCluster,

@@ -11,25 +11,25 @@ import React, { useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
-  EuiSpacer,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
-  EuiForm,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { ErrorMessage } from '../../inference_error';
 import type { InferrerType } from '..';
-import { useIndexInput, InferenceInputFormIndexControls } from '../index_input';
+import { ErrorMessage } from '../../inference_error';
+import { useTestTrainedModelsContext } from '../../test_trained_models_context';
+import { InferenceInputFormIndexControls, useIndexInput } from '../index_input';
 import { RUNNING_STATE } from '../inference_base';
 import { InputFormControls } from './input_form_controls';
-import { useTestTrainedModelsContext } from '../../test_trained_models_context';
 
 interface Props {
   inferrer: InferrerType;

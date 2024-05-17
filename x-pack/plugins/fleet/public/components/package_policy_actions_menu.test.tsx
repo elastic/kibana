@@ -9,8 +9,8 @@ import React from 'react';
 
 import { act } from '@testing-library/react';
 
-import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
+import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 

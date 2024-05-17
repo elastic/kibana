@@ -9,15 +9,15 @@
 import { loggingSystemMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import {
   Collector,
-  createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 
-import {
-  registerManagementUsageCollector,
-  createCollectorFetch,
-} from './telemetry_management_collector';
 import { IUiSettingsClient } from '@kbn/core/server';
+import {
+  createCollectorFetch,
+  registerManagementUsageCollector,
+} from './telemetry_management_collector';
 
 const logger = loggingSystemMock.createLogger();
 

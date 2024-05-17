@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSteps, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSteps } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../test_helpers';
 

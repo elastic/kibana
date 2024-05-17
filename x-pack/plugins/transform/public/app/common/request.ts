@@ -8,18 +8,12 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
+  type SavedSearchQuery,
+  type SearchQueryVariant,
   buildBaseFilterCriteria,
   isDefaultQuery,
-  type SearchQueryVariant,
-  type SavedSearchQuery,
 } from '@kbn/ml-query-utils';
 
-import {
-  DEFAULT_CONTINUOUS_MODE_DELAY,
-  DEFAULT_TRANSFORM_FREQUENCY,
-  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
-  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
-} from '../../../common/constants';
 import type {
   PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
@@ -27,6 +21,12 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
+import {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../common/constants';
 import type {
   DateHistogramAgg,
   HistogramAgg,

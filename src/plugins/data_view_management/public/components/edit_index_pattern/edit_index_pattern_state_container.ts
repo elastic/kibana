@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { createHashHistory } from 'history';
 import {
+  createKbnUrlStateStorage,
   createStateContainer,
   syncState,
-  createKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
+import { createHashHistory } from 'history';
 
 interface IEditIndexPatternState {
   tab: string;

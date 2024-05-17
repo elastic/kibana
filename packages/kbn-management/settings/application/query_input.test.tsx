@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { Query } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act, waitFor } from '@testing-library/react';
+import React from 'react';
 
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
-import { QueryInput } from './query_input';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { categorizeFields } from '@kbn/management-settings-utilities';
+import { QueryInput } from './query_input';
 
 const query = Query.parse('');
 const settings = getSettingsMock();

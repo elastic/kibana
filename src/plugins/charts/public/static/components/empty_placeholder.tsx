@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiIcon, EuiSpacer, EuiText, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect } from 'react';
 
 export interface EmptyPlaceholderProps {
   icon: IconType;

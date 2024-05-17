@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { ClusterHealth } from './cluster_health';
 import { getHeathBarLinearGradient } from './gradient';
 

@@ -8,7 +8,7 @@
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
-import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
+import type { EventDetails, UserActionEvent, UserActionParameters } from '../types';
 
 export class PushedUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'pushed'>): UserActionEvent {

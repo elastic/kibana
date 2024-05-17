@@ -6,26 +6,26 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { FilterBar } from './components/filter_bar';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { LayoutView } from './components/layout_view';
-import { MetricsPageTemplate } from '../page_template';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 import { inventoryTitle } from '../../../translations';
+import { MetricsPageTemplate } from '../page_template';
+import { FilterBar } from './components/filter_bar';
+import { LayoutView } from './components/layout_view';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
-import { fullHeightContentStyles } from '../../../page_template.styles';
 import { SurveySection } from './components/survey_section';
-import { NoRemoteCluster } from '../../../components/empty_states';
+import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
-import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 
 export const SnapshotPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();

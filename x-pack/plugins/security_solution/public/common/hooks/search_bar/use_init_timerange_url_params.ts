@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
+import { formatDate } from '../../components/super_date_picker';
+import { inputsActions } from '../../store/inputs';
 import type { TimeRangeKinds } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 import type {
   AbsoluteTimeRange,
   LinkTo,
   RelativeTimeRange,
   UrlInputsModel,
 } from '../../store/inputs/model';
-import { normalizeTimeRange } from '../../utils/normalize_time_range';
-import { inputsActions } from '../../store/inputs';
-import { formatDate } from '../../components/super_date_picker';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
+import { normalizeTimeRange } from '../../utils/normalize_time_range';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { InputsModelId } from '../../store/inputs/constants';
 
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();

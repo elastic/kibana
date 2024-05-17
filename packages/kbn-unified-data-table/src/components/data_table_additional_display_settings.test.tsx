@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import lodash from 'lodash';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import {
   UnifiedDataTableAdditionalDisplaySettings,
   UnifiedDataTableAdditionalDisplaySettingsProps,
 } from './data_table_additional_display_settings';
-import lodash from 'lodash';
-import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { RowHeightMode } from './row_height_settings';
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);

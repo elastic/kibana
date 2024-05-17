@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { EuiComboBoxOptionOption, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import { AggDescriptor } from '../../../../common/descriptor_types';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
-import { ResolutionEditor } from './resolution_editor';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { RenderAsSelect } from './render_as_select';
-import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
 import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 import { isMvt } from './is_mvt';
+import { RenderAsSelect } from './render_as_select';
+import { ResolutionEditor } from './resolution_editor';
 
 interface Props {
   bucketsName: string;

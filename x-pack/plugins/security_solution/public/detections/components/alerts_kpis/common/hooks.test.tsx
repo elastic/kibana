@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import type { BrowserField } from '@kbn/timelines-plugin/common';
+import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { TestProviders } from '../../../../common/mock';
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -26,8 +26,9 @@ jest.mock('../../../../common/containers/sourcerer', () => ({
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {
-    expect(getAggregatableFields(mockBrowserFields.base?.fields as GetAggregatableFields))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAggregatableFields(mockBrowserFields.base?.fields as GetAggregatableFields)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "@timestamp",

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
-  UserCommentAttachmentAttributes,
   AttachmentType,
+  UserCommentAttachmentAttributes,
 } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
+  createCase,
+  createComment,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
-  createCase,
-  createComment,
-  updateComment,
   getAuthWithSuperUser,
+  updateComment,
 } from '../../../../common/lib/api';
+import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

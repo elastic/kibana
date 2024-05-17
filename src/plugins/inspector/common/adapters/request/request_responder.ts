@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistics, RequestStatus, Response } from './types';
 import { moveRequestParamsToTopLevel } from './move_request_params_to_top_level';
+import { Request, RequestStatistics, RequestStatus, Response } from './types';
 
 /**
  * An API to specify information about a specific request that will be logged.

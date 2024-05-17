@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
+  Observable,
+  Subject,
   combineLatest,
   debounceTime,
   delay,
   filter,
   map,
   merge,
-  Observable,
   of,
   skip,
   startWith,
-  Subject,
   switchMap,
   takeUntil,
   tap,
 } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { HasParentApi, apiHasParentApi } from '../has_parent_api';
+import { apiPublishesReload } from './publishes_reload';
+import { PublishesSearchSession, apiPublishesSearchSession } from './publishes_search_session';
 import {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
   PublishesTimeRange,
   PublishesUnifiedSearch,
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
 } from './publishes_unified_search';
-import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_search_session';
-import { apiHasParentApi, HasParentApi } from '../has_parent_api';
-import { apiPublishesReload } from './publishes_reload';
 
 export interface FetchContext {
   isReload: boolean;

@@ -8,8 +8,8 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { convertToLens } from './goal';
 import { GaugeVisParams } from '../types';
+import { convertToLens } from './goal';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetPercentageColumnFormulaColumn = jest.fn();

@@ -24,17 +24,17 @@ import {
   CRAWL_RULE,
 } from './_mocks_/crawler_domains.mock';
 
-import { CrawlerDomainValidationStep, CrawlerDomainValidationResultFromServer } from './types';
+import { CrawlerDomainValidationResultFromServer, CrawlerDomainValidationStep } from './types';
 
 import {
-  crawlerDomainServerToClient,
-  crawlerDataServerToClient,
   crawlDomainValidationToResult,
   crawlEventServerToClient,
   crawlRequestServerToClient,
   crawlRequestWithDetailsServerToClient,
-  domainConfigServerToClient,
+  crawlerDataServerToClient,
+  crawlerDomainServerToClient,
   crawlerDomainsWithMetaServerToClient,
+  domainConfigServerToClient,
 } from './utils';
 
 describe('crawlerDomainServerToClient', () => {

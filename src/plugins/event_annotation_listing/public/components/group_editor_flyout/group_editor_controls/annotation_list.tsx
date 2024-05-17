@@ -8,12 +8,17 @@
 
 import { css } from '@emotion/react';
 import {
-  Droppable,
   Draggable,
   DropTargetSwapDuplicateCombine,
+  Droppable,
   ReorderProvider,
   useDragDropContext,
 } from '@kbn/dom-drag-drop';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { createCopiedAnnotation } from '@kbn/event-annotation-common';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   DimensionButton,
   DimensionTrigger,
@@ -21,11 +26,6 @@ import {
 } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { createCopiedAnnotation } from '@kbn/event-annotation-common';
-import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 
 export const AnnotationList = ({
   annotations,

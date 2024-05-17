@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge } from '@elastic/eui';
 
 const SpanWithMargin = styled.span`
   margin-right: 16px;

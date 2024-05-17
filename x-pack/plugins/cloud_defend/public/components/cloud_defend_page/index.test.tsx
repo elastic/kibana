@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { coreMock } from '@kbn/core/public/mocks';
+import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { UseQueryResult } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
 import Chance from 'chance';
+import React, { ComponentProps } from 'react';
 import {
   CloudDefendPage,
   DEFAULT_NO_DATA_TEST_SUBJECT,
   ERROR_STATE_TEST_SUBJECT,
-  isCommonError,
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
+  isCommonError,
 } from '.';
+import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
-import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
-import { UseQueryResult } from '@tanstack/react-query';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
-import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 const chance = new Chance();
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Routes, Route } from '@kbn/shared-ux-router';
-import React, { memo } from 'react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { MANAGEMENT_ROUTING_BLOCKLIST_PATH } from '../../common/constants';
+import React, { memo } from 'react';
 import { NotFoundPage } from '../../../app/404';
-import { Blocklist } from './view/blocklist';
 import { SecurityPageName } from '../../../app/types';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { MANAGEMENT_ROUTING_BLOCKLIST_PATH } from '../../common/constants';
+import { Blocklist } from './view/blocklist';
 
 /**
  * Provides the routing container for the blocklist related views

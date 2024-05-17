@@ -13,26 +13,26 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import type { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
-import {
-  getCombinedRuntimeMappings,
-  isRuntimeMappings,
-  type RuntimeMappings,
-} from '@kbn/ml-runtime-field-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { EsSorting, UseIndexDataReturnType } from '@kbn/ml-data-grid';
 import {
-  getFieldType,
-  getDataGridSchemaFromKibanaFieldType,
+  INDEX_STATUS,
   getDataGridSchemaFromESFieldType,
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldType,
   getFieldsFromKibanaDataView,
+  getProcessedFields,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
-  getProcessedFields,
-  INDEX_STATUS,
 } from '@kbn/ml-data-grid';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import {
+  type RuntimeMappings,
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 

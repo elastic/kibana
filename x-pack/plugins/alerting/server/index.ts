@@ -1,3 +1,4 @@
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { RulesClient as RulesClientClass } from './rules_client';
 import { AlertingConfig, configSchema } from './config';
+import { RulesClient as RulesClientClass } from './rules_client';
 
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 

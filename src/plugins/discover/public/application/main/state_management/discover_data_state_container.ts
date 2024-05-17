@@ -1,3 +1,14 @@
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,30 +16,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
-import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import { getDataViewByTextBasedQueryLang } from './utils/get_data_view_by_text_based_query_lang';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { getRawRecordType } from '../utils/get_raw_record_type';
-import { DiscoverAppState } from './discover_app_state_container';
+import { BehaviorSubject, Observable, Subject, filter, map, mergeMap, share, tap } from 'rxjs';
 import { DiscoverServices } from '../../../build_services';
-import { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
-import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
+import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { getRawRecordType } from '../utils/get_raw_record_type';
+import { isTextBasedQuery } from '../utils/is_text_based_query';
+import { DiscoverAppState } from './discover_app_state_container';
 import { InternalState } from './discover_internal_state_container';
+import { DiscoverSearchSessionManager } from './discover_search_session';
+import { getDataViewByTextBasedQueryLang } from './utils/get_data_view_by_text_based_query_lang';
+import { validateTimeRange } from './utils/validate_time_range';
 
 export interface SavedSearchData {
   main$: DataMain$;

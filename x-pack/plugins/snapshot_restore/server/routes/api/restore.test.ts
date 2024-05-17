@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { RequestMock, RouterMock, routeDependencies } from '../../test/helpers';
 import { addBasePath } from '../helpers';
 import { registerRestoreRoutes } from './restore';
-import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Restore', () => {
   const mockEsShard = {

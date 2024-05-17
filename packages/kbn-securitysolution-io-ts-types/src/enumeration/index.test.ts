@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { enumeration } from '.';
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('enumeration', () => {
   enum TestEnum {
-    'test' = 'test',
+    test = 'test',
   }
 
   it('should validate a string from the enum', () => {

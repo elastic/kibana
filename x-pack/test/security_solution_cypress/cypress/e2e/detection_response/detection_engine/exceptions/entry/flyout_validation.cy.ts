@@ -9,14 +9,23 @@ import { getNewRule } from '../../../../../objects/rule';
 
 import { RULE_STATUS } from '../../../../../screens/create_new_rule';
 
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { login } from '../../../../../tasks/login';
 import {
-  openExceptionFlyoutFromEmptyViewerPrompt,
-  goToExceptionsTab,
-  openEditException,
-  visitRuleDetailsPage,
-} from '../../../../../tasks/rule_details';
+  ADD_AND_BTN,
+  ADD_NESTED_BTN,
+  ADD_OR_BTN,
+  CONFIRM_BTN,
+  ENTRY_DELETE_BTN,
+  EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
+  EXCEPTION_FIELD_LIST,
+  EXCEPTION_FLYOUT_LIST_DELETED_ERROR,
+  EXCEPTION_FLYOUT_TITLE,
+  EXCEPTION_FLYOUT_VERSION_CONFLICT,
+  EXCEPTION_ITEM_CONTAINER,
+  FIELD_INPUT_PARENT,
+  LOADING_SPINNER,
+  VALUES_INPUT,
+} from '../../../../../screens/exceptions';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
@@ -30,32 +39,23 @@ import {
   showFieldConflictsWarningTooltipWithMessage,
   showMappingConflictsWarningMessage,
 } from '../../../../../tasks/exceptions';
+import { login } from '../../../../../tasks/login';
 import {
-  ADD_AND_BTN,
-  ADD_OR_BTN,
-  ADD_NESTED_BTN,
-  ENTRY_DELETE_BTN,
-  LOADING_SPINNER,
-  EXCEPTION_ITEM_CONTAINER,
-  EXCEPTION_FIELD_LIST,
-  EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
-  EXCEPTION_FLYOUT_VERSION_CONFLICT,
-  EXCEPTION_FLYOUT_LIST_DELETED_ERROR,
-  CONFIRM_BTN,
-  VALUES_INPUT,
-  EXCEPTION_FLYOUT_TITLE,
-  FIELD_INPUT_PARENT,
-} from '../../../../../screens/exceptions';
+  goToExceptionsTab,
+  openEditException,
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
+} from '../../../../../tasks/rule_details';
 
-import { reload } from '../../../../../tasks/common';
+import { getExceptionList } from '../../../../../objects/exception';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   createExceptionList,
   createExceptionListItem,
-  updateExceptionListItem,
   deleteExceptionList,
+  updateExceptionListItem,
 } from '../../../../../tasks/api_calls/exceptions';
-import { getExceptionList } from '../../../../../objects/exception';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { reload } from '../../../../../tasks/common';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // Test Skipped until we fix the Flyout rerendering issue

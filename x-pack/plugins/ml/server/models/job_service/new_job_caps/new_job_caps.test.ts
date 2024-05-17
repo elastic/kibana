@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { newJobCapsProvider } from '.';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { newJobCapsProvider } from '.';
 
-import farequoteFieldCaps from './__mocks__/responses/farequote_field_caps.json';
 import cloudwatchFieldCaps from './__mocks__/responses/cloudwatch_field_caps.json';
-import rollupCaps from './__mocks__/responses/rollup_caps.json';
 import dataView from './__mocks__/responses/data_view_rollup_cloudwatch.json';
+import farequoteFieldCaps from './__mocks__/responses/farequote_field_caps.json';
+import rollupCaps from './__mocks__/responses/rollup_caps.json';
 
+import cloudwatchJobCaps from './__mocks__/results/cloudwatch_rollup_job_caps.json';
 import farequoteJobCaps from './__mocks__/results/farequote_job_caps.json';
 import farequoteJobCapsEmpty from './__mocks__/results/farequote_job_caps_empty.json';
-import cloudwatchJobCaps from './__mocks__/results/cloudwatch_rollup_job_caps.json';
 
 describe('job_service - job_caps', () => {
   let mlClusterClientNonRollupMock: any;

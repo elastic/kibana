@@ -7,8 +7,8 @@
 
 import {
   AZURE_OPENAI_CHAT_URL,
-  AZURE_OPENAI_COMPLETIONS_URL,
   AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL,
+  AZURE_OPENAI_COMPLETIONS_URL,
 } from '../../../../common/openai/constants';
 
 const APIS_ALLOWING_STREAMING = new Set<string>([

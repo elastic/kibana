@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
-import { performBulkAction } from '../../../../detection_engine/rule_management/api/api';
 import { RuleSwitchComponent } from '.';
 import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import { useRulesTableContextMock } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
-import { TestProviders } from '../../../../common/mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { TestProviders } from '../../../../common/mock';
+import { performBulkAction } from '../../../../detection_engine/rule_management/api/api';
+import { useRulesTableContextMock } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
+import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../detection_engine/rule_management/api/api');

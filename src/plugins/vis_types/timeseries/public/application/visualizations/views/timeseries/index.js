@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useCallback, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { i18n } from '@kbn/i18n';
+import {
+  AnnotationDomainType,
+  Axis,
+  Chart,
+  LineAnnotation,
+  Placement,
+  Position,
+  Settings,
+  StackMode,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
 import {
   MULTILAYER_TIME_AXIS_STYLE,
   renderEndzoneTooltip,
   useActiveCursor,
 } from '@kbn/charts-plugin/public';
-import {
-  Axis,
-  Chart,
-  Position,
-  Settings,
-  AnnotationDomainType,
-  LineAnnotation,
-  TooltipType,
-  StackMode,
-  Placement,
-  Tooltip,
-} from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/visualization-utils';
-import { getUISettings, getCharts } from '../../../../services';
+import classNames from 'classnames';
+import PropTypes from 'prop-types';
+import React, { useRef, useCallback, useMemo } from 'react';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
+import { getCharts, getUISettings } from '../../../../services';
+import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
+import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
+import { calculateDomainForSeries } from './utils/series_domain_calculation';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { TOOLTIP_MODES } from '../../../../../common/enums';
-import { getValueOrEmpty } from '../../../../../common/empty_label';
-import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
-import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({

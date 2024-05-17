@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import React, { useEffect } from 'react';
 import { logEntryCategoriesJobType } from '../../../../../../common/log_analysis';
-import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
-import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { TimeRange } from '../../../../../../common/time/time_range';
-import { CategoryExampleMessage } from './category_example_message';
+import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
+import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
+import { CategoryExampleMessage } from './category_example_message';
 
 const exampleCount = 5;
 

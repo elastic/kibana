@@ -7,9 +7,9 @@
 
 import { Action } from 'redux-actions';
 import {
+  SelectedFilters,
   getSelectedFilters,
   setSelectedFilters,
-  SelectedFilters,
 } from '../actions/selected_filters';
 
 const initialState: SelectedFilters | null = null;

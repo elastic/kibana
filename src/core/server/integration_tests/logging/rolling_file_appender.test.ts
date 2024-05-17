@@ -7,10 +7,10 @@
  */
 
 import { join } from 'path';
-import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
-import moment from 'moment-timezone';
 import { getNextRollingTime } from '@kbn/core-logging-server-internal';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
+import { mkdtemp, readFile, readdir, rm } from 'fs/promises';
+import moment from 'moment-timezone';
 
 const flushDelay = 250;
 const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { calculateAuto } from './calculate_auto';
 import _ from 'lodash';
 import moment from 'moment';
+import { calculateAuto } from './calculate_auto';
 
 describe('Calculating Time Intervals Based on Size of Buckets', () => {
   it('Empty Arguments', () => {

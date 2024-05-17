@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { useDispatch } from 'react-redux';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useDispatch } from 'react-redux';
 import { TimelinesStartServices } from '../../..';
+import { DataProvider } from '../../../../common/types';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
+import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { DataProvider } from '../../../../common/types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
-import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-import { HoverActionComponentProps } from './types';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
+import { HoverActionComponentProps } from './types';
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
 

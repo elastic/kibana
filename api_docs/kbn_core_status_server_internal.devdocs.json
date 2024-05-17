@@ -50,9 +50,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,9 +62,7 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": [
-                  "CoreContext"
-                ],
+                "signature": ["CoreContext"],
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -82,11 +78,7 @@
             "tags": [],
             "label": "preboot",
             "description": [],
-            "signature": [
-              "({ http }: ",
-              "StatusServicePrebootDeps",
-              ") => Promise<void>"
-            ],
+            "signature": ["({ http }: ", "StatusServicePrebootDeps", ") => Promise<void>"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -98,9 +90,7 @@
                 "tags": [],
                 "label": "{ http }",
                 "description": [],
-                "signature": [
-                  "StatusServicePrebootDeps"
-                ],
+                "signature": ["StatusServicePrebootDeps"],
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -210,9 +200,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -226,9 +214,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -261,9 +247,7 @@
             "tags": [],
             "label": "{\n  router,\n  config,\n  metrics,\n  status,\n  incrementUsageCounter,\n}",
             "description": [],
-            "signature": [
-              "Deps"
-            ],
+            "signature": ["Deps"],
             "path": "packages/core/status/core-status-server-internal/src/routes/status.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -391,9 +375,7 @@
             "tags": [],
             "label": "environment",
             "description": [],
-            "signature": [
-              "InternalEnvironmentServicePreboot"
-            ],
+            "signature": ["InternalEnvironmentServicePreboot"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -405,9 +387,7 @@
             "tags": [],
             "label": "pluginDependencies",
             "description": [],
-            "signature": [
-              "ReadonlyMap<string, string[]>"
-            ],
+            "signature": ["ReadonlyMap<string, string[]>"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -419,9 +399,7 @@
             "tags": [],
             "label": "http",
             "description": [],
-            "signature": [
-              "InternalHttpServiceSetup"
-            ],
+            "signature": ["InternalHttpServiceSetup"],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -513,9 +491,7 @@
         "tags": [],
         "label": "StatusConfigType",
         "description": [],
-        "signature": [
-          "{ readonly allowAnonymous: boolean; }"
-        ],
+        "signature": ["{ readonly allowAnonymous: boolean; }"],
         "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
         "deprecated": false,
         "trackAdoption": false,

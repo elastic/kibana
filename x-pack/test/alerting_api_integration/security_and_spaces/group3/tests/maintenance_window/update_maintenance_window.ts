@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import moment from 'moment';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getUrlPrefix } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const scopedQuery = {
   kql: "_id: '1234'",

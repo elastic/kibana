@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getKeystore } from './get_keystore';
-import { Logger } from '../logger';
 import fs from 'fs';
 import sinon from 'sinon';
+import { Logger } from '../logger';
+import { getKeystore } from './get_keystore';
 
 describe('get_keystore', () => {
   const sandbox = sinon.createSandbox();

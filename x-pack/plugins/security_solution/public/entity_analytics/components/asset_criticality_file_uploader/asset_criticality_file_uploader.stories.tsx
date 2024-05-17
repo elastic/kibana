@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { euiLightVars } from '@kbn/ui-theme';
 import type { Story } from '@storybook/react';
 import { addDecorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-theme';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { AssetCriticalityFileUploader } from './asset_criticality_file_uploader';
+import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 import { AssetCriticalityResultStep } from './components/result_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
-import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>

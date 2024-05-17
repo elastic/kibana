@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
-import { compact, mapValues, omit, uniq } from 'lodash';
 import datemath from '@elastic/datemath';
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { getTypedSearch } from '../utils/create_typed_es_client';
+import { compact, mapValues, omit, uniq } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
+import { getTypedSearch } from '../utils/create_typed_es_client';
 
 export function registerGetApmDatasetInfoFunction({
   apmEventClient,
@@ -130,24 +130,16 @@ export function registerGetApmDatasetInfoFunction({
 
           When generating an ES|QL query, you MUST use one of the indices mentioned below for the \`FROM\` command.
 
-          For transactions, query the transactions index (${availableIndices.transaction.join(
-            ','
-          )}) and filter where \`processor.event\` is "transaction".
+          For transactions, query the transactions index (${availableIndices.transaction.join(',')}) and filter where \`processor.event\` is "transaction".
           Transactions have transaction.type, transaction.name, event.outcome (success, failure, unknown).
 
-          For spans, query the spans index (${availableIndices.span.join(
-            ','
-          )}) and filter where \`processor.event\` is "span".
+          For spans, query the spans index (${availableIndices.span.join(',')}) and filter where \`processor.event\` is "span".
           Spans have span.name, span.type, span.subtype, and optionally span.destination.service.resource.
 
-          For errors, query the errors index (${availableIndices.error.join(
-            ','
-          )}) and filter where processor.event is "error".
+          For errors, query the errors index (${availableIndices.error.join(',')}) and filter where processor.event is "error".
           Errors have error.grouping_name and possibly transaction metadata.
 
-          For metrics, query the metrics index (${availableIndices.metric.join(
-            ','
-          )}) and filter where \`metricset.name\` is "app".
+          For metrics, query the metrics index (${availableIndices.metric.join(',')}) and filter where \`metricset.name\` is "app".
 
           For logs, query the logs index (${availableIndices.error.join(',')}).
 

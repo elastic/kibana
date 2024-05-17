@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { DataView } from '@kbn/data-plugin/common';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-plugin/common';
+import React, { useMemo, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
+import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../common/i18n_getters';
 import {
+  getHttp,
   getIndexPatternSelectComponent,
   getIndexPatternService,
-  getHttp,
 } from '../kibana_services';
-import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../common/i18n_getters';
-import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
   onChange: (indexPattern: DataView) => void;

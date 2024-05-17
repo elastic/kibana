@@ -46,18 +46,18 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
   }
   public async clearScript() {
-    const editor = await (
-      await this.testSubjects.find('valueRow')
-    ).findByClassName('react-monaco-editor-container');
+    const editor = await (await this.testSubjects.find('valueRow')).findByClassName(
+      'react-monaco-editor-container'
+    );
     const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
     await textarea.click();
     const input = await this.find.activeElement();
     await input.clearValueWithKeyboard();
   }
   public async typeScript(script: string) {
-    const editor = await (
-      await this.testSubjects.find('valueRow')
-    ).findByClassName('react-monaco-editor-container');
+    const editor = await (await this.testSubjects.find('valueRow')).findByClassName(
+      'react-monaco-editor-container'
+    );
     const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
 
     await textarea.click();

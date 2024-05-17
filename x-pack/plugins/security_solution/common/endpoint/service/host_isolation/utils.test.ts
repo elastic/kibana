@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isVersionSupported, isOsSupported, isIsolationSupported } from './utils';
+import { isIsolationSupported, isOsSupported, isVersionSupported } from './utils';
 
 describe('Host Isolation utils isVersionSupported', () => {
   // NOTE: the `7.15.0.8295.0` and the text current versions are invalid.

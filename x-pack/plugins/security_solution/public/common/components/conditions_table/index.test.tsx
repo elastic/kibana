@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { ConditionsTable } from '.';
-import { createItems, TEST_COLUMNS } from './test_utils';
+import { TEST_COLUMNS, createItems } from './test_utils';
 
 describe('conditions_table', () => {
   describe('ConditionsTable', () => {

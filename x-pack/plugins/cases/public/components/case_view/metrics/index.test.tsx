@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { CaseViewMetrics } from '.';
+import { CaseMetricsFeature } from '../../../../common/types/api';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import { TestProviders } from '../../../common/mock';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import {
   basicCaseMetrics,
   basicCaseNumericValueFeatures,
   basicCaseStatusFeatures,
 } from '../../../containers/mock';
-import { CaseViewMetrics } from '.';
-import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
-import { TestProviders } from '../../../common/mock';
 import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
-import { useCasesFeatures } from '../../../common/use_cases_features';
-import { CaseMetricsFeature } from '../../../../common/types/api';
 
 jest.mock('../../../containers/use_get_case_metrics');
 jest.mock('../../../common/use_cases_features');

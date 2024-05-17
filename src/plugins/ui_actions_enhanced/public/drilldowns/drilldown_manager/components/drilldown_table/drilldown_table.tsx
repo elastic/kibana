@@ -7,11 +7,11 @@
  */
 
 import {
-  EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
   EuiIcon,
+  EuiInMemoryTable,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
@@ -19,13 +19,13 @@ import React, { useState } from 'react';
 import { TextWithIcon } from '../text_with_icon';
 import { TriggerLineItem } from '../trigger_line_item';
 import {
+  txtAction,
+  txtCloneDrilldown,
   txtCreateDrilldown,
   txtDeleteDrilldowns,
   txtEditDrilldown,
-  txtCloneDrilldown,
-  txtSelectDrilldown,
   txtName,
-  txtAction,
+  txtSelectDrilldown,
   txtTrigger,
 } from './i18n';
 

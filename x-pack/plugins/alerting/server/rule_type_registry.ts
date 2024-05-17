@@ -6,39 +6,39 @@
  */
 
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
+import { stateSchemaByVersion } from '@kbn/alerting-state-types';
 import { schema } from '@kbn/config-schema';
-import typeDetect from 'type-detect';
-import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { stateSchemaByVersion } from '@kbn/alerting-state-types';
+import { intersection } from 'lodash';
+import typeDetect from 'type-detect';
+import { AlertingRulesConfig } from '.';
+import {
+  ActionGroup,
+  RecoveredActionGroup,
+  RecoveredActionGroupId,
+  RuleAlertData,
+  getBuiltinActionGroups,
+  parseDuration,
+  validateDurationSchema,
+} from '../common';
+import { AlertsService } from './alerts_service/alerts_service';
+import { AlertingConfig } from './config';
+import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
+import { ILicenseState } from './lib/license_state';
+import { InMemoryMetrics } from './monitoring';
+import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
 import { TaskRunnerFactory } from './task_runner';
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  IRuleTypeAlerts,
   RuleType,
   RuleTypeParams,
   RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  IRuleTypeAlerts,
 } from './types';
-import {
-  RecoveredActionGroup,
-  getBuiltinActionGroups,
-  RecoveredActionGroupId,
-  ActionGroup,
-  validateDurationSchema,
-  parseDuration,
-  RuleAlertData,
-} from '../common';
-import { ILicenseState } from './lib/license_state';
-import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
-import { InMemoryMetrics } from './monitoring';
-import { AlertingRulesConfig } from '.';
-import { AlertsService } from './alerts_service/alerts_service';
-import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
-import { AlertingConfig } from './config';
 
 export interface ConstructorOptions {
   config: AlertingConfig;
@@ -105,7 +105,7 @@ export type NormalizedRuleType<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > = {
   validLegacyConsumers: string[];
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
@@ -202,7 +202,7 @@ export class RuleTypeRegistry {
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData
+    AlertData extends RuleAlertData,
   >(
     ruleType: RuleType<
       Params,
@@ -338,7 +338,7 @@ export class RuleTypeRegistry {
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
     RecoveryActionGroupId extends string = string,
-    AlertData extends RuleAlertData = RuleAlertData
+    AlertData extends RuleAlertData = RuleAlertData,
   >(
     id: string
   ): NormalizedRuleType<
@@ -458,7 +458,7 @@ function augmentActionGroupsWithReserved<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >(
   ruleType: RuleType<
     Params,

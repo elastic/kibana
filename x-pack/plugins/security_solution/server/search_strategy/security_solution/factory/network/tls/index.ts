@@ -11,9 +11,9 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
-  NetworkTlsStrategyResponse,
   NetworkQueries,
   NetworkTlsEdges,
+  NetworkTlsStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';

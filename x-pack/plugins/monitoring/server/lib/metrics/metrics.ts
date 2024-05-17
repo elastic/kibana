@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { metrics as apmMetrics } from './apm/metrics';
+import { metrics as beatsMetrics } from './beats/metrics';
 import { Metric } from './classes/metric';
 import { metrics as elasticsearchMetrics } from './elasticsearch/metrics';
+import { metrics as entSearchMetrics } from './enterprise_search/metrics';
 import { metrics as kibanaMetrics } from './kibana/metrics';
 import { metrics as logstashMetrics } from './logstash/metrics';
-import { metrics as beatsMetrics } from './beats/metrics';
-import { metrics as apmMetrics } from './apm/metrics';
-import { metrics as entSearchMetrics } from './enterprise_search/metrics';
 
 export type { Metric } from './classes/metric';
 

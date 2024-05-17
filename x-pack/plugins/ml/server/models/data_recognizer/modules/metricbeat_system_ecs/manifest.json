@@ -9,13 +9,10 @@
     "bool": {
       "filter": {
         "terms": {
-          "event.dataset": [
-            "system.cpu",
-            "system.filesystem"
-          ]
+          "event.dataset": ["system.cpu", "system.filesystem"]
         }
       },
-      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
     }
   },
   "jobs": [

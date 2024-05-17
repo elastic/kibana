@@ -5,31 +5,13 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
-import { FeatureCollection } from 'geojson';
-import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
-import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
-import {
-  hasVectorLayerMethod,
-  BlendedVectorLayer,
-  MvtVectorLayer,
-  GeoJsonVectorLayer,
-} from '../classes/layers/vector_layer';
-import { VectorStyle } from '../classes/styles/vector/vector_style';
-import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
-import { HeatmapLayer } from '../classes/layers/heatmap_layer';
-import { InvalidLayer } from '../classes/layers/invalid_layer';
-import { getTimeFilter } from '../kibana_services';
-import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
-import { InnerJoin } from '../classes/joins/inner_join';
-import { createSourceInstance } from '../classes/sources/create_source_instance';
-import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import { FeatureCollection } from 'geojson';
+import _ from 'lodash';
+import { createSelector } from 'reselect';
 import {
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
@@ -37,12 +19,9 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../common/constants';
-// @ts-ignore
-import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
-import { MapStoreState } from '../reducers/store';
 import {
-  DataRequestDescriptor,
   CustomIcon,
+  DataRequestDescriptor,
   DrawState,
   EMSVectorTileLayerDescriptor,
   EditState,
@@ -56,12 +35,33 @@ import {
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
+// @ts-ignore
+import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
+import { InnerJoin } from '../classes/joins/inner_join';
+import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
+import { HeatmapLayer } from '../classes/layers/heatmap_layer';
+import { InvalidLayer } from '../classes/layers/invalid_layer';
+import { ILayer } from '../classes/layers/layer';
+import { LayerGroup, isLayerGroup } from '../classes/layers/layer_group';
+import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
+import {
+  BlendedVectorLayer,
+  GeoJsonVectorLayer,
+  MvtVectorLayer,
+  hasVectorLayerMethod,
+} from '../classes/layers/vector_layer';
+import { createSourceInstance } from '../classes/sources/create_source_instance';
+import { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import { IRasterSource } from '../classes/sources/raster_source';
 import { ISource } from '../classes/sources/source';
 import { IVectorSource } from '../classes/sources/vector_source';
-import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
-import { EMSTMSSource } from '../classes/sources/ems_tms_source';
-import { IRasterSource } from '../classes/sources/raster_source';
-import { ILayer } from '../classes/layers/layer';
+import { VectorStyle } from '../classes/styles/vector/vector_style';
+import { getTimeFilter } from '../kibana_services';
+import { TRACKED_LAYER_DESCRIPTOR, copyPersistentState } from '../reducers/copy_persistent_state';
+import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
+import { MapStoreState } from '../reducers/store';
 import { getIsReadOnly } from './ui_selectors';
 
 function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, source: IVectorSource) {

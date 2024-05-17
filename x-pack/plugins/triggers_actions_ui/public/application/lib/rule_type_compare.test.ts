@@ -6,13 +6,13 @@
  */
 
 import { RuleTypeModel } from '../../types';
+import { IsDisabledResult, IsEnabledResult } from './check_rule_type_enabled';
 import {
   RuleTypeGroup,
-  ruleTypeGroupCompare,
   ruleTypeCompare,
+  ruleTypeGroupCompare,
   ruleTypeUngroupedCompare,
 } from './rule_type_compare';
-import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
 test('should sort groups by containing enabled rule types first and then by name', async () => {
   const ruleTypes: RuleTypeGroup[] = [

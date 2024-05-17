@@ -11,14 +11,14 @@ jest.mock('uuid', () => ({
 }));
 
 import { RouteOptions } from '@hapi/hapi';
-import { hapiMocks } from '@kbn/hapi-mocks';
-import type { FakeRawRequest } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { hapiMocks } from '@kbn/hapi-mocks';
+import { CoreKibanaRequest } from './request';
 
 describe('CoreKibanaRequest', () => {
   describe('using real requests', () => {

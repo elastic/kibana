@@ -10,8 +10,8 @@ import { multiPoint } from '@turf/helpers';
 import { MapExtent } from '../../common/descriptor_types';
 import { turfBboxToBounds } from '../../common/elasticsearch_util';
 import { ILayer } from '../classes/layers/layer';
-import type { DataRequestContext } from './data_request_actions';
 import { DataRequestAbortError } from '../classes/util/data_request';
+import type { DataRequestContext } from './data_request_actions';
 
 export async function getLayersExtent(
   layers: ILayer[],

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import React from 'react';
 
 import { CanvasReportingService } from '../reporting';
 

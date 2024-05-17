@@ -6,21 +6,21 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { KbnClient } from '@kbn/test';
-import pMap from 'p-map';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { indexAlerts } from '../../../../common/endpoint/data_loaders/index_alerts';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
-import { indexEndpointHostDocs } from '../../../../common/endpoint/data_loaders/index_endpoint_hosts';
-import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { enableFleetServerIfNecessary } from '../../../../common/endpoint/data_loaders/index_fleet_server';
+import type { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import pMap from 'p-map';
 import { METADATA_DATASTREAM } from '../../../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { indexAlerts } from '../../../../common/endpoint/data_loaders/index_alerts';
+import { indexEndpointHostDocs } from '../../../../common/endpoint/data_loaders/index_endpoint_hosts';
+import { enableFleetServerIfNecessary } from '../../../../common/endpoint/data_loaders/index_fleet_server';
+import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { getEndpointPackageInfo } from '../../../../common/endpoint/utils/package';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from '../../common/constants';
+import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
 
 let WAS_FLEET_SETUP_DONE = false;
 

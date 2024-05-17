@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext, FtrService } from '../ftr_provider_context';
 
 interface FillTagFormFields {
   name?: string;
@@ -27,7 +27,10 @@ class TagModal extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
 
-  constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
+  constructor(
+    ctx: FtrProviderContext,
+    private readonly page: TagManagementPageObject
+  ) {
     super(ctx);
   }
 
@@ -187,7 +190,10 @@ class TagAssignmentFlyout extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
 
-  constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
+  constructor(
+    ctx: FtrProviderContext,
+    private readonly page: TagManagementPageObject
+  ) {
     super(ctx);
   }
 

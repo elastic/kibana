@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { ApmBase } from '@elastic/apm-rum';
 import {
   KibanaContextProvider,
+  useDarkMode,
   useKibana,
   useUiSetting,
   useUiSetting$,
-  useDarkMode,
   withKibana,
 } from '@kbn/kibana-react-plugin/public';
-import type { ApmBase } from '@elastic/apm-rum';
 import type { StartServices } from '../../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();

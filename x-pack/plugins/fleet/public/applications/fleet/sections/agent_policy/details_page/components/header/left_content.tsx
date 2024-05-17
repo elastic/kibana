@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlexGroup,
-  EuiIconTip,
-  EuiFlexItem,
   EuiButtonEmpty,
-  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
+import { Loading } from '../../../../../components';
 import { useLink } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../types';
-import { Loading } from '../../../../../components';
 
 interface HeaderLeftContentProps {
   isLoading: boolean;

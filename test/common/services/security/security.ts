@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Role } from './role';
-import { User } from './user';
-import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { createTestUserService, TestUserSupertestProvider, TestUser } from './test_user';
+import { Role } from './role';
+import { RoleMappings } from './role_mappings';
 import { createSystemIndicesUser } from './system_indices_user';
+import { TestUser, TestUserSupertestProvider, createTestUserService } from './test_user';
+import { User } from './user';
 
 export class SecurityService {
   constructor(

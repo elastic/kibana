@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
 import type { Logger } from '@kbn/logging';
+import dedent from 'dedent';
 import type { ObservabilityAIAssistantService } from '../..';
 
 export function addLensDocsToKb({

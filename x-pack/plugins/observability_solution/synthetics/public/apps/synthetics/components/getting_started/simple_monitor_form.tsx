@@ -6,23 +6,23 @@
  */
 
 import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiForm,
   EuiButton,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSimpleMonitor } from './use_simple_monitor';
-import { ServiceLocationsField } from './form_fields/service_locations';
+import React, { useState } from 'react';
 import { ConfigKey, ServiceLocation, ServiceLocations } from '../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
 import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
-import { NoPermissionsTooltip } from '../common/components/permissions';
 import { isUrlValid } from '../../utils/validators/is_url_valid';
+import { NoPermissionsTooltip } from '../common/components/permissions';
+import { ServiceLocationsField } from './form_fields/service_locations';
+import { useSimpleMonitor } from './use_simple_monitor';
 
 export interface SimpleFormData {
   urls: string;

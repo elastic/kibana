@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { SimpleTemplate } from './simple_template';
-import { ExtendedTemplate } from './extended_template';
 import { ArgumentStrings } from '../../../../i18n';
+import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { ExtendedTemplate } from './extended_template';
+import { SimpleTemplate } from './simple_template';
 
 const { AxisConfig: strings } = ArgumentStrings;
 

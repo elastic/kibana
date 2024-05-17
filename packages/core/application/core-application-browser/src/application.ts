@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { AppCategory } from '@kbn/core-application-common';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { Observable } from 'rxjs';
 import type { AppMount } from './app_mount';
 
 /**

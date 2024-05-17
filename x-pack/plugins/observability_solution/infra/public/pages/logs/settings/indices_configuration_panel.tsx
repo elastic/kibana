@@ -6,22 +6,22 @@
  */
 
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import {
-  logIndexNameReferenceRT,
-  LogDataViewReference,
-  logDataViewReferenceRT,
-  LogIndexReference,
-} from '@kbn/logs-shared-plugin/common';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  LogDataViewReference,
+  LogIndexReference,
+  logDataViewReferenceRT,
+  logIndexNameReferenceRT,
+} from '@kbn/logs-shared-plugin/common';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
+import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { EuiLink } from '@elastic/eui';
+import { RulesParams, rulesLocatorID } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';

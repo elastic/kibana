@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
 import type { ApplicationStart } from '@kbn/core/public';
-import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
-import { mount } from 'enzyme';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
+import { mount } from 'enzyme';
+import React, { FormEvent } from 'react';
+import { LensApi } from '../embeddable';
 import {
   ActionFactoryContext,
   CollectConfigProps,
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
-import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { LensApi } from '../embeddable';
+import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),
@@ -34,10 +34,10 @@ describe('open in discover drilldown', () => {
 
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
-      locator: () => ({} as DiscoverAppLocator),
-      dataViews: () => ({} as DataViewsService),
+      locator: () => ({}) as DiscoverAppLocator,
+      dataViews: () => ({}) as DataViewsService,
       hasDiscoverAccess: () => true,
-      application: () => ({} as ApplicationStart),
+      application: () => ({}) as ApplicationStart,
     });
   });
 

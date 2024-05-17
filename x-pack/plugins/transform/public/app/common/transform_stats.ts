@@ -7,11 +7,11 @@
 
 import { TRANSFORM_STATE } from '../../../common/constants';
 
-import type { TransformListRow } from './transform_list';
 import type {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../common/api_schemas/transforms';
+import type { TransformListRow } from './transform_list';
 
 type TransformItem = Omit<TransformListRow, 'config'> & {
   config:

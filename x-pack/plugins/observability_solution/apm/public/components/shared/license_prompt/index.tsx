@@ -6,8 +6,8 @@
  */
 
 import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 

@@ -6,8 +6,8 @@
  */
 
 import {
-  getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
-import { idFormatRT } from '../../id_formats/v1/id_formats';
+import * as rt from 'io-ts';
 import { logEntryExampleRT } from '../../../../log_analysis';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
-  timeRangeRT,
   routeTimingMetadataRT,
+  timeRangeRT,
 } from '../../../shared';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_examples';

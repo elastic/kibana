@@ -1,3 +1,17 @@
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSearchBar,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
+import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
+import { euiThemeVars } from '@kbn/ui-theme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,34 +19,20 @@
  * 2.0.
  */
 import React, { useState, useCallback } from 'react';
-import { css } from '@emotion/css';
-import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSearchBar,
-} from '@elastic/eui';
-import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedDate } from '../../common/components/formatted_date';
 import { useKibana } from '../../common/lib/kibana';
-import { AddListItemPopover } from './add_list_item_popover';
-import { UploadListItem } from './upload_list_item';
-import { ListItemTable } from './list_item_table';
-import { Info } from './info';
-import type { SortFields, ValueListModalProps, OnTableChange, Sorting } from '../types';
 import {
-  INFO_UPDATED_AT,
-  INFO_TYPE,
-  INFO_UPDATED_BY,
   INFO_TOTAL_ITEMS,
+  INFO_TYPE,
+  INFO_UPDATED_AT,
+  INFO_UPDATED_BY,
   getInfoTotalItems,
 } from '../translations';
+import type { OnTableChange, SortFields, Sorting, ValueListModalProps } from '../types';
+import { AddListItemPopover } from './add_list_item_popover';
+import { Info } from './info';
+import { ListItemTable } from './list_item_table';
+import { UploadListItem } from './upload_list_item';
 
 const modalBodyStyle = css`
   overflow: hidden;

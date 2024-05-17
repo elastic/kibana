@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback, useEffect, useState } from 'react';
 
-import { isJSON, Forms } from '../../../../../shared_imports';
+import { Forms, isJSON } from '../../../../../shared_imports';
 
 interface Parameters {
   onChange: (content: Forms.Content) => void;

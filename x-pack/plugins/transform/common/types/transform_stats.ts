@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { type TransformState, TRANSFORM_STATE } from '../constants';
+import { TRANSFORM_STATE, type TransformState } from '../constants';
 
 export interface TransformHealthIssue {
   type: string;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getAnonymizedValues } from '../get_anonymized_values';
-import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { getAnonymizedData } from '.';
+import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
+import { getAnonymizedValues } from '../get_anonymized_values';
 
 describe('getAnonymizedData', () => {
   const rawData: Record<string, string[]> = {

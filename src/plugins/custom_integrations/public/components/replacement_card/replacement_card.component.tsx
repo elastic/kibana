@@ -11,14 +11,14 @@
 import { css, jsx } from '@emotion/react';
 
 import {
-  htmlIdGenerator,
+  EuiAccordion,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
-  EuiAccordion,
-  EuiLink,
+  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

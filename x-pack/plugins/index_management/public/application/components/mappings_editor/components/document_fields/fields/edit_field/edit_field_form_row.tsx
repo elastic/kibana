@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { get } from 'lodash';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiSwitch,
   EuiSpacer,
-  EuiButtonIcon,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { get } from 'lodash';
+import React, { useState } from 'react';
 
 import {
+  FormDataProvider,
   ToggleField,
   UseField,
-  FormDataProvider,
   useFormContext,
 } from '../../../../shared_imports';
 
-import { ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { ParameterName } from '../../../../types';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
@@ -65,10 +65,10 @@ export const EditFieldFormRow = React.memo(
       withToggle === false
         ? true
         : defaultToggleValue !== undefined
-        ? defaultToggleValue
-        : formFieldPath !== undefined
-        ? (getFieldConfig(configPath ? configPath : formFieldPath).defaultValue! as boolean)
-        : false;
+          ? defaultToggleValue
+          : formFieldPath !== undefined
+            ? (getFieldConfig(configPath ? configPath : formFieldPath).defaultValue! as boolean)
+            : false;
 
     const [isContentVisible, setIsContentVisible] = useState<boolean>(initialVisibleState);
 

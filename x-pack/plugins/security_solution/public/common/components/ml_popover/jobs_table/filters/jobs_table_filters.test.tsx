@@ -6,11 +6,11 @@
  */
 
 import { mount } from 'enzyme';
-import React from 'react';
-import { JobsTableFiltersComponent } from './jobs_table_filters';
-import type { SecurityJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
+import React from 'react';
 import { mockSecurityJobs } from '../../api.mock';
+import type { SecurityJob } from '../../types';
+import { JobsTableFiltersComponent } from './jobs_table_filters';
 
 describe('JobsTableFilters', () => {
   let securityJobs: SecurityJob[];

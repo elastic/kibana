@@ -45,9 +45,7 @@
           ]
         }
       },
-      "indices": [
-        "ft_farequote"
-      ],
+      "indices": ["ft_farequote"],
       "aggregations": {
         "buckets": {
           "date_histogram": {
@@ -77,9 +75,7 @@
   {
     "job": {
       "job_id": "ad-test2",
-      "groups": [
-        "newgroup"
-      ],
+      "groups": ["newgroup"],
       "description": "",
       "analysis_config": {
         "bucket_span": "15m",
@@ -123,9 +119,7 @@
           ]
         }
       },
-      "indices": [
-        "missing"
-      ],
+      "indices": ["missing"],
       "aggregations": {
         "buckets": {
           "date_histogram": {
@@ -168,9 +162,7 @@
             "detector_index": 0
           }
         ],
-        "influencers": [
-          "airline"
-        ]
+        "influencers": ["airline"]
       },
       "analysis_limits": {
         "model_memory_limit": "11mb",
@@ -201,9 +193,7 @@
           ]
         }
       },
-      "indices": [
-        "ft_farequote"
-      ],
+      "indices": ["ft_farequote"],
       "scroll_size": 1000,
       "delayed_data_check_config": {
         "enabled": true

@@ -5,33 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { Case } from '@kbn/cases-plugin/common';
-import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
-import { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { CASES_TEST_FIXTURE_FILE_KIND_ID } from '@kbn/cases-api-integration-test-plugin/server/files';
-import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { Case } from '@kbn/cases-plugin/common';
+import { Owner } from '@kbn/cases-plugin/common/constants/types';
+import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
+import expect from '@kbn/expect';
+import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
 import {
-  bulkCreateAttachments,
-  bulkGetAttachments,
-  createAndUploadFile,
-  createCase,
-  createFile,
-  deleteAllCaseItems,
-  deleteAllFiles,
-  bulkDeleteFileAttachments,
-  getComment,
-  listFiles,
-} from '../../../../common/lib/api';
-import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
-import {
-  globalRead,
-  noKibanaPrivileges,
-  superUser,
-} from '../../../../common/lib/authentication/users';
-import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import {
+  users as api_int_users,
   casesAllUser,
   obsCasesAllUser,
   obsCasesReadUser,
@@ -40,9 +21,28 @@ import {
   secAllSpace1User,
   secAllUser,
   secReadUser,
-  users as api_int_users,
 } from '../../../../../api_integration/apis/cases/common/users';
-import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  bulkCreateAttachments,
+  bulkDeleteFileAttachments,
+  bulkGetAttachments,
+  createAndUploadFile,
+  createCase,
+  createFile,
+  deleteAllCaseItems,
+  deleteAllFiles,
+  getComment,
+  listFiles,
+} from '../../../../common/lib/api';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  superUser,
+} from '../../../../common/lib/authentication/users';
+import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
+import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

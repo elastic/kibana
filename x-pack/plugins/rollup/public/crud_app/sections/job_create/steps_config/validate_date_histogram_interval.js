@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { search } from '@kbn/data-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 const { InvalidEsIntervalFormatError, InvalidEsCalendarIntervalError, parseEsInterval } =
   search.aggs;
 

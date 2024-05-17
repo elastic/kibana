@@ -11,8 +11,8 @@ jest.mock('./toc_entry', () => ({
   },
 }));
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { ILayer } from '../../../../classes/layers/layer';
 
 import { LayerTOC } from './layer_toc';

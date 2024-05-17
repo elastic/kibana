@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getNewSelectedPromptContext } from '.';
 import { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { mockAlertPromptContext } from '../../mock/prompt_context';
-import { getNewSelectedPromptContext } from '.';
 
 describe('getNewSelectedPromptContext', () => {
   const anonymizationFields = {

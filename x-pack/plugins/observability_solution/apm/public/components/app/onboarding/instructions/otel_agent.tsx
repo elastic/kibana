@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  copyToClipboard,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
@@ -16,14 +14,16 @@ import {
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
+  copyToClipboard,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { agentStatusCheckInstruction } from '../agent_status_instructions';
 import { AgentApiDetails, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
-import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createOpenTelemetryAgentInstructions = (
   commonOptions: AgentInstructions

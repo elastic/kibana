@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreScopedHistory as ScopedHistory } from './scoped_history';
-import { createMemoryHistory, History } from 'history';
+import { History, createMemoryHistory } from 'history';
 import type { ConfirmHandler } from './navigation_confirm';
+import { CoreScopedHistory as ScopedHistory } from './scoped_history';
 
 describe('ScopedHistory', () => {
   describe('construction', () => {

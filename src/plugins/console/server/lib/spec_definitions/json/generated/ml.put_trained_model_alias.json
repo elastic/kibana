@@ -7,12 +7,8 @@
       "pretty": "__flag__",
       "reassign": "__flag__"
     },
-    "methods": [
-      "PUT"
-    ],
-    "patterns": [
-      "_ml/trained_models/{model_id}/model_aliases/{model_alias}"
-    ],
+    "methods": ["PUT"],
+    "patterns": ["_ml/trained_models/{model_id}/model_aliases/{model_alias}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-models-aliases.html",
     "availability": {
       "stack": true,

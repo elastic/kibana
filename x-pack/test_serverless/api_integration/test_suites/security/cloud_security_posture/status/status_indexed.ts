@@ -1,3 +1,14 @@
+import {
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_INDEX_DEFAULT_NS,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,26 +17,15 @@
  */
 import expect from '@kbn/expect';
 import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
-import {
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteIndex,
   addIndex,
   createPackagePolicy,
+  deleteIndex,
 } from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import {
   findingsMockData,
   vulnerabilityMockData,
 } from '../../../../../../test/api_integration/apis/cloud_security_posture/mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,

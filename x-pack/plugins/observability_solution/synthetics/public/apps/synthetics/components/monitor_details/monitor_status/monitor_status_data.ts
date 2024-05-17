@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { BrushEvent } from '@elastic/charts';
 import datemath from '@elastic/datemath';
-import moment from 'moment';
 import {
+  COLOR_MODES_STANDARD,
+  EuiThemeColorModeStandard,
+  EuiThemeComputed,
+  VISUALIZATION_COLORS,
   tint,
   transparentize,
-  VISUALIZATION_COLORS,
-  EuiThemeComputed,
-  EuiThemeColorModeStandard,
-  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
-import type { BrushEvent } from '@elastic/charts';
+import moment from 'moment';
 import { PingStatus } from '../../../../../../common/runtime_types';
 
 export const SUCCESS_VIZ_COLOR = VISUALIZATION_COLORS[0];

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
-import { Logger } from '@kbn/core/server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
+import {
+  SlackApiConfigSchema,
+  SlackApiParamsSchema,
+  SlackApiSecretsSchema,
+} from '../../../common/slack_api/schema';
 import type {
-  SlackApiExecutorOptions,
   SlackApiConnectorType,
+  SlackApiExecutorOptions,
   SlackApiParams,
   SlackApiSecrets,
 } from '../../../common/slack_api/types';
-import {
-  SlackApiSecretsSchema,
-  SlackApiParamsSchema,
-  SlackApiConfigSchema,
-} from '../../../common/slack_api/schema';
-import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
-import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
+import { SLACK_CONNECTOR_NAME } from './translations';
 
 const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage', 'postBlockkit'];
 

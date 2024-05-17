@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  showSaveModal,
   OnSaveProps,
-  SavedObjectSaveModal,
   SaveResult,
+  SavedObjectSaveModal,
+  showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
+import React from 'react';
 
 import { CONTENT_ID } from '../../common';
 import { LinksAttributes } from '../../common/content_management';
 import { LinksByReferenceInput, LinksInput } from '../embeddable/types';
-import { checkForDuplicateTitle } from './duplicate_title_check';
 import { getLinksAttributeService } from '../services/attribute_service';
+import { checkForDuplicateTitle } from './duplicate_title_check';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,

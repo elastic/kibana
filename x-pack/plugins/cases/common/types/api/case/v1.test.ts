@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
-  MAX_CATEGORY_FILTER_LENGTH,
-  MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
-  MAX_REPORTERS_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TAGS_PER_CASE,
-  MAX_LENGTH_PER_TAG,
-  MAX_TITLE_LENGTH,
+  MAX_CATEGORY_FILTER_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
 import type { Case } from '../../domain/case/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
+import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
 import type { CasePostRequest } from './v1';
 import {
@@ -42,7 +43,6 @@ import {
   CasesPatchRequestRt,
   CasesSearchRequestRt,
 } from './v1';
-import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
 const basicCase: Case = {
   owner: 'cases',

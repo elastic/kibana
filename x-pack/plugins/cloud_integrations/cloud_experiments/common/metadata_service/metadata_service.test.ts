@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import moment from 'moment';
-import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { firstValueFrom } from 'rxjs';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { MetadataService } from './metadata_service';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('rxjs', () => {
   const RxJs = jest.requireActual('rxjs');

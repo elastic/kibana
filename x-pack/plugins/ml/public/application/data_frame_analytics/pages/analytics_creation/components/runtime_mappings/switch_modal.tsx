@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
 
 interface Props {
   onCancel: () => void;

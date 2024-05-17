@@ -6,12 +6,7 @@
     "id": "featureUsageTest",
     "server": true,
     "browser": false,
-    "configPath": [
-      "xpack",
-      "feature_usage_test"
-    ],
-    "requiredPlugins": [
-      "licensing"
-    ]
+    "configPath": ["xpack", "feature_usage_test"],
+    "requiredPlugins": ["licensing"]
   }
 }

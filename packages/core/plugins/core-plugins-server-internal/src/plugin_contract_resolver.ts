@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginName } from '@kbn/core-base-common';
 import type {
-  PluginContractResolverResponse,
   PluginContractMap,
+  PluginContractResolverResponse,
   PluginContractResolverResponseItem,
 } from '@kbn/core-plugins-contracts-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export type IRuntimePluginContractResolver = PublicMethodsOf<RuntimePluginContractResolver>;
 

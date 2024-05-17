@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createGunzip } from 'zlib';
 import { PassThrough } from 'stream';
+import { createGunzip } from 'zlib';
 import {
   createFilterStream,
-  createSplitStream,
-  createReplaceStream,
   createMapStream,
+  createReplaceStream,
+  createSplitStream,
 } from '@kbn/utils';
 
 import { RECORD_SEPARATOR } from './constants';

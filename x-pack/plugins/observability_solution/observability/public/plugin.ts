@@ -8,8 +8,8 @@
 import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   App,
   AppDeepLink,
@@ -32,12 +32,12 @@ import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-pl
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type {
   NavigationEntry,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
@@ -57,18 +57,18 @@ import {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -79,11 +79,11 @@ import {
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
-import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import {
-  createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
+  createObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 

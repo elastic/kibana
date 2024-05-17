@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
 import { BytesFormat } from './bytes';
 import { NumberFormat } from './number';
 import { PercentFormat } from './percent';
@@ -41,8 +41,8 @@ export class HistogramFormat extends FieldFormat {
         subFormatId === 'bytes'
           ? BytesFormat
           : subFormatId === 'percent'
-          ? PercentFormat
-          : NumberFormat;
+            ? PercentFormat
+            : NumberFormat;
       const converter = new SubFormat(this.param('params'), this.getConfig);
       return converter.textConvert(val, options);
     } else {

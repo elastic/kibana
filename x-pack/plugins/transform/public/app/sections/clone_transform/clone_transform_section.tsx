@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { parse } from 'query-string';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { parse } from 'query-string';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
@@ -21,11 +21,11 @@ import { useGetTransform } from '../../hooks';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 
-import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
+import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
 
-import { Wizard } from '../create_transform/components/wizard';
 import { overrideTransformForCloning } from '../../common/transform';
+import { Wizard } from '../create_transform/components/wizard';
 
 type Props = RouteComponentProps<{ transformId: string }>;
 

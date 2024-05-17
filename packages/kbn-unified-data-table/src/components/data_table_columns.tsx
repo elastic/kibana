@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { ExpandButton } from './data_table_expand_button';
+import React from 'react';
+import { ROWS_HEIGHT_OPTIONS, defaultTimeColumnWidth } from '../constants';
 import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
-import { buildCellActions } from './default_cell_actions';
-import { getSchemaByKbnType } from './data_table_schema';
-import { SelectButton } from './data_table_document_selection';
-import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
+import type { DataTableColumnsMeta, ValueToStringConverter } from '../types';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import { SelectButton } from './data_table_document_selection';
+import { ExpandButton } from './data_table_expand_button';
+import { getSchemaByKbnType } from './data_table_schema';
+import { buildCellActions } from './default_cell_actions';
 
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);

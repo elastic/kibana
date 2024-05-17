@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useSecurityTags } from '../context/dashboard_context';
-import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { SecurityPageName } from '../../../common';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { useSecurityTags } from '../context/dashboard_context';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 

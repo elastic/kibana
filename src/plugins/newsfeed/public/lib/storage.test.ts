@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NewsfeedStorage, getStorageKey } from './storage';
 import { take } from 'rxjs';
+import { NewsfeedStorage, getStorageKey } from './storage';
 
 describe('NewsfeedStorage', () => {
   const storagePrefix = 'test';

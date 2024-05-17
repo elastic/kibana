@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useContext, useEffect, useState } from 'react';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
-import { useKibana } from './use_kibana';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { InspectorContext } from '../containers/inspector';
 import { INSPECTOR_FLYOUT_TITLE } from './translations';
+import { useKibana } from './use_kibana';
 
 /**
  *

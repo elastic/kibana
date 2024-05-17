@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { RouteDependencies } from '../../../types';
 
 import { TemplateDeserialized } from '../../../../common';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { GenerationInterval } from '../../types';
 import {
-  encodeGenerationIntervals,
   decodeGenerationIntervals,
+  encodeGenerationIntervals,
   getLocalStorageGenerationIntervals,
   setLocalStorageGenerationIntervals,
 } from '.';
+import type { GenerationInterval } from '../../types';
 
 const key = 'elasticAssistantDefault.attackDiscovery.default.generationIntervals';
 

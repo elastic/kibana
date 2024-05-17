@@ -13,9 +13,6 @@
 
 import { uniq } from 'lodash';
 
-import PropTypes from 'prop-types';
-import React, { Component, Fragment, useContext } from 'react';
-import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
   EuiCallOut,
@@ -29,27 +26,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import memoizeOne from 'memoize-one';
+import PropTypes from 'prop-types';
+import React, { Component, Fragment, useContext } from 'react';
 
-import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
-import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
-import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../common/util/job_utils';
+import { mlJobService } from '../../../services/job_service';
+import { ml } from '../../../services/ml_api_service';
+import { mlTableService } from '../../../services/table_service';
+import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 
-import { annotationsRefresh$, annotationsRefreshed } from '../../../services/annotations_service';
-import {
-  ANNOTATION_EVENT_USER,
-  ANNOTATION_EVENT_DELAYED_DATA,
-} from '../../../../../common/constants/annotations';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { timeFormatter } from '@kbn/ml-date-utils';
+import {
+  ANNOTATION_EVENT_DELAYED_DATA,
+  ANNOTATION_EVENT_USER,
+} from '../../../../../common/constants/annotations';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
+import { annotationsRefresh$, annotationsRefreshed } from '../../../services/annotations_service';
 import { RevertModelSnapshotFlyout } from '../../model_snapshots/revert_model_snapshot_flyout';
 
 const editAnnotationsText = (

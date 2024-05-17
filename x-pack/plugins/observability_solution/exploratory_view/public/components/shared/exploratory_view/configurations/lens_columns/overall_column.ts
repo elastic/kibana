@@ -1,3 +1,4 @@
+import type { DataView } from '@kbn/data-views-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { FormulaIndexPatternColumn, FormulaPublicApi } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 
 export function getDistributionInPercentageColumn({
   label,

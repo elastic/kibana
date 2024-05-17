@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { AlertingPlugin, PluginSetupContract } from './plugin';
-import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { eventLogServiceMock } from '@kbn/event-log-plugin/server/event_log_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { KibanaFeature } from '@kbn/features-plugin/server';
-import { AlertingConfig } from './config';
-import { RuleType } from './types';
-import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
-import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import {
-  DataViewsServerPluginStart,
-  PluginSetup as DataPluginSetup,
-} from '@kbn/data-plugin/server';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from '@kbn/core/server';
+import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
+import {
+  PluginSetup as DataPluginSetup,
+  DataViewsServerPluginStart,
+} from '@kbn/data-plugin/server';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { eventLogServiceMock } from '@kbn/event-log-plugin/server/event_log_service.mock';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
+import { AlertingConfig } from './config';
+import { AlertingPlugin, PluginSetupContract } from './plugin';
+import { RuleType } from './types';
 
 const mockAlertService = alertsServiceMock.create();
 jest.mock('./alerts_service/alerts_service', () => ({
   AlertsService: jest.fn().mockImplementation(() => mockAlertService),
 }));
-import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { generateAlertingConfig } from './test_utils';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {

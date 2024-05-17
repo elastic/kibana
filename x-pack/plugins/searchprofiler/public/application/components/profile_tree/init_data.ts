@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { flow } from 'fp-ts/lib/function';
-import { Targets, Shard, ShardSerialized } from '../../types';
-import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
+import { cloneDeep } from 'lodash';
+import { Shard, ShardSerialized, Targets } from '../../types';
 import { IndexMap } from './types';
+import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
 
 /**
  * Functions prefixed with "mutate" change values by reference. Be careful when using these!
@@ -71,8 +71,8 @@ export const calculateShardValues = (target: Targets) => (data: Shard[]) => {
     target === 'searches'
       ? mutateSearchTimesTree
       : target === 'aggregations'
-      ? mutateAggsTimesTree
-      : null;
+        ? mutateAggsTimesTree
+        : null;
 
   if (mutateTimesTree) {
     for (const shard of data) {

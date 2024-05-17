@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { Story } from '@storybook/react';
+import React from 'react';
 import { ExpandableSection } from './expandable_section';
 
 const title = <p>{'title'}</p>;

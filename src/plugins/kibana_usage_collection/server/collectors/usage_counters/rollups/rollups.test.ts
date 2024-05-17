@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsFindResult } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
 import { isSavedObjectOlderThan, rollUsageCountersIndices } from './rollups';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectsFindResult } from '@kbn/core/server';
 
 import {
-  UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';
 
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
@@ -32,7 +32,7 @@ const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
     updated_at: updatedAt.format(),
     version: 'WzI5LDFd',
     score: 0,
-  } as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>);
+  }) as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>;
 
 describe('isSavedObjectOlderThan', () => {
   it(`returns true if doc is older than x days`, () => {

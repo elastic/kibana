@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { NotificationsList } from './components/notifications_list';
-import { useMlKibana } from '../contexts/kibana';
-import { MlPageHeader } from '../components/page_header';
-import { NodeAvailableWarning } from '../components/node_available_warning';
-import { UpgradeWarning } from '../components/upgrade';
+import type { FC } from 'react';
+import React from 'react';
 import { HelpMenu } from '../components/help_menu';
+import { NodeAvailableWarning } from '../components/node_available_warning';
+import { MlPageHeader } from '../components/page_header';
+import { UpgradeWarning } from '../components/upgrade';
+import { useMlKibana } from '../contexts/kibana';
+import { NotificationsList } from './components/notifications_list';
 
 export const NotificationsPage: FC = () => {
   const {

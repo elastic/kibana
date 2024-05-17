@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import { ConversationSelector } from '.';
-import { render, fireEvent, within } from '@testing-library/react';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { CONVERSATION_SELECTOR_PLACE_HOLDER } from './translations';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 const setConversation = jest.fn();
 const deleteConversation = jest.fn();

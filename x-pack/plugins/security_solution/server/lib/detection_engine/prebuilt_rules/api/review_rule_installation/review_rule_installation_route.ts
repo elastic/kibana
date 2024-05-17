@@ -13,13 +13,13 @@ import type {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/normalization/rule_converters';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
-import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/normalization/rule_converters';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

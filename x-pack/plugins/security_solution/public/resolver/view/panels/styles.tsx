@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiBreadcrumbs, EuiCode, EuiDescriptionList } from '@elastic/eui';
 import { memo } from 'react';
-import { EuiCode, EuiBreadcrumbs, EuiDescriptionList } from '@elastic/eui';
 
 import styled from 'styled-components';
 

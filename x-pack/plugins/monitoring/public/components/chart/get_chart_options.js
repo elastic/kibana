@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Legacy } from '../../legacy_shims';
 import { merge } from 'lodash';
 import { CHART_LINE_COLOR, CHART_TEXT_COLOR } from '../../../common/constants';
+import { Legacy } from '../../legacy_shims';
 
 export async function getChartOptions(axisOptions) {
   const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');

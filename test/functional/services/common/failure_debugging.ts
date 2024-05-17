@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { mkdir, writeFile } from 'fs';
 import { resolve } from 'path';
-import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import del from 'del';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
+import del from 'del';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface Test {

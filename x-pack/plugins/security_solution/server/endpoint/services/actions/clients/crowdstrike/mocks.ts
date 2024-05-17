@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { CrowdstrikeGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import type { CrowdstrikeGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { merge } from 'lodash';
+import type { NormalizedExternalConnectorClient } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
-import type { NormalizedExternalConnectorClient } from '../../..';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;

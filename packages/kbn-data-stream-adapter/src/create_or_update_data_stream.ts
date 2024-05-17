@@ -8,7 +8,7 @@
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

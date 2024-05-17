@@ -6,8 +6,8 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ActionConnectorProps } from '../../../types';
 import { loadAllActions } from '.';
+import { ActionConnectorProps } from '../../../types';
 
 const http = httpServiceMock.createStartContract();
 

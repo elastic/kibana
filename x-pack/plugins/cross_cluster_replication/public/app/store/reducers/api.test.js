@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { reducer, initialState } from './api';
 import { API_STATUS } from '../../constants';
-import { apiRequestStart, apiRequestEnd, setApiError } from '../actions';
+import { apiRequestEnd, apiRequestStart, setApiError } from '../actions';
+import { initialState, reducer } from './api';
 
 jest.mock('../../constants', () => ({
   API_STATUS: {

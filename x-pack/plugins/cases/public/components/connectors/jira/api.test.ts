@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
+import { getFieldsByIssueType, getIssue, getIssueTypes, getIssues } from './api';
 
 const issueTypesResponse = {
   data: {

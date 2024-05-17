@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -16,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 import { ConnectionDetails } from './connection_details';
 import { useConnectionDetailsOpts } from './context';
 import { Tabs } from './tabs';

@@ -13,10 +13,10 @@ import { Observable } from 'rxjs';
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { JSON } from '../../common';
 import { LazyDebugRenderComponent } from '../components';
 

@@ -7,11 +7,6 @@
     "id": "screenshottingExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "screenshotting",
-      "developerExamples",
-      "kibanaReact",
-      "navigation"
-    ]
+    "requiredPlugins": ["screenshotting", "developerExamples", "kibanaReact", "navigation"]
   }
 }

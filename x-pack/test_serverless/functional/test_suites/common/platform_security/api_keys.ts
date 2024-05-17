@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
+import expect from '@kbn/expect';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

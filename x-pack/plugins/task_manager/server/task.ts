@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { ObjectType, TypeOf, schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
-import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { isErr, tryAsResult } from './lib/result_type';
 import { DecoratedError } from './task_running';
 
 export enum TaskPriority {

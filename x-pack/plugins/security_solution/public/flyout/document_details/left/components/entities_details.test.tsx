@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
-import { TestProviders } from '../../../../common/mock';
-import { EntitiesDetails } from './entities_details';
-import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
-import type { Anomalies } from '../../../../common/components/ml/types';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import type { Anomalies } from '../../../../common/components/ml/types';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
+import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
+import { TestProviders } from '../../../../common/mock';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { LeftPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
+import { EntitiesDetails } from './entities_details';
+import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

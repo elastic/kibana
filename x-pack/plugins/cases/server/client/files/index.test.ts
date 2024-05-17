@@ -6,9 +6,9 @@
  */
 
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
+import { createFileEntities, deleteFiles } from '.';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { constructFileKindIdByOwner } from '../../../common/files';
-import { createFileEntities, deleteFiles } from '.';
 
 describe('server files', () => {
   describe('createFileEntities', () => {

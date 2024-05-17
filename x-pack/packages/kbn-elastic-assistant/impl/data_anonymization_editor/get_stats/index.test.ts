@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Stats } from '../helpers';
 import { getStats } from '.';
+import type { Stats } from '../helpers';
 
 describe('getStats', () => {
   it('returns ZERO_STATS for string rawData', () => {

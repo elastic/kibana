@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MetricsAPIRequest } from '../../../../common/http_api';
 import moment from 'moment';
+import { MetricsAPIRequest } from '../../../../common/http_api';
 import { convertBucketsToMetricsApiSeries } from './convert_buckets_to_metrics_series';
 
 const keys = ['example-0'];

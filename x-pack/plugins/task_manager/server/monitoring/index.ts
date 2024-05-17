@@ -8,16 +8,16 @@
 import { Logger } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { TaskManagerConfig } from '../config';
+import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
+import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { TaskStore } from '../task_store';
 import {
   MonitoringStats,
   createAggregators,
   createMonitoringStatsStream,
 } from './monitoring_stats_stream';
-import { TaskStore } from '../task_store';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
-import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
-import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {

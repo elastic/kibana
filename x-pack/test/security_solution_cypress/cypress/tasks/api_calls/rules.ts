@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import type {
+  RuleCreateProps,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '@kbn/security-solution-plugin/common/constants';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
+import moment from 'moment';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { rootRequest } from './common';
 

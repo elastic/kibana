@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import { DocLinksService } from './doc_links_service';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { DocLinksService } from './doc_links_service';
+import { getDocLinksMetaMock, getDocLinksMock } from './doc_links_service.test.mocks';
 
 describe('DocLinksService', () => {
   let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createStartContract>;

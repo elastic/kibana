@@ -14,10 +14,10 @@ import { UserProfileAvatarData } from './types';
 
 import type { UserProfile, UserProfileUserInfo } from './user_profile';
 import {
+  USER_AVATAR_MAX_INITIALS,
   getUserAvatarColor,
   getUserAvatarInitials,
   getUserDisplayName,
-  USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 
 /**

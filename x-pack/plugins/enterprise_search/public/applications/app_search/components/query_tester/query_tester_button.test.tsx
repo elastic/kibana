@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { QueryTesterFlyout, QueryTesterButton } from '.';
+import { QueryTesterButton, QueryTesterFlyout } from '.';
 
 describe('QueryTesterButton', () => {
   beforeEach(() => {

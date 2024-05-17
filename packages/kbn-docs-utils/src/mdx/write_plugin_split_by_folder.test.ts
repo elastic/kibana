@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
-import { splitApisByFolder } from './write_plugin_split_by_folder';
+import { Project } from 'ts-morph';
 import { getPluginApi } from '../get_plugin_api';
 import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
 import { PluginOrPackage } from '../types';
+import { splitApisByFolder } from './write_plugin_split_by_folder';
 
 const log = new ToolingLog({
   level: 'debug',

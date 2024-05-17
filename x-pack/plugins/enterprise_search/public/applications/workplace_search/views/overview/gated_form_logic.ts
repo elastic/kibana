@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { GatedFormDataApiLogicActions, UpdateGatedFormDataApiLogic } from './gated_form_api_logic';
 

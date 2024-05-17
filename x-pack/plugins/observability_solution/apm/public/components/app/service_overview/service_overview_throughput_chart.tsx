@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ChartType, getTimeSeriesColor } from '../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
-import { ChartType, getTimeSeriesColor } from '../../shared/charts/helper/get_timeseries_color';
-import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
 
 const INITIAL_STATE = {

@@ -10,15 +10,15 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   API_VERSIONS,
-  INTERNAL_API_ACCESS,
   GetEvaluateResponse,
+  INTERNAL_API_ACCESS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { EVALUATE } from '../../../common/constants';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
+import { buildResponse } from '../../lib/build_response';
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned

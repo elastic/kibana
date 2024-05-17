@@ -7,12 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type { RunOpts, SearchAfterAndBulkCreateReturnType, RuleServices } from '../../types';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
+import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
 
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
-import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 type BulkCreateUnsuppressedAlerts = (params: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;

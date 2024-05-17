@@ -5,17 +5,17 @@
  * 2.0.
  */
 import type { JsonValue } from '@kbn/utility-types';
-import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 import type { AppMockRenderer } from '../../common/mock';
 
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 describe('getFileType', () => {
   const fileType = getFileType();

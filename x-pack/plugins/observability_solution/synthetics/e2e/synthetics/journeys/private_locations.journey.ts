@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { journey, step, before, after, expect } from '@elastic/synthetics';
+import { after, before, expect, journey, step } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { byTestId } from '../../helpers/utils';
 import { recordVideo } from '../../helpers/record_video';
+import { byTestId } from '../../helpers/utils';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   addTestMonitor,
   cleanPrivateLocations,
   cleanTestMonitors,
   getPrivateLocations,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   recordVideo(page);

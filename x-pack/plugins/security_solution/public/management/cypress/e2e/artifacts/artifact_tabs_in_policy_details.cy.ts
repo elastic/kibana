@@ -6,8 +6,8 @@
  */
 
 import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users';
-import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
+import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import {
   createArtifactList,
@@ -16,9 +16,9 @@ import {
   removeExceptionsList,
   yieldFirstPolicyID,
 } from '../../tasks/artifacts';
-import { login, ROLE } from '../../tasks/login';
-import { performUserActions } from '../../tasks/perform_user_actions';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { ROLE, login } from '../../tasks/login';
+import { performUserActions } from '../../tasks/perform_user_actions';
 import type { ReturnTypeFromChainable } from '../../types';
 
 const loginWithPrivilegeAll = () => {

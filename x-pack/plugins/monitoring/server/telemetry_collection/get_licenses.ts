@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { ESLicense } from '@kbn/telemetry-collection-xpack-plugin/server';
 import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 

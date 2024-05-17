@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   ENDPOINT_LIST_DESCRIPTION,
@@ -14,19 +20,13 @@ import {
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
 import type { KbnClient } from '@kbn/test';
-import type {
-  CreateExceptionListSchema,
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { memoize } from 'lodash';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
-import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
-import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
-import { BLOCKLISTS_LIST_DEFINITION } from '../../../public/management/pages/blocklist/constants';
-import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/host_isolation_exceptions/constants';
 import type { NewTrustedApp } from '../../../common/endpoint/types';
+import { BLOCKLISTS_LIST_DEFINITION } from '../../../public/management/pages/blocklist/constants';
+import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
+import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/host_isolation_exceptions/constants';
+import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 
 const ensureArtifactListExists = memoize(

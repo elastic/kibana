@@ -6,11 +6,11 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import * as i18n from './translations';
-import { deleteCases } from './api';
-import type { ServerError } from '../types';
-import { casesQueriesKeys, casesMutationsKeys } from './constants';
 import { useCasesToast } from '../common/use_cases_toast';
+import type { ServerError } from '../types';
+import { deleteCases } from './api';
+import { casesMutationsKeys, casesQueriesKeys } from './constants';
+import * as i18n from './translations';
 
 interface MutationArgs {
   caseIds: string[];

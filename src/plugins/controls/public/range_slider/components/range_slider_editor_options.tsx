@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 import type { RangeSliderEmbeddableInput } from '../../../common/range_slider/types';
 import { ControlEditorProps } from '../../types';

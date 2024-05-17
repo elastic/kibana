@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import {
-  getInventoryViewInAppUrl,
   flatAlertRuleParams,
+  getInventoryViewInAppUrl,
   getMetricsViewInAppUrl,
 } from './alert_link';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { resolve, dirname } from 'path';
-import globby from 'globby';
+import { dirname, resolve } from 'path';
 import { readFile } from 'fs/promises';
+import globby from 'globby';
 
 interface I18NRCFileStructure {
   translations?: string[];

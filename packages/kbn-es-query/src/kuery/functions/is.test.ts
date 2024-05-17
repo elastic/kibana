@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
+import { nodeTypes } from '../node_types';
 
-import * as is from './is';
-import { DataViewBase } from '../../..';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
+import { DataViewBase } from '../../..';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
+import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
+import * as is from './is';
 import { KqlIsFunctionNode } from './is';
 
 describe('kuery functions', () => {

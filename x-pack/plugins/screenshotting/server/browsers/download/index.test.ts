@@ -6,12 +6,12 @@
  */
 
 import path from 'path';
-import mockFs from 'mock-fs';
 import { access, readdir } from 'fs/promises';
-import { ChromiumArchivePaths, PackageInfo } from '../chromium';
-import { fetch } from './fetch';
-import { sha256 } from './checksum';
+import mockFs from 'mock-fs';
 import { download } from '.';
+import { ChromiumArchivePaths, PackageInfo } from '../chromium';
+import { sha256 } from './checksum';
+import { fetch } from './fetch';
 
 jest.mock('./checksum');
 jest.mock('./fetch');

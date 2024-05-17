@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({

@@ -10,8 +10,8 @@ import { DataProviderType } from '../../../../common/api/timeline';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {
   EXISTS_OPERATOR,
-  IS_OPERATOR,
   IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
 } from '../timeline/data_providers/data_provider';
 
 import {

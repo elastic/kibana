@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
-import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { getRepeatImageRenderer } from '../repeat_image_renderer';
 
 const Renderer = ({

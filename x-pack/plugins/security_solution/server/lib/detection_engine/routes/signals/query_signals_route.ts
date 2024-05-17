@@ -6,12 +6,12 @@
  */
 
 import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../utils';
 
 import type { QuerySignalsSchemaDecoded } from '../../../../../common/api/detection_engine/signals';
 import { querySignalsSchema } from '../../../../../common/api/detection_engine/signals';

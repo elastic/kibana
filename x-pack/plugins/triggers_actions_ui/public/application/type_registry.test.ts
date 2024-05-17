@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { TypeRegistry } from './type_registry';
 import {
-  ValidationResult,
-  RuleTypeModel,
   ActionTypeModel,
   GenericValidationResult,
+  RuleTypeModel,
+  ValidationResult,
 } from '../types';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
+import { TypeRegistry } from './type_registry';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;

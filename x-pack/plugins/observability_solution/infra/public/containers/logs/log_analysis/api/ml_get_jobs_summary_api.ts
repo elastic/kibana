@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
+import * as rt from 'io-ts';
 
 import { IdFormat, JobType } from '../../../../../common/http_api/latest';
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';

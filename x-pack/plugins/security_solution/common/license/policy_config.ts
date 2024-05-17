@@ -6,15 +6,15 @@
  */
 
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { isAtLeast } from './license';
-import type { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
+  policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
-  policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
+import type { PolicyConfig } from '../endpoint/types';
+import { isAtLeast } from './license';
 
 function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {

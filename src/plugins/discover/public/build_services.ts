@@ -8,60 +8,60 @@
 
 import { History } from 'history';
 
+import { UiCounterMetricType } from '@kbn/analytics';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
+  AnalyticsServiceStart,
+  AppMountParameters,
+  ApplicationStart,
   Capabilities,
   ChromeStart,
   CoreStart,
   DocLinksStart,
-  ToastsStart,
+  HttpStart,
   I18nStart,
   IUiSettingsClient,
-  PluginInitializerContext,
-  HttpStart,
   NotificationsStart,
-  ApplicationStart,
-  AnalyticsServiceStart,
-  AppMountParameters,
+  PluginInitializerContext,
   ScopedHistory,
+  ToastsStart,
 } from '@kbn/core/public';
 import {
+  DataPublicPluginStart,
+  DataViewsContract,
   FilterManager,
   TimefilterContract,
-  DataViewsContract,
-  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { UiCounterMetricType } from '@kbn/analytics';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { memoize, noop } from 'lodash';
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import { DiscoverStartPlugins } from './plugin';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { memoize, noop } from 'lodash';
+import { DiscoverAppLocator } from '../common';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
-import { DiscoverAppLocator } from '../common';
+import { DiscoverStartPlugins } from './plugin';
 
 /**
  * Location state of internal Discover history instance

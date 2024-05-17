@@ -7,14 +7,14 @@
 
 import {
   EuiButtonIcon,
-  EuiFlexItem,
   EuiContextMenuPanel,
+  EuiFlexItem,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState } from 'react';
 import { getAlertsTableDefaultAlertActionsLazy } from '../../../../common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps } from '../../../../types';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import SemVer from 'semver/classes/semver';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import SemVer from 'semver/classes/semver';
 
 import { apiService } from './application/lib/api';
 import { breadcrumbService } from './application/lib/breadcrumbs';
 import { uiMetricService } from './application/lib/ui_metric';
-import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
+import { AppDependencies, ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>

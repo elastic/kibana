@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
 import { createReadStream } from 'fs';
+import path from 'path';
 import type SuperTest from 'supertest';
 
 type SupportedPackage = 'beat' | 'elasticsearch' | 'enterprisesearch' | 'logstash' | 'kibana';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { overwrite } from '../../helpers';
 import { getFieldsForTerms } from '../../../../../common/fields_utils';
+import { overwrite } from '../../helpers';
 
 export function splitByEverything(req, panel, series) {
   return (next) => (doc) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import expect from '@kbn/expect';
 import { navigateToCasesApp } from '../../../../../shared/lib/cases/helpers';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-import { TooltipIcon, IconType } from '../tooltip_icon';
+import { IconType, TooltipIcon } from '../tooltip_icon';
 
 const strings = {
   getFailureTooltip: () =>

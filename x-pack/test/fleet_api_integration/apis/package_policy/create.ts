@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
-import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import expect from '@kbn/expect';
 import { Installation } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 

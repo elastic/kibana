@@ -11,16 +11,16 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCode,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiSwitch,
-  EuiCode,
-  EuiSpacer,
   EuiLink,
-  EuiTitle,
+  EuiSpacer,
+  EuiSwitch,
   EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
@@ -34,21 +34,21 @@ import {
   CLIENT_SECRET_LABEL,
   CONFIDENTIAL_HELP_TEXT,
   CONFIDENTIAL_LABEL,
-  CREDENTIALS_TITLE,
   CREDENTIALS_DESCRIPTION,
+  CREDENTIALS_TITLE,
+  EXPLORE_PLATINUM_FEATURES_LINK,
   NAME_LABEL,
   NAV,
+  NON_PLATINUM_OAUTH_DESCRIPTION,
+  NON_PLATINUM_OAUTH_TITLE,
   OAUTH_DESCRIPTION,
   OAUTH_PERSISTED_DESCRIPTION,
   REDIRECT_HELP_TEXT,
-  REDIRECT_NATIVE_HELP_TEXT,
   REDIRECT_INSECURE_ERROR_TEXT,
+  REDIRECT_NATIVE_HELP_TEXT,
   REDIRECT_SECURE_ERROR_TEXT,
   REDIRECT_URIS_LABEL,
   SAVE_CHANGES_BUTTON,
-  NON_PLATINUM_OAUTH_TITLE,
-  NON_PLATINUM_OAUTH_DESCRIPTION,
-  EXPLORE_PLATINUM_FEATURES_LINK,
 } from '../../../constants';
 import { SettingsLogic } from '../settings_logic';
 

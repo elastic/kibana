@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useMemo } from 'react';

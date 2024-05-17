@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { HttpSetup } from '@kbn/core/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { HttpSetup } from '@kbn/core/public';
+import { WindowSchema } from '../typings';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
-import { WindowSchema } from '../typings';
 
 export interface SloRule extends Record<string, unknown> {
   windows: WindowSchema[];

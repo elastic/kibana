@@ -3,21 +3,21 @@
   "processors": [
     {
       "pipeline": {
-          "if": "ctx.message.charAt(0) == (char)(\"{\")",
-          "name": "{<IngestPipeline 'pipeline-json' >}"
+        "if": "ctx.message.charAt(0) == (char)(\"{\")",
+        "name": "{<IngestPipeline 'pipeline-json' >}"
       }
     },
     {
       "pipeline": {
-          "if": "ctx.message.charAt(0) != (char)(\"{\")",
-          "name": "{<IngestPipeline 'pipeline-plaintext' >}"
+        "if": "ctx.message.charAt(0) != (char)(\"{\")",
+        "name": "{<IngestPipeline 'pipeline-plaintext' >}"
       }
     },
     {
       "script": {
         "lang": "painless",
         "source": "ctx.event.created = ctx['@timestamp']; ctx['@timestamp'] = ctx['timestamp']; ctx.remove('timestamp');",
-        "ignore_failure" : true
+        "ignore_failure": true
       }
     },
     {
@@ -35,32 +35,32 @@
       }
     },
     {
-      "convert" : {
-        "field" : "source.port",
+      "convert": {
+        "field": "source.port",
         "type": "integer"
       }
     },
     {
-      "convert" : {
-        "field" : "coredns.duration",
+      "convert": {
+        "field": "coredns.duration",
         "type": "double"
       }
     },
     {
-      "convert" : {
-        "field" : "coredns.query.size",
+      "convert": {
+        "field": "coredns.query.size",
         "type": "long"
       }
     },
     {
-      "convert" : {
-        "field" : "coredns.response.size",
+      "convert": {
+        "field": "coredns.response.size",
         "type": "long"
       }
     },
     {
-      "convert" : {
-        "field" : "coredns.dnssec_ok",
+      "convert": {
+        "field": "coredns.dnssec_ok",
         "type": "boolean"
       }
     },
@@ -92,10 +92,12 @@
       }
     }
   ],
-  "on_failure" : [{
-    "set" : {
-      "field" : "error.message",
-      "value" : "{{ _ingest.on_failure_message }}"
+  "on_failure": [
+    {
+      "set": {
+        "field": "error.message",
+        "value": "{{ _ingest.on_failure_message }}"
+      }
     }
-  }]
+  ]
 }

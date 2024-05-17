@@ -7,8 +7,8 @@
  */
 
 import type {
-  SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 
 export const migrations = {

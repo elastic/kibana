@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { PANEL_ID } from '@storybook/addon-actions';
 import { addons } from '@storybook/addons';
 import { create } from '@storybook/theming';
-import { PANEL_ID } from '@storybook/addon-actions';
 
 import { registerThemeSwitcherAddon } from '@kbn/storybook/src/lib/register_theme_switcher_addon';
 

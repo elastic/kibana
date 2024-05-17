@@ -7,8 +7,8 @@
 
 import {
   LogicMounter,
-  mockHttpValues,
   mockFlashMessageHelpers,
+  mockHttpValues,
 } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 

@@ -7,8 +7,8 @@
 
 import type { LayoutParams } from '../../common/layout';
 import { CanvasLayout } from './canvas_layout';
-import { PreserveLayout } from './preserve_layout';
 import { createLayout } from './create_layout';
+import { PreserveLayout } from './preserve_layout';
 
 describe('Create Layout', () => {
   it('creates preserve layout instance', () => {

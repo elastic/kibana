@@ -1,3 +1,8 @@
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +11,6 @@
  */
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
-import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
 import './_entity_filter.scss';
 

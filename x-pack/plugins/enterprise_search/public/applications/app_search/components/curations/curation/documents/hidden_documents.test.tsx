@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';

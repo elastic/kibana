@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { MouseEventHandler, ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
-import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 
 const SCROLLING_PADDING = 20;
 

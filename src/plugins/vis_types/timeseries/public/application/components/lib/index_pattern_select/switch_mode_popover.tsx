@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
 
 import {
   EuiButtonIcon,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiLink,
 } from '@elastic/eui';
 
-import type { PopoverProps } from './types';
-import { getCoreStart, getUISettings } from '../../../../services';
 import { UI_SETTINGS } from '../../../../../common/constants';
+import { getCoreStart, getUISettings } from '../../../../services';
+import type { PopoverProps } from './types';
 
 const allowStringIndicesMessage = i18n.translate(
   'visTypeTimeseries.indexPatternSelect.switchModePopover.allowStringIndices',

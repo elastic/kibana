@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { RecentCasesFilters, caseFilterOptions } from '.';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { waitFor, fireEvent } from '@testing-library/react';
-import { RecentCasesFilters, caseFilterOptions } from '.';
 import type { FilterMode } from '../types';
 
 describe('Severity form field', () => {

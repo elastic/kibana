@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import {
-  AggParamsMapping,
   AggConfigSerialized,
-  SerializedSearchSourceFields,
-  METRIC_TYPES,
+  AggParamsMapping,
   BUCKET_TYPES,
+  METRIC_TYPES,
+  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export interface VisParams {
   [key: string]: any;

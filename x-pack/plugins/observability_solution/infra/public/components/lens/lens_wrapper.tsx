@@ -1,3 +1,8 @@
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +10,6 @@
  * 2.0.
  */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import type { LensWrapperProps } from './types';

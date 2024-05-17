@@ -21,9 +21,7 @@
       "type": "Interface",
       "tags": [],
       "label": "EcsDataQualityDashboardPluginSetup",
-      "description": [
-        "The plugin setup interface"
-      ],
+      "description": ["The plugin setup interface"],
       "path": "x-pack/plugins/ecs_data_quality_dashboard/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -37,9 +35,7 @@
       "type": "Interface",
       "tags": [],
       "label": "EcsDataQualityDashboardPluginStart",
-      "description": [
-        "The plugin start interface"
-      ],
+      "description": ["The plugin start interface"],
       "path": "x-pack/plugins/ecs_data_quality_dashboard/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,

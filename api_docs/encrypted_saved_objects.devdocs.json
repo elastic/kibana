@@ -38,9 +38,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -52,9 +50,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -67,9 +63,7 @@
                 "tags": [],
                 "label": "attributeName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -103,9 +97,7 @@
                 "tags": [],
                 "label": "cause",
                 "description": [],
-                "signature": [
-                  "Error | undefined"
-                ],
+                "signature": ["Error | undefined"],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -121,9 +113,7 @@
             "tags": [],
             "label": "toJSON",
             "description": [],
-            "signature": [
-              "() => { message: string; }"
-            ],
+            "signature": ["() => { message: string; }"],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -167,9 +157,7 @@
             "tags": [],
             "label": "dangerouslyExposeValue",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -365,9 +353,7 @@
             "tags": [],
             "label": "shouldMigrateIfDecryptionFails",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -465,9 +451,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -480,9 +464,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -624,9 +606,7 @@
             "tags": [],
             "label": "includedHiddenTypes",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -687,9 +667,7 @@
             "tags": [],
             "label": "attributesToIncludeInAAD",
             "description": [],
-            "signature": [
-              "ReadonlySet<string> | undefined"
-            ],
+            "signature": ["ReadonlySet<string> | undefined"],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1036,9 +1014,7 @@
               "tags": [],
               "label": "opts",
               "description": [],
-              "signature": [
-                "CreateEsoModelVersionFnOpts"
-              ],
+              "signature": ["CreateEsoModelVersionFnOpts"],
               "path": "x-pack/plugins/encrypted_saved_objects/server/create_model_version.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -1067,9 +1043,7 @@
           "tags": [],
           "label": "isEncryptionError",
           "description": [],
-          "signature": [
-            "(error: Error) => boolean"
-          ],
+          "signature": ["(error: Error) => boolean"],
           "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1081,9 +1055,7 @@
               "tags": [],
               "label": "error",
               "description": [],
-              "signature": [
-                "Error"
-              ],
+              "signature": ["Error"],
               "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,

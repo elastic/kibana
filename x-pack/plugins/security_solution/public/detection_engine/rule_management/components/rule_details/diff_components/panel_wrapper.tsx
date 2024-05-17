@@ -6,8 +6,8 @@
  */
 
 import { EuiAccordion, EuiSplitPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { camelCase, startCase } from 'lodash';
 import { css } from '@emotion/css';
+import { camelCase, startCase } from 'lodash';
 import React from 'react';
 import { fieldToDisplayNameMap } from './translations';
 

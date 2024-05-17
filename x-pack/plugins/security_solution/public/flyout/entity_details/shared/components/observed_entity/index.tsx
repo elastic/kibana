@@ -7,14 +7,14 @@
 
 import { EuiAccordion, EuiSpacer, EuiTitle, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityTable } from '../entity_table';
+import React from 'react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
-import type { EntityTableRows } from '../entity_table/types';
 import { ONE_WEEK_IN_HOURS } from '../../constants';
+import { EntityTable } from '../entity_table';
+import type { EntityTableRows } from '../entity_table/types';
 import type { ObservedEntityData } from './types';
 
 export const ObservedEntity = <T,>({

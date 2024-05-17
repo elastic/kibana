@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
+import { i18n } from '@kbn/i18n';
 import { APMIndices } from '..';
+import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';
@@ -91,10 +91,13 @@ function removeEmpty(apmIndices: Partial<APMIndices>) {
   return Object.entries(apmIndices)
     .map(([key, value]) => [key, value?.trim()])
     .filter(([_, value]) => !!value)
-    .reduce((obj, [key, value]) => {
-      obj[key] = value;
-      return obj;
-    }, {} as Record<string, unknown>);
+    .reduce(
+      (obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      },
+      {} as Record<string, unknown>
+    );
 }
 
 export async function getApmIndicesSavedObject(savedObjectsClient: SavedObjectsClientContract) {

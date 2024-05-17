@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Datatable, ExpressionFunctionDefinition, Range } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Range } from '@kbn/expressions-plugin/common';
 
 interface Arguments {
   from: number;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
 import { storiesOf } from '@storybook/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-theme';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { AndOrBadge } from '..';
 

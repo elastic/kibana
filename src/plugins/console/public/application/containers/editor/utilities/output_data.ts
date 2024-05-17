@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { YAML_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
+import { CONSOLE_OUTPUT_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
 import { expandLiteralStrings } from '../../../../shared_imports';
 
 export const isJSONContentType = (contentType?: string) =>

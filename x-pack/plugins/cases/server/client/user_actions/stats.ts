@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { CasesClientArgs } from '..';
 import type { CaseUserActionStatsResponse } from '../../../common/types/api';
 import { CaseUserActionStatsResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import type { CasesClientArgs } from '..';
-import type { UserActionGet } from './types';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../client';
+import type { UserActionGet } from './types';
 
 export const getStats = async (
   { caseId }: UserActionGet,

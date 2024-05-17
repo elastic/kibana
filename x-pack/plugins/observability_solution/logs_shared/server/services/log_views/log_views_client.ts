@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsUtils,
   SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
 } from '@kbn/core/server';
+import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  defaultLogViewAttributes,
-  defaultLogViewId,
   LogView,
   LogViewAttributes,
   LogViewReference,
   LogViewsStaticConfig,
-  persistedLogViewReferenceRT,
   ResolvedLogView,
+  defaultLogViewAttributes,
+  defaultLogViewId,
+  persistedLogViewReferenceRT,
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';

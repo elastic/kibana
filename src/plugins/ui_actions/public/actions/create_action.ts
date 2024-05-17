@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ActionDefinition, Action } from './action';
+import { Action, ActionDefinition } from './action';
 
 export function createAction<Context extends object = object>(
   action: ActionDefinition<Context>

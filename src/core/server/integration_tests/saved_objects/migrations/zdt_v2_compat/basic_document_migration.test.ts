@@ -7,18 +7,18 @@
  */
 
 import Path from 'path';
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
-  getSampleAType,
   getLegacyType,
+  getSampleAType,
 } from '../fixtures/zdt_base.fixtures';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { delay, parseLogFile } from '../test_utils';
 
 const logFilePath = Path.join(__dirname, 'basic_document_migration.test.log');
 

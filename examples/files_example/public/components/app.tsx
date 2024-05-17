@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
+import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 
 import {
-  EuiProvider,
-  EuiPageTemplate,
+  EuiButton,
+  EuiButtonIcon,
+  EuiIcon,
   EuiInMemoryTable,
   EuiInMemoryTableProps,
-  EuiButton,
-  EuiIcon,
-  EuiButtonIcon,
   EuiLink,
+  EuiPageTemplate,
+  EuiProvider,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
-import { MyFilePicker } from './file_picker';
 import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';
-import { DetailsFlyout } from './details_flyout';
 import { ConfirmButtonIcon } from './confirm_button';
+import { DetailsFlyout } from './details_flyout';
+import { MyFilePicker } from './file_picker';
 import { Modal } from './modal';
 
 interface FilesExampleAppDeps {

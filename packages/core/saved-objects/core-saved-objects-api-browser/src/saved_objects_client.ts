@@ -12,15 +12,15 @@ import type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
   SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsBulkDeleteResponse,
-  SavedObjectsBulkDeleteOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateOptions,
 } from './apis';
 import type { SimpleSavedObject } from './simple_saved_object';
 

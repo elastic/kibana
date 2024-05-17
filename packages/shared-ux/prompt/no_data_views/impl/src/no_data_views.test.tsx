@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
+import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';

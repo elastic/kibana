@@ -9,9 +9,9 @@ import React, { useCallback, useRef } from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
+import { ViewApiRequestFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewApiRequestFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 

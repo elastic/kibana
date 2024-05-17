@@ -7,8 +7,8 @@
  */
 
 import fetch, { Response } from 'node-fetch';
-import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
+import { CloudService } from './cloud_service';
 
 // GCP documentation shows both 'metadata.google.internal' (mostly) and '169.254.169.254' (sometimes)
 // To bypass potential DNS changes, the IP was used because it's shared with other cloud services

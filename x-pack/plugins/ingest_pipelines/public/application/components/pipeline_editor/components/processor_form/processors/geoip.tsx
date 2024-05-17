@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
-import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../shared_imports';
+import { FIELD_TYPES, Field, ToggleField, UseField } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, from, to } from './shared';
-import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
+import { TargetField } from './common_fields/target_field';
+import { FieldsConfig, from, to } from './shared';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */

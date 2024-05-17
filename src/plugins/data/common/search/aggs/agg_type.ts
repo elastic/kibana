@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { constant, identity, noop } from 'lodash';
 
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ISearchSource } from '../../../public';
-import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
-import { BaseParamType } from './param_types/base';
+import { initParams } from './agg_params';
 import { AggParamType } from './param_types/agg';
+import { BaseParamType } from './param_types/base';
 
 type PostFlightRequestFn<TAggConfig> = (
   resp: estypes.SearchResponse<any>,
@@ -35,7 +35,7 @@ type PostFlightRequestFn<TAggConfig> = (
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>,
 > {
   name: string;
   title: string;
@@ -68,7 +68,7 @@ export type IAggType = AggType;
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>,
 > {
   /**
    * the unique, unchanging, name that we have assigned this aggType

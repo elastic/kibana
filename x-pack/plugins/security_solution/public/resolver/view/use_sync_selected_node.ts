@@ -6,13 +6,13 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import type { State } from '../../common/store/types';
+import { userSelectedResolverNode } from '../store/actions';
+import { panelViewAndParameters } from '../store/panel_view_and_parameters';
 import * as selectors from '../store/selectors';
 import { SideEffectContext } from './side_effect_context';
-import { panelViewAndParameters } from '../store/panel_view_and_parameters';
-import { userSelectedResolverNode } from '../store/actions';
-import type { State } from '../../common/store/types';
 
 /**
  * This custom hook, will maintain the state of the active/selected node with the what the selected nodeID is in url state.

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { SolutionSideNavPanel, type SolutionSideNavPanelProps } from './solution_side_nav_panel';
-import { BETA_LABEL } from './beta_badge';
-import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-navigation';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { BETA_LABEL } from './beta_badge';
+import { SolutionSideNavPanel, type SolutionSideNavPanelProps } from './solution_side_nav_panel';
+import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
 import type { SolutionSideNavItem } from './types';
-import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-navigation';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {

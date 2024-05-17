@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
+import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { getDefaultChartsData } from './explorer_charts_container_service';
 import { ExplorerChartsContainer, getEntitiesQuery } from './explorer_charts_container';
+import { getDefaultChartsData } from './explorer_charts_container_service';
 
+import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
-import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
-import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
-import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
 jest.mock('../../services/job_service', () => ({
   mlJobService: {

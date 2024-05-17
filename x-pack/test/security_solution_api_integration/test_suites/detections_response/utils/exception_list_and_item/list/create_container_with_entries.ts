@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ListArray, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { createExceptionList } from './create_exception_list';
-import { createExceptionListItem } from '../item/create_exception_list_item';
 import { waitFor } from '../../../../../../common/utils/security_solution';
+import { createExceptionListItem } from '../item/create_exception_list_item';
+import { createExceptionList } from './create_exception_list';
 
 /**
  * Convenience testing function where you can pass in just the endpoint entries and you will

@@ -30,11 +30,11 @@ import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../app_logic';
 import connectionIllustration from '../../../../assets/connection_illustration.svg';
 import {
-  WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
+  WorkplaceSearchPageTemplate,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { getSourcesPath, getAddPath } from '../../../../routes';
+import { getAddPath, getSourcesPath } from '../../../../routes';
 import { staticGenericExternalSourceData } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';

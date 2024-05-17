@@ -6,7 +6,7 @@
  */
 
 // import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { isHexColor } from './utils';
 

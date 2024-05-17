@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
+import React, { Suspense } from 'react';
 import type { Props } from './chat';
 export type { ChatApi, Props } from './chat';
 

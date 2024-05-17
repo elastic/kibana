@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiIcon, EuiKeyPadMenuItem, type EuiIconProps } from '@elastic/eui';
+import { EuiIcon, type EuiIconProps, EuiKeyPadMenuItem } from '@elastic/eui';
 import { ProjectType } from '@kbn/serverless-types';
+import React from 'react';
 
-import { labels, icons } from './constants';
+import { icons, labels } from './constants';
 
 type OnChangeType = (id: string, value?: any) => void;
 

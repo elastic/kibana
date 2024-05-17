@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
   ThreeVersionsOf,
   ThreeWayDiff,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  determineDiffOutcome,
-  determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
+  determineDiffOutcome,
+  determineIfValueCanUpdate,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 export const simpleDiffAlgorithm = <TValue>(
   versions: ThreeVersionsOf<TValue>

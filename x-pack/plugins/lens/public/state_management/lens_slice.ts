@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current } from '@reduxjs/toolkit';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { mapValues, uniq } from 'lodash';
-import { Filter, Query } from '@kbn/es-query';
-import { History } from 'history';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { Filter, Query } from '@kbn/es-query';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { SeriesType } from '@kbn/visualizations-plugin/common';
+import { createAction, createReducer, current } from '@reduxjs/toolkit';
+import { History } from 'history';
+import { mapValues, uniq } from 'lodash';
 import { LensEmbeddableInput } from '..';
+import type { DateRange, LayerType } from '../../common/types';
+import type { LensAppServices } from '../app_plugin/types';
+import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
+import { generateId } from '../id_generator';
 import type {
-  VisualizeEditorContext,
-  Suggestion,
-  IndexPattern,
-  VisualizationMap,
   DatasourceMap,
   DragDropOperation,
+  IndexPattern,
+  Suggestion,
+  VisualizationMap,
+  VisualizeEditorContext,
 } from '../types';
-import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
-import { generateId } from '../id_generator';
-import type { DateRange, LayerType } from '../../common/types';
-import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import { getInitialDatasourceId, getRemoveOperation, getResolvedDateRange } from '../utils';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
-import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import type { LensAppServices } from '../app_plugin/types';
+import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -124,8 +124,8 @@ export const getPreloadedState = ({
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
-      ? initialContext.searchFilters
-      : data.query.filterManager.getFilters(),
+        ? initialContext.searchFilters
+        : data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId() || '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(

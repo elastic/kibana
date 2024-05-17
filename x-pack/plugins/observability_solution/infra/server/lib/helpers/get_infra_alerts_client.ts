@@ -1,3 +1,6 @@
+import { KibanaRequest } from '@kbn/core/server';
+import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginStartServicesAccessor } from '../../types';
 
 type RequiredParams = ESSearchRequest & {

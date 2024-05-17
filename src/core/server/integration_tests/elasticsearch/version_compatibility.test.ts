@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { CliArgs } from '@kbn/config';
 import {
-  createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
+  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { esTestConfig } from '@kbn/test';
-import { firstValueFrom, Subject } from 'rxjs';
-import { CliArgs } from '@kbn/config';
-import Semver from 'semver';
 import { unsafeConsole } from '@kbn/security-hardening';
+import { esTestConfig } from '@kbn/test';
+import { Subject, firstValueFrom } from 'rxjs';
+import Semver from 'semver';
 
 function nextMinor() {
   return Semver.inc(esTestConfig.getVersion(), 'minor') || '10.0.0';

@@ -7,18 +7,18 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { addSeverityAndEventTypeInBody } from './helpers';
+import { D3SecuritySeverity, SUB_ACTION } from '../../../common/d3security/constants';
 import {
   D3SecurityRunActionParamsSchema,
   D3SecurityRunActionResponseSchema,
 } from '../../../common/d3security/schema';
 import type {
   D3SecurityConfig,
-  D3SecuritySecrets,
   D3SecurityRunActionParams,
   D3SecurityRunActionResponse,
+  D3SecuritySecrets,
 } from '../../../common/d3security/types';
-import { D3SecuritySeverity, SUB_ACTION } from '../../../common/d3security/constants';
+import { addSeverityAndEventTypeInBody } from './helpers';
 
 export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3SecuritySecrets> {
   private url;

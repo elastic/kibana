@@ -6,8 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FullScreenshot, RefResult } from '../../../../common/runtime_types/ping/synthetics';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { RefResult, FullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
   _source: RefResult | FullScreenshot;

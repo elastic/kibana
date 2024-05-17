@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { ruleTagsRequestQuerySchema, ruleTagsFormattedResponseSchema } from '..';
+import { ruleTagsFormattedResponseSchema, ruleTagsRequestQuerySchema } from '..';
 
 export type RuleTagsRequestQuery = TypeOf<typeof ruleTagsRequestQuerySchema>;
 export type RuleTagsFormattedResponse = TypeOf<typeof ruleTagsFormattedResponseSchema>;

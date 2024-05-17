@@ -7,12 +7,12 @@
  */
 
 import { CspConfig, ICspConfig } from '@kbn/core/server';
-import { createCspCollector } from './csp_collector';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
+import { createCspCollector } from './csp_collector';
 
 const logger = loggingSystemMock.createLogger();
 

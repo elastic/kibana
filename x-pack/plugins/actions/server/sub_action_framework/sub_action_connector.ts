@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { isPlainObject, isEmpty } from 'lodash';
+import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
+import { inspect } from 'util';
 import { Type } from '@kbn/config-schema';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/logging';
 import axios, {
   AxiosInstance,
@@ -16,19 +21,14 @@ import axios, {
   AxiosHeaders,
   AxiosHeaderValue,
 } from 'axios';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isEmpty, isPlainObject } from 'lodash';
 import { finished } from 'stream/promises';
-import { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { inspect } from 'util';
-import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { request } from '../lib/axios_utils';
+import { assertURL } from './helpers/validators';
+import * as i18n from './translations';
 import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
-import * as i18n from './translations';
-import { request } from '../lib/axios_utils';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);

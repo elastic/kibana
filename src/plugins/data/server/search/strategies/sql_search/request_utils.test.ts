@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultAsyncSubmitParams, getDefaultAsyncGetParams } from './request_utils';
 import moment from 'moment';
 import { getMockSearchConfig } from '../../../../config.mock';
+import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 
 describe('request utils', () => {
   describe('getDefaultAsyncSubmitParams', () => {

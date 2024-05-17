@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { omit, pick } from 'lodash';
-import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { LineStyle } from '@kbn/visualization-ui-components';
+import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
+import dateMath from '@kbn/datemath';
 import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-common';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { LineStyle } from '@kbn/visualization-ui-components';
+import { omit, pick } from 'lodash';
+import moment from 'moment';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
 import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import { annotationColumns, EventAnnotationOutput } from '../types';
+import { EventAnnotationOutput, annotationColumns } from '../types';
 
 export const isRangeAnnotation = (
   annotation: EventAnnotationOutput
@@ -175,10 +175,13 @@ export const postprocessAnnotations = (
 
         let extraFields: Record<string, string | number | string[] | number[]> = {};
         if (annotationConfig?.extraFields?.length) {
-          extraFields = annotationConfig.extraFields.reduce((acc, field) => {
-            acc[`field:${field}`] = row[fieldsColIdMap[field]];
-            return acc;
-          }, {} as typeof extraFields);
+          extraFields = annotationConfig.extraFields.reduce(
+            (acc, field) => {
+              acc[`field:${field}`] = row[fieldsColIdMap[field]];
+              return acc;
+            },
+            {} as typeof extraFields
+          );
         }
         if (annotationConfig?.textField) {
           extraFields[`field:${annotationConfig.textField}`] =

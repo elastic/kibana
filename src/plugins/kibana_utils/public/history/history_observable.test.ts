@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { History, createMemoryHistory } from 'history';
+import { ParsedQuery } from 'query-string';
 import {
   createHistoryObservable,
   createQueryParamObservable,
   createQueryParamsObservable,
 } from './history_observable';
-import { createMemoryHistory, History } from 'history';
-import { ParsedQuery } from 'query-string';
 
 let history: History;
 

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportRequestOptions } from '@elastic/transport';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { Readable } from 'stream';
-import type { TransportRequestOptions } from '@elastic/transport';
-import { applyEsClientSearchMock } from '../../mocks/utils.mock';
-import type { HapiReadableStream } from '../../../types';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+} from '../../../../common/endpoint/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import type {
   EndpointActionResponse,
+  FileUploadMetadata,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  FileUploadMetadata,
 } from '../../../../common/endpoint/types';
-import {
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-  ENDPOINT_ACTIONS_INDEX,
-} from '../../../../common/endpoint/constants';
+import type { HapiReadableStream } from '../../../types';
+import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 
 export const createActionRequestsEsSearchResultsMock = (
   agentIds?: string[],

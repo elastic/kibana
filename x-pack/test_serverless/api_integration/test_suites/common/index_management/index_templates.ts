@@ -16,14 +16,14 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const randomness = getService('randomness');
   const indexManagementService = getService('indexManagement');
-  let getTemplatePayload: typeof indexManagementService['templates']['helpers']['getTemplatePayload'];
-  let catTemplate: typeof indexManagementService['templates']['helpers']['catTemplate'];
-  let getSerializedTemplate: typeof indexManagementService['templates']['helpers']['getSerializedTemplate'];
-  let createTemplate: typeof indexManagementService['templates']['api']['createTemplate'];
-  let updateTemplate: typeof indexManagementService['templates']['api']['updateTemplate'];
-  let deleteTemplates: typeof indexManagementService['templates']['api']['deleteTemplates'];
-  let simulateTemplate: typeof indexManagementService['templates']['api']['simulateTemplate'];
-  let cleanUpTemplates: typeof indexManagementService['templates']['api']['cleanUpTemplates'];
+  let getTemplatePayload: (typeof indexManagementService)['templates']['helpers']['getTemplatePayload'];
+  let catTemplate: (typeof indexManagementService)['templates']['helpers']['catTemplate'];
+  let getSerializedTemplate: (typeof indexManagementService)['templates']['helpers']['getSerializedTemplate'];
+  let createTemplate: (typeof indexManagementService)['templates']['api']['createTemplate'];
+  let updateTemplate: (typeof indexManagementService)['templates']['api']['updateTemplate'];
+  let deleteTemplates: (typeof indexManagementService)['templates']['api']['deleteTemplates'];
+  let simulateTemplate: (typeof indexManagementService)['templates']['api']['simulateTemplate'];
+  let cleanUpTemplates: (typeof indexManagementService)['templates']['api']['cleanUpTemplates'];
 
   let getRandomString: () => string;
   describe('Index templates', function () {

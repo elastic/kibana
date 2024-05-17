@@ -7,10 +7,10 @@
 
 import { mockHttpRequest, pageHelpers } from './helpers';
 
-import { act } from 'react-dom/test-utils';
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
-import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import { act } from 'react-dom/test-utils';
+import { init as initDocumentation, setHttp } from '../../crud_app/services';
+import { JOB_CLONE_INDEX_PATTERN_CHECK, JOB_TO_CLONE } from './helpers/constants';
 
 const { setup } = pageHelpers.jobClone;
 const {

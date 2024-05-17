@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState, useCallback } from 'react';
+import useMount from 'react-use/lib/useMount';
 import { DashboardItemWithTitle } from '../../../../../common/custom_dashboards';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 

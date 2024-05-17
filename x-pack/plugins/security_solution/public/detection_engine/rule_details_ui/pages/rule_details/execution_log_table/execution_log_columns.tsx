@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiLink,
-  EuiText,
   EuiButtonIcon,
+  EuiLink,
   EuiScreenReaderOnly,
+  EuiText,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import type {
   RuleExecutionResult,
@@ -25,9 +25,9 @@ import type {
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { PopoverTooltip } from '../../../../rule_management_ui/components/rules_table/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
+import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { RuleDurationFormat } from './rule_duration_format';
 
 import * as i18n from './translations';

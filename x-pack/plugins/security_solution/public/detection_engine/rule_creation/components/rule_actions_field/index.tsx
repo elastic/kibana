@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import deepMerge from 'deepmerge';
+import { isEmpty } from 'lodash/fp';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import type {
-  ActionVariables,
-  NotifyWhenSelectOptions,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
   RuleAction,
   RuleActionAlertsFilterProperty,
   RuleActionParam,
 } from '@kbn/alerting-plugin/common';
-import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type {
+  ActionVariables,
+  NotifyWhenSelectOptions,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,
-  FORM_ON_ACTIVE_ALERT_OPTION,
   FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_ON_ACTIVE_ALERT_OPTION,
   FORM_SUMMARY_BODY_MESSAGE,
 } from './translations';
 

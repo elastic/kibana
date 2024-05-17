@@ -7,14 +7,14 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
+import { RouterMock, mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
-  httpServiceMock,
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
+  httpServiceMock,
 } from '@kbn/core-http-server-mocks';
-import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import { CapabilitiesService } from './capabilities_service';
 
 const fakeRequest = {} as KibanaRequest;
@@ -74,8 +74,9 @@ describe('CapabilitiesService', () => {
         catalogue: { myPlugin: true },
       }));
       const start = service.start();
-      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' })
+      ).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "myPlugin": true,
@@ -104,8 +105,9 @@ describe('CapabilitiesService', () => {
         },
       }));
       const start = service.start();
-      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' })
+      ).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "A": true,
@@ -141,8 +143,9 @@ describe('CapabilitiesService', () => {
         { capabilityPath: '*' }
       );
       const start = service.start();
-      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' })
+      ).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "a": true,
@@ -202,8 +205,9 @@ describe('CapabilitiesService', () => {
       );
 
       const start = service.start();
-      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' })
+      ).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "a": true,
@@ -232,8 +236,9 @@ describe('CapabilitiesService', () => {
       );
 
       const start = service.start();
-      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' })
+      ).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {},
           "customSection": Object {

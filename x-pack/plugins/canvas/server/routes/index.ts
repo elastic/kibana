@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { IRouter, Logger } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
-import { initCustomElementsRoutes } from './custom_elements';
-import { initShareablesRoutes } from './shareables';
-import { initWorkpadRoutes } from './workpad';
-import { initTemplateRoutes } from './templates';
-import { initFunctionsRoutes } from './functions';
 import { CanvasRouteHandlerContext } from '../workpad_route_context';
+import { initCustomElementsRoutes } from './custom_elements';
+import { initFunctionsRoutes } from './functions';
+import { initShareablesRoutes } from './shareables';
+import { initTemplateRoutes } from './templates';
+import { initWorkpadRoutes } from './workpad';
 
 export interface RouteInitializerDeps {
   router: IRouter<CanvasRouteHandlerContext>;

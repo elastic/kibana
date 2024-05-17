@@ -7,16 +7,16 @@
  */
 
 import type {
-  GetIn,
-  GetResult,
   CreateIn,
   CreateResult,
+  DeleteIn,
+  DeleteResult,
+  GetIn,
+  GetResult,
   SearchIn,
   SearchResult,
   UpdateIn,
   UpdateResult,
-  DeleteIn,
-  DeleteResult,
 } from '@kbn/content-management-plugin/common';
 
 import type {
@@ -29,15 +29,15 @@ export interface ServicesDefinitionSet {
 }
 
 import {
-  SortOrder,
   AggregationsAggregationContainer,
+  SortOrder,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   MutatingOperationRefreshSetting,
-  SavedObjectsPitParams,
   SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
 } from '@kbn/core-saved-objects-api-server';
 
 type KueryNode = any;
@@ -297,7 +297,7 @@ export interface ContentManagementCrudTypes<
   Attributes extends object,
   CreateOptions extends object,
   UpdateOptions extends object,
-  SearchOptions extends object
+  SearchOptions extends object,
 > {
   Attributes: Attributes;
   /**

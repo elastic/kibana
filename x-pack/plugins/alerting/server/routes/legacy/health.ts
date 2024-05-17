@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { AlertingFrameworkHealth } from '../../types';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getSecurityHealth } from '../../lib/get_security_health';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { ILicenseState } from '../../lib/license_state';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import type { AlertingRouter } from '../../types';
+import { AlertingFrameworkHealth } from '../../types';
 
 export function healthRoute(
   router: AlertingRouter,

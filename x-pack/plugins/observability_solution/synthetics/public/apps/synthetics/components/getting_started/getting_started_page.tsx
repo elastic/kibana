@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
 import {
+  EuiButton,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
-import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
-import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import {
+  cleanMonitorListState,
+  getAgentPoliciesAction,
   getServiceLocations,
   selectAddingNewPrivateLocation,
-  setAddingNewPrivateLocation,
-  getAgentPoliciesAction,
   selectAgentPolicies,
-  cleanMonitorListState,
+  setAddingNewPrivateLocation,
 } from '../../state';
-import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
-import { SimpleMonitorForm } from './simple_monitor_form';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
-import type { ClientPluginsStart } from '../../../../plugin';
+import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
+import { SimpleMonitorForm } from './simple_monitor_form';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();

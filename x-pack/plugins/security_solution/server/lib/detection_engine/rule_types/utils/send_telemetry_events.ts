@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { copyAllowlistedFields, filterList } from '../../../telemetry/filterlists';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { TelemetryEvent } from '../../../telemetry/types';
+import { TelemetryChannel } from '../../../telemetry/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { SignalSource, SignalSourceHit } from '../types';
-import { TelemetryChannel } from '../../../telemetry/types';
-import { copyAllowlistedFields, filterList } from '../../../telemetry/filterlists';
 
 interface SearchResultSource {
   _source: SignalSource;

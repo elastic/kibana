@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount, shallow } from 'enzyme';
 import { act } from '@testing-library/react';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
-import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
-import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
-import { StepRuleDescription } from '../description_step';
-import { stepAboutDefaultValue } from './default_value';
+import { useFetchIndex } from '../../../../common/containers/source';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { TestProviders } from '../../../../common/mock';
+import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -25,17 +26,16 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { TestProviders } from '../../../../common/mock';
-import { useRuleForms } from '../../pages/form';
-import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import {
   defaultSchedule,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import type { FormHook } from '../../../../shared_imports';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-import { useKibana } from '../../../../common/lib/kibana';
+import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
+import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
+import { useRuleForms } from '../../pages/form';
+import { StepRuleDescription } from '../description_step';
+import { stepAboutDefaultValue } from './default_value';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');

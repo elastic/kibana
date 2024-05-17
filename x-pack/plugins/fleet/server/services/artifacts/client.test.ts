@@ -11,8 +11,8 @@ import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common/constants';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
-import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../app_context';
 
 import { FleetArtifactsClient } from './client';
 import {

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Node, ReferenceFindableNode } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
+import { Node, ReferenceFindableNode } from 'ts-morph';
+import { isNamedNode } from '../tsmorph_utils';
+import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';
 import { getPluginForPath } from '../utils';
 import { getSourceForNode } from './utils';
-import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';
-import { isNamedNode } from '../tsmorph_utils';
 
 interface Opts {
   node: ReferenceFindableNode;

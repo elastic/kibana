@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import { createAction } from 'redux-actions';
 import { reloadIndices as request } from '../../services';
-import { loadIndices } from './load_indices';
 import { notificationService } from '../../services/notification';
+import { loadIndices } from './load_indices';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
 export const reloadIndices = (indexNames, options) => async (dispatch) => {

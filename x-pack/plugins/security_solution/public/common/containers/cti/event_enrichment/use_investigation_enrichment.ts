@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { isEmpty, isEqual } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { isEmpty, isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { InputsModelId } from '../../../store/inputs/constants';
-import type { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
+import { useEventEnrichmentComplete } from '.';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../../common/cti/constants';
+import type { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
+import { InputsModelId } from '../../../store/inputs/constants';
 import * as i18n from './translations';
-import { useEventEnrichmentComplete } from '.';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};

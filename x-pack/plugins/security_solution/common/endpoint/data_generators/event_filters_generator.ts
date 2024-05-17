@@ -6,15 +6,15 @@
  */
 
 import type {
-  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   ListOperator,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import { exceptionItemToCreateExceptionItem } from './exceptions_list_item_generator';
 import { GLOBAL_ARTIFACT_TAG } from '../service/artifacts';
 import { BaseDataGenerator } from './base_data_generator';
 import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
+import { exceptionItemToCreateExceptionItem } from './exceptions_list_item_generator';
 
 const ENTRY_OPERATORS: readonly ListOperator[] = ['included', 'excluded'];
 

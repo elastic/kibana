@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import moment, { Moment } from 'moment';
-import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
-import { v4 as uuidv4 } from 'uuid';
 import {
+  EuiButton,
+  EuiComboBox,
   EuiDatePicker,
   EuiDatePickerRange,
-  EuiComboBox,
-  EuiFormRow,
-  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiSpacer,
-  EuiButton,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSpacer,
   EuiSplitPanel,
+  EuiSwitch,
 } from '@elastic/eui';
+import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import moment, { Moment } from 'moment';
+import React, { useState, useCallback, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
 

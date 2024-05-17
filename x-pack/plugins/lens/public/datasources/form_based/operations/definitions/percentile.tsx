@@ -6,32 +6,32 @@
  */
 
 import { EuiFieldNumber, EuiRange } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
-  buildExpression,
-  buildExpressionFunction,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
+  buildExpression,
+  buildExpressionFunction,
 } from '@kbn/expressions-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { i18n } from '@kbn/i18n';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import React, { useCallback } from 'react';
 import { OperationDefinition } from '.';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { FieldBasedIndexPatternColumn } from './column_types';
+import { getGroupByKey, groupByKey } from './get_group_by_key';
 import {
+  combineErrorMessages,
+  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
-  isValidNumber,
-  getFilter,
   isColumnOfType,
-  combineErrorMessages,
+  isValidNumber,
 } from './helpers';
-import { FieldBasedIndexPatternColumn } from './column_types';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
-import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { getGroupByKey, groupByKey } from './get_group_by_key';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: typeof PERCENTILE_ID;

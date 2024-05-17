@@ -1,3 +1,5 @@
+import { EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { useStyles } from './styles';
 

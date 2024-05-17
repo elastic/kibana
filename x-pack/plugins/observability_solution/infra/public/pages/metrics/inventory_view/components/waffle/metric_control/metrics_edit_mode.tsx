@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 

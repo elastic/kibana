@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mapValues, isObject, isArray } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
+import { isArray, isObject, mapValues } from 'lodash/fp';
 
-import { toArray } from '../../../common/utils/to_array';
 import { isGeoField } from '../../../common/utils/field_formatters';
+import { toArray } from '../../../common/utils/to_array';
 
 export const mapObjectValuesToStringArray = (object: object): object =>
   mapValues((o) => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiSideNav } from '@elastic/eui';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { routes } from '../../../routes';
 

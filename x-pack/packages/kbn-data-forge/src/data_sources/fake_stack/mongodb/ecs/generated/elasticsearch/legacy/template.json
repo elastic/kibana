@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "kbn-data-forge-fake_stack.mongodb-*"
-  ],
+  "index_patterns": ["kbn-data-forge-fake_stack.mongodb-*"],
   "mappings": {
     "_meta": {
       "version": "1.6.0"

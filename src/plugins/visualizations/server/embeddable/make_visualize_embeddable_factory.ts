@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { flow, mapValues } from 'lodash';
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
   MigrateFunction,
+  MigrateFunctionsObject,
+  mergeMigrationFunctionMaps,
 } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { flow, mapValues } from 'lodash';
+import { SerializedVis } from '../../common';
 import {
-  commonAddSupportOfDualIndexSelectionModeInTSVB,
-  commonHideTSVBLastValueIndicator,
-  commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
-  commonMigrateVislibPie,
-  commonAddEmptyValueColorRule,
-  commonMigrateTagCloud,
   commonAddDropLastBucketIntoTSVBModel,
   commonAddDropLastBucketIntoTSVBModel714Above,
+  commonAddEmptyValueColorRule,
+  commonAddSupportOfDualIndexSelectionModeInTSVB,
+  commonHideTSVBLastValueIndicator,
+  commonMigrateTagCloud,
+  commonMigrateVislibPie,
+  commonPreserveOldLegendSizeDefault,
+  commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+  commonRemoveExclamationCircleIcon,
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
-  commonPreserveOldLegendSizeDefault,
-  commonRemoveExclamationCircleIcon,
 } from '../migrations/visualization_common_migrations';
-import { SerializedVis } from '../../common';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
   return {

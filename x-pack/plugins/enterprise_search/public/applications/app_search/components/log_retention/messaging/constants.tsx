@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
-import { LogRetentionOptions, LogRetentionSettings, LogRetentionPolicy } from '../types';
+import { LogRetentionOptions, LogRetentionPolicy, LogRetentionSettings } from '../types';
 
 export const renderLogRetentionDate = (dateString: string) => (
   <FormattedDate value={new Date(dateString)} month="long" day="numeric" year="numeric" />

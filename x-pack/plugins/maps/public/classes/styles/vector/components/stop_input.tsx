@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
 import { SINGLE_SELECTION_AS_TEXT_PROPS } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
 

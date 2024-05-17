@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { get } from 'lodash/fp';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ChatOpenAI } from '@langchain/openai';
-import { Stream } from 'openai/streaming';
 import {
   ChatCompletion,
   ChatCompletionChunk,
-  ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
 } from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import { InvokeAIActionParamsSchema } from './types';
 

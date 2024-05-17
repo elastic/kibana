@@ -10,36 +10,36 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
-import minimatch from 'minimatch';
-import { Subject, Observable, from, of } from 'rxjs';
-import { mergeScan } from 'rxjs';
 import { groupBy, pick } from 'lodash';
+import minimatch from 'minimatch';
+import { Observable, Subject, from, of } from 'rxjs';
+import { mergeScan } from 'rxjs';
 
+import { ClaimOwnershipResult, TaskClaimerOpts } from '.';
 import { asOk } from '../lib/result_type';
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult } from '.';
+import { filterDownBy, matchesClauses, mustBeAllOf, shouldBeOneOf } from '../queries/query_clauses';
+import { TASK_MANAGER_MARK_AS_CLAIMED, isLimited } from '../queries/task_claiming';
 import { ConcreteTaskInstance, TaskPriority } from '../task';
-import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
-import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
+import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 
 import {
-  updateFieldsAndMarkAsFailed,
+  EnabledTask,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
   tasksOfType,
-  EnabledTask,
+  updateFieldsAndMarkAsFailed,
 } from '../queries/mark_available_tasks_as_claimed';
 
 import {
-  correctVersionConflictsForContinuation,
+  SearchOpts,
   TaskStore,
   UpdateByQueryResult,
-  SearchOpts,
+  correctVersionConflictsForContinuation,
 } from '../task_store';
 
 interface OwnershipClaimingOpts {

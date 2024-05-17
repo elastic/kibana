@@ -6,76 +6,76 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   Chart,
   Datum,
   LayerValue,
   Partition,
-  Position,
-  Settings,
-  TooltipProps,
-  TooltipType,
-  SeriesIdentifier,
   PartitionElementEvent,
+  Position,
+  SeriesIdentifier,
+  Settings,
   SettingsProps,
   Tooltip,
+  TooltipProps,
+  TooltipType,
   TooltipValue,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { ChartsPluginSetup, LegendToggle } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import {
-  DEFAULT_LEGEND_SIZE,
-  LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { i18n } from '@kbn/i18n';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { consolidateMetricColumns } from '../../common/utils';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   type BucketColumns,
-  ValueFormats,
-  type PieContainerDimensions,
   type PartitionChartProps,
   type PartitionVisParams,
+  type PieContainerDimensions,
+  ValueFormats,
 } from '../../common/types/expression_renderers';
+import { consolidateMetricColumns } from '../../common/utils';
+import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 import {
   LegendColorPickerWrapper,
   LegendColorPickerWrapperContext,
-  getLayers,
-  getLegendActions,
   canFilter,
+  generateFormatters,
+  getColumns,
   getFilterClickData,
   getFilterEventData,
+  getFormatter,
+  getLayers,
+  getLegendActions,
   getPartitionTheme,
-  getColumns,
+  getPartitionType,
   getSplitDimensionAccessor,
   isLegendFlat,
   shouldShowLegend,
-  generateFormatters,
-  getFormatter,
-  getPartitionType,
 } from '../utils';
+import { getMultiFilterCells } from '../utils/filter_helpers';
+import { filterOutConfig } from '../utils/filter_out_config';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
-import { VisualizationNoResults } from './visualization_noresults';
 import {
-  partitionVisWrapperStyle,
   partitionVisContainerStyle,
   partitionVisContainerWithToggleStyleFactory,
+  partitionVisWrapperStyle,
 } from './partition_vis_component.styles';
-import { filterOutConfig } from '../utils/filter_out_config';
-import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
-import { getMultiFilterCells } from '../utils/filter_helpers';
+import { VisualizationNoResults } from './visualization_noresults';
 
 declare global {
   interface Window {
@@ -283,14 +283,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         defaultFormatter
       )
     : splitRow
-    ? getFormatter(
-        typeof splitRow[0] === 'string'
-          ? getColumnByAccessor(splitRow[0], visData.columns)!
-          : splitRow[0],
-        formatters,
-        defaultFormatter
-      )
-    : undefined;
+      ? getFormatter(
+          typeof splitRow[0] === 'string'
+            ? getColumnByAccessor(splitRow[0], visData.columns)!
+            : splitRow[0],
+          formatters,
+          defaultFormatter
+        )
+      : undefined;
 
   const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
@@ -407,8 +407,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const splitChartDimension = splitColumn
     ? getColumnByAccessor(splitColumn[0], visData.columns)
     : splitRow
-    ? getColumnByAccessor(splitRow[0], visData.columns)
-    : undefined;
+      ? getColumnByAccessor(splitRow[0], visData.columns)
+      : undefined;
 
   const hasTooltipActions =
     interactive && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;

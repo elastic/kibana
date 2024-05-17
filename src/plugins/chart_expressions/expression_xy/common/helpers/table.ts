@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import moment from 'moment';
 
 export function normalizeTable(data: Datatable, xAccessor?: string | ExpressionValueVisDimension) {
   const xColumn = xAccessor && getColumnByAccessor(xAccessor, data.columns);

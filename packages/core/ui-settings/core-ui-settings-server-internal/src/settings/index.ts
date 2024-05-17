@@ -8,13 +8,13 @@
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { getAccessibilitySettings } from './accessibility';
+import { getAnnouncementsSettings } from './announcements';
 import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';
 import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
-import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
-import { getAnnouncementsSettings } from './announcements';
+import { getThemeSettings } from './theme';
 
 interface GetCoreSettingsOptions {
   isDist?: boolean;

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { find } from 'lodash/fp';
+import React from 'react';
 
 import { APP_ID } from '../../../../../common';
 import * as i18n from './translations';
 
-import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { hasData } from './helpers';
+import type { BrowserFields } from '../../../containers/source';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useLicense } from '../../../hooks/use_license';
-import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
-import { RelatedCases } from './related_cases';
-import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
-import { RelatedAlertsBySession } from './related_alerts_by_session';
-import { RelatedAlertsUpsell } from './related_alerts_upsell';
 import { useKibana } from '../../../lib/kibana';
+import { hasData } from './helpers';
+import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
+import { RelatedAlertsUpsell } from './related_alerts_upsell';
+import { RelatedCases } from './related_cases';
 
 const StyledInsightItem = euiStyled(EuiFlexItem)`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};

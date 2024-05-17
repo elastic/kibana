@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiPortal, EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiPortal } from '@elastic/eui';
 
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';

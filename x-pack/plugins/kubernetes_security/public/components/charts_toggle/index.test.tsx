@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { CHART_TOGGLE_SHOW, CHART_TOGGLE_HIDE } from '../../../common/translations';
 import { ChartsToggle, TOGGLE_TEST_ID } from '.';
+import { CHART_TOGGLE_HIDE, CHART_TOGGLE_SHOW } from '../../../common/translations';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 
 describe('ChartsToggle component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

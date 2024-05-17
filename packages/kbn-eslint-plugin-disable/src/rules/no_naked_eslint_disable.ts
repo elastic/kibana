@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Rule, AST } from 'eslint';
+import type { AST, Rule } from 'eslint';
 import { getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';

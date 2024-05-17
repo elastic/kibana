@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiFormRow,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiText,
   EuiFormLabel,
-  EuiSuperSelect,
-  EuiBadge,
-  EuiErrorBoundary,
-  EuiToolTip,
-  EuiBetaBadge,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
   EuiSplitPanel,
-  useEuiTheme,
-  EuiCallOut,
+  EuiSuperSelect,
   EuiSwitch,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { isEmpty, partition, some } from 'lodash';
 import {
   ActionVariable,
   RuleActionAlertsFilterProperty,
@@ -44,30 +39,35 @@ import {
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import { isEmpty, partition, some } from 'lodash';
+import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import {
-  IErrorObject,
-  RuleAction,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
-  ActionConnectorMode,
-  NotifyWhenSelectOptions,
-} from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
-import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorsSelection } from './connectors_selection';
-import { ActionNotifyWhen } from './action_notify_when';
-import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
-import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
-import { validateActionFilterQuery } from '../../lib/value_validators';
+import {
+  ActionConnector,
+  ActionConnectorMode,
+  ActionTypeIndex,
+  ActionTypeRegistryContract,
+  ActionVariables,
+  IErrorObject,
+  NotifyWhenSelectOptions,
+  RuleAction,
+} from '../../../types';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { transformActionVariables } from '../../lib/action_variables';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
+import { validateActionFilterQuery } from '../../lib/value_validators';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
+import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
+import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
+import { ActionNotifyWhen } from './action_notify_when';
+import { ConnectorsSelection } from './connectors_selection';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;

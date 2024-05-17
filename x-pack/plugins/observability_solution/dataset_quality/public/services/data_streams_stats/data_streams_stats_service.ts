@@ -8,8 +8,8 @@
 import { DataStreamsStatsClient } from './data_streams_stats_client';
 import {
   DataStreamsStatsServiceSetup,
-  DataStreamsStatsServiceStartDeps,
   DataStreamsStatsServiceStart,
+  DataStreamsStatsServiceStartDeps,
 } from './types';
 
 export class DataStreamsStatsService {

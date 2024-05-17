@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 const errorToastTitle = i18n.translate('xpack.apm.anomalyDetection.createJobs.failed.title', {

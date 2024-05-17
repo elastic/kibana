@@ -10,9 +10,9 @@ import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TableText } from '..';
+import { SearchSessionStatus } from '../../../../../../common/search/session/status';
 import { UISession } from '../../types';
 import { getStatusText } from '../status';
-import { SearchSessionStatus } from '../../../../../../common/search/session/status';
 
 export const getStatusFilter: (tableData: UISession[]) => SearchFilterConfig = (tableData) => ({
   type: 'field_value_selection',

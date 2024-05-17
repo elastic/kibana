@@ -12,8 +12,8 @@ import {} from '../..';
 import {
   CONNECTORS_JOBS_INDEX,
   ConnectorSyncJobDocument,
-  fetchConnectorByIndexName,
   SyncStatus,
+  fetchConnectorByIndexName,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';

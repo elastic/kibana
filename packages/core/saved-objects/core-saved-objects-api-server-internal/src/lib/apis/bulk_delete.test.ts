@@ -9,46 +9,46 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
-  pointInTimeFinderMock,
+  mockDeleteLegacyUrlAliases,
   mockGetBulkOperationError,
   mockGetCurrentTime,
-  mockDeleteLegacyUrlAliases,
   mockGetSearchDsl,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
-import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Payload } from '@hapi/boom';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { SavedObjectsRepository } from '../repository';
-import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  NAMESPACE_AGNOSTIC_TYPE,
-  MULTI_NAMESPACE_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   HIDDEN_TYPE,
-  mockTimestamp,
-  mappings,
-  createRegistry,
-  createDocumentMigrator,
-  getMockMgetResponse,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  MULTI_NAMESPACE_TYPE,
+  NAMESPACE_AGNOSTIC_TYPE,
   type TypeIdTuple,
+  bulkDeleteSuccess,
+  createBadRequestErrorPayload,
+  createBulkDeleteSuccessStatus,
+  createDocumentMigrator,
+  createRegistry,
   createSpySerializer,
   expectErrorInvalidType,
   expectErrorNotFound,
-  createBadRequestErrorPayload,
   getMockEsBulkDeleteResponse,
-  bulkDeleteSuccess,
-  createBulkDeleteSuccessStatus,
+  getMockMgetResponse,
+  mappings,
+  mockTimestamp,
 } from '../../test_helpers/repository.test.common';
 
 interface ExpectedErrorResult {

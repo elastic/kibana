@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { LocationStatus, Locations, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('tcp normalizers', () => {

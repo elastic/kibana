@@ -7,23 +7,23 @@
 
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
-import { convertTimelineAsInput } from './timeline_save';
-import type { TimelineModel } from '../model';
 import { createMockStore, kibanaMock } from '../../../common/mock';
-import { selectTimelineById } from '../selectors';
 import { copyTimeline, persistTimeline } from '../../containers/api';
-import { refreshTimelines } from './helpers';
 import * as i18n from '../../pages/translations';
+import type { TimelineModel } from '../model';
+import { selectTimelineById } from '../selectors';
+import { refreshTimelines } from './helpers';
+import { convertTimelineAsInput } from './timeline_save';
 
 import {
-  startTimelineSaving,
   endTimelineSaving,
-  showCallOutUnauthorizedMsg,
   saveTimeline,
   setChanged,
+  showCallOutUnauthorizedMsg,
+  startTimelineSaving,
 } from '../actions';
 
 jest.mock('../actions', () => {

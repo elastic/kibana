@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { KibanaServices } from '../../lib/kibana';
+import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
 import type {
   CheckRecognizerProps,
   CloseJobsResponse,
@@ -17,8 +19,6 @@ import type {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
-import { KibanaServices } from '../../lib/kibana';
 
 /**
  * Checks the ML Recognizer API to see if a given indexPattern has any compatible modules

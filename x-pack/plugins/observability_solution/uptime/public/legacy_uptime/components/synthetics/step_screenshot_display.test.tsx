@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StepScreenshotDisplay } from './step_screenshot_display';
-import { render } from '../../lib/helper/rtl_helpers';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { render } from '../../lib/helper/rtl_helpers';
+import { StepScreenshotDisplay } from './step_screenshot_display';
 import '../../lib/__mocks__/legacy_use_composite_image.mock';
 import { mockRef } from '../../lib/__mocks__/legacy_screenshot_ref.mock';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { QueryClientProviderProps, useQuery } from '@tanstack/react-query';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ServerError } from '../types';
-import { useLicense } from '../../../hooks/use_license';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
+import { useLicense } from '../../../hooks/use_license';
+import { ServerError } from '../types';
 import {
-  bulkGetMaintenanceWindows,
   BulkGetMaintenanceWindowsResult,
+  bulkGetMaintenanceWindows,
 } from './apis/bulk_get_maintenance_windows';
 
 const ERROR_TITLE = i18n.translate(

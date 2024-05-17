@@ -7,12 +7,12 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getAgentDetailsRoute } from './get_agent_details';
 import { getAgentPoliciesRoute } from './get_agent_policies';
 import { getAgentPolicyRoute } from './get_agent_policy';
 import { getAgentStatusForAgentPolicyRoute } from './get_agent_status_for_agent_policy';
-import { getPackagePoliciesRoute } from './get_package_policies';
 import { getAgentsRoute } from './get_agents';
-import { getAgentDetailsRoute } from './get_agent_details';
+import { getPackagePoliciesRoute } from './get_package_policies';
 
 export const initFleetWrapperRoutes = (router: IRouter, context: OsqueryAppContext) => {
   getAgentDetailsRoute(router, context);

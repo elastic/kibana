@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { Logger } from '@kbn/logging';
 import {
   AGENT_NAME,
   PROCESSOR_EVENT,

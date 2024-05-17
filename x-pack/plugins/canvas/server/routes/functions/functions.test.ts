@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { RequestHandler, RequestHandlerContext, kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { ExpressionFunction } from '@kbn/expressions-plugin/common/expression_functions';
-import { initializeGetFunctionsRoute } from './functions';
-import { getMockedRouterDeps } from '../test_helpers';
-import { API_ROUTE_FUNCTIONS } from '../../../common/lib';
 import { functions } from '../../../canvas_plugin_src/functions/server';
+import { API_ROUTE_FUNCTIONS } from '../../../common/lib';
+import { getMockedRouterDeps } from '../test_helpers';
+import { initializeGetFunctionsRoute } from './functions';
 
 const mockRouteContext = {} as RequestHandlerContext;
 const routePath = API_ROUTE_FUNCTIONS;

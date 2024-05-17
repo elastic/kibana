@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
-import { eqlExecutor } from './eql';
 import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
-import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
+import { eqlExecutor } from './eql';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { find } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, useEuiTheme } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { isActiveTimeline } from '../../../../../helpers';
-import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
+import { find } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { Status } from '../../../../../../common/api/detection_engine';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import { useExceptionFlyout } from '../../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { AddExceptionFlyoutWrapper } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { EventFiltersFlyout } from '../../../../../management/pages/event_filters/view/components/event_filters_flyout';
+import { useExceptionFlyout } from '../../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { useEventFilterModal } from '../../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../../detections/components/host_isolation/helpers';
-import type { Status } from '../../../../../../common/api/detection_engine';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
+import { isActiveTimeline } from '../../../../../helpers';
+import { EventFiltersFlyout } from '../../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useRefetchByScope } from './use_refetch_by_scope';
 
 interface FlyoutFooterProps {

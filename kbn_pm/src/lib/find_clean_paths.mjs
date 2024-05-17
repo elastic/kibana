@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 
-import { REPO_ROOT } from './paths.mjs';
 import External from './external_packages.js';
+import { REPO_ROOT } from './paths.mjs';
 
 /**
  * Attempt to load the package map, if bootstrap hasn't run successfully

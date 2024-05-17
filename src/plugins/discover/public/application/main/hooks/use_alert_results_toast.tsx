@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useEffect } from 'react';
 import { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { useEffect } from 'react';
 
 export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
   const infoTitle = i18n.translate('discover.viewAlert.documentsMayVaryInfoTitle', {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 import { ConnectorsCallout } from './connectors_callout';
 import { FileUploadCallout } from './file_upload_callout';

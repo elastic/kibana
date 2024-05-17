@@ -11,14 +11,17 @@
  * rescheduling, middleware application, etc.
  */
 
-import apm from 'elastic-apm-node';
-import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, omit, random } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import apm from 'elastic-apm-node';
+import { defaults, flow, identity, omit, random } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import type { EventLoopDelayConfig } from '../config';
+import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import { Middleware } from '../lib/middleware';
 import {
+  Result,
   asErr,
   asOk,
   eitherAsync,
@@ -26,36 +29,33 @@ import {
   mapErr,
   mapOk,
   promiseResult,
-  Result,
   unwrap,
 } from '../lib/result_type';
-import {
-  asTaskMarkRunningEvent,
-  asTaskRunEvent,
-  asTaskManagerStatEvent,
-  startTaskTimerWithEventLoopMonitoring,
-  TaskMarkRunning,
-  TaskPersistence,
-  TaskRun,
-  TaskTiming,
-  TaskManagerStat,
-} from '../task_events';
-import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
   FailedRunResult,
   FailedTaskResult,
-  isFailedRunResult,
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
+  isFailedRunResult,
 } from '../task';
+import {
+  TaskManagerStat,
+  TaskMarkRunning,
+  TaskPersistence,
+  TaskRun,
+  TaskTiming,
+  asTaskManagerStatEvent,
+  asTaskMarkRunningEvent,
+  asTaskRunEvent,
+  startTaskTimerWithEventLoopMonitoring,
+} from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isRetryableError, isUnrecoverableError } from './errors';
-import type { EventLoopDelayConfig } from '../config';
 import { TaskValidator } from '../task_validator';
+import { isRetryableError, isUnrecoverableError } from './errors';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -502,11 +502,14 @@ export class TaskManagerRunner implements TaskRunner {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
           // try to release claim as an unknown failure prevented us from marking as running
-          mapErr((errReleaseClaim: Error) => {
-            this.logger.error(
-              `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
-            );
-          }, await this.releaseClaimAndIncrementAttempts());
+          mapErr(
+            (errReleaseClaim: Error) => {
+              this.logger.error(
+                `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
+              );
+            },
+            await this.releaseClaimAndIncrementAttempts()
+          );
         }
 
         throw error;
@@ -582,16 +585,16 @@ export class TaskManagerRunner implements TaskRunner {
       const reschedule = failureResult.runAt
         ? { runAt: failureResult.runAt }
         : failureResult.schedule
-        ? { schedule: failureResult.schedule }
-        : schedule
-        ? { schedule }
-        : // when result.error is truthy, then we're retrying because it failed
-          {
-            runAt: this.getRetryDelay({
-              attempts,
-              error,
-            }),
-          };
+          ? { schedule: failureResult.schedule }
+          : schedule
+            ? { schedule }
+            : // when result.error is truthy, then we're retrying because it failed
+              {
+                runAt: this.getRetryDelay({
+                  attempts,
+                  error,
+                }),
+              };
 
       if (reschedule.runAt || reschedule.schedule) {
         return asOk({
@@ -668,8 +671,8 @@ export class TaskManagerRunner implements TaskRunner {
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
       : hasTaskRunFailed
-      ? TaskRunResult.SuccessRescheduled
-      : TaskRunResult.RetryScheduled;
+        ? TaskRunResult.SuccessRescheduled
+        : TaskRunResult.RetryScheduled;
   }
 
   private async processResultWhenDone(): Promise<TaskRunResult> {

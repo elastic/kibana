@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 
 import {
+  API_BASE_PATH,
+  APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_INDEX,
   DEPRECATION_LOGS_ORIGIN_FIELD,
-  APPS_WITH_DEPRECATION_LOGS,
-  API_BASE_PATH,
 } from '@kbn/upgrade-assistant-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initHelpers } from './es_deprecation_logs.helpers';

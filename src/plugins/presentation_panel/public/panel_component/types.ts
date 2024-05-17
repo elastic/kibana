@@ -26,12 +26,12 @@ import { MaybePromise } from '@kbn/utility-types';
  * ------------------------------------------------------------------------------------------ */
 export type PanelCompatibleComponent<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
+  PropsType extends {} = {},
 > = React.ForwardRefExoticComponent<PropsType & React.RefAttributes<ApiType>>;
 
 export interface PresentationPanelInternalProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
+  PropsType extends {} = {},
 > {
   Component: PanelCompatibleComponent<ApiType, PropsType>;
   componentProps?: Omit<React.ComponentProps<PanelCompatibleComponent<ApiType, PropsType>>, 'ref'>;
@@ -77,7 +77,7 @@ export interface DefaultPresentationPanelApi
 
 export type PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
+  PropsType extends {} = {},
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component'> & {
   Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
 };

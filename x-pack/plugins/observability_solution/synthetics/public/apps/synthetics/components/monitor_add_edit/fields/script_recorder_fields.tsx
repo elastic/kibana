@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiCodeBlock,
-  EuiTitle,
-  EuiButton,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
 import { Uploader } from './uploader';
 
 interface Props {

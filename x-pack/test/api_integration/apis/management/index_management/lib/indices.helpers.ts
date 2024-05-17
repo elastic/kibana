@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getRandomString } from './random';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { getRandomString } from './random';
 
 export function indicesHelpers(getService: FtrProviderContext['getService']) {
   const es = getService('es');

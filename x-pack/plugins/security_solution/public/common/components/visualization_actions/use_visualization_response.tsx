@@ -7,10 +7,10 @@
 
 import { useMemo } from 'react';
 
-import { parseVisualizationData } from './utils';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import type { VisualizationResponse } from './types';
+import { parseVisualizationData } from './utils';
 
 export const useVisualizationResponse = ({ visualizationId }: { visualizationId: string }) => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);

@@ -19,13 +19,13 @@ import {
 } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
 import type { UserProfileWithSecurity } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
 import { sessionMock } from '../session_management/session.mock';
+import { UserProfileService, prefixCommaSeparatedValues } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
@@ -199,8 +199,9 @@ describe('UserProfileService', () => {
       });
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(
+        startContract.getCurrent({ request: mockRequest })
+      ).resolves.toMatchInlineSnapshot(`
               Object {
                 "data": Object {},
                 "enabled": true,
@@ -248,8 +249,9 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest, dataPath: 'one,two' })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(
+        startContract.getCurrent({ request: mockRequest, dataPath: 'one,two' })
+      ).resolves.toMatchInlineSnapshot(`
               Object {
                 "data": Object {
                   "avatar": "fun.gif",
@@ -362,8 +364,9 @@ describe('UserProfileService', () => {
 
     it('should activate user profile with access token grant', async () => {
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.activate({ type: 'accessToken', accessToken: 'some-token' }))
-        .resolves.toMatchInlineSnapshot(`
+      await expect(
+        startContract.activate({ type: 'accessToken', accessToken: 'some-token' })
+      ).resolves.toMatchInlineSnapshot(`
               Object {
                 "data": Object {},
                 "enabled": true,
@@ -513,8 +516,9 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.bulkGet({ uids: new Set(['UID-1', 'UID-2']) })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(
+        startContract.bulkGet({ uids: new Set(['UID-1', 'UID-2']) })
+      ).resolves.toMatchInlineSnapshot(`
                         Array [
                           Object {
                             "data": Object {},
@@ -559,8 +563,9 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.bulkGet({ uids: new Set(['UID-1']), dataPath: 'one,two' }))
-        .resolves.toMatchInlineSnapshot(`
+      await expect(
+        startContract.bulkGet({ uids: new Set(['UID-1']), dataPath: 'one,two' })
+      ).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "data": Object {
@@ -638,8 +643,9 @@ describe('UserProfileService', () => {
       } as unknown as SecuritySuggestUserProfilesResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.suggest({ size: 50, name: 'some' })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(
+        startContract.suggest({ size: 50, name: 'some' })
+      ).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "data": Object {},
@@ -686,8 +692,9 @@ describe('UserProfileService', () => {
       } as unknown as SecuritySuggestUserProfilesResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.suggest({ name: 'some', dataPath: 'one,two' })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(
+        startContract.suggest({ name: 'some', dataPath: 'one,two' })
+      ).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "data": Object {
@@ -726,8 +733,9 @@ describe('UserProfileService', () => {
       } as unknown as SecuritySuggestUserProfilesResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.suggest({ hint: { uids: ['UID-1'] } })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(
+        startContract.suggest({ hint: { uids: ['UID-1'] } })
+      ).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "data": Object {},

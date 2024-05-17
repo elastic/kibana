@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { PathConfigType } from '@kbn/utils';
 import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';
 

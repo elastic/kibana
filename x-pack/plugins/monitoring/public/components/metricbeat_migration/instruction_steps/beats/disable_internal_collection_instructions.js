@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import { EuiSpacer, EuiCodeBlock, EuiText } from '@elastic/eui';
-import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UNDETECTED_BEAT_TYPE } from './common_beats_instructions';
+import React, { Fragment } from 'react';
 import { getDisableStatusStep } from '../common_instructions';
+import { Monospace } from '../components/monospace';
+import { UNDETECTED_BEAT_TYPE } from './common_beats_instructions';
 
 export function getBeatsInstructionsForDisablingInternalCollection(product, meta) {
   const beatType = product.beatType;

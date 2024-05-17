@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 

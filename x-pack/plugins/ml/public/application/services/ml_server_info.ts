@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ml } from './ml_api_service';
 import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
+import { ml } from './ml_api_service';
 
 export interface CloudInfo {
   cloudId: string | null;

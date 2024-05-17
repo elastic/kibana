@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
-import Hapi from '@hapi/hapi';
-import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import { SavedObject, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import h2o2 from '@hapi/h2o2';
+import Hapi from '@hapi/hapi';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { ALL_SAVED_OBJECT_INDICES, SavedObject } from '@kbn/core-saved-objects-server';
 import {
+  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
-  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
-  declareGetRoute,
+  allCombinationsPermutations,
   declareDeleteRoute,
+  declareGetRoute,
+  declareGetSearchRoute,
+  declareIndexRoute,
+  declarePassthroughRoute,
   declarePostBulkRoute,
   declarePostMgetRoute,
-  declareGetSearchRoute,
-  declarePostSearchRoute,
-  declarePostUpdateRoute,
   declarePostPitRoute,
+  declarePostSearchRoute,
   declarePostUpdateByQueryRoute,
-  declarePassthroughRoute,
-  declareIndexRoute,
+  declarePostUpdateRoute,
   setProxyInterrupt,
-  allCombinationsPermutations,
 } from './repository_with_proxy_utils';
 
 let esServer: TestElasticsearchUtils;

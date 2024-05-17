@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import type { DataViewBase } from '@kbn/es-query';
 
-import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
-import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
-import { usePreviewRoute } from './use_preview_route';
+import { REASONABLE_INVOCATION_COUNT, RulePreview } from '.';
+import { TestProviders } from '../../../../common/mock';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   getStepScheduleDefaultValue,
@@ -22,6 +21,7 @@ import {
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
+import { usePreviewRoute } from './use_preview_route';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');

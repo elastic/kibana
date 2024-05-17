@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { TextBasedLanguages } from '@kbn/esql-utils';
-import { ChangeDataView } from './change_dataview';
-import { DataViewSelector } from './data_view_selector';
-import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
-import { DataViewPickerPropsExtended } from './data_view_picker';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { ChangeDataView } from './change_dataview';
+import { DataViewPickerPropsExtended } from './data_view_picker';
+import { DataViewSelector } from './data_view_selector';
+import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({

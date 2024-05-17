@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { useUncommonProcesses } from '../../containers/uncommon_processes';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { UncommonProcessQueryTabBody } from './uncommon_process_query_tab_body';
 import { HostsType } from '../../store/model';
+import { UncommonProcessQueryTabBody } from './uncommon_process_query_tab_body';
 
 jest.mock('../../containers/uncommon_processes');
 jest.mock('../../../../common/containers/query_toggle');

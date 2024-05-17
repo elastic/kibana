@@ -12,16 +12,16 @@ import { ENTITY_ANALYTICS_URL } from '../../../../urls/navigation';
 
 import {
   ANOMALIES_TABLE,
-  ANOMALIES_TABLE_ROWS,
-  ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
+  ANOMALIES_TABLE_ENABLE_JOB_LOADER,
+  ANOMALIES_TABLE_ROWS,
 } from '../../../../screens/entity_analytics';
-import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
 import {
   enableJob,
   navigateToNextPage,
   waitForAnomaliesToBeLoaded,
 } from '../../../../tasks/entity_analytics';
+import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
 
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

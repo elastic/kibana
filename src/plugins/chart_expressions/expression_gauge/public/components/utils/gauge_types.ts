@@ -10,12 +10,12 @@ import { BulletProps, BulletSubtype } from '@elastic/charts';
 import { GaugeShape, GaugeShapes } from '../../../common';
 
 export const getSubtypeByGaugeType = (type: GaugeShape): BulletProps['subtype'] =>
-  ((
-    {
+  (
+    ({
       [GaugeShapes.HORIZONTAL_BULLET]: BulletSubtype.horizontal,
       [GaugeShapes.VERTICAL_BULLET]: BulletSubtype.vertical,
       [GaugeShapes.SEMI_CIRCLE]: BulletSubtype.halfCircle,
       [GaugeShapes.ARC]: BulletSubtype.twoThirdsCircle,
       [GaugeShapes.CIRCLE]: BulletSubtype.circle,
-    } as const
-  )[type]);
+    }) as const
+  )[type];

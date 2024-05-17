@@ -8,15 +8,15 @@
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
-import { DetailPanel } from './detail_panel';
 import {
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
-  JOB_DETAILS_TAB_HISTOGRAM,
-  JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
   tabToHumanizedMap,
 } from '../../components';
+import { DetailPanel } from './detail_panel';
 
 jest.mock('../../../../kibana_services', () => {
   const services = jest.requireActual('../../../../kibana_services');

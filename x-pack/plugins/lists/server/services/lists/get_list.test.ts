@@ -7,8 +7,8 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
+import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import { getSearchListMock } from '../../schemas/elastic_response/search_es_list_schema.mock';
 
 import { getList } from './get_list';

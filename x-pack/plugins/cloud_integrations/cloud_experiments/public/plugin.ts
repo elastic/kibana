@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { get, has } from 'lodash';
 import { duration } from 'moment';
 import { concatMap } from 'rxjs';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Logger } from '@kbn/logging';
 
-import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 import type {
   CloudExperimentsFeatureFlagNames,
   CloudExperimentsMetric,
   CloudExperimentsPluginStart,
 } from '../common';
-import { MetadataService } from '../common/metadata_service';
 import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
+import { MetadataService } from '../common/metadata_service';
+import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 
 interface CloudExperimentsPluginSetupDeps {
   cloud: CloudSetup;

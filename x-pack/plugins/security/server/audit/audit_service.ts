@@ -17,10 +17,10 @@ import type {
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import { httpRequestEvent } from './audit_events';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
+import { httpRequestEvent } from './audit_events';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour

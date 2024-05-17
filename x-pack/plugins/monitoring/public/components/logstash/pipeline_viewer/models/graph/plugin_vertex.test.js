@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Vertex } from './vertex';
 import { PluginVertex, TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT } from './plugin_vertex';
+import { Vertex } from './vertex';
 
 describe('PluginVertex', () => {
   let graph;

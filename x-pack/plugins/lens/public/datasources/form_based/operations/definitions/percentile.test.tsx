@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
-import { act } from 'react-dom/test-utils';
 import { EuiRange } from '@elastic/eui';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
-import { shallow, mount } from 'enzyme';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { createMockedIndexPattern } from '../../mocks';
+import {
+  ExpressionAstExpressionBuilder,
+  buildExpression,
+  buildExpressionFunction,
+  parseExpression,
+} from '@kbn/expressions-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { mount, shallow } from 'enzyme';
+import faker from 'faker';
+import React, { ChangeEvent } from 'react';
+import { act } from 'react-dom/test-utils';
 import { LastValueIndexPatternColumn, percentileOperation } from '.';
+import { IndexPattern } from '../../../../types';
+import { createMockedIndexPattern } from '../../mocks';
+import type { OriginalColumn } from '../../to_expression';
 import { FormBasedLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
-import {
-  buildExpressionFunction,
-  buildExpression,
-  ExpressionAstExpressionBuilder,
-  parseExpression,
-} from '@kbn/expressions-plugin/public';
-import type { OriginalColumn } from '../../to_expression';
-import { IndexPattern } from '../../../../types';
-import faker from 'faker';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

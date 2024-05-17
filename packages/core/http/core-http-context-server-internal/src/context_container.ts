@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { flatten } from 'lodash';
-import { ShallowPromise } from '@kbn/utility-types';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
 import type {
+  HandlerContextType,
+  HandlerParameters,
+  IContextContainer,
+  IContextProvider,
   RequestHandler,
   RequestHandlerContextBase,
-  IContextProvider,
-  IContextContainer,
-  HandlerParameters,
-  HandlerContextType,
 } from '@kbn/core-http-server';
+import { ShallowPromise } from '@kbn/utility-types';
+import { flatten } from 'lodash';
 
 /** @internal */
 export class ContextContainer implements IContextContainer {
@@ -47,7 +47,7 @@ export class ContextContainer implements IContextContainer {
 
   public registerContext = <
     Context extends RequestHandlerContextBase,
-    ContextName extends keyof Context
+    ContextName extends keyof Context,
   >(
     source: symbol,
     name: ContextName,

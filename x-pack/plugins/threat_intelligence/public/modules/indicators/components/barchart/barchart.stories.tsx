@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { Story } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
-import { Story } from '@storybook/react';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
-import { IndicatorsBarChart } from './barchart';
+import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { IndicatorsBarChart } from './barchart';
 
 const mockIndicators: ChartSeries[] = [
   {

@@ -7,15 +7,15 @@
 
 import { readFile } from 'fs/promises';
 
-import * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
+import * as openpgp from 'openpgp';
 
 import type { PackageVerificationResult } from '../../../types';
 
 import * as Registry from '../registry';
 
-import { appContextService } from '../../app_context';
 import type { Installation } from '../../../types';
+import { appContextService } from '../../app_context';
 
 interface VerificationResult {
   isVerified: boolean;

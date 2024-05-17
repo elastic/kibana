@@ -9,23 +9,23 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiButtonIcon } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiText,
-  EuiPopover,
   EuiInMemoryTable,
   EuiLink,
-  EuiToolTip,
+  EuiPopover,
   EuiSkeletonText,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { useKibana, useRouterNavigate } from '../common/lib/kibana';
-import { usePacks } from './use_packs';
-import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
+import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { ActiveStateSwitch } from './active_state_switch';
 import type { PackSavedObject } from './types';
+import { usePacks } from './use_packs';
 
 const updatedAtCss = {
   whiteSpace: 'nowrap' as const,

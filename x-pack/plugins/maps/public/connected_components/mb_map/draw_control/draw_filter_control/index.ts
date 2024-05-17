@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { DrawFilterControl } from './draw_filter_control';
-import { setDrawMode, updateDrawState } from '../../../../actions';
-import { getDrawState, getGeoFieldNames } from '../../../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../../../common/constants';
+import { setDrawMode, updateDrawState } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
+import { getDrawState, getGeoFieldNames } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
+import { DrawFilterControl } from './draw_filter_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

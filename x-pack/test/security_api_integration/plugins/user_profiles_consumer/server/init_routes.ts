@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { CoreSetup } from '@kbn/core/server';
 import { PluginStartDependencies } from '.';
 
 export function initRoutes(core: CoreSetup<PluginStartDependencies>) {

@@ -12,8 +12,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
@@ -221,34 +221,37 @@ export const fetchHistogramsForFields = async (
     }, {} as NumericColumnStatsMap),
   };
 
-  const chartDataAggs = fields.reduce((aggs, field) => {
-    const id = stringHash(field.fieldName);
-    if (isNumericHistogramField(field)) {
-      if (aggIntervals[id] !== undefined) {
-        aggs[`${id}_histogram`] = {
-          histogram: {
+  const chartDataAggs = fields.reduce(
+    (aggs, field) => {
+      const id = stringHash(field.fieldName);
+      if (isNumericHistogramField(field)) {
+        if (aggIntervals[id] !== undefined) {
+          aggs[`${id}_histogram`] = {
+            histogram: {
+              field: field.fieldName,
+              interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
+            },
+          };
+        }
+      } else if (isOrdinalHistogramField(field)) {
+        if (field.type === KBN_FIELD_TYPES.STRING) {
+          aggs[`${id}_cardinality`] = {
+            cardinality: {
+              field: field.fieldName,
+            },
+          };
+        }
+        aggs[`${id}_terms`] = {
+          terms: {
             field: field.fieldName,
-            interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
+            size: MAX_CHART_COLUMNS,
           },
         };
       }
-    } else if (isOrdinalHistogramField(field)) {
-      if (field.type === KBN_FIELD_TYPES.STRING) {
-        aggs[`${id}_cardinality`] = {
-          cardinality: {
-            field: field.fieldName,
-          },
-        };
-      }
-      aggs[`${id}_terms`] = {
-        terms: {
-          field: field.fieldName,
-          size: MAX_CHART_COLUMNS,
-        },
-      };
-    }
-    return aggs;
-  }, {} as Record<string, ChartRequestAgg>);
+      return aggs;
+    },
+    {} as Record<string, ChartRequestAgg>
+  );
 
   if (Object.keys(chartDataAggs).length === 0) {
     return [];
@@ -284,8 +287,8 @@ export const fetchHistogramsForFields = async (
     aggsPath.length > 0
       ? get(body.aggregations, aggsPath)
       : randomSamplerProbability !== undefined && body.aggregations !== undefined
-      ? unwrap(body.aggregations)
-      : body.aggregations;
+        ? unwrap(body.aggregations)
+        : body.aggregations;
 
   return fields.map((field) => {
     const id = stringHash(field.fieldName);

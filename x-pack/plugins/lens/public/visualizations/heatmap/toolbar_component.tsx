@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
+import { EuiIconAxisBottom, EuiIconAxisLeft } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { VisualizationToolbarProps } from '../../types';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import React, { memo, useState } from 'react';
 import {
+  AxisTicksSettings,
+  AxisTitleSettings,
   LegendSettingsPopover,
   ToolbarPopover,
   ValueLabelsSettings,
-  AxisTitleSettings,
-  AxisTicksSettings,
 } from '../../shared_components';
-import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+import type { VisualizationToolbarProps } from '../../types';
+import type { HeatmapVisualizationState } from './types';
 import './toolbar_component.scss';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [

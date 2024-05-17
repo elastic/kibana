@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { get, each } from 'lodash';
+import { each, get } from 'lodash';
 
 function addOne(obj, key) {
   let value = get(obj, key);

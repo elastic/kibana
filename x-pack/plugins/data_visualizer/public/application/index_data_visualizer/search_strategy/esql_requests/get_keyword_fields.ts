@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import pLimit from 'p-limit';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
-import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
-import { getSafeESQLName } from '../requests/esql_utils';
+import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
+import pLimit from 'p-limit';
+import type { FieldStatsError, StringFieldStats } from '../../../../../common/types/field_stats';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
+import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import type { BucketCount, BucketTerm } from '../../types/esql_data_visualizer';
-import type { FieldStatsError, StringFieldStats } from '../../../../../common/types/field_stats';
+import { getSafeESQLName } from '../requests/esql_utils';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];

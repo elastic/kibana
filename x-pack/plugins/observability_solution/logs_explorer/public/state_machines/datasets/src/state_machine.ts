@@ -13,8 +13,8 @@ import { createDefaultContext } from './defaults';
 import type {
   DatasetsContext,
   DatasetsEvent,
-  DefaultDatasetsContext,
   DatasetsTypestate,
+  DefaultDatasetsContext,
 } from './types';
 
 export const createPureDatasetsStateMachine = (

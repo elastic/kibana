@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback } from 'react';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
+import { useDiscoverLink } from '../../hooks/use_discover_link';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { useDiscoverLink } from '../../hooks/use_discover_link';
-import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 
 interface Props {
   seriesId: number;

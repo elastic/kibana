@@ -11,7 +11,7 @@ import React from 'react';
 
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { Result } from '../../../result';
 

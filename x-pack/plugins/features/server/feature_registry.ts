@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { cloneDeep, uniq } from 'lodash';
 import { ILicense } from '@kbn/licensing-plugin/server';
+import { cloneDeep, uniq } from 'lodash';
 import {
-  KibanaFeatureConfig,
-  KibanaFeature,
-  FeatureKibanaPrivileges,
-  ElasticsearchFeatureConfig,
   ElasticsearchFeature,
+  ElasticsearchFeatureConfig,
+  FeatureKibanaPrivileges,
+  KibanaFeature,
+  KibanaFeatureConfig,
 } from '../common';
-import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
+import { validateElasticsearchFeature, validateKibanaFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;

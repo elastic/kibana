@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import {
-  filterOperationsAxis,
-  getHeatmapVisualization,
-  isCellValueSupported,
-} from './visualization';
+import { Position } from '@elastic/charts';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import type {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationDescriptor,
+  UserMessage,
+} from '../../types';
 import {
   CHART_SHAPES,
   FUNCTION_NAME,
@@ -18,17 +23,12 @@ import {
   HEATMAP_GRID_FUNCTION,
   LEGEND_FUNCTION,
 } from './constants';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type {
-  DatasourceLayers,
-  FramePublicAPI,
-  OperationDescriptor,
-  UserMessage,
-} from '../../types';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import {
+  filterOperationsAxis,
+  getHeatmapVisualization,
+  isCellValueSupported,
+} from './visualization';
 
 function exampleState(): HeatmapVisualizationState {
   return {

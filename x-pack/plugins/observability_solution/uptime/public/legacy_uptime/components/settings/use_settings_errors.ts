@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+import { SettingsPageFieldErrors, isValidCertVal } from '../../pages/settings';
 import { BLANK_STR, SPACE_STR } from '../../pages/translations';
-import { isValidCertVal, SettingsPageFieldErrors } from '../../pages/settings';
-import { validateEmail } from './default_email';
+import { connectorsSelector } from '../../state/alerts/alerts';
 import { selectDynamicSettings } from '../../state/selectors';
 import { PartialSettings } from './certificate_form';
-import { connectorsSelector } from '../../state/alerts/alerts';
+import { validateEmail } from './default_email';
 
 const hasInvalidEmail = (defaultConnectors?: string[], value?: PartialSettings['defaultEmail']) => {
   if (!defaultConnectors || defaultConnectors.length === 0) {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup } from '@elastic/eui';
 
 export class Unassigned extends React.Component {
   static displayName = i18n.translate(

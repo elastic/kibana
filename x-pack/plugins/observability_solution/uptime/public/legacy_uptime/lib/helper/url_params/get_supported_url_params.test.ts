@@ -6,8 +6,8 @@
  */
 
 import DateMath from '@kbn/datemath';
-import { getSupportedUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
+import { getSupportedUrlParams } from './get_supported_url_params';
 
 describe('getSupportedUrlParams', () => {
   let dateMathSpy: any;

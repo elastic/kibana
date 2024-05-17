@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
-import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
 } from '../../../../../../common/constants/client_defaults';
+import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
+import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
 import { useInlineErrorsCount } from './use_inline_errors_count';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 const sortFieldMap: Record<string, string> = {
   ['name.keyword']: 'monitor.name',

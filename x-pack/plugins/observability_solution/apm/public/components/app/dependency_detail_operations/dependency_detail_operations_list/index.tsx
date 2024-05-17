@@ -15,8 +15,8 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import {
-  getSpanMetricColumns,
   SpanMetricGroup,
+  getSpanMetricColumns,
 } from '../../../shared/dependencies_table/get_span_metric_columns';
 import { EmptyMessage } from '../../../shared/empty_message';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';

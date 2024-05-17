@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { sessionViewBasicProcessMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { DetailPanelProcessTab } from '.';
+import { sessionViewBasicProcessMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { CLOUD_DEFEND_INDEX } from '../../methods';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 
 describe('DetailPanelProcessTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

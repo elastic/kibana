@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { NotFoundPage } from './not_found';
 import { render } from '../lib/helper/rtl_helpers';
+import { NotFoundPage } from './not_found';
 
 describe('NotFoundPage', () => {
   it('render component', async () => {

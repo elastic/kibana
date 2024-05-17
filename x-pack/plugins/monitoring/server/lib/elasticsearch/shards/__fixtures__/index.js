@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import shardStatsFixture from './shard_stats.json';
 import clusterFixture from './cluster.json';
+import shardStatsFixture from './shard_stats.json';
 
 export { shardStatsFixture, clusterFixture };

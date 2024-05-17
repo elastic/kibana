@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { RiskSeverity, Inspect, Maybe } from '../../..';
+import type { Inspect, Maybe, RiskSeverity } from '../../..';
 import type { BucketItem } from '../../cti';
 
 export interface RelatedHost {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import React from 'react';
+import { exactMatchText } from '../mocks';
 import type { SettingCardProps } from './setting_card';
 import { SettingCard } from './setting_card';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { exactMatchText } from '../mocks';
 
 describe('Policy form SettingCard component', () => {
   let formProps: SettingCardProps;

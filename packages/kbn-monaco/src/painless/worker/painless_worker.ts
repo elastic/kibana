@@ -7,12 +7,12 @@
  */
 
 import { monaco } from '../../monaco_imports';
+import type { BaseWorkerDefinition } from '../../types';
 import type {
+  PainlessAutocompleteField,
   PainlessCompletionResult,
   PainlessContext,
-  PainlessAutocompleteField,
 } from '../types';
-import type { BaseWorkerDefinition } from '../../types';
 
 import { getAutocompleteSuggestions, parseAndGetSyntaxErrors } from './lib';
 

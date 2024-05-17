@@ -6,8 +6,8 @@
  */
 
 import { EuiCheckbox, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
 import { xor } from 'lodash/fp';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { RowRendererId } from '../../../../common/api/timeline';

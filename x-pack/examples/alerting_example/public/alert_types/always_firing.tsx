@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
 import {
+  EuiExpression,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldNumber,
   EuiFormRow,
   EuiPopover,
-  EuiExpression,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit, pick } from 'lodash';
 import {
   ActionGroupWithCondition,
   AlertConditions,
@@ -24,9 +22,11 @@ import {
   RuleTypeModel,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { omit, pick } from 'lodash';
+import React, { Fragment, useState } from 'react';
 import {
-  AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
+  AlwaysFiringParams,
   DEFAULT_INSTANCES_TO_GENERATE,
 } from '../../common/constants';
 

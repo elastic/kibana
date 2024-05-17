@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { ExistingFailedTestIssue } from './existing_failed_test_issues';
 import { TestFailure } from './get_failures';
 import { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
-import { ExistingFailedTestIssue } from './existing_failed_test_issues';
 
 export async function createFailureIssue(
   buildUrl: string,

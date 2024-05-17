@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiNotificationBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React from 'react';
 import * as i18n from '../translations';

@@ -7,8 +7,8 @@
  */
 
 import { calculatePopoverPosition } from '@elastic/eui';
-import { formatValue as createTooltipContent } from 'vega-tooltip';
 import _ from 'lodash';
+import { formatValue as createTooltipContent } from 'vega-tooltip';
 
 // Some of this code was adapted from https://github.com/vega/vega-tooltip
 

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { renderToString } from 'react-dom/server';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
 import debounce from 'lodash/debounce';
-import { PreviewState, FetchDocError } from './types';
-import { BehaviorObservable } from '../../state_utils';
-import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { BehaviorSubject } from 'rxjs';
 import type { FieldFormatsStart } from '../../shared_imports';
-import { valueTypeToSelectedType } from './field_preview_context';
+import { BehaviorObservable } from '../../state_utils';
 import { InternalFieldType } from '../../types';
+import { valueTypeToSelectedType } from './field_preview_context';
+import { FetchDocError, PreviewState } from './types';
+import { EsDocument, FieldPreview, Params, ScriptErrorCodes } from './types';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
@@ -394,18 +394,18 @@ export class PreviewController {
           },
         }
       : isDocumentFound === false
-      ? {
-          code: 'DOC_NOT_FOUND',
-          error: {
-            message: i18n.translate(
-              'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
-              {
-                defaultMessage: 'Document ID not found',
-              }
-            ),
-          },
-        }
-      : null;
+        ? {
+            code: 'DOC_NOT_FOUND',
+            error: {
+              message: i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
+                {
+                  defaultMessage: 'Document ID not found',
+                }
+              ),
+            },
+          }
+        : null;
 
     this.setFetchDocError(error);
 

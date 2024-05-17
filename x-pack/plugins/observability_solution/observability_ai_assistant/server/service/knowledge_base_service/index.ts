@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
+import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
+import { gatewayTimeout, serverUnavailable } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { encode } from 'gpt-tokenizer';
+import { map, orderBy } from 'lodash';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { map, orderBy } from 'lodash';
-import { encode } from 'gpt-tokenizer';
-import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';

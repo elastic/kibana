@@ -7,18 +7,18 @@
  */
 
 import {
+  CoreStart,
+  ElasticsearchClient,
+  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-  ElasticsearchClient,
   UiSettingsServiceStart,
-  KibanaRequest,
-  CoreStart,
 } from '@kbn/core/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
-import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
+import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 
 interface DataViewsServiceFactoryDeps {
   logger: Logger;
@@ -64,22 +64,22 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
         byPassCapabilities
           ? true
           : request
-          ? (
-              await capabilities.resolveCapabilities(request, {
-                capabilityPath: 'indexPatterns.save',
-              })
-            ).indexPatterns.save === true
-          : false,
+            ? (
+                await capabilities.resolveCapabilities(request, {
+                  capabilityPath: 'indexPatterns.save',
+                })
+              ).indexPatterns.save === true
+            : false,
       getCanSaveAdvancedSettings: async () =>
         byPassCapabilities
           ? true
           : request
-          ? (
-              await capabilities.resolveCapabilities(request, {
-                capabilityPath: 'advancedSettings.save',
-              })
-            ).advancedSettings.save === true
-          : false,
+            ? (
+                await capabilities.resolveCapabilities(request, {
+                  capabilityPath: 'advancedSettings.save',
+                })
+              ).advancedSettings.save === true
+            : false,
       scriptedFieldsEnabled: deps.scriptedFieldsEnabled,
     });
   };

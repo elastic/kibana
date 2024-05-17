@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 
-import type { DryRunResult, BulkActionForConfirmation } from './types';
+import type { BulkActionForConfirmation, DryRunResult } from './types';
 
 interface BulkActionRuleErrorItemProps {
   errorCode: BulkActionsDryRunErrCode | undefined;

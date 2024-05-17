@@ -7,13 +7,13 @@
 
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import {
-  mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
+  mergeMigrationFunctionMaps,
 } from '@kbn/kibana-utils-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable';
+import { getMapsDataViewMigrations, getMapsFilterMigrations } from '../saved_objects';
 import { embeddableMigrations } from './embeddable_migrations';
-import { getMapsFilterMigrations, getMapsDataViewMigrations } from '../saved_objects';
 
 export function setupEmbeddable(
   embeddable: EmbeddableSetup,

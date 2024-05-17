@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
 import { ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { SUB_ACTION } from '../../../../common/openai/constants';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 

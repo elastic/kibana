@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { MetricsExplorerSeries } from '../../../../common/http_api';
-import { createStartServicesAccessorMock, createMetricsClientMock } from '../test_helpers';
+import { CoreProviders } from '../../../apps/common_providers';
+import { createMetricsClientMock, createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
 import { HostMetricsTable } from './host_metrics_table';
 import IntegratedHostMetricsTable from './integrated_host_metrics_table';

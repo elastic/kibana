@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
 import { ExecutionContextStart } from '@kbn/core/public';
+import React, { createContext, useContext } from 'react';
 
 export interface Context {
   isCloudEnabled: boolean;

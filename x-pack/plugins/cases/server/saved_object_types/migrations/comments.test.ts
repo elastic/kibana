@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type { PersistableStateAttachmentAttributes } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
+import {
+  getLensVisualizations,
+  parseCommentString,
+} from '../../../common/utils/markdown_plugins/utils';
 import {
   createCommentsMigrations,
   migrateByValueLensVisualizations,
@@ -12,36 +18,30 @@ import {
   removeRuleInformation,
   stringifyCommentWithoutTrailingNewline,
 } from './comments';
-import {
-  getLensVisualizations,
-  parseCommentString,
-} from '../../../common/utils/markdown_plugins/utils';
-import type { PersistableStateAttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
 
-import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import type { LensDocShape715 } from '@kbn/lens-plugin/server';
-import type {
-  SavedObjectReference,
-  SavedObjectsMigrationLogger,
-  SavedObjectUnsanitizedDoc,
-} from '@kbn/core/server';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { omit, partition } from 'lodash';
-import gte from 'semver/functions/gte';
 import type {
   SavedObject,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationParams,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type {
+  SavedObjectReference,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsMigrationLogger,
+} from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { LensDocShape715 } from '@kbn/lens-plugin/server';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { omit, partition } from 'lodash';
+import gte from 'semver/functions/gte';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { mockCaseComments } from '../../mocks';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 
 describe('comments migrations', () => {
   const contextMock = savedObjectsServiceMock.createMigrationContext();

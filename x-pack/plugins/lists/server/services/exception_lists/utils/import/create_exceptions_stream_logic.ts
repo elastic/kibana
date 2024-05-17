@@ -7,10 +7,7 @@
 
 import { Transform } from 'stream';
 
-import * as t from 'io-ts';
-import { has } from 'lodash/fp';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   CreateCommentsArray,
   ExportExceptionDetails,
@@ -22,6 +19,7 @@ import {
   importExceptionListItemSchema,
   importExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
   createConcatStream,
   createFilterStream,
@@ -29,8 +27,10 @@ import {
   createReduceStream,
   createSplitStream,
 } from '@kbn/utils';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { has } from 'lodash/fp';
 
 import { ExceptionsImport } from '../../import_exception_list_and_items';
 

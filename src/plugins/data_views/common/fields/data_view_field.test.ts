@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '..';
-import { DataViewField } from './data_view_field';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldSpec, RuntimeField } from '../types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DataView } from '..';
+import { FieldSpec, RuntimeField } from '../types';
+import { DataViewField } from './data_view_field';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -160,7 +160,7 @@ describe('Field', function () {
             pattern: '$0,0.[00]',
           },
         }),
-      } as unknown as FieldFormat);
+      }) as unknown as FieldFormat;
     expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { InspectorViewProps, Adapters } from '@kbn/inspector-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Datatable, DatatableColumn, TablesAdapter } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { TablesAdapter, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { Adapters, InspectorViewProps } from '@kbn/inspector-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataTableFormat } from './data_table';
 import { TableSelector } from './data_table_selector';
 import { DataDownloadOptions } from './download_options';

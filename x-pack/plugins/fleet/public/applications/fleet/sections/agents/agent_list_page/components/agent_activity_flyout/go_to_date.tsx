@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiDatePicker } from '@elastic/eui';
-import React, { forwardRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
+import React, { forwardRef } from 'react';
 
 interface Props {
   selectedDate: moment.Moment | null;

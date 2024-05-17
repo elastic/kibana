@@ -6,9 +6,9 @@
  */
 
 import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
+import { initDeleteCustomDashboardRoute } from './delete_custom_dashboard';
 import { initGetCustomDashboardRoute } from './get_custom_dashboard';
 import { initSaveCustomDashboardRoute } from './save_custom_dashboard';
-import { initDeleteCustomDashboardRoute } from './delete_custom_dashboard';
 import { initUpdateCustomDashboardRoute } from './update_custom_dashboard';
 
 export function initCustomDashboardsRoutes(framework: KibanaFramework) {

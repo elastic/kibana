@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
-  TimefilterContract,
-  SerializedSearchSourceFields,
   DataPublicPluginStart,
+  SerializedSearchSourceFields,
+  TimefilterContract,
 } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
-import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
-import { createSearchSource } from './create_search_source';
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { ControlParams } from '../editor_utils';
 import { InputControlSettings, InputControlVisDependencies } from '../plugin';
+import { Control, noIndexPatternMsg, noValuesDisableMsg } from './control';
+import { createSearchSource } from './create_search_source';
+import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators

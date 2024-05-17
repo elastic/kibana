@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
 import { Markdown } from '@kbn/shared-ux-markdown';
+import React, { FC } from 'react';
 import { BannerConfiguration } from '../../common';
 
 import './banner.scss';

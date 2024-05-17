@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import { TRANSFORM_STATE, TransformState } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
 import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {

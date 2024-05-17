@@ -7,13 +7,13 @@
 
 import { useState } from 'react';
 
-import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { getTransformConfigQuery } from '../../../../../common';
 
-import type { StepDefineExposedState, QUERY_LANGUAGE } from '../common';
+import type { QUERY_LANGUAGE, StepDefineExposedState } from '../common';
 import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../common';
 
 import type { StepDefineFormProps } from '../step_define_form';

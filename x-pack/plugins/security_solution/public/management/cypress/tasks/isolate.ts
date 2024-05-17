@@ -8,8 +8,8 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
-import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
+import { openAlertDetailsView } from '../screens/alerts';
 import { loadPage } from './common';
 import { waitForActionToSucceed } from './response_actions';
 

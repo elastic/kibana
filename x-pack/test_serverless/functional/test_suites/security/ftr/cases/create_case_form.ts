@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../shared/lib/cases';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const owner = SECURITY_SOLUTION_OWNER;
 

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { CoreSetup, kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import * as t from 'io-ts';
+import { NEVER } from 'rxjs';
 import { registerRoutes } from './register_routes';
 import { routeValidationObject } from './route_validation_object';
-import { NEVER } from 'rxjs';
 
 describe('registerRoutes', () => {
   const get = jest.fn();

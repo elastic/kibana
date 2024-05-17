@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { AppUpdater } from '@kbn/core/public';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { DiscoverSetupPlugins } from '../plugin';
 import { initializeKbnUrlTracking } from './initialize_kbn_url_tracking';
 

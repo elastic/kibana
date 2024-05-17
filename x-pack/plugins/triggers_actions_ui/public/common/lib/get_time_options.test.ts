@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTimeOptions, getTimeFieldOptions } from './get_time_options';
+import { getTimeFieldOptions, getTimeOptions } from './get_time_options';
 
 describe('get_time_options', () => {
   test('if getTimeOptions return single unit time options', () => {

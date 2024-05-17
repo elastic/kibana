@@ -8,8 +8,8 @@
 import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { ActionStatusModelEs, ServerActionStatusModel } from '../../../common/types';
 import { getMoment } from '../../../common/lib/get_moment';
+import { ActionStatusModelEs, ServerActionStatusModel } from '../../../common/types';
 import { deriveState } from './action_status_model_utils';
 
 export const buildServerActionStatusModel = (

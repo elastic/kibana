@@ -7,32 +7,32 @@
 
 import expect from '@kbn/expect';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  getSimpleRule,
-  getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  getSimpleRuleOutputWithoutRuleId,
-  removeServerGeneratedPropertiesIncludingRuleId,
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  getRuleSOById,
-  updateUsername,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  getRuleSavedObjectWithLegacyInvestigationFields,
-  checkInvestigationFieldSoValue,
-} from '../../../utils';
-import {
   createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   createRule,
+  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  checkInvestigationFieldSoValue,
+  createLegacyRuleAction,
+  createRuleThroughAlertingEndpoint,
+  getLegacyActionSO,
+  getRuleSOById,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getSimpleRule,
+  getSimpleRuleOutput,
+  getSimpleRuleOutputWithoutRuleId,
+  removeServerGeneratedProperties,
+  removeServerGeneratedPropertiesIncludingRuleId,
+  updateUsername,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

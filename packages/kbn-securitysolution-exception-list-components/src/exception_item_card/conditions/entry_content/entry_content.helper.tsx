@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { ElementType } from 'react';
+import { EuiBadge, EuiExpression } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import React, { ElementType } from 'react';
 import { ValueWithSpaceWarning } from '../../../..';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';

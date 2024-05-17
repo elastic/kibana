@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ObjectRemover } from '../../../lib/object_remover';
 
 export const createObjectRemover = async ({
   getService,

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { loggerMock } from '@kbn/logging-mocks';
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type {
-  PluginsService,
   InternalPluginsServiceSetup,
   InternalPluginsServiceStart,
+  PluginsService,
 } from '@kbn/core-plugins-browser-internal';
-import type { BuildFlavor } from '@kbn/config/src/types';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalPluginsServiceSetup> = {

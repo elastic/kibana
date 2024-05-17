@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import omit from 'lodash/omit';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
@@ -13,7 +14,6 @@ import {
   enableAssetCriticalityAdvancedSetting,
   getAssetCriticalityDoc,
 } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Entity Analytics - Asset Criticality CSV upload', () => {
     const esClient = getService('es');

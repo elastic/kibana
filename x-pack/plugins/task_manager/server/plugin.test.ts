@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
+import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
-import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
-import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
-import { TaskPollingLifecycle } from './polling_lifecycle';
-import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
-import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { TaskManagerConfig } from './config';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import type { EphemeralTaskLifecycle as EphemeralTaskLifecycleClass } from './ephemeral_task_lifecycle';
+import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
+import { TaskPollingLifecycle } from './polling_lifecycle';
+import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
+import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {

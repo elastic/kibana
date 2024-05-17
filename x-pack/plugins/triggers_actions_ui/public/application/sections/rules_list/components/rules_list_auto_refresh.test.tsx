@@ -1,3 +1,5 @@
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React from 'react';
-import moment from 'moment';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 

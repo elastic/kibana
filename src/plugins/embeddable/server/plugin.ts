@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { identity } from 'lodash';
 import {
-  PersistableStateService,
-  PersistableStateMigrateFn,
   MigrateFunctionsObject,
+  PersistableStateMigrateFn,
+  PersistableStateService,
 } from '@kbn/kibana-utils-plugin/common';
-import {
-  EmbeddableFactoryRegistry,
-  EnhancementsRegistry,
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
-} from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { identity } from 'lodash';
 import {
   getExtractFunction,
   getInjectFunction,
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
+import { getAllMigrations } from '../common/lib/get_all_migrations';
 import {
-  EmbeddableStateWithType,
   CommonEmbeddableStartContract,
   EmbeddableRegistryDefinition,
+  EmbeddableStateWithType,
 } from '../common/types';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
+import {
+  EmbeddableFactoryRegistry,
+  EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
+  EnhancementsRegistry,
+} from './types';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;

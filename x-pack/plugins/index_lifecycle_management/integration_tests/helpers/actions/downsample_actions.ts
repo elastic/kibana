@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
-import { Phase } from '../../../common/types';
+import { act } from 'react-dom/test-utils';
 import { createFormToggleAction } from '..';
+import { Phase } from '../../../common/types';
 
 const createSetDownsampleIntervalAction =
   (testBed: TestBed, phase: Phase) => async (value: string, units?: string) => {

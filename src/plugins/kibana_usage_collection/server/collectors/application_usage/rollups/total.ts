@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
   ApplicationUsageDaily,

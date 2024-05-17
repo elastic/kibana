@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
-import { DetectionResponse } from './detection_response';
-import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+import { TestProviders } from '../../common/mock';
+import { DetectionResponse } from './detection_response';
 
 jest.mock('../components/detection_response/alerts_by_status', () => ({
   AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,

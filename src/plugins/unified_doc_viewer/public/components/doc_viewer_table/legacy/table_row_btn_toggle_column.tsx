@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export interface Props {
   active: boolean;

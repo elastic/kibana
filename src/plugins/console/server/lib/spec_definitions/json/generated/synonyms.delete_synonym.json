@@ -6,12 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "DELETE"
-    ],
-    "patterns": [
-      "_synonyms/{id}"
-    ],
+    "methods": ["DELETE"],
+    "patterns": ["_synonyms/{id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonyms-set.html",
     "availability": {
       "stack": true,

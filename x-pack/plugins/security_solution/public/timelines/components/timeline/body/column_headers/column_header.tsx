@@ -7,27 +7,27 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import type { ResizeCallback } from 're-resizable';
 import { Resizable } from 're-resizable';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
-import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
+import { Direction } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { Direction } from '../../../../../../common/search_strategy';
+import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
 import type { OnFilterChange } from '../../events';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
+import { EventsHeadingHandle, EventsTh, EventsThContent } from '../../styles';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 import type { Sort } from '../sort';
 
-import { Header } from './header';
 import { timelineActions } from '../../../../store';
+import { Header } from './header';
 
 import * as i18n from './translations';
 

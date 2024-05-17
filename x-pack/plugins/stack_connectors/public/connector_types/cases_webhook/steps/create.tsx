@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
-import { containsTitleAndDesc } from '../validator';
+import React, { FunctionComponent } from 'react';
 import { casesVars } from '../action_variables';
-import { HTTP_VERBS } from '../webhook_connectors';
 import * as i18n from '../translations';
+import { containsTitleAndDesc } from '../validator';
+import { HTTP_VERBS } from '../webhook_connectors';
 const { emptyField, urlField } = fieldValidators;
 
 interface Props {

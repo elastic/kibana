@@ -9,10 +9,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   createFleetRequestHandlerContextMock,
-  createMockAgentService,
   createMockAgentPolicyService,
-  createPackagePolicyServiceMock,
+  createMockAgentService,
   createMockPackageService,
+  createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
 

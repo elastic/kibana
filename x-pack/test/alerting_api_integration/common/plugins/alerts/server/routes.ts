@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import {
-  CoreSetup,
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  Logger,
-  SavedObject,
-} from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '@kbn/alerting-plugin/server';
 import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { schema } from '@kbn/config-schema';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import {
+  CoreSetup,
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+  RequestHandlerContext,
+  SavedObject,
+} from '@kbn/core/server';
+import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
+import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
-import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import {
-  RULE_SAVED_OBJECT_TYPE,
-  API_KEY_PENDING_INVALIDATION_TYPE,
-} from '@kbn/alerting-plugin/server';
-import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
-import { FixtureStartDeps } from './plugin';
+import { v4 as uuidv4 } from 'uuid';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
+import { FixtureStartDeps } from './plugin';
 
 export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { sendGetAgentPolicies, sendGetAgents } from '../../../../../hooks';
 import type { DownloadSource } from '../../../../../types';
-import { sendGetAgents, sendGetAgentPolicies } from '../../../../../hooks';
 
 import { getCountsForDownloadSource } from './get_count';
 

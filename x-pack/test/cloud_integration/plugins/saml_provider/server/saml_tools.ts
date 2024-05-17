@@ -7,13 +7,13 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
-import { stringify } from 'query-string';
 import url from 'url';
-import zlib from 'zlib';
 import { promisify } from 'util';
-import { parseString } from 'xml2js';
-import { SignedXml } from 'xml-crypto';
+import zlib from 'zlib';
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
+import { stringify } from 'query-string';
+import { SignedXml } from 'xml-crypto';
+import { parseString } from 'xml2js';
 import { CLOUD_USER_ID } from '../constants';
 
 /**

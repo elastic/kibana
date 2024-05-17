@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getPartitionTheme } from './get_partition_theme';
-import { createMockPieParams, createMockDonutParams, createMockPartitionVisParams } from '../mocks';
-import { ChartTypes, LabelPositions, PartitionVisParams } from '../../common/types';
-import { RecursivePartial } from '@elastic/eui';
 import { Theme } from '@elastic/charts';
+import { RecursivePartial } from '@elastic/eui';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ChartTypes, LabelPositions, PartitionVisParams } from '../../common/types';
+import { createMockDonutParams, createMockPartitionVisParams, createMockPieParams } from '../mocks';
+import { getPartitionTheme } from './get_partition_theme';
 
 const column: ExpressionValueVisDimension = {
   type: 'vis_dimension',

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Conversation, Prompt, QuickPrompt } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
-import type { KnowledgeBaseConfig } from '../../types';
+import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
 import {
   ConversationsBulkActions,
   bulkUpdateConversations,
 } from '../../api/conversations/bulk_update_actions_conversations';
-import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
+import type { KnowledgeBaseConfig } from '../../types';
 
 interface UseSettingsUpdater {
   assistantStreamingEnabled: boolean;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rgb, nest } from 'd3';
+import { nest, rgb } from 'd3';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 

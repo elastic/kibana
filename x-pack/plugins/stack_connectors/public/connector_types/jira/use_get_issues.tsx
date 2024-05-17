@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty, debounce } from 'lodash/fp';
-import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { Issue } from './types';
+import { debounce, isEmpty } from 'lodash/fp';
+import { useEffect, useRef, useState } from 'react';
 import { getIssues } from './api';
 import * as i18n from './translations';
+import { Issue } from './types';
 
 interface Props {
   http: HttpSetup;

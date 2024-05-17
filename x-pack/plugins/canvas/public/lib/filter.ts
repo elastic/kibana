@@ -8,8 +8,8 @@
 import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
 import { flowRight, get, groupBy } from 'lodash';
 import {
-  Filter as FilterType,
   FilterField,
+  Filter as FilterType,
   FilterViewInstance,
   FlattenFilterViewInstance,
   FormattedFilterViewInstance,

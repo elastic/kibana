@@ -6,11 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Query } from '@kbn/es-query';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { Query } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -282,7 +282,7 @@ export const EMBEDDABLE_SAMPLER_OPTION = {
   NORMAL: 'normal_sampling',
 };
 export type FieldStatsEmbeddableSamplerOption =
-  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+  (typeof EMBEDDABLE_SAMPLER_OPTION)[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
 
 export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
   return arg.mode === 'random_sampling';

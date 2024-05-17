@@ -7,20 +7,20 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
-  EuiStepsHorizontal,
   EuiStepStatus,
+  EuiStepsHorizontal,
 } from '@elastic/eui';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import * as i18n from './translations';
 import { AuthStep, CreateStep, GetStep, UpdateStep } from './steps';
+import * as i18n from './translations';
 
 export const HTTP_VERBS = ['post', 'put', 'patch'];
 const fields = {
@@ -84,8 +84,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           currentStep === index
             ? 'current'
             : currentStep > index
-            ? 'complete'
-            : ('incomplete' as EuiStepStatus),
+              ? 'complete'
+              : ('incomplete' as EuiStepStatus),
       };
     });
     setStatus(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
@@ -102,16 +102,16 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         selectedStep != null
           ? selectedStep
           : currentStep === 4
-          ? currentStep
-          : ((currentStep + 1) as PossibleStepNumbers);
+            ? currentStep
+            : ((currentStep + 1) as PossibleStepNumbers);
       const fieldsToValidate: string[] =
         nextStep === 2
           ? fields.step1
           : nextStep === 3
-          ? [...fields.step1, ...fields.step2]
-          : nextStep === 4
-          ? [...fields.step1, ...fields.step2, ...fields.step3]
-          : [];
+            ? [...fields.step1, ...fields.step2]
+            : nextStep === 4
+              ? [...fields.step1, ...fields.step2, ...fields.step3]
+              : [];
       // step validation needs async call in order to run each field through validator
       const { areFieldsValid } = await validateFields(fieldsToValidate);
 

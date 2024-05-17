@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
   isJobStatusWithResults,
   logEntryCategoriesJobType,
@@ -30,9 +30,9 @@ import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogsPageTemplate } from '../shared/page_template';
+import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
-import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 

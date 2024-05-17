@@ -17,12 +17,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useUsageTracker } from '../hooks/use_usage_tracker';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
-import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
-import { ChatFormFields } from '../types';
 import { AnalyticsEvents } from '../analytics/constants';
+import { useLoadConnectors } from '../hooks/use_load_connectors';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
+import { ChatFormFields } from '../types';
+import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
+import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
 
 const maxWidthPage = 640;
 

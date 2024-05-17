@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
   EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useMemo, useEffect } from 'react';
 
-import type { Agent } from '../../../../types';
+import { AgentPolicyPackageBadges } from '../../../../components';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 import {
   sendPostAgentReassign,
   sendPostBulkAgentReassign,
-  useStartServices,
   useGetAgentPolicies,
+  useStartServices,
 } from '../../../../hooks';
-import { AgentPolicyPackageBadges } from '../../../../components';
-import { SO_SEARCH_LIMIT } from '../../../../constants';
+import type { Agent } from '../../../../types';
 
 interface Props {
   onClose: () => void;

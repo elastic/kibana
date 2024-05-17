@@ -12,8 +12,8 @@ import type {
 } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 import { SavedObjectsSecurityExtension } from '../saved_objects';
+import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Deps {
   audit: AuditServiceSetup;

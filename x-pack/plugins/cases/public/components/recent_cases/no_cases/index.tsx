@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 
 import type { ReactElement } from 'react-markdown';
-import * as i18n from '../translations';
-import { LinkAnchor } from '../../links';
-import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCreateCaseNavigation } from '../../../common/navigation';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { LinkAnchor } from '../../links';
+import * as i18n from '../translations';
 import type { FilterMode as RecentCasesFilterMode } from '../types';
 
 export interface NoCasesComp {

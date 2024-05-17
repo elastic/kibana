@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
-import { parse } from 'hjson';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { ExperimentalMapLayerInfo, shouldShowMapLayerInfo } from './experimental_map_vis_info';
+import { parse } from 'hjson';
+import React, { useMemo } from 'react';
 import {
   DeprecatedHistogramIntervalInfo,
   shouldShowDeprecatedHistogramIntervalInfo,
 } from './deprecated_interval_info';
+import { ExperimentalMapLayerInfo, shouldShowMapLayerInfo } from './experimental_map_vis_info';
 
 import type { VegaSpec } from '../data_model/types';
 

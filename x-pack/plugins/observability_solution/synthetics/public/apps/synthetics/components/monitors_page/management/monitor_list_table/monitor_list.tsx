@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
 import {
   Criteria,
   EuiBasicTable,
-  EuiTableSortingType,
-  EuiPanel,
   EuiHorizontalRule,
+  EuiPanel,
+  EuiTableSortingType,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
-import { DeleteMonitor } from './delete_monitor';
-import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
-import { MonitorListPageState } from '../../../../state';
+import React, { useCallback, useState } from 'react';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   SourceType,
 } from '../../../../../../../common/runtime_types';
+import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
+import { MonitorListPageState } from '../../../../state';
+import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { useMonitorListColumns } from './columns';
+import { DeleteMonitor } from './delete_monitor';
 import * as labels from './labels';
 
 interface Props {

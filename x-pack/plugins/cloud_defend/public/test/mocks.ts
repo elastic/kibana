@@ -1,3 +1,4 @@
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +6,7 @@
  * 2.0.
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../common/constants';
+import { ALERTS_DATASET, INPUT_CONTROL, INTEGRATION_PACKAGE_NAME } from '../../common/constants';
 import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../common/constants';
 
 export const MOCK_YAML_CONFIGURATION = `file:

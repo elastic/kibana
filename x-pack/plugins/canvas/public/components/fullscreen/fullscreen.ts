@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FC, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
+import { FC, useEffect, useState } from 'react';
 import { getWindow } from '../../lib/get_window';
 
 interface Props {

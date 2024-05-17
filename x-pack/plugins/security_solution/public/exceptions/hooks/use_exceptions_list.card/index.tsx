@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   ExceptionListItemSchema,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useGeneratedHtmlId } from '@elastic/eui';
-import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
+import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { SecurityPageName } from '../../../../common/constants';
-import type { ExceptionListInfo } from '../use_all_exception_lists';
-import { useListExceptionItems } from '../use_list_exception_items';
-import * as i18n from '../../translations';
-import { checkIfListCannotBeEdited } from '../../utils/list.utils';
+import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
 import { CHECK_EXCEPTION_TTL_ACTION_TYPES } from '../../components/expired_exceptions_list_items_modal';
+import * as i18n from '../../translations';
+import { checkIfListCannotBeEdited } from '../../utils/list.utils';
+import type { ExceptionListInfo } from '../use_all_exception_lists';
+import { useListExceptionItems } from '../use_list_exception_items';
 
 interface DuplicateListAction {
   listId: string;

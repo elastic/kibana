@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
 import { History, LocationDescriptor } from 'history';
+import { useCallback, useMemo } from 'react';
 
 import { useKibana } from '..';
 

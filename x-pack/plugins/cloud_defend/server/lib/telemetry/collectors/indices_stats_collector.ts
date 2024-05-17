@@ -1,3 +1,4 @@
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +6,15 @@
  * 2.0.
  */
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCloudDefendStatus } from '../../../routes/status/status';
 import type { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
 
-import type { CloudDefendIndicesStats, IndexStats } from './types';
 import {
   ALERTS_INDEX_PATTERN,
   FILE_INDEX_PATTERN,
   PROCESS_INDEX_PATTERN,
 } from '../../../../common/constants';
+import type { CloudDefendIndicesStats, IndexStats } from './types';
 
 const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
   esClient.indices.stats({ index });

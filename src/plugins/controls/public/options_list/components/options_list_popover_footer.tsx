@@ -9,19 +9,19 @@
 import React from 'react';
 
 import {
-  EuiIconTip,
-  EuiFlexItem,
-  EuiProgress,
-  EuiFlexGroup,
   EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPopoverFooter,
-  useEuiPaddingSize,
+  EuiProgress,
   useEuiBackgroundColor,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { OptionsListStrings } from './options_list_strings';
 
 const aggregationToggleButtons = [
   {

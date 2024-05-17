@@ -1,3 +1,14 @@
+import { IToasts } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +16,16 @@
  * 2.0.
  */
 import * as React from 'react';
-import { IToasts } from '@kbn/core/public';
-import {
-  render,
-  screen,
-  cleanup,
-  waitFor,
-  waitForElementToBeRemoved,
-  fireEvent,
-} from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
-  mockedRulesData,
-  ruleTypeFromApi,
   getDisabledByLicenseRuleTypeFromApi,
+  mockedRulesData,
   ruleType,
+  ruleTypeFromApi,
 } from './test_helpers';
 
 jest.mock('../../../../common/lib/kibana');

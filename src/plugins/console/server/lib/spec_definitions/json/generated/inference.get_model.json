@@ -7,16 +7,9 @@
       "pretty": "__flag__"
     },
     "url_components": {
-      "task_type": [
-        "sparse_embedding",
-        "text_embedding",
-        "rerank",
-        "completion"
-      ]
+      "task_type": ["sparse_embedding", "text_embedding", "rerank", "completion"]
     },
-    "methods": [
-      "GET"
-    ],
+    "methods": ["GET"],
     "patterns": [
       "_inference",
       "_inference/{inference_id}",

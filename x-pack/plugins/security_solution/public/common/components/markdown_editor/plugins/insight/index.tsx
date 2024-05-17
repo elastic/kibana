@@ -5,60 +5,60 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
-import type { Plugin } from 'unified';
-import moment from 'moment';
-import React, { useContext, useMemo, useCallback, useState } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import {
-  EuiLoadingSpinner,
-  EuiIcon,
-  EuiSpacer,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiFieldText,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSelect,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
-import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { useForm, FormProvider, useController } from 'react-hook-form';
-import { useUpsellingMessage } from '../../../../hooks/use_upselling';
-import { useAppToasts } from '../../../../hooks/use_app_toasts';
-import { useKibana } from '../../../../lib/kibana';
-import { useInsightQuery } from './use_insight_query';
-import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
-import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
-import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
-import {
-  getTimeRangeSettings,
-  parseDateWithDefault,
-  DEFAULT_FROM_MOMENT,
-  DEFAULT_TO_MOMENT,
-} from '../../../../utils/default_date_settings';
-import type { TimeRange } from '../../../../store/inputs/model';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty, pickBy } from 'lodash';
+import moment from 'moment';
+import React, { useContext, useMemo, useCallback, useState } from 'react';
+import { FormProvider, useController, useForm } from 'react-hook-form';
+import type { Plugin } from 'unified';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
-import { SourcererScopeName } from '../../../../store/sourcerer/model';
-import { filtersToInsightProviders } from './provider';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useLicense } from '../../../../hooks/use_license';
-import { isProviderValid } from './helpers';
-import * as i18n from './translations';
+import { useUpsellingMessage } from '../../../../hooks/use_upselling';
+import { useKibana } from '../../../../lib/kibana';
+import type { TimeRange } from '../../../../store/inputs/model';
+import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+  getTimeRangeSettings,
+  parseDateWithDefault,
+} from '../../../../utils/default_date_settings';
+import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
+import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
 import { useGetScopedSourcererDataView } from '../../../sourcerer/use_get_sourcerer_data_view';
+import { isProviderValid } from './helpers';
+import { filtersToInsightProviders } from './provider';
+import * as i18n from './translations';
+import { type Provider, useInsightDataProviders } from './use_insight_data_providers';
+import { useInsightQuery } from './use_insight_query';
 
 interface InsightComponentProps {
   label?: string;

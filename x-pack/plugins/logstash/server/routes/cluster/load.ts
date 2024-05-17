@@ -6,8 +6,8 @@
  */
 
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
-import { Cluster } from '../../models/cluster';
 import { checkLicense } from '../../lib/check_license';
+import { Cluster } from '../../models/cluster';
 import type { LogstashPluginRouter } from '../../types';
 
 export function registerClusterLoadRoute(router: LogstashPluginRouter) {

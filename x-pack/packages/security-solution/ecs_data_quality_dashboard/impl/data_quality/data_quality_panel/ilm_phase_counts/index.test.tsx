@@ -13,8 +13,8 @@ import {
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { IlmPhaseCounts } from '.';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 import { getIlmExplainPhaseCounts } from '../pattern/helpers';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {

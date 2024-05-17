@@ -10,14 +10,14 @@ import Path from 'path';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   clearLog,
-  startElasticsearch,
+  defaultKibanaIndex,
   getKibanaMigratorTestKit,
   nextMinor,
-  defaultKibanaIndex,
+  startElasticsearch,
 } from '../kibana_migrator_test_kit';
 import '../jest_matchers';
-import { delay, parseLogFile } from '../test_utils';
 import { baselineTypes as types } from '../kibana_migrator_test_kit.fixtures';
+import { delay, parseLogFile } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'fail_on_rollback.test.log');
 

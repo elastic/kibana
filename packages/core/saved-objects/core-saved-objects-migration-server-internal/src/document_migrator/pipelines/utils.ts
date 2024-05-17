@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import Semver from 'semver';
 import Boom from '@hapi/boom';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import Semver from 'semver';
 import { type Transform, TransformType } from '../types';
 
 /** transform types using `coreMigrationVersion` and not `typeMigrationVersion` */

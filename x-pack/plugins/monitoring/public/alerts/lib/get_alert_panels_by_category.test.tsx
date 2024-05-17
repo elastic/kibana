@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import {
   RULE_CPU_USAGE,
   RULE_LOGSTASH_VERSION_MISMATCH,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
 } from '../../../common/constants';
-import { AlertSeverity } from '../../../common/enums';
-import { getAlertPanelsByCategory } from './get_alert_panels_by_category';
 import {
-  RULE_LICENSE_EXPIRATION,
-  RULE_NODES_CHANGED,
   RULE_DISK_USAGE,
+  RULE_LICENSE_EXPIRATION,
   RULE_MEMORY_USAGE,
+  RULE_NODES_CHANGED,
 } from '../../../common/constants';
-import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
+import { AlertSeverity } from '../../../common/enums';
 import { AlertState } from '../../../common/types/alerts';
+import { getAlertPanelsByCategory } from './get_alert_panels_by_category';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {

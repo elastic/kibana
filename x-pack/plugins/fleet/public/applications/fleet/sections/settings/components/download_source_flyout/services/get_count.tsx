@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import { sendGetAgentPolicies, sendGetAgents } from '../../../../../hooks';
 import type { DownloadSource } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 
 export async function getCountsForDownloadSource(downloadSource: DownloadSource) {
   let kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:"${downloadSource.id}"`;

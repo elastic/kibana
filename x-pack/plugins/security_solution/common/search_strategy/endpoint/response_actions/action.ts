@@ -7,11 +7,11 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
-  SortOrder,
   Inspect,
   Maybe,
   RequestBasicOptions,
   ResponseActionsSearchHit,
+  SortOrder,
 } from './types';
 
 export interface ActionRequestOptions extends RequestBasicOptions {

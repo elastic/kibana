@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { BehaviorSubject } from 'rxjs';
 
 import {
-  elasticsearchClientMock,
   type ClusterClientMock,
   type CustomClusterClientMock,
   createAgentStatsProviderMock,
+  elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
+  ElasticsearchCapabilities,
   ElasticsearchClientConfig,
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
-  ElasticsearchServicePreboot,
-  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import type {
+  ClusterInfo,
   ElasticsearchConfig,
   ElasticsearchService,
+  ElasticsearchStatusMeta,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
   NodesVersionCompatibility,
-  ClusterInfo,
 } from '@kbn/core-elasticsearch-server-internal';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 

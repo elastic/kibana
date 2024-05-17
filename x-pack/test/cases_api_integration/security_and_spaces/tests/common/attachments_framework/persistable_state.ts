@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
+import { omit } from 'lodash/fp';
 
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  bulkCreateAttachments,
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  getCaseUserActions,
+  getReferenceFromEsResponse,
+  getSOFromKibanaIndex,
+  removeServerGeneratedPropertiesFromSavedObject,
+  updateComment,
+} from '../../../../common/lib/api';
 import {
   defaultUser,
   persistableStateAttachment,
   postCaseReq,
   postCommentUserReq,
 } from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
-  createCase,
-  createComment,
-  removeServerGeneratedPropertiesFromSavedObject,
-  getSOFromKibanaIndex,
-  getReferenceFromEsResponse,
-  bulkCreateAttachments,
-  updateComment,
-  getCaseUserActions,
-} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

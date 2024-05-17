@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import { SomeDevLog } from '@kbn/some-dev-log';
+import * as Rx from 'rxjs';
 
+import { Message, MessageTypes } from './message';
 import { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 import { Writer } from './writer';
-import { Message, MessageTypes } from './message';
 
 export interface ToolingLogOptions {
   /**

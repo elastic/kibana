@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { AggParamEditorProps } from '../agg_param_props';
 import { IAggConfig } from '@kbn/data-plugin/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { PercentilesEditor } from './percentiles';
+import React from 'react';
+import { AggParamEditorProps } from '../agg_param_props';
 import { EditorVisState } from '../sidebar/state/reducers';
+import { PercentilesEditor } from './percentiles';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

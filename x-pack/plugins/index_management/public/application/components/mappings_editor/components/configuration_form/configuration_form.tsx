@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 import { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useAppContext } from '../../../../app_context';
-import { useForm, Form } from '../../shared_imports';
-import { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
 import { useDispatch } from '../../mappings_state_context';
+import { Form, useForm } from '../../shared_imports';
+import { GenericObject, MappingsConfiguration } from '../../types';
+import { configurationFormSchema } from './configuration_form_schema';
 import { DynamicMappingSection } from './dynamic_mapping_section';
-import { SourceFieldSection } from './source_field_section';
+import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
-import { MapperSizePluginSection } from './mapper_size_plugin_section';
-import { configurationFormSchema } from './configuration_form_schema';
+import { SourceFieldSection } from './source_field_section';
 
 interface Props {
   value?: MappingsConfiguration;

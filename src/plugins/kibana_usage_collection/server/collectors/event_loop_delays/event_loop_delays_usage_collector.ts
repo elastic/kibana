@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { type Observable, timer, takeUntil } from 'rxjs';
-import { SavedObjectsServiceSetup, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { rollDailyData } from './rollups';
-import { registerSavedObjectTypes, EventLoopDelaysDaily } from './saved_objects';
-import { eventLoopDelaysUsageSchema, EventLoopDelaysUsageReport } from './schema';
-import { SAVED_OBJECTS_DAILY_TYPE } from './saved_objects';
+import { type Observable, takeUntil, timer } from 'rxjs';
 import { ROLL_DAILY_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
+import { rollDailyData } from './rollups';
+import { EventLoopDelaysDaily, registerSavedObjectTypes } from './saved_objects';
+import { SAVED_OBJECTS_DAILY_TYPE } from './saved_objects';
+import { EventLoopDelaysUsageReport, eventLoopDelaysUsageSchema } from './schema';
 
 export function registerEventLoopDelaysCollector(
   logger: Logger,

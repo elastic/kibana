@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import { TopNType } from '@kbn/profiling-utils';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { StatefulProfilingRouter } from '../../hooks/use_profiling_router';
 import { ProfilingRoutes } from '../../routing';
 

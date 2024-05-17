@@ -11,7 +11,7 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { ApiLogsTable } from '../../api_logs';
 

@@ -8,10 +8,10 @@
 
 import { Root } from '@kbn/core-root-server-internal';
 import {
-  createTestServers,
-  createRootWithCorePlugins,
-  request,
   type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+  request,
 } from '@kbn/core-test-helpers-kbn-server';
 
 describe('default route provider', () => {

@@ -21,7 +21,7 @@ export const getCardBackgroundColor = (value: number) => {
 };
 
 export const extractSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity,
 >(
   options: Array<{ checked?: string; label: T }>
 ): T[] => {

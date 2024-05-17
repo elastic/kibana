@@ -1,3 +1,4 @@
+import { Either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,7 +10,6 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -66,8 +66,7 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const MlAnomalyDetectionHealthAlertRequired = rt.type({
-});
+const MlAnomalyDetectionHealthAlertRequired = rt.type({});
 // prettier-ignore
 const MlAnomalyDetectionHealthAlertOptional = rt.partial({
   'kibana.alert.datafeed_results': rt.array(
@@ -106,6 +105,10 @@ const MlAnomalyDetectionHealthAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const MlAnomalyDetectionHealthAlertSchema = rt.intersection([MlAnomalyDetectionHealthAlertRequired, MlAnomalyDetectionHealthAlertOptional, AlertSchema]);
+export const MlAnomalyDetectionHealthAlertSchema = rt.intersection([
+  MlAnomalyDetectionHealthAlertRequired,
+  MlAnomalyDetectionHealthAlertOptional,
+  AlertSchema,
+]);
 // prettier-ignore
 export type MlAnomalyDetectionHealthAlert = rt.TypeOf<typeof MlAnomalyDetectionHealthAlertSchema>;

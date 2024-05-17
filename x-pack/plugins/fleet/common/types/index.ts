@@ -10,8 +10,8 @@ export * from './rest_spec';
 
 import type {
   PreconfiguredAgentPolicy,
-  PreconfiguredPackage,
   PreconfiguredOutput,
+  PreconfiguredPackage,
 } from './models/preconfiguration';
 
 export interface FleetConfigType {

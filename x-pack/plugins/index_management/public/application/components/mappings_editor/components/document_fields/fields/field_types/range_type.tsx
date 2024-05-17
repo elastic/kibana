@@ -8,24 +8,24 @@
 import React from 'react';
 import SemVer from 'semver/classes/semver';
 
-import {
-  NormalizedField,
-  Field as FieldType,
-  ParameterName,
-  ComboBoxOption,
-} from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { FormDataProvider } from '../../../../shared_imports';
 import {
-  StoreParameter,
-  IndexParameter,
+  ComboBoxOption,
+  Field as FieldType,
+  NormalizedField,
+  ParameterName,
+} from '../../../../types';
+import {
   BoostParameter,
   CoerceNumberParameter,
   FormatParameter,
+  IndexParameter,
   LocaleParameter,
   MetaParameter,
+  StoreParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
-import { FormDataProvider } from '../../../../shared_imports';
+import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;

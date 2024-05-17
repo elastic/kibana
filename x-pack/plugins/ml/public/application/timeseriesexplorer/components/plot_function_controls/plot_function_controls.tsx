@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import { mlJobService } from '../../../services/job_service';
-import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
-import { useToastNotificationService } from '../../../services/toast_notification_service';
-import { useMlResultsService } from '../../../services/results_service';
+import React, { useCallback, useEffect } from 'react';
 import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import type { MlEntity } from '../../../../embeddables';
+import { mlJobService } from '../../../services/job_service';
+import { useMlResultsService } from '../../../services/results_service';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 
 const plotByFunctionOptions = [
   {

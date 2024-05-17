@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SearchResult as SearchResultType, State } from '../../../types';
 import { useDispatch } from '../../../mappings_state_context';
+import { SearchResult as SearchResultType, State } from '../../../types';
 import { SearchResultItem } from './search_result_item';
 
 interface Props {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { EuiSuperDatePicker } from '@elastic/eui';

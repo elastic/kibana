@@ -7,7 +7,7 @@
 
 import { generatePath } from 'react-router-dom';
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';

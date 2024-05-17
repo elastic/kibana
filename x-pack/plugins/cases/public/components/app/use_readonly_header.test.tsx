@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
-import { readCasesPermissions, TestProviders } from '../../common/mock';
+import { TestProviders, readCasesPermissions } from '../../common/mock';
 import { useReadonlyHeader } from './use_readonly_header';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

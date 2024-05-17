@@ -7,17 +7,17 @@
 
 import Boom from '@hapi/boom';
 
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
-import type { CasesClientArgs } from '../types';
-import { createCaseError } from '../../common/error';
-import { Operations } from '../../authorization';
-import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequest } from '../../../common/types/api';
 import { AttachmentRequestRt } from '../../../common/types/api';
+import type { AlertAttachmentPayload } from '../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
+import { Operations } from '../../authorization';
+import { createCaseError } from '../../common/error';
+import { decodeOrThrow } from '../../common/runtime_types';
+import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
+import type { CasesClientArgs } from '../types';
+import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
  * Delete all comments for a case.

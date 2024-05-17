@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { AnomalyDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
-import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { range } from 'lodash';
+import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule } from './helpers/alerting_api_helper';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

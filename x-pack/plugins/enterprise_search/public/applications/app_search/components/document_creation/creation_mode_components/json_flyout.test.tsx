@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTab, EuiTabs } from '@elastic/eui';
 
 import {
   JsonFlyout,
-  PasteJsonTextTabContent,
-  UploadJsonFileTabContent,
   PasteJsonTextFooterContent,
+  PasteJsonTextTabContent,
   UploadJsonFileFooterContent,
+  UploadJsonFileTabContent,
 } from '.';
 
 describe('JsonFlyout', () => {

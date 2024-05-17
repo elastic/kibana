@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import styled from 'styled-components';
-import { RecentTimelineHeader } from './header';
+import { TimelineType } from '../../../../common/api/timeline';
+import { HoverPopover } from '../../../common/components/hover_popover';
 import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
-import { HoverPopover } from '../../../common/components/hover_popover';
-import { TimelineType } from '../../../../common/api/timeline';
+import { RecentTimelineHeader } from './header';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';

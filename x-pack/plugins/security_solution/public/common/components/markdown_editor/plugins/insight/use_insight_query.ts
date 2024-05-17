@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useMemo, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useMemo, useState } from 'react';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import { useKibana } from '../../../../lib/kibana';
-import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
-import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { useKibana } from '../../../../lib/kibana';
+import { combineQueries } from '../../../../lib/kuery';
 import type { TimeRange } from '../../../../store/inputs/model';
+import { SourcererScopeName } from '../../../../store/sourcerer/model';
 
 export interface UseInsightQuery {
   dataProviders: DataProvider[];

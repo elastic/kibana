@@ -7,11 +7,11 @@
  */
 
 import type { collectMultiNamespaceReferences } from './apis/internals/collect_multi_namespace_references';
+import type { deleteLegacyUrlAliases } from './apis/internals/delete_legacy_url_aliases';
 import type { internalBulkResolve } from './apis/internals/internal_bulk_resolve';
-import type * as InternalUtils from './apis/utils/internal_utils';
 import type { preflightCheckForCreate } from './apis/internals/preflight_check_for_create';
 import type { updateObjectsSpaces } from './apis/internals/update_objects_spaces';
-import type { deleteLegacyUrlAliases } from './apis/internals/delete_legacy_url_aliases';
+import type * as InternalUtils from './apis/utils/internal_utils';
 
 export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
   typeof collectMultiNamespaceReferences
@@ -29,10 +29,10 @@ jest.mock('./apis/internals/internal_bulk_resolve', () => ({
 }));
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getBulkOperationError']
+  (typeof InternalUtils)['getBulkOperationError']
 >;
 export const mockGetCurrentTime = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getCurrentTime']
+  (typeof InternalUtils)['getCurrentTime']
 >;
 
 jest.mock('./apis/utils/internal_utils', () => {

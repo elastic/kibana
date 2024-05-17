@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { compareFilters, Query, TimeRange } from '@kbn/es-query';
-import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
+import { Query, TimeRange, compareFilters } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import React, { useCallback, useMemo, useState } from 'react';
+import { TriggersAndActionsUiServices } from '../../..';
+import { useAlertDataViews } from '../../hooks/use_alert_data_view';
+import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
+import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { NO_INDEX_PATTERNS } from './constants';
+import { QuickFiltersMenuItem, isQuickFiltersGroup } from './quick_filters';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertDataViews } from '../../hooks/use_alert_data_view';
-import { TriggersAndActionsUiServices } from '../../..';
-import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 

@@ -1,3 +1,6 @@
+import { loggerMock } from '@kbn/logging-mocks';
+import { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +8,9 @@
  * 2.0.
  */
 import {
-  getTokenCountFromInvokeAsyncIterator,
   InvokeAsyncIteratorBody,
+  getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
-import { loggerMock } from '@kbn/logging-mocks';
-import { Stream } from 'openai/streaming';
-import { ChatCompletionChunk } from 'openai/resources/chat/completions';
 
 const body: InvokeAsyncIteratorBody = {
   messages: [

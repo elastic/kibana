@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
-import { createCasesServiceMock } from '../index.mock';
-import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../types';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
+import { createCasesServiceMock } from '../index.mock';
+import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');

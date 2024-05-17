@@ -13,17 +13,17 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { defineConfigureRoute } from './configure';
-import { routeDefinitionParamsMock } from './index.mock';
 import {
-  ElasticsearchConnectionStatus,
   ERROR_CONFIGURE_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
   ERROR_KIBANA_CONFIG_FAILURE,
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
+  ElasticsearchConnectionStatus,
 } from '../../common';
 import { interactiveSetupMock } from '../mocks';
+import { defineConfigureRoute } from './configure';
+import { routeDefinitionParamsMock } from './index.mock';
 
 describe('Configure routes', () => {
   let router: jest.Mocked<IRouter>;
@@ -100,15 +100,17 @@ describe('Configure routes', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[caCert]: expected value of type [string] but got [undefined]"`
       );
-      expect(bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der' })
+      ).toMatchInlineSnapshot(`
         Object {
           "caCert": "der",
           "host": "https://localhost:9200",
         }
       `);
-      expect(bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der', code: '123456' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der', code: '123456' })
+      ).toMatchInlineSnapshot(`
         Object {
           "caCert": "der",
           "code": "123456",

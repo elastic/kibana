@@ -6,10 +6,10 @@
  */
 
 import { Ast } from '@kbn/interpreter';
-import type { Transform } from './transform';
-import type { View } from './view';
 import type { Datasource } from './datasource';
 import type { Model } from './model';
+import type { Transform } from './transform';
+import type { View } from './view';
 
 export type ArgType = string;
 export type ArgDisplayType = 'model' | 'argument';

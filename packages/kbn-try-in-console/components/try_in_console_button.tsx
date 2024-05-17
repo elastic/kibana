@@ -9,9 +9,9 @@
 import React from 'react';
 
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';

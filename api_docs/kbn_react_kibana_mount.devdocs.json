@@ -76,9 +76,7 @@
         "type": "Function",
         "tags": [],
         "label": "toMountPoint",
-        "description": [
-          "\nMountPoint converter for react nodes.\n"
-        ],
+        "description": ["\nMountPoint converter for react nodes.\n"],
         "signature": [
           "(node: React.ReactNode, params: ",
           {
@@ -108,12 +106,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "node",
-            "description": [
-              "to get a mount point for"
-            ],
-            "signature": [
-              "React.ReactNode"
-            ],
+            "description": ["to get a mount point for"],
+            "signature": ["React.ReactNode"],
             "path": "packages/react/kibana_mount/to_mount_point.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -151,9 +145,7 @@
         "tags": [],
         "label": "useIfMounted",
         "description": [],
-        "signature": [
-          "() => (func: any) => void"
-        ],
+        "signature": ["() => (func: any) => void"],
         "path": "packages/react/kibana_mount/utils.ts",
         "deprecated": false,
         "trackAdoption": false,

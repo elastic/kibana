@@ -6,31 +6,31 @@
  */
 
 import {
-  SecurityPageName,
   ExternalPageName,
   LinkCategoryType,
+  SecurityPageName,
 } from '@kbn/security-solution-navigation';
-import { MACHINE_LEARNING_PATH } from '../../../../../common/constants';
-import type { LinkItem } from '../../../../common/links/types';
 import { SERVER_APP_ID } from '../../../../../common';
+import { MACHINE_LEARNING_PATH } from '../../../../../common/constants';
 import type { SolutionLinkCategory, SolutionNavLink } from '../../../../common/links';
+import type { LinkItem } from '../../../../common/links/types';
 import {
-  IconLensLazy,
-  IconMarketingLazy,
-  IconInfraLazy,
+  IconChartArrowLazy,
+  IconDashboardLazy,
+  IconDataViewLazy,
   IconFilebeatChartLazy,
+  IconFilebeatLazy,
+  IconInfraLazy,
+  IconIntuitiveLazy,
   IconJobsLazy,
   IconKeywordLazy,
-  IconDashboardLazy,
-  IconVisualizationLazy,
-  IconSettingsLazy,
-  IconChartArrowLazy,
+  IconLensLazy,
   IconManagerLazy,
-  IconFilebeatLazy,
-  IconReplicationLazy,
-  IconDataViewLazy,
-  IconIntuitiveLazy,
+  IconMarketingLazy,
   IconRapidBarGraphLazy,
+  IconReplicationLazy,
+  IconSettingsLazy,
+  IconVisualizationLazy,
 } from './lazy_icons';
 import * as i18n from './ml_translations';
 

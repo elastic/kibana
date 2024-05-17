@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
-import type { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
+import type { Pagination, Rule, RuleStatus, Sorting } from '../../../types';
 import { transformRule } from './common_transformations';
 
 export interface LoadRulesProps {

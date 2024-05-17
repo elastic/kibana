@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { RegionMapVisConfig } from './types';
-import { MapComponent } from '../../embeddable/map_component';
+import React, { useMemo } from 'react';
 import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
+import { MapComponent } from '../../embeddable/map_component';
+import { RegionMapVisConfig } from './types';
 
 interface Props {
   filters?: Filter[];

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { MapStoreState } from '../../../reducers/store';
 import { fitToDataBounds } from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
 import { getMapSettings } from '../../../selectors/map_selectors';
 import { FitToData } from './fit_to_data';
 

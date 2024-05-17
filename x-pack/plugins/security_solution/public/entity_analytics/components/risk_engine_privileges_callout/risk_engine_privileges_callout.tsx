@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import type { CallOutMessage } from '../../../common/components/callouts';
 import { CallOut } from '../../../common/components/callouts';
-import { MissingPrivilegesCallOutBody, MISSING_PRIVILEGES_CALLOUT_TITLE } from './translations';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
+import { MISSING_PRIVILEGES_CALLOUT_TITLE, MissingPrivilegesCallOutBody } from './translations';
 
 export const RiskEnginePrivilegesCallOut: React.FC<{
   privileges: RiskEngineMissingPrivilegesResponse;

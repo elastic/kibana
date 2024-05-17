@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import moment from 'moment';
-import { css } from '@emotion/react';
-import { EuiToolTip } from '@elastic/eui';
 
 import './_annotation.scss';
 

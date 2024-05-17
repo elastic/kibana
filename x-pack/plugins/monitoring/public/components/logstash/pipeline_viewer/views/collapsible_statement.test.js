@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiButtonIcon } from '@elastic/eui';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { CollapsibleStatement } from './collapsible_statement';
-import { shallow } from 'enzyme';
-import { EuiButtonIcon } from '@elastic/eui';
 
 describe('CollapsibleStatement component', () => {
   let props;

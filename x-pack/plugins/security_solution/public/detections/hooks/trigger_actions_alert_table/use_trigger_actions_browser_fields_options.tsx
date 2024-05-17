@@ -1,3 +1,4 @@
+import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 
 export const getUseTriggersActionsFieldBrowserOptions = (scopeId: SourcererScopeName) => {
   const useTriggersActionsFieldBrowserOptions: AlertsTableConfigurationRegistry['useFieldBrowserOptions'] =

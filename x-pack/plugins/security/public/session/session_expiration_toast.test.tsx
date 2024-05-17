@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { createSessionExpirationToast, SessionExpirationToast } from './session_expiration_toast';
+import { SessionExpirationToast, createSessionExpirationToast } from './session_expiration_toast';
 import type { SessionState } from './session_timeout';
 
 describe('createSessionExpirationToast', () => {

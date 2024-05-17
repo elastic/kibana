@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseConnector, ExternalService, User } from '../../../common/types/domain';
-import { UserActionTypes } from '../../../common/types/domain';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   NONE_CONNECTOR_ID,
 } from '../../../common/constants';
+import type { CaseConnector, ExternalService, User } from '../../../common/types/domain';
+import { UserActionTypes } from '../../../common/types/domain';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -25,10 +26,9 @@ import type {
   BuilderParameters,
   CommonBuilderArguments,
   SavedObjectParameters,
-  UserActionParameters,
   UserActionEvent,
+  UserActionParameters,
 } from './types';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export abstract class UserActionBuilder {
   protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;

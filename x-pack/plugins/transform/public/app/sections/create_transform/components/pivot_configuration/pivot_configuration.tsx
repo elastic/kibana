@@ -8,17 +8,17 @@
 import type { FC } from 'react';
 import React, { memo, createContext, useMemo } from 'react';
 
-import { EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { type DropDownOptionWithField } from '../step_define/common/get_pivot_dropdown_options';
-import type { DropDownOption } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
-import { AggListForm } from '../aggregation_list';
+import type { DropDownOption } from '../../../../common';
 import { DropDown } from '../aggregation_dropdown';
+import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import type { StepDefineFormHook } from '../step_define';
+import { type DropDownOptionWithField } from '../step_define/common/get_pivot_dropdown_options';
 
 export const PivotConfigurationContext = createContext<
   StepDefineFormHook['pivotConfig'] | undefined

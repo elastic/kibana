@@ -7,8 +7,8 @@
  */
 
 import { PresentationUtilPluginStartDeps } from '../../types';
-import { PresentationUiActionsService } from './types';
 import { KibanaPluginServiceFactory } from '../create';
+import { PresentationUiActionsService } from './types';
 
 export type UiActionsServiceFactory = KibanaPluginServiceFactory<
   PresentationUiActionsService,

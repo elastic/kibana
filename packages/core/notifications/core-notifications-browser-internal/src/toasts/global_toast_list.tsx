@@ -7,14 +7,14 @@
  */
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Observable } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 
-import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
-import { deduplicateToasts, ToastWithRichTitle } from './deduplicate_toasts';
+import type { Toast } from '@kbn/core-notifications-browser';
+import { ToastWithRichTitle, deduplicateToasts } from './deduplicate_toasts';
 import { EventReporter } from './telemetry';
 
 interface Props {

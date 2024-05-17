@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 import {
   getLoggingContainerHref,
-  getLoggingKubernetesHref,
   getLoggingIpHref,
+  getLoggingKubernetesHref,
 } from './get_logging_href';
-import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 
 describe('getLoggingHref', () => {
   let summary: MonitorSummary;

@@ -6,9 +6,9 @@
  */
 
 import {
+  InfraWaffleMapGradientLegend,
   InfraWaffleMapGroupOfGroups,
   InfraWaffleMapGroupOfNodes,
-  InfraWaffleMapGradientLegend,
   InfraWaffleMapStepLegend,
 } from '../../../../lib/lib';
 

@@ -6,14 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { newTelemetryLogger, getPreviousDiagTaskTimestamp } from '../helpers';
-import type { ITelemetryEventsSender } from '../sender';
-import type { TelemetryEvent } from '../types';
-import type { ITelemetryReceiver } from '../receiver';
-import type { TaskExecutionPeriod } from '../task';
-import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS } from '../constants';
 import { copyAllowlistedFields, filterList } from '../filterlists';
+import { getPreviousDiagTaskTimestamp, newTelemetryLogger } from '../helpers';
+import type { ITelemetryReceiver } from '../receiver';
+import type { ITelemetryEventsSender } from '../sender';
+import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import type { TelemetryEvent } from '../types';
 
 export function createTelemetryDiagnosticsTaskConfig() {
   const taskName = 'Security Solution Telemetry Diagnostics task';

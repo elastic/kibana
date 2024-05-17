@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiFormRow, EuiSelectOption } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component, Fragment } from 'react';
 
-import { Frequency, Field, FieldToValueMap } from './types';
+import { Field, FieldToValueMap, Frequency } from './types';
 
 import {
-  MINUTE_OPTIONS,
-  HOUR_OPTIONS,
-  DAY_OPTIONS,
   DATE_OPTIONS,
+  DAY_OPTIONS,
+  HOUR_OPTIONS,
+  MINUTE_OPTIONS,
   MONTH_OPTIONS,
   UNITS,
-  frequencyToFieldsMap,
   frequencyToBaselineFieldsMap,
+  frequencyToFieldsMap,
 } from './constants';
 
-import { cronExpressionToParts, cronPartsToExpression } from './services';
-import { CronHourly } from './cron_hourly';
 import { CronDaily } from './cron_daily';
-import { CronWeekly } from './cron_weekly';
+import { CronHourly } from './cron_hourly';
 import { CronMonthly } from './cron_monthly';
+import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
+import { cronExpressionToParts, cronPartsToExpression } from './services';
 
 const excludeBlockListedFrequencies = (
   units: EuiSelectOption[],

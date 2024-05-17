@@ -13,11 +13,11 @@ import {
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
-  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';

@@ -9,8 +9,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import {
   EuiButtonEmpty,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -20,14 +20,14 @@ import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_PAGES } from '../../../locator';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import type { Dictionary } from '../../../../common/types/common';
+import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
+import { ML_PAGES } from '../../../locator';
+import { FeedBackButton } from '../feedback_button';
 import { IdBadges } from './id_badges';
 import type { JobSelectorFlyoutProps } from './job_selector_flyout';
 import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
-import { FeedBackButton } from '../feedback_button';
 
 interface GroupObj {
   groupId: string;

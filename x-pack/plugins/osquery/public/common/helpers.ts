@@ -6,10 +6,10 @@
  */
 
 import type {
-  PaginationInputPaginated,
   FactoryQueryTypes,
-  StrategyResponseType,
   Inspect,
+  PaginationInputPaginated,
+  StrategyResponseType,
 } from '../../common/search_strategy';
 
 export type InspectResponse = Inspect & { response: string[] };

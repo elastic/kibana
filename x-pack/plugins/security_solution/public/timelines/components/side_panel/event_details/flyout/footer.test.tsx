@@ -1,3 +1,7 @@
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +9,12 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
-import { FlyoutFooter } from './footer';
-import { TestProviders } from '../../../../../common/mock';
-import { TimelineId } from '../../../../../../common/types/timeline';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
 import { KibanaServices, useKibana } from '../../../../../common/lib/kibana';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { TestProviders } from '../../../../../common/mock';
+import { FlyoutFooter } from './footer';
 
 const ecsData: Ecs = {
   _id: '1',

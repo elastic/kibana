@@ -6,9 +6,6 @@
     "id": "translations",
     "server": true,
     "browser": false,
-    "configPath": [
-      "x-pack",
-      "translations"
-    ]
+    "configPath": ["x-pack", "translations"]
   }
 }

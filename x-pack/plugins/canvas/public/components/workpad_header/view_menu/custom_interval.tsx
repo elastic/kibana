@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { EuiButtonSize } from '@elastic/eui/src/components/button/button';
 import { EuiFlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
+import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { useState, ChangeEvent } from 'react';
 import { getTimeInterval } from '../../../lib/time_interval';
 
 const strings = {

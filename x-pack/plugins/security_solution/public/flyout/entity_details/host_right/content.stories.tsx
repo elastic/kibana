@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { HostPanelContent } from './content';
 import { mockObservedHostData } from '../mocks';
+import { HostPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 

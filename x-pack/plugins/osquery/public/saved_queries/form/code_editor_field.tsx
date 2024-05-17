@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
-import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { useController } from 'react-hook-form';
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
 

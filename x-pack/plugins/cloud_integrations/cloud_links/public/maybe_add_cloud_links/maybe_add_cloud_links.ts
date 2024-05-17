@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { catchError, defer, filter, map, of, combineLatest } from 'rxjs';
+import { catchError, combineLatest, defer, filter, map, of } from 'rxjs';
 
-import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { createUserMenuLinks } from './user_menu_links';
 import { createHelpMenuLinks } from './help_menu_links';
+import { createUserMenuLinks } from './user_menu_links';
 
 export interface MaybeAddCloudLinksDeps {
   core: CoreStart;

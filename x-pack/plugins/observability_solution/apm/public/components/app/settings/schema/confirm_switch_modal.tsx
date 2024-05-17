@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiConfirmModal,
   EuiCallOut,
   EuiCheckbox,
-  EuiSpacer,
   EuiCodeBlock,
+  EuiConfirmModal,
+  EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useState } from 'react';
 import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
 
 interface Props {

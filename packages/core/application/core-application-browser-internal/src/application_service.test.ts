@@ -9,24 +9,18 @@
 import {
   MockCapabilitiesService,
   MockHistory,
-  parseAppUrlMock,
   getLocationObservableMock,
+  parseAppUrlMock,
   registerAnalyticsContextProviderMock,
 } from './application_service.test.mocks';
 
-import { createElement } from 'react';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { bufferCount, takeUntil } from 'rxjs';
 import { mount, shallow } from 'enzyme';
 import { createBrowserHistory } from 'history';
+import { createElement } from 'react';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
+import { bufferCount, takeUntil } from 'rxjs';
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { MockLifecycle } from './test_helpers/test_types';
-import { ApplicationService } from './application_service';
 import {
   App,
   AppDeepLink,
@@ -34,7 +28,13 @@ import {
   AppUpdater,
   PublicAppInfo,
 } from '@kbn/core-application-browser';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { act } from 'react-dom/test-utils';
+import { ApplicationService } from './application_service';
+import { MockLifecycle } from './test_helpers/test_types';
 import { DEFAULT_APP_VISIBILITY } from './utils';
 
 const createApp = (props: Partial<App>): App => {

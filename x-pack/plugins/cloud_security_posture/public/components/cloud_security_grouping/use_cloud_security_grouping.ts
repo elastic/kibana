@@ -1,3 +1,10 @@
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import {
+  GroupOption,
+  GroupPanelRenderer,
+  GroupStatsRenderer,
+} from '@kbn/securitysolution-grouping/src';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +12,12 @@
  * 2.0.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import * as uuid from 'uuid';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  GroupOption,
-  GroupPanelRenderer,
-  GroupStatsRenderer,
-} from '@kbn/securitysolution-grouping/src';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
-import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
+import { FindingsBaseURLQuery } from '../../common/types';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_MAX_GROUPING_LEVELS = 3;

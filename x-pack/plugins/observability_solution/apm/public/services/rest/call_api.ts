@@ -6,10 +6,10 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(fetchOptions: FetchOptions, inspectableEsQueriesEnabled: boolean) {

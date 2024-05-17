@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LogRecord, LogLevel } from '@kbn/logging';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { ConsoleAppender } from './console_appender';
 

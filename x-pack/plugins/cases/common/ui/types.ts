@@ -19,32 +19,32 @@ import type {
 } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
-  CaseSeverity,
-  CaseStatuses,
-  UserAction,
-  Case as CaseSnakeCase,
-  User,
+  CaseMetricsFeature,
+  CasePatchRequest,
+  CaseUserActionStatsResponse,
+  CasesFindResponse,
+  CasesMetricsResponse,
+  CasesStatusResponse,
+  GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
+  SingleCaseMetricsResponse,
+  UserActionFindRequestTypes,
+  UserActionFindResponse,
+} from '../types/api';
+import type {
   ActionConnector,
   AlertAttachment,
   Attachment,
-  ExternalReferenceAttachment,
-  PersistableStateAttachment,
+  CaseSeverity,
+  Case as CaseSnakeCase,
+  CaseStatuses,
   Configuration,
   CustomFieldTypes,
+  ExternalReferenceAttachment,
+  PersistableStateAttachment,
+  User,
+  UserAction,
 } from '../types/domain';
-import type {
-  CasePatchRequest,
-  CasesFindResponse,
-  CasesStatusResponse,
-  CaseUserActionStatsResponse,
-  GetCaseConnectorsResponse,
-  GetCaseUsersResponse,
-  UserActionFindRequestTypes,
-  UserActionFindResponse,
-  CaseMetricsFeature,
-  CasesMetricsResponse,
-  SingleCaseMetricsResponse,
-} from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 

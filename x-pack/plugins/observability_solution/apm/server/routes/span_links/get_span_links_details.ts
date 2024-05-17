@@ -1,3 +1,4 @@
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,30 +6,29 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
+import { Environment } from '../../../common/environment_rt';
 import {
+  AGENT_NAME,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SPAN_DURATION,
   SPAN_ID,
   SPAN_NAME,
-  TRACE_ID,
-  TRANSACTION_ID,
-  TRANSACTION_NAME,
-  TRANSACTION_DURATION,
-  SPAN_DURATION,
-  PROCESSOR_EVENT,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
-import { Environment } from '../../../common/environment_rt';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getBufferedTimerange } from './utils';
 
 async function fetchSpanLinksDetails({
   apmEventClient,

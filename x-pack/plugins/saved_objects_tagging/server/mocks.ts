@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectTaggingStart } from './types';
-import { tagsClientMock } from './services/tags/tags_client.mock';
 import { assigmentServiceMock } from './services/assignments/assignment_service.mock';
+import { tagsClientMock } from './services/tags/tags_client.mock';
+import type { SavedObjectTaggingStart } from './types';
 
 const createStartMock = () => {
   const start: jest.Mocked<SavedObjectTaggingStart> = {

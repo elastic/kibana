@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { relationsSerializer, relationsDeserializer } from './relations_parameter';
-import { dynamicSerializer, dynamicDeserializer } from './dynamic_parameter';
+import { dynamicDeserializer, dynamicSerializer } from './dynamic_parameter';
+import { relationsDeserializer, relationsSerializer } from './relations_parameter';
 
 export * from './name_parameter';
 

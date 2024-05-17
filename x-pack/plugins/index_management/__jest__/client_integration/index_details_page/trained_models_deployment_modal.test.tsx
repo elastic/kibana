@@ -6,8 +6,8 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { TrainedModelsDeploymentModal } from '../../../public/application/sections/home/index_list/details_page/trained_models_deployment_modal';
 import { act } from 'react-dom/test-utils';
+import { TrainedModelsDeploymentModal } from '../../../public/application/sections/home/index_list/details_page/trained_models_deployment_modal';
 
 const refreshModal = jest.fn();
 const setIsModalVisible = jest.fn();

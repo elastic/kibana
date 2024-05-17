@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
 import { has, sortBy } from 'lodash/fp';
+import { useEffect, useMemo, useState } from 'react';
 
-import { getAggregatedAnomaliesQuery } from '../../../../entity_analytics/components/entity_analytics_anomalies/query';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
-import * as i18n from './translations';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { getAggregatedAnomaliesQuery } from '../../../../entity_analytics/components/entity_analytics_anomalies/query';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { anomaliesSearch } from '../api/anomalies_search';
+import { useUiSetting$ } from '../../../lib/kibana';
 import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';
+import { anomaliesSearch } from '../api/anomalies_search';
+import * as i18n from './translations';
 
 export enum AnomalyEntity {
   User,

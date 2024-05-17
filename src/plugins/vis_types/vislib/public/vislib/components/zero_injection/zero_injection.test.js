@@ -7,12 +7,12 @@
  */
 
 import _ from 'lodash';
+import { flattenData } from './flatten_data';
 import { injectZeros } from './inject_zeros';
 import { orderXValues } from './ordered_x_keys';
 import { getUniqKeys } from './uniq_keys';
-import { flattenData } from './flatten_data';
-import { createZeroFilledArray } from './zero_filled_array';
 import { zeroFillDataArray } from './zero_fill_data_array';
+import { createZeroFilledArray } from './zero_filled_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
   const dateHistogramRowsObj = {

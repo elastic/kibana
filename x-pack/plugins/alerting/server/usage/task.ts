@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import {
+  IntervalSchedule,
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 
-import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
-import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
-import {
-  getExecutionsPerDayCount,
-  getExecutionTimeoutsPerDayCount,
-} from './lib/get_telemetry_from_event_log';
-import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  getExecutionTimeoutsPerDayCount,
+  getExecutionsPerDayCount,
+} from './lib/get_telemetry_from_event_log';
+import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
+import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
+import { type LatestTaskStateSchema, emptyState, stateSchemaByVersion } from './task_state';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 

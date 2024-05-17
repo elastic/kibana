@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
 import { EuiTableSortingType } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
+import { useCallback, useState } from 'react';
 import { EUI_SORT_ASCENDING } from '../../../common/constants';
+import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
 
 export interface Pagination {
   pageSize: number;

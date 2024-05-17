@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 
 import React, { useCallback } from 'react';
 import { useStepContext } from '../context/step_context';

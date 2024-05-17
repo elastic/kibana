@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID } from '@kbn/observability-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export interface SloDetailsLocatorParams extends SerializableRecord {
   sloId?: string;

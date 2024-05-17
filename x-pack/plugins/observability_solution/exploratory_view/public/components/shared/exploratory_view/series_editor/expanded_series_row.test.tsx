@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
-import { ExpandedSeriesRow } from './expanded_series_row';
-import { mockDataView, mockUxSeries, render } from '../rtl_helpers';
-import { getDefaultConfigs } from '../configurations/default_configs';
+import React from 'react';
 import { PERCENTILE } from '../configurations/constants';
+import { getDefaultConfigs } from '../configurations/default_configs';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { mockDataView, mockUxSeries, render } from '../rtl_helpers';
+import { ExpandedSeriesRow } from './expanded_series_row';
 
 describe('ExpandedSeriesRow', function () {
   const dataViewSeries = getDefaultConfigs({

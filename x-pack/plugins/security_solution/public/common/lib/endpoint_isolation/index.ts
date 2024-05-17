@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import {
+  ISOLATE_HOST_ROUTE_V2,
+  UNISOLATE_HOST_ROUTE_V2,
+} from '../../../../common/endpoint/constants';
 import type {
   HostIsolationRequestBody,
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
-import {
-  ISOLATE_HOST_ROUTE_V2,
-  UNISOLATE_HOST_ROUTE_V2,
-} from '../../../../common/endpoint/constants';
 
 /** Isolates a Host running either elastic endpoint or fleet agent */
 export const isolateHost = async (

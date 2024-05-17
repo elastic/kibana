@@ -5,95 +5,95 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  RuleExecutorOptions,
-  RuleTypeParams,
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleExecutionStatusWarningReasons,
-  Rule,
-  RuleAction,
-  RuleAlertData,
-} from '../types';
-import {
-  ConcreteTaskInstance,
-  isUnrecoverableError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './types';
-import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import {
+  elasticsearchServiceMock,
+  executionContextServiceMock,
+  httpServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
-  executionContextServiceMock,
   savedObjectsServiceMock,
-  elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { omit } from 'lodash';
-import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import moment from 'moment';
-import {
-  generateAlertOpts,
-  generateActionOpts,
-  mockDate,
-  mockedRuleTypeSavedObject,
-  mockRunNowResponse,
-  ruleType,
-  RULE_NAME,
-  generateRunnerResult,
-  RULE_ACTIONS,
-  generateEnqueueFunctionInput,
-  generateSavedObjectParams,
-  mockTaskInstance,
-  GENERIC_ERROR_MESSAGE,
-  generateAlertInstance,
-  MOCK_DURATION,
-  DATE_1969,
-  DATE_1970,
-  DATE_1970_5_MIN,
-  DATE_9999,
-  mockAAD,
-  mockedRawRuleSO,
-} from './fixtures';
-import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IN_MEMORY_METRICS } from '../monitoring';
-import { translations } from '../constants/translations';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import {
+  ConcreteTaskInstance,
+  TaskErrorSource,
+  isUnrecoverableError,
+} from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { omit } from 'lodash';
+import moment from 'moment';
+import sinon from 'sinon';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { backfillClientMock } from '../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { translations } from '../constants/translations';
+import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import {
   AlertingEventLogger,
   ContextOpts,
 } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
-import { alertsClientMock } from '../alerts_client/alerts_client.mock';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { alertsMock, rulesClientMock } from '../mocks';
+import { IN_MEMORY_METRICS } from '../monitoring';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
-import { backfillClientMock } from '../backfill_client/backfill_client.mock';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  Rule,
+  RuleAction,
+  RuleAlertData,
+  RuleExecutionStatusWarningReasons,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
+} from '../types';
+import {
+  DATE_1969,
+  DATE_1970,
+  DATE_1970_5_MIN,
+  DATE_9999,
+  GENERIC_ERROR_MESSAGE,
+  MOCK_DURATION,
+  RULE_ACTIONS,
+  RULE_NAME,
+  generateActionOpts,
+  generateAlertInstance,
+  generateAlertOpts,
+  generateEnqueueFunctionInput,
+  generateRunnerResult,
+  generateSavedObjectParams,
+  mockAAD,
+  mockDate,
+  mockRunNowResponse,
+  mockTaskInstance,
+  mockedRawRuleSO,
+  mockedRuleTypeSavedObject,
+  ruleType,
+} from './fixtures';
 import * as getExecutorServicesModule from './get_executor_services';
+import { TaskRunner } from './task_runner';
+import { TaskRunnerContext } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -202,7 +202,7 @@ describe('Task Runner', () => {
       nameExtension: string,
       customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
       enqueueFunction: unknown,
-      isBulk: boolean
+      isBulk: boolean,
     ]
   > = [
     ['', taskRunnerFactoryInitializerParams, actionsClient.bulkEnqueueExecution, true],
@@ -533,7 +533,7 @@ describe('Task Runner', () => {
   type SnoozeTestParams = [
     muteAll: boolean,
     snoozeEndTime: string | undefined | null,
-    shouldBeSnoozed: boolean
+    shouldBeSnoozed: boolean,
   ];
 
   const snoozeTestParams: SnoozeTestParams[] = [

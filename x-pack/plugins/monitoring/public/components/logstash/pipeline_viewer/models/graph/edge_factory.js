@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Edge } from './edge';
 import { BooleanEdge } from './boolean_edge';
+import { Edge } from './edge';
 
 export function edgeFactory(graph, edgeJson) {
   const type = edgeJson.type;

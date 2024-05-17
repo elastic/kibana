@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { EuiBasicTableProps, EuiTableSelectionType, Pagination } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import classnames from 'classnames';
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback } from 'react';
-import { css } from '@emotion/react';
-import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
-import classnames from 'classnames';
 
 import { LinkButton } from '../links';
 
-import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
+import type { CaseUI, CasesFindResponseUI } from '../../../common/ui/types';
 
-import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import * as i18n from './translations';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<CaseUI>['columns'];

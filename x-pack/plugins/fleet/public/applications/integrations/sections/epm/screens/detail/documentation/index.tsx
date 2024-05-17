@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
+  EuiCallOut,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiCallOut,
+  EuiTitle,
 } from '@elastic/eui';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 
+import { getStreamsForInputType } from '../../../../../../../../common/services';
+import { useStartServices } from '../../../../../../../hooks';
 import type {
   PackageInfo,
-  RegistryVarsEntry,
-  RegistryStream,
   RegistryInput,
+  RegistryStream,
+  RegistryVarsEntry,
 } from '../../../../../types';
-import { useStartServices } from '../../../../../../../hooks';
-import { getStreamsForInputType } from '../../../../../../../../common/services';
 
 interface Props {
   packageInfo: PackageInfo;

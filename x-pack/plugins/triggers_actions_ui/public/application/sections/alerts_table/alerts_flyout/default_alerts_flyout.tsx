@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import {
   type EuiDataGridColumn,
   EuiDescriptionList,
@@ -13,12 +12,13 @@ import {
   EuiTabbedContentTab,
   EuiTitle,
 } from '@elastic/eui';
+import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
+import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AlertTableFlyoutComponent, AlertsTableFlyoutBaseProps } from '../../../..';
 import { RegisterFormatter } from '../cells/render_cell_value';
-import { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
   const name = alert[ALERT_RULE_NAME];

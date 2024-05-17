@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../constants';
+import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
 
 describe('getSpaceIdFromPath', () => {
   describe('without a serverBasePath defined', () => {

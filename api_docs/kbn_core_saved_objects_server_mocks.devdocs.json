@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<SavedObjectsServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<SavedObjectsServiceContract>"],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,11 +55,7 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalSavedObjectsServiceSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalSavedObjectsServiceSetup", ">"],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

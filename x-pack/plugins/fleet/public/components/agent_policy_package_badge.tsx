@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 
 import { FLEET_SERVER_PACKAGE } from '../../common/constants';
 

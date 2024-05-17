@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
+import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
+import {
+  closeAlertsStepTourIfVisible,
+  closeModalIfVisible,
+  closeToastIfVisible,
+} from '../../tasks/integrations';
 import {
   checkResults,
   inputQueryInFlyout,
@@ -15,12 +19,8 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import {
-  closeAlertsStepTourIfVisible,
-  closeModalIfVisible,
-  closeToastIfVisible,
-} from '../../tasks/integrations';
-import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { initializeDataViews } from '../../tasks/login';
+import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
 
 describe(
   'Alert Event Details',

@@ -7,59 +7,59 @@
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import type {
-  UserActionAction,
+  Attachment,
+  Case,
+  CaseConnector,
+  Cases,
   CommentUserAction,
   UserAction,
-  UserActions,
+  UserActionAction,
   UserActionType,
-  Case,
-  Cases,
-  CaseConnector,
-  Attachment,
+  UserActions,
 } from '../../common/types/domain';
 import {
+  AttachmentType,
   CaseSeverity,
   CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+  ExternalReferenceStorageType,
   UserActionActions,
   UserActionTypes,
-  ConnectorTypes,
-  AttachmentType,
-  ExternalReferenceStorageType,
-  CustomFieldTypes,
 } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
 
-import type {
-  ResolvedCase,
-  SingleCaseMetrics,
-  SingleCaseMetricsFeature,
-  AlertAttachmentUI,
-  CasesMetrics,
-  ExternalReferenceAttachmentUI,
-  PersistableStateAttachmentUI,
-  FindCaseUserActions,
-  CaseUsers,
-  CaseUserActionsStats,
-  CasesFindResponseUI,
-  CasesUI,
-  AttachmentUI,
-  CaseUICustomField,
-  CasesConfigurationUICustomField,
-} from '../../common/ui/types';
-import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
-import { covertToSnakeCase } from './utils';
-import type {
-  ExternalReferenceAttachmentType,
-  AttachmentViewObject,
-  PersistableStateAttachmentType,
-} from '../client/attachment_framework/types';
+import { CaseMetricsFeature } from '../../common/types/api';
 import type {
   CasesFindResponse,
   CasesStatusResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
+import type {
+  AlertAttachmentUI,
+  AttachmentUI,
+  CaseUICustomField,
+  CaseUserActionsStats,
+  CaseUsers,
+  CasesConfigurationUICustomField,
+  CasesFindResponseUI,
+  CasesMetrics,
+  CasesUI,
+  ExternalReferenceAttachmentUI,
+  FindCaseUserActions,
+  PersistableStateAttachmentUI,
+  ResolvedCase,
+  SingleCaseMetrics,
+  SingleCaseMetricsFeature,
+} from '../../common/ui/types';
+import type {
+  AttachmentViewObject,
+  ExternalReferenceAttachmentType,
+  PersistableStateAttachmentType,
+} from '../client/attachment_framework/types';
+import { covertToSnakeCase } from './utils';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';

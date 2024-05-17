@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { MatchedItem } from '@kbn/data-views-plugin/public';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { StatusMessage } from '.';
-import { shallow } from 'enzyme';
-import { MatchedItem } from '@kbn/data-views-plugin/public';
 
 const tagsPartial = {
   tags: [],

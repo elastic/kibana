@@ -8,14 +8,14 @@
 
 import { AbortError, abortSignalToPromise, defer } from '@kbn/kibana-utils-plugin/public';
 import {
+  ErrorLike,
   ItemBufferParams,
   TimedItemBufferParams,
   createBatchedFunction,
-  ErrorLike,
   normalizeError,
 } from '../../common';
 import { fetchStreaming } from '../streaming';
-import { BatchedFunc, BatchItem } from './types';
+import { BatchItem, BatchedFunc } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;

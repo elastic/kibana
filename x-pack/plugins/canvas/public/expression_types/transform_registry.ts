@@ -7,7 +7,7 @@
 
 import { Registry } from '@kbn/interpreter';
 import { Transform } from './transform';
-import type { Transform as TransformType, TransformProps } from './transform';
+import type { TransformProps, Transform as TransformType } from './transform';
 
 class TransformRegistry extends Registry<TransformProps, TransformType> {
   wrapper(obj: TransformProps): TransformType {

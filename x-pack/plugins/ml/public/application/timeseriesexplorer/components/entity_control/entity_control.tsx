@@ -11,9 +11,9 @@ import React, { Component } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexItem, EuiFormRow, EuiHealth, EuiHighlight } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { getSeverityColor, type MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { type MlEntityFieldType, getSeverityColor } from '@kbn/ml-anomaly-utils';
 
 import type { UiPartitionFieldConfig } from '../series_controls/series_controls';
 

@@ -7,11 +7,11 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { SelfChangingEditor } from './self_changing_vis/self_changing_editor';
-import { selfChangingVisFn, SelfChangingVisParams } from './self_changing_vis_fn';
+import { SelfChangingVisParams, selfChangingVisFn } from './self_changing_vis_fn';
 import { selfChangingVisRenderer } from './self_changing_vis_renderer';
 import { toExpressionAst } from './to_ast';
 

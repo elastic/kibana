@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { VisTypeTimeseriesPublicConfig } from '../config';
 
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
@@ -26,15 +26,15 @@ import { EditorController, TSVB_EDITOR_NAME } from './application/editor_control
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';
 import {
-  setUISettings,
-  setI18n,
-  setFieldFormats,
+  setCharts,
   setCoreStart,
   setDataStart,
   setDataViewsStart,
-  setCharts,
-  setUsageCollectionStart,
+  setFieldFormats,
+  setI18n,
+  setUISettings,
   setUnifiedSearchStart,
+  setUsageCollectionStart,
 } from './services';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 

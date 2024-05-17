@@ -7,8 +7,8 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { camelCase } from 'lodash';
 import { join } from 'path';
+import { camelCase } from 'lodash';
 import * as recast from 'recast';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionsDefinitions } from '../src/definitions/functions';
@@ -402,8 +402,8 @@ function generateEvalCommandTestsForEvalFunction(
               fullNumberOfArgs === 1
                 ? 'one argument'
                 : fullNumberOfArgs === 0
-                ? '0 arguments'
-                : `${fullNumberOfArgs} arguments`
+                  ? '0 arguments'
+                  : `${fullNumberOfArgs} arguments`
             }, got ${fieldMappingWithOneExtraArg.length}.`,
           ]
         );
@@ -1007,8 +1007,8 @@ function generateIncorrectlyTypedParameters(
         canBeFieldButNotString || isLiteralType
           ? values.stringField
           : canBeFieldButNotNumber
-          ? values.numberField
-          : values.booleanField;
+            ? values.numberField
+            : values.booleanField;
       return { name: nameValue, type, wrong: true, ...rest };
     }
   );

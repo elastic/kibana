@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiLoadingLogo,
   EuiButton,
   EuiEmptyPrompt,
-  EuiIcon,
-  EuiMarkdownFormat,
-  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiImage,
+  EuiLink,
+  EuiLoadingLogo,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
-import { FullSizeCenteredPage } from './full_size_centered_page';
+import type { CspStatusCode, IndexDetails, PostureTypes } from '../../common/types_old';
+import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
+import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
+import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
+import { FullSizeCenteredPage } from './full_size_centered_page';
 import {
   CSPM_NOT_INSTALLED_ACTION_SUBJ,
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
 } from './test_subjects';
-import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails, PostureTypes, CspStatusCode } from '../../common/types_old';
-import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
-import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
-import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
-import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({

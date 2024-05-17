@@ -7,16 +7,16 @@
 
 import { omit } from 'lodash';
 
-import { agentPolicyRouteService, packagePolicyRouteService } from '../../../services';
 import {
   formatInputs,
   formatVars,
 } from '../../../../../../common/services/simplified_package_policy_helper';
+import { agentPolicyRouteService, packagePolicyRouteService } from '../../../services';
 import type {
   NewAgentPolicy,
   NewPackagePolicy,
-  UpdatePackagePolicy,
   UpdateAgentPolicyRequest,
+  UpdatePackagePolicy,
 } from '../../../types';
 
 function generateKibanaDevToolsRequest(method: string, path: string, body: any) {

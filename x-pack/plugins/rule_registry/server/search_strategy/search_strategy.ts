@@ -1,31 +1,31 @@
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AlertingAuthorizationEntity,
+  PluginStartContract as AlertingStart,
+  ReadOperations,
+} from '@kbn/alerting-plugin/server';
+import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
+import { Logger } from '@kbn/core/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { AlertConsumers, isValidFeatureId } from '@kbn/rule-data-utils';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, mergeMap, catchError } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
+import { catchError, map, mergeMap } from 'rxjs';
 import { from, of } from 'rxjs';
-import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import {
-  ReadOperations,
-  PluginStartContract as AlertingStart,
-  AlertingAuthorizationEntity,
-} from '@kbn/alerting-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
+import { AlertAuditAction, alertAuditEvent } from '..';
+import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '../../common/search_strategy';
-import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
-import { AlertAuditAction, alertAuditEvent } from '..';
-import { getSpacesFilter, getAuthzFilter } from '../lib';
+import { getAuthzFilter, getSpacesFilter } from '../lib';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],

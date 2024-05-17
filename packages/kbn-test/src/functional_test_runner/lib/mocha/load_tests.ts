@@ -10,11 +10,11 @@ import { isAbsolute } from 'path';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import type { Config } from '../config';
 import type { GenericFtrProviderContext } from '../../public_types';
+import type { Config } from '../config';
 import type { Lifecycle } from '../lifecycle';
-import type { ProviderCollection } from '../providers';
 import { loadTracer } from '../load_tracer';
+import type { ProviderCollection } from '../providers';
 import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
 
 import { decorateMochaUi } from './decorate_mocha_ui';

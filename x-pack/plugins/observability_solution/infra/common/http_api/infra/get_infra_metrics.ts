@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT, inRangeRt, dateRt } from '@kbn/io-ts-utils';
+import { createLiteralValueFromUndefinedRT, dateRt, inRangeRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const InfraMetricTypeRT = rt.keyof({

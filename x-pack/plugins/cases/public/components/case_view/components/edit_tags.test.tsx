@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
-import type { EditTagsProps } from './edit_tags';
-import { EditTags } from './edit_tags';
-import { readCasesPermissions, createAppMockRenderer } from '../../../common/mock';
+import { MAX_LENGTH_PER_TAG } from '../../../../common/constants';
+import { createAppMockRenderer, readCasesPermissions } from '../../../common/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { useGetTags } from '../../../containers/use_get_tags';
-import { MAX_LENGTH_PER_TAG } from '../../../../common/constants';
+import type { EditTagsProps } from './edit_tags';
+import { EditTags } from './edit_tags';
 
 jest.mock('../../../containers/use_get_tags');
 

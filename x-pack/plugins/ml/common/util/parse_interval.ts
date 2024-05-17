@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import type { Duration, unitOfTime } from 'moment';
 import { duration } from 'moment';
-import dateMath from '@kbn/datemath';
 
 type SupportedUnits = unitOfTime.Base;
 

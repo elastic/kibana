@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getSplits, getLastMetric, mapEmptyToZero } from '../../helpers';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { getLastMetric, getSplits, mapEmptyToZero } from '../../helpers';
 
 import type { TableResponseProcessorsFunction } from './types';
 

@@ -1,3 +1,4 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +7,11 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { ArrayInput } from './array_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
 import { InputProps } from '../types';
+import { ArrayInput } from './array_input';
 
 const name = 'Some array field';
 const id = 'some:array:field';

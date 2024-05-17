@@ -1,3 +1,4 @@
+import { EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +7,8 @@
  */
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../common/endpoint/service/response_actions/constants';
+import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 
 interface EndpointActionTextProps {
   name: EnabledAutomatedResponseActionsCommands;

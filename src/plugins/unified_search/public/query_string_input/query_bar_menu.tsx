@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, RefObject } from 'react';
 import {
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
-  useGeneratedHtmlId,
-  EuiButtonIconProps,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   EuiContextMenuClass,
   EuiContextMenuPanelId,
 } from '@elastic/eui/src/components/context_menu/context_menu';
-import { i18n } from '@kbn/i18n';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { SavedQuery, SavedQueryService, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useState, useEffect, useCallback, RefObject } from 'react';
 import {
-  useQueryBarMenuPanels,
-  QueryBarMenuPanelsProps,
-  QueryBarMenuPanel,
-  AdditionalQueryBarMenuItems,
-} from './query_bar_menu_panels';
-import { FilterEditorWrapper } from './filter_editor_wrapper';
-import {
-  withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
+  withCloseFilterEditorConfirmModal,
 } from '../filter_bar/filter_editor';
 import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { FilterEditorWrapper } from './filter_editor_wrapper';
+import {
+  AdditionalQueryBarMenuItems,
+  QueryBarMenuPanel,
+  QueryBarMenuPanelsProps,
+  useQueryBarMenuPanels,
+} from './query_bar_menu_panels';
 
 export const strings = {
   getFilterSetButtonLabel: () =>

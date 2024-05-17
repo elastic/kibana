@@ -21,9 +21,7 @@
         "tags": [],
         "label": "AssetsDataAccessPluginStart",
         "description": [],
-        "signature": [
-          "{ services: {}; }"
-        ],
+        "signature": ["{ services: {}; }"],
         "path": "x-pack/plugins/observability_solution/assets_data_access/server/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,9 +36,7 @@
       "tags": [],
       "label": "AssetsDataAccessPluginSetup",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "x-pack/plugins/observability_solution/assets_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DeprecatedConfigDetails } from './types';
 import { createMockedContext } from '../internal_mocks';
 import { configDeprecationFactory } from './deprecation_factory';
+import { DeprecatedConfigDetails } from './types';
 
 describe('DeprecationFactory', () => {
   const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =

@@ -6,11 +6,11 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
-import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
+import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 
 export const onPackagePolicyPostCreateCallback = async (
   logger: Logger,

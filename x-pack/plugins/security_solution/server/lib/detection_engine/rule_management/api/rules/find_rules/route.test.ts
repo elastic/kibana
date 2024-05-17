@@ -7,14 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
-import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import {
-  getRuleMock,
+  getEmptySavedObjectsResponse,
   getFindRequest,
   getFindResultWithSingleHit,
-  getEmptySavedObjectsResponse,
+  getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
+import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { findRulesRoute } from './route';
 
 describe('Find rules route', () => {

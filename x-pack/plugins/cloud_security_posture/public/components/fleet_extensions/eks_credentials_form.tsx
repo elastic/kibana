@@ -1,3 +1,8 @@
+import { EuiHorizontalRule, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +10,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { RadioGroup } from './csp_boxed_radio_group';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { AwsInputVarFields } from './aws_credentials_form/aws_input_var_fields';
+import { RadioGroup } from './csp_boxed_radio_group';
+import { NewPackagePolicyPostureInput, getPosturePolicy } from './utils';
 
 const AWSSetupInfoContent = () => (
   <>

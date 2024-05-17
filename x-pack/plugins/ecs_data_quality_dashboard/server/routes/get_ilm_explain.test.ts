@@ -8,11 +8,11 @@ import { GET_ILM_EXPLAIN } from '../../common/constants';
 
 import { fetchILMExplain } from '../lib';
 
-import { serverMock } from '../__mocks__/server';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
+import { serverMock } from '../__mocks__/server';
 import { getILMExplainRoute } from './get_ilm_explain';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchILMExplain: jest.fn(),

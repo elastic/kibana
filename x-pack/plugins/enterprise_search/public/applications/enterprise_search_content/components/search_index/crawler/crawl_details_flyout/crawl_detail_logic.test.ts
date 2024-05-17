@@ -13,8 +13,8 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import {
   CrawlRequestWithDetailsFromServer,
-  CrawlerStatus,
   CrawlType,
+  CrawlerStatus,
 } from '../../../../api/crawler/types';
 import { crawlRequestWithDetailsServerToClient } from '../../../../api/crawler/utils';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 
 import type { VisParams } from '../types';
-import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 import { ValidationWrapper } from './components/common/validation_wrapper';
+import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 
 export const optionTabs = [
   {

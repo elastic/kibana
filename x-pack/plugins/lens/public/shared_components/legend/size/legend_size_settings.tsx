@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
+import React, { useEffect, useCallback } from 'react';
 
 interface LegendSizeSettingsProps {
   legendSize?: LegendSize;

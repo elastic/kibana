@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { useGetLinkUrl } from '@kbn/security-solution-navigation/links';
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
-import { useGetLinkUrl } from '@kbn/security-solution-navigation/links';
-import {
-  useUrlStateQueryParams,
-  useGetUrlStateQueryParams,
-} from '../navigation/use_url_state_query_params';
-import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityPageName } from '../../../app/types';
+import { useAppUrl } from '../../lib/kibana/hooks';
+import {
+  useGetUrlStateQueryParams,
+  useUrlStateQueryParams,
+} from '../navigation/use_url_state_query_params';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
@@ -88,8 +88,8 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
         ? search
         : `?${parameterPath}${isEmpty(search) ? '' : `&${search}`}`
       : isEmpty(parameterPath)
-      ? ''
-      : `?${parameterPath}`
+        ? ''
+        : `?${parameterPath}`
   }`;
   return formattedPath;
 }

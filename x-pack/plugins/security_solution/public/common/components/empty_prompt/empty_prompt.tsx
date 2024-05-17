@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
-  useEuiTheme,
   type EuiThemeComputed,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { memo, useCallback } from 'react';
 import { SecurityPageName } from '../../../../common';
 
-import * as i18n from './translations';
-import endpointSvg from './images/endpoint1.svg';
-import cloudSvg from './images/cloud1.svg';
-import siemSvg from './images/siem1.svg';
 import { useNavigateTo } from '../../lib/kibana';
-import { VIDEO_SOURCE } from './constants';
 import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
+import { VIDEO_SOURCE } from './constants';
+import cloudSvg from './images/cloud1.svg';
+import endpointSvg from './images/endpoint1.svg';
+import siemSvg from './images/siem1.svg';
+import * as i18n from './translations';
 
 const imgUrls = {
   cloud: cloudSvg,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { RuleActionArray } from '../actions';
 
 export const DefaultActionsArray = new t.Type<

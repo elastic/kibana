@@ -7,17 +7,7 @@
     "id": "visTypeTagcloud",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "expressions",
-      "visualizations",
-      "charts",
-      "dataViews"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "visDefaultEditor",
-      "kibanaUtils"
-    ]
+    "requiredPlugins": ["data", "expressions", "visualizations", "charts", "dataViews"],
+    "requiredBundles": ["kibanaReact", "visDefaultEditor", "kibanaUtils"]
   }
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import type {
   EuiSuperDatePickerProps,
   EuiSuperDatePickerRecentRange,
@@ -15,20 +14,22 @@ import type {
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import dateMath from '@kbn/datemath';
+import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, take } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
-import deepEqual from 'fast-deep-equal';
 
-import { isQueryInput } from '../../store/inputs/helpers';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store';
 import { useUiSetting$ } from '../../lib/kibana';
-import type { inputsModel, State } from '../../store';
+import type { State, inputsModel } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { isQueryInput } from '../../store/inputs/helpers';
+import type { Inputs } from '../../store/inputs/model';
 import {
   durationSelector,
   endSelector,
@@ -41,7 +42,6 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import type { Inputs } from '../../store/inputs/model';
 
 const refreshButtonProps: EuiSuperUpdateButtonProps = {
   fill: false,

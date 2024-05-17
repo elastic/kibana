@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { type CellActionTemplate, createCellActionFactory } from '@kbn/cell-actions/actions';
 import { i18n } from '@kbn/i18n';
-import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions/actions';
 import {
+  dataTableSelectors,
   defaultColumnHeaderType,
   tableDefaults,
-  dataTableSelectors,
 } from '@kbn/securitysolution-data-table';
-import { fieldHasCellActions } from '../../utils';
+import { getAlertConfigIdByScopeId } from '../../../../common/lib/triggers_actions_ui/alert_table_scope_config';
 import type { SecurityAppStore } from '../../../../common/store';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
-import { timelineSelectors } from '../../../../timelines/store';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
-import type { SecurityCellAction } from '../../types';
-import { SecurityCellActionType } from '../../constants';
+import { timelineSelectors } from '../../../../timelines/store';
+import { timelineDefaults } from '../../../../timelines/store/defaults';
 import type { StartServices } from '../../../../types';
-import { getAlertConfigIdByScopeId } from '../../../../common/lib/triggers_actions_ui/alert_table_scope_config';
+import { SecurityCellActionType } from '../../constants';
+import type { SecurityCellAction } from '../../types';
+import { fieldHasCellActions } from '../../utils';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {

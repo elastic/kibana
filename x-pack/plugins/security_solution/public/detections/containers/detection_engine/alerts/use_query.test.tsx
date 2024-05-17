@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
+import * as api from './api';
+import { ALERTS_QUERY_NAMES } from './constants';
+import { alertsMock, mockAlertsQuery } from './mock';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
-import { ALERTS_QUERY_NAMES } from './constants';
-import * as api from './api';
-import { mockAlertsQuery, alertsMock } from './mock';
 
 jest.mock('./api');
 jest.mock('../../../../common/lib/apm/use_track_http_request');

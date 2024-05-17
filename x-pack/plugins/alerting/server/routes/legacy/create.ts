@@ -6,20 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { verifyApiAccess } from '../../lib/license_api_access';
+import { RouteOptions } from '..';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from '../lib/error_handler';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
-  SanitizedRule,
+  LEGACY_BASE_ALERT_API_PATH,
   RuleNotifyWhenType,
   RuleTypeParams,
-  LEGACY_BASE_ALERT_API_PATH,
+  SanitizedRule,
   validateNotifyWhenType,
 } from '../../types';
-import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { RouteOptions } from '..';
 import { countUsageOfPredefinedIds } from '../lib';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 
 export const bodySchema = schema.object({
   name: schema.string(),

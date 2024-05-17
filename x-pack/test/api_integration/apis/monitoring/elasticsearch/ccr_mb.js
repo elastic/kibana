@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import ccrFixture from './fixtures/ccr.json';
 import { getLifecycleMethods } from '../data_stream';
+import ccrFixture from './fixtures/ccr.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
-import type { ESQLColumn } from '@kbn/es-types';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   EuiFormRow,
   EuiPanel,
@@ -19,12 +14,17 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { ESQLColumn } from '@kbn/es-types';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
-import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 
 interface Props {
   mostCommonDataViewId?: string;

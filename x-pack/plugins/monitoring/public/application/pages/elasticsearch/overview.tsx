@@ -1,3 +1,6 @@
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +8,12 @@
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ElasticsearchTemplate } from './elasticsearch_template';
-import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
-import { useCharts } from '../../hooks/use_charts';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useCharts } from '../../hooks/use_charts';
+import { ComponentProps } from '../../route_init';
+import { ElasticsearchTemplate } from './elasticsearch_template';
 
 export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

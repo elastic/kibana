@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { loadJobs as sendLoadJobsRequest, deserializeJobs, showApiWarning } from '../../services';
+import { deserializeJobs, loadJobs as sendLoadJobsRequest, showApiWarning } from '../../services';
 import { REFRESH_JOBS_SUCCESS } from '../action_types';
 
 export const refreshJobs = (options) => async (dispatch) => {

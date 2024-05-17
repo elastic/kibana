@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { set } from '@kbn/safer-lodash-set/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { set } from '@kbn/safer-lodash-set/fp';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
 
+import { RiskScoreFields } from '../../../../common/search_strategy';
+import { Direction } from '../../../../common/search_strategy/common';
+import { UsersFields } from '../../../../common/search_strategy/security_solution/users/common';
 import {
+  addUserAssetTableField,
   removeUserAssetTableField,
   setUsersTablesActivePageToZero,
   updateTableActivePage,
@@ -19,8 +23,8 @@ import {
   updateUserRiskScoreSeverityFilter,
   updateUsersAnomaliesInterval,
   updateUsersAnomaliesJobIdFilter,
-  addUserAssetTableField,
 } from './actions';
+import { USER_ASSET_TABLE_DEFAULTS_FIELDS } from './constants';
 import {
   addAssetTableField,
   removeAssetTableField,
@@ -28,10 +32,6 @@ import {
 } from './helpers';
 import type { UsersModel } from './model';
 import { UserAssetTableType, UsersTableType } from './model';
-import { Direction } from '../../../../common/search_strategy/common';
-import { RiskScoreFields } from '../../../../common/search_strategy';
-import { UsersFields } from '../../../../common/search_strategy/security_solution/users/common';
-import { USER_ASSET_TABLE_DEFAULTS_FIELDS } from './constants';
 import { getUserAssetTableFromStorage } from './storage';
 
 export type UsersState = UsersModel;

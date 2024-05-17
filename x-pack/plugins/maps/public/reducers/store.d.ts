@@ -7,8 +7,8 @@
 
 import { Store } from 'redux';
 import { MapState } from './map';
-import { MapUiState } from './ui';
 import { NonSerializableState } from './non_serializable_instances';
+import { MapUiState } from './ui';
 
 export interface MapStoreState {
   ui: MapUiState;

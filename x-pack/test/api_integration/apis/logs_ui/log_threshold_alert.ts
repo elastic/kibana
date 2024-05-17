@@ -6,20 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
-import {
-  executeAlert,
-  executeRatioAlert,
-  LogThresholdAlertReporter,
-} from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   Comparator,
-  TimeUnit,
   RatioCriteria,
   RuleParams,
+  TimeUnit,
 } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
-import { DATES } from '../metrics_ui/constants';
+import {
+  LogThresholdAlertReporter,
+  executeAlert,
+  executeRatioAlert,
+} from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
+import sinon from 'sinon';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { DATES } from '../metrics_ui/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

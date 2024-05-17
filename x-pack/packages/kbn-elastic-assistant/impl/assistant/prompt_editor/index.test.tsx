@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 
+import { PromptEditor, Props } from '.';
 import { mockAlertPromptContext, mockEventPromptContext } from '../../mock/prompt_context';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { SelectedPromptContext } from '../prompt_context/types';
-import { PromptEditor, Props } from '.';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
   contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },

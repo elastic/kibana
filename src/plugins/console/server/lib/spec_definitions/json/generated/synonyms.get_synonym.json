@@ -6,16 +6,10 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "from": "",
-      "size": [
-        "10"
-      ]
+      "size": ["10"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_synonyms/{id}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_synonyms/{id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-synonyms-set.html",
     "availability": {
       "stack": true,

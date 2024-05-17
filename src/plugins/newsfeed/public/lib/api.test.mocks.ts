@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { storageMock } from './storage.mock';
 import { driverMock } from './driver.mock';
 import { NeverFetchNewsfeedApiDriver } from './never_fetch_driver';
+import { storageMock } from './storage.mock';
 
 export const storageInstanceMock = storageMock.create();
 jest.doMock('./storage', () => ({

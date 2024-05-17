@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
-import { AppState, getState, GlobalState } from '../services/context_state';
+import { AppState, GlobalState, getState } from '../services/context_state';
 
 export function useContextAppState({
   services,

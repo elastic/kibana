@@ -11,17 +11,17 @@ import React from 'react';
 import '../../../../common/mock/react_beautiful_dnd';
 import { TestProviders } from '../../../../common/mock';
 
-import { EndpointOverview } from '.';
-import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
-import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { set } from 'lodash';
+import { EndpointOverview } from '.';
+import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('EndpointOverview Component', () => {
   let endpointData: EndpointFields;
   let wrapper: ReturnType<typeof mount>;
-  let findData: ReturnType<typeof wrapper['find']>;
+  let findData: ReturnType<(typeof wrapper)['find']>;
   const render = (data: EndpointFields | null = endpointData) => {
     wrapper = mount(
       <TestProviders>

@@ -9,23 +9,23 @@ import {
   Axis,
   BrushEndListener,
   Chart,
-  niceTimeFormatter,
   Position,
   Settings,
-  TooltipProps,
   Tooltip,
+  TooltipProps,
+  niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import {
   MetricsExplorerChartOptions,
   MetricsExplorerOptions,

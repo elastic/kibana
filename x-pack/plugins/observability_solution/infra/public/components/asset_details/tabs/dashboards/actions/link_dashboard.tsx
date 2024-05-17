@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-import { SaveDashboardModal } from './save_dashboard_modal';
 import { useSavedObjectUserPermissions } from '../../../hooks/use_saved_objects_permissions';
+import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function LinkDashboard({
   onRefresh,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiBreadcrumb } from '@elastic/eui';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { MouseEvent, useContext, useEffect } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SyntheticsUrlParams, stringifyUrlParams } from '../utils/url_params';
-import { useUrlParams } from './use_url_params';
+import { MouseEvent, useContext, useEffect } from 'react';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { SyntheticsSettingsContext } from '../contexts';
+import { SyntheticsUrlParams, stringifyUrlParams } from '../utils/url_params';
+import { useUrlParams } from './use_url_params';
 
 const EMPTY_QUERY = '?';
 

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import {
-  getEmptyFindResult,
-  getRuleMock,
-  getUpdateRequest,
-  getFindResultWithSingleHit,
-  nonRuleFindResult,
-  typicalMlRulePayload,
-} from '../../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { updateRuleRoute } from './route';
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { buildMlAuthz } from '../../../../../machine_learning/authz';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
+import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
+import {
+  getEmptyFindResult,
+  getFindResultWithSingleHit,
+  getRuleMock,
+  getUpdateRequest,
+  nonRuleFindResult,
+  typicalMlRulePayload,
+} from '../../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
+import { updateRuleRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz');
 

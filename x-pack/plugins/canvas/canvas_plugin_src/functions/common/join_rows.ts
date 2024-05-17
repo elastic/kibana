@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;

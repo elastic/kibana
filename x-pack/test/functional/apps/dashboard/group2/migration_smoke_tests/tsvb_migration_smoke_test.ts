@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import path from 'path';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -64,9 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let panelsWithDrilldowns = 0;
         let drilldownCount = 0;
         for (let panelIndex = 0; panelIndex < totalPanels; panelIndex++) {
-          const panelDrilldownCount = await PageObjects.dashboard.getPanelDrilldownCount(
-            panelIndex
-          );
+          const panelDrilldownCount =
+            await PageObjects.dashboard.getPanelDrilldownCount(panelIndex);
           if (panelDrilldownCount >= 1) {
             panelsWithDrilldowns++;
           }

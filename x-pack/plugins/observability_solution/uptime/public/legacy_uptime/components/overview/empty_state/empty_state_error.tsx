@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 interface EmptyStateErrorProps {
   errors: Array<IHttpFetchError<ResponseErrorBody>>;

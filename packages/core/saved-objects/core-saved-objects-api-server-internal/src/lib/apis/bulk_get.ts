@@ -9,19 +9,20 @@
 import Boom, { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
-  SavedObjectsErrorHelpers,
-  type SavedObject,
-  DecoratedError,
-  SavedObjectsRawDocSource,
-  AuthorizeBulkGetObject,
-} from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
+import {
+  AuthorizeBulkGetObject,
+  DecoratedError,
+  type SavedObject,
+  SavedObjectsErrorHelpers,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { includedFields } from '../utils';
+import { ApiExecutionContext } from './types';
 import {
   Either,
   errorContent,
@@ -29,10 +30,9 @@ import {
   isLeft,
   isRight,
   left,
-  right,
   rawDocExistsInNamespaces,
+  right,
 } from './utils';
-import { ApiExecutionContext } from './types';
 
 export interface PerformBulkGetParams<T = unknown> {
   objects: SavedObjectsBulkGetObject[];

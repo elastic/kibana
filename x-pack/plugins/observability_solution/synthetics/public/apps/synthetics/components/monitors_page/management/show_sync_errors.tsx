@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
+import React from 'react';
 import { ServiceLocationErrors, ServiceLocations } from '../../../../../../common/runtime_types';
 
 export const showSyncErrors = (

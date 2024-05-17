@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<ThemeServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<ThemeServiceContract>"],
             "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

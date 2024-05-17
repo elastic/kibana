@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertMessageDocLinkToken } from '../../common/types/alerts';
 import { AlertMessageTokenType } from '../../common/enums';
+import { AlertMessageDocLinkToken } from '../../common/types/alerts';
 
 export class AlertingDefaults {
   public static readonly THROTTLE: string = '1d';

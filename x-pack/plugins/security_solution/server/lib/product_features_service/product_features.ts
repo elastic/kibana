@@ -8,13 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import type {
   FeatureKibanaPrivileges,
-  KibanaFeatureConfig,
   PluginSetupContract as FeaturesPluginSetup,
+  KibanaFeatureConfig,
 } from '@kbn/features-plugin/server';
 import type {
-  ProductFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
+  ProductFeaturesConfig,
 } from '@kbn/security-solution-features';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 

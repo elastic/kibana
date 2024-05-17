@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, GaugeConfig } from '../config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { GaugeConfig, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<GaugeConfig> = {
   exposeToBrowser: {

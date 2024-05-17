@@ -8,8 +8,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { mockBrowserFields } from './mock';
 import { FieldBrowserModal, FieldBrowserModalProps } from './field_browser_modal';
+import { mockBrowserFields } from './mock';
 
 const mockOnHide = jest.fn();
 const mockOnToggleColumn = jest.fn();

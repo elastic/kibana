@@ -8,7 +8,6 @@
 import { useContext, useEffect } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { getCertsListAction, selectCertsListState } from '../../state/certs';
 import {
   DEFAULT_DIRECTION,
   DEFAULT_SIZE,
@@ -16,6 +15,7 @@ import {
 } from '../../../../../common/requests/get_certs_request_body';
 import { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { SyntheticsRefreshContext } from '../../contexts';
+import { getCertsListAction, selectCertsListState } from '../../state/certs';
 
 export const useCertSearch = ({
   pageIndex,

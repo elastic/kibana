@@ -10,21 +10,21 @@ import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../../../../common/endpoint/models/policy_config';
-import type { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import {
-  policyIdFromParams,
-  isOnPolicyDetailsPage,
-  policyDetails,
-  policyDetailsForUpdate,
-  needsToRefresh,
-} from '../selectors/policy_settings_selectors';
-import {
-  sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
+  sendGetPackagePolicy,
   sendPutPackagePolicy,
 } from '../../../../../services/policies/ingest';
-import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
-import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import type { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
+import {
+  isOnPolicyDetailsPage,
+  needsToRefresh,
+  policyDetails,
+  policyDetailsForUpdate,
+  policyIdFromParams,
+} from '../selectors/policy_settings_selectors';
 
 export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
   { coreStart },

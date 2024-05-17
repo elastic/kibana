@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression } from './types';
 import { format } from './format';
+import { ExpressionAstExpression } from './types';
 
 /**
  * Given expression pipeline AST, returns formatted string.

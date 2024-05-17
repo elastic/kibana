@@ -12,14 +12,14 @@
 
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
-import { from, isObservable, Subject } from 'rxjs';
+import { Subject, from, isObservable } from 'rxjs';
 import { distinctUntilChanged, flatMap, scan, shareReplay } from 'rxjs';
 import type { DeepPartial } from '../../../common/types/common';
+import type { MlFieldFormatService } from '../services/field_format_service';
 import { jobSelectionActionCreator } from './actions';
 import { EXPLORER_ACTION } from './explorer_constants';
 import type { ExplorerState } from './reducers';
 import { explorerReducer, getExplorerDefaultState } from './reducers';
-import type { MlFieldFormatService } from '../services/field_format_service';
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();

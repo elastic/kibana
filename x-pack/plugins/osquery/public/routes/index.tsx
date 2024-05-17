@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
 import { LiveQueries } from './live_queries';
-import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
+import { SavedQueries } from './saved_queries';
 
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');

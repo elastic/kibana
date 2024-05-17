@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { reverseSortDir, SortDirection } from './sorting';
+import { SortDirection, reverseSortDir } from './sorting';
 
 describe('function reverseSortDir', function () {
   test('reverse a given sort direction', function () {

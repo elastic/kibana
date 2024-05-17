@@ -6,6 +6,14 @@
  */
 
 import {
+  TIMELINE_AND_OR_BADGE,
+  TIMELINE_DATA_PROVIDERS_WRAPPER,
+  TIMELINE_DRAGGABLE_ITEM,
+} from '../screens/timeline';
+import { closeFlyout, openFlyout, openFlyoutTakeAction } from '../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { login, visit } from '../tasks/login';
+import {
   addToTimelineFromBarchartLegend,
   addToTimelineFromFlyoutOverviewTabBlock,
   addToTimelineFromFlyoutOverviewTabTable,
@@ -15,14 +23,6 @@ import {
   investigateInTimelineFromTable,
   openTimeline,
 } from '../tasks/timeline';
-import { closeFlyout, openFlyout, openFlyoutTakeAction } from '../tasks/common';
-import {
-  TIMELINE_AND_OR_BADGE,
-  TIMELINE_DATA_PROVIDERS_WRAPPER,
-  TIMELINE_DRAGGABLE_ITEM,
-} from '../screens/timeline';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { login, visit } from '../tasks/login';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 

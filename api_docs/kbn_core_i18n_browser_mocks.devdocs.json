@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<I18nServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<I18nServiceContract>"],
             "path": "packages/core/i18n/core-i18n-browser-mocks/src/i18n_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

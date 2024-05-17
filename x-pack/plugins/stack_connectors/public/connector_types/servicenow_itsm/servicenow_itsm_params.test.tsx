@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act, waitFor } from '@testing-library/react';
 import { merge } from 'lodash';
+import React from 'react';
 
 import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
+import { Choice } from '../lib/servicenow/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
-import { Choice } from '../lib/servicenow/types';
-import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');

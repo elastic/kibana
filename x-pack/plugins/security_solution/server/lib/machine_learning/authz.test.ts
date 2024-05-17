@@ -7,10 +7,10 @@
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
-import { mlServicesMock } from './mocks';
-import { hasMlLicense, isMlAdmin, buildMlAuthz } from './authz';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
+import { buildMlAuthz, hasMlLicense, isMlAdmin } from './authz';
+import { mlServicesMock } from './mocks';
 
 jest.mock('../../../common/machine_learning/has_ml_admin_permissions');
 

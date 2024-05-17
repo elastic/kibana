@@ -13,8 +13,8 @@ import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 import { InspectButton } from '../inspect';
 
-import { Subtitle } from '../subtitle';
 import * as i18n from '../../containers/query_toggle/translations';
+import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
   border?: boolean;

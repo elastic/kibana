@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getColorRampCenterColor, getColorPalette } from '../../../color_palettes';
 import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
 import {
   ColorDynamicOptions,
   ColorStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';
+import { getColorPalette, getColorRampCenterColor } from '../../../color_palettes';
 
 export function extractColorFromStyleProperty(
   colorStyleProperty: ColorStylePropertyDescriptor | undefined,

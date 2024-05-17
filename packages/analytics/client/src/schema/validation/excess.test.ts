@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { either, isLeft } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { excess } from './excess';
 
 describe('excess', () => {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { isDefined } from '@kbn/ml-is-defined';
 import type {
   FieldStatsProps,
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
 import { FieldStats } from '@kbn/unified-field-list/src/components/field_stats';
-import { isDefined } from '@kbn/ml-is-defined';
-import type { DataView } from '@kbn/data-plugin/common';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import moment from 'moment';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 

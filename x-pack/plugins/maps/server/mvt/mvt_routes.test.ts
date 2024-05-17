@@ -6,8 +6,8 @@
  */
 
 import { Readable } from 'stream';
-import sinon from 'sinon';
 import { KibanaResponseFactory } from '@kbn/core/server';
+import sinon from 'sinon';
 import { sendResponse } from './mvt_routes';
 
 const mockStream = Readable.from(['{}']);

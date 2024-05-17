@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useCallback, useMemo } from 'react';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { CaseSeverity } from '../../../common/types/domain';
-import type { FormProps } from './schema';
-import { schema } from './schema';
-import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 
-import type { CasesConfigurationUI, CaseUI, CaseUICustomField } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/types/api';
+import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
+import { useApplication } from '../../common/lib/kibana/use_application';
+import { useCasesFeatures } from '../../common/use_cases_features';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import type { CaseUI, CaseUICustomField, CasesConfigurationUI } from '../../containers/types';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesFeatures } from '../../common/use_cases_features';
 import {
+  convertCustomFieldValue,
   getConnectorById,
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
-  convertCustomFieldValue,
 } from '../utils';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import type { CaseAttachmentsWithoutOwner } from '../../types';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
-import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
-import { useApplication } from '../../common/lib/kibana/use_application';
 
 const initialCaseValue: FormProps = {
   description: '',

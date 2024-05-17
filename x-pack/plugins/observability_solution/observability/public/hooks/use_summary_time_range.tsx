@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useMemo } from 'react';
 import { calculateTimeRangeBucketSize, getAlertSummaryTimeRange, useTimeBuckets } from '..';
-import { DEFAULT_INTERVAL, DEFAULT_DATE_FORMAT } from '../constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../constants';
 
 export const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();

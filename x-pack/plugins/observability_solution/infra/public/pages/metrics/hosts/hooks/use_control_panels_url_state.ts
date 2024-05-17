@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { pick } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
+import { pick } from 'lodash';
 import { useMemo } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
 

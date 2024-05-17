@@ -11,10 +11,10 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
+import React, { Suspense } from 'react';
 
-import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiCode, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import type {
   AttachmentType,
@@ -22,20 +22,20 @@ import type {
   CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
-import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { Attachment } from '../../../../common/types/domain';
-import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
+import type { Attachment } from '../../../../common/types/domain';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { UserActionContentToolbar } from '../content_toolbar';
+import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
+import { UserActionTimestamp } from '../timestamp';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import {
   ATTACHMENT_NOT_REGISTERED_ERROR,
   DEFAULT_EVENT_ATTACHMENT_TITLE,
   DELETE_REGISTERED_ATTACHMENT,
 } from './translations';
-import { UserActionContentToolbar } from '../content_toolbar';
-import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
-import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
@@ -78,7 +78,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends Attachment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends AttachmentTypeRegistry<AttachmentType<any>>
+  R extends AttachmentTypeRegistry<AttachmentType<any>>,
 >({
   userAction,
   userProfiles,

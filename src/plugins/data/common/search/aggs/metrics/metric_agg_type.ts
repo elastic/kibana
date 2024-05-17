@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggType, AggTypeConfig } from '../agg_type';
-import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
-import { METRIC_TYPES } from './metric_agg_types';
-import { BaseParamType, FieldTypes } from '../param_types';
 import { AggGroupNames } from '../agg_groups';
+import { AggType, AggTypeConfig } from '../agg_type';
+import { BaseParamType, FieldTypes } from '../param_types';
+import { AggParamType } from '../param_types/agg';
 import { createMetricFilter } from './lib/create_filter';
+import { METRIC_TYPES } from './metric_agg_types';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;

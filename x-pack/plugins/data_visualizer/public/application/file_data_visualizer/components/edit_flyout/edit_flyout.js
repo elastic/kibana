@@ -9,15 +9,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { Overrides } from './overrides';

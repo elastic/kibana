@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { createMemoryHistory } from 'history';
 import moment from 'moment';
 import React from 'react';
-import { MonitorStatusBar } from './status_bar';
-import { Ping } from '../../../../../common/runtime_types';
 import * as redux from 'react-redux';
+import { Ping } from '../../../../../common/runtime_types';
 import { renderWithRouter } from '../../../lib';
-import { createMemoryHistory } from 'history';
+import { MonitorStatusBar } from './status_bar';
 
 describe('MonitorStatusBar component', () => {
   let monitorStatus: Ping;

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
-import { firstValueFrom, Subject } from 'rxjs';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import {
-  PluginStartContract as AlertingPluginsStart,
   PluginSetupContract as AlertingPluginSetup,
+  PluginStartContract as AlertingPluginsStart,
 } from '@kbn/alerting-plugin/server/plugin';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { IEventLogClientService } from '@kbn/event-log-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { IEventLogClientService } from '@kbn/event-log-plugin/server';
-import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { defineRoutes } from './routes';
+import { Subject, firstValueFrom } from 'rxjs';
 import { defineActionTypes } from './action_types';
-import { defineRuleTypes } from './rule_types';
 import { defineConnectorAdapters } from './connector_adapters';
+import { defineRoutes } from './routes';
+import { defineRuleTypes } from './rule_types';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

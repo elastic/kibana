@@ -1,3 +1,4 @@
+import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,10 +11,9 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
-import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 
 export interface UseFetchSloBurnRatesResponse {
   isInitialLoading: boolean;

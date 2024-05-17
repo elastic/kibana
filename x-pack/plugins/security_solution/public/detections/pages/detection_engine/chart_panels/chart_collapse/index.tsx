@@ -1,3 +1,4 @@
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +6,18 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
-import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import { v4 as uuid } from 'uuid';
+import { ALERT_RULE_NAME, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { capitalize } from 'lodash';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
-import { getGroupByLabel } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/helpers';
+import { v4 as uuid } from 'uuid';
+import { FormattedCount } from '../../../../../common/components/formatted_number';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
+import { getGroupByLabel } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/helpers';
+import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
 import { useSummaryChartData } from '../../../../components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 import { getSeverityColor } from '../../../../components/alerts_kpis/severity_level_panel/helpers';
-import { FormattedCount } from '../../../../../common/components/formatted_number';
 import { getIsChartCollapseData } from './helpers';
 import * as i18n from './translations';
 

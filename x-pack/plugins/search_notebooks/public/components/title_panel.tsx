@@ -1,3 +1,4 @@
+import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import React, { FC, PropsWithChildren } from 'react';
-import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
 export const TitlePanel: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <>

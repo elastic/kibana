@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { UserProfile } from '@kbn/security-plugin/common';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { UserProfile } from '@kbn/security-plugin/common';
-import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { ServerError } from '../../types';
 import { casesQueriesKeys } from '../constants';
+import * as i18n from '../translations';
 import { getCurrentUserProfile } from './api';
 
 export const useGetCurrentUserProfile = () => {

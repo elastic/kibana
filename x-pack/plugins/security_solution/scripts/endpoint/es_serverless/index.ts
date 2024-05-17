@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { run, type RunContext } from '@kbn/dev-cli-runner';
+import { join } from 'path';
+import { type RunContext, run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { cyan, gray } from 'chalk';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { join } from 'path';
-import { ColumnLayoutFormatter } from '../common/screen/column_layout_formatter';
 import { ES_LOADED_USERS, ES_RESOURCES } from '../common/roles_users/serverless';
+import { ColumnLayoutFormatter } from '../common/screen/column_layout_formatter';
 
 export const cli = async () => {
   return run(

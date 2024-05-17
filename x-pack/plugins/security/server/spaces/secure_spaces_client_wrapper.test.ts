@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import type {
   AuditEvent,
   AuditLogger,
@@ -20,11 +20,11 @@ import type { GetAllSpacesPurpose, Space } from '@kbn/spaces-plugin/server';
 import { spacesClientMock } from '@kbn/spaces-plugin/server/mocks';
 import { deepFreeze } from '@kbn/std';
 
-import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 import { SpaceAuditAction } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { authorizationMock } from '../authorization/index.mock';
+import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Opts {
   securityEnabled?: boolean;

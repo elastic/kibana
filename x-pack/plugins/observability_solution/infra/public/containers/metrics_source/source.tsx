@@ -9,16 +9,16 @@ import createContainer from 'constate';
 import React, { useEffect, useState } from 'react';
 
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type {
-  MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
+  MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { MissingHttpClientException } from './source_errors';
 import { useSourceNotifier } from './notifications';
+import { MissingHttpClientException } from './source_errors';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,

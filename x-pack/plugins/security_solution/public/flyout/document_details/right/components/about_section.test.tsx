@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, render } from '@testing-library/react';
+import React from 'react';
+import { TestProviders } from '../../../../common/mock';
+import { RightPanelContext } from '../context';
+import { useExpandSection } from '../hooks/use_expand_section';
+import { mockContextValue } from '../mocks/mock_context';
+import { AboutSection } from './about_section';
 import {
   ABOUT_SECTION_CONTENT_TEST_ID,
   ABOUT_SECTION_HEADER_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
-  EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_CATEGORY_DESCRIPTION_TEST_ID,
-  REASON_TITLE_TEST_ID,
-  MITRE_ATTACK_TITLE_TEST_ID,
+  EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_RENDERER_TEST_ID,
+  MITRE_ATTACK_TITLE_TEST_ID,
+  REASON_TITLE_TEST_ID,
 } from './test_ids';
-import { TestProviders } from '../../../../common/mock';
-import { AboutSection } from './about_section';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
-import { useExpandSection } from '../hooks/use_expand_section';
 
 jest.mock('../../../../common/components/link_to');
 jest.mock('../hooks/use_expand_section');

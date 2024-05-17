@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsBaseOptions } from './base';
 import type { SavedObject } from '../..';
+import { SavedObjectsBaseOptions } from './base';
 
 /**
  * Options for the saved objects get operation

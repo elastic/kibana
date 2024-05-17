@@ -8,29 +8,29 @@
 import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
-  dataTableSelectors,
   dataTableActions,
+  dataTableSelectors,
   tableEntity,
 } from '@kbn/securitysolution-data-table';
 import type { DataTableModel, DataTableState, TableId } from '@kbn/securitysolution-data-table';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import { BulkActions } from '.';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type {
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
-import { BulkActions } from '.';
-import { useBulkActionItems } from './use_bulk_action_items';
-import type { AlertWorkflowStatus, Refetch } from '../../../types';
-import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { inputsModel } from '../../../store';
 import { inputsSelectors } from '../../../store';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { AlertWorkflowStatus, Refetch } from '../../../types';
 import * as i18n from './translations';
+import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
+import { useBulkActionItems } from './use_bulk_action_items';
 
 interface OwnProps {
   id: TableId;

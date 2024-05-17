@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
 import type {
-  CasePostRequest,
-  CasesFindResponse,
-  CaseResolveResponse,
-  CasesBulkGetRequest,
-  CasesPatchRequest,
-  AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
-  GetRelatedCasesByAlertResponse,
-  CasesBulkGetResponse,
+  AllTagsFindRequest,
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
+  CasePostRequest,
+  CaseResolveResponse,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
+  CasesFindResponse,
+  CasesPatchRequest,
   CasesSearchRequest,
+  GetRelatedCasesByAlertResponse,
 } from '../../../common/types/api';
+import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
+import { bulkCreate } from './bulk_create';
 import { bulkGet } from './bulk_get';
+import { bulkUpdate } from './bulk_update';
 import { create } from './create';
 import { deleteCases } from './delete';
-import { search } from './search';
 import type { CasesByAlertIDParams, GetParams } from './get';
-import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
+import { get, getCasesByAlertID, getCategories, getReporters, getTags, resolve } from './get';
 import type { PushParams } from './push';
 import { push } from './push';
-import { bulkUpdate } from './bulk_update';
-import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
+import { search } from './search';
 
 /**
  * API for interacting with the cases entities.

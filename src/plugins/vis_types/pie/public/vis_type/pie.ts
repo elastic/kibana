@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import {
-  PartitionVisParams,
-  LabelPositions,
-  ValueFormats,
   EmptySizeRatios,
+  LabelPositions,
   LegendDisplay,
+  PartitionVisParams,
+  ValueFormats,
 } from '@kbn/expression-partition-vis-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieTypeProps } from '../types';
-import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
+import { toExpressionAst } from '../to_ast';
+import { PieTypeProps } from '../types';
 
 export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,

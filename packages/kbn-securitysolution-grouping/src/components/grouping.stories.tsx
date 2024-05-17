@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { Story } from '@storybook/react';
-import { mockGroupingProps } from './grouping.mock';
-import { Grouping } from './grouping';
+import React from 'react';
 import readme from '../../README.mdx';
+import { Grouping } from './grouping';
+import { mockGroupingProps } from './grouping.mock';
 
 export default {
   component: Grouping,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { JoinDescriptor } from '../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../common/constants';
+import type { JoinDescriptor } from '../../../common/descriptor_types';
 
 export function isSpatialJoin(joinDescriptor: Partial<JoinDescriptor>) {
   return joinDescriptor?.right?.type === SOURCE_TYPES.ES_DISTANCE_SOURCE;

@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import { EuiButton, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import React, { useState, useCallback, useRef } from 'react';
 
-import { allowAutoCreateRadioIds } from '../../../../common/constants';
 import { TemplateDeserialized } from '../../../../common';
-import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
-import {
-  CommonWizardSteps,
-  StepSettingsContainer,
-  StepMappingsContainer,
-  StepAliasesContainer,
-} from '../shared';
-import { documentationService } from '../../services/documentation';
-import { SectionError } from '../section_error';
+import { allowAutoCreateRadioIds } from '../../../../common/constants';
 import { serializeAsESLifecycle } from '../../../../common/lib/data_stream_serialization';
+import { Forms, GlobalFlyout, serializers } from '../../../shared_imports';
+import { documentationService } from '../../services/documentation';
 import {
+  LegacyIndexTemplatesDeprecation,
+  SimulateTemplateFilters,
   SimulateTemplateFlyoutContent,
   SimulateTemplateProps,
   simulateTemplateFlyoutProps,
-  SimulateTemplateFilters,
-  LegacyIndexTemplatesDeprecation,
 } from '../index_templates';
-import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
+import { SectionError } from '../section_error';
+import {
+  CommonWizardSteps,
+  StepAliasesContainer,
+  StepMappingsContainer,
+  StepSettingsContainer,
+} from '../shared';
+import { StepComponentContainer, StepLogisticsContainer, StepReviewContainer } from './steps';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;

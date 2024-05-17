@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -17,12 +15,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { capitalize } from 'lodash';
 import moment from 'moment';
-import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
+import React from 'react';
 import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { useAppContext } from '../../hooks/use_app_context';
+import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 
 const CATEGORY_MAP = {
   lens: {

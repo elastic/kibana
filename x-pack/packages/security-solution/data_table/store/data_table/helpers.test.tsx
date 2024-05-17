@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { SortColumnTable, TableId } from '../../common/types';
+import { mockGlobalState } from '../../mock/global_state';
 import { tableDefaults } from './defaults';
 import {
   setInitializeDataTableSettings,
   updateDataTableColumnOrder,
   updateDataTableColumnWidth,
 } from './helpers';
-import { mockGlobalState } from '../../mock/global_state';
-import { SortColumnTable, TableId } from '../../common/types';
 import type { DataTableModelSettings } from './model';
 import type { TableById } from './types';
 

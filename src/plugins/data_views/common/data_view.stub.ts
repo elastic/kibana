@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
 import { createStubDataView } from './data_views/data_view.stub';
+import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
 export {
   createStubDataView,
   createStubDataView as createStubIndexPattern,

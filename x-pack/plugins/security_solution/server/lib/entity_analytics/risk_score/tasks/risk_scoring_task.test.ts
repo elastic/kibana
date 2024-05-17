@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { ConfigType } from '../../../../config';
+import { riskEngineDataClientMock } from '../../risk_engine/risk_engine_data_client.mock';
 import type { RiskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
-import { riskScoringTaskMock } from './risk_scoring_task.mock';
-import { riskEngineDataClientMock } from '../../risk_engine/risk_engine_data_client.mock';
 import {
   registerRiskScoringTask,
-  startRiskScoringTask,
   removeRiskScoringTask,
   runTask,
+  startRiskScoringTask,
 } from './risk_scoring_task';
-import type { ConfigType } from '../../../../config';
+import { riskScoringTaskMock } from './risk_scoring_task.mock';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 

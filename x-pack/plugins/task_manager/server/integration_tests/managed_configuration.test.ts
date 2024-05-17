@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { Client } from '@elastic/elasticsearch';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import sinon from 'sinon';
+import { TaskManagerConfig } from '../config';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
-import { coreMock } from '@kbn/core/server/mocks';
-import { TaskManagerConfig } from '../config';
 
 describe('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;

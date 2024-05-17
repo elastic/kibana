@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { euiPaletteColorBlind } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
-import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
-import {
-  ChartMode,
-  AxisType,
-  ScaleType,
-  AxisMode,
-  ThresholdLineStyle,
-  InterpolationMode,
-} from '../types';
-import { toExpressionAst } from '../to_ast';
+import { LabelRotation, defaultCountLabel } from '@kbn/charts-plugin/public';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
+import { toExpressionAst } from '../to_ast';
+import {
+  AxisMode,
+  AxisType,
+  ChartMode,
+  InterpolationMode,
+  ScaleType,
+  ThresholdLineStyle,
+} from '../types';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const horizontalBarVisTypeDefinition = {

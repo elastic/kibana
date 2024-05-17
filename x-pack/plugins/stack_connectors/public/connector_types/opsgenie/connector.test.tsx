@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import OpsgenieConnectorFields from './connector';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, screen, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import OpsgenieConnectorFields from './connector';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

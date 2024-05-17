@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreEditor, Position } from '../../types';
 import { TokenIterator } from '../../lib/token_iterator';
+import { CoreEditor, Position } from '../../types';
 
 interface Dependencies {
   position: Position;

@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ import { AppLogic } from '../../../app_logic';
 import { EngineLogic, getEngineBreadcrumbs } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
-import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
+import { EmptyState, SchemaCallouts, SchemaTable } from '../components';
 import { SCHEMA_TITLE } from '../constants';
 import { SchemaLogic } from '../schema_logic';
 

@@ -7,12 +7,12 @@
 
 import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
-import { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
+import { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 

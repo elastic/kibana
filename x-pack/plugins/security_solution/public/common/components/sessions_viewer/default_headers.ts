@@ -11,13 +11,13 @@ import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import {
-  COLUMN_SESSION_START,
-  COLUMN_EXECUTABLE,
-  COLUMN_ENTRY_USER_ID,
-  COLUMN_INTERACTIVE,
-  COLUMN_HOST_NAME,
-  COLUMN_ENTRY_TYPE,
   COLUMN_ENTRY_IP,
+  COLUMN_ENTRY_TYPE,
+  COLUMN_ENTRY_USER_ID,
+  COLUMN_EXECUTABLE,
+  COLUMN_HOST_NAME,
+  COLUMN_INTERACTIVE,
+  COLUMN_SESSION_START,
 } from './translations';
 
 export const sessionsHeaders: ColumnHeaderOptions[] = [

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 interface ExploreMatchingButtonProps {
   noDataViewMatches: boolean;

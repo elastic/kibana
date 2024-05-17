@@ -11,7 +11,7 @@ import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { INFRA_LOGS_LOCATOR_ID } from './infra';
 import { LogsLocatorParams, TraceLogsLocatorParams } from './types';
 
-import { getTraceQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
+import { getTimeRangeEndFromTime, getTimeRangeStartFromTime, getTraceQuery } from './helpers';
 
 export const TRACE_LOGS_LOCATOR_ID = 'TRACE_LOGS_LOCATOR';
 

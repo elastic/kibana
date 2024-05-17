@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { useMemo, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
-import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { type FieldTypeKnown, getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { type FieldTypeKnown, fieldNameWildcardMatcher, getFieldIconType } from '@kbn/field-utils';
+import { useMemo, useState } from 'react';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, GetCustomFieldType } from '../types';
 

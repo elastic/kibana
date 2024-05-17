@@ -1,14 +1,12 @@
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery, kqlQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { Environment } from '../../../common/environment_rt';
-import { TraceSearchType } from '../../../common/trace_explorer';
-import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   PARENT_ID,
   PROCESSOR_EVENT,
@@ -16,7 +14,9 @@ import {
   TRANSACTION_ID,
   TRANSACTION_SAMPLED,
 } from '../../../common/es_fields/apm';
+import { TraceSearchType } from '../../../common/trace_explorer';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type TraceSamplesResponse = Array<{

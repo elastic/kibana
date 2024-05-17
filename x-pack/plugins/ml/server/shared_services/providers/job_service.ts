@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { GetGuards } from '../shared_services';
 import { jobServiceProvider } from '../../models/job_service';
+import type { GetGuards } from '../shared_services';
 
 type OrigJobServiceProvider = ReturnType<typeof jobServiceProvider>;
 

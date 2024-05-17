@@ -1,3 +1,15 @@
+import type { EuiBasicTableColumn, SearchFilterConfig } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiProgress,
+  EuiSpacer,
+  EuiTabbedContent,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,30 +18,18 @@
  */
 import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { SearchFilterConfig, EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiProgress,
-} from '@elastic/eui';
 
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import { useEnabledFeatures } from '../../../../../contexts/ml';
-import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
-  ManagementListResponse,
   ManagementItems,
+  ManagementListResponse,
 } from '../../../../../../../common/types/management';
+import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
+import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
+import { useEnabledFeatures } from '../../../../../contexts/ml';
 import { useManagementApiService } from '../../../../../services/ml_api_service/management';
 import { getColumns } from './columns';
-import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
 
 interface Props {

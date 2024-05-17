@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,11 +16,11 @@ import { HttpLogic } from '../../../../shared/http';
 import { StartSyncApiLogic, StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
 import { GetCrawlerApiLogic, GetCrawlerArgs } from '../../../api/crawler/get_crawler_api_logic';
 import {
+  CrawlEvent,
+  CrawlRequest,
   CrawlerData,
   CrawlerDomain,
   CrawlerStatus,
-  CrawlEvent,
-  CrawlRequest,
 } from '../../../api/crawler/types';
 
 import {

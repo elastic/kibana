@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { PieLayerState, PieVisualizationState } from '../..';
-import { LayerSettings } from './layer_settings';
-import { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { shallow } from 'enzyme';
+import React from 'react';
+import { PieLayerState, PieVisualizationState } from '../..';
+import { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
+import { LayerSettings } from './layer_settings';
 
 describe('layer settings', () => {
   describe('multiple metrics switch', () => {

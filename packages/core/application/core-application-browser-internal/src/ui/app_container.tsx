@@ -8,20 +8,20 @@
 
 import './app_container.scss';
 
-import { Observable } from 'rxjs';
-import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import { Observable } from 'rxjs';
 
-import { i18n } from '@kbn/i18n';
-import type { CoreTheme } from '@kbn/core-theme-browser';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 import {
-  AppStatus,
   type AppLeaveHandler,
+  AppStatus,
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
+import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { CoreTheme } from '@kbn/core-theme-browser';
+import { i18n } from '@kbn/i18n';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';

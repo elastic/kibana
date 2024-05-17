@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -14,15 +14,15 @@ import { HttpError, Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import {
-  flashAPIErrors,
   FlashMessagesLogic,
+  flashAPIErrors,
   flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
-  AddAnalyticsCollectionsAPILogic,
   AddAnalyticsCollectionApiLogicArgs,
   AddAnalyticsCollectionApiLogicResponse,
+  AddAnalyticsCollectionsAPILogic,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_OVERVIEW_PATH } from '../../routes';
 

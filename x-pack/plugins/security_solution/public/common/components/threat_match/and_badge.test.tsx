@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mount } from 'enzyme';
 
-import { AndBadgeComponent } from './and_badge';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { AndBadgeComponent } from './and_badge';
 
 const mockTheme = getMockTheme({
   eui: {

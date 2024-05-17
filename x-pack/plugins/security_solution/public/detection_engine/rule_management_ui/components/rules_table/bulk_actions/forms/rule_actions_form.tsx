@@ -1,3 +1,5 @@
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,36 +7,34 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
-  RuleAction,
   ActionTypeRegistryContract,
+  RuleAction,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
-  useForm,
-  UseField,
   FIELD_TYPES,
-  useFormData,
-  getUseField,
   Field,
+  UseField,
+  getUseField,
+  useForm,
+  useFormData,
 } from '../../../../../../shared_imports';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 
-import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
+import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
-import { RuleActionsField } from '../../../../../rule_creation/components/rule_actions_field';
 import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
+import { RuleActionsField } from '../../../../../rule_creation/components/rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
 

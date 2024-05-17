@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Style, openSans } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { Style, openSans } from '@kbn/expressions-plugin/common';
-import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
+import { BOOLEAN_FALSE, BOOLEAN_TRUE, CSS, FONT_FAMILY, FONT_WEIGHT } from '../constants';
 import { ExpressionProgressFunction, Progress } from '../types';
 
 export const strings = {

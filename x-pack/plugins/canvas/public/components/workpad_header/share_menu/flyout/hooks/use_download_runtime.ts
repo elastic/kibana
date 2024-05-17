@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
+import fileSaver from 'file-saver';
+import { useCallback } from 'react';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../../common/lib/constants';
 import { ZIP } from '../../../../../../i18n/constants';
 
-import { usePlatformService, useNotifyService, useWorkpadService } from '../../../../../services';
 import type { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
+import { useNotifyService, usePlatformService, useWorkpadService } from '../../../../../services';
 
 const strings = {
   getDownloadRuntimeFailureErrorMessage: () =>

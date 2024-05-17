@@ -12,11 +12,11 @@ import {
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
 import { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
-import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
-import { injectReferences, extractReferences } from './saved_objects/workpad_references';
 import { getId } from '../common/lib/get_id';
 import { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
+import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
+import { extractReferences, injectReferences } from './saved_objects/workpad_references';
 
 export type CanvasRouteHandlerContext = CustomRequestHandlerContext<{
   canvas: {

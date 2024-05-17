@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { join } from 'path';
-import { writeFile } from 'fs/promises';
 import os from 'os';
+import { join } from 'path';
 import AdmZip from 'adm-zip';
+import { writeFile } from 'fs/promises';
 
 export function generateUniqueId() {
   return `${Date.now() + Math.floor(Math.random() * 1e13)}`;

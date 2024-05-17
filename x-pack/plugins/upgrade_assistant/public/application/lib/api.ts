@@ -8,23 +8,23 @@
 import { HttpSetup } from '@kbn/core/public';
 
 import {
-  ESUpgradeStatus,
-  CloudBackupStatus,
-  ClusterUpgradeState,
-  ResponseError,
-  SystemIndicesMigrationStatus,
-  ReindexStatusResponse,
-} from '../../../common/types';
-import {
   API_BASE_PATH,
+  CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
   CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
-  CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
 } from '../../../common/constants';
 import {
-  UseRequestConfig,
+  CloudBackupStatus,
+  ClusterUpgradeState,
+  ESUpgradeStatus,
+  ReindexStatusResponse,
+  ResponseError,
+  SystemIndicesMigrationStatus,
+} from '../../../common/types';
+import {
   SendRequestConfig,
   SendRequestResponse,
+  UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';

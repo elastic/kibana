@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import React from 'react';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
-import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { InputProps } from '../types';
 
 /**
  * Props for a {@link TextInput} component.

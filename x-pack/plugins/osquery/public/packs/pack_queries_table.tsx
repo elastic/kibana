@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
 
 import { PlatformIcons } from './queries/platforms';
 import type { PackQueryFormData } from './queries/use_pack_query_form';

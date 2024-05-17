@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -16,6 +13,9 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { InspectorViewDescription } from '../types';
 
 interface Props {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IAggType, IAggConfig, search } from '@kbn/data-plugin/public';
+import { IAggConfig, IAggType, search } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const { propFilter } = search.aggs;

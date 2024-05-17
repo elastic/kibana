@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../../common/types/domain';
 import {
-  MAX_CATEGORY_LENGTH,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TAGS_PER_CASE,
-  MAX_LENGTH_PER_TAG,
-  MAX_TITLE_LENGTH,
-  MAX_CASES_TO_UPDATE,
-  MAX_USER_ACTIONS_PER_CASE,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CASES_TO_UPDATE,
+  MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
+  MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { bulkUpdate } from './bulk_update';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
 
 interface VegaActionsMenuProps {
   formatHJson(): void;

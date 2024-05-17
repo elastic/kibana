@@ -6,46 +6,46 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
 import {
-  HttpSetup,
-  NotificationsStart,
+  CoreStart,
   CoreTheme,
   DocLinksStart,
-  CoreStart,
+  HttpSetup,
+  NotificationsStart,
 } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { Observable } from 'rxjs';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiWindowEvent } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ObjectStorageClient } from '../../../../common/types';
 
-import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import { loadActiveApi } from '../../../lib/kb';
+import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import {
-  getAutocompleteInfo,
   AutocompleteInfo,
   History,
   Settings,
   Storage,
   createHistory,
   createSettings,
+  getAutocompleteInfo,
   getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
+import { EmbeddableConsoleDependencies, MetricsTracker } from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
 
+import { EditorContentSpinner } from '../../components';
 import {
-  ServicesContextProvider,
   EditorContextProvider,
   RequestContextProvider,
+  ServicesContextProvider,
 } from '../../contexts';
 import { Main } from '../main';
-import { EditorContentSpinner } from '../../components';
 
 interface ConsoleDependencies {
   autocompleteInfo: AutocompleteInfo;

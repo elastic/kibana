@@ -6,16 +6,16 @@
  */
 
 import { encode } from '@kbn/rison';
-import { TIMELINE_HEADER } from '../../../screens/timeline';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { ALERTS_URL } from '../../../urls/navigation';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';
+import { TIMELINE_HEADER } from '../../../screens/timeline';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
+import { ALERTS_URL } from '../../../urls/navigation';
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;

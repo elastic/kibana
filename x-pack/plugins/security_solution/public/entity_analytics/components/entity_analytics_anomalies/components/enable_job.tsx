@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+import React, { useCallback } from 'react';
 import { LinkAnchor } from '../../../../common/components/links';
-import * as i18n from '../translations';
 import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+import * as i18n from '../translations';
 
 export const EnableJob = ({
   job,

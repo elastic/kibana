@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { ILayer } from '../classes/layers/layer';
-import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
+import { LayerGroup, isLayerGroup } from '../classes/layers/layer_group';
 
 export interface Props {
   layer: ILayer;

@@ -6,27 +6,27 @@
  */
 
 import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
   IKibanaResponse,
+  IRouter,
+  KibanaRequest,
   KibanaResponseFactory,
+  RequestHandlerContext,
 } from '@kbn/core/server';
-import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
-import { Observable, Subject } from 'rxjs';
-import { tap, map, filter } from 'rxjs';
-import { throttleTime } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup, IClusterClient } from '@kbn/core/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
-import {
-  MonitoringStats,
-  summarizeMonitoringStats,
-  HealthStatus,
-  RawMonitoringStats,
-} from '../monitoring';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { Observable, Subject } from 'rxjs';
+import { filter, map, tap } from 'rxjs';
+import { throttleTime } from 'rxjs';
 import { TaskManagerConfig } from '../config';
-import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
+import { logHealthMetrics } from '../lib/log_health_metrics';
+import {
+  HealthStatus,
+  MonitoringStats,
+  RawMonitoringStats,
+  summarizeMonitoringStats,
+} from '../monitoring';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;

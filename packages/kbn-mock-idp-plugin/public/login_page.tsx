@@ -8,19 +8,19 @@
 
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiEmptyPrompt,
-  EuiComboBox,
-  EuiInlineEditTitle,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiInlineEditTitle,
+  EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
-import { FormikProvider, useFormik, Field, Form } from 'formik';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Field, Form, FormikProvider, useFormik } from 'formik';
+import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
 import { useAuthenticator } from './role_switcher';
 
 export const LoginPage = () => {

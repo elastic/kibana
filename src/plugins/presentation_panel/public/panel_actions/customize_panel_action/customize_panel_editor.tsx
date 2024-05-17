@@ -30,12 +30,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
+  PublishesUnifiedSearch,
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
   getPanelDescription,
   getPanelTitle,
-  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { combineLatest, filter, interval, map, merge, Observable, startWith } from 'rxjs';
 import { JsonValue } from '@kbn/utility-types';
-import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { Observable, combineLatest, filter, interval, map, merge, startWith } from 'rxjs';
 import { TaskManagerConfig } from '../config';
-import { ITaskMetricsAggregator } from './types';
+import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { ITaskMetricsAggregator } from './types';
 
 export interface CreateMetricsAggregatorOpts<T> {
   key: string;

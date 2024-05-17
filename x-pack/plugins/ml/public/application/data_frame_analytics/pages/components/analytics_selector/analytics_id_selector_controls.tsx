@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -16,6 +13,9 @@ import {
   EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React from 'react';
 
 interface Props {
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;

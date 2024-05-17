@@ -60,10 +60,7 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": [
-              "IconType",
-              " | undefined"
-            ],
+            "signature": ["IconType", " | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -159,9 +156,7 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -177,9 +172,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ChromeDocTitle",
-        "description": [
-          "\nAPIs for accessing and updating the document title.\n"
-        ],
+        "description": ["\nAPIs for accessing and updating the document title.\n"],
         "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -190,12 +183,8 @@
             "type": "Function",
             "tags": [],
             "label": "change",
-            "description": [
-              "\nChanges the current document title.\n"
-            ],
-            "signature": [
-              "(newTitle: string | string[]) => void"
-            ],
+            "description": ["\nChanges the current document title.\n"],
+            "signature": ["(newTitle: string | string[]) => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -206,12 +195,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "newTitle",
-                "description": [
-                  "The new title to set, either a string or string array"
-                ],
-                "signature": [
-                  "string | string[]"
-                ],
+                "description": ["The new title to set, either a string or string array"],
+                "signature": ["string | string[]"],
                 "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -229,9 +214,7 @@
             "description": [
               "\nResets the document title to it's initial value.\n(meaning the one present in the title meta at application load.)"
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -275,9 +258,7 @@
             "type": "number",
             "tags": [],
             "label": "priority",
-            "description": [
-              "\nHighest priority items are listed at the top of the list of links."
-            ],
+            "description": ["\nHighest priority items are listed at the top of the list of links."],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -302,9 +283,7 @@
             "type": "string",
             "tags": [],
             "label": "appName",
-            "description": [
-              "\nProvide your plugin's name to create a header for separation"
-            ],
+            "description": ["\nProvide your plugin's name to create a header for separation"],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -338,9 +317,7 @@
             "type": "Function",
             "tags": [],
             "label": "content",
-            "description": [
-              "\nCustom content to occur below the list of links"
-            ],
+            "description": ["\nCustom content to occur below the list of links"],
             "signature": [
               "((element: HTMLDivElement, menuActions: ",
               {
@@ -363,9 +340,7 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": [
-                  "HTMLDivElement"
-                ],
+                "signature": ["HTMLDivElement"],
                 "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -432,12 +407,8 @@
             "type": "string",
             "tags": [],
             "label": "linkType",
-            "description": [
-              "\nExtend EuiButtonEmpty to provide extra functionality"
-            ],
-            "signature": [
-              "\"custom\""
-            ],
+            "description": ["\nExtend EuiButtonEmpty to provide extra functionality"],
+            "signature": ["\"custom\""],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -448,9 +419,7 @@
             "type": "string",
             "tags": [],
             "label": "href",
-            "description": [
-              "\nURL of the link"
-            ],
+            "description": ["\nURL of the link"],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -461,9 +430,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "content",
-            "description": [
-              "\nContent of the button (in lieu of `children`)"
-            ],
+            "description": ["\nContent of the button (in lieu of `children`)"],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
@@ -477,12 +444,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "external",
-            "description": [
-              "\nOpens link in new tab"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nOpens link in new tab"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -524,12 +487,8 @@
             "type": "string",
             "tags": [],
             "label": "linkType",
-            "description": [
-              "\nCreates a generic give feedback link with comment icon"
-            ],
-            "signature": [
-              "\"discuss\""
-            ],
+            "description": ["\nCreates a generic give feedback link with comment icon"],
+            "signature": ["\"discuss\""],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -584,12 +543,8 @@
             "type": "string",
             "tags": [],
             "label": "linkType",
-            "description": [
-              "\nCreates a deep-link to app-specific documentation"
-            ],
-            "signature": [
-              "\"documentation\""
-            ],
+            "description": ["\nCreates a deep-link to app-specific documentation"],
+            "signature": ["\"documentation\""],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -644,12 +599,8 @@
             "type": "string",
             "tags": [],
             "label": "linkType",
-            "description": [
-              "\nCreates a link to a new github issue in the Kibana repo"
-            ],
-            "signature": [
-              "\"github\""
-            ],
+            "description": ["\nCreates a link to a new github issue in the Kibana repo"],
+            "signature": ["\"github\""],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -663,9 +614,7 @@
             "description": [
               "\nInclude at least one app-specific label to be applied to the new github issue"
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -676,12 +625,8 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": [
-              "\nProvides initial text for the title of the issue"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nProvides initial text for the title of the issue"],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -707,9 +652,7 @@
             "tags": [],
             "label": "hideHelpMenu",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -748,9 +691,7 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -762,9 +703,7 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -776,9 +715,7 @@
             "tags": [],
             "label": "onClick",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -792,9 +729,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -820,9 +755,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -856,9 +789,7 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1079,9 +1010,7 @@
             "type": "Function",
             "tags": [],
             "label": "setHelpMenuLinks",
-            "description": [
-              "Set the help menu links"
-            ],
+            "description": ["Set the help menu links"],
             "signature": [
               "(links: ",
               {
@@ -1142,9 +1071,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nA unique identifier for looking up links."
-            ],
+            "description": ["\nA unique identifier for looking up links."],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1155,9 +1082,7 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": [
-              "\nThe title of the application."
-            ],
+            "description": ["\nThe title of the application."],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1168,9 +1093,7 @@
             "type": "Object",
             "tags": [],
             "label": "category",
-            "description": [
-              "\nThe category the app lives in"
-            ],
+            "description": ["\nThe category the app lives in"],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-common",
@@ -1191,9 +1114,7 @@
             "type": "string",
             "tags": [],
             "label": "baseUrl",
-            "description": [
-              "\nThe base route used to open the root of an application."
-            ],
+            "description": ["\nThe base route used to open the root of an application."],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1220,9 +1141,7 @@
             "description": [
               "\nAn ordinal used to sort nav links relative to one another for display."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1233,12 +1152,8 @@
             "type": "string",
             "tags": [],
             "label": "tooltip",
-            "description": [
-              "\nA tooltip shown when hovering over an app link."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nA tooltip shown when hovering over an app link."],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1252,9 +1167,7 @@
             "description": [
               "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precedence over the `icon` property."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1268,9 +1181,7 @@
             "description": [
               "\nA URL to an image file used as an icon. Used as a fallback\nif `euiIconType` is not provided."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1281,9 +1192,7 @@
             "type": "string",
             "tags": [],
             "label": "href",
-            "description": [
-              "\nSettled state between `url`, `baseUrl`, and `active`"
-            ],
+            "description": ["\nSettled state between `url`, `baseUrl`, and `active`"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1292,9 +1201,7 @@
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeNavLink.visibleIn",
             "type": "Array",
-            "tags": [
-              "default"
-            ],
+            "tags": ["default"],
             "label": "visibleIn",
             "description": [
               "\nList of locations where the nav link should be visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
@@ -1322,9 +1229,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ChromeNavLinks",
-        "description": [
-          "\n{@link ChromeNavLinks | APIs} for manipulating nav links.\n"
-        ],
+        "description": ["\n{@link ChromeNavLinks | APIs} for manipulating nav links.\n"],
         "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1335,9 +1240,7 @@
             "type": "Function",
             "tags": [],
             "label": "getNavLinks$",
-            "description": [
-              "\nGet an observable for a sorted list of navlinks."
-            ],
+            "description": ["\nGet an observable for a sorted list of navlinks."],
             "signature": [
               "() => ",
               "Observable",
@@ -1363,9 +1266,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nGet the state of a navlink at this point in time."
-            ],
+            "description": ["\nGet the state of a navlink at this point in time."],
             "signature": [
               "(id: string) => ",
               {
@@ -1388,9 +1289,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1405,9 +1304,7 @@
             "type": "Function",
             "tags": [],
             "label": "getAll",
-            "description": [
-              "\nGet the current state of all navlinks."
-            ],
+            "description": ["\nGet the current state of all navlinks."],
             "signature": [
               "() => Readonly<",
               {
@@ -1431,12 +1328,8 @@
             "type": "Function",
             "tags": [],
             "label": "has",
-            "description": [
-              "\nCheck whether or not a navlink exists."
-            ],
-            "signature": [
-              "(id: string) => boolean"
-            ],
+            "description": ["\nCheck whether or not a navlink exists."],
+            "signature": ["(id: string) => boolean"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1448,9 +1341,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1468,9 +1359,7 @@
             "description": [
               "\nEnable forced navigation mode, which will trigger a page refresh\nwhen a nav link is clicked and only the hash is updated.\n"
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1483,14 +1372,8 @@
             "type": "Function",
             "tags": [],
             "label": "getForceAppSwitcherNavigation$",
-            "description": [
-              "\nAn observable of the forced app switcher state."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<boolean>"
-            ],
+            "description": ["\nAn observable of the forced app switcher state."],
+            "signature": ["() => ", "Observable", "<boolean>"],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1529,9 +1412,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Optional id, if not passed a \"link\" must be provided."
-            ],
+            "description": ["Optional id, if not passed a \"link\" must be provided."],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1555,9 +1436,7 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": [
-              "Path in the tree of the node"
-            ],
+            "description": ["Path in the tree of the node"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1568,9 +1447,7 @@
             "type": "Object",
             "tags": [],
             "label": "deepLink",
-            "description": [
-              "App id or deeplink id"
-            ],
+            "description": ["App id or deeplink id"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -1617,9 +1494,7 @@
             "description": [
               "\nHandler to render the node item with custom JSX. This handler is added to render the `children` of\nthe Navigation.Item component when React components are used to declare the navigation tree."
             ],
-            "signature": [
-              "(() => React.ReactNode) | undefined"
-            ],
+            "signature": ["(() => React.ReactNode) | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1632,12 +1507,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isElasticInternalLink",
-            "description": [
-              "\nFlag to indicate if the node is an \"external\" cloud link"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nFlag to indicate if the node is an \"external\" cloud link"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1651,9 +1522,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ChromeRecentlyAccessed",
-        "description": [
-          "\n{@link ChromeRecentlyAccessed | APIs} for recently accessed history."
-        ],
+        "description": ["\n{@link ChromeRecentlyAccessed | APIs} for recently accessed history."],
         "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1664,12 +1533,8 @@
             "type": "Function",
             "tags": [],
             "label": "add",
-            "description": [
-              "\nAdds a new item to the recently accessed history.\n"
-            ],
-            "signature": [
-              "(link: string, label: string, id: string) => void"
-            ],
+            "description": ["\nAdds a new item to the recently accessed history.\n"],
+            "signature": ["(link: string, label: string, id: string) => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1683,9 +1548,7 @@
                 "description": [
                   "a relative URL to the resource (not including the {@link HttpStart.basePath | `http.basePath`})"
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1697,12 +1560,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "label",
-                "description": [
-                  "the label to display in the UI"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["the label to display in the UI"],
+                "signature": ["string"],
                 "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1714,12 +1573,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "a unique string used to de-duplicate the recently accessed list."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["a unique string used to de-duplicate the recently accessed list."],
+                "signature": ["string"],
                 "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1734,9 +1589,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nGets an Array of the current recently accessed history.\n"
-            ],
+            "description": ["\nGets an Array of the current recently accessed history.\n"],
             "signature": [
               "() => ",
               {
@@ -1760,9 +1613,7 @@
             "type": "Function",
             "tags": [],
             "label": "get$",
-            "description": [
-              "\nGets an Observable of the array of recently accessed history.\n"
-            ],
+            "description": ["\nGets an Observable of the array of recently accessed history.\n"],
             "signature": [
               "() => ",
               "Observable",
@@ -1876,9 +1727,7 @@
             "type": "Object",
             "tags": [],
             "label": "navLinks",
-            "description": [
-              "{@inheritdoc ChromeNavLinks}"
-            ],
+            "description": ["{@inheritdoc ChromeNavLinks}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -1898,9 +1747,7 @@
             "type": "Object",
             "tags": [],
             "label": "navControls",
-            "description": [
-              "{@inheritdoc ChromeNavControls}"
-            ],
+            "description": ["{@inheritdoc ChromeNavControls}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -1920,9 +1767,7 @@
             "type": "Object",
             "tags": [],
             "label": "recentlyAccessed",
-            "description": [
-              "{@inheritdoc ChromeRecentlyAccessed}"
-            ],
+            "description": ["{@inheritdoc ChromeRecentlyAccessed}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -1942,9 +1787,7 @@
             "type": "Object",
             "tags": [],
             "label": "docTitle",
-            "description": [
-              "{@inheritdoc ChromeDocTitle}"
-            ],
+            "description": ["{@inheritdoc ChromeDocTitle}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -1964,14 +1807,8 @@
             "type": "Function",
             "tags": [],
             "label": "getIsVisible$",
-            "description": [
-              "\nGet an observable of the current visibility state of the chrome."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<boolean>"
-            ],
+            "description": ["\nGet an observable of the current visibility state of the chrome."],
+            "signature": ["() => ", "Observable", "<boolean>"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1987,9 +1824,7 @@
             "description": [
               "\nSet the temporary visibility for the chrome. This does nothing if the chrome is hidden\nby default and should be used to hide the chrome for things like full-screen modes\nwith an exit button."
             ],
-            "signature": [
-              "(isVisible: boolean) => void"
-            ],
+            "signature": ["(isVisible: boolean) => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2001,9 +1836,7 @@
                 "tags": [],
                 "label": "isVisible",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2018,9 +1851,7 @@
             "type": "Function",
             "tags": [],
             "label": "getBadge$",
-            "description": [
-              "\nGet an observable of the current badge"
-            ],
+            "description": ["\nGet an observable of the current badge"],
             "signature": [
               "() => ",
               "Observable",
@@ -2046,9 +1877,7 @@
             "type": "Function",
             "tags": [],
             "label": "setBadge",
-            "description": [
-              "\nOverride the current badge"
-            ],
+            "description": ["\nOverride the current badge"],
             "signature": [
               "(badge?: ",
               {
@@ -2095,9 +1924,7 @@
             "type": "Function",
             "tags": [],
             "label": "getBreadcrumbs$",
-            "description": [
-              "\nGet an observable of the current list of breadcrumbs"
-            ],
+            "description": ["\nGet an observable of the current list of breadcrumbs"],
             "signature": [
               "() => ",
               "Observable",
@@ -2123,9 +1950,7 @@
             "type": "Function",
             "tags": [],
             "label": "setBreadcrumbs",
-            "description": [
-              "\nOverride the current set of breadcrumbs"
-            ],
+            "description": ["\nOverride the current set of breadcrumbs"],
             "signature": [
               "(newBreadcrumbs: ",
               {
@@ -2172,9 +1997,7 @@
             "type": "Function",
             "tags": [],
             "label": "getBreadcrumbsAppendExtension$",
-            "description": [
-              "\nGet an observable of the current extension appended to breadcrumbs"
-            ],
+            "description": ["\nGet an observable of the current extension appended to breadcrumbs"],
             "signature": [
               "() => ",
               "Observable",
@@ -2200,9 +2023,7 @@
             "type": "Function",
             "tags": [],
             "label": "setBreadcrumbsAppendExtension",
-            "description": [
-              "\nMount an element next to the last breadcrumb"
-            ],
+            "description": ["\nMount an element next to the last breadcrumb"],
             "signature": [
               "(breadcrumbsAppendExtension?: ",
               {
@@ -2249,9 +2070,7 @@
             "type": "Function",
             "tags": [],
             "label": "getCustomNavLink$",
-            "description": [
-              "\nGet an observable of the current custom nav link"
-            ],
+            "description": ["\nGet an observable of the current custom nav link"],
             "signature": [
               "() => ",
               "Observable",
@@ -2277,9 +2096,7 @@
             "type": "Function",
             "tags": [],
             "label": "setCustomNavLink",
-            "description": [
-              "\nOverride the current set of custom nav link"
-            ],
+            "description": ["\nOverride the current set of custom nav link"],
             "signature": [
               "(newCustomNavLink?: Partial<",
               {
@@ -2327,9 +2144,7 @@
             "type": "Function",
             "tags": [],
             "label": "setHelpMenuLinks",
-            "description": [
-              "\nOverride the default links shown in the help menu"
-            ],
+            "description": ["\nOverride the default links shown in the help menu"],
             "signature": [
               "(links: ",
               {
@@ -2376,9 +2191,7 @@
             "type": "Function",
             "tags": [],
             "label": "getGlobalHelpExtensionMenuLinks$",
-            "description": [
-              "\nGet the list of the registered global help extension menu links"
-            ],
+            "description": ["\nGet the list of the registered global help extension menu links"],
             "signature": [
               "() => ",
               "Observable",
@@ -2404,9 +2217,7 @@
             "type": "Function",
             "tags": [],
             "label": "registerGlobalHelpExtensionMenuLink",
-            "description": [
-              "\nAppend a global help extension menu link"
-            ],
+            "description": ["\nAppend a global help extension menu link"],
             "signature": [
               "(globalHelpExtensionMenuLink: ",
               {
@@ -2452,9 +2263,7 @@
             "type": "Function",
             "tags": [],
             "label": "getHelpExtension$",
-            "description": [
-              "\nGet an observable of the current custom help content"
-            ],
+            "description": ["\nGet an observable of the current custom help content"],
             "signature": [
               "() => ",
               "Observable",
@@ -2480,9 +2289,7 @@
             "type": "Function",
             "tags": [],
             "label": "setHelpExtension",
-            "description": [
-              "\nOverride the current set of custom help content"
-            ],
+            "description": ["\nOverride the current set of custom help content"],
             "signature": [
               "(helpExtension?: ",
               {
@@ -2529,12 +2336,8 @@
             "type": "Function",
             "tags": [],
             "label": "setHelpSupportUrl",
-            "description": [
-              "\nOverride the default support URL shown in the help menu"
-            ],
-            "signature": [
-              "(url: string) => void"
-            ],
+            "description": ["\nOverride the default support URL shown in the help menu"],
+            "signature": ["(url: string) => void"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2545,12 +2348,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "url",
-                "description": [
-                  "The updated support URL"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The updated support URL"],
+                "signature": ["string"],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2565,14 +2364,8 @@
             "type": "Function",
             "tags": [],
             "label": "getHelpSupportUrl$",
-            "description": [
-              "\nGet the support URL shown in the help menu"
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<string>"
-            ],
+            "description": ["\nGet the support URL shown in the help menu"],
+            "signature": ["() => ", "Observable", "<string>"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2585,14 +2378,8 @@
             "type": "Function",
             "tags": [],
             "label": "getIsNavDrawerLocked$",
-            "description": [
-              "\nGet an observable of the current locked state of the nav drawer."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<boolean>"
-            ],
+            "description": ["\nGet an observable of the current locked state of the nav drawer."],
+            "signature": ["() => ", "Observable", "<boolean>"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2605,9 +2392,7 @@
             "type": "Function",
             "tags": [],
             "label": "setHeaderBanner",
-            "description": [
-              "\nSet the banner that will appear on top of the chrome header.\n"
-            ],
+            "description": ["\nSet the banner that will appear on top of the chrome header.\n"],
             "signature": [
               "(headerBanner?: ",
               {
@@ -2654,14 +2439,8 @@
             "type": "Function",
             "tags": [],
             "label": "hasHeaderBanner$",
-            "description": [
-              "\nGet an observable of the current header banner presence state."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<boolean>"
-            ],
+            "description": ["\nGet an observable of the current header banner presence state."],
+            "signature": ["() => ", "Observable", "<boolean>"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2674,9 +2453,7 @@
             "type": "Function",
             "tags": [],
             "label": "setChromeStyle",
-            "description": [
-              "\nSets the style type of the chrome."
-            ],
+            "description": ["\nSets the style type of the chrome."],
             "signature": [
               "(style: ",
               {
@@ -2698,9 +2475,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "style",
-                "description": [
-                  "The style type to apply to the chrome."
-                ],
+                "description": ["The style type to apply to the chrome."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-chrome-browser",
@@ -2724,9 +2499,7 @@
             "type": "Function",
             "tags": [],
             "label": "getChromeStyle$",
-            "description": [
-              "\nGet an observable of the current style type of the chrome."
-            ],
+            "description": ["\nGet an observable of the current style type of the chrome."],
             "signature": [
               "() => ",
               "Observable",
@@ -2752,14 +2525,8 @@
             "type": "Function",
             "tags": [],
             "label": "getIsSideNavCollapsed$",
-            "description": [
-              "\nGet an observable of the current collapsed state of the side nav."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<boolean>"
-            ],
+            "description": ["\nGet an observable of the current collapsed state of the side nav."],
+            "signature": ["() => ", "Observable", "<boolean>"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2775,11 +2542,7 @@
             "description": [
               "\nGet the id of the currently active project navigation or `null` otherwise."
             ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<string | null>"
-            ],
+            "signature": ["() => ", "Observable", "<string | null>"],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2829,9 +2592,7 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2895,9 +2656,7 @@
             "tags": [],
             "label": "baseUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2909,9 +2668,7 @@
             "tags": [],
             "label": "billingUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2923,9 +2680,7 @@
             "tags": [],
             "label": "deploymentsUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2937,9 +2692,7 @@
             "tags": [],
             "label": "deploymentUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2951,9 +2704,7 @@
             "tags": [],
             "label": "projectsUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2965,9 +2716,7 @@
             "tags": [],
             "label": "performanceUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2979,9 +2728,7 @@
             "tags": [],
             "label": "usersAndRolesUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3025,9 +2772,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"navGroup\""
-            ],
+            "signature": ["\"navGroup\""],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3092,9 +2837,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"navItem\""
-            ],
+            "signature": ["\"navItem\""],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3273,12 +3016,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "id",
-            "description": [
-              "Optional id, if not passed a \"link\" must be provided."
-            ],
-            "signature": [
-              "Id | undefined"
-            ],
+            "description": ["Optional id, if not passed a \"link\" must be provided."],
+            "signature": ["Id | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3292,9 +3031,7 @@
             "description": [
               "Optional title. If not provided and a \"link\" is provided the title will be the Deep link title"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3305,12 +3042,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "link",
-            "description": [
-              "App id or deeplink id"
-            ],
-            "signature": [
-              "LinkId | undefined"
-            ],
+            "description": ["App id or deeplink id"],
+            "signature": ["LinkId | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3321,9 +3054,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "cloudLink",
-            "description": [
-              "Cloud link id"
-            ],
+            "description": ["Cloud link id"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -3400,9 +3131,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"preset\""
-            ],
+            "signature": ["\"preset\""],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3414,9 +3143,7 @@
             "tags": [],
             "label": "preset",
             "description": [],
-            "signature": [
-              "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
-            ],
+            "signature": ["\"ml\" | \"management\" | \"analytics\" | \"devtools\""],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3442,9 +3169,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"recentlyAccessed\""
-            ],
+            "signature": ["\"recentlyAccessed\""],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3478,16 +3203,10 @@
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.RecentlyAccessedDefinition.defaultIsCollapsed",
             "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
+            "tags": ["default"],
             "label": "defaultIsCollapsed",
-            "description": [
-              "\nIf true, the recently accessed list will be collapsed by default."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nIf true, the recently accessed list will be collapsed by default."],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3557,9 +3276,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Unique id for the solution navigation."
-            ],
+            "description": ["Unique id for the solution navigation."],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3570,9 +3287,7 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": [
-              "Title for the solution navigation."
-            ],
+            "description": ["Title for the solution navigation."],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3583,9 +3298,7 @@
             "type": "Object",
             "tags": [],
             "label": "navigationTree$",
-            "description": [
-              "The navigation tree definition"
-            ],
+            "description": ["The navigation tree definition"],
             "signature": [
               "Observable",
               "<",
@@ -3611,10 +3324,7 @@
             "description": [
               "Optional icon for the solution navigation to render in the select dropdown."
             ],
-            "signature": [
-              "IconType",
-              " | undefined"
-            ],
+            "signature": ["IconType", " | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3625,9 +3335,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "sideNavComponent",
-            "description": [
-              "React component to render in the side nav for the navigation"
-            ],
+            "description": ["React component to render in the side nav for the navigation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -3648,12 +3356,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "homePage",
-            "description": [
-              "The page to navigate to when switching to this solution navigation."
-            ],
-            "signature": [
-              "LinkId | undefined"
-            ],
+            "description": ["The page to navigate to when switching to this solution navigation."],
+            "signature": ["LinkId | undefined"],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3852,9 +3556,7 @@
         "tags": [],
         "label": "ChromeStyle",
         "description": [],
-        "signature": [
-          "\"classic\" | \"project\""
-        ],
+        "signature": ["\"classic\" | \"project\""],
         "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3945,9 +3647,7 @@
         "tags": [],
         "label": "EuiThemeSize",
         "description": [],
-        "signature": [
-          "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\""
-        ],
+        "signature": ["\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\""],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3959,12 +3659,8 @@
         "type": "Type",
         "tags": [],
         "label": "NavigationGroupPreset",
-        "description": [
-          "The preset that can be pass to the NavigationBucket component"
-        ],
-        "signature": [
-          "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
-        ],
+        "description": ["The preset that can be pass to the NavigationBucket component"],
+        "signature": ["\"ml\" | \"management\" | \"analytics\" | \"devtools\""],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4007,9 +3703,7 @@
         "tags": [],
         "label": "RenderAs",
         "description": [],
-        "signature": [
-          "\"block\" | \"item\" | \"accordion\" | \"panelOpener\""
-        ],
+        "signature": ["\"block\" | \"item\" | \"accordion\" | \"panelOpener\""],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4099,9 +3793,7 @@
         "tags": [],
         "label": "SideNavNodeStatus",
         "description": [],
-        "signature": [
-          "\"hidden\" | \"visible\""
-        ],
+        "signature": ["\"hidden\" | \"visible\""],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,

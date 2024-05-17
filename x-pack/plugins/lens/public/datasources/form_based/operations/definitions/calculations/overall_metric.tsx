@@ -20,13 +20,13 @@ import {
   OVERALL_SUM_NAME,
   SUM_ID,
 } from '@kbn/lens-formula-docs';
+import type { OperationDefinition } from '..';
 import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from '../column_types';
-import { optionallHistogramBasedOperationToExpression } from './utils';
-import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
+import { optionallHistogramBasedOperationToExpression } from './utils';
 
 type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {

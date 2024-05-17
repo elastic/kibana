@@ -8,13 +8,13 @@
 import { login } from '../../../tasks/login';
 import { visitHostDetailsPage } from '../../../tasks/navigation';
 
-import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
-import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
-import { openRiskInformationFlyout, mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
+import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytics';
-import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
+import { mockRiskEngineEnabled, openRiskInformationFlyout } from '../../../tasks/entity_analytics';
+import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {

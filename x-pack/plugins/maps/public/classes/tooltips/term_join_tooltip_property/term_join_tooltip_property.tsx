@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
 import { Filter } from '@kbn/es-query';
+import React, { ReactNode } from 'react';
+import type { ITermJoinSource } from '../../sources/join_sources';
 import { ITooltipProperty } from '../tooltip_property';
 import { TermJoinKeyLabel } from './term_join_key_label';
-import type { ITermJoinSource } from '../../sources/join_sources';
 
 export class TermJoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import {
   getLayerWizards,
-  registerLayerWizardInternal,
   registerLayerWizardExternal,
+  registerLayerWizardInternal,
 } from './layer_wizard_registry';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 describe('LayerWizardRegistryTest', () => {
   it('should enforce ordering', async () => {

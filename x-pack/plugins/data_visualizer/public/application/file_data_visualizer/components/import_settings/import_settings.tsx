@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { SimpleSettings } from './simple';
-import { AdvancedSettings } from './advanced';
 import type { CombinedField } from '../../../common/components/combined_fields';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { AdvancedSettings } from './advanced';
+import { SimpleSettings } from './simple';
 
 interface Props {
   index: string;

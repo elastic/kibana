@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '../../../common/constants';
 import { dataStreamRouteService } from '../../services';
 import type { GetDataStreamsResponse } from '../../types';
-import { API_VERSIONS } from '../../../common/constants';
 
-import { useRequest, sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 export const useGetDataStreams = () => {
   return useRequest<GetDataStreamsResponse>({

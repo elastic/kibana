@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type {
+  RouteValidationError,
+  RouteValidationFunction,
+  RouteValidationResultFactory,
+} from '@kbn/core/server';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type * as rt from 'io-ts';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import type {
-  RouteValidationFunction,
-  RouteValidationResultFactory,
-  RouteValidationError,
-} from '@kbn/core/server';
 
 type RequestValidationResult<T> =
   | {

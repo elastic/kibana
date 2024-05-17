@@ -6,14 +6,14 @@
  */
 
 import { EuiComment, EuiSpacer } from '@elastic/eui';
-import React, { useLayoutEffect, useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
+import React, { useLayoutEffect, useState } from 'react';
 
-import type { OsqueryActionResultsProps } from './types';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { ATTACHED_QUERY } from '../../agents/translations';
-import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { AlertAttachmentContext } from '../../common/contexts';
+import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+import type { OsqueryActionResultsProps } from './types';
 
 interface OsqueryResultProps extends OsqueryActionResultsProps {
   actionId: string;

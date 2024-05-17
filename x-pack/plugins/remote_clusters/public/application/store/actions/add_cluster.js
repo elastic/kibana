@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 import { extractQueryParams } from '../../../shared_imports';
-import { addCluster as sendAddClusterRequest, getRouter, redirect } from '../../services';
+import { getRouter, redirect, addCluster as sendAddClusterRequest } from '../../services';
 import { fatalError, toasts } from '../../services/notification';
 
 import {
+  ADD_CLUSTER_FAILURE,
   ADD_CLUSTER_START,
   ADD_CLUSTER_SUCCESS,
-  ADD_CLUSTER_FAILURE,
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
 

@@ -13,8 +13,8 @@ import type {
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import type { IEventLogReader } from '../event_log/event_log_reader';
 import type { ExtMeta } from '../../utils/console_logging';
+import type { IEventLogReader } from '../event_log/event_log_reader';
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,

@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
-import turfBbox from '@turf/bbox';
-import { multiPoint } from '@turf/helpers';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { type Filter, buildExistsFilter } from '@kbn/es-query';
-import { lastValueFrom } from 'rxjs';
 import type {
   AggregationsGeoBoundsAggregate,
   LatLonGeoLocation,
   TopLeftBottomRightGeoBounds,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type Filter, buildExistsFilter } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import turfBbox from '@turf/bbox';
+import { multiPoint } from '@turf/helpers';
+import React from 'react';
+import { lastValueFrom } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { UpdateSourceEditor } from './update_source_editor';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { convertToLines } from './convert_to_lines';
-import { AbstractESAggSource } from '../es_agg_source';
-import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
-import { DataRequestAbortError } from '../../util/data_request';
-import { mergeExecutionContext } from '../execution_context_utils';
-import { SourceEditorArgs } from '../source';
 import {
   DataFilters,
   ESPewPewSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
+import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
+import { DataRequestAbortError } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { AbstractESAggSource } from '../es_agg_source';
+import { mergeExecutionContext } from '../execution_context_utils';
+import { SourceEditorArgs } from '../source';
 import { BoundsRequestMeta, GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
+import { convertToLines } from './convert_to_lines';
+import { UpdateSourceEditor } from './update_source_editor';
 
 const MAX_GEOTILE_LEVEL = 29;
 

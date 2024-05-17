@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import expect from '@kbn/expect';
 import { ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
-import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getEventLog, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';

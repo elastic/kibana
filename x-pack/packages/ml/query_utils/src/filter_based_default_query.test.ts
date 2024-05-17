@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isFilterBasedDefaultQuery } from './filter_based_default_query';
 import { simpleQueryMock } from './__mocks__/simple_query';
+import { isFilterBasedDefaultQuery } from './filter_based_default_query';
 import { matchAllQuery } from './match_all_query';
 import { defaultSimpleQuery } from './simple_query';
 

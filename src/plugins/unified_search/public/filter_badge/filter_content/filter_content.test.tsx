@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { phraseFilter } from '@kbn/data-plugin/common/stubs';
+import { render } from '@testing-library/react';
 import React from 'react';
 import FilterContent from './filter_content';
-import { render } from '@testing-library/react';
-import { phraseFilter } from '@kbn/data-plugin/common/stubs';
 
 test('alias', () => {
   const filter = {

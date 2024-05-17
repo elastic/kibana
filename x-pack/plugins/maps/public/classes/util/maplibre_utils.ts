@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { round } from 'lodash';
 import type { LngLatBounds } from '@kbn/mapbox-gl';
+import { round } from 'lodash';
 import { DECIMAL_DEGREES_PRECISION } from '../../../common/constants';
 import type { MapExtent } from '../../../common/descriptor_types';
 

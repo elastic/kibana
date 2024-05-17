@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
 import { EuiBasicTable } from '@elastic/eui';
-import { CorrelationsDetailsAlertsTable, columns } from './correlations_details_alerts_table';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { TestProviders } from '../../../../common/mock';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { CorrelationsDetailsAlertsTable, columns } from './correlations_details_alerts_table';
 
 jest.mock('../hooks/use_paginated_alerts');
 jest.mock('@elastic/eui', () => ({

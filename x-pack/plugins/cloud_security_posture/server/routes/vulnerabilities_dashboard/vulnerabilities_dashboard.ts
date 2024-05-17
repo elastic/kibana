@@ -6,14 +6,14 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { getVulnerabilitiesTrends } from './get_vulnerabilities_trend';
-import type { CnvmDashboardData } from '../../../common/types_old';
 import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
+import type { CnvmDashboardData } from '../../../common/types_old';
 import { CspRouter } from '../../types';
-import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
-import { getTopVulnerableResources } from './get_top_vulnerable_resources';
 import { getTopPatchableVulnerabilities } from './get_top_patchable_vulnerabilities';
 import { getTopVulnerabilities } from './get_top_vulnerabilities';
+import { getTopVulnerableResources } from './get_top_vulnerable_resources';
+import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
+import { getVulnerabilitiesTrends } from './get_vulnerabilities_trend';
 
 export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void =>
   router.get(

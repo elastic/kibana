@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { RefObject } from 'react';
 import userEvent from '@testing-library/user-event';
+import { Cancelable } from 'lodash';
+import React, { RefObject } from 'react';
+import { ProcessDeps, ProcessTreeNode } from '.';
+import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import {
+  childProcessMock,
   mockAlerts,
   processMock,
-  childProcessMock,
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessDeps, ProcessTreeNode } from '.';
-import { Cancelable } from 'lodash';
-import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 
 jest.useFakeTimers();
 

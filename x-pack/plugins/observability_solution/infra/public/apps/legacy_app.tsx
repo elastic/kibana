@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { createBrowserHistory, History } from 'history';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { History, createBrowserHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteProps } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 // This exists purely to facilitate legacy app/infra URL redirects.
 // It will be removed in 8.0.0.

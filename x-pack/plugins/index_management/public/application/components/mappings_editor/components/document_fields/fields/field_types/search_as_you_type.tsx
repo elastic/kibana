@@ -7,19 +7,19 @@
 
 import React from 'react';
 
-import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { Field as FieldType, NormalizedField } from '../../../../types';
 import {
-  StoreParameter,
-  IndexParameter,
   AnalyzersParameter,
-  NormsParameter,
-  SimilarityParameter,
-  TermVectorParameter,
+  IndexParameter,
   MaxShingleSizeParameter,
   MetaParameter,
+  NormsParameter,
+  SimilarityParameter,
+  StoreParameter,
+  TermVectorParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;

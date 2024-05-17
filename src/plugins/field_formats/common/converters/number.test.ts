@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NumberFormat } from './number';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { NumberFormat } from './number';
 
 describe('NumberFormat', () => {
   const config: { [key: string]: string } = {
@@ -33,8 +33,9 @@ describe('NumberFormat', () => {
     expect(
       formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 })
     ).toMatchInlineSnapshot(`"{\\"min\\":150,\\"max\\":1000,\\"sum\\":5000,\\"value_count\\":10}"`);
-    expect(formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 }, 'html'))
-      .toMatchInlineSnapshot(`
+    expect(
+      formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 }, 'html')
+    ).toMatchInlineSnapshot(`
     "{
       \\"min\\": 150,
       \\"max\\": 1000,

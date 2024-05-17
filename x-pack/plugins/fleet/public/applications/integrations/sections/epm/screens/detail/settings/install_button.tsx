@@ -6,12 +6,12 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { Fragment, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useCallback, useState } from 'react';
 
+import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {

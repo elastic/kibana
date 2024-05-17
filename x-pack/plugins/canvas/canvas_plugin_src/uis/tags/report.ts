@@ -6,8 +6,8 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
+import { TagFactory } from '../../../public/lib/tag';
 const euiVisPalette = euiPaletteColorBlind();
 
 export const report: TagFactory = () => ({

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getTestActionData, getTestAlertData } from '../../lib/get_test_data';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

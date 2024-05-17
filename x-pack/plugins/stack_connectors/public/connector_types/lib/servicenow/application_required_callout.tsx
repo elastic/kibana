@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
 import { SNStoreButton } from './sn_store_button';
 
 const content = i18n.translate(

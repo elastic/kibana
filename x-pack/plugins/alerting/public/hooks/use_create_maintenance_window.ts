@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { useMutation } from '@tanstack/react-query';
 
+import { CreateParams, createMaintenanceWindow } from '../services/maintenance_windows_api/create';
 import { useKibana } from '../utils/kibana_react';
-import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
 
 interface UseCreateMaintenanceWindowProps {
   onError?: (error: IHttpFetchError<KibanaServerError>) => void;

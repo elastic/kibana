@@ -7,10 +7,10 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { safeParseResult } from '@kbn/zod-helpers';
-import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import type {
   RulesTableStorageSavedState,
@@ -18,9 +18,9 @@ import type {
 } from './rules_table_saved_state';
 import {
   RulesTableSavedFilter,
+  RulesTableSavedSorting,
   RulesTableStorageSavedPagination,
   RulesTableUrlSavedPagination,
-  RulesTableSavedSorting,
 } from './rules_table_saved_state';
 
 function readStorageState(storage: Storage): RulesTableStorageSavedState | null {

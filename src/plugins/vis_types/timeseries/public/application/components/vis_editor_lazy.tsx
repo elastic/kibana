@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import type { TimeseriesEditorProps } from './vis_editor';
 
 const VisEditorComponent = lazy(() => import('./vis_editor'));

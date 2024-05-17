@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
@@ -45,12 +45,7 @@ client = Elasticsearch(
 ]
 
 client.bulk(operations=documents${ingestPipeline ? `, pipeline="${ingestPipeline}"` : ''})`,
-  ingestDataIndex: ({
-    apiKey,
-    url,
-    indexName,
-    ingestPipeline,
-  }) => `from elasticsearch_serverless import Elasticsearch
+  ingestDataIndex: ({ apiKey, url, indexName, ingestPipeline }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
   "${url}",

@@ -13,7 +13,7 @@
         "analysis": {
           "outlier_detection": {
             "n_neighbors": 1,
-            "method": {"__one_of": ["lof", "ldof", "distance_knn_nn", "distance_knn"]},
+            "method": { "__one_of": ["lof", "ldof", "distance_knn_nn", "distance_knn"] },
             "feature_influence_threshold": 1.0
           }
         },

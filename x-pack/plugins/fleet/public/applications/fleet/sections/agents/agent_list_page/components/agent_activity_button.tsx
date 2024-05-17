@@ -6,8 +6,8 @@
  */
 
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 
 import type { TOUR_STORAGE_CONFIG } from '../../../../constants';
 import { TOUR_STORAGE_KEYS } from '../../../../constants';

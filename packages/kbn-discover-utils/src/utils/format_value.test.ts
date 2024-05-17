@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { dataViewMock } from '../__mocks__';
 import { formatFieldValue } from './format_value';
 
 const services = {
   fieldFormats: {
     getDefaultInstance: jest.fn<FieldFormat, [string]>(
-      () => ({ convert: (value: unknown) => value } as FieldFormat)
+      () => ({ convert: (value: unknown) => value }) as FieldFormat
     ),
   } as unknown as FieldFormatsStart,
 };

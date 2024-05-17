@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { css } from '@emotion/css';
 import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
 } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import React, { useMemo } from 'react';
 import * as constants from '../../../../../common/data_types/logs/constants';
 import { LogLevel } from '../../../data_types/logs/log_level';
 

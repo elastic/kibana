@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { ResolutionEditor } from './resolution_editor';
 import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { ResolutionEditor } from './resolution_editor';
 
 const defaultProps = {
   resolution: GRID_RESOLUTION.COARSE,

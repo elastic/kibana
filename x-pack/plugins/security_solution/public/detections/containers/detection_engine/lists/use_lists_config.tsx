@@ -7,10 +7,10 @@
 
 import { useEffect } from 'react';
 
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useListsIndex } from './use_lists_index';
 import { useListsPrivileges } from './use_lists_privileges';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface UseListsConfigReturn {
   canManageIndex: boolean | null;

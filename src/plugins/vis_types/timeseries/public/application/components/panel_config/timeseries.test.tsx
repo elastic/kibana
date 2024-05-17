@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import React from 'react';
 
 jest.mock('../lib/get_default_query_language', () => ({
   getDefaultQueryLanguage: () => 'kuery',

@@ -6,32 +6,32 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { partition, uniq } from 'lodash';
-import seedrandom from 'seedrandom';
+import { queryToAst } from '@kbn/data-plugin/common';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
-import { queryToAst } from '@kbn/data-plugin/common';
 import {
-  buildExpression,
-  buildExpressionFunction,
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
+  buildExpression,
+  buildExpressionFunction,
 } from '@kbn/expressions-plugin/public';
+import { partition, uniq } from 'lodash';
+import seedrandom from 'seedrandom';
 import type { DateRange } from '../../../common/types';
+import type { IndexPattern, IndexPatternMap } from '../../types';
+import { dedupeAggs } from './dedupe_aggs';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
-import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
-import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
+import { FormBasedLayer, FormBasedPrivateState } from './types';
 import { getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;

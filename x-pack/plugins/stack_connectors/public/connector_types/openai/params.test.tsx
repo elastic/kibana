@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import ParamsFields from './params';
+import React from 'react';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
+import ParamsFields from './params';
 
 const messageVariables = [
   {

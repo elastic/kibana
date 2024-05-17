@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiProgress, EuiSpacer, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexItem, EuiProgress, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
-import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useFailedTestByStep } from '../hooks/use_failed_tests_by_step';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const FailedTestsByStep = ({ time }: { time: { to: string; from: string } }) => {
   const { failedSteps, loading } = useFailedTestByStep(time);

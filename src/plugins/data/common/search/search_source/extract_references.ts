@@ -7,10 +7,10 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { Filter } from '@kbn/es-query';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { SerializedSearchSourceFields } from './types';
+import { Filter } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../..';
+import { SerializedSearchSourceFields } from './types';
 
 export const extractReferences = (
   state: SerializedSearchSourceFields

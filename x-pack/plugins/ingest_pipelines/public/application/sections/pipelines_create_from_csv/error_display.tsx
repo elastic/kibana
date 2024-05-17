@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
-import { EuiCallOut } from '@elastic/eui';
 
 interface Props {
   error: { title: string; message: string };

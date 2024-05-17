@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { journey, step, before } from '@elastic/synthetics';
-import { byTestId, waitForLoadingToFinish } from '../../helpers/utils';
+import { before, journey, step } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
+import { byTestId, waitForLoadingToFinish } from '../../helpers/utils';
 
 journey('uptime', ({ page, params }) => {
   recordVideo(page);

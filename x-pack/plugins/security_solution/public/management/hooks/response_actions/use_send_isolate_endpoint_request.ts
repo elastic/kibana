@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { isolateHost } from '../../../common/lib/endpoint_isolation';
 import type {
   HostIsolationRequestBody,
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
+import { isolateHost } from '../../../common/lib/endpoint_isolation';
 
 /**
  * Create host isolation requests

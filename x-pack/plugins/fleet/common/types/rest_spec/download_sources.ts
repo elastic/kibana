@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DownloadSourceBase, DownloadSource } from '../models';
+import type { DownloadSource, DownloadSourceBase } from '../models';
 
 import type { ListResult } from './common';
 

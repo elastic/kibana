@@ -6,31 +6,31 @@
  */
 
 import './toolbar.scss';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import {
+  AVAILABLE_PALETTES,
   CategoricalColorMapping,
+  ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   PaletteRegistry,
-  ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERTION,
-  AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
+import { i18n } from '@kbn/i18n';
 import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
-import { useState, useCallback } from 'react';
-import { getColorCategories } from '@kbn/chart-expressions-common';
+import React from 'react';
+import { useCallback, useState } from 'react';
 import { PieVisualizationState } from '../../../common/types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { VisualizationDimensionEditorProps } from '../../types';
 import {
   getDefaultColorForMultiMetricDimension,
   hasNonCollapsedSliceBy,
   isCollapsed,
 } from './visualization';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;

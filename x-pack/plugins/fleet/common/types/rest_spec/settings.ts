@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Settings, AgentPolicy, FleetServerHost, FleetProxy, DownloadSource } from '../models';
+import type { AgentPolicy, DownloadSource, FleetProxy, FleetServerHost, Settings } from '../models';
 
 export interface GetSettingsResponse {
   item: Settings;

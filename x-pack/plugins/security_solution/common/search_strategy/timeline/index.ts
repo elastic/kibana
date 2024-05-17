@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SortField, Maybe } from '../common';
 import type {
   DataProviderType,
-  TimelineType,
-  TimelineStatus,
   RowRendererId,
+  TimelineStatus,
+  TimelineType,
 } from '../../api/timeline/model/api';
+import type { Maybe, SortField } from '../common';
 
 export * from './events';
 

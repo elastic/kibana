@@ -7,9 +7,9 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services as functionalTestServices } from '../functional/services';
 import { services as kibanaApiIntegrationServices } from '../api_integration/services';
 import { pageObjects } from '../functional/page_objects';
+import { services as functionalTestServices } from '../functional/services';
 
 export const services = {
   ...functionalTestServices,

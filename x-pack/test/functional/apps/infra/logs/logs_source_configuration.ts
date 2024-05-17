@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
 import { DATES } from '../constants';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -124,9 +124,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
-          firstLogStreamEntry
-        );
+        const logStreamEntryColumns =
+          await logsUi.logStreamPage.getLogColumnsOfStreamEntry(firstLogStreamEntry);
 
         expect(logStreamEntryColumns).to.have.length(3);
       });
@@ -182,9 +181,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
-          firstLogStreamEntry
-        );
+        const logStreamEntryColumns =
+          await logsUi.logStreamPage.getLogColumnsOfStreamEntry(firstLogStreamEntry);
 
         expect(logStreamEntryColumns).to.have.length(2);
       });

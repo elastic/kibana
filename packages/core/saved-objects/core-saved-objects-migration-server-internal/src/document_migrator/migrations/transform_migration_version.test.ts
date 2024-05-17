@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { unary } from 'lodash';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { unary } from 'lodash';
 import { transformMigrationVersion } from './transform_migration_version';
 
 const transform = unary(SavedObjectsUtils.getMigrationFunction(transformMigrationVersion));

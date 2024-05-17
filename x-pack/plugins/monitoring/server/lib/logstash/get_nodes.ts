@@ -6,13 +6,13 @@
  */
 
 import moment from 'moment';
-import { createQuery } from '../create_query';
-import { calculateAvailability } from '../calculate_availability';
-import { LogstashMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
+import { calculateAvailability } from '../calculate_availability';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { LogstashMetric } from '../metrics';
 
 interface Logstash {
   jvm?: {

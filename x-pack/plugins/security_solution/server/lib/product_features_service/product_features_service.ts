@@ -12,8 +12,8 @@
  */
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
-import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import {
   getAssistantFeature,
@@ -22,10 +22,10 @@ import {
 } from '@kbn/security-solution-features/product_features';
 import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID } from '../../../common';
-import { ProductFeatures } from './product_features';
-import type { ProductFeaturesConfigurator } from './types';
-import { securityDefaultSavedObjects } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
+import { ProductFeatures } from './product_features';
+import { securityDefaultSavedObjects } from './security_saved_objects';
+import type { ProductFeaturesConfigurator } from './types';
 
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;

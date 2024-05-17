@@ -8,12 +8,12 @@
 
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
-import { getAccessors, normalizeTable, getShowLines } from '../helpers';
+import { getAccessors, getShowLines, normalizeTable } from '../helpers';
+import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import {
-  validateLinesVisibilityForChartType,
   validateLineWidthForChartType,
+  validateLinesVisibilityForChartType,
   validateMarkSizeForChartType,
   validatePointsRadiusForChartType,
   validateShowPointsForChartType,

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import React from 'react';
+import styled from 'styled-components';
 import * as I18n from './translations';
 
 import {
+  RISK_COLOR_CRITICAL,
+  RISK_COLOR_HIGH,
   RISK_COLOR_LOW,
   RISK_COLOR_MEDIUM,
-  RISK_COLOR_HIGH,
-  RISK_COLOR_CRITICAL,
+  RISK_SCORE_CRITICAL,
+  RISK_SCORE_HIGH,
   RISK_SCORE_LOW,
   RISK_SCORE_MEDIUM,
-  RISK_SCORE_HIGH,
-  RISK_SCORE_CRITICAL,
 } from '../../../../common/constants';
 
 export interface SeverityOptionItem {

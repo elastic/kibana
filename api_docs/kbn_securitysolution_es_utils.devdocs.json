@@ -50,11 +50,7 @@
         "tags": [],
         "label": "createBootstrapIndex",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", index: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", index: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -66,9 +62,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,9 +75,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -99,14 +91,8 @@
         "type": "Function",
         "tags": [],
         "label": "createDataStream",
-        "description": [
-          "\ncreates data stream"
-        ],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<unknown>"
-        ],
+        "description": ["\ncreates data stream"],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -118,9 +104,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,9 +117,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,9 +148,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-es-utils/src/decode_version/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -201,9 +181,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -216,9 +194,7 @@
             "tags": [],
             "label": "pattern",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -231,9 +207,7 @@
             "tags": [],
             "label": "specifyAlias",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -246,9 +220,7 @@
             "tags": [],
             "label": "maxAttempts",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -264,14 +236,8 @@
         "type": "Function",
         "tags": [],
         "label": "deleteDataStream",
-        "description": [
-          "\ndeletes data stream"
-        ],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<boolean>"
-        ],
+        "description": ["\ndeletes data stream"],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<boolean>"],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -283,9 +249,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -298,9 +262,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -317,11 +279,7 @@
         "tags": [],
         "label": "deleteIndexTemplate",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -333,9 +291,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -348,9 +304,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -367,11 +321,7 @@
         "tags": [],
         "label": "deletePolicy",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -383,9 +333,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -398,9 +346,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -417,11 +363,7 @@
         "tags": [],
         "label": "deleteTemplate",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_template/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -433,9 +375,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -448,9 +388,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -469,9 +407,7 @@
         "description": [
           "\nVery similar to the encode_hit_version from saved object system from here:\nsrc/core/server/saved_objects/version/encode_hit_version.ts\n\nwith the most notably change is that it doesn't do any throws but rather just returns undefined\nif _seq_no or _primary_term does not exist."
         ],
-        "signature": [
-          "<T>(hit: T) => string | undefined"
-        ],
+        "signature": ["<T>(hit: T) => string | undefined"],
         "path": "packages/kbn-securitysolution-es-utils/src/encode_hit_version/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -483,9 +419,7 @@
             "tags": [],
             "label": "hit",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-securitysolution-es-utils/src/encode_hit_version/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -504,11 +438,7 @@
         "description": [
           "\nThis function is similar to getIndexExists, but is limited to searching indices that match\nthe index pattern used as concrete backing indices (e.g. .siem-signals-default-000001).\nThis allows us to separate the indices that are actually .siem-signals indices from\nalerts as data indices that only share the .siem-signals alias.\n"
         ],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", index: string) => Promise<boolean>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", index: string) => Promise<boolean>"],
         "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -519,12 +449,8 @@
             "type": "Object",
             "tags": [],
             "label": "esClient",
-            "description": [
-              "Elasticsearch client to use to make the request"
-            ],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "description": ["Elasticsearch client to use to make the request"],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -536,12 +462,8 @@
             "type": "string",
             "tags": [],
             "label": "index",
-            "description": [
-              "Index alias name to check for existence"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["Index alias name to check for existence"],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -557,14 +479,8 @@
         "type": "Function",
         "tags": [],
         "label": "getDataStreamExists",
-        "description": [
-          "\nchecks if data stream exists"
-        ],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<boolean>"
-        ],
+        "description": ["\nchecks if data stream exists"],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<boolean>"],
         "path": "packages/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -576,9 +492,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -591,9 +505,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -609,9 +521,7 @@
         "type": "Function",
         "tags": [],
         "label": "getIndexAliases",
-        "description": [
-          "\nRetrieves all index aliases for a given alias name\n"
-        ],
+        "description": ["\nRetrieves all index aliases for a given alias name\n"],
         "signature": [
           "({ esClient, alias, }: { esClient: ",
           "ElasticsearchClient",
@@ -1878,9 +1788,7 @@
             ]
           }
         ],
-        "returnComment": [
-          "an array of {@link IndexAlias } objects"
-        ],
+        "returnComment": ["an array of {@link IndexAlias } objects"],
         "initialIsOpen": false
       },
       {
@@ -1889,9 +1797,7 @@
         "type": "Function",
         "tags": [],
         "label": "getIndexCount",
-        "description": [
-          "\nRetrieves the count of documents in a given index\n"
-        ],
+        "description": ["\nRetrieves the count of documents in a given index\n"],
         "signature": [
           "({ esClient, index, }: { esClient: ",
           "ElasticsearchClient",
@@ -3158,9 +3064,7 @@
             ]
           }
         ],
-        "returnComment": [
-          "the document count"
-        ],
+        "returnComment": ["the document count"],
         "initialIsOpen": false
       },
       {
@@ -3170,11 +3074,7 @@
         "tags": [],
         "label": "getIndexExists",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", index: string) => Promise<boolean>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", index: string) => Promise<boolean>"],
         "path": "packages/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3186,9 +3086,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3201,9 +3099,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3236,9 +3132,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3251,9 +3145,7 @@
             "tags": [],
             "label": "template",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3270,11 +3162,7 @@
         "tags": [],
         "label": "getPolicyExists",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<boolean>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<boolean>"],
         "path": "packages/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3286,9 +3174,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3301,9 +3187,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3336,9 +3220,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3351,9 +3233,7 @@
             "tags": [],
             "label": "template",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3369,14 +3249,8 @@
         "type": "Function",
         "tags": [],
         "label": "migrateToDataStream",
-        "description": [
-          "\nmigrate to data stream"
-        ],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", name: string) => Promise<unknown>"
-        ],
+        "description": ["\nmigrate to data stream"],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", name: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3388,9 +3262,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3403,9 +3275,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3421,9 +3291,7 @@
         "type": "Function",
         "tags": [],
         "label": "putMappings",
-        "description": [
-          "\nupdate mappings of index"
-        ],
+        "description": ["\nupdate mappings of index"],
         "signature": [
           "(esClient: ",
           "ElasticsearchClient",
@@ -3442,9 +3310,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3457,9 +3323,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3472,11 +3336,7 @@
             "tags": [],
             "label": "mappings",
             "description": [],
-            "signature": [
-              "Record<string, ",
-              "MappingProperty",
-              ">"
-            ],
+            "signature": ["Record<string, ", "MappingProperty", ">"],
             "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3493,11 +3353,7 @@
         "tags": [],
         "label": "readIndex",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", index: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", index: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/read_index/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3509,9 +3365,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/read_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3524,9 +3378,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/read_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3543,11 +3395,7 @@
         "tags": [],
         "label": "readPrivileges",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", index: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", index: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3559,9 +3407,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3574,9 +3420,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3593,11 +3437,7 @@
         "tags": [],
         "label": "removePolicyFromIndex",
         "description": [],
-        "signature": [
-          "(esClient: ",
-          "ElasticsearchClient",
-          ", index: string) => Promise<unknown>"
-        ],
+        "signature": ["(esClient: ", "ElasticsearchClient", ", index: string) => Promise<unknown>"],
         "path": "packages/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3609,9 +3449,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3624,9 +3462,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3659,9 +3495,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3674,9 +3508,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3689,9 +3521,7 @@
             "tags": [],
             "label": "body",
             "description": [],
-            "signature": [
-              "Record<string, unknown>"
-            ],
+            "signature": ["Record<string, unknown>"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3724,9 +3554,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3739,9 +3567,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3754,9 +3580,7 @@
             "tags": [],
             "label": "body",
             "description": [],
-            "signature": [
-              "Record<string, unknown>"
-            ],
+            "signature": ["Record<string, unknown>"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3789,9 +3613,7 @@
             "tags": [],
             "label": "esClient",
             "description": [],
-            "signature": [
-              "ElasticsearchClient"
-            ],
+            "signature": ["ElasticsearchClient"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3804,9 +3626,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3819,9 +3639,7 @@
             "tags": [],
             "label": "body",
             "description": [],
-            "signature": [
-              "Record<string, unknown>"
-            ],
+            "signature": ["Record<string, unknown>"],
             "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3861,11 +3679,7 @@
             "tags": [],
             "label": "err",
             "description": [],
-            "signature": [
-              "Error & Partial<",
-              "ResponseError",
-              ">"
-            ],
+            "signature": ["Error & Partial<", "ResponseError", ">"],
             "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
             "deprecated": false,
             "trackAdoption": false,

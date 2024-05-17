@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { TestProviders } from '../../../../common/mock';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { RightPanelContext } from '../context';
+import { useExpandSection } from '../hooks/use_expand_section';
+import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { InsightsSection } from './insights_section';
 import {
-  INSIGHTS_HEADER_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   CORRELATIONS_TEST_ID,
   INSIGHTS_CONTENT_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
+  INSIGHTS_HEADER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   PREVALENCE_TEST_ID,
 } from './test_ids';
-import { TestProviders } from '../../../../common/mock';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { InsightsSection } from './insights_section';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 

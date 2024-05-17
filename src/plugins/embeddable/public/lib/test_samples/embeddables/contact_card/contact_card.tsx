@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React from 'react';
-import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 
-import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
-import * as Rx from 'rxjs';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
+import { Subscription } from 'rxjs';
+import * as Rx from 'rxjs';
+import { CONTACT_USER_TRIGGER, ContactCardEmbeddable } from './contact_card_embeddable';
 
 interface Props {
   embeddable: ContactCardEmbeddable;

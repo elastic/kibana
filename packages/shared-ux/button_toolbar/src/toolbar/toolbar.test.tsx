@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
-import { Toolbar } from './toolbar';
 import { ToolbarButton } from '../buttons';
+import { Toolbar } from './toolbar';
 
 describe('<Toolbar />', () => {
   test('is rendered', () => {

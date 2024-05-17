@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { MetricsExplorerSeries } from '../../../../common/http_api';
-import { createStartServicesAccessorMock, createMetricsClientMock } from '../test_helpers';
+import { CoreProviders } from '../../../apps/common_providers';
+import { createMetricsClientMock, createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
 import { PodMetricsTable } from './pod_metrics_table';

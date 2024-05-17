@@ -6,17 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
+import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { MlClient } from '../helpers/get_ml_client';

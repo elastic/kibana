@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields } from './apm_fields';
 import { Serializable } from '../serializable';
 import { generateLongId, generateShortId } from '../utils/generate_id';
+import { ApmFields } from './apm_fields';
 
 export class ApmError extends Serializable<ApmFields> {
   constructor(fields: ApmFields) {

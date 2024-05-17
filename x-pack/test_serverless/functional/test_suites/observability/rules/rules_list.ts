@@ -6,17 +6,17 @@
  */
 
 import { expect } from 'expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
+  createEsQueryRule,
+  createIndexConnector,
+  createLatencyThresholdRule,
   createAnomalyRule as createRule,
   disableRule,
   enableRule,
   runRule,
-  createIndexConnector,
   snoozeRule,
-  createLatencyThresholdRule,
-  createEsQueryRule,
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');

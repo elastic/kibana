@@ -7,12 +7,12 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
+import type { UpdateAliasesState } from '../../state';
 import {
+  type MockedMigratorContext,
   createContextMock,
   createPostInitState,
-  type MockedMigratorContext,
 } from '../../test_helpers';
-import type { UpdateAliasesState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateAliases } from './update_aliases';
 

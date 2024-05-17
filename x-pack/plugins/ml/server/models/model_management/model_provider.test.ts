@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { modelsProvider } from './models_provider';
-import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { type IScopedClusterClient } from '@kbn/core/server';
 import type { MlClient } from '../../lib/ml_client';
+import { modelsProvider } from './models_provider';
 
 describe('modelsProvider', () => {
   const mockClient = {

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
 import {
   Axis,
   BarSeries,
   Chart,
+  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
   Settings,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IndicatorBarchartLegendAction } from './legend_action';
+import React, { VFC } from 'react';
 import { barChartTimeAxisLabelFormatter } from '../../../../utils/dates';
 import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { IndicatorBarchartLegendAction } from './legend_action';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';

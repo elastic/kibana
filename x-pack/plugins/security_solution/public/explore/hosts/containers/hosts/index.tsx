@@ -9,20 +9,20 @@ import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HostsRequestOptionsInput } from '../../../../../common/api/search_strategy';
-import type { inputsModel, State } from '../../../../common/store';
-import { createFilter } from '../../../../common/containers/helpers';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { hostsModel } from '../../store';
-import { hostsSelectors } from '../../store';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import type { HostsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
 import { HostsQueries } from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
+import { createFilter } from '../../../../common/containers/helpers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import type { State, inputsModel } from '../../../../common/store';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import type { hostsModel } from '../../store';
+import { hostsSelectors } from '../../store';
 
-import * as i18n from './translations';
-import type { InspectResponse } from '../../../../types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import type { InspectResponse } from '../../../../types';
+import * as i18n from './translations';
 
 export const ID = 'hostsAllQuery';
 

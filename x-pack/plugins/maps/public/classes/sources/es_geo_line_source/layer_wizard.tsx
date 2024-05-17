@@ -7,9 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CreateSourceEditor } from './create_source_editor';
-import { ESGeoLineSource, geoLineTitle, REQUIRES_GOLD_LICENSE_MSG } from './es_geo_line_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
 import {
   LAYER_WIZARD_CATEGORY,
   STYLE_TYPE,
@@ -17,10 +14,13 @@ import {
   WIZARD_ID,
 } from '../../../../common/constants';
 import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { TracksLayerIcon } from '../../layers/wizards/icons/tracks_layer_icon';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { CreateSourceEditor } from './create_source_editor';
+import { ESGeoLineSource, REQUIRES_GOLD_LICENSE_MSG, geoLineTitle } from './es_geo_line_source';
 
 export const geoLineLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.GEO_LINE,

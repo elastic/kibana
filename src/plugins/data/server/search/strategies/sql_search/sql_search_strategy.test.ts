@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { merge } from 'lodash';
-import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
+import { merge } from 'lodash';
+import { SqlSearchStrategyRequest } from '../../../../common';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import { getMockSearchConfig } from '../../../../config.mock';
+import { createSearchSessionsClientMock } from '../../mocks';
+import { KbnSearchError } from '../../report_search_error';
 import { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
-import { createSearchSessionsClientMock } from '../../mocks';
-import { SqlSearchStrategyRequest } from '../../../../common';
-import { getMockSearchConfig } from '../../../../config.mock';
 
 const mockSqlResponse = {
   body: {

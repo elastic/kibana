@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { flatMap, merge } from 'lodash';
 import type {
-  AggregationsKeyedPercentiles,
-  AggregationsSingleBucketAggregateBase,
-  AggregationsPercentilesAggregateBase,
-  AggregationsSingleMetricAggregateBase,
-  AggregationsTermsAggregateBase,
-  AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
+  AggregationsKeyedPercentiles,
+  AggregationsPercentilesAggregateBase,
+  AggregationsSingleBucketAggregateBase,
+  AggregationsSingleMetricAggregateBase,
+  AggregationsStringTermsBucketKeys,
+  AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { flatMap, merge } from 'lodash';
 import {
-  NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
+  NUM_ALERTING_RULE_TYPES,
 } from '../alerting_usage_collector';
-import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import { replaceDotSymbols } from './replace_dots_with_underscores';
 
 const Millis2Nanos = 1000 * 1000;
 const percentileFieldNameMapping: Record<string, string> = {

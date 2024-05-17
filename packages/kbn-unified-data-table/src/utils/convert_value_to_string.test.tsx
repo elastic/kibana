@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { dataTableContextComplexMock, dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
-import { convertValueToString, convertNameToString } from './convert_value_to_string';
+import { dataTableContextComplexMock, dataTableContextMock } from '../../__mocks__/table_context';
+import { convertNameToString, convertValueToString } from './convert_value_to_string';
 
 describe('convertValueToString', () => {
   it('should convert a keyword value to text', () => {

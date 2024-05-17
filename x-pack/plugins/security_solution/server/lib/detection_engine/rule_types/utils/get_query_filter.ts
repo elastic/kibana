@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter, EsQueryConfig, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase, EsQueryConfig, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
+import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   IndexPatternArray,
   RuleQuery,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 export const getQueryFilter = ({
   query,

@@ -8,9 +8,9 @@
 // This file is a copy of x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts
 // The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
-import { get } from 'lodash';
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export interface IIndexPatternString {

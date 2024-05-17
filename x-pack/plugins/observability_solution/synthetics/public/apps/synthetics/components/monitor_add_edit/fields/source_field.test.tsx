@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { SourceField } from './source_field';
 

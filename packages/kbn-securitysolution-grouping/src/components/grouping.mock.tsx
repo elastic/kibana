@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import React from 'react';
 export const host1Name = 'nice-host';
 export const host2Name = 'cool-host';
 

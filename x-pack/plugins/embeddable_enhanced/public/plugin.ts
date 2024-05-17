@@ -7,7 +7,6 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import {
-  defaultEmbeddableFactoryProvider,
   EmbeddableContext,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -17,18 +16,19 @@ import {
   EmbeddableStart,
   IEmbeddable,
   PANEL_NOTIFICATION_TRIGGER,
+  defaultEmbeddableFactoryProvider,
 } from '@kbn/embeddable-plugin/public';
 import {
-  apiHasUniqueId,
   EmbeddableApiContext,
   StateComparators,
+  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-  DynamicActionsState,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  DynamicActionsState,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
@@ -38,8 +38,8 @@ import {
   type DynamicActionStorageApi,
 } from './embeddables/dynamic_action_storage';
 import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
-import { EnhancedEmbeddable } from './types';
 import { getDynamicActionsState } from './get_dynamic_actions_state';
+import { EnhancedEmbeddable } from './types';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -105,7 +105,7 @@ export class EmbeddableEnhancedPlugin
         I extends EmbeddableInput = EmbeddableInput,
         O extends EmbeddableOutput = EmbeddableOutput,
         E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-        T extends FinderAttributes = {}
+        T extends FinderAttributes = {},
       >(
         def: EmbeddableFactoryDefinition<I, O, E, T>
       ): EmbeddableFactory<I, O, E, T> => {

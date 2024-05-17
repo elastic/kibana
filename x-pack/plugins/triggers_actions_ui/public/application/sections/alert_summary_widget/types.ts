@@ -7,8 +7,8 @@
 
 import type { BrushEndListener, PartialTheme, SettingsProps, Theme } from '@elastic/charts';
 import { estypes } from '@elastic/elasticsearch';
-import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
 
 export interface Alert {
   key: number;

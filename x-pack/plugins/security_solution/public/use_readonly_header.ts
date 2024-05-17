@@ -7,9 +7,9 @@
 
 import { useEffect } from 'react';
 
-import * as i18n from './translations';
 import { useKibana } from './common/lib/kibana';
 import { useAlertsPrivileges } from './detections/containers/detection_engine/alerts/use_alerts_privileges';
+import * as i18n from './translations';
 
 /**
  * This component places a read-only icon badge in the header

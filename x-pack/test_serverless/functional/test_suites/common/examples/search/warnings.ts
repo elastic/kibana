@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import assert from 'assert';
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import assert from 'assert';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

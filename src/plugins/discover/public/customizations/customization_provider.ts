@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useContext, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
+import { createContext, useContext, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { CustomizationCallback } from './types';
 import {
-  createCustomizationService,
   DiscoverCustomizationId,
   DiscoverCustomizationService,
+  createCustomizationService,
 } from './customization_service';
+import type { CustomizationCallback } from './types';
 
 const customizationContext = createContext(createCustomizationService());
 

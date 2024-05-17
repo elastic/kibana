@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ChangeEvent } from 'react';
+import type { ChangeEvent, FC } from 'react';
 import React, { useState } from 'react';
 
 import {
@@ -14,18 +14,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiToolTip,
-  EuiTextArea,
   EuiSpacer,
+  EuiTextArea,
+  EuiToolTip,
 } from '@elastic/eui';
 
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MlUrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
-  isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
+  isDataFrameAnalyticsConfigs,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
 
@@ -34,9 +34,9 @@ import { useToastNotificationService } from '../../../services/toast_notificatio
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
+import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.

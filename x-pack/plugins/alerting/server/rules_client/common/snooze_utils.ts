@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import {
   Rule,
   RuleDomain,
-  RuleParams,
   RuleSnoozeSchedule as RuleDomainSnoozeSchedule,
+  RuleParams,
 } from '../../application/rule/types';
 import { RuleAttributes } from '../../data/rule/types';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';

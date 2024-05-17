@@ -11,10 +11,10 @@ import {
 } from '../../../common/schemas/request/import_exceptions_schema.mock';
 import { createExtensionPointStorageMock } from '../extension_points/extension_point_storage.mock';
 
-import { importExceptionLists } from './utils/import/import_exception_lists';
-import { importExceptionListItems } from './utils/import/import_exception_list_items';
-import { getExceptionListSavedObjectClientMock, toReadable } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
+import { getExceptionListSavedObjectClientMock, toReadable } from './exception_list_client.mock';
+import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { importExceptionLists } from './utils/import/import_exception_lists';
 
 jest.mock('./utils/import/import_exception_lists');
 jest.mock('./utils/import/import_exception_list_items');

@@ -8,24 +8,24 @@
 import React, { FunctionComponent } from 'react';
 
 import {
+  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiAccordion,
-  EuiSpacer,
-  EuiTimelineItem,
-  EuiSplitPanel,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
+  EuiTimelineItem,
 } from '@elastic/eui';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { get } from 'lodash';
 
 import { Phase as PhaseType } from '../../../../../../../common/types';
 import { useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 import { FormInternal } from '../../../types';
-import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
+import { PhaseIcon } from '../../phase_icon';
 
 import './phase.scss';
 import { PhaseTitle } from './phase_title';

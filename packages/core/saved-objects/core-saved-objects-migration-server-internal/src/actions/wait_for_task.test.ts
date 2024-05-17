@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
 import { errors as EsErrors, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import * as Either from 'fp-ts/lib/Either';
 import { waitForTask } from './wait_for_task';
 
 describe('waitForTask', () => {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { spawn, spawnSync, ChildProcessWithoutNullStreams } from 'child_process';
-import type { Readable } from 'stream';
+import { ChildProcessWithoutNullStreams, spawn, spawnSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { filter, firstValueFrom, from, concatMap } from 'rxjs';
+import type { Readable } from 'stream';
+import { concatMap, filter, firstValueFrom, from } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigDirectory } from '@kbn/utils';

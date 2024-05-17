@@ -7,8 +7,8 @@
  */
 
 import {
-  PluginServiceProviders,
   PluginServiceProvider,
+  PluginServiceProviders,
   PluginServiceRegistry,
 } from '@kbn/presentation-util-plugin/public';
 
@@ -17,9 +17,12 @@ import { DashboardServices } from './types';
 import { analyticsServiceFactory } from './analytics/analytics.stub';
 import { applicationServiceFactory } from './application/application.stub';
 import { chromeServiceFactory } from './chrome/chrome.stub';
+import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
 import { coreContextServiceFactory } from './core_context/core_context.stub';
-import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
+import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup.stub';
+import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
+import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links.stub';
@@ -28,24 +31,21 @@ import { httpServiceFactory } from './http/http.stub';
 import { i18nServiceFactory } from './i18n/i18n.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
 import { navigationServiceFactory } from './navigation/navigation.stub';
+import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 import { notificationsServiceFactory } from './notifications/notifications.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
+import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging.stub';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode.stub';
+import { serverlessServiceFactory } from './serverless/serverless_service.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
 import { shareServiceFactory } from './share/share.stub';
-import { usageCollectionServiceFactory } from './usage_collection/usage_collection.stub';
 import { spacesServiceFactory } from './spaces/spaces.stub';
-import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
-import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
-import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
-import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
-import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
-import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
-import { serverlessServiceFactory } from './serverless/serverless_service.stub';
-import { userProfileServiceFactory } from './user_profile/user_profile_service.stub';
-import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
+import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
+import { usageCollectionServiceFactory } from './usage_collection/usage_collection.stub';
+import { userProfileServiceFactory } from './user_profile/user_profile_service.stub';
+import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),

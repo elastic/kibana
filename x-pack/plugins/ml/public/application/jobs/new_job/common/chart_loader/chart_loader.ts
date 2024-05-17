@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Field, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { AggFieldPair, Field, SplitField } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { isEqual } from 'lodash';
+import memoizeOne from 'memoize-one';
 import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
-import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
+import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 
 type DetectorIndex = number;
 export interface LineChartPoint {

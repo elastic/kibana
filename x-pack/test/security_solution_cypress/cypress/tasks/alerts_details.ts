@@ -9,13 +9,13 @@ import { CLOSE_ALERT_BTN, MARK_ALERT_ACKNOWLEDGED_BTN, OPEN_ALERT_BTN } from '..
 import {
   ALERT_FLYOUT,
   ENRICHMENT_COUNT_NOTIFICATION,
-  JSON_VIEW_TAB,
-  TABLE_TAB,
-  FILTER_INPUT,
-  OVERVIEW_STATUS,
   EVENT_DETAILS_ALERT_STATUS_POPOVER,
+  FILTER_INPUT,
+  JSON_VIEW_TAB,
+  OVERVIEW_STATUS,
+  TABLE_TAB,
 } from '../screens/alerts_details';
-import { TIMELINE_TITLE, QUERY_TAB_BUTTON } from '../screens/timeline';
+import { QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../screens/timeline';
 
 export const filterBy = (value: string) => {
   cy.get(FILTER_INPUT).type(value);

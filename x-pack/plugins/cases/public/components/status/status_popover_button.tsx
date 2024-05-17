@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
+import React, { memo } from 'react';
 
 import type { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { statuses } from './config';

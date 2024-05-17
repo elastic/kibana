@@ -7,14 +7,14 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
 import $ from 'jquery';
+import _ from 'lodash';
 
-import { AxisTitle } from './axis_title';
-import { AxisConfig } from './axis_config';
-import { VisConfig } from '../vis_config';
-import { Data } from '../data';
 import { getMockUiState } from '../../../fixtures/mocks';
+import { Data } from '../data';
+import { VisConfig } from '../vis_config';
+import { AxisConfig } from './axis_config';
+import { AxisTitle } from './axis_title';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
   let el;

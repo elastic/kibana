@@ -8,9 +8,9 @@ import { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { last } from 'lodash';
 import { MessageRole } from '../../../../../common';
-import { createBedrockClaudeAdapter } from './bedrock_claude_adapter';
-import { LlmApiAdapterFactory } from '../types';
 import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/constants';
+import { LlmApiAdapterFactory } from '../types';
+import { createBedrockClaudeAdapter } from './bedrock_claude_adapter';
 
 describe('createBedrockClaudeAdapter', () => {
   describe('getSubAction', () => {

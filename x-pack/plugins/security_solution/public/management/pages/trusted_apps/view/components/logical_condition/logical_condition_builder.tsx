@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiText, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { ConditionGroupProps } from '../condition_group';
 import { ConditionGroup } from '../condition_group';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(

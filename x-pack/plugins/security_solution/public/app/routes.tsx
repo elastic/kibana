@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 
 import { APP_ID } from '../../common/constants';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get, getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/search-types';
+import { get, getOr } from 'lodash/fp';
 import type {
   NetworkUsersBucketsItem,
   NetworkUsersEdges,

@@ -10,12 +10,12 @@ import { JsonObject } from '@kbn/utility-types';
 
 import {
   Direction,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
+  TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getFieldsToRequest, getFilterValue } from '../../../../utils';
-import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 const TO = '3000-01-01T00:00:00.000Z';
 const FROM = '2000-01-01T00:00:00.000Z';

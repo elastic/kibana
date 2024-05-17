@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiImage } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AuthenticatedUser } from '@kbn/security-plugin/public';

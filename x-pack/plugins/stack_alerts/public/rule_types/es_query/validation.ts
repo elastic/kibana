@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  ValidationResult,
-  builtInComparators,
-  builtInAggregationTypes,
-  builtInGroupByTypes,
   COMPARATORS,
+  ValidationResult,
+  builtInAggregationTypes,
+  builtInComparators,
+  builtInGroupByTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { defaultsDeep, isNil } from 'lodash';
 import {
-  MAX_SELECTABLE_SOURCE_FIELDS,
-  MAX_SELECTABLE_GROUP_BY_TERMS,
-  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+  MAX_SELECTABLE_SOURCE_FIELDS,
 } from '../../../common/constants';
-import { EsQueryRuleParams, SearchType } from './types';
-import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
   ONLY_ESQL_QUERY_EXPRESSION_ERRORS,
   ONLY_ES_QUERY_EXPRESSION_ERRORS,
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
+import { EsQueryRuleParams, SearchType } from './types';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 
 const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: boolean) => {
   const {

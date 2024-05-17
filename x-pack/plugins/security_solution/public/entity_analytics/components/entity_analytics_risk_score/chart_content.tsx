@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import type { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import type { SeverityCount } from '../severity/types';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
-import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 import { getRiskScoreDonutAttributes } from '../../lens_attributes/risk_score_donut';
+import { RiskScoreDonutChart } from '../risk_score_donut_chart';
+import type { SeverityCount } from '../severity/types';
 
 const CHART_HEIGHT = 180;
 const ChartContentComponent = ({

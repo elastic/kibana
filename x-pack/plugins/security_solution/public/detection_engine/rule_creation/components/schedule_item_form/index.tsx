@@ -6,12 +6,12 @@
  */
 
 import {
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldNumber,
+  EuiFormControlLayout,
   EuiFormRow,
   EuiSelect,
-  EuiFormControlLayout,
   transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';

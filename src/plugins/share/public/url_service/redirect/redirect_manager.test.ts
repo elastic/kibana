@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { RedirectManager } from './redirect_manager';
-import { MockUrlService } from '../../mocks';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { MockUrlService } from '../../mocks';
+import { RedirectManager } from './redirect_manager';
 
 const setup = () => {
   const url = new MockUrlService();

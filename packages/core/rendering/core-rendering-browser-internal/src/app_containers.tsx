@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
-import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+import classNames from 'classnames';
+import React, { FC, PropsWithChildren } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 
 export const AppWrapper: FC<
   PropsWithChildren<{

@@ -8,8 +8,8 @@
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 import type { PackagePolicy } from '../../../../common';
-import { relativeDownloadUrlFromArtifact } from '../../../services/artifacts/mappings';
 import type { ArtifactElasticsearchProperties } from '../../../services';
+import { relativeDownloadUrlFromArtifact } from '../../../services/artifacts/mappings';
 
 type ArtifactManifestList = Record<
   string,

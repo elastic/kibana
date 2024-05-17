@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { UpdateGroupsRequest } from '../../../common/types/job_service';
-import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { Group } from '../../../common/types/groups';
+import type { UpdateGroupsRequest } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
+import { CalendarManager } from '../calendar';
 
 export interface Results {
   [id: string]: {

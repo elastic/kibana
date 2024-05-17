@@ -8,9 +8,9 @@
 import React from 'react';
 import deepEqual from 'react-fast-compare';
 import { useSelector } from 'react-redux';
+import { State } from '../../../../types';
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings.component';
-import { State } from '../../../../types';
 
 interface Props {
   selectedElementId: string | null;

@@ -6,14 +6,14 @@
  */
 
 import {
-  AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
+  AllDatasetsLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
 import { LocatorClient, LocatorDefinition } from '@kbn/share-plugin/common/url_service';
 
-import { NodeLogsLocatorParams } from './types';
+import { getNodeQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
 import { INFRA_NODE_LOGS_LOCATOR_ID } from './infra';
-import { getNodeQuery, getTimeRangeStartFromTime, getTimeRangeEndFromTime } from './helpers';
+import { NodeLogsLocatorParams } from './types';
 
 export const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 

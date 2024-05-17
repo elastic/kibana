@@ -6,24 +6,24 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import { performUserActions } from '../../tasks/perform_user_actions';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
-import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts, removeAllArtifactsPromise } from '../../tasks/artifacts';
-import { login } from '../../tasks/login';
-import { request, loadPage } from '../../tasks/common';
+import { loadPage, request } from '../../tasks/common';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import {
   createAgentPolicyTask,
   getEndpointIntegrationVersion,
   yieldEndpointPolicyRevision,
 } from '../../tasks/fleet';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
-import { createEndpointHost } from '../../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import { login } from '../../tasks/login';
+import { performUserActions } from '../../tasks/perform_user_actions';
 
 const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
   request<MetadataListResponse>({

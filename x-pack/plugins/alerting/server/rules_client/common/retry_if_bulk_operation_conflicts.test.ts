@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { KueryNode } from '@kbn/es-query';
 
 import { retryIfBulkOperationConflicts } from './retry_if_bulk_operation_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';

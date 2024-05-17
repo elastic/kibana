@@ -9,8 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React, { FC, PropsWithChildren } from 'react';
 import * as reactRedux from 'react-redux';
-import { useOverviewFilterCheck } from './use_overview_filter_check';
 import { MockRouter } from '../lib/helper/rtl_helpers';
+import { useOverviewFilterCheck } from './use_overview_filter_check';
 
 function getWrapper(customSearch?: string): FC<PropsWithChildren<unknown>> {
   return ({ children }) => {

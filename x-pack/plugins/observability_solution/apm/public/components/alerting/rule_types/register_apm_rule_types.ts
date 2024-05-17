@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { lazy } from 'react';
-import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
+import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
+import { lazy } from 'react';
 import {
   anomalyMessage,
   errorCountMessage,
   transactionDurationMessage,
   transactionErrorRateMessage,
 } from '../../../../common/rules/default_action_message';
+import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
 import { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size

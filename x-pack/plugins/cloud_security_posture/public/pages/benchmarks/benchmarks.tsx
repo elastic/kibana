@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
@@ -17,28 +16,29 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
-import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
-import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { BenchmarksTable } from './benchmarks_table';
-import {
-  useCspBenchmarkIntegrationsV2,
-  UseCspBenchmarkIntegrationsProps,
-} from './use_csp_benchmark_integrations';
 import { extractErrorMessage, getBenchmarkCisName } from '../../../common/utils/helpers';
-import * as TEST_SUBJ from './test_subjects';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import {
   LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
   NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
 } from '../../common/constants';
-import { usePageSize } from '../../common/hooks/use_page_size';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { usePageSize } from '../../common/hooks/use_page_size';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { NoFindingsStates } from '../../components/no_findings_states';
+import { BenchmarksTable } from './benchmarks_table';
+import * as TEST_SUBJ from './test_subjects';
+import {
+  UseCspBenchmarkIntegrationsProps,
+  useCspBenchmarkIntegrationsV2,
+} from './use_csp_benchmark_integrations';
 
 const SEARCH_DEBOUNCE_MS = 300;
 

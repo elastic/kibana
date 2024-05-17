@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { getSuggestions } from './get_suggestions';
 
 const createTag = (parts: Partial<Tag> = {}): Tag => ({

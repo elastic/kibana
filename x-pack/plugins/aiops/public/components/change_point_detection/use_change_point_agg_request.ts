@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { i18n } from '@kbn/i18n';
-import { isDefined } from '@kbn/ml-is-defined';
 import type {
   MappingRuntimeFields,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useReload } from '../../hooks/use_reload';
+import { i18n } from '@kbn/i18n';
+import { isDefined } from '@kbn/ml-is-defined';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useCancellableSearch } from '../../hooks/use_cancellable_search';
+import { useDataSource } from '../../hooks/use_data_source';
+import { useReload } from '../../hooks/use_reload';
 import type {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
   FieldConfig,
 } from './change_point_detection_context';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
-import { useDataSource } from '../../hooks/use_data_source';
-import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import {
-  type ChangePointType,
+  CHANGE_POINT_DETECTION_EVENT,
   COMPOSITE_AGG_SIZE,
+  type ChangePointType,
   EXCLUDED_CHANGE_POINT_TYPES,
   SPLIT_FIELD_CARDINALITY_LIMIT,
-  CHANGE_POINT_DETECTION_EVENT,
 } from './constants';
 
 interface RequestOptions {

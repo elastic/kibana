@@ -7,11 +7,11 @@
 
 import { mockHttpRequest, pageHelpers } from './helpers';
 
-import { act } from 'react-dom/test-utils';
-import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
-import { getRouter } from '../../crud_app/services/routing';
-import { setHttp } from '../../crud_app/services';
 import { coreMock } from '@kbn/core/public/mocks';
+import { act } from 'react-dom/test-utils';
+import { setHttp } from '../../crud_app/services';
+import { getRouter } from '../../crud_app/services/routing';
+import { JOB_CLONE_INDEX_PATTERN_CHECK, JOB_TO_CLONE } from './helpers/constants';
 
 jest.mock('../../kibana_services', () => {
   const services = jest.requireActual('../../kibana_services');

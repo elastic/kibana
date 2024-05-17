@@ -1,3 +1,4 @@
+import { Metric } from '@kbn/monitoring-collection-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { Metric } from '@kbn/monitoring-collection-plugin/server';
-import { registerNodeCollector } from './register_node_collector';
-import { NodeActionsMetric } from './types';
 import { IN_MEMORY_METRICS } from '.';
 import { inMemoryMetricsMock } from './in_memory_metrics.mock';
+import { registerNodeCollector } from './register_node_collector';
+import { NodeActionsMetric } from './types';
 
 describe('registerNodeCollector()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();

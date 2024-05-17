@@ -18,18 +18,18 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/code-editor';
 
-import { XJson } from '../../../../shared_imports';
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
-import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
-import { onWatchSave } from '../../watch_edit_actions';
-import { WatchContext } from '../../watch_context';
-import { goToWatchList } from '../../../../lib/navigation';
-import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
+import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
+import { goToWatchList } from '../../../../lib/navigation';
+import { XJson } from '../../../../shared_imports';
+import { WatchContext } from '../../watch_context';
+import { onWatchSave } from '../../watch_edit_actions';
+import { RequestFlyout } from '../request_flyout';
 
 const { useXJsonMode } = XJson;
 

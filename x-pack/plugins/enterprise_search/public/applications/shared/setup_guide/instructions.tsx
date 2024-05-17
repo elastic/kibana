@@ -8,14 +8,14 @@
 import React from 'react';
 
 import {
-  EuiPageSection,
-  EuiText,
-  EuiSteps,
+  EuiAccordion,
   EuiCode,
   EuiCodeBlock,
-  EuiAccordion,
   EuiLink,
+  EuiPageSection,
   EuiSpacer,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

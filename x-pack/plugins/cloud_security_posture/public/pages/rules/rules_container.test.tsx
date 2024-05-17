@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { RulesContainer } from './rules_container';
-import { render, screen } from '@testing-library/react';
-import { QueryClient } from '@tanstack/react-query';
-import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
-import * as TEST_SUBJECTS from './test_subjects';
-import { Chance } from 'chance';
-import { TestProvider } from '../../test/test_provider';
-import type { CspBenchmarkRule } from '../../../common/types/latest';
-import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
+import { QueryClient } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+import { Chance } from 'chance';
+import React, { FC, PropsWithChildren } from 'react';
+import { useParams } from 'react-router-dom';
+import type { CspBenchmarkRule } from '../../../common/types/latest';
+import { TestProvider } from '../../test/test_provider';
+import { RulesContainer } from './rules_container';
+import * as TEST_SUBJECTS from './test_subjects';
+import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 
 const chance = new Chance();
 
@@ -78,7 +78,7 @@ const getRuleMock = (id = chance.guid()): CspBenchmarkRule =>
       tags: [chance.word(), chance.word()],
       version: chance.sentence(),
     },
-  } as CspBenchmarkRule);
+  }) as CspBenchmarkRule;
 
 const params = {
   paginations: {

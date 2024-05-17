@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { Subject } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  createManagedConfiguration,
-  ADJUST_THROUGHPUT_INTERVAL,
-} from './create_managed_configuration';
+import { Subject } from 'rxjs';
+import sinon from 'sinon';
 import { mockLogger } from '../test_utils';
+import {
+  ADJUST_THROUGHPUT_INTERVAL,
+  createManagedConfiguration,
+} from './create_managed_configuration';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;

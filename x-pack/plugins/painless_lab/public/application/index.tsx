@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { ChromeStart, CoreSetup, CoreStart, HttpSetup } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreSetup, CoreStart, HttpSetup, ChromeStart } from '@kbn/core/public';
 
-import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';
+import { KibanaRenderContextProvider, createKibanaReactContext } from '../shared_imports';
 
 import { Links } from '../links';
-import { AppContextProvider } from './context';
-import { Main } from './components/main';
 import { PainlessLabStartServices } from '../types';
+import { Main } from './components/main';
+import { AppContextProvider } from './context';
 
 interface AppDependencies {
   http: HttpSetup;

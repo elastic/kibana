@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import React from 'react';
 import {
+  CUSTOM_PALETTE,
+  CustomPaletteParams,
+  DEFAULT_COLOR_STEPS,
+  DEFAULT_PALETTE_NAME,
+  FIXED_PROGRESSION,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams,
-  CUSTOM_PALETTE,
-  DEFAULT_COLOR_STEPS,
-  FIXED_PROGRESSION,
-  DEFAULT_PALETTE_NAME,
 } from '../../palettes';
 
 function getCustomPaletteConfig(

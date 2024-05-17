@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createBenchmarkScoreIndex } from './create_indices';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CSP_INGEST_TIMESTAMP_PIPELINE,
 } from '../../common/constants';
-import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
+import { createBenchmarkScoreIndex } from './create_indices';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 

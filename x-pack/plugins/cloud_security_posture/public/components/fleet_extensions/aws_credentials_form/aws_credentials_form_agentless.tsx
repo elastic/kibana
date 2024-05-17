@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
+import { getAwsCredentialsType, getPosturePolicy } from '../utils';
+import {
+  AWSSetupInfoContent,
+  AwsCredentialTypeSelector,
+  AwsFormProps,
+  ReadDocumentation,
+} from './aws_credentials_form';
+import { AwsInputVarFields } from './aws_input_var_fields';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import { getAwsCredentialsType, getPosturePolicy } from '../utils';
-import { AwsInputVarFields } from './aws_input_var_fields';
-import {
-  AwsFormProps,
-  ReadDocumentation,
-  AWSSetupInfoContent,
-  AwsCredentialTypeSelector,
-} from './aws_credentials_form';
 
 export const AwsCredentialsFormAgentless = ({
   input,

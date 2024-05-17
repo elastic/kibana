@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { useGetCase } from './use_get_case';
-import * as api from './api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
+import * as api from './api';
+import { useGetCase } from './use_get_case';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

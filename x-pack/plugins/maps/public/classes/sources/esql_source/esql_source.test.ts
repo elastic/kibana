@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESQLSource } from './esql_source';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { ESQLSource } from './esql_source';
 
 describe('getSupportedShapeTypes', () => {
   test('should return point for geo_point column', async () => {

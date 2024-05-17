@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 import type { NewsfeedApi } from '../lib/api';
-import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
+import { NewsfeedFlyout } from './flyout_list';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;

@@ -7,22 +7,22 @@
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { getCaseMetrics } from './get_case_metrics';
+import { CaseStatuses } from '@kbn/cases-components';
+import type { Case } from '../../../common';
 import { CaseMetricsFeature } from '../../../common/types/api';
-import type { CasesClientMock } from '../mocks';
-import { createCasesClientMock } from '../mocks';
-import type { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
   createUserActionServiceMock,
 } from '../../services/mocks';
+import type { CasesClientMock } from '../mocks';
+import { createCasesClientMock } from '../mocks';
+import type { CasesClientArgs } from '../types';
+import { getCaseMetrics } from './get_case_metrics';
 import { mockAlertsService } from './test_utils/alerts';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { CaseStatuses } from '@kbn/cases-components';
-import type { Case } from '../../../common';
 
 describe('getCaseMetrics', () => {
   const inProgressStatusChangeTimestamp = new Date('2021-11-23T20:00:43Z');

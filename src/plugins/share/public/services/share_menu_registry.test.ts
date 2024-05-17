@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ShareContext, ShareMenuItem } from '../types';
 import { ShareMenuRegistry } from './share_menu_registry';
-import { ShareMenuItem, ShareContext } from '../types';
 
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {

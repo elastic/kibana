@@ -8,8 +8,8 @@
 import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
-import { fetchUnallowedValues, getUnallowedValues } from './helpers';
 import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
+import { fetchUnallowedValues, getUnallowedValues } from './helpers';
 
 export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;

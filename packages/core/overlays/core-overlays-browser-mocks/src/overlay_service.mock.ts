@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { OverlayService } from '@kbn/core-overlays-browser-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { OverlayService } from '@kbn/core-overlays-browser-internal';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayBannersServiceMock } from './banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout_service.mock';
 import { overlayModalServiceMock } from './modal_service.mock';

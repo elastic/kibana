@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { assign, get, includes, isUndefined, pick } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { visWithSplits } from '../../vis_with_splits';
-import { getMetricsField } from '../../lib/get_metrics_field';
-import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { get, isUndefined, assign, includes, pick } from 'lodash';
-import { Metric } from '../../../visualizations/views/metric';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getLastValue } from '../../../../../common/last_value_utils';
-import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { isBackgroundInverted } from '../../../lib/set_is_reversed';
+import { Metric } from '../../../visualizations/views/metric';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { getMetricsField } from '../../lib/get_metrics_field';
+import { createTickFormatter } from '../../lib/tick_formatter';
+import { visWithSplits } from '../../vis_with_splits';
 
 function getColors(props) {
   const { model, visData } = props;

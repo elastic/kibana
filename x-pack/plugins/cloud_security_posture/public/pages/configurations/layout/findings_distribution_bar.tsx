@@ -1,3 +1,15 @@
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiSpacer,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,22 +17,10 @@
  * 2.0.
  */
 import React from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiHealth,
-  EuiBadge,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiTextColor,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
-import { statusColors } from '../../../common/constants';
 import type { Evaluation } from '../../../../common/types_old';
+import { statusColors } from '../../../common/constants';
+import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 
 interface Props {
   passed: number;

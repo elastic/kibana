@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { identity } from 'lodash';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { identity } from 'lodash';
 
-import { AggConfig, IAggConfig } from './agg_config';
-import { AggConfigs, CreateAggConfigParams } from './agg_configs';
-import { AggType } from './agg_type';
-import { AggTypesRegistryStart } from './agg_types_registry';
-import { mockAggTypesRegistry } from './test_helpers';
-import { MetricAggType } from './metrics/metric_agg_type';
 import type {
   DataView,
   DataViewField,
   IIndexPatternFieldList,
 } from '@kbn/data-views-plugin/common';
+import { AggConfig, IAggConfig } from './agg_config';
+import { AggConfigs, CreateAggConfigParams } from './agg_configs';
+import { AggType } from './agg_type';
+import { AggTypesRegistryStart } from './agg_types_registry';
+import { MetricAggType } from './metrics/metric_agg_type';
+import { mockAggTypesRegistry } from './test_helpers';
 
 describe('AggConfig', () => {
   let indexPattern: DataView;

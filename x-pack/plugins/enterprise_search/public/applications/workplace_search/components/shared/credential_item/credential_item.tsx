@@ -12,11 +12,11 @@ import { upperFirst } from 'lodash';
 import {
   EuiButtonIcon,
   EuiCopy,
+  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiFieldPassword,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

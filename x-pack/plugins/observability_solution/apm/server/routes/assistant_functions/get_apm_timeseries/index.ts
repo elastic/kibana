@@ -6,9 +6,9 @@
  */
 
 import datemath from '@elastic/datemath';
+import type { ChangePointType } from '@kbn/es-types/src';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
-import type { ChangePointType } from '@kbn/es-types/src';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';

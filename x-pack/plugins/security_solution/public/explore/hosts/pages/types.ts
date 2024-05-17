@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { hostsModel } from '../store';
-import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HOSTS_PATH } from '../../../../common/constants';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { hostsModel } from '../store';
 
 export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
 

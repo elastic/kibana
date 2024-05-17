@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiHorizontalRule, EuiProgress, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import type { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
-import { GuideStep } from '../guide_panel_step';
+import React from 'react';
 import type { PluginState } from '../../../common';
 import { getGuidePanelStyles } from '../guide_panel.styles';
+import { GuideStep } from '../guide_panel_step';
 
 export const GuideProgress = ({
   guideConfig,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
 
-import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
-import { License } from './services';
-import { ApiRoutes } from './routes';
+import { APP_REQUIRED_CLUSTER_PRIVILEGES, PLUGIN } from '../common';
+import { SnapshotRestoreConfig } from './config';
 import { wrapEsError } from './lib';
+import { ApiRoutes } from './routes';
+import { License } from './services';
 import { handleEsError } from './shared_imports';
 import type { Dependencies } from './types';
-import { SnapshotRestoreConfig } from './config';
 
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
   EuiCallOut,
-  EuiPageTemplate,
-  EuiPageSection,
   EuiPageBody,
+  EuiPageSection,
+  EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { extractQueryParams, SectionLoading } from '../../../shared_imports';
+import { SectionLoading, extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
-import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
+import { RemoteClusterForm, RemoteClusterPageTitle } from '../components';
 
 export class RemoteClusterEdit extends Component {
   static propTypes = {

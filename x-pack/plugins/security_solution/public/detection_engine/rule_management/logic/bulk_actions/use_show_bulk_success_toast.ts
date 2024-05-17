@@ -7,12 +7,12 @@
 
 import { useCallback } from 'react';
 import type { BulkActionSummary } from '..';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type {
   BulkActionEditPayload,
   BulkActionType,
 } from '../../../../../common/api/detection_engine/rule_management';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { explainBulkEditSuccess, explainBulkSuccess, summarizeBulkSuccess } from './translations';
 
 interface ShowBulkSuccessToastProps {

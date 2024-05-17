@@ -6,11 +6,11 @@
  */
 
 import { type SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type {
   InfraCustomDashboard,
   InfraCustomDashboardAssetType,
 } from '../../../../common/custom_dashboards';
+import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 export async function findCustomDashboard(
   assetType: InfraCustomDashboardAssetType,

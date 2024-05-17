@@ -7,17 +7,17 @@
  */
 
 import { EuiConfirmModal, EuiFlyout } from '@elastic/eui';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Subject } from 'rxjs';
-import React from 'react';
+import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import {
   MountPoint,
   OverlayFlyoutOpenOptions,
   OverlayModalConfirmOptions,
   OverlayRef,
 } from '@kbn/core/public';
-import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { Subject } from 'rxjs';
 import { ControlsOverlaysService } from './types';
 
 type OverlaysServiceFactory = PluginServiceFactory<ControlsOverlaysService>;

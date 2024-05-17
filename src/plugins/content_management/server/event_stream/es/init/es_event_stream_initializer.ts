@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import pRetry from 'p-retry';
 import { errors } from '@elastic/elasticsearch';
-import type { EsClient } from '../types';
-import type { EsEventStreamNames } from '../es_event_stream_names';
+import pRetry from 'p-retry';
 import type { EventStreamLogger } from '../../types';
+import type { EsEventStreamNames } from '../es_event_stream_names';
+import type { EsClient } from '../types';
 import { newIndexTemplateRequest } from './index_template';
 
 export interface EsEventStreamInitializerDependencies {

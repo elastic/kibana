@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { extractReferences } from '../saved_visualization_references';
 import { visualizationsClient } from '../../content_management';
 import { TypesStart } from '../../vis_types';
+import { extractReferences } from '../saved_visualization_references';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;

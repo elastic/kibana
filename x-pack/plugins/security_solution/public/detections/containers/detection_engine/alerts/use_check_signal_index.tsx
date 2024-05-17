@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
+import { useEffect, useState } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { checkSignalIndex } from './api';

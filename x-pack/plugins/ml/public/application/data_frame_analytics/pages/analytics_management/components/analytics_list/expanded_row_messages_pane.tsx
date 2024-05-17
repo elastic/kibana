@@ -7,14 +7,14 @@
 
 import './expanded_row_messages_pane.scss';
 
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
-import { useRefreshAnalyticsList } from '../../../../common';
-import { JobMessages } from '../../../../../components/job_messages';
 import type { JobMessage } from '../../../../../../../common/types/audit_message';
+import { JobMessages } from '../../../../../components/job_messages';
+import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+import { useRefreshAnalyticsList } from '../../../../common';
 
 interface Props {
   analyticsId: string;

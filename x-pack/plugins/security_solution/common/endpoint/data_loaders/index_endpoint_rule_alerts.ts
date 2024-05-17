@@ -6,8 +6,6 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   IndexName,
   IndicesAlias,
@@ -15,9 +13,11 @@ import type {
   MappingTypeMapping,
   Name,
 } from '@elastic/elasticsearch/lib/api/types';
-import { createToolingLogger, wrapErrorIfNeeded } from './utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
+import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 
 export interface IndexEndpointRuleAlertsOptions {
   esClient: Client;

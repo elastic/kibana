@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fleetProxiesRoutesService } from '../../../common/services';
 import { API_VERSIONS } from '../../../common/constants';
+import { fleetProxiesRoutesService } from '../../../common/services';
 
 import type {
   GetFleetProxiesResponse,

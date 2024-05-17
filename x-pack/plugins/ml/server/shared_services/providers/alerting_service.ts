@@ -6,10 +6,10 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { GetGuards } from '../shared_services';
 import type { MlAlertingService } from '../../lib/alerts/alerting_service';
 import { alertingServiceProvider } from '../../lib/alerts/alerting_service';
 import { datafeedsProvider } from '../../models/job_service/datafeeds';
+import type { GetGuards } from '../shared_services';
 
 export function getAlertingServiceProvider(getGuards: GetGuards) {
   return {

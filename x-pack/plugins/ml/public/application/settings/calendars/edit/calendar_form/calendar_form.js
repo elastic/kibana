@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
+import React, { Fragment } from 'react';
 
 import {
   EuiButton,
@@ -17,8 +17,8 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 
 import { EventsTable } from '../events_table';
@@ -26,8 +26,8 @@ import { EventsTable } from '../events_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 function EditHeader({ calendarId, description }) {
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRumAgentName, isMobileAgentName } from './agent_name';
+import { isMobileAgentName, isRumAgentName } from './agent_name';
 
 const TRANSACTION_PAGE_LOAD = 'page-load';
 const TRANSACTION_MOBILE = 'mobile';

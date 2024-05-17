@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { TELEMETRY_METRIC_BUTTON_CLICK } from '../../../common/constants';
 import { SetupModeExitButton } from './exit_button';
 

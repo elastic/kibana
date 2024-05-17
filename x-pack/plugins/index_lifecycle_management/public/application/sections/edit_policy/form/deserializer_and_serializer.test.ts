@@ -9,9 +9,9 @@ import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
 import { defaultRolloverAction } from '../../../constants';
+import { FormInternal } from '../types';
 import { createDeserializer } from './deserializer';
 import { createSerializer } from './serializer';
-import { FormInternal } from '../types';
 
 const isObject = (v: unknown): v is { [key: string]: any } =>
   Object.prototype.toString.call(v) === '[object Object]';

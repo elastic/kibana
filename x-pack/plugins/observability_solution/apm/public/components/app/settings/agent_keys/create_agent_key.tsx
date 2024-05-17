@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
   EuiForm,
+  EuiFormFieldset,
   EuiFormRow,
   EuiSpacer,
-  EuiFieldText,
   EuiText,
-  EuiFormFieldset,
-  EuiCheckbox,
+  EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import React, { useState } from 'react';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
-import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { PrivilegeType } from '../../../../../common/privilege_type';
+import { useCurrentUser } from '../../../../hooks/use_current_user';
+import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface Props {
   onCancel: () => void;

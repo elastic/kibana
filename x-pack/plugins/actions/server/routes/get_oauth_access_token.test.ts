@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getOAuthAccessToken } from './get_oauth_access_token';
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
+import { getOAuthAccessToken } from './get_oauth_access_token';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { actionsConfigMock } from '../actions_config.mock';
-import { actionsClientMock } from '../actions_client/actions_client.mock';
 
 jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),

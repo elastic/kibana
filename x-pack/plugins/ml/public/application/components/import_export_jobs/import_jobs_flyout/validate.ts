@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback } from 'react';
+import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
-import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
-import type { JobIdObject } from './jobs_import_service';
 import { useMlApiContext } from '../../../contexts/kibana';
+import type { JobIdObject } from './jobs_import_service';
 
 export const useValidateIds = (
   jobType: JobType | null,

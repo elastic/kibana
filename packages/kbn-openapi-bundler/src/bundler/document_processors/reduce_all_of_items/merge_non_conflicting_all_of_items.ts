@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import deepEqual from 'fast-deep-equal';
+import { omit } from 'lodash';
 import { OpenAPIV3 } from 'openapi-types';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
 import { DocumentNodeProcessor } from '../../types';
@@ -70,7 +70,7 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
 
       const resultItems: [
         MergedObjectSchema,
-        ...Array<OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
+        ...Array<OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>,
       ] = [
         {
           type: 'object',

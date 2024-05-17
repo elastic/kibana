@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
+import { Request, Server } from '@hapi/hapi';
 
-import type { Logger } from '@kbn/logging';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type {
   KibanaRequest,
-  SessionStorageFactory,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageFactory,
 } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import type { Logger } from '@kbn/logging';
 
 class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> {
   constructor(

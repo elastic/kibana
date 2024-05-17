@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { Provider } from 'react-redux';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import React, { Component } from 'react';
+import { Provider } from 'react-redux';
+import { MapEmbeddableInput } from '../../embeddable/types';
 import { MapApp } from './map_app';
 import {
   SavedMap,
   getInitialLayersFromUrlParam,
   getOpenLayerWizardFromUrlParam,
 } from './saved_map';
-import { MapEmbeddableInput } from '../../embeddable/types';
 
 interface Props {
   mapEmbeddableInput?: MapEmbeddableInput;

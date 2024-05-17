@@ -7,10 +7,10 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { useGetGroupSelector, useGetGroupSelectorStateless } from './use_get_group_selector';
-import { initialState } from './state';
-import { ActionType, defaultGroup } from '..';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ActionType, defaultGroup } from '..';
+import { initialState } from './state';
+import { useGetGroupSelector, useGetGroupSelectorStateless } from './use_get_group_selector';
 
 const defaultGroupingOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },

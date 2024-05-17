@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { IconChartTagcloud } from '@kbn/chart-icons';
+import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
+  ExpressionFunctionTheme,
   buildExpression,
   buildExpressionFunction,
-  ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
-import { IconChartTagcloud } from '@kbn/chart-icons';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { OperationMetadata, Visualization } from '../..';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getColorMappingDefaults } from '../../utils';
-import type { TagcloudState } from './types';
+import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
-import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
-import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import type { TagcloudState } from './types';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -97,8 +97,8 @@ export const getTagcloudVisualization = ({
     return state.colorMapping
       ? { type: 'colorMapping', value: state.colorMapping }
       : state.palette
-      ? { type: 'legacyPalette', value: state.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: state.palette }
+        : undefined;
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryParams } from '../actions/types';
-import { Ping } from '../../../../common/runtime_types';
 import { API_URLS } from '../../../../common/constants';
+import { Ping } from '../../../../common/runtime_types';
+import { QueryParams } from '../actions/types';
 import { apiService } from './utils';
 
 export const fetchMonitorStatus = async ({

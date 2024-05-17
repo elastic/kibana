@@ -9,12 +9,12 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 
 import {
-  SAMPLE_ENGINE_CREATION_CTA_TITLE,
-  SAMPLE_ENGINE_CREATION_CTA_DESCRIPTION,
   SAMPLE_ENGINE_CREATION_CTA_BUTTON_LABEL,
+  SAMPLE_ENGINE_CREATION_CTA_DESCRIPTION,
+  SAMPLE_ENGINE_CREATION_CTA_TITLE,
 } from './i18n';
 import { SampleEngineCreationCtaLogic } from './sample_engine_creation_cta_logic';
 

@@ -7,8 +7,8 @@
 
 import { CoreStart } from '@kbn/core/public';
 import {
-  createKibanaReactContext,
   KibanaReactContextValue,
+  createKibanaReactContext,
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';

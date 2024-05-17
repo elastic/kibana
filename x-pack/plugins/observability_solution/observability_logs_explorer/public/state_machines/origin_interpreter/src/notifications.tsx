@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { LOGS_ONBOARDING_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
 import React from 'react';

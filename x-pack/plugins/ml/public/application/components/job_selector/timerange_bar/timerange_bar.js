@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { PropTypes } from 'prop-types';
 import { EuiToolTip } from '@elastic/eui';
+import { PropTypes } from 'prop-types';
+import React, { Fragment } from 'react';
 
 export function TimeRangeBar({ isRunning, timerange, ganttBarWidth }) {
   const style = {

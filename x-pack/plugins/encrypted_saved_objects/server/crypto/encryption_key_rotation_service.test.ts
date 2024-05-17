@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsClientContract,
@@ -17,7 +18,6 @@ import {
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
-import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';

@@ -5,26 +5,26 @@
  * 2.0.
  */
 import React, { FC, useCallback, useContext } from 'react';
-import { connect, useDispatch } from 'react-redux';
 import { compose, withHandlers } from 'react-recompose';
+import { connect, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+import { CanvasWorkpadBoundingBox, State } from '../../../../types';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
-import { State, CanvasWorkpadBoundingBox } from '../../../../types';
+import { WorkpadRoutingContext } from '../../../routes/workpad';
 // @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-expect-error untyped local
-import { setZoomScale, selectToplevelNodes } from '../../../state/actions/transient';
+import { selectToplevelNodes, setZoomScale } from '../../../state/actions/transient';
 import { setWriteable } from '../../../state/actions/workpad';
-import { getZoomScale, canUserWrite } from '../../../state/selectors/app';
+import { canUserWrite, getZoomScale } from '../../../state/selectors/app';
 import {
   getWorkpadBoundingBox,
-  getWorkpadWidth,
   getWorkpadHeight,
+  getWorkpadWidth,
   isWriteable,
 } from '../../../state/selectors/workpad';
-import { WorkpadRoutingContext } from '../../../routes/workpad';
-import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
+import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
 
 interface StateProps {
   zoomScale: number;

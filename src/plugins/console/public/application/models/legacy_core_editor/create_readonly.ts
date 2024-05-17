@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import ace from 'brace';
+import _ from 'lodash';
 import { Mode } from './mode/output';
 import smartResize from './smart_resize';
 

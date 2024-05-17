@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { omit } from 'lodash';
 import { TlsTranslations } from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

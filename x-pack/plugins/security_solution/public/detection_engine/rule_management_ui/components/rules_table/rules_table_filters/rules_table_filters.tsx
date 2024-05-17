@@ -9,15 +9,15 @@ import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@ela
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
-import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
-import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
-import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { TagsFilterPopover } from './tags_filter_popover';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};

@@ -6,14 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import type { UserItem } from '../../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getAnomaliesFields } from '../../shared/common';
-import * as i18n from './translations';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityTableRows } from '../../shared/components/entity_table/types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import * as i18n from './translations';
 
 const basicUserFields: EntityTableRows<ObservedEntityData<UserItem>> = [
   {

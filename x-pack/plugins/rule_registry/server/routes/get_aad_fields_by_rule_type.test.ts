@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getAADFieldsByRuleType } from './get_aad_fields_by_rule_type';
 import { requestContextMock } from './__mocks__/request_context';
 import { getMetricThresholdAADFields } from './__mocks__/request_responses';
 import { serverMock } from './__mocks__/server';
+import { getAADFieldsByRuleType } from './get_aad_fields_by_rule_type';
 
 describe('getAADFieldsByRuleType', () => {
   let server: ReturnType<typeof serverMock.create>;

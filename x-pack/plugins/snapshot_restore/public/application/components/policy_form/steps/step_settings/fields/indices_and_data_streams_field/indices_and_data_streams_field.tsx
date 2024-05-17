@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, FunctionComponent, useState } from 'react';
 
 import {
   EuiComboBox,
@@ -17,8 +17,8 @@ import {
   EuiLink,
   EuiPanel,
   EuiSelectable,
-  EuiSpacer,
   EuiSelectableOption,
+  EuiSpacer,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
@@ -28,10 +28,10 @@ import { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { useServices } from '../../../../../../app_context';
 import { PolicyValidation, ValidatePolicyHelperData } from '../../../../../../services/validation';
 
-import { orderDataStreamsAndIndices } from '../../../../../lib';
 import { DataStreamBadge } from '../../../../../data_stream_badge';
+import { orderDataStreamsAndIndices } from '../../../../../lib';
 
-import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
+import { determineListMode, mapSelectionToIndicesOptions } from './helpers';
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
@@ -106,8 +106,8 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
     typeof config.indices === 'string'
       ? (config.indices as string).split(',')
       : Array.isArray(config.indices) && config.indices
-      ? config.indices
-      : []
+        ? config.indices
+        : []
   );
 
   const indicesSwitch = (

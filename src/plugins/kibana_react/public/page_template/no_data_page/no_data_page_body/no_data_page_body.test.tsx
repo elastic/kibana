@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { NoDataPageBody } from './no_data_page_body';
-import React, { ReactElement } from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React, { ReactElement } from 'react';
 import { NoDataCard } from '../no_data_card';
+import { NoDataPageBody } from './no_data_page_body';
 
 describe('NoDataPageBody', () => {
   const action = {

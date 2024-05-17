@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType, isBreakpoint } from 'kea';
+import { MakeLogicType, isBreakpoint, kea } from 'kea';
 import type { BreakPointFunction } from 'kea';
 import { cloneDeep, findIndex } from 'lodash';
 

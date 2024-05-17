@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiPopover,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiSpacer,
-  EuiPopover,
-  EuiButton,
-  EuiContextMenu,
+  EuiTitle,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
 import {
-  UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
-  UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB,
-  UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
+  UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
+  UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
+  UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB,
 } from '../../../../../../common/constants';
 import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
-import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
-import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
+import { Error, SectionError, TemplateDeleteModal } from '../../../../components';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
-import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
-import { TabSummary, TabPreview } from './tabs';
+import { useLoadIndexTemplate } from '../../../../services/api';
+import { TemplateDeprecatedBadge, TemplateTypeIndicator } from '../components';
+import { TabPreview, TabSummary } from './tabs';
 
 const SUMMARY_TAB_ID = 'summary';
 const MAPPINGS_TAB_ID = 'mappings';
@@ -164,7 +164,9 @@ export const TemplateDetailsContent = ({
     }
 
     if (templateDetails) {
-      const { template: { settings, mappings, aliases } = {} } = templateDetails;
+      const {
+        template: { settings, mappings, aliases } = {},
+      } = templateDetails;
 
       const tabToComponentMap: Record<string, React.ReactNode> = {
         [SUMMARY_TAB_ID]: <TabSummary templateDetails={templateDetails} />,

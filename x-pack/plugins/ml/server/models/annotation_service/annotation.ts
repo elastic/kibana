@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { each, get } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { each, get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
@@ -19,10 +19,10 @@ import {
 
 import type { Annotation, Annotations } from '../../../common/types/annotations';
 import {
-  isAnnotation,
-  isAnnotations,
   getAnnotationFieldName,
   getAnnotationFieldValue,
+  isAnnotation,
+  isAnnotations,
 } from '../../../common/types/annotations';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 

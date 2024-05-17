@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
+import { createSign, generateKeyPairSync, randomBytes } from 'crypto';
 
 import { backOff } from 'exponential-backoff';
 
-import type { LoggerFactory, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { Logger, LoggerFactory } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { MessageSigningError } from '../../../common/errors';
 
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { appContextService } from '../app_context';
 import { SigningServiceNotFoundError } from '../../errors';
+import { appContextService } from '../app_context';
 
 interface MessageSigningKeys {
   private_key: string;
@@ -45,7 +45,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
   private logger: Logger;
 
-  constructor(loggerFactory: LoggerFactory, private esoClient: EncryptedSavedObjectsClient) {
+  constructor(
+    loggerFactory: LoggerFactory,
+    private esoClient: EncryptedSavedObjectsClient
+  ) {
     this.logger = loggerFactory.get('messageSigningService');
   }
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -15,10 +13,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
+import type { FC } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useMlApiContext } from '../../contexts/kibana';
-import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 type EntityType = 'anomaly_detector' | 'data_frame_analytics' | 'trained_models';
 

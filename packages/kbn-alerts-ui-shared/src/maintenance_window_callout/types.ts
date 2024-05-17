@@ -1,3 +1,4 @@
+import { CoreStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +6,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { WeekdayStr, Options } from '@kbn/rrule';
-import { CoreStart } from '@kbn/core/public';
+import type { Options, WeekdayStr } from '@kbn/rrule';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',

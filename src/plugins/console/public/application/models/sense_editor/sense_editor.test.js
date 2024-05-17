@@ -8,14 +8,14 @@
 
 import './sense_editor.test.mocks';
 
+import { URL } from 'url';
 import $ from 'jquery';
 import _ from 'lodash';
-import { URL } from 'url';
 
-import { create } from './create';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { createStorage, setStorage } from '../../../services';
 import editorInput1 from './__fixtures__/editor_input1.txt';
-import { setStorage, createStorage } from '../../../services';
+import { create } from './create';
 
 const { collapseLiteralStrings } = XJson;
 

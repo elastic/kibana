@@ -7,8 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import { generateTransformSecondaryAuthHeaders } from '../../../../common/utils/transform_api_key';
 import type { StartTransformsRequestSchema } from '../../../../common/api_schemas/start_transforms';
+import { generateTransformSecondaryAuthHeaders } from '../../../../common/utils/transform_api_key';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 

@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { TypeOf } from '@kbn/config-schema';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { TypeOf } from '@kbn/config-schema';
 import {
   ExecutorSubActionPushParamsSchema,
   ExternalIncidentServiceConfigurationSchema,

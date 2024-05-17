@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import React from 'react';
 import { fullHeightContentStyles } from '../../../../page_template.styles';
 import { LogsPageTemplate, LogsPageTemplateProps } from '../../shared/page_template';
 

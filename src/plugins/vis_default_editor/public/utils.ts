@@ -34,29 +34,32 @@ export function groupAndSortBy<
   T extends Record<TGroupBy | TLabelName | TKeyName, string>,
   TGroupBy extends string = 'type',
   TLabelName extends string = 'title',
-  TKeyName extends string = never
+  TKeyName extends string = never,
 >(
   objects: T[],
   groupBy: TGroupBy,
   labelName: TLabelName,
   keyName?: TKeyName
 ): ComboBoxGroupedOptions<T> {
-  const groupedOptions = objects.reduce((array, obj) => {
-    const group = array.find((element) => element.label === obj[groupBy]);
-    const option = {
-      label: obj[labelName],
-      target: obj,
-      ...(keyName ? { key: obj[keyName] } : {}),
-    };
+  const groupedOptions = objects.reduce(
+    (array, obj) => {
+      const group = array.find((element) => element.label === obj[groupBy]);
+      const option = {
+        label: obj[labelName],
+        target: obj,
+        ...(keyName ? { key: obj[keyName] } : {}),
+      };
 
-    if (group && group.options) {
-      group.options.push(option);
-    } else {
-      array.push({ label: obj[groupBy], options: [option] });
-    }
+      if (group && group.options) {
+        group.options.push(option);
+      } else {
+        array.push({ label: obj[groupBy], options: [option] });
+      }
 
-    return array;
-  }, [] as Array<ComboBoxGroupedOption<T>>);
+      return array;
+    },
+    [] as Array<ComboBoxGroupedOption<T>>
+  );
 
   groupedOptions.sort(sortByLabel);
 

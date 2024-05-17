@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
-import styled from 'styled-components';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import React from 'react';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { CERT_STATUS } from '../../../../common/constants';
 import { Cert } from '../../../../common/runtime_types';
 import { useCertStatus } from '../../hooks';
-import * as labels from './translations';
-import { CERT_STATUS } from '../../../../common/constants';
 import { selectDynamicSettings } from '../../state/selectors';
+import * as labels from './translations';
 
 interface Props {
   cert: Cert;

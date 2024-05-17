@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export const useIsUserTyping = () => {
   const [isUserTyping, setIsUserTyping] = useState(false);

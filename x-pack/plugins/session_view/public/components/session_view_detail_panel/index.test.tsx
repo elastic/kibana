@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
+import { SessionViewDetailPanel } from '.';
 import {
   mockAlerts,
   sessionViewBasicProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionViewDetailPanel } from '.';
 import { useDateFormat } from '../../hooks';
 import { ENDPOINT_INDEX } from '../../methods';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;

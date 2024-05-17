@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { act, renderHook } from '@testing-library/react-hooks';
 import { render, screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import { useAddToCaseActions } from './use_add_to_case_actions';
-import { TestProviders } from '../../../../common/mock';
-import { useKibana } from '../../../../common/lib/kibana';
+import React from 'react';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
   AlertsCasesTourSteps,
   sampleCase,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+import { useKibana } from '../../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
 import type { AlertTableContextMenuItem } from '../types';
-import { allCasesPermissions } from '../../../../cases_test_utils';
+import { useAddToCaseActions } from './use_add_to_case_actions';
 
 jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { format as formatUrl, parse as parseUrl } from 'url';
 import {
   EuiButton,
+  EuiCopy,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiFlexItem,
-  EuiCopy,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
 import { type IShareContext } from '../../context';

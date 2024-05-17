@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-import React from 'react';
 import type { EuiBasicTableProps } from '@elastic/eui';
-import { EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
+import { EuiAccordion, EuiBasicTable, EuiText, EuiToolTip } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import moment from 'moment';
+import React from 'react';
+import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 
@@ -19,8 +19,8 @@ import type { ActionErrorResult } from '../../../../../../../common/types';
 import { buildQuery } from '../../agent_details_page/components/agent_logs/build_query';
 import { ViewLogsButton } from '../../agent_details_page/components/agent_logs/view_logs_button';
 
-import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
+import type { ActionStatus } from '../../../../types';
 
 const TruncatedEuiText = styled(EuiText)`
   overflow: hidden;

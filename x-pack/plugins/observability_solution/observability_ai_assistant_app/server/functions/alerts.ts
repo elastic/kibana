@@ -6,6 +6,7 @@
  */
 
 import datemath from '@elastic/datemath';
+import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
@@ -13,7 +14,6 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
-import { KibanaRequest } from '@kbn/core/server';
 import { FunctionRegistrationParameters } from '.';
 
 const OMITTED_ALERT_FIELDS = [

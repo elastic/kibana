@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { indexNameToDataStreamParts } from '../../common/utils';
 import { Integration } from '../../common/data_streams_stats/integration';
-import { generateDatasets } from './generate_datasets';
 import { DataStreamStatType } from '../../common/data_streams_stats/types';
+import { indexNameToDataStreamParts } from '../../common/utils';
+import { generateDatasets } from './generate_datasets';
 
 describe('generateDatasets', () => {
   const integrations: Integration[] = [

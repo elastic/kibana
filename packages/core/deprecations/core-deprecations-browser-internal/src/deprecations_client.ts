@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type {
-  DomainDeprecationDetails,
-  DeprecationsGetResponse,
-} from '@kbn/core-deprecations-common';
 import type { ResolveDeprecationResponse } from '@kbn/core-deprecations-browser';
+import type {
+  DeprecationsGetResponse,
+  DomainDeprecationDetails,
+} from '@kbn/core-deprecations-common';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 
 /* @internal */
 export interface DeprecationsClientDeps {

@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -16,12 +15,13 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import type { AssigneesIdsSelection } from '../assignees/types';
 import { useLicense } from '../../hooks/use_license';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
-import { ASSIGNEES_PANEL_WIDTH } from '../assignees/constants';
 import { AssigneesSelectable } from '../assignees/assignees_selectable';
+import { ASSIGNEES_PANEL_WIDTH } from '../assignees/constants';
+import type { AssigneesIdsSelection } from '../assignees/types';
 import { FILTER_BY_ASSIGNEES_BUTTON } from './test_ids';
 
 export interface FilterByAssigneesPopoverProps {

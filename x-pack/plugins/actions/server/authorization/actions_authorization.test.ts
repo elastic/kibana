@@ -6,19 +6,19 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { ActionsAuthorization } from './actions_authorization';
+import { forEach } from 'lodash';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
-import { AuthorizationMode } from './get_authorization_mode_by_source';
 import {
   CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
   CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
 } from '../feature';
-import { forEach } from 'lodash';
+import { ActionsAuthorization } from './actions_authorization';
+import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 const request = {} as KibanaRequest;
 

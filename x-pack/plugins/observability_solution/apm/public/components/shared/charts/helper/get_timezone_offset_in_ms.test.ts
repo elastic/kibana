@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 import moment from 'moment-timezone';
+import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 
 // FAILING: https://github.com/elastic/kibana/issues/50005
 describe('getTimezoneOffsetInMs', () => {

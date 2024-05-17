@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
-import { PingTimestamp } from './ping_timestamp';
-import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
-import { render } from '../../../../../lib/helper/rtl_helpers';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
-import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
+import { fireEvent, waitFor } from '@testing-library/react';
 import moment from 'moment';
+import React from 'react';
+import { render } from '../../../../../lib/helper/rtl_helpers';
+import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
+import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
+import { PingTimestamp } from './ping_timestamp';
 import '../../../../../lib/__mocks__/legacy_use_composite_image.mock';
 import { mockRef } from '../../../../../lib/__mocks__/legacy_screenshot_ref.mock';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
+import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../../common';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 export const useBulkUntrackAlertsByQuery = () => {
   const {

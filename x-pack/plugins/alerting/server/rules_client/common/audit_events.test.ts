@@ -7,10 +7,10 @@
 
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
-  RuleAuditAction,
-  ruleAuditEvent,
   AdHocRunAuditAction,
+  RuleAuditAction,
   adHocRunAuditEvent,
+  ruleAuditEvent,
 } from './audit_events';
 
 describe('#ruleAuditEvent', () => {

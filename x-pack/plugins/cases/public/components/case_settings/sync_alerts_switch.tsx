@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
 import { EuiSwitch } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
 
 import * as i18n from '../../common/translations';
 

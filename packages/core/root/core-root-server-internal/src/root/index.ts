@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ConnectableObservable, Subscription } from 'rxjs';
-import { first, publishReplay, switchMap, concatMap, tap, distinctUntilChanged } from 'rxjs';
-import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
-import type { ElasticConfigType } from './elastic_config';
-import { Server } from '../server';
+import { ConnectableObservable, Subscription } from 'rxjs';
+import { concatMap, distinctUntilChanged, first, publishReplay, switchMap, tap } from 'rxjs';
 import { MIGRATION_EXCEPTION_CODE } from '../constants';
+import { Server } from '../server';
+import type { ElasticConfigType } from './elastic_config';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.

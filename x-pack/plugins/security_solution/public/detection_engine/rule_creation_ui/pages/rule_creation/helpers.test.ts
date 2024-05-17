@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { Rule } from '../../../rule_management/logic';
 import {
-  getListMock,
   getEndpointListMock,
+  getListMock,
 } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type {
-  DefineStepRuleJson,
-  ScheduleStepRuleJson,
-  AboutStepRuleJson,
-  ActionsStepRuleJson,
   AboutStepRule,
+  AboutStepRuleJson,
   ActionsStepRule,
-  ScheduleStepRule,
+  ActionsStepRuleJson,
   DefineStepRule,
+  DefineStepRuleJson,
+  ScheduleStepRule,
+  ScheduleStepRuleJson,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic';
 import {
-  getTimeTypeValue,
-  formatDefineStepData,
-  formatScheduleStepData,
-  formatAboutStepData,
-  formatActionsStepData,
-  formatRule,
-  filterRuleFieldsForType,
-  filterEmptyThreats,
-} from './helpers';
-import {
+  mockAboutStepRule,
+  mockActionsStepRule,
   mockDefineStepRule,
   mockQueryBar,
   mockScheduleStepRule,
-  mockAboutStepRule,
-  mockActionsStepRule,
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
-import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  filterEmptyThreats,
+  filterRuleFieldsForType,
+  formatAboutStepData,
+  formatActionsStepData,
+  formatDefineStepData,
+  formatRule,
+  formatScheduleStepData,
+  getTimeTypeValue,
+} from './helpers';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {

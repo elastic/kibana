@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { EuiPage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
 import { Sidebar } from './components/sidebar';
 
-import { RulesListSandbox } from './components/rules_list_sandbox';
-import { RulesListNotifyBadgeSandbox } from './components/rules_list_notify_badge_sandbox';
-import { RuleTagBadgeSandbox } from './components/rule_tag_badge_sandbox';
-import { RuleTagFilterSandbox } from './components/rule_tag_filter_sandbox';
-import { RuleEventLogListSandbox } from './components/rule_event_log_list_sandbox';
+import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { GlobalRuleEventLogListSandbox } from './components/global_rule_event_log_list_sandbox';
+import { RuleEventLogListSandbox } from './components/rule_event_log_list_sandbox';
 import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_sandbox';
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
-import { AlertsTableSandbox } from './components/alerts_table_sandbox';
+import { RuleTagBadgeSandbox } from './components/rule_tag_badge_sandbox';
+import { RuleTagFilterSandbox } from './components/rule_tag_filter_sandbox';
+import { RulesListNotifyBadgeSandbox } from './components/rules_list_notify_badge_sandbox';
+import { RulesListSandbox } from './components/rules_list_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {

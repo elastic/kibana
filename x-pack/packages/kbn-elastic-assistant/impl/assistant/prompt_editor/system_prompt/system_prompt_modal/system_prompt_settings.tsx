@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import {
-  EuiFormRow,
-  EuiTextArea,
   EuiCheckbox,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
+  EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiSpacer,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
 import { keyBy } from 'lodash/fp';
 
 import { css } from '@emotion/react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
-import { AIConnector } from '../../../../connectorland/connector_selector';
 import { Conversation, Prompt } from '../../../../..';
-import * as i18n from './translations';
+import { AIConnector } from '../../../../connectorland/connector_selector';
+import { ConversationsBulkActions } from '../../../api';
+import { TEST_IDS } from '../../../constants';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
-import { TEST_IDS } from '../../../constants';
-import { ConversationsBulkActions } from '../../../api';
+import * as i18n from './translations';
 
 interface Props {
   conversationSettings: Record<string, Conversation>;
@@ -114,12 +114,12 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
           currentPromptConversationTitles.includes(convo.title)
             ? selectedSystemPrompt?.id
             : convo.apiConfig && convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-            ? // remove the default System Prompt if it is assigned to a conversation
-              // but that conversation is not in the currentPromptConversationList
-              // This means conversation was removed in the current transaction
-              undefined
-            : //  leave it as it is .. if that conversation was neither added nor removed.
-              convo.apiConfig?.defaultSystemPromptId;
+              ? // remove the default System Prompt if it is assigned to a conversation
+                // but that conversation is not in the currentPromptConversationList
+                // This means conversation was removed in the current transaction
+                undefined
+              : //  leave it as it is .. if that conversation was neither added nor removed.
+                convo.apiConfig?.defaultSystemPromptId;
 
         if (selectedSystemPrompt != null) {
           setConversationSettings((prev) =>

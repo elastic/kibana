@@ -1,3 +1,6 @@
+import type { ConfigDeprecationContext, ConfigDeprecationProvider } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/config-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +9,6 @@
  * Side Public License, v 1.
  */
 import { set } from '@kbn/safer-lodash-set';
-import type { ConfigDeprecationProvider, ConfigDeprecationContext } from '@kbn/config';
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
-import { configDeprecationsMock } from '@kbn/config-mocks';
 
 const defaultContext = configDeprecationsMock.createContext();
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Frequency } from '@kbn/rrule';
-import * as i18n from '../translations';
-import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
 import { ScopedQueryAttributes } from '../../../../common';
+import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
+import * as i18n from '../translations';
 
 const { emptyField } = fieldValidators;
 

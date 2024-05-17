@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type LookupServicesResponse = Array<{

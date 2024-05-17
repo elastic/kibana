@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { throttle } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { throttle } from 'lodash';
 
 export const restoreUrlErrorTitle = i18n.translate(
   'kibana_utils.stateManagement.url.restoreUrlErrorTitle',

@@ -9,11 +9,11 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
   AggregateQuery,
-  compareFilters,
   COMPARE_ALL_OPTIONS,
   Filter,
   Query,
   TimeRange,
+  compareFilters,
 } from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -22,11 +22,11 @@ import deepEqual from 'fast-deep-equal';
 import { isNil } from 'lodash';
 import {
   BehaviorSubject,
-  map,
   Subscription,
-  distinct,
   combineLatest,
+  distinct,
   distinctUntilChanged,
+  map,
 } from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';

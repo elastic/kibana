@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
+import React, { useCallback } from 'react';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
-import { SUCCESSFULLY_DELETED_ITEM } from '../translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import { SUCCESSFULLY_DELETED_ITEM } from '../translations';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,

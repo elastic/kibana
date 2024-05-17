@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, checkA11y } from '../support/commands';
+import { checkA11y, login } from '../support/commands';
 
 context('Overview', () => {
   beforeEach(() => {

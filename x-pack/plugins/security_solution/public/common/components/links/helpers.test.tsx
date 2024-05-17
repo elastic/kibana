@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { DEFAULT_MORE_MAX_HEIGHT } from '.';
 import { TestProviders } from '../../mock';

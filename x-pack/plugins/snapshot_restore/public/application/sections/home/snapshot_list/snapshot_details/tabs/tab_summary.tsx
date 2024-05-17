@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -16,20 +14,22 @@ import {
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SnapshotDetails } from '../../../../../../../common/types';
-import { SNAPSHOT_STATE } from '../../../../../constants';
+import { useServices } from '../../../../../app_context';
 import {
+  CollapsibleDataStreamsList,
+  CollapsibleIndicesList,
   DataPlaceholder,
   FormattedDateTime,
-  CollapsibleIndicesList,
-  CollapsibleDataStreamsList,
 } from '../../../../../components';
+import { SnapshotFeatureStatesSummary } from '../../../../../components/summaries';
+import { SNAPSHOT_STATE } from '../../../../../constants';
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
-import { useServices } from '../../../../../app_context';
-import { SnapshotFeatureStatesSummary } from '../../../../../components/summaries';
 
 interface Props {
   snapshotDetails: SnapshotDetails;

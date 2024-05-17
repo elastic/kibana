@@ -11,7 +11,7 @@ import React from 'react';
 
 import { ShallowWrapper, shallow } from 'enzyme';
 
-import { EuiPanel, EuiText, EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
 import { staticCustomSourceData } from '../source_data';
 

@@ -1,3 +1,6 @@
+import Path from 'path';
+import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +8,8 @@
  * 2.0.
  */
 import Fs from 'fs/promises';
-import Path from 'path';
 import { isEqualWith } from 'lodash';
-import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
-import { concatMap, defer, filter, firstValueFrom, ReplaySubject, scan, timeout } from 'rxjs';
+import { ReplaySubject, concatMap, defer, filter, firstValueFrom, scan, timeout } from 'rxjs';
 
 export const logFilePath = Path.resolve(__dirname, './kibana.log');
 export const ANY = Symbol('any');

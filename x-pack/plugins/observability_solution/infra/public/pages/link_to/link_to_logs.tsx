@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { match as RouteMatch, Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Redirect, match as RouteMatch } from 'react-router-dom';
 
 import { inventoryModels } from '@kbn/metrics-data-access-plugin/common';
 import { RedirectToLogs } from './redirect_to_logs';

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { SerializableRecord } from '@kbn/utility-types';
+import deepEqual from 'fast-deep-equal';
 
+import { omit, pick, xor } from 'lodash';
 import { v4 } from 'uuid';
-import { pick, omit, xor } from 'lodash';
 
+import { ControlGroupInput } from '..';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
@@ -21,12 +22,11 @@ import {
   ControlPanelDiffSystems,
   genericControlPanelDiffSystem,
 } from './control_group_panel_diff_system';
-import { ControlGroupInput } from '..';
 import {
   ControlsPanels,
   PersistableControlGroupInput,
-  persistableControlGroupInputKeys,
   RawControlGroupAttributes,
+  persistableControlGroupInputKeys,
 } from './types';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {

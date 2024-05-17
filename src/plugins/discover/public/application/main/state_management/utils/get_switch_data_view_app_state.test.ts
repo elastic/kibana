@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getDataViewAppState } from './get_switch_data_view_app_state';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { getDataViewAppState } from './get_switch_data_view_app_state';
 
 const emptyDefaultColumns: string[] = [];
 

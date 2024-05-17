@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { AXIS_EXTENT_CONFIG, AxisExtentModes } from '../constants';
 import { AxisExtentConfig, AxisExtentConfigResult } from '../types';
-import { AxisExtentModes, AXIS_EXTENT_CONFIG } from '../constants';
 
 const errors = {
   upperBoundLowerOrEqualToLowerBoundError: () =>

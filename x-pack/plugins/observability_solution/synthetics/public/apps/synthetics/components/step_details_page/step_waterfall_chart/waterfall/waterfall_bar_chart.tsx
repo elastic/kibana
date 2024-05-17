@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
 import {
   Axis,
   BarSeries,
   BarStyleAccessor,
   Chart,
+  CustomTooltip as CustomChartTooltip,
   DomainRange,
   Position,
   ScaleType,
   Settings,
   TickFormatter,
-  TooltipContainer,
-  CustomTooltip as CustomChartTooltip,
   Tooltip,
+  TooltipContainer,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback } from 'react';
 import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
-import { BAR_HEIGHT } from './constants';
-import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
-import { WaterfallData } from '../../common/network_data/types';
-import { useWaterfallContext } from './context/waterfall_context';
-import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { formatTooltipHeading } from '../../common/network_data/data_formatting';
+import { WaterfallData } from '../../common/network_data/types';
+import { BAR_HEIGHT } from './constants';
+import { useWaterfallContext } from './context/waterfall_context';
+import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { WaterfallChartMarkers } from './waterfall_marker/waterfall_markers';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index

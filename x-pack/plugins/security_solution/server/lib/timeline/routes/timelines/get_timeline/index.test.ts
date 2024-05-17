@@ -8,9 +8,9 @@
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
-  serverMock,
-  requestContextMock,
   createMockConfig,
+  requestContextMock,
+  serverMock,
 } from '../../../../detection_engine/routes/__mocks__';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../../saved_object/timelines';
 

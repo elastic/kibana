@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { registerFullStoryRouteMock } from './plugin.test.mock';
+import { coreMock } from '@kbn/core/server/mocks';
 import { CloudFullStoryPlugin } from './plugin';
+import { registerFullStoryRouteMock } from './plugin.test.mock';
 
 describe('Cloud FullStory plugin', () => {
   let plugin: CloudFullStoryPlugin;

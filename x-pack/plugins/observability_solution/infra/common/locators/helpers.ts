@@ -11,8 +11,8 @@ import {
   DEFAULT_LOG_VIEW,
   LogViewColumnConfiguration,
   LogViewReference,
-  ResolvedLogView,
   LogsLocatorParams,
+  ResolvedLogView,
 } from '@kbn/logs-shared-plugin/common';
 import { flowRight } from 'lodash';
 import type { InfraClientCoreSetup } from '../../public/types';

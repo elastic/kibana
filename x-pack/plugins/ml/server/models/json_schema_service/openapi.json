@@ -34,25 +34,13 @@
               "anyOf": [
                 {
                   "type": "string",
-                  "enum": [
-                    "all",
-                    "open",
-                    "closed",
-                    "hidden",
-                    "none"
-                  ]
+                  "enum": ["all", "open", "closed", "hidden", "none"]
                 },
                 {
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "enum": [
-                      "all",
-                      "open",
-                      "closed",
-                      "hidden",
-                      "none"
-                    ]
+                    "enum": ["all", "open", "closed", "hidden", "none"]
                   }
                 }
               ]
@@ -76,9 +64,7 @@
             "description": "If true, unavailable indices (missing or closed) are ignored."
           }
         ],
-        "tags": [
-          "ml"
-        ],
+        "tags": ["ml"],
         "requestBody": {
           "required": true,
           "content": {
@@ -339,9 +325,7 @@
             "description": "The identifier for the anomaly detection job. This identifier can contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores. It must start and end with alphanumeric characters."
           }
         ],
-        "tags": [
-          "ml"
-        ],
+        "tags": ["ml"],
         "requestBody": {
           "required": true,
           "content": {
@@ -420,11 +404,7 @@
                   }
                 },
                 "additionalProperties": false,
-                "required": [
-                  "analysis_config",
-                  "background_persist_interval",
-                  "data_description"
-                ]
+                "required": ["analysis_config", "background_persist_interval", "data_description"]
               }
             }
           }
@@ -611,10 +591,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "bucket_span",
-          "detectors"
-        ]
+        "required": ["bucket_span", "detectors"]
       },
       "Ml_Types_AnalysisLimits": {
         "type": "object",
@@ -884,11 +861,7 @@
         "properties": {
           "mode": {
             "type": "string",
-            "enum": [
-              "auto",
-              "manual",
-              "off"
-            ],
+            "enum": ["auto", "manual", "off"],
             "description": "If the mode is `auto`, the chunk size is dynamically calculated;\nthis is the recommended value when the datafeed does not use aggregations.\nIf the mode is `manual`, chunking is applied according to the specified `time_span`;\nuse this mode when the datafeed uses aggregations. If the mode is `off`, no chunking is applied."
           },
           "time_span": {
@@ -904,9 +877,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "mode"
-        ]
+        "required": ["mode"]
       },
       "Ml_Types_DataDescription": {
         "type": "object",
@@ -1024,10 +995,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "indices",
-          "query"
-        ]
+        "required": ["indices", "query"]
       },
       "Ml_Types_DelayedDataCheckConfig": {
         "type": "object",
@@ -1049,9 +1017,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "enabled"
-        ]
+        "required": ["enabled"]
       },
       "Ml_Types_DetectionRule": {
         "type": "object",
@@ -1060,10 +1026,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "skip_result",
-                "skip_model_update"
-              ]
+              "enum": ["skip_result", "skip_model_update"]
             },
             "description": "The set of actions to be triggered when the rule applies. If more than one action is specified the effects of all actions are combined."
           },
@@ -1108,12 +1071,7 @@
           },
           "exclude_frequent": {
             "type": "string",
-            "enum": [
-              "all",
-              "none",
-              "by",
-              "over"
-            ],
+            "enum": ["all", "none", "by", "over"],
             "description": "If set, frequent entities are excluded from influencing the anomaly results. Entities can be considered frequent over time or frequent in a population. If you are working with both over and by fields, you can set `exclude_frequent` to `all` for both fields, or to `by` or `over` for those specific fields."
           },
           "field_name": {
@@ -1138,9 +1096,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "function"
-        ]
+        "required": ["function"]
       },
       "Ml_Types_FilterRef": {
         "type": "object",
@@ -1151,17 +1107,12 @@
           },
           "filter_type": {
             "type": "string",
-            "enum": [
-              "include",
-              "exclude"
-            ],
+            "enum": ["include", "exclude"],
             "description": "If set to `include`, the rule applies for values in the filter. If set to `exclude`, the rule applies for values not in the filter."
           }
         },
         "additionalProperties": false,
-        "required": [
-          "filter_id"
-        ]
+        "required": ["filter_id"]
       },
       "Ml_Types_ModelPlotConfig": {
         "type": "object",
@@ -1200,22 +1151,12 @@
         "properties": {
           "applies_to": {
             "type": "string",
-            "enum": [
-              "actual",
-              "typical",
-              "diff_from_typical",
-              "time"
-            ],
+            "enum": ["actual", "typical", "diff_from_typical", "time"],
             "description": "Specifies the result property to which the condition applies. If your detector uses `lat_long`, `metric`, `rare`, or `freq_rare` functions, you can only specify conditions that apply to time."
           },
           "operator": {
             "type": "string",
-            "enum": [
-              "gt",
-              "gte",
-              "lt",
-              "lte"
-            ],
+            "enum": ["gt", "gte", "lt", "lte"],
             "description": "Specifies the condition operator. The available options are greater than, greater than or equals, less than, and less than or equals."
           },
           "value": {
@@ -1224,11 +1165,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "applies_to",
-          "operator",
-          "value"
-        ]
+        "required": ["applies_to", "operator", "value"]
       }
     }
   }

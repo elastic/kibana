@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { useGetAppInfo, UseGetAppInfo, UseGetAppInfoProps } from './use_get_app_info';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getAppInfo } from './api';
 import { ServiceNowActionConnector } from './types';
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { UseGetAppInfo, UseGetAppInfoProps, useGetAppInfo } from './use_get_app_info';
 
 jest.mock('./api');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');

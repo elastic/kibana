@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { SloTabId } from './slo_details';
+import { SLOWithSummaryResponse, rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
+import { SloTabId } from './slo_details';
 
 import { ErrorBudgetActions } from './error_budget_actions';
 

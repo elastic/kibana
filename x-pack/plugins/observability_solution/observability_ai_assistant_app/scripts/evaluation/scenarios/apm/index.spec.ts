@@ -7,13 +7,13 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
-import moment from 'moment';
-import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import { apm, serviceMap, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
+import moment from 'moment';
 import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
+import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 
 describe('apm', () => {
   const ruleIds: any[] = [];

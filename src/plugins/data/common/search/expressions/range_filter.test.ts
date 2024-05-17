@@ -7,8 +7,8 @@
  */
 
 import { createMockContext } from '@kbn/expressions-plugin/common';
-import { functionWrapper } from './utils';
 import { rangeFilterFunction } from './range_filter';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#rangeFilter', () => {
   const fn = functionWrapper(rangeFilterFunction);

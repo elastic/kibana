@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
-import { get } from 'lodash';
 import { encode } from '@kbn/presentation-util-plugin/common';
+import { get } from 'lodash';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
+import { AssetType, CanvasWorkpad, State } from '../../../types';
+import { createAsset, notifyError } from '../../lib/assets';
 // @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';
-import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { createAsset, notifyError } from '../../lib/assets';
-import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error untyped local
 import { setAsset } from '../../state/actions/assets';
-import { State, AssetType, CanvasWorkpad } from '../../../types';
+import { getAssets } from '../../state/selectors/assets';
 
-import { AssetManager as Component } from './asset_manager.component';
-import { getFullWorkpadPersisted } from '../../state/selectors/workpad';
 import { pluginServices } from '../../services';
+import { getFullWorkpadPersisted } from '../../state/selectors/workpad';
+import { AssetManager as Component } from './asset_manager.component';
 
 export const AssetManager = connect(
   (state: State) => ({

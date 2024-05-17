@@ -6,19 +6,19 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-import { type TransformEnabledFeatures } from './serverless_context';
 import type { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';
+import { type TransformEnabledFeatures } from './serverless_context';
 
 import type { ExperimentalFeatures } from '../../common/config';
+import { renderApp } from './app';
 import type { AppDependencies } from './app_dependencies';
 import { breadcrumbService } from './services/navigation';
 import { docTitleService } from './services/navigation';
 import { textService } from './services/text';
-import { renderApp } from './app';
 
 const localStorage = new Storage(window.localStorage);
 

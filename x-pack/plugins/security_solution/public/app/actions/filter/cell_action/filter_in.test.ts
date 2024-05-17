@@ -8,11 +8,11 @@
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { TableId } from '@kbn/securitysolution-data-table';
 
-import { createMockStore, mockGlobalState } from '../../../../common/mock';
-import { createFilterInCellActionFactory } from './filter_in';
-import type { SecurityCellActionExecutionContext } from '../../types';
 import { TimelineId } from '../../../../../common/types';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createMockStore, mockGlobalState } from '../../../../common/mock';
+import type { SecurityCellActionExecutionContext } from '../../types';
+import { createFilterInCellActionFactory } from './filter_in';
 
 const services = createStartServicesMock();
 const mockGlobalFilterManager = services.data.query.filterManager;

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { createMemoryHistory } from 'history';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { createMemoryHistory } from 'history';
+import { act } from 'react-dom/test-utils';
 
-import {
-  breadcrumbService,
-  IndexManagementBreadcrumb,
-} from '../../../public/application/services/breadcrumbs';
 import { API_BASE_PATH, MAX_DATA_RETENTION } from '../../../common/constants';
+import {
+  IndexManagementBreadcrumb,
+  breadcrumbService,
+} from '../../../public/application/services/breadcrumbs';
+import { notificationService } from '../../../public/application/services/notification';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
-import { notificationService } from '../../../public/application/services/notification';
 
 import {
   DataStreamsTabTestBed,
-  setup,
-  createDataStreamPayload,
   createDataStreamBackingIndex,
+  createDataStreamPayload,
   createNonDataStreamIndex,
+  setup,
 } from './data_streams_tab.helpers';
 
 const nonBreakingSpace = ' ';

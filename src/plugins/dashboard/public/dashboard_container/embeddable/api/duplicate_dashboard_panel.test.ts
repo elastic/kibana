@@ -8,19 +8,19 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { isErrorEmbeddable, ReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ReferenceOrValueEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { duplicateDashboardPanel, incrementPanelTitle } from './duplicate_dashboard_panel';
 import { buildMockDashboard, getSampleDashboardPanel } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainer } from '../dashboard_container';
+import { duplicateDashboardPanel, incrementPanelTitle } from './duplicate_dashboard_panel';
 
 let container: DashboardContainer;
 let genericEmbeddable: ContactCardEmbeddable;

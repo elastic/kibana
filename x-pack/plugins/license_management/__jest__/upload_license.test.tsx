@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Provider } from 'react-redux';
-import { LocationDescriptorObject } from 'history';
 import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { LocationDescriptorObject } from 'history';
+import React from 'react';
+import { Provider } from 'react-redux';
 
 import { uploadLicense } from '../public/application/store/actions/upload_license';
 
 import { licenseManagementStore } from '../public/application/store/store';
 
-import { UploadLicense } from '../public/application/sections/upload_license';
 import { AppContextProvider } from '../public/application/app_context';
+import { UploadLicense } from '../public/application/sections/upload_license';
 
 import {
   UPLOAD_LICENSE_EXPIRED,
+  UPLOAD_LICENSE_INVALID,
   UPLOAD_LICENSE_REQUIRES_ACK,
   UPLOAD_LICENSE_SUCCESS,
   UPLOAD_LICENSE_TLS_NOT_ENABLED,
-  UPLOAD_LICENSE_INVALID,
 } from './api_responses';
 
 let store: any = null;

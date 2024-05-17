@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
 export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, children }) => {
   if (!sourceTransportAddress) {

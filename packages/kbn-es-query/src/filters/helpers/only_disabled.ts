@@ -9,7 +9,7 @@
 import { filter } from 'lodash';
 import type { Filter } from '..';
 import type { FilterCompareOptions } from './compare_filters';
-import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
+import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
 
 const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
 

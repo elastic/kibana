@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALL_VALUE,
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { estypes } from '@elastic/elasticsearch';
-import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
-  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';

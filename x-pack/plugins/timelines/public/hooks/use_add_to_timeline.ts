@@ -1,3 +1,4 @@
+import type { DraggableId, FluidDragActions, SensorAPI } from '@hello-pangea/dnd';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +9,6 @@ import type { Position } from 'css-box-model';
 import { range } from 'd3-array';
 import { interpolate } from 'd3-interpolate';
 import { useCallback } from 'react';
-import type { DraggableId, FluidDragActions, SensorAPI } from '@hello-pangea/dnd';
 
 import {
   EMPTY_PROVIDERS_GROUP_CLASS_NAME,

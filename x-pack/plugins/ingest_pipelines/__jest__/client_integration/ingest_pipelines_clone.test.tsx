@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { PIPELINE_TO_CLONE, PipelinesCloneTestBed } from './helpers/pipelines_clone.helpers';
 
 const { setup } = pageHelpers.pipelinesClone;

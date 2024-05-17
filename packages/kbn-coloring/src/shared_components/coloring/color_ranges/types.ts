@@ -7,10 +7,10 @@
  */
 
 import type {
+  CustomPaletteParams,
+  DataBounds,
   PaletteContinuity,
   PaletteRegistry,
-  DataBounds,
-  CustomPaletteParams,
 } from '../../../palettes';
 
 export interface ColorRange {

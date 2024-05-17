@@ -5,41 +5,41 @@
  * 2.0.
  */
 import {
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { MessageRole, type Message } from '../../../common/types';
+import { type Message, MessageRole } from '../../../common/types';
+import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
+import { useFlyoutState } from '../../hooks/use_flyout_state';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { useFlyoutState } from '../../hooks/use_flyout_state';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
-import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
-import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
-import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
+import { InsightBase } from './insight_base';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));

@@ -14,8 +14,8 @@ import './display_settings.scss';
 import {
   EuiButton,
   EuiEmptyPrompt,
-  EuiTabbedContent,
   EuiPanel,
+  EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
@@ -26,13 +26,13 @@ import { NAV, SAVE_BUTTON } from '../../../../constants';
 import { SourceLayout } from '../source_layout';
 
 import {
-  UNSAVED_MESSAGE,
-  DISPLAY_SETTINGS_TITLE,
   DISPLAY_SETTINGS_DESCRIPTION,
-  DISPLAY_SETTINGS_EMPTY_TITLE,
   DISPLAY_SETTINGS_EMPTY_BODY,
-  SEARCH_RESULTS_LABEL,
+  DISPLAY_SETTINGS_EMPTY_TITLE,
+  DISPLAY_SETTINGS_TITLE,
   RESULT_DETAIL_LABEL,
+  SEARCH_RESULTS_LABEL,
+  UNSAVED_MESSAGE,
 } from './constants';
 import { DisplaySettingsLogic, TabId } from './display_settings_logic';
 import { FieldEditorModal } from './field_editor_modal';

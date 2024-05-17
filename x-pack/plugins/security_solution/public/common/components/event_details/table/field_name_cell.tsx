@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import { FieldIcon } from '@kbn/react-field';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import * as i18n from '../translations';
+import { FieldIcon } from '@kbn/react-field';
+import { isEmpty } from 'lodash';
+import React from 'react';
 import { getExampleText } from '../helpers';
+import * as i18n from '../translations';
 import type { EventFieldsData } from '../types';
 import { getFieldTypeName } from './get_field_type_name';
 

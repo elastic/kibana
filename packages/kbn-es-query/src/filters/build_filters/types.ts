@@ -7,10 +7,10 @@
  */
 
 import { ExistsFilter } from './exists_filter';
-import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
-import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
-import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
 import { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
+import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
+import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
+import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
 
 /**
  * A common type for filters supported by this package

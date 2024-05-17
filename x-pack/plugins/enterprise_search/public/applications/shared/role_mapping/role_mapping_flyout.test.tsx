@@ -12,10 +12,10 @@ import { shallow } from 'enzyme';
 import { EuiFlyout } from '@elastic/eui';
 
 import {
-  ROLE_MAPPING_FLYOUT_CREATE_TITLE,
-  ROLE_MAPPING_FLYOUT_UPDATE_TITLE,
   ROLE_MAPPING_FLYOUT_CREATE_BUTTON,
+  ROLE_MAPPING_FLYOUT_CREATE_TITLE,
   ROLE_MAPPING_FLYOUT_UPDATE_BUTTON,
+  ROLE_MAPPING_FLYOUT_UPDATE_TITLE,
 } from './constants';
 import { RoleMappingFlyout } from './role_mapping_flyout';
 

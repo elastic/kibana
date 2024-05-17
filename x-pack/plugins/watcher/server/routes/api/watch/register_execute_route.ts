@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 
-import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { ExecuteDetails } from '../../../models/execute_details';
 // @ts-ignore
 import { Watch } from '../../../models/watch';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item';
+import { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
   executeDetails: schema.object({}, { unknowns: 'allow' }),

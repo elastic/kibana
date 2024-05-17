@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import type { SetStateAction, Dispatch } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 
 import {
-  useGeneratedHtmlId,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiFlyoutFooter,
   EuiTextColor,
-  EuiFlyout,
+  EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 import type {
   BulkErrorSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
 import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 

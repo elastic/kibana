@@ -1,3 +1,6 @@
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,21 +9,18 @@
  */
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { CaseUI } from '../../../../common';
-import { isLensEmbeddable, hasInput, getLensCaseAttachment } from './utils';
+import { getLensCaseAttachment, hasInput, isLensEmbeddable } from './utils';
 
-import type { ActionContext, CasesUIActionProps } from './types';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
-import { ActionWrapper } from './action_wrapper';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
+import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { ActionWrapper } from './action_wrapper';
+import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
+import type { ActionContext, CasesUIActionProps } from './types';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;

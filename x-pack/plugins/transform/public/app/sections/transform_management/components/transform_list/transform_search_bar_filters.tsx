@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import {
   TRANSFORM_FUNCTION,
+  TRANSFORM_HEALTH_STATUS,
   TRANSFORM_MODE,
   TRANSFORM_STATE,
-  TRANSFORM_HEALTH_STATUS,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import type { TransformListRow } from '../../../../common';
-import { TransformTaskStateBadge } from './transform_task_state_badge';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
 
 export const transformFilters: SearchFilterConfig[] = [
   {

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
-import d3 from 'd3';
+import { i18n } from '@kbn/i18n';
 import type {
   FeatureImportance,
   FeatureImportanceBaseline,
   TopClass,
   TopClasses,
 } from '@kbn/ml-data-frame-analytics-utils';
-import {
-  isDecisionPathData,
-  useDecisionPathData,
-  getStringBasedClassName,
-} from './use_classification_path_data';
+import d3 from 'd3';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
+import {
+  getStringBasedClassName,
+  isDecisionPathData,
+  useDecisionPathData,
+} from './use_classification_path_data';
 
 interface ClassificationDecisionPathProps {
   predictedValue: string | boolean;

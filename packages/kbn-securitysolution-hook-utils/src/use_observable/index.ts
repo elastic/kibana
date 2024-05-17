@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef, useReducer, Reducer } from 'react';
+import { Reducer, useCallback, useEffect, useReducer, useRef } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
-import { useIsMounted } from '../use_is_mounted';
 import { Task } from '../types';
+import { useIsMounted } from '../use_is_mounted';
 
 interface State<T> {
   loading: boolean;

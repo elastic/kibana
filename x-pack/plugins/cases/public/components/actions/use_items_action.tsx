@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
 import { difference, isEqual } from 'lodash';
+import { useCallback, useState } from 'react';
+import type { CaseUI, CasesUI } from '../../../common';
 import type { CaseUpdateRequest } from '../../../common/ui';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
-import type { CasesUI, CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import type { UseActionProps, ItemsSelectionState } from './types';
+import type { ItemsSelectionState, UseActionProps } from './types';
 
 type UseItemsActionProps<T> = UseActionProps & {
   fieldKey: 'tags' | 'assignees';

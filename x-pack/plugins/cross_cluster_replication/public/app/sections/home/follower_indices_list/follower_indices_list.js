@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiText, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
-import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
+import { PageError, PageLoading, extractQueryParams } from '../../../../shared_imports';
 import { API_STATUS, UIM_FOLLOWER_INDEX_LIST_LOAD } from '../../../constants';
-import { FollowerIndicesTable, DetailPanel } from './components';
+import { METRIC_TYPE, trackUiMetric } from '../../../services/track_ui_metric';
+import { DetailPanel, FollowerIndicesTable } from './components';
 
 const REFRESH_RATE_MS = 30000;
 

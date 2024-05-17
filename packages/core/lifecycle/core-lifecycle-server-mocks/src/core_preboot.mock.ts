@@ -1,3 +1,4 @@
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +7,10 @@
  * Side Public License, v 1.
  */
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import type { CorePreboot } from '@kbn/core-lifecycle-server';
 import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import type { CorePreboot } from '@kbn/core-lifecycle-server';
 
 type CorePrebootMockType = MockedKeys<CorePreboot> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createPreboot>;

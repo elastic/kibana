@@ -8,18 +8,18 @@
 
 import React, { useCallback } from 'react';
 
+import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiTitle, EuiColorPicker, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import {
+  RequiredNumberInputOption,
   SelectOption,
   SwitchOption,
-  RequiredNumberInputOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { ValidationVisOptionsProps } from '../../common';
 import { VisParams } from '../../../../types';
 import { getThresholdLineStyles } from '../../../collections';
+import { ValidationVisOptionsProps } from '../../common';
 
 const thresholdLineStyles = getThresholdLineStyles();
 

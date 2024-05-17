@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { DisabledLinkPanel } from './disabled_link_panel';
 import { ThreatIntelPanelView as TestView } from '../overview_cti_links/threat_intel_panel_view';
+import { DisabledLinkPanel } from './disabled_link_panel';
 
 jest.mock('../../../common/lib/kibana');
 

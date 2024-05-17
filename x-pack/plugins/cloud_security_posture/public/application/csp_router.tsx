@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import type { CspSecuritySolutionContext } from '..';
-import { SecuritySolutionContext } from './security_solution_context';
+import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import * as pages from '../pages';
 import { CspRoute } from './csp_route';
+import { SecuritySolutionContext } from './security_solution_context';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },

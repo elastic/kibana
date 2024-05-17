@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 import Util from 'util';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
+import {
+  type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 const logFilePath = Path.join(__dirname, 'outdated_docs.log');
 

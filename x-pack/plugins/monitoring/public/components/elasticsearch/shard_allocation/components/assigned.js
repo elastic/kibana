@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { get, sortBy } from 'lodash';
 import React from 'react';
-import { Shard } from './shard';
-import { calculateClass } from '../lib/calculate_class';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
+import { calculateClass } from '../lib/calculate_class';
+import { Shard } from './shard';
 
 const generateQueryAndLink = (data) => {
   let type = 'indices';

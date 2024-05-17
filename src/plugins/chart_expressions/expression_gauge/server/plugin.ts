@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { ExpressionsServerSetup, ExpressionsServerStart } from '@kbn/expressions-plugin/server';
 import { gaugeFunction } from '../common';
 
 interface SetupDeps {

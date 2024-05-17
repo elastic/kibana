@@ -1,3 +1,7 @@
+import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +9,6 @@
  * 2.0.
  */
 import { SemVer } from 'semver';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { MAJOR_VERSION } from '../common';
 

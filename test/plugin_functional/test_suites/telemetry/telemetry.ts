@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/public';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
+import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/public';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const TELEMETRY_SO_TYPE = 'telemetry';

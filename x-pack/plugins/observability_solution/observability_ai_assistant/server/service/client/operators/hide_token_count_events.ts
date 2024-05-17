@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, Observable, partition } from 'rxjs';
+import { Observable, merge, partition } from 'rxjs';
 import type { StreamingChatResponseEvent } from '../../../../common';
 import {
   StreamingChatResponseEventType,

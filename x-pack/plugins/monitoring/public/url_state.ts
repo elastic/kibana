@@ -1,3 +1,16 @@
+import { RefreshInterval, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import {
+  IKbnUrlStateStorage,
+  INullableBaseStateContainer,
+  ISyncStateRef,
+  StateContainer,
+  createKbnUrlStateStorage,
+  createStateContainer,
+  syncState,
+  withNotifyOnErrors,
+} from '@kbn/kibana-utils-plugin/public';
+import { History, createHashHistory } from 'history';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,21 +18,8 @@
  * 2.0.
  */
 import { Subscription } from 'rxjs';
-import { History, createHashHistory } from 'history';
-import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
-import {
-  createStateContainer,
-  createKbnUrlStateStorage,
-  StateContainer,
-  INullableBaseStateContainer,
-  IKbnUrlStateStorage,
-  ISyncStateRef,
-  syncState,
-  withNotifyOnErrors,
-} from '@kbn/kibana-utils-plugin/public';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
 import { Legacy } from './legacy_shims';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
 
 interface RawObject {
   [key: string]: unknown;

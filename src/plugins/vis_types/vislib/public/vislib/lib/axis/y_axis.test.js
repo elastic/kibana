@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
+import _ from 'lodash';
 
-import { Axis } from './axis';
-import { VisConfig } from '../vis_config';
 import { getMockUiState } from '../../../fixtures/mocks';
+import { VisConfig } from '../vis_config';
+import { Axis } from './axis';
 
 const YAxis = Axis;
 let mockUiState;

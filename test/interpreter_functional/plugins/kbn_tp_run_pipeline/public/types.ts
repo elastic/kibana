@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsStart, ExpressionRenderHandler } from '@kbn/expressions-plugin/public';
+import { ExpressionRenderHandler, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
 
 export type { ExpressionsStart, ExpressionRenderHandler, Adapters };

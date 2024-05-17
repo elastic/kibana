@@ -7,10 +7,7 @@
     "id": "filesManagement",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "files",
-      "management"
-    ],
+    "requiredPlugins": ["files", "management"],
     "requiredBundles": []
   }
 }

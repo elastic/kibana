@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { modifyUrl } from '@kbn/std';
 import { Request } from '@hapi/hapi';
-import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import type { IBasePath, KibanaRequest } from '@kbn/core-http-server';
+import { modifyUrl } from '@kbn/std';
 
 /**
  * Core internal implementation of {@link IBasePath}

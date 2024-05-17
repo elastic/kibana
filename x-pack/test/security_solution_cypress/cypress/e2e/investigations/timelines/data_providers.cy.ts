@@ -6,27 +6,27 @@
  */
 
 import {
-  TIMELINE_DROPPED_DATA_PROVIDERS,
-  TIMELINE_DATA_PROVIDERS_ACTION_MENU,
-  TIMELINE_FLYOUT_HEADER,
   GET_TIMELINE_GRID_CELL,
+  TIMELINE_DATA_PROVIDERS_ACTION_MENU,
   TIMELINE_DATA_PROVIDERS_CONTAINER,
+  TIMELINE_DROPPED_DATA_PROVIDERS,
+  TIMELINE_FLYOUT_HEADER,
 } from '../../../screens/timeline';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
+import { getTimeline } from '../../../objects/timeline';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   addDataProvider,
-  updateDataProviderbyDraggingField,
   addNameAndDescriptionToTimeline,
-  populateTimeline,
   createTimelineFromBottomBar,
-  updateDataProviderByFieldHoverAction,
+  populateTimeline,
   saveTimeline,
+  updateDataProviderByFieldHoverAction,
+  updateDataProviderbyDraggingField,
 } from '../../../tasks/timeline';
-import { getTimeline } from '../../../objects/timeline';
 import { hostsUrl } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/176945

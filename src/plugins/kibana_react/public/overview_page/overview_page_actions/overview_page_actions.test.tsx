@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { overviewPageActions } from './overview_page_actions';
 import { ApplicationStart } from '@kbn/core/public';
+import { overviewPageActions } from './overview_page_actions';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),

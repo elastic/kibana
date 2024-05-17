@@ -6,13 +6,13 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { createValidationFunction } from '../../../common/runtime_types';
 import {
-  metricsExplorerViewResponsePayloadRT,
-  metricsExplorerViewRequestQueryRT,
   METRICS_EXPLORER_VIEW_URL_ENTITY,
   getMetricsExplorerViewRequestParamsRT,
+  metricsExplorerViewRequestQueryRT,
+  metricsExplorerViewResponsePayloadRT,
 } from '../../../common/http_api/latest';
+import { createValidationFunction } from '../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
 const NON_STARTED_SERVICE_ERROR = {

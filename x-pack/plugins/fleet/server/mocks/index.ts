@@ -14,22 +14,22 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { PackagePolicyClient } from '../services/package_policy_service';
-import type { AgentPolicyServiceInterface } from '../services';
-import type { FleetAppContext } from '../plugin';
-import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
-import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { createFleetAuthzMock } from '../../common/mocks';
+import type { FleetConfigType } from '../../common/types';
+import type { FleetAppContext } from '../plugin';
+import type { AgentPolicyServiceInterface } from '../services';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
-import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
-import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
+import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { MessageSigningServiceInterface } from '../services/security';
+import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
+import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import type { FleetRequestHandlerContext } from '../types';
 
 import { PackagePolicyMocks } from './package_policy.mocks';
 

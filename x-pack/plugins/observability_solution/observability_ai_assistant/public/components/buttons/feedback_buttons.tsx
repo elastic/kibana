@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 
 export type Feedback = 'positive' | 'negative';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
-import { useKibana } from '../../../../common/lib/kibana';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { AlertsField } from '../../../../types';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { renderHook } from '@testing-library/react-hooks';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AlertsField } from '../../../../types';
+import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
 
 jest.mock('../../../../common/lib/kibana');
 

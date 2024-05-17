@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ActionTaskParams } from '@kbn/actions-plugin/server/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

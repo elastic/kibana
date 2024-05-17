@@ -7,9 +7,9 @@
 
 import {
   IngestProcessorContainer,
-  VersionNumber,
-  Metadata,
   IngestPutPipelineRequest,
+  Metadata,
+  VersionNumber,
 } from '@elastic/elasticsearch/lib/api/types';
 
 export interface Pipeline {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS, AppMountParameters, CoreSetup } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import * as React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { StartDependencies } from './plugin';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>

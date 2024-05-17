@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESGeoLineSource } from './es_geo_line_source';
 import { DataRequest } from '../../util/data_request';
+import { ESGeoLineSource } from './es_geo_line_source';
 
 describe('getSourceStatus', () => {
   const geoLineSource = new ESGeoLineSource({

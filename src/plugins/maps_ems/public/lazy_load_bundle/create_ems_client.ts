@@ -8,11 +8,11 @@
 
 import coerce from 'semver/functions/coerce';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { BuildFlavor } from '@kbn/config/src/types';
-import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { EMS_APP_NAME, EMSSettings, DEFAULT_EMS_REST_VERSION } from '../../common';
+import { BuildFlavor } from '@kbn/config/src/types';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_EMS_REST_VERSION, EMSSettings, EMS_APP_NAME } from '../../common';
 
 export function createEMSClient(
   emsSettings: EMSSettings,

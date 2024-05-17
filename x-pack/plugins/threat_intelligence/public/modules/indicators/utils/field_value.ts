@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../constants/common';
 import { unwrapValue } from './unwrap_value';
-import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 
 /**
  * Retrieves a field/value pair from an Indicator

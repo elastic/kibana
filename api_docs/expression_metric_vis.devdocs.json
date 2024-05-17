@@ -54,9 +54,7 @@
                 "tags": [],
                 "label": "max",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -68,9 +66,7 @@
                 "tags": [],
                 "label": "breakdownBy",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -106,9 +102,7 @@
             "tags": [],
             "label": "rowNumber",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -129,9 +123,7 @@
         "tags": [],
         "label": "EXPRESSION_METRIC_NAME",
         "description": [],
-        "signature": [
-          "\"metricVis\""
-        ],
+        "signature": ["\"metricVis\""],
         "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -144,9 +136,7 @@
         "tags": [],
         "label": "EXPRESSION_METRIC_TRENDLINE_NAME",
         "description": [],
-        "signature": [
-          "\"metricTrendline\""
-        ],
+        "signature": ["\"metricTrendline\""],
         "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -398,10 +388,7 @@
             "tags": [],
             "label": "trendline",
             "description": [],
-            "signature": [
-              "TrendlineResult",
-              " | undefined"
-            ],
+            "signature": ["TrendlineResult", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -413,9 +400,7 @@
             "tags": [],
             "label": "subtitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -427,9 +412,7 @@
             "tags": [],
             "label": "secondaryPrefix",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -441,10 +424,7 @@
             "tags": [],
             "label": "progressDirection",
             "description": [],
-            "signature": [
-              "LayoutDirection",
-              " | undefined"
-            ],
+            "signature": ["LayoutDirection", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -456,9 +436,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -470,9 +448,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -524,9 +500,7 @@
             "tags": [],
             "label": "minTiles",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -585,9 +559,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -599,9 +571,7 @@
             "tags": [],
             "label": "bgColor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -660,9 +630,7 @@
             "tags": [],
             "label": "subtitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -674,9 +642,7 @@
             "tags": [],
             "label": "secondaryPrefix",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -688,9 +654,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -702,9 +666,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -737,10 +699,7 @@
             "tags": [],
             "label": "progressDirection",
             "description": [],
-            "signature": [
-              "LayoutDirection",
-              " | undefined"
-            ],
+            "signature": ["LayoutDirection", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -763,9 +722,7 @@
             "tags": [],
             "label": "minTiles",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -777,9 +734,7 @@
             "tags": [],
             "label": "trends",
             "description": [],
-            "signature": [
-              "Record<string, { x: number; y: number; }[]> | undefined"
-            ],
+            "signature": ["Record<string, { x: number; y: number; }[]> | undefined"],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -805,9 +760,7 @@
             "tags": [],
             "label": "visType",
             "description": [],
-            "signature": [
-              "\"metric\""
-            ],
+            "signature": ["\"metric\""],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -993,9 +946,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"metric\""
-            ],
+            "signature": ["\"metric\""],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1028,9 +979,7 @@
         "tags": [],
         "label": "EXPRESSION_METRIC_NAME",
         "description": [],
-        "signature": [
-          "\"metricVis\""
-        ],
+        "signature": ["\"metricVis\""],
         "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1043,9 +992,7 @@
         "tags": [],
         "label": "EXPRESSION_METRIC_TRENDLINE_NAME",
         "description": [],
-        "signature": [
-          "\"metricTrendline\""
-        ],
+        "signature": ["\"metricTrendline\""],
         "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1149,9 +1096,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"expressionMetricVis\""
-        ],
+        "signature": ["\"expressionMetricVis\""],
         "path": "src/plugins/chart_expressions/expression_metric/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1164,9 +1109,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"expressionMetricVis\""
-        ],
+        "signature": ["\"expressionMetricVis\""],
         "path": "src/plugins/chart_expressions/expression_metric/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

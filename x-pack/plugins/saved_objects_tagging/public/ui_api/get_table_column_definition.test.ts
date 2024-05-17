@@ -7,8 +7,8 @@
 
 import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
+import { createSavedObject, createTag, createTagReference } from '../../common/test_utils';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
-import { createTagReference, createSavedObject, createTag } from '../../common/test_utils';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
 
 describe('getTableColumnDefinition', () => {

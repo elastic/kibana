@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, Type } from '@kbn/config-schema';
-import { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
+import { Type, schema } from '@kbn/config-schema';
 import { SubActionConnector } from './sub_action_connector';
+import { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { ServiceParams } from './types';
 
 export interface CaseConnectorInterface<Incident, GetIncidentResponse> {

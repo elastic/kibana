@@ -30,8 +30,8 @@ import type { RolesAPIClient } from '../../../roles';
 import { RoleSelector } from '../role_selector';
 import {
   validateRoleMappingName,
-  validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
+  validateRoleMappingRoles,
 } from '../services/role_mapping_validation';
 
 interface Props {

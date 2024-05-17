@@ -1,3 +1,9 @@
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
+import type {
+  BulkOperationBase,
+  BulkResponseItem,
+  ErrorCause,
+} from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +12,6 @@
  * Side Public License, v 1.
  */
 import type { Payload } from '@hapi/boom';
-import type {
-  BulkOperationBase,
-  BulkResponseItem,
-  ErrorCause,
-} from '@elastic/elasticsearch/lib/api/types';
-import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import type { Either } from '../utils';
 import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
 

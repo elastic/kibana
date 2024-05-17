@@ -13,12 +13,12 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import {
-  RoleMappingsTable,
   RoleMappingsHeading,
+  RoleMappingsTable,
   RolesEmptyPrompt,
-  UsersTable,
-  UsersHeading,
   UsersEmptyPrompt,
+  UsersHeading,
+  UsersTable,
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 

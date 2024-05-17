@@ -6,10 +6,10 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import type { Services } from '../services';
 
 export const mockServices: Services = {

@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
+import { WaterfallMetadataEntry } from '../../waterfall/types';
 import {
-  WaterfallFlyout,
-  DETAILS,
   CERTIFICATES,
+  DETAILS,
   REQUEST_HEADERS,
   RESPONSE_HEADERS,
+  WaterfallFlyout,
 } from './waterfall_flyout';
-import { WaterfallMetadataEntry } from '../../waterfall/types';
 
 describe('WaterfallFlyout', () => {
   const flyoutData: WaterfallMetadataEntry = {

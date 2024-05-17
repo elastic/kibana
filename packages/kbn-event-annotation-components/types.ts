@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 export interface EventAnnotationServiceType {
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;

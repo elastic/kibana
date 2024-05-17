@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
 import {
-  EuiPanel,
+  EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
   useEuiTheme,
-  EuiBadge,
 } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import * as i18n from '../translations';
 
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';

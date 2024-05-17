@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
+import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 export const dataViewSavedObjectType: SavedObjectsType = {
   name: DATA_VIEW_SAVED_OBJECT_TYPE,

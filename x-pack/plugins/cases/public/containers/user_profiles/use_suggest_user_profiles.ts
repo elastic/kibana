@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import useDebounce from 'react-use/lib/useDebounce';
-import type { UserProfile } from '@kbn/security-plugin/common';
 import { noop } from 'lodash';
+import { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants';
-import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { ServerError } from '../../types';
 import { casesQueriesKeys } from '../constants';
+import * as i18n from '../translations';
 import type { SuggestUserProfilesArgs } from './api';
 import { suggestUserProfiles } from './api';
 

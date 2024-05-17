@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import type { KueryNode } from '@kbn/es-query';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import { get } from 'lodash';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
+import type { Owner } from '../../../common/constants/types';
+import { buildFilter } from '../../client/utils';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type {
-  CaseAggregationResult,
-  Buckets,
-  MaxBucketOnCaseAggregation,
-  SolutionTelemetry,
-  AttachmentFramework,
   AttachmentAggregationResult,
-  BucketsWithMaxOnCase,
+  AttachmentFramework,
+  AttachmentFrameworkAggsResult,
   AttachmentStats,
-  FileAttachmentStats,
+  Buckets,
+  BucketsWithMaxOnCase,
+  CaseAggregationResult,
+  CustomFieldsTelemetry,
   FileAttachmentAggregationResults,
   FileAttachmentAggsResult,
-  AttachmentFrameworkAggsResult,
-  CustomFieldsTelemetry,
+  FileAttachmentStats,
+  MaxBucketOnCaseAggregation,
+  SolutionTelemetry,
 } from '../types';
-import { buildFilter } from '../../client/utils';
-import type { Owner } from '../../../common/constants/types';
-import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {

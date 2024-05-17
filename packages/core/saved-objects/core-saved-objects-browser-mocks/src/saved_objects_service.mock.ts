@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+import type { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 

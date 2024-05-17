@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import {
   DefaultUuid,
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
 } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
+import { NamespaceType } from '../../common/default_namespace';
+import { description } from '../../common/description';
 import { exceptionListType } from '../../common/exception_list';
+import { ListId } from '../../common/list_id';
+import { meta } from '../../common/meta';
+import { name } from '../../common/name';
+import { namespace_type } from '../../common/namespace_type';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { Tags } from '../../common/tags';
-import { ListId } from '../../common/list_id';
-import { NamespaceType } from '../../common/default_namespace';
-import { name } from '../../common/name';
-import { description } from '../../common/description';
-import { namespace_type } from '../../common/namespace_type';
 import { tags } from '../../common/tags';
-import { meta } from '../../common/meta';
 
 export const createExceptionListSchema = t.intersection([
   t.exact(

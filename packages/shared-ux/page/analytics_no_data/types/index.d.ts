@@ -10,8 +10,8 @@ import { Observable } from 'rxjs';
 
 import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import {
-  KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
+  KibanaNoDataPageServices,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 /**

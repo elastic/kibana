@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, createElement, FC, PropsWithChildren } from 'react';
-import { KibanaEnvironmentContext, type KibanaEnvContext } from './kibana_environment_context';
+import { FC, PropsWithChildren, createElement, useMemo } from 'react';
+import { type KibanaEnvContext, KibanaEnvironmentContext } from './kibana_environment_context';
 
 export const useKibanaEnvironmentContextProvider = ({
   kibanaVersion,

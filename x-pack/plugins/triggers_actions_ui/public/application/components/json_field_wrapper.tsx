@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import {
   FieldHook,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { styles } from './json_field_wrapper.styles';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
+import { styles } from './json_field_wrapper.styles';
 
 interface Props {
   field: FieldHook<any, string>;

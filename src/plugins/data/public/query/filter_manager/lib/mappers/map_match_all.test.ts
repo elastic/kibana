@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mapMatchAll } from './map_match_all';
 import { MatchAllFilter } from '@kbn/es-query';
+import { mapMatchAll } from './map_match_all';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {

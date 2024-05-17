@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { CaseStatuses } from '@kbn/cases-components';
+import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASE_RULES_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
@@ -15,35 +17,33 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import { createCasesClientMock } from '../../client/mocks';
+import { CaseError } from '../../common/error';
+import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
-import { createCasesClientMock } from '../../client/mocks';
-import { CaseStatuses } from '@kbn/cases-components';
-import { CaseError } from '../../common/error';
+import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
 import {
   alerts,
+  alertsNested,
+  alertsWithNoGrouping,
   cases,
   createdOracleRecord,
   groupedAlertsWithOracleKey,
   groupingBy,
   oracleRecords,
-  rule,
   owner,
-  timeWindow,
   reopenClosedCases,
+  rule,
+  timeWindow,
   updatedCounterOracleRecord,
-  alertsNested,
-  alertsWithNoGrouping,
 } from './index.mock';
 import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
   expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
 } from './test_helpers';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
-import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
-import { CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');

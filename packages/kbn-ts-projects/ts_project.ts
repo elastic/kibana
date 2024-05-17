@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { makeMatcher } from '@kbn/picomatcher';
-import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { makeMatcher } from '@kbn/picomatcher';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 
-import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
+import { TsConfig, parseTsConfig, readTsConfig } from './ts_configfile';
 
 export type RefableTsProject = TsProject & { rootImportReq: string; pkg: Package };
 

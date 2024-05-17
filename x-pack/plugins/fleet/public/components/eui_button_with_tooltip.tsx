@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
+import React from 'react';
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 

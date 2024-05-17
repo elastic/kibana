@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { EuiCode, EuiFormRow, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { PainlessContext, PainlessLang, monaco } from '@kbn/monaco';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { first, firstValueFrom } from 'rxjs';
 import type { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
-import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
 
-import {
-  UseField,
-  useFormData,
-  useBehaviorSubject,
-  RuntimeType,
-  CodeEditor,
-  useFormContext,
-} from '../../../shared_imports';
-import type { RuntimeFieldPainlessError } from '../../../types';
 import { painlessErrorToMonacoMarker } from '../../../lib';
-import { useFieldPreviewContext } from '../../preview';
-import { schema } from '../form_schema';
-import type { FieldFormInternal } from '../field_editor';
+import {
+  CodeEditor,
+  RuntimeType,
+  UseField,
+  useBehaviorSubject,
+  useFormContext,
+  useFormData,
+} from '../../../shared_imports';
 import { useStateSelector } from '../../../state_utils';
+import type { RuntimeFieldPainlessError } from '../../../types';
+import { useFieldPreviewContext } from '../../preview';
 import { PreviewState } from '../../preview/types';
+import type { FieldFormInternal } from '../field_editor';
+import { schema } from '../form_schema';
 
 interface Props {
   links: { runtimePainless: string };

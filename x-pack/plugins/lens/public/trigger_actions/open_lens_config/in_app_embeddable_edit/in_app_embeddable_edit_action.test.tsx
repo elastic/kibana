@@ -6,9 +6,9 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import type { LensPluginStartDependencies } from '../../../plugin';
 import { EditLensEmbeddableAction } from './in_app_embeddable_edit_action';
 
 describe('inapp editing of Lens embeddable', () => {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { ISearchStrategy } from '@kbn/data-plugin/server';
 import { of } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
 export const fibonacciStrategyProvider = (): ISearchStrategy<

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export

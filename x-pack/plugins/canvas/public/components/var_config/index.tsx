@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
+import copy from 'copy-to-clipboard';
+import React, { FC } from 'react';
 
-import { VarConfig as ChildComponent } from './var_config';
-import { useNotifyService } from '../../services';
 import { CanvasVariable } from '../../../types';
+import { useNotifyService } from '../../services';
+import { VarConfig as ChildComponent } from './var_config';
 
 const strings = {
   getCopyNotificationDescription: () =>

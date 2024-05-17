@@ -1,3 +1,10 @@
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,39 +13,32 @@
  */
 import pMap from 'p-map';
 import {
-  SavedObjectsUpdateResponse,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { InvalidLocationError } from './normalizers/common_fields';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { SyntheticsServerSetup } from '../../types';
-import { RouteContext } from '../../routes/types';
+  ConfigKey,
+  EncryptedSyntheticsMonitorAttributes,
+  Locations,
+  MonitorFields,
+  ProjectMonitor,
+  ServiceLocationErrors,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
+} from '../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
-import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
-  ConfigKey,
-  SyntheticsMonitorWithSecretsAttributes,
-  EncryptedSyntheticsMonitorAttributes,
-  ServiceLocationErrors,
-  ProjectMonitor,
-  Locations,
-  SyntheticsMonitor,
-  MonitorFields,
-} from '../../../common/runtime_types';
-import { formatSecrets, normalizeSecrets } from '../utils/secrets';
-import {
-  validateProjectMonitor,
-  validateMonitor,
-  ValidationResult,
   INVALID_CONFIGURATION_ERROR,
+  ValidationResult,
+  validateMonitor,
+  validateProjectMonitor,
 } from '../../routes/monitor_cruds/monitor_validation';
+import { RouteContext } from '../../routes/types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsServerSetup } from '../../types';
+import { getAllLocations } from '../get_all_locations';
+import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
+import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import { normalizeProjectMonitor } from './normalizers';
+import { InvalidLocationError } from './normalizers/common_fields';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 

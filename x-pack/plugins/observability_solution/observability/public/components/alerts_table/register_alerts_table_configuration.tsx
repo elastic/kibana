@@ -6,8 +6,8 @@
  */
 
 import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
-import type { ConfigSchema } from '../../plugin';
 import { ObservabilityRuleTypeRegistry } from '../..';
+import type { ConfigSchema } from '../../plugin';
 import { getAlertsPageTableConfiguration } from './alerts/get_alerts_page_table_configuration';
 import { getRuleDetailsTableConfiguration } from './rule_details/get_rule_details_table_configuration';
 import { getSloAlertsTableConfiguration } from './slo/get_slo_alerts_table_configuration';

@@ -6,10 +6,6 @@
  */
 
 import { pick } from 'lodash';
-import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { login, ROLE } from '../../../tasks/login';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
   ensureArtifactPageAuthzAccess,
@@ -29,6 +25,10 @@ import {
   visitFleetAgentList,
   visitPolicyList,
 } from '../../../screens';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
+import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { ROLE, login } from '../../../tasks/login';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',

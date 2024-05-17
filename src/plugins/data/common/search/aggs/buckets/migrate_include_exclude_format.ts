@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { isString, isObject } from 'lodash';
-import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
+import { isObject, isString } from 'lodash';
 import { IAggConfig } from '../agg_config';
+import { BucketAggParam, BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 
 export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {

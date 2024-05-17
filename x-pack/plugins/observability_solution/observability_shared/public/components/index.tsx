@@ -7,8 +7,8 @@
 
 import React, { lazy, Suspense } from 'react';
 import type {
-  FieldValueSuggestionsProps,
   FieldValueSelectionProps,
+  FieldValueSuggestionsProps,
 } from './field_value_suggestions/types';
 
 const FieldValueSelectionLazy = lazy(

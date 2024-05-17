@@ -80,9 +80,7 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": [
-              "never[]"
-            ],
+            "signature": ["never[]"],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -150,9 +148,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Partial<Params> | undefined"
-            ],
+            "signature": ["Partial<Params> | undefined"],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -171,10 +167,7 @@
         "description": [
           "\nReturns the Jest-compatible service abstractions for the `NoDataCard` Provider."
         ],
-        "signature": [
-          "(params?: Partial<Params> | undefined) => ",
-          "RedirectAppLinksServices"
-        ],
+        "signature": ["(params?: Partial<Params> | undefined) => ", "RedirectAppLinksServices"],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -186,9 +179,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Partial<Params> | undefined"
-            ],
+            "signature": ["Partial<Params> | undefined"],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,

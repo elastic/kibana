@@ -8,7 +8,7 @@
 
 import dedent from 'dedent';
 import { RuleTester } from 'eslint';
-import { NoNakedESLintDisableRule, NAKED_DISABLE_MSG_ID } from './no_naked_eslint_disable';
+import { NAKED_DISABLE_MSG_ID, NoNakedESLintDisableRule } from './no_naked_eslint_disable';
 
 const tsTester = [
   '@typescript-eslint/parser',

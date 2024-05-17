@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, ChangeEvent, FormEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback, ChangeEvent, FormEvent } from 'react';
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiBasicTable,
+  type EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
-  EuiBasicTable,
+  EuiButtonIcon,
   EuiFieldText,
-  useGeneratedHtmlId,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiButtonIcon,
   EuiSpacer,
   EuiText,
-  type EuiBasicTableColumn,
+  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import * as utils from './utils';

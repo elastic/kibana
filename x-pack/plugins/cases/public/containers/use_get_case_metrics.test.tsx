@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import type { SingleCaseMetricsFeature } from '../../common/ui';
-import { useGetCaseMetrics } from './use_get_case_metrics';
-import { basicCase } from './mock';
-import * as api from './api';
-import { TestProviders } from '../common/mock';
-import { useToasts } from '../common/lib/kibana';
 import { CaseMetricsFeature } from '../../common/types/api';
+import type { SingleCaseMetricsFeature } from '../../common/ui';
+import { useToasts } from '../common/lib/kibana';
+import { TestProviders } from '../common/mock';
+import * as api from './api';
+import { basicCase } from './mock';
+import { useGetCaseMetrics } from './use_get_case_metrics';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import React from 'react';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { SeriesConfig, SeriesUrl } from '../../types';
 

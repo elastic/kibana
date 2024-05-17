@@ -9,22 +9,22 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
-  FormulaPublicApi,
+  DateHistogramIndexPatternColumn,
   FormBasedPersistedState,
-  PersistedIndexPatternLayer,
+  FormulaPublicApi,
   XYDataLayerConfig as LensXYDataLayerConfig,
+  PersistedIndexPatternLayer,
   SeriesType,
   TermsIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { ChartColumn, ChartLayer, FormulaValueConfig } from '../../types';
 import {
+  type DateHistogramColumnParams,
+  type TopValuesColumnParams,
   getDefaultReferences,
   getHistogramColumn,
   getTopValuesColumn,
   nonNullable,
-  type TopValuesColumnParams,
-  type DateHistogramColumnParams,
 } from '../../utils';
 import { XY_DATA_ID } from '../constants';
 import { FormulaColumn } from './columns/formula';

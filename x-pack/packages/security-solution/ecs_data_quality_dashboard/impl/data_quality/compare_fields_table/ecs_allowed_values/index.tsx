@@ -9,9 +9,9 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EMPTY_PLACEHOLDER } from '../helpers';
 import { CodeSuccess } from '../../styles';
 import type { AllowedValue } from '../../types';
+import { EMPTY_PLACEHOLDER } from '../helpers';
 
 const EcsAllowedValueFlexItem = styled(EuiFlexItem)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};

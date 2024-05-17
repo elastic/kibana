@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { transformValidate, transformValidateBulkError } from './validate';
-import type { BulkError } from '../../routes/utils';
-import { getRuleMock } from '../../routes/__mocks__/request_responses';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { getRuleMock } from '../../routes/__mocks__/request_responses';
+import type { BulkError } from '../../routes/utils';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { transformValidate, transformValidateBulkError } from './validate';
 
 export const ruleOutput = (): RuleResponse => ({
   actions: [],

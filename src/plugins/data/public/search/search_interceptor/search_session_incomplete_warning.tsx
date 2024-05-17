@@ -8,8 +8,8 @@
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { DocLinksStart } from '@kbn/core/public';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const SearchSessionIncompleteWarning = (docLinks: DocLinksStart) => (
   <>

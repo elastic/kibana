@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { TryItButton } from '../../../../components/try_it_button';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { InfraFormatter } from '../../../../lib/lib';
+import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { Timeline } from './timeline/timeline';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {

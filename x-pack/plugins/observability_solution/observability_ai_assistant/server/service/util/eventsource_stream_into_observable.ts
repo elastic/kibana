@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createParser } from 'eventsource-parser';
 import { Readable } from 'node:stream';
+import { createParser } from 'eventsource-parser';
 import { Observable } from 'rxjs';
 
 // OpenAI sends server-sent events, so we can use a library

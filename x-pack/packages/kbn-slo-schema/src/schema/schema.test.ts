@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
 
 import { dateType } from './common';
 

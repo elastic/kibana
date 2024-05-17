@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
+import { PLUGIN_ID } from '../common/constants';
+import { AIAssistantService } from './ai_assistant_service';
 import { events } from './lib/telemetry/event_based_telemetry';
+import { registerRoutes } from './routes/register_routes';
+import { RequestContextFactory } from './routes/request_context_factory';
+import { appContextService } from './services/app_context';
 import {
   AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -19,11 +24,6 @@ import {
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
 } from './types';
-import { AIAssistantService } from './ai_assistant_service';
-import { RequestContextFactory } from './routes/request_context_factory';
-import { PLUGIN_ID } from '../common/constants';
-import { registerRoutes } from './routes/register_routes';
-import { appContextService } from './services/app_context';
 
 export class ElasticAssistantPlugin
   implements

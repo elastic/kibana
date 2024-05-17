@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { Footer } from './footer';
+import React from 'react';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import { Footer } from './footer';
 
 const defaultProps = {
   isLocked: false,

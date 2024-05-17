@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import {
-  compareVirtualVersionsMock,
-  getVirtualVersionMapMock,
-  getVirtualVersionsFromMappingsMock,
-  getUpdatedRootFieldsMock,
-} from './check_version_compatibility.test.mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
+  CompareModelVersionResult,
   IndexMapping,
   VirtualVersionMap,
-  CompareModelVersionResult,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { checkVersionCompatibility } from './check_version_compatibility';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createType } from '../test_helpers';
+import { checkVersionCompatibility } from './check_version_compatibility';
+import {
+  compareVirtualVersionsMock,
+  getUpdatedRootFieldsMock,
+  getVirtualVersionMapMock,
+  getVirtualVersionsFromMappingsMock,
+} from './check_version_compatibility.test.mocks';
 
 describe('checkVersionCompatibility', () => {
   const deletedTypes = ['some-deleted-type'];

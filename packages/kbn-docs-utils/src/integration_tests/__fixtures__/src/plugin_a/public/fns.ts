@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TypeWithGeneric, ImAType } from './types';
 import { ImNotExportedFromIndex } from './foo';
+import { ImAType, TypeWithGeneric } from './types';
 
 /**
  * This is a non arrow function.

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiExpression, EuiFormHelpText, EuiPopover } from '@elastic/eui';
 import { DataView, Query } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import { getData, getSearchBar } from '../../../../kibana_services';
 

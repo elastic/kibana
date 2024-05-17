@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiRange } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiRange } from '@elastic/eui';
 
 interface Props {
   value: number;

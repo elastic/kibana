@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionTypeDefinition } from '../types';
 import { ExpressionValueRender } from '.';
+import { ExpressionTypeDefinition } from '../types';
 
 const name = 'range';
 

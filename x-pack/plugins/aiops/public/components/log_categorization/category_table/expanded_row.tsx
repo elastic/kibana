@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 
-import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+import { i18n } from '@kbn/i18n';
 
 import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../format_category';
 

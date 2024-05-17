@@ -13,11 +13,7 @@
  * connector.id.
  */
 
-import { omit, unset } from 'lodash';
-import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type {
   SavedObject,
   SavedObjectReference,
@@ -28,27 +24,18 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import { getNoneCaseConnector } from '../../common/utils';
+import { omit, unset } from 'lodash';
 import { CasesService } from '.';
-import type { ESCaseConnectorWithId } from '../test_utils';
-import {
-  createESJiraConnector,
-  createJiraConnector,
-  createExternalService,
-  createSavedObjectReferences,
-  createCaseSavedObjectResponse,
-  basicCaseFields,
-  createSOFindResponse,
-  createErrorSO,
-} from '../test_utils';
-import { AttachmentService } from '../attachments';
+import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import type { CaseAttributes, CaseConnector, ExternalService } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import type {
-  CaseSavedObjectTransformed,
   CasePersistedAttributes,
+  CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
@@ -56,6 +43,19 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import { getNoneCaseConnector } from '../../common/utils';
+import { AttachmentService } from '../attachments';
+import type { ESCaseConnectorWithId } from '../test_utils';
+import {
+  basicCaseFields,
+  createCaseSavedObjectResponse,
+  createESJiraConnector,
+  createErrorSO,
+  createExternalService,
+  createJiraConnector,
+  createSOFindResponse,
+  createSavedObjectReferences,
+} from '../test_utils';
 
 const createUpdateSOResponse = ({
   connector,

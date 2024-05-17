@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
+import { DELETE_BUTTON_LABEL, EDIT_BUTTON_LABEL } from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';

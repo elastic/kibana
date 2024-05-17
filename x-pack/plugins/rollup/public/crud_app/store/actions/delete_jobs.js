@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  deleteJobs as sendDeleteJobsRequest,
   createNoticeableDelay,
+  deleteJobs as sendDeleteJobsRequest,
   showApiError,
 } from '../../services';
 import { getDetailPanelJob } from '../selectors';
 
-import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../action_types';
+import { UPDATE_JOB_FAILURE, UPDATE_JOB_START, UPDATE_JOB_SUCCESS } from '../action_types';
 
-import { refreshJobs } from './refresh_jobs';
 import { closeDetailPanel } from './detail_panel';
+import { refreshJobs } from './refresh_jobs';
 
 import { getNotifications } from '../../../kibana_services';
 

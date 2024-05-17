@@ -12,8 +12,8 @@ import type {
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { SloBurnRateRuleParams } from './slo_api';
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');

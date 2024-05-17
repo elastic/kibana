@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
 
 export function WaterfallMarkerIcon({ field, label }: { field: string; label: string }) {

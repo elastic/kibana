@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
+import { act, waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import React from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
+import { CreateCase } from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
+import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
-import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
-import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
-import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import {
   sampleConnectorData,
   sampleData,
   sampleTags,
-  useGetIncidentTypesResponse,
-  useGetSeverityResponse,
-  useGetIssueTypesResponse,
   useGetFieldsByIssueTypeResponse,
+  useGetIncidentTypesResponse,
+  useGetIssueTypesResponse,
+  useGetSeverityResponse,
 } from './mock';
-import { CreateCase } from '.';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/api');

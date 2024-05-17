@@ -17,14 +17,14 @@ import type {
 } from '@kbn/core/server';
 import type { UserActionType } from '../../../../common/types/domain';
 import {
+  AttachmentType,
+  CaseStatuses,
   UserActionActions,
   UserActionTypes,
-  CaseStatuses,
-  AttachmentType,
 } from '../../../../common/types/domain';
-import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';
+import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import type { UserActions } from './types';
 
 export function payloadMigration(
@@ -180,8 +180,8 @@ const getSingleFieldPayload = (
         tags: isString(value)
           ? value.split(',').map((item) => item.trim())
           : Array.isArray(value)
-          ? value
-          : [],
+            ? value
+            : [],
       };
     case 'comment':
       /**

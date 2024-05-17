@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import {
-  CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
-} from './test_ids';
-import { RelatedCases } from './related_cases';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import React from 'react';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { RelatedCases } from './related_cases';
+import {
+  CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
+} from './test_ids';
 
 jest.mock('../../shared/hooks/use_fetch_related_cases');
 jest.mock('../../../../common/components/links', () => ({

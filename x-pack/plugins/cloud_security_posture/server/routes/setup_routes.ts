@@ -7,21 +7,21 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { PLUGIN_ID } from '../../common';
 import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
   CspServerPluginStartDeps,
 } from '../types';
-import { PLUGIN_ID } from '../../common';
-import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
-import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
-import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
-import { defineGetCspStatusRoute } from './status/status';
-import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
-import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
+import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
+import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
+import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
+import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
+import { defineGetCspStatusRoute } from './status/status';
+import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
 
 /**
  * 1. Registers routes

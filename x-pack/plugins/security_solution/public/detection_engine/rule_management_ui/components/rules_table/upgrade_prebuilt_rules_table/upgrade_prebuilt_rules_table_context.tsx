@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { invariant } from '../../../../../../common/utils/invariant';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import { invariant } from '../../../../../../common/utils/invariant';
-import {
-  usePerformUpgradeAllRules,
-  usePerformUpgradeSpecificRules,
-} from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
-import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
-import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
-import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
-import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
-import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
+import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import {
   RuleDetailsFlyout,
   TabContentPadding,
 } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
+import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import {
+  usePerformUpgradeAllRules,
+  usePerformUpgradeSpecificRules,
+} from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
+import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import * as i18n from './translations';
+import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
+import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -131,7 +131,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
-    data: { rules, stats: { tags } } = {
+    data: {
+      rules,
+      stats: { tags },
+    } = {
       rules: [],
       stats: { tags: [] },
     },

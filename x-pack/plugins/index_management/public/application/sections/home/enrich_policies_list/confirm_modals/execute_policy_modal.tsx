@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { executeEnrichPolicy } from '../../../../services/api';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAppContext } from '../../../../app_context';
+import { executeEnrichPolicy } from '../../../../services/api';
 
 export const ExecutePolicyModal = ({
   policyToExecute,

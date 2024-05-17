@@ -6,8 +6,8 @@
  */
 
 import { MetricsAPIRequest, MetricsAPIResponse } from '../../../../common/http_api';
-import { ESSearchClient } from '../../../lib/metrics/types';
 import { query } from '../../../lib/metrics';
+import { ESSearchClient } from '../../../lib/metrics/types';
 
 const handleResponse =
   (client: ESSearchClient, options: MetricsAPIRequest, previousResponse?: MetricsAPIResponse) =>

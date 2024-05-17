@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import { CertMonitor } from '../../../../common/runtime_types';
 import { MonitorPageLink } from '../common/monitor_page_link';
 

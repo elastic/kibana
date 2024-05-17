@@ -18,9 +18,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AssistantTool",
-        "description": [
-          "\nInterfaces for registering tools to be used by the elastic assistant"
-        ],
+        "description": ["\nInterfaces for registering tools to be used by the elastic assistant"],
         "path": "x-pack/plugins/elastic_assistant/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -186,9 +184,7 @@
             "tags": [],
             "label": "alertsIndexPattern",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -225,10 +221,7 @@
             "tags": [],
             "label": "chain",
             "description": [],
-            "signature": [
-              "RetrievalQAChain",
-              " | undefined"
-            ],
+            "signature": ["RetrievalQAChain", " | undefined"],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1476,9 +1469,7 @@
             "tags": [],
             "label": "langChainTimeout",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1490,12 +1481,7 @@
             "tags": [],
             "label": "llm",
             "description": [],
-            "signature": [
-              "ActionsClientLlm",
-              " | ",
-              "ActionsClientChatOpenAI",
-              " | undefined"
-            ],
+            "signature": ["ActionsClientLlm", " | ", "ActionsClientChatOpenAI", " | undefined"],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1532,9 +1518,7 @@
                 "tags": [],
                 "label": "newReplacements",
                 "description": [],
-                "signature": [
-                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"
-                ],
+                "signature": ["Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"],
                 "path": "x-pack/plugins/elastic_assistant/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1550,9 +1534,7 @@
             "tags": [],
             "label": "replacements",
             "description": [],
-            "signature": [
-              "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
-            ],
+            "signature": ["Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1585,9 +1567,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1803,9 +1783,7 @@
       "type": "Interface",
       "tags": [],
       "label": "ElasticAssistantPluginSetup",
-      "description": [
-        "The plugin setup interface"
-      ],
+      "description": ["The plugin setup interface"],
       "path": "x-pack/plugins/elastic_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1840,9 +1818,7 @@
       "type": "Interface",
       "tags": [],
       "label": "ElasticAssistantPluginStart",
-      "description": [
-        "The plugin start interface"
-      ],
+      "description": ["The plugin start interface"],
       "path": "x-pack/plugins/elastic_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1853,9 +1829,7 @@
           "type": "Object",
           "tags": [],
           "label": "actions",
-          "description": [
-            "\nActions plugin start contract."
-          ],
+          "description": ["\nActions plugin start contract."],
           "signature": [
             {
               "pluginId": "actions",
@@ -1899,12 +1873,8 @@
               "type": "string",
               "tags": [],
               "label": "pluginName",
-              "description": [
-                "Name of the plugin the features should be registered to"
-              ],
-              "signature": [
-                "string"
-              ],
+              "description": ["Name of the plugin the features should be registered to"],
+              "signature": ["string"],
               "path": "x-pack/plugins/elastic_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1944,9 +1914,7 @@
           "type": "Function",
           "tags": [],
           "label": "getRegisteredFeatures",
-          "description": [
-            "\nGet the registered features for a given plugin name."
-          ],
+          "description": ["\nGet the registered features for a given plugin name."],
           "signature": [
             "(pluginName: string) => ",
             {
@@ -1968,9 +1936,7 @@
               "type": "string",
               "tags": [],
               "label": "pluginName",
-              "description": [
-                "Name of the plugin to get the features for"
-              ],
+              "description": ["Name of the plugin to get the features for"],
               "path": "x-pack/plugins/elastic_assistant/server/services/app_context.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -2007,12 +1973,8 @@
               "type": "string",
               "tags": [],
               "label": "pluginName",
-              "description": [
-                "Name of the plugin the tool should be registered to"
-              ],
-              "signature": [
-                "string"
-              ],
+              "description": ["Name of the plugin the tool should be registered to"],
+              "signature": ["string"],
               "path": "x-pack/plugins/elastic_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -2024,9 +1986,7 @@
               "type": "Array",
               "tags": [],
               "label": "tools",
-              "description": [
-                "AssistantTools to be registered with for the given plugin"
-              ],
+              "description": ["AssistantTools to be registered with for the given plugin"],
               "signature": [
                 {
                   "pluginId": "elasticAssistant",
@@ -2051,9 +2011,7 @@
           "type": "Function",
           "tags": [],
           "label": "getRegisteredTools",
-          "description": [
-            "\nGet the registered tools for a given plugin name."
-          ],
+          "description": ["\nGet the registered tools for a given plugin name."],
           "signature": [
             "(pluginName: string) => ",
             {
@@ -2076,9 +2034,7 @@
               "type": "string",
               "tags": [],
               "label": "pluginName",
-              "description": [
-                "Name of the plugin to get the tools for"
-              ],
+              "description": ["Name of the plugin to get the tools for"],
               "path": "x-pack/plugins/elastic_assistant/server/services/app_context.ts",
               "deprecated": false,
               "trackAdoption": false

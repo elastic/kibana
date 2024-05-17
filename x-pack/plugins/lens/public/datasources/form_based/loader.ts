@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { uniq, mapValues, difference } from 'lodash';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   ActionExecutionContext,
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import { difference, mapValues, uniq } from 'lodash';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 
-import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
 import type { IndexPattern, IndexPatternRef } from '../../types';
+import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 
 export function onRefreshIndexPattern() {
   if (memoizedGetAvailableOperationsByMetadata.cache.clear) {

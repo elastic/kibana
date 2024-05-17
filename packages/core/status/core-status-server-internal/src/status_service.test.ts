@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom, of } from 'rxjs';
 
-import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
-import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import { first, take, toArray } from 'rxjs';
+import { configServiceMock } from '@kbn/config-mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import { RouterMock, mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { configServiceMock } from '@kbn/config-mocks';
-import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { type CoreStatus, type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
+import { first, take, toArray } from 'rxjs';
 
+import { StatusService, type StatusServiceSetupDeps } from './status_service';
 import {
   logCoreStatusChangesMock,
-  logPluginsStatusChangesMock,
   logOverallStatusChangesMock,
+  logPluginsStatusChangesMock,
 } from './status_service.test.mocks';
-import { StatusService, type StatusServiceSetupDeps } from './status_service';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 import type { InternalStatusServiceSetup } from './types';
 
@@ -562,8 +562,9 @@ describe('StatusService', () => {
       test('registers a context provider', async () => {
         expect(analyticsMock.registerContextProvider).toHaveBeenCalledTimes(1);
         const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
-        await expect(firstValueFrom(context$.pipe(take(2), toArray()))).resolves
-          .toMatchInlineSnapshot(`
+        await expect(
+          firstValueFrom(context$.pipe(take(2), toArray()))
+        ).resolves.toMatchInlineSnapshot(`
           Array [
             Object {
               "overall_status_level": "initializing",

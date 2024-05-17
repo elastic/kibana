@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../mocks';
-import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { set } from 'lodash';
 import React from 'react';
-import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
+import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
+import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
+import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { AdvancedSectionProps } from './advanced_section';
 import { AdvancedSection } from './advanced_section';
-import userEvent from '@testing-library/user-event';
-import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
-import { within } from '@testing-library/react';
-import { set } from 'lodash';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

@@ -1,3 +1,7 @@
+import path from 'path';
+import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+import { REPO_ROOT } from '@kbn/repo-info';
+import expect from 'expect';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +9,10 @@
  * 2.0.
  */
 import fs from 'fs/promises';
-import path from 'path';
+import JSON5 from 'json5';
 import getMajorVersion from 'semver/functions/major';
 import getMinorVersion from 'semver/functions/minor';
-import { REPO_ROOT } from '@kbn/repo-info';
-import JSON5 from 'json5';
-import expect from 'expect';
-import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -19,11 +20,10 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   installPrebuiltRulesPackageByVersion,
-  upgradePrebuiltRules,
   reviewPrebuiltRulesToInstall,
   reviewPrebuiltRulesToUpgrade,
+  upgradePrebuiltRules,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

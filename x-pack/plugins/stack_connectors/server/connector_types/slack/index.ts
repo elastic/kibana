@@ -6,14 +6,13 @@
  */
 
 import { URL } from 'url';
-import HttpProxyAgent from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
+import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -21,13 +20,14 @@ import type {
   ExecutorType,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
-import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
+import { getOrElse, map } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import HttpProxyAgent from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 export type SlackConnectorType = ConnectorType<

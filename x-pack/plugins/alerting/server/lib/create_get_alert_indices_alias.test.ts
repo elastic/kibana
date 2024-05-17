@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { AlertingConfig } from '../config';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { ConstructorOptions, RuleTypeRegistry } from '../rule_type_registry';
 import { TaskRunnerFactory } from '../task_runner/task_runner_factory';
+import { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
 import { ILicenseState } from './license_state';
 import { licenseStateMock } from './license_state.mock';
-import { schema } from '@kbn/config-schema';
-import { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
-import { AlertingConfig } from '../config';
 
 describe('createGetAlertIndicesAliasFn', () => {
   const logger = loggingSystemMock.create().get();

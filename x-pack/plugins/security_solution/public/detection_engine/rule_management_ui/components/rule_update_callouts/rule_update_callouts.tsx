@@ -13,8 +13,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { MiniCallout } from '../mini_callout/mini_callout';
 import {
-  getUpdateRulesCalloutTitle,
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
+  getUpdateRulesCalloutTitle,
 } from '../mini_callout/translations';
 import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
 

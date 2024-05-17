@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultDecoration, getSplits, getLastMetric, mapEmptyToZero } from '../../helpers';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { getDefaultDecoration, getLastMetric, getSplits, mapEmptyToZero } from '../../helpers';
 
 export function stdMetric(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

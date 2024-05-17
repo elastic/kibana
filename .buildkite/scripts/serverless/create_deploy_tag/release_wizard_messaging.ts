@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { GithubCommitType } from './info_sections/commit_info';
+import { getUsefulLinks } from './info_sections/useful_links';
 import {
-  buildkite,
   COMMIT_INFO_CTX,
   CURRENT_COMMIT_META_KEY,
   DEPLOY_TAG_META_KEY,
   DRY_RUN_CTX,
-  octokit,
   SELECTED_COMMIT_META_KEY,
+  buildkite,
+  octokit,
   sendSlackMessage,
 } from './shared';
-import { GithubCommitType } from './info_sections/commit_info';
-import { getUsefulLinks } from './info_sections/useful_links';
 
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';

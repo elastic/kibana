@@ -12,17 +12,17 @@ import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { getPackages } from '@kbn/repo-packages';
-import { ToolingLog } from '@kbn/tooling-log';
+import { CliArgs, Env, RawPackageInfo } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 import {
-  createTestEsCluster,
   CreateTestEsClusterOptions,
+  createTestEsCluster,
   esTestConfig,
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { CliArgs, Env, RawPackageInfo } from '@kbn/config';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';

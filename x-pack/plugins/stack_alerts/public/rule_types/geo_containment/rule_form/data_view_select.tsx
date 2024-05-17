@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { i18n } from '@kbn/i18n';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 interface Props {
   data: DataPublicPluginStart;

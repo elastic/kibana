@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
-import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
-import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   ruleParamsRT,
 } from '../../../../common/alerting/logs/log_threshold';
-import { InfraBackendLibs } from '../../infra_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
-  groupByKeysActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
+  groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   orchestratorActionVariableDescription,
   tagsActionVariableDescription,
 } from '../common/messages';
 import { LogsRulesTypeAlertDefinition } from '../register_rule_types';
+import { FIRED_ACTIONS, createLogThresholdExecutor } from './log_threshold_executor';
+import { extractReferences, injectReferences } from './log_threshold_references_manager';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',

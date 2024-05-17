@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { act } from '@testing-library/react';
+import React from 'react';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { merge } from 'lodash';
+import { Choice } from '../lib/servicenow/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowSIRParamsFields from './servicenow_sir_params';
-import { Choice } from '../lib/servicenow/types';
-import { merge } from 'lodash';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');

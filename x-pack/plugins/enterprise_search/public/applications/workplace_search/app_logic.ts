@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { InitialAppData, SearchOAuth } from '../../../common/types';
 
 import {
+  Account,
   Organization,
   WorkplaceSearchInitialData,
-  Account,
 } from '../../../common/types/workplace_search';
 
 interface AppValues extends WorkplaceSearchInitialData {

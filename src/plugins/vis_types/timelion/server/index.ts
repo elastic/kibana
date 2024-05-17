@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, TimelionConfig } from '../config';
+import { TimelionConfig, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<TimelionConfig> = {
   exposeToBrowser: {

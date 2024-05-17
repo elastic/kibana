@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { ViewQueryFlyout } from './view_query_flyout';
-import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { ViewQueryFlyout } from './view_query_flyout';
 
 jest.mock('../../hooks/use_indices_fields', () => ({
   useIndicesFields: () => ({

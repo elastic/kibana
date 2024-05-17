@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
-import { StepNumberNav } from './step_number_nav';
 import { StepScreenshotDetails } from '../step_screenshot_details';
 import { StepTabs } from '../step_tabs';
+import { StepNumberNav } from './step_number_nav';
 
 export const StepDetails = ({
   step,

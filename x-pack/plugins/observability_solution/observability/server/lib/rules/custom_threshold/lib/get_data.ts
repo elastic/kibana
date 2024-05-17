@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
-import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
+import { AdditionalContext, CONTAINER_ID, KUBERNETES_POD_UID, doFieldsExist } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<

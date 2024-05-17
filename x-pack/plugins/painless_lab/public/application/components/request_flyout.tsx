@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
-  EuiCodeBlock,
-  EuiTabbedContent,
-  EuiTitle,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTabbedContent,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 import { Links } from '../../links';
 
 interface Props {

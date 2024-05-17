@@ -1,3 +1,15 @@
+import {
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSwitch,
+  EuiSwitchProps,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +18,6 @@
  * Side Public License, v 1.
  */
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiSwitchProps,
-  EuiSwitch,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
 
 import { Connector, SchedulingConfiguraton, SyncJobType } from '../../types/connectors';
 import { PlatinumLicensePopover } from '../configuration/platinum_license_popover';

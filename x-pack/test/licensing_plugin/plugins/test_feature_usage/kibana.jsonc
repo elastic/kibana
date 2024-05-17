@@ -6,8 +6,6 @@
     "id": "testFeatureUsage",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "licensing"
-    ]
+    "requiredPlugins": ["licensing"]
   }
 }

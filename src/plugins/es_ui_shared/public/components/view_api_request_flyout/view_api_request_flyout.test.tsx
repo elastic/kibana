@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { compressToEncodedURIComponent } from 'lz-string';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
-import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
-import { compressToEncodedURIComponent } from 'lz-string';
 
-import { ViewApiRequestFlyout } from './view_api_request_flyout';
-import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { ApplicationStart } from '@kbn/core/public';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import type { UrlService } from '@kbn/share-plugin/common/url_service';
+import { ViewApiRequestFlyout } from './view_api_request_flyout';
 
 const payload = {
   title: 'Test title',

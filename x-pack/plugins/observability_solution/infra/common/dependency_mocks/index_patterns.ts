@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView, DataViewsContract, FieldSpec, fieldList } from '@kbn/data-views-plugin/common';
 import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs';
-import { DataView, DataViewsContract, fieldList, FieldSpec } from '@kbn/data-views-plugin/common';
 
 type IndexPatternMock = Pick<
   DataView,

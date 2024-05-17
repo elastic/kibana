@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiCallOut, EuiButtonIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { VegaSpec } from '../data_model/types';
 import { getDocLinks } from '../services';
 

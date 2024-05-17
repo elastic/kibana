@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   FileJSON,
-  FileStatus,
+  FileKindBase,
   FileMetadata,
   FileShare,
   FileShareJSON,
-  FileKindBase,
   FileShareJSONWithToken,
+  FileStatus,
 } from '@kbn/shared-ux-file-types';
+import type { Observable } from 'rxjs';
 import type { UploadOptions } from '../server/blob_storage_service';
-import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 import type { SupportedFileHashAlgorithm } from '../server/saved_objects/file';
+import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type {
   FileKindBase,

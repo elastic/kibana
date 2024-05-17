@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, ReactElement, useState, useMemo } from 'react';
 import {
+  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableProps,
   EuiSelectableOption,
-  useEuiTheme,
-  EuiPanel,
+  EuiSelectableProps,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import React, { useCallback, ReactElement, useState, useMemo } from 'react';
 
 export const EMPTY_OPTION = '__EMPTY_SELECTOR_OPTION__';
 

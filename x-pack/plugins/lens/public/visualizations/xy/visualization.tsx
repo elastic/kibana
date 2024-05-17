@@ -5,72 +5,62 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Position } from '@elastic/charts';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { IconChartBarAnnotations, IconChartBarReferenceLine } from '@kbn/chart-icons';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { getAnnotationAccessor } from '@kbn/event-annotation-components';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { isEqual } from 'lodash';
-import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
+import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { isEqual } from 'lodash';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { generateId } from '../../id_generator';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import type {
+  AnnotationGroups,
+  FramePublicAPI,
+  Suggestion,
+  UserMessage,
+  Visualization,
+} from '../../types';
 import {
+  getColorMappingDefaults,
   isDraggedDataViewField,
   isOperationFromCompatibleGroup,
   isOperationFromTheSameGroup,
   nonNullable,
   renewIDs,
-  getColorMappingDefaults,
 } from '../../utils';
-import { getSuggestions } from './xy_suggestions';
-import { XyToolbar } from './xy_config_panel';
+import { AddLayerButton } from './add_layer';
+import { createAnnotationActions } from './annotations/actions';
 import {
-  DataDimensionEditor,
-  DataDimensionEditorDataSectionExtra,
-} from './xy_config_panel/dimension_editor';
-import {
-  ReferenceLayerHeader,
-  AnnotationsLayerHeader,
-  LayerHeaderContent,
-} from './xy_config_panel/layer_header';
-import type {
-  Visualization,
-  FramePublicAPI,
-  Suggestion,
-  UserMessage,
-  AnnotationGroups,
-} from '../../types';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import {
-  type State,
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type SeriesType,
-  visualizationTypes,
-} from './types';
-import {
-  getAnnotationLayerErrors,
-  isHorizontalChart,
-  annotationLayerHasUnsavedChanges,
-  isHorizontalSeries,
-} from './state_helpers';
-import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
+  getAnnotationsConfiguration,
+  getAnnotationsSupportedLayer,
+  getUniqueLabels,
+  onAnnotationDrop,
+  setAnnotationsDimension,
+} from './annotations/helpers';
+import { defaultAnnotationLabel } from './annotations/helpers';
+import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
-import { getColumnToLabelMap } from './state_helpers';
+import { LayerSettings } from './layer_settings';
+import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
 import {
   getGroupsAvailableInData,
   getReferenceConfiguration,
@@ -78,12 +68,21 @@ import {
   setReferenceDimension,
 } from './reference_line_helpers';
 import {
-  getAnnotationsConfiguration,
-  getAnnotationsSupportedLayer,
-  setAnnotationsDimension,
-  getUniqueLabels,
-  onAnnotationDrop,
-} from './annotations/helpers';
+  annotationLayerHasUnsavedChanges,
+  getAnnotationLayerErrors,
+  isHorizontalChart,
+  isHorizontalSeries,
+} from './state_helpers';
+import { getColumnToLabelMap } from './state_helpers';
+import { getSortedAccessors, toExpression, toPreviewExpression } from './to_expression';
+import {
+  type SeriesType,
+  type State,
+  type XYDataLayerConfig,
+  type XYLayerConfig,
+  visualizationTypes,
+} from './types';
+import type { XYByValueAnnotationLayerConfig, XYState } from './types';
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
@@ -102,23 +101,24 @@ import {
   isDataLayer,
   isNumericDynamicMetric,
   isReferenceLayer,
+  isTimeChart,
   newLayerState,
   supportedDataLayer,
   validateLayersForDimension,
-  isTimeChart,
 } from './visualization_helpers';
-import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
-import type { XYByValueAnnotationLayerConfig, XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
+import { XyToolbar } from './xy_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
-import { defaultAnnotationLabel } from './annotations/helpers';
-import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import { createAnnotationActions } from './annotations/actions';
-import { AddLayerButton } from './add_layer';
-import { LayerSettings } from './layer_settings';
-import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
-import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
+import {
+  DataDimensionEditor,
+  DataDimensionEditorDataSectionExtra,
+} from './xy_config_panel/dimension_editor';
+import {
+  AnnotationsLayerHeader,
+  LayerHeaderContent,
+  ReferenceLayerHeader,
+} from './xy_config_panel/layer_header';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
+import { getSuggestions } from './xy_suggestions';
 
 const XY_ID = 'lnsXY';
 
@@ -498,8 +498,8 @@ export const getXyVisualization = ({
     return firstDataLayer?.colorMapping
       ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
       : firstDataLayer?.palette
-      ? { type: 'legacyPalette', value: firstDataLayer.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: firstDataLayer.palette }
+        : undefined;
   },
 
   getDropProps(dropProps) {
@@ -853,7 +853,7 @@ export const getXyVisualization = ({
             displayLocations: [{ id: 'visualization' }],
             shortMessage,
             longMessage,
-          } as UserMessage)
+          }) as UserMessage
       )
     );
 

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { i18n } from '@kbn/i18n';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationListingStartDependencies {

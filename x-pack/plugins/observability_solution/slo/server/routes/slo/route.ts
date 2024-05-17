@@ -8,28 +8,27 @@
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
+  PutSLOSettingsParams,
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
   fetchSLOHealthParamsSchema,
-  findSloDefinitionsParamsSchema,
   findSLOGroupsParamsSchema,
   findSLOParamsSchema,
+  findSloDefinitionsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   putSLOServerlessSettingsParamsSchema,
-  PutSLOSettingsParams,
   putSLOSettingsParamsSchema,
   resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -51,6 +50,7 @@ import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
 import { GetSLOInstances } from '../../services/get_slo_instances';
 import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
+import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
 import { ManageSLO } from '../../services/manage_slo';
 import { ResetSLO } from '../../services/reset_slo';

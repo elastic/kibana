@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { type SavedObject, BulkResolveError } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResolveResponse,
   SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { errorContent } from './utils';
-import { ApiExecutionContext } from './types';
-import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
+import { BulkResolveError, type SavedObject } from '@kbn/core-saved-objects-server';
 import { incrementCounterInternal } from './internals/increment_counter_internal';
+import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
+import { ApiExecutionContext } from './types';
+import { errorContent } from './utils';
 
 export interface PerformCreateParams<T = unknown> {
   objects: SavedObjectsBulkResolveObject[];

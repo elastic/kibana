@@ -10,8 +10,8 @@ import {
   FIELD_PREVIEW_PATH as path,
   INITIAL_REST_VERSION as version,
 } from '../../common/constants';
+import { FieldPreviewResponse, PainlessExecuteContext } from '../components/preview';
 import { sendRequest } from '../shared_imports';
-import { PainlessExecuteContext, FieldPreviewResponse } from '../components/preview';
 
 export const initApi = (httpClient: HttpSetup) => {
   const getFieldPreview = ({

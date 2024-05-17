@@ -6,10 +6,10 @@
  */
 import { act, render } from '@testing-library/react';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsByType } from './alerts_by_type';
 import { parsedAlerts } from './mock_type_data';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const display = 'alerts-by-type-palette-display';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiInMemoryTable, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { EuiTitle, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import * as i18n from './translations';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getRulesTableColumn } from '../utils';
+import * as i18n from './translations';
 
 interface ExceptionsLinkedToRuleComponentProps {
   rule: Rule;

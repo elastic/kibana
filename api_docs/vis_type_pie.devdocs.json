@@ -42,9 +42,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "PieTypeProps"
-            ],
+            "signature": ["PieTypeProps"],
             "path": "src/plugins/vis_types/pie/public/vis_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -234,9 +232,7 @@
         "tags": [],
         "label": "DEFAULT_PERCENT_DECIMALS",
         "description": [],
-        "signature": [
-          "2"
-        ],
+        "signature": ["2"],
         "path": "src/plugins/vis_types/pie/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

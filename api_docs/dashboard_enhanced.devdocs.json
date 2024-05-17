@@ -54,9 +54,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -103,9 +101,7 @@
             "tags": [],
             "label": "supportedTriggers",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -164,9 +160,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "Context"
-                ],
+                "signature": ["Context"],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -179,9 +173,7 @@
                 "tags": [],
                 "label": "useUrlForState",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -197,9 +189,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "100"
-            ],
+            "signature": ["100"],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -211,9 +201,7 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -227,9 +215,7 @@
             "tags": [],
             "label": "euiIcon",
             "description": [],
-            "signature": [
-              "\"dashboardApp\""
-            ],
+            "signature": ["\"dashboardApp\""],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -280,9 +266,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
+                "signature": ["P & { children?: React.ReactNode; }"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -294,9 +278,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -422,9 +404,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "Context"
-                ],
+                "signature": ["Context"],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -483,9 +463,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "Context"
-                ],
+                "signature": ["Context"],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -939,9 +917,7 @@
             "tags": [],
             "label": "uiActionsEnhanced",
             "description": [],
-            "signature": [
-              "void"
-            ],
+            "signature": ["void"],
             "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1151,9 +1127,7 @@
         "description": [
           "\nNOTE: DO NOT CHANGE THIS STRING WITHOUT CAREFUL CONSIDERATOIN, BECAUSE IT IS\nSTORED IN SAVED OBJECTS.\n\nAlso temporary dashboard drilldown migration code inside embeddable plugin relies on it\nx-pack/plugins/embeddable_enhanced/public/embeddables/embeddable_action_storage.ts"
         ],
-        "signature": [
-          "\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\""
-        ],
+        "signature": ["\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\""],
         "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

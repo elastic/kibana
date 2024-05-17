@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
-import ReactDOM from 'react-dom';
-import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
+import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import type { DataView } from '@kbn/data-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   AlertConsumers,
   ES_QUERY_ID,
   RuleCreationValidConsumer,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import React, { useCallback, useState, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { DiscoverServices } from '../../../../build_services';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 
 const container = document.createElement('div');
 let isOpen = false;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { CSSObject, css } from '@emotion/react';
+import { useMemo } from 'react';
 
 interface StylesDeps {
   minimal?: boolean;

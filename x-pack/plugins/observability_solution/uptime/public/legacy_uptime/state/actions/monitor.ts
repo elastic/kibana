@@ -6,9 +6,9 @@
  */
 
 import { createAction } from 'redux-actions';
-import { MonitorDetailsActionPayload } from './types';
 import { PingError } from '../../../../common/runtime_types';
 import { MonitorLocations } from '../../../../common/runtime_types';
+import { MonitorDetailsActionPayload } from './types';
 import { QueryParams } from './types';
 import { createAsyncAction } from './utils';
 

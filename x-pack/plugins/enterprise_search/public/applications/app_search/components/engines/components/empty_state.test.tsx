@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { setMockValues, mockTelemetryActions } from '../../../../__mocks__/kea_logic';
+import { mockTelemetryActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 

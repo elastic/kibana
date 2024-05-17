@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../types';
+import { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
 
 describe('ErrorWithReason', () => {
   const plainError = new Error('well, actually');

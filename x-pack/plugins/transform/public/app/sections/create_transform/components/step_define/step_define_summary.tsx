@@ -7,29 +7,29 @@
 
 import React, { type FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { isDefaultQuery, isMatchAllQuery } from '@kbn/ml-query-utils';
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import {
+  getPreviewTransformRequestBody,
   getTransformConfigQuery,
   getTransformPreviewDevConsoleStatement,
-  getPreviewTransformRequestBody,
 } from '../../../../common';
-import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import type { SearchItems } from '../../../../hooks/use_search_items';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import type { StepDefineExposedState } from './common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+import type { StepDefineExposedState } from './common';
 import { isLatestPartialRequest } from './common/types';
 
 interface Props {

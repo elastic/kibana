@@ -1,3 +1,9 @@
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,30 +11,24 @@
  * 2.0.
  */
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { BaseRule } from './base_rule';
+import { LEGACY_RULE_DETAILS, RULE_LICENSE_EXPIRATION } from '../../common/constants';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import {
-  AlertData,
   AlertCluster,
-  AlertState,
-  AlertMessage,
-  AlertMessageTimeToken,
-  AlertMessageLinkToken,
+  AlertData,
   AlertInstanceState,
-  CommonAlertParams,
   AlertLicense,
   AlertLicenseState,
+  AlertMessage,
+  AlertMessageLinkToken,
+  AlertMessageTimeToken,
+  AlertState,
+  CommonAlertParams,
 } from '../../common/types/alerts';
-import { RULE_LICENSE_EXPIRATION, LEGACY_RULE_DETAILS } from '../../common/constants';
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { AlertingDefaults } from './alert_helpers';
-import { Globals } from '../static_globals';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
+import { Globals } from '../static_globals';
+import { AlertingDefaults } from './alert_helpers';
+import { BaseRule } from './base_rule';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 

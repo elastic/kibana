@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiFlyout,
@@ -16,9 +15,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EndpointResponderExtensionComponentProps } from '../types';
+import React, { memo, useCallback, useState } from 'react';
 import { ResponseActionsLog } from '../../endpoint_response_actions_list/response_actions_log';
 import { UX_MESSAGES } from '../../endpoint_response_actions_list/translations';
+import type { EndpointResponderExtensionComponentProps } from '../types';
 
 export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((props) => {
   const { euiTheme } = useEuiTheme();

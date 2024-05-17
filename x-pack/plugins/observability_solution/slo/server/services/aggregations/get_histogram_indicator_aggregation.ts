@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HistogramIndicator } from '@kbn/slo-schema';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { HistogramIndicator } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow } from '../transform_generators/common';
 
 type HistogramIndicatorDef =

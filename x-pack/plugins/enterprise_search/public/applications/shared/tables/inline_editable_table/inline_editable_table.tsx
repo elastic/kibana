@@ -9,7 +9,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { useActions, useValues, BindLogic } from 'kea';
+import { BindLogic, useActions, useValues } from 'kea';
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

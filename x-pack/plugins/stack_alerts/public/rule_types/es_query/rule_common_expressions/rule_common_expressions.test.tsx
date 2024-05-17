@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import { RuleCommonExpressions } from './rule_common_expressions';
 import {
+  TIME_UNITS,
   builtInAggregationTypes,
   builtInComparators,
   getTimeUnitLabel,
-  TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { DEFAULT_VALUES } from '../constants';
 import { CommonEsQueryRuleParams } from '../types';
+import { RuleCommonExpressions } from './rule_common_expressions';
 
 const errors = {
   index: new Array<string>(),

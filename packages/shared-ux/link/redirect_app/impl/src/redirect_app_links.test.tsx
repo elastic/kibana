@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { ReactWrapper, mount as enzymeMount } from 'enzyme';
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { MouseEvent } from 'react';
-import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
 import {
   getRedirectAppLinksKibanaDependenciesMock,
   getRedirectAppLinksServicesMock,
 } from '@kbn/shared-ux-link-redirect-app-mocks';
 
-import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
-import { RedirectAppLinks } from './redirect_app_links.container';
 import { RedirectAppLinks as ComposedWrapper } from './redirect_app_links';
+import { RedirectAppLinks } from './redirect_app_links.container';
+import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
 
 export type UnmountCallback = () => void;
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;

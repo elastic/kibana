@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { IErrorObject, Rule, UserConfiguredActionConnector } from '../../types';
 import {
-  throwIfAbsent,
-  throwIfIsntContained,
-  isValidUrl,
   getConnectorWithInvalidatedFields,
   getRuleWithInvalidatedFields,
+  isValidUrl,
+  throwIfAbsent,
+  throwIfIsntContained,
 } from './value_validators';
-import { v4 as uuidv4 } from 'uuid';
-import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {

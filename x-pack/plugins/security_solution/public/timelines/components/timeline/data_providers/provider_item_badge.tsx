@@ -15,16 +15,16 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { timelineSelectors } from '../../../store';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
+import { timelineSelectors } from '../../../store';
 
-import type { OnDataProviderEdited } from '../events';
-import { ProviderBadge } from './provider_badge';
-import { ProviderItemActions } from './provider_item_actions';
-import type { DataProvidersAnd, QueryOperator } from './data_provider';
-import { DataProviderType } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
 import { timelineDefaults } from '../../../store/defaults';
+import type { OnDataProviderEdited } from '../events';
+import type { DataProvidersAnd, QueryOperator } from './data_provider';
+import { DataProviderType } from './data_provider';
+import { ProviderBadge } from './provider_badge';
+import { ProviderItemActions } from './provider_item_actions';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;

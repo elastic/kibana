@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EnrichedDeprecationInfo, MlAction } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { MlSnapshotsResolutionCell } from './resolution_table_cell';
-import { FixSnapshotsFlyout, FixSnapshotsFlyoutProps } from './flyout';
 import { MlSnapshotsStatusProvider, useMlSnapshotContext } from './context';
+import { FixSnapshotsFlyout, FixSnapshotsFlyoutProps } from './flyout';
+import { MlSnapshotsResolutionCell } from './resolution_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 

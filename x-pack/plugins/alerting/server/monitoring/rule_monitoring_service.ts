@@ -6,7 +6,7 @@
  */
 
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+import { PublicRuleMonitoringService, RuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());

@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 
 import {
   TinesSimulator,
+  tinesAgentWebhook,
   tinesStory1,
   tinesStory2,
-  tinesAgentWebhook,
   tinesWebhookSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';

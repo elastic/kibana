@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
-  GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
+  GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { lazy } from 'react';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
-import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
+import { JiraActionParams, JiraConfig, JiraSecrets } from './types';
 
 export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {
   defaultMessage: 'Create an incident in Jira.',

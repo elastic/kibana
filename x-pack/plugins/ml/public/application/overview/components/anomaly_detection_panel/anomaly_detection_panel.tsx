@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { zipObject, groupBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useStorage } from '@kbn/ml-local-storage';
-import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
-import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
+import { groupBy, zipObject } from 'lodash';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
-import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlKibana, useMlLink } from '../../../contexts/kibana';
-import { AnomalyDetectionTable } from './table';
-import { ml } from '../../../services/ml_api_service';
-import { getGroupsFromJobs, getStatsBarData } from './utils';
-import type { Dictionary } from '../../../../../common/types/common';
 import type {
   MlSummaryJob,
   MlSummaryJobs,
 } from '../../../../../common/types/anomaly_detection_jobs';
-import { useRefresh } from '../../../routing/use_refresh';
-import { useToastNotificationService } from '../../../services/toast_notification_service';
-import type { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
+import type { Dictionary } from '../../../../../common/types/common';
+import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
+import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
+import { CollapsiblePanel } from '../../../components/collapsible_panel';
+import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
+import { useMlKibana, useMlLink } from '../../../contexts/kibana';
+import { useEnabledFeatures } from '../../../contexts/ml';
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import { useRefresh } from '../../../routing/use_refresh';
+import type { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
+import { ml } from '../../../services/ml_api_service';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { overviewPanelDefaultState } from '../../overview_page';
-import { useEnabledFeatures } from '../../../contexts/ml';
+import { AnomalyDetectionTable } from './table';
+import { getGroupsFromJobs, getStatsBarData } from './utils';
 
 export type GroupsDictionary = Dictionary<Group>;
 

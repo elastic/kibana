@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
-import React from 'react';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import React from 'react';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import type { MlFeatures } from '../../../../common/constants/app';
 import type { MlStartDependencies } from '../../../plugin';
-import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
+import { JobsListPage } from './components';
 
 const renderApp = (
   element: HTMLElement,

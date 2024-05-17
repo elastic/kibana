@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MODEL_GPT_3_5_TURBO, MODEL_GPT_4, ModelSelector } from './model_selector';
-import { fireEvent, render } from '@testing-library/react';
 
 describe('ModelSelector', () => {
   it('should render with correct default selection', () => {

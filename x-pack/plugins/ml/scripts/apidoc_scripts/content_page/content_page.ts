@@ -7,11 +7,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-// @ts-ignore can only be default-imported using the 'esModuleInterop' flag
-import moment from 'moment';
 import { kibanaPackageJson } from '@kbn/repo-info';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createDoc } from 'apidoc-light';
+// @ts-ignore can only be default-imported using the 'esModuleInterop' flag
+import moment from 'moment';
 
 interface Group {
   anchor: string;

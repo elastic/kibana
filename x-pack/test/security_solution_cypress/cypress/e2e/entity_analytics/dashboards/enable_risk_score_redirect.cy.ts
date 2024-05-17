@@ -15,8 +15,8 @@ import { visit } from '../../../tasks/navigation';
 import { clickEnableRiskScore } from '../../../tasks/risk_scores';
 import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 
-import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
+import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 describe('Enable risk scores from dashboard', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

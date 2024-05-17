@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Arguments, MarkdownVisParams } from './types';
 
 export interface MarkdownVisRenderValue {

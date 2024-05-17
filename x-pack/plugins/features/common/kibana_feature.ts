@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
 import { AppCategory } from '@kbn/core/types';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
+import { SubFeature as KibanaSubFeature, SubFeatureConfig } from './sub_feature';
 
 /**
  * Interface for registering a feature.

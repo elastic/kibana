@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render } from '@testing-library/react';
+import React from 'react';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,

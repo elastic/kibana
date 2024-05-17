@@ -13,9 +13,9 @@ import {
   SHARD_DELAY_AGG_NAME,
 } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import { Vis, VisToExpressionAstParams } from './types';
-import { SchemaConfig, VisParams } from '../common/types';
 import { convertToSchemaConfig } from '../common';
+import { SchemaConfig, VisParams } from '../common/types';
+import { Vis, VisToExpressionAstParams } from './types';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -25,7 +25,7 @@ const SUPPORTED_AGGREGATIONS = [
   SHARD_DELAY_AGG_NAME,
 ];
 
-type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
+type SupportedAggregation = (typeof SUPPORTED_AGGREGATIONS)[number];
 
 function isSupportedAggType(name: string): name is SupportedAggregation {
   return SUPPORTED_AGGREGATIONS.includes(name as SupportedAggregation);

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { journey, step, before } from '@elastic/synthetics';
+import { before, journey, step } from '@elastic/synthetics';
+import { recordVideo } from '../../../helpers/record_video';
 import {
   assertNotText,
   assertText,
   byTestId,
   waitForLoadingToFinish,
 } from '../../../helpers/utils';
-import { recordVideo } from '../../../helpers/record_video';
 
 import { settingsPageProvider } from '../../page_objects/settings';
 

@@ -7,13 +7,13 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { useGetEndpointDetails } from '../../../../hooks';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
-import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import type { HostMetadata } from '../../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
+import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
+import { PolicyResponseWrapper } from '../../../../components/policy_response';
+import { useGetEndpointDetails } from '../../../../hooks';
 import { showView, uiQueryParams } from '../../store/selectors';
 import { useEndpointSelector } from '../hooks';
 import * as i18 from '../translations';

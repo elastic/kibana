@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ManifestConstants } from './common';
 import type { OldInternalManifestSchema } from './migrations';
 import { migrations } from './migrations';

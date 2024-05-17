@@ -14,9 +14,9 @@ import {
   getMonitorAction,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
-  selectorMonitorDetailsState,
-  selectorError,
   selectRefreshInterval,
+  selectorError,
+  selectorMonitorDetailsState,
 } from '../../../state';
 
 export const useSelectedMonitor = (monId?: string) => {
@@ -46,8 +46,8 @@ export const useSelectedMonitor = (monId?: string) => {
   const availableMonitor: EncryptedSyntheticsSavedMonitor | null = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
-    ? monitorFromList
-    : null;
+      ? monitorFromList
+      : null;
 
   const isMonitorMissing =
     error?.body.statusCode === 404 &&

@@ -17,9 +17,9 @@ jest.mock('@kbn/react-kibana-mount', () => {
   };
 });
 
-import { StartPlugins, PluginStart } from './types';
 import { RuntimeFieldEditorFlyoutContent } from './components';
 import { RuntimeFieldsPlugin } from './plugin';
+import { PluginStart, StartPlugins } from './types';
 
 const noop = () => {};
 

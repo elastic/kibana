@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type {
-  SavedObjectsClientContract,
   ElasticsearchClient,
   SavedObject,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -18,8 +18,8 @@ import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elastics
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 
 import type { EsAssetReference, Installation } from '../../../../../../common';
-import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
+import { appContextService } from '../../../../app_context';
 import { updateCurrentWriteIndices } from '../../../elasticsearch/template/template';
 
 import { stepUpdateCurrentWriteIndices } from './step_update_current_write_indices';
@@ -36,7 +36,7 @@ const createMockTemplate = ({ name, composedOf = [] }: { name: string; composedO
     index_template: {
       composed_of: composedOf,
     },
-  } as IndicesGetIndexTemplateIndexTemplateItem);
+  }) as IndicesGetIndexTemplateIndexTemplateItem;
 
 describe('stepUpdateCurrentWriteIndices', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;

@@ -8,13 +8,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
 import type { Props } from '.';
 import { FieldSelection } from '.';
 import {
   GROUP_BY_LABEL,
   GROUP_BY_TOP_LABEL,
 } from '../../../detections/components/alerts_kpis/common/translations';
+import { TestProviders } from '../../mock';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

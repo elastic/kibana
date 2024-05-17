@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getServices } from './services';
 

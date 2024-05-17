@@ -46,5 +46,7 @@ export function createSavedObjectClass(
     }
   }
 
-  return SavedObjectClass as new (config: SavedObjectConfig) => SavedObject;
+  return SavedObjectClass as new (
+    config: SavedObjectConfig
+  ) => SavedObject;
 }

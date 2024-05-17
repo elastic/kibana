@@ -6,8 +6,8 @@
  */
 
 import { omit } from 'lodash/fp';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 
 export const mockDuplicateIdErrors = [];
 

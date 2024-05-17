@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import * as i18n from './translations';
+import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
+import { IP_FIELD_TYPE } from '../../../explore/network/components/ip';
+import { PORT_NAMES } from '../../../explore/network/components/port/helpers';
 import {
   EVENT_URL_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
@@ -14,10 +16,8 @@ import {
   RULE_REFERENCE_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
-import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
-import { IP_FIELD_TYPE } from '../../../explore/network/components/ip';
-import { PORT_NAMES } from '../../../explore/network/components/port/helpers';
 import { useKibana } from '../kibana';
+import * as i18n from './translations';
 
 export const COLUMNS_WITH_LINKS = [
   {

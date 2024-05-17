@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCheckbox, EuiFormRow, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  builtInAggregationTypes,
   ForLastExpression,
   GroupByExpression,
   IErrorObject,
@@ -18,12 +16,14 @@ import {
   ThresholdExpression,
   ValueExpression,
   WhenExpression,
+  builtInAggregationTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { builtInGroupByTypes, FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { FieldOption, builtInGroupByTypes } from '@kbn/triggers-actions-ui-plugin/public/common';
+import React, { useEffect, useState } from 'react';
 import { SourceFields } from '../../components/source_fields_select';
-import { CommonRuleParams, SourceField } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
+import { CommonRuleParams, SourceField } from '../types';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
 export interface RuleCommonExpressionsProps extends CommonRuleParams {

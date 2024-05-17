@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Observable } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import React, { ComponentType } from 'react';
+import { Observable } from 'rxjs';
 import { CoreVitalItem } from '../core_vital_item';
 import { LCP_HELP_LABEL, LCP_LABEL } from '../translations';
 

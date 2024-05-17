@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
+  DATA_VIEW_PATH,
   DATA_VIEW_SWAP_REFERENCES_PATH,
   SPECIFIC_DATA_VIEW_PATH,
-  DATA_VIEW_PATH,
 } from '@kbn/data-views-plugin/server';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

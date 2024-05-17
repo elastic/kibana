@@ -19,13 +19,13 @@ import {
 
 import { FleetUnauthorizedError } from '../../errors';
 
-import { getAuthzFromRequest } from '../security';
 import type { FleetAuthz } from '../../../common';
 import { createFleetAuthzMock } from '../../../common/mocks';
+import { getAuthzFromRequest } from '../security';
 
 import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
-import { getAgentsByKuery, getAgentById } from './crud';
+import { getAgentById, getAgentsByKuery } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 import { getLatestAvailableAgentVersion } from './versions';
 

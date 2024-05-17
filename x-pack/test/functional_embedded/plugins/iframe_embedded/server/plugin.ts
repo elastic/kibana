@@ -6,7 +6,7 @@
  */
 
 import Url from 'url';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 function renderBody(iframeUrl: string) {
   return `

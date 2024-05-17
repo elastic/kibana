@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import { GetHostsOptionsPublic } from '../common/types_client';
 import { GetHostAssetsResponse } from '../common/types_api';
+import { GetHostsOptionsPublic } from '../common/types_client';
 export interface AssetManagerPublicPluginSetup {
   publicAssetsClient: IPublicAssetsClient;
 }

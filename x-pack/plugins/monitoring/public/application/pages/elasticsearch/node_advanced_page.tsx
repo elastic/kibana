@@ -1,3 +1,6 @@
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,25 +9,22 @@
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { find } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ItemTemplate } from './item_template';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { AdvancedNode } from '../../../components/elasticsearch/node/advanced';
-import { ComponentProps } from '../../route_init';
-import { useCharts } from '../../hooks/use_charts';
-import { AlertsByName } from '../../../alerts/types';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
   RULE_CPU_USAGE,
-  RULE_THREAD_POOL_SEARCH_REJECTIONS,
-  RULE_THREAD_POOL_WRITE_REJECTIONS,
-  RULE_MISSING_MONITORING_DATA,
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
 } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { AdvancedNode } from '../../../components/elasticsearch/node/advanced';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useCharts } from '../../hooks/use_charts';
+import { ComponentProps } from '../../route_init';
+import { ItemTemplate } from './item_template';
 
 export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

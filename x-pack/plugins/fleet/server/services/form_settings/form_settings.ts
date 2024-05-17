@@ -8,8 +8,8 @@
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers';
 
-import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
 import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../common/settings';
+import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
 import type { AgentPolicy } from '../../types';
 
 export function getSettingsAPISchema(settingSection: SettingsSection) {

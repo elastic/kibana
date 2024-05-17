@@ -65,8 +65,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "filteredSuggestions": Object {
               "aggs": Object {
@@ -112,8 +113,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "filteredSuggestions": Object {
               "aggs": Object {
@@ -159,8 +161,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "filteredSuggestions": Object {
               "aggs": Object {
@@ -208,8 +211,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "nestedSuggestions": Object {
               "aggs": Object {
@@ -278,8 +282,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
               "aggs": Object {
@@ -326,8 +331,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
               "aggs": Object {
@@ -373,8 +379,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
               "aggs": Object {
@@ -422,8 +429,9 @@ describe('options list type-specific search queries', () => {
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
           optionsListRequestBodyMock
         );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
+        expect(
+          suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)
+        ).toMatchInlineSnapshot(`
           Object {
             "suggestions": Object {
               "aggs": Object {
@@ -487,8 +495,9 @@ describe('options list type-specific search queries', () => {
           },
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
+      expect(
+        suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock)
+      ).toMatchInlineSnapshot(`
         Object {
           "suggestions": Array [
             Object {
@@ -539,8 +548,9 @@ describe('options list type-specific search queries', () => {
           },
         },
       };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
+      expect(
+        suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock)
+      ).toMatchInlineSnapshot(`
         Object {
           "suggestions": Array [
             Object {

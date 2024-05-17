@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import moment from 'moment-timezone';
+import {
+  EuiBadge,
+  EuiBadgeProps,
+  EuiCode,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import {
-  EuiCodeBlock,
-  EuiLink,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiText,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiBadgeProps,
-  EuiBadge,
-  EuiCode,
-} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import moment from 'moment-timezone';
+import React, { FunctionComponent } from 'react';
 
+import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { ApplicationStart } from '@kbn/core/public';
 import { Index, IndexDetailsTab } from '@kbn/index-management';
-import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
 

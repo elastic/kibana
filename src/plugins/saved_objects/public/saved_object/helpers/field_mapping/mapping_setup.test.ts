@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { expandShorthand } from './mapping_setup';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { expandShorthand } from './mapping_setup';
 
 describe('mapping_setup', () => {
   it('allows shortcuts for field types by just setting the value to the type name', () => {

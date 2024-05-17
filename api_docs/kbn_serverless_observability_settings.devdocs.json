@@ -29,9 +29,7 @@
         "tags": [],
         "label": "OBSERVABILITY_PROJECT_SETTINGS",
         "description": [],
-        "signature": [
-          "string[]"
-        ],
+        "signature": ["string[]"],
         "path": "packages/serverless/settings/observability_project/index.ts",
         "deprecated": false,
         "trackAdoption": false,

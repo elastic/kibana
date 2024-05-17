@@ -7,11 +7,7 @@
     "id": "locatorExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "share"
-    ],
-    "extraPublicDirs": [
-      "public/locator"
-    ]
+    "requiredPlugins": ["share"],
+    "extraPublicDirs": ["public/locator"]
   }
 }

@@ -1,3 +1,4 @@
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import type { Observable } from 'rxjs';
-import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { UserProfileService } from './service';
 
 export type CoreUserProfileDelegateContract = Omit<UserProfileService, 'getUserProfile$'> & {

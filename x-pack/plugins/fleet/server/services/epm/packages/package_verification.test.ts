@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
-import { getGpgKeyOrUndefined, _readGpgKey } from './package_verification';
+import { _readGpgKey, getGpgKeyOrUndefined } from './package_verification';
 
 const testGpgKeyId = 'd27d666cd88e42b4';
 const testGpgKey = `

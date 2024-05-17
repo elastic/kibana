@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { useUiSetting$ } from '../../lib/kibana';
 
+import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
 import {
-  GoogleLink,
-  HostDetailsLink,
-  NetworkDetailsLink,
-  ReputationLink,
-  WhoIsLink,
   CertificateFingerprintLink,
-  Ja3FingerprintLink,
-  PortOrServiceNameLink,
   DEFAULT_NUMBER_OF_LINK,
   ExternalLink,
+  GoogleLink,
+  HostDetailsLink,
+  Ja3FingerprintLink,
+  NetworkDetailsLink,
+  PortOrServiceNameLink,
+  ReputationLink,
   SecuritySolutionLinkButton,
+  WhoIsLink,
 } from '.';
 import { SecurityPageName } from '../../../app/types';
-import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../navigation/use_url_state_query_params');

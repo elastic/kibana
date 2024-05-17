@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
-import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import moment from 'moment';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function getBackfillTests({ getService }: FtrProviderContext) {

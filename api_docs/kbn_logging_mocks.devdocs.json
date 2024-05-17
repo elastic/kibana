@@ -147,9 +147,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

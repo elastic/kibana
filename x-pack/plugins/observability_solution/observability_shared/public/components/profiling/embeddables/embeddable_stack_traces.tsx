@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { TopNType } from '@kbn/profiling-utils';
+import React from 'react';
 import { EMBEDDABLE_STACK_TRACES } from '.';
 import { ProfilingEmbeddable } from './profiling_embeddable';
 

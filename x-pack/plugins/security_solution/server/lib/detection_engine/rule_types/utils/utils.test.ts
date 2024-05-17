@@ -5,67 +5,67 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
+import moment from 'moment';
+import sinon from 'sinon';
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 moment.suppressDeprecationWarnings = true;
 
-import {
-  generateId,
-  parseInterval,
-  getGapBetweenRuns,
-  getNumCatchupIntervals,
-  errorAggregator,
-  getListsClient,
-  getRuleRangeTuples,
-  getExceptions,
-  hasTimestampFields,
-  wrapBuildingBlocks,
-  generateSignalId,
-  createErrorsFromShard,
-  createSearchAfterReturnTypeFromResponse,
-  createSearchAfterReturnType,
-  mergeReturns,
-  lastValidDate,
-  buildChunkedOrFilter,
-  getValidDateFromDoc,
-  calculateTotal,
-  getTotalHitsValue,
-  isDetectionAlert,
-  getField,
-  addToSearchAfterReturn,
-  getUnprocessedExceptionsWarnings,
-} from './utils';
-import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
-import {
-  sampleBulkResponse,
-  sampleEmptyBulkResponse,
-  sampleBulkError,
-  sampleBulkErrorItem,
-  sampleSignalHit,
-  sampleDocSearchResultsWithSortId,
-  sampleEmptyDocSearchResults,
-  sampleDocSearchResultsNoSortIdNoHits,
-  sampleDocSearchResultsNoSortId,
-  sampleDocNoSortId,
-  sampleAlertDocNoSortIdWithTimestamp,
-  sampleAlertDocAADNoSortIdWithTimestamp,
-} from '../__mocks__/es_results';
+import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import {
+  sampleAlertDocAADNoSortIdWithTimestamp,
+  sampleAlertDocNoSortIdWithTimestamp,
+  sampleBulkError,
+  sampleBulkErrorItem,
+  sampleBulkResponse,
+  sampleDocNoSortId,
+  sampleDocSearchResultsNoSortId,
+  sampleDocSearchResultsNoSortIdNoHits,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyBulkResponse,
+  sampleEmptyDocSearchResults,
+  sampleSignalHit,
+} from '../__mocks__/es_results';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
+import {
+  addToSearchAfterReturn,
+  buildChunkedOrFilter,
+  calculateTotal,
+  createErrorsFromShard,
+  createSearchAfterReturnType,
+  createSearchAfterReturnTypeFromResponse,
+  errorAggregator,
+  generateId,
+  generateSignalId,
+  getExceptions,
+  getField,
+  getGapBetweenRuns,
+  getListsClient,
+  getNumCatchupIntervals,
+  getRuleRangeTuples,
+  getTotalHitsValue,
+  getUnprocessedExceptionsWarnings,
+  getValidDateFromDoc,
+  hasTimestampFields,
+  isDetectionAlert,
+  lastValidDate,
+  mergeReturns,
+  parseInterval,
+  wrapBuildingBlocks,
+} from './utils';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -630,7 +630,7 @@ describe('utils', () => {
             .mockImplementationOnce(({ executeFunctionOnStream }) => {
               executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
             }),
-        } as unknown as ExceptionListClient);
+        }) as unknown as ExceptionListClient;
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
         client,
@@ -656,7 +656,7 @@ describe('utils', () => {
       listMock.getExceptionListClient = () =>
         ({
           findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
-        } as unknown as ExceptionListClient);
+        }) as unknown as ExceptionListClient;
 
       await expect(() =>
         getExceptions({
@@ -672,7 +672,7 @@ describe('utils', () => {
       listMock.getExceptionListClient = () =>
         ({
           findExceptionListsItem: jest.fn().mockResolvedValue(null),
-        } as unknown as ExceptionListClient);
+        }) as unknown as ExceptionListClient;
 
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),

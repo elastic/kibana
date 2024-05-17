@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getStateColumnActions } from './columns';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { Capabilities } from '@kbn/core/types';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewsMock } from '../../../__mocks__/data_views';
+import { getStateColumnActions } from './columns';
 
 function getStateColumnAction(
   state: { columns?: string[]; sort?: string[][] },

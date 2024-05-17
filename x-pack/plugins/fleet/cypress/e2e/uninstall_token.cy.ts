@@ -7,9 +7,9 @@
 
 import type { UninstallToken } from '../../common/types/models/uninstall_token';
 
-import { cleanupAgentPolicies } from '../tasks/cleanup';
-import { UNINSTALL_TOKENS } from '../screens/fleet';
 import type { GetUninstallTokenResponse } from '../../common/types/rest_spec/uninstall_token';
+import { UNINSTALL_TOKENS } from '../screens/fleet';
+import { cleanupAgentPolicies } from '../tasks/cleanup';
 
 import { API_VERSIONS } from '../../common/constants';
 import { request } from '../tasks/common';

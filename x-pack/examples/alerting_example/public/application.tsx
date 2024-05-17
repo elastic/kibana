@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { EuiPage } from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import { EuiPage } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Page } from './components/page';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { DocumentationPage } from './components/documentation';
+import { Page } from './components/page';
 import { ViewAlertPage } from './components/view_alert';
-import { AlertingExamplePublicStartDeps } from './plugin';
 import { ViewPeopleInSpaceAlertPage } from './components/view_astros_alert';
+import { AlertingExamplePublicStartDeps } from './plugin';
 
 export interface AlertingExampleComponentParams {
   http: CoreStart['http'];

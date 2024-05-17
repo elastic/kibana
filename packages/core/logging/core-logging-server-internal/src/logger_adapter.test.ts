@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { LoggerAdapter } from './logger_adapter';
 
 describe('LoggerAdapter', () => {

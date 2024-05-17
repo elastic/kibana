@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
+import { mockAnomalies } from '../mock';
 import { createCompoundAnomalyKey } from './create_compound_key';
 
 describe('create_explorer_link', () => {

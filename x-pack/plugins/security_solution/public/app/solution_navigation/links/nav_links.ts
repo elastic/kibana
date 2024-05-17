@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { map, combineLatest, skipWhile, debounceTime, type Observable } from 'rxjs';
 import type { ChromeNavLinks, CoreStart } from '@kbn/core/public';
-import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
+import { type NavigationLink, SecurityPageName } from '@kbn/security-solution-navigation';
 import { isSecurityId } from '@kbn/security-solution-navigation/links';
-import { assetsNavLinks } from './sections/assets_links';
-import { mlNavCategories, mlNavLinks } from './sections/ml_links';
-import { settingsNavLinks } from './sections/settings_links';
-import { devToolsNavLink } from './sections/dev_tools_links';
-import { discoverNavLink } from './sections/discover_links';
+import { type Observable, combineLatest, debounceTime, map, skipWhile } from 'rxjs';
 import type { SolutionNavLink } from '../../../common/links';
 import { getNavLinkIdFromSolutionPageName } from '../util';
+import { assetsNavLinks } from './sections/assets_links';
+import { devToolsNavLink } from './sections/dev_tools_links';
+import { discoverNavLink } from './sections/discover_links';
 import { investigationsNavLinks } from './sections/investigations_links';
+import { mlNavCategories, mlNavLinks } from './sections/ml_links';
+import { settingsNavLinks } from './sections/settings_links';
 
 export const createSolutionNavLinks$ = (
   securityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,

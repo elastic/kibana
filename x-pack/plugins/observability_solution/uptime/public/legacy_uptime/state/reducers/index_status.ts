@@ -6,10 +6,10 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { indexStatusAction } from '../actions';
-import { asyncInitState, handleAsyncAction } from './utils';
-import { AsyncInitState } from './types';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
+import { indexStatusAction } from '../actions';
+import { AsyncInitState } from './types';
+import { asyncInitState, handleAsyncAction } from './utils';
 
 export interface IndexStatusState {
   indexStatus: AsyncInitState<StatesIndexStatus | null>;

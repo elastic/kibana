@@ -7,8 +7,8 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core/public';
+import { CanvasPlugin, type CanvasSetup, type CanvasStart, type CanvasStartDeps } from './plugin';
 import type { CanvasServices } from './services';
-import { type CanvasSetup, type CanvasStart, type CanvasStartDeps, CanvasPlugin } from './plugin';
 
 export type { CanvasSetup, CanvasStart };
 

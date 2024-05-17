@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
-import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
+import { useCallback, useMemo } from 'react';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
-import * as i18n from './translations';
-import { updateAlertStatus } from './update_alerts';
+import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
 import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
+import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../types';
+import * as i18n from './translations';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
+import { updateAlertStatus } from './update_alerts';
 
 export interface BulkActionsProps {
   eventIds: string[];

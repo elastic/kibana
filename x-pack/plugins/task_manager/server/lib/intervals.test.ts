@@ -8,14 +8,14 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import {
-  parseIntervalAsSecond,
-  parseIntervalAsMillisecond,
-  intervalFromNow,
-  intervalFromDate,
-  secondsFromNow,
-  secondsFromDate,
   asInterval,
+  intervalFromDate,
+  intervalFromNow,
   maxIntervalFromDate,
+  parseIntervalAsMillisecond,
+  parseIntervalAsSecond,
+  secondsFromDate,
+  secondsFromNow,
 } from './intervals';
 
 let fakeTimer: sinon.SinonFakeTimers;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactRouterDom from 'react-router-dom';
+import { EuiButtonIcon } from '@elastic/eui';
 import { Route } from '@kbn/shared-ux-router';
 import { fireEvent, screen } from '@testing-library/react';
-import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
+import { act as hooksAct, renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { EuiButtonIcon } from '@elastic/eui';
-import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';
-import { render } from '../../../lib/helper/rtl_helpers';
-import { JourneyStep } from '../../../../../common/runtime_types';
-import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../../common/constants';
-import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import ReactRouterDom from 'react-router-dom';
+import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../../common/constants';
+import { JourneyStep } from '../../../../../common/runtime_types';
+import { render } from '../../../lib/helper/rtl_helpers';
+import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
+import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

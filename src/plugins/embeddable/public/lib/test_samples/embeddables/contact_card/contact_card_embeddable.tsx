@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
-import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Container } from '../../../containers';
-import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
-import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
+import { Embeddable, EmbeddableInput, EmbeddableOutput } from '../../../embeddables';
 import { ContactCardEmbeddableComponent } from './contact_card';
+import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 
 export interface ContactCardEmbeddableInput extends EmbeddableInput {
   firstName: string;

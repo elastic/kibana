@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { buildPhraseFilter } from './phrase_filter';
-import { buildQueryFilter } from './query_string_filter';
-import { getFilterField } from './get_filter_field';
 import { DataViewBase } from '../../es_query';
 import { fields } from '../stubs/fields.mocks';
+import { getFilterField } from './get_filter_field';
+import { buildPhraseFilter } from './phrase_filter';
+import { buildQueryFilter } from './query_string_filter';
 
 describe('getFilterField', function () {
   const indexPattern: DataViewBase = {

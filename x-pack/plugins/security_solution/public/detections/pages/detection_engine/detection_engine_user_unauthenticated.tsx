@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 
 import { EmptyPage } from '../../../common/components/empty_page';
-import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
+import * as i18n from './translations';
 
 export const DetectionEngineUserUnauthenticated = React.memo(() => {
   const docLinks = useKibana().services.docLinks;

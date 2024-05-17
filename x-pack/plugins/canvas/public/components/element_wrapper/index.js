@@ -6,12 +6,12 @@
  */
 
 import PropTypes from 'prop-types';
-import { connectAdvanced } from 'react-redux';
-import { compose, withPropsOnChange, mapProps } from 'react-recompose';
 import isEqual from 'react-fast-compare';
-import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
-import { getState, getValue } from '../../lib/resolved_arg';
+import { compose, mapProps, withPropsOnChange } from 'react-recompose';
+import { connectAdvanced } from 'react-redux';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
+import { getState, getValue } from '../../lib/resolved_arg';
+import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { ElementWrapper as Component } from './element_wrapper';
 
 function selectorFactory(dispatch) {

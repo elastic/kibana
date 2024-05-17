@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { RouteProps } from '../../routes';
 import { SETTINGS_ROUTE, SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
-import { SettingsPage } from './settings_page';
+import { RouteProps } from '../../routes';
 import { getSettingsPageHeader } from './page_header';
+import { SettingsPage } from './settings_page';
 
 export const getSettingsRouteConfig = (
   history: ReturnType<typeof useHistory>,

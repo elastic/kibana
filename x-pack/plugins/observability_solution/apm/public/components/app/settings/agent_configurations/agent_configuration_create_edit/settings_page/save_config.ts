@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
-import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import { i18n } from '@kbn/i18n';
 import {
   getOptionLabel,
   omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
+import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import { callApmApi } from '../../../../../../services/rest/create_call_apm_api';
 
 export async function saveConfig({

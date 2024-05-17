@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { shallow } from 'enzyme';
-import { WhenExpression } from './when';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { shallow } from 'enzyme';
+import * as React from 'react';
+import { WhenExpression } from './when';
 
 describe('when expression', () => {
   it('renders with builtin aggregation types', () => {

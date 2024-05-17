@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mount } from 'enzyme';
 import React from 'react';
+import * as Rx from 'rxjs';
 import { ReportingAPIClient } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { GroupDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import produce from 'immer';
 import { map } from 'rxjs';
 import { type Services } from '../common/services';

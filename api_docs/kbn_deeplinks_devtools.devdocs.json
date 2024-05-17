@@ -29,9 +29,7 @@
         "tags": [],
         "label": "AppId",
         "description": [],
-        "signature": [
-          "\"dev_tools\""
-        ],
+        "signature": ["\"dev_tools\""],
         "path": "packages/deeplinks/devtools/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -81,9 +79,7 @@
         "tags": [],
         "label": "DEV_TOOLS_APP_ID",
         "description": [],
-        "signature": [
-          "\"dev_tools\""
-        ],
+        "signature": ["\"dev_tools\""],
         "path": "packages/deeplinks/devtools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -96,9 +92,7 @@
         "tags": [],
         "label": "LinkId",
         "description": [],
-        "signature": [
-          "\"console\" | \"searchprofiler\" | \"painless_lab\" | \"grokdebugger\""
-        ],
+        "signature": ["\"console\" | \"searchprofiler\" | \"painless_lab\" | \"grokdebugger\""],
         "path": "packages/deeplinks/devtools/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,

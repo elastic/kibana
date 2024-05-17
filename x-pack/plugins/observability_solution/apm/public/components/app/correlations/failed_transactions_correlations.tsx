@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { orderBy } from 'lodash';
 
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiIcon,
-  EuiTitle,
-  EuiBadge,
-  EuiToolTip,
-  EuiSwitch,
   EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
@@ -29,31 +29,31 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { FieldStatsPopover } from './context_popover/field_stats_popover';
-import { asPercent, asPreciseDecimal } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import { asPercent, asPreciseDecimal } from '../../../../common/utils/formatters';
+import { FieldStatsPopover } from './context_popover/field_stats_popover';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTheme } from '../../../hooks/use_theme';
 import { push } from '../../shared/links/url_helpers';
 
+import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
+import { OnAddFilter } from './context_popover/field_stats_popover';
 import { CorrelationsTable } from './correlations_table';
+import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
+import { CorrelationsProgressControls } from './progress_controls';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { getOverallHistogram } from './utils/get_overall_histogram';
-import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
-import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
-import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
-import { CorrelationsProgressControls } from './progress_controls';
-import { OnAddFilter } from './context_popover/field_stats_popover';
 
-import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
-import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
-import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
+import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { ChartTitleToolTip } from './chart_title_tool_tip';
+import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
+import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 
 export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => void }) {
   const euiTheme = useTheme();

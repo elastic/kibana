@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getNewsFeed } from './get_news_feed';
 import { HttpSetup } from '@kbn/core/public';
+import { getNewsFeed } from './get_news_feed';
 
 describe('getNewsFeed', () => {
   const originalConsole = global.console;

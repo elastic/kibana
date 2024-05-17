@@ -7,15 +7,15 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
-import { DataStreamType } from '../../../common/types';
 import { DegradedDocs } from '../../../common/api_types';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DATA_STREAM_DATASET,
   DATA_STREAM_NAMESPACE,
   DATA_STREAM_TYPE,
   _IGNORED,
 } from '../../../common/es_fields';
+import { DataStreamType } from '../../../common/types';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
 interface ResultBucket {

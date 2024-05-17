@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,14 +19,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
+import { ManualInstructions } from '../../../../../../../../components/enrollment_instructions';
 import {
   sendGetEnrollmentAPIKeys,
-  useFleetServerHostsForPolicy,
   useAgentVersion,
+  useFleetServerHostsForPolicy,
 } from '../../../../../../hooks';
-import { ManualInstructions } from '../../../../../../../../components/enrollment_instructions';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 
 import { GoogleCloudShellGuide } from '../../../../../../../../components/cloud_security_posture';
 import { useCreateCloudShellUrl } from '../../../../../../../../components/cloud_security_posture/hooks';

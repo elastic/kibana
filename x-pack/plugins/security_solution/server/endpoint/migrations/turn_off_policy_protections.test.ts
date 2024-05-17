@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { createMockEndpointAppContextServiceStartContract } from '../mocks';
-import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import { createMockEndpointAppContextServiceStartContract } from '../mocks';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
-import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
-import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import type { PolicyData } from '../../../common/endpoint/types';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import type { PromiseResolvedValue } from '../../../common/endpoint/types/utility_types';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { ensureOnlyEventCollectionIsAllowed } from '../../../common/endpoint/models/policy_config_helpers';
-import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import type { PolicyData } from '../../../common/endpoint/types';
+import type { PromiseResolvedValue } from '../../../common/endpoint/types/utility_types';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;

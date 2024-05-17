@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { AwsCredentialsType } from '../../../../common/types_old';
 import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form';
 

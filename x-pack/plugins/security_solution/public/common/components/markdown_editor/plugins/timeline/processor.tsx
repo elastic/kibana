@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, memo } from 'react';
-import { EuiToolTip, EuiLink } from '@elastic/eui';
 
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
-import type { TimelineProps } from './types';
 import * as i18n from './translations';
-import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import type { TimelineProps } from './types';
 
 export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   id,

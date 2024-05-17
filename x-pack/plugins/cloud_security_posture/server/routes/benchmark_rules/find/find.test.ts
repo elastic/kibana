@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getSortedCspBenchmarkRulesTemplates } from './utils';
 import { CspBenchmarkRule } from '../../../../common/types/latest';
+import { getSortedCspBenchmarkRulesTemplates } from './utils';
 
 describe('getSortedCspBenchmarkRules', () => {
   it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last', () => {

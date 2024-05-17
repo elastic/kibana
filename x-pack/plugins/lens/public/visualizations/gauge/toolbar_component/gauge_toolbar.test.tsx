@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
+import React, { FormEvent } from 'react';
 import { act } from 'react-dom/test-utils';
-import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { GaugeToolbar } from '.';
+import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import type { GaugeVisualizationState } from '../constants';
 
 jest.mock('lodash', () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { cloneDeep, debounce, first, mapValues } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,40 +18,40 @@ import {
   EuiCallOut,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiStepsHorizontal,
 } from '@elastic/eui';
 
 import {
-  validateIndexPattern,
+  createBreadcrumb,
   formatFields,
   listBreadcrumb,
-  createBreadcrumb,
   retypeMetrics,
+  validateIndexPattern,
 } from '../../services';
 
 import { Navigation } from './navigation';
 import {
-  StepLogistics,
   StepDateHistogram,
-  StepTerms,
   StepHistogram,
+  StepLogistics,
   StepMetrics,
   StepReview,
+  StepTerms,
 } from './steps';
 import {
-  STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
-  STEP_TERMS,
   STEP_HISTOGRAM,
+  STEP_LOGISTICS,
   STEP_METRICS,
   STEP_REVIEW,
-  stepIds,
-  stepIdToStepConfigMap,
+  STEP_TERMS,
   getAffectedStepsFields,
   hasErrors,
+  stepIdToStepConfigMap,
+  stepIds,
 } from './steps_config';
 
 import { getFatalErrors } from '../../../kibana_services';

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import useObservable from 'react-use/lib/useObservable';
-import { firstValueFrom } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   EuiAccordion,
   EuiCode,
@@ -23,13 +20,16 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
+import { firstValueFrom } from 'rxjs';
 
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { i18n } from '@kbn/i18n';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { InferrerType } from '.';
 import { CreateDataViewButton } from '../../../components/create_data_view_button';
 import { useMlKibana } from '../../../contexts/kibana';
 import { RUNNING_STATE } from './inference_base';
-import type { InferrerType } from '.';
 
 interface Props {
   inferrer: InferrerType;

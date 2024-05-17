@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Response } from 'superagent';
-import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { estypes } from '@elastic/elasticsearch';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { estypes } from '@elastic/elasticsearch';
-import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import {
   IndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
+import { Response } from 'superagent';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class DetectionsTestService extends FtrService {

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -13,8 +15,6 @@ import {
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
-import type { Filter } from '@kbn/es-query';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const ALERT_STATUS_ALL = 'all';

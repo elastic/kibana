@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type { Map as MbMap } from '@kbn/mapbox-gl';
-import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DynamicStyleProperty, OTHER_CATEGORY_KEY } from './dynamic_style_property';
-import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
-import {
-  getOrdinalMbColorRampStops,
-  getPercentilesMbColorRampStops,
-  getColorPalette,
-} from '../../color_palettes';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import React from 'react';
 import {
   COLOR_MAP_TYPE,
   DATA_MAPPING_FUNCTION,
   FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
-import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
-import { LegendProps } from './style_property';
-import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
+import {
+  getColorPalette,
+  getOrdinalMbColorRampStops,
+  getPercentilesMbColorRampStops,
+} from '../../color_palettes';
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
+import { Break, BreakedLegend } from '../components/legend/breaked_legend';
+import { dynamicRound, makeMbClampedNumberExpression } from '../style_util';
+import { OTHER_CATEGORY_DEFAULT_COLOR, OTHER_CATEGORY_LABEL } from '../style_util';
+import { DynamicStyleProperty, OTHER_CATEGORY_KEY } from './dynamic_style_property';
+import { LegendProps } from './style_property';
 
 const UP_TO = i18n.translate('xpack.maps.legend.upto', {
   defaultMessage: 'up to',

@@ -6,9 +6,9 @@
  */
 
 import { assertUnreachable } from '../../../../utility_types';
+import { LogLevel, LogLevelEnum } from './execution_event.gen';
 import type { RuleExecutionStatus } from './execution_status.gen';
 import { RuleExecutionStatusEnum } from './execution_status.gen';
-import { LogLevel, LogLevelEnum } from './execution_event.gen';
 
 /**
  * An array of supported log levels.

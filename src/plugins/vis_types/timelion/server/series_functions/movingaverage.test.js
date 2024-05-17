@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import fn from './movingaverage';
 import expect from '@kbn/expect';
+import fn from './movingaverage';
 
-import moment from 'moment';
 import _ from 'lodash';
+import moment from 'moment';
 import buckets from './fixtures/bucket_list';
 import getSeries from './test_helpers/get_series';
 import getSeriesList from './test_helpers/get_series_list';

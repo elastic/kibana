@@ -23,6 +23,7 @@ import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type {
   AppMountParameters,
   CustomBrandingStart,
@@ -30,13 +31,10 @@ import type {
   HttpStart,
   NotificationsStart,
 } from '@kbn/core/public';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import type { LoginFormProps } from './components';
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import type { StartServices } from '../..';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -45,6 +43,8 @@ import {
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
+import type { LoginFormProps } from './components';
+import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
 interface Props {
   http: HttpStart;

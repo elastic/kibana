@@ -1,6 +1,6 @@
 [
   {
-    "hits" : {
+    "hits": {
       "hits": [
         {
           "_index": ".monitoring-logstash-7-2021.02.01",
@@ -29,75 +29,67 @@
             "type": "logstash_stats"
           },
           "fields": {
-            "logstash_stats.logstash.uuid": [
-              "12a3b26f-9b8c-4d38-b4d0-54649c1dd244"
-            ]
+            "logstash_stats.logstash.uuid": ["12a3b26f-9b8c-4d38-b4d0-54649c1dd244"]
           },
-          "sort": [
-            1612214529897
-          ]
+          "sort": [1612214529897]
         },
         {
-          "_index" : ".monitoring-logstash-7-mb-2021.01.28",
-          "_type" : "_doc",
-          "_id" : "rC2jSncB1VO1nvgvsKx6",
-          "_score" : null,
-          "_source" : {
-            "agent" : {
-              "type" : "metricbeat"
+          "_index": ".monitoring-logstash-7-mb-2021.01.28",
+          "_type": "_doc",
+          "_id": "rC2jSncB1VO1nvgvsKx6",
+          "_score": null,
+          "_source": {
+            "agent": {
+              "type": "metricbeat"
             },
-            "logstash_stats" : {
-              "logstash" : {
-                "version" : "7.8.0",
-                "snapshot" : false,
-                "status" : "green"
+            "logstash_stats": {
+              "logstash": {
+                "version": "7.8.0",
+                "snapshot": false,
+                "status": "green"
               },
-              "pipelines" : [
+              "pipelines": [
                 {
-                  "id" : "test2",
-                  "ephemeral_id" : "47a70feb-3cb5-4618-8670-2c0bada61acd",
-                  "queue" : {
-                    "max_queue_size_in_bytes" : 0,
-                    "type" : "memory"
+                  "id": "test2",
+                  "ephemeral_id": "47a70feb-3cb5-4618-8670-2c0bada61acd",
+                  "queue": {
+                    "max_queue_size_in_bytes": 0,
+                    "type": "memory"
                   }
                 },
                 {
-                  "id" : "main",
-                  "ephemeral_id" : "5a65d966-0330-4bd7-82f2-ee81040c13cf",
-                  "queue" : {
-                    "max_queue_size_in_bytes" : 0,
-                    "type" : "memory"
+                  "id": "main",
+                  "ephemeral_id": "5a65d966-0330-4bd7-82f2-ee81040c13cf",
+                  "queue": {
+                    "max_queue_size_in_bytes": 0,
+                    "type": "memory"
                   }
                 },
                 {
-                  "id" : "main2",
-                  "ephemeral_id" : "8d33fe25-a2c0-4c54-9ecf-d218cb8dbfe4",
-                  "queue" : {
-                    "max_queue_size_in_bytes" : 0,
-                    "type" : "memory"
+                  "id": "main2",
+                  "ephemeral_id": "8d33fe25-a2c0-4c54-9ecf-d218cb8dbfe4",
+                  "queue": {
+                    "max_queue_size_in_bytes": 0,
+                    "type": "memory"
                   }
                 },
                 {
-                  "id" : "main3",
-                  "ephemeral_id" : "f4167a94-20a8-43e7-828e-4cf38d906187",
-                  "queue" : {
-                    "max_queue_size_in_bytes" : 1.19185342464E11,
-                    "type" : "persisted"
+                  "id": "main3",
+                  "ephemeral_id": "f4167a94-20a8-43e7-828e-4cf38d906187",
+                  "queue": {
+                    "max_queue_size_in_bytes": 1.19185342464e11,
+                    "type": "persisted"
                   }
                 }
               ]
             },
-            "cluster_uuid" : "1nmp",
-            "type" : "logstash_stats"
+            "cluster_uuid": "1nmp",
+            "type": "logstash_stats"
           },
-          "fields" : {
-            "logstash_stats.logstash.uuid" : [
-              "1232122-f2b6-4b6c-8cea-22661f9c4134"
-            ]
+          "fields": {
+            "logstash_stats.logstash.uuid": ["1232122-f2b6-4b6c-8cea-22661f9c4134"]
           },
-          "sort" : [
-            1611864976527
-          ]
+          "sort": [1611864976527]
         },
         {
           "_index": ".monitoring-logstash-7-2021.02.01",
@@ -142,13 +134,9 @@
             "type": "logstash_stats"
           },
           "fields": {
-            "logstash_stats.logstash.uuid": [
-              "701ce2f6-4e6a-426b-a959-80e7cdd608aa"
-            ]
+            "logstash_stats.logstash.uuid": ["701ce2f6-4e6a-426b-a959-80e7cdd608aa"]
           },
-          "sort": [
-            1612214046021
-          ]
+          "sort": [1612214046021]
         },
         {
           "_index": ".monitoring-logstash-7-2021.02.01",
@@ -273,13 +261,9 @@
             "type": "logstash_stats"
           },
           "fields": {
-            "logstash_stats.logstash.uuid": [
-              "255eab6a-e15c-4e21-8d81-a9474eadb3eb"
-            ]
+            "logstash_stats.logstash.uuid": ["255eab6a-e15c-4e21-8d81-a9474eadb3eb"]
           },
-          "sort": [
-            1612213826805
-          ]
+          "sort": [1612213826805]
         },
         {
           "_index": ".monitoring-logstash-7-2021.02.01",
@@ -308,16 +292,11 @@
             "type": "logstash_stats"
           },
           "fields": {
-            "logstash_stats.logstash.uuid": [
-              "beb45ee3-ad5f-4895-87f0-97625a6e5295"
-            ]
+            "logstash_stats.logstash.uuid": ["beb45ee3-ad5f-4895-87f0-97625a6e5295"]
           },
-          "sort": [
-            1612213150986
-          ]
+          "sort": [1612213150986]
         }
       ]
     }
   }
 ]
-

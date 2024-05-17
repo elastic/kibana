@@ -1,3 +1,5 @@
+import { EuiPanel } from '@elastic/eui';
+import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +7,7 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import { ComponentProps } from 'react';
-import { EuiPanel } from '@elastic/eui';
 import { EsqlCodeBlock as Component } from './esql_code_block';
 
 const meta: ComponentMeta<typeof Component> = {

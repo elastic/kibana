@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { isEqual } from 'lodash/fp';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { isEqual } from 'lodash/fp';
 
-import type { FeatureKeys } from '../../../endpoint/services';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { ExceptionItemLikeOptions } from '../types';
-import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';
 import {
   getPolicyIdsFromArtifact,
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
-import { EndpointArtifactExceptionValidationError } from './errors';
+import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type { FeatureKeys } from '../../../endpoint/services';
+import type { ExceptionItemLikeOptions } from '../types';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
+import { EndpointArtifactExceptionValidationError } from './errors';
 
 export const BasicEndpointExceptionDataSchema = schema.object(
   {

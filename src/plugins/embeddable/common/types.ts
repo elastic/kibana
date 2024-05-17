@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type {
-  PersistableStateService,
   PersistableState,
   PersistableStateDefinition,
+  PersistableStateService,
 } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -74,7 +74,7 @@ export type EmbeddableInput = {
 };
 
 export interface PanelState<
-  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
+  E extends EmbeddableInput & { id: string } = { id: string; version?: string },
 > {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
@@ -88,7 +88,7 @@ export interface PanelState<
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
 
 export interface EmbeddableRegistryDefinition<
-  P extends EmbeddableStateWithType = EmbeddableStateWithType
+  P extends EmbeddableStateWithType = EmbeddableStateWithType,
 > extends PersistableStateDefinition<P> {
   id: string;
 }

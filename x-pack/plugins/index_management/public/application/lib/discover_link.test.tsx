@@ -1,3 +1,5 @@
+import { EuiButtonIcon } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +7,8 @@
  * 2.0.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButtonIcon } from '@elastic/eui';
-import { DiscoverLink } from './discover_link';
 import { AppContextProvider, AppDependencies } from '../app_context';
+import { DiscoverLink } from './discover_link';
 
 describe('DiscoverLink', () => {
   const indexName = 'my-fancy-index';

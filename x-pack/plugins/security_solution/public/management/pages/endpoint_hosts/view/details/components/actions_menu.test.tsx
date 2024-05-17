@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import type { HostInfo } from '../../../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
+import { initialUserPrivilegesState } from '../../../../../../common/components/user_privileges/user_privileges_context';
+import { licenseService } from '../../../../../../common/hooks/use_license';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { useKibana } from '../../../../../../common/lib/kibana';
-import { ActionsMenu } from './actions_menu';
-import React from 'react';
-import { act } from '@testing-library/react';
 import { endpointPageHttpMock } from '../../../mocks';
-import { licenseService } from '../../../../../../common/hooks/use_license';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { initialUserPrivilegesState } from '../../../../../../common/components/user_privileges/user_privileges_context';
-import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
-import type { HostInfo } from '../../../../../../../common/endpoint/types';
-import userEvent from '@testing-library/user-event';
+import { ActionsMenu } from './actions_menu';
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
   const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');

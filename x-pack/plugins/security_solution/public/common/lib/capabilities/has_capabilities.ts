@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get, isArray } from 'lodash';
 import type { Capabilities } from '@kbn/core/public';
+import { get, isArray } from 'lodash';
 
 /**
  * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion

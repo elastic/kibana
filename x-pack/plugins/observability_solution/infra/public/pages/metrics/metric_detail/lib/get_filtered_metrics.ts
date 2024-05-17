@@ -7,8 +7,8 @@
 
 import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { metrics } from '@kbn/metrics-data-access-plugin/common';
-import { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
 
 export const getFilteredMetrics = (
   requiredMetrics: InventoryMetric[],

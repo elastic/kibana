@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
 import type { ESSearchResponse } from '@kbn/es-types';
-import type { SignalSource } from '../types';
-import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
+import type { Moment } from 'moment';
 import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
+import type { SignalSource } from '../types';
 
 export type RecentTermsAggResult = ESSearchResponse<
   SignalSource,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
+import React from 'react';
 import { useQueryToggle } from '../../common/containers/query_toggle';
-import { UserRiskScoreQueryTabBody } from './user_risk_score_tab_body';
+import { TestProviders } from '../../common/mock';
 import { UsersType } from '../../explore/users/store/model';
 import { useRiskScore } from '../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
+import { UserRiskScoreQueryTabBody } from './user_risk_score_tab_body';
 
 jest.mock('../api/hooks/use_risk_score_kpi');
 jest.mock('../api/hooks/use_risk_score');

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
+import type { Action, CombinedState, Dispatch, Middleware, Store } from 'redux';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataTableState } from '@kbn/securitysolution-data-table';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { HostsPluginState } from '../../explore/hosts/store';
+import type { NetworkPluginState } from '../../explore/network/store';
+import type { UsersPluginState } from '../../explore/users/store';
+import type { ManagementPluginState } from '../../management';
+import type { AnalyzerState } from '../../resolver/types';
+import type { TimelinePluginState } from '../../timelines/store';
 import type { StartPlugins } from '../../types';
 import type { AppAction } from './actions';
-import type { Immutable } from '../../../common/endpoint/types';
 import type { AppState } from './app/reducer';
-import type { InputsState } from './inputs/reducer';
-import type { SourcererState } from './sourcerer/reducer';
-import type { HostsPluginState } from '../../explore/hosts/store';
+import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { DragAndDropState } from './drag_and_drop/reducer';
-import type { TimelinePluginState } from '../../timelines/store';
-import type { NetworkPluginState } from '../../explore/network/store';
-import type { ManagementPluginState } from '../../management';
-import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { GroupState } from './grouping/types';
-import type { SecuritySolutionDiscoverState } from './discover/model';
-import type { AnalyzerState } from '../../resolver/types';
+import type { InputsState } from './inputs/reducer';
+import type { SourcererState } from './sourcerer/reducer';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -152,7 +152,7 @@ type ImmutableReducersMapObject<S, A extends Action = Action> = {
  * https://github.com/reduxjs/reselect/pull/454
  */
 export type CreateStructuredSelector = <
-  SelectorMap extends { [key: string]: (...args: never[]) => unknown }
+  SelectorMap extends { [key: string]: (...args: never[]) => unknown },
 >(
   selectorMap: SelectorMap
 ) => (state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never) => {

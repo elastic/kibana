@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, IRouter, RouteMethod, RouteConfig, RequestHandler } from '@kbn/core/server';
+import { CoreSetup, IRouter, RequestHandler, RouteConfig, RouteMethod } from '@kbn/core/server';
 
 import { ILicense } from '@kbn/licensing-plugin/server';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { getControlledBy, MapEmbeddable } from './map_embeddable';
-import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
-import type { DataViewFieldBase, DataViewBase } from '@kbn/es-query';
-import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
 import type { MapAttributes } from '../../common/content_management';
+import { MapEmbeddable, getControlledBy } from './map_embeddable';
+import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
 
 jest.mock('../kibana_services', () => {
   return {

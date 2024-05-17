@@ -7,8 +7,8 @@
 
 import { mapValues } from 'lodash';
 
-import { ShortcutMap, ShortcutNameSpace } from '../../types/shortcuts';
 import { ShortcutStrings as strings } from '../../i18n/shortcuts';
+import { ShortcutMap, ShortcutNameSpace } from '../../types/shortcuts';
 
 const shortcutHelp = strings.getShortcutHelp();
 const namespaceDisplayNames = strings.getNamespaceDisplayNames();

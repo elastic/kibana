@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,15 +13,18 @@ import {
   EuiInMemoryTable,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { IUiSettingsClient } from '@kbn/core/public';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DataViewRow, DataViewColumn } from '../types';
+import { DataViewColumn, DataViewRow } from '../types';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];

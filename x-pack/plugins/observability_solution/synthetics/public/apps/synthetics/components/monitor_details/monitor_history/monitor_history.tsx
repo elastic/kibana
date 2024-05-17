@@ -7,23 +7,23 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useRefreshedRangeFromUrl, useUrlParams } from '../../../hooks';
 import { useDimensions } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
-import { AvailabilityPanel } from '../monitor_summary/availability_panel';
-import { DurationPanel } from '../monitor_summary/duration_panel';
-import { MonitorDurationTrend } from '../monitor_summary/duration_trend';
-import { TestRunsTable } from '../monitor_summary/test_runs_table';
-import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
-import { MonitorCompleteCount } from '../monitor_summary/monitor_complete_count';
-import { MonitorTotalRunsCount } from '../monitor_summary/monitor_total_runs_count';
-import { MonitorErrorSparklines } from '../monitor_summary/monitor_error_sparklines';
-import { AvailabilitySparklines } from '../monitor_summary/availability_sparklines';
-import { DurationSparklines } from '../monitor_summary/duration_sparklines';
-import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
-import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
+import { AvailabilityPanel } from '../monitor_summary/availability_panel';
+import { AvailabilitySparklines } from '../monitor_summary/availability_sparklines';
+import { DurationPanel } from '../monitor_summary/duration_panel';
+import { DurationSparklines } from '../monitor_summary/duration_sparklines';
+import { MonitorDurationTrend } from '../monitor_summary/duration_trend';
+import { MonitorCompleteCount } from '../monitor_summary/monitor_complete_count';
+import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
+import { MonitorErrorSparklines } from '../monitor_summary/monitor_error_sparklines';
+import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
+import { MonitorTotalRunsCount } from '../monitor_summary/monitor_total_runs_count';
+import { TestRunsTable } from '../monitor_summary/test_runs_table';
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
 
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
 

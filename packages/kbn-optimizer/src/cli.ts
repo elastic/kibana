@@ -8,17 +8,17 @@
 
 import Path from 'path';
 
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { Flags, run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { lastValueFrom } from 'rxjs';
-import { run, Flags } from '@kbn/dev-cli-runner';
-import { createFlagError } from '@kbn/dev-cli-errors';
 
-import { logOptimizerState } from './log_optimizer_state';
+import { updateBundleLimits, validateLimitsForAllBundles } from './limits';
 import { logOptimizerProgress } from './log_optimizer_progress';
+import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
-import { runOptimizer } from './run_optimizer';
-import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
 import { reportOptimizerTimings } from './report_optimizer_timings';
+import { runOptimizer } from './run_optimizer';
 
 function getLimitsPath(flags: Flags, defaultPath: string) {
   if (flags.limits) {

@@ -19,9 +19,9 @@ import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
 import { CanvasPlatformService } from './platform';
 import { CanvasReportingService } from './reporting';
+import { CanvasUiActionsService } from './ui_actions';
 import { CanvasVisualizationsService } from './visualizations';
 import { CanvasWorkpadService } from './workpad';
-import { CanvasUiActionsService } from './ui_actions';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;

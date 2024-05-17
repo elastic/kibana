@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IContainer, EmbeddableInput, EmbeddableFactoryDefinition, EmbeddableFactory } from '../..';
-import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embeddable';
+import { EmbeddableFactory, EmbeddableFactoryDefinition, EmbeddableInput, IContainer } from '../..';
+import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddable } from './hello_world_embeddable';
 
 export type HelloWorldEmbeddableFactory = EmbeddableFactory;
 export class HelloWorldEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {

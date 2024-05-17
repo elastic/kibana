@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
-import { merge, range as lodashRange } from 'lodash';
+import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
+import { range as lodashRange, merge } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';

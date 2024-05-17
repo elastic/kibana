@@ -7,14 +7,14 @@
 
 import {
   getCaseFindUserActionsUrl,
-  getCaseUserActionUrl,
   getCaseUserActionStatsUrl,
+  getCaseUserActionUrl,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import {
   CaseUserActionDeprecatedResponse,
-  CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
+  CaseUserActionsDeprecatedResponse,
   GetCaseUsersResponse,
   UserActionFindRequest,
   UserActionFindResponse,
@@ -32,7 +32,7 @@ export const removeServerGeneratedPropertiesFromUserAction = (
   const keysToRemove: Array<keyof CaseUserActionDeprecatedResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
     CaseUserActionDeprecatedResponse,
-    typeof keysToRemove[number]
+    (typeof keysToRemove)[number]
   >(attributes, keysToRemove);
 };
 

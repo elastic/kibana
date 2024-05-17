@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { cloneDeep } from 'lodash/fp';
 import type { EuiLinkAnchorProps, EuiTextProps } from '@elastic/eui';
-import { EuiMarkdownFormat, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import unified from 'unified';
+import { EuiCallOut, EuiLink, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { cloneDeep } from 'lodash/fp';
+import React, { memo, useMemo } from 'react';
+import unified from 'unified';
 
-import { parsingPlugins, processingPlugins, platinumOnlyPluginTokens } from './plugins';
-import { MarkdownLink } from './markdown_link';
-import { useKibana } from '../../lib/kibana';
 import { useLicense } from '../../hooks/use_license';
+import { useKibana } from '../../lib/kibana';
+import { MarkdownLink } from './markdown_link';
+import { parsingPlugins, platinumOnlyPluginTokens, processingPlugins } from './plugins';
 import * as i18n from './translations';
 
 interface Props {

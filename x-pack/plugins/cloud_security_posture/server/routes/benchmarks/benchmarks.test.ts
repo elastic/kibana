@@ -1,3 +1,4 @@
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +6,16 @@
  * 2.0.
  */
 import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createMockAgentPolicyService } from '@kbn/fleet-plugin/server/mocks';
 import {
-  benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
+  benchmarksQueryParamsSchema,
 } from '../../../common/types/benchmarks/v1';
 import { getCspAgentPolicies } from '../../lib/fleet_util';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 import { defineGetBenchmarksRoute } from './benchmarks';
 import { getRulesCountForPolicy } from './utilities';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import { createMockAgentPolicyService } from '@kbn/fleet-plugin/server/mocks';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { createCspRequestHandlerContextMock } from '../../mocks';
 
 describe('benchmarks API', () => {
   beforeEach(() => {

@@ -6,9 +6,9 @@
  */
 
 import './app.scss';
-import React, { useContext, useMemo, useRef } from 'react';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
+import React, { useContext, useMemo, useRef } from 'react';
 import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT } from '../../common';
 import { ScreenshotModeContext } from './screenshot_mode_context';
 

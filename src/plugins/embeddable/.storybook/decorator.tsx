@@ -8,9 +8,9 @@
 
 import React from 'react';
 
-import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { DecoratorFn } from '@storybook/react';
 
 export const servicesContextDecorator: DecoratorFn = (story, { globals }) => {
   const darkMode = ['v8.dark', 'v7.dark'].includes(globals.euiTheme);

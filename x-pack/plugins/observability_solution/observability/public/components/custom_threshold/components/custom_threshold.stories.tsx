@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
+import { ComponentMeta } from '@storybook/react';
+import React from 'react';
 
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { Props, Threshold as Component } from './custom_threshold';
+import { Threshold as Component, Props } from './custom_threshold';
 
 export default {
   component: Component,

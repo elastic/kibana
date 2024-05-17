@@ -1,3 +1,4 @@
+import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
 import { MonitorFilterState } from '../monitor_list';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
   perPage: number;

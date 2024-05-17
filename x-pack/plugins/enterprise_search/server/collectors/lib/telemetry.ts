@@ -7,9 +7,9 @@
 
 import {
   ISavedObjectsRepository,
-  SavedObjectsServiceStart,
-  SavedObjectAttributes,
   Logger,
+  SavedObjectAttributes,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 
 // This throws `Error: Cannot find module 'src/core/server'` if I import it via alias ¯\_(ツ)_/¯

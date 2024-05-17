@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import type { ApplicationStart } from '@kbn/core/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import type {
-  UiActionsEnhancedDrilldownDefinition as Drilldown,
-  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { i18n } from '@kbn/i18n';
+import type { ApplicationStart } from '@kbn/core/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { apiIsOfType } from '@kbn/presentation-publishing';
+import type {
+  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import React from 'react';
 import { DOC_TYPE } from '../../common/constants';
-import type { DiscoverAppLocator } from './open_in_discover_helpers';
 import { LensApi } from '../embeddable';
+import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
 

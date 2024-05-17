@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useContext, useEffect, useMemo } from 'react';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
+import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageControlsContext } from '../ml_page';
 

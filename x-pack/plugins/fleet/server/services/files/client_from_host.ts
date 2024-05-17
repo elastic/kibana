@@ -7,13 +7,13 @@
 
 import type { Readable } from 'stream';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { File } from '@kbn/files-plugin/common';
 import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
-import type { File } from '@kbn/files-plugin/common';
 
 import moment from 'moment';
 

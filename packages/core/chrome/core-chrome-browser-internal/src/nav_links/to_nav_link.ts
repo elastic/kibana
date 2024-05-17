@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { IBasePath } from '@kbn/core-http-browser';
 import {
-  type PublicAppInfo,
-  type PublicAppDeepLinkInfo,
   AppStatus,
+  type PublicAppDeepLinkInfo,
+  type PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { appendAppPath } from '@kbn/core-application-browser-internal';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { NavLinkWrapper } from './nav_link';
 
 export function toNavLink(

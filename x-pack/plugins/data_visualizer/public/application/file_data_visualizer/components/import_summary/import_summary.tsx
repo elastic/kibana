@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import type { DocFailure } from './failures';
 import { Failures } from './failures';
 

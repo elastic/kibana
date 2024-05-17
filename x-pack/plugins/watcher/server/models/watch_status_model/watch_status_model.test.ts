@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import { WatchStatusModelEs } from '../../../common/types';
 import { WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
-import { buildServerWatchStatusModel, buildClientWatchStatusModel } from './watch_status_model';
+import { WatchStatusModelEs } from '../../../common/types';
+import { buildClientWatchStatusModel, buildServerWatchStatusModel } from './watch_status_model';
 
 const upstreamJson: WatchStatusModelEs = {
   id: 'my-watch',

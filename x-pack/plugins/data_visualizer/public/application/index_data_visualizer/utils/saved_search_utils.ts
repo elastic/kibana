@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { SearchSource, getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
-import type { FilterManager } from '@kbn/data-plugin/public';
-import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SavedSearchSavedObject } from '../../../../common/types';
 import { isSavedSearchSavedObject } from '../../../../common/types';
 

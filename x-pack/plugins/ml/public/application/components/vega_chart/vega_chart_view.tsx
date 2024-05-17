@@ -12,11 +12,11 @@ import React, { useMemo, useEffect } from 'react';
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
+import { View, Warn, parse } from 'vega';
+import { expressionInterpreter } from 'vega-interpreter';
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
 import { compile } from 'vega-lite/build/vega-lite';
-import { parse, View, Warn } from 'vega';
-import { expressionInterpreter } from 'vega-interpreter';
 import { Handler } from 'vega-tooltip';
 
 import { htmlIdGenerator } from '@elastic/eui';

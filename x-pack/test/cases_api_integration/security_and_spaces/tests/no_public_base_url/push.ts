@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
-import { arraysToEqual } from '../../../common/lib/validation';
-import {
-  postCommentUserReq,
-  postCommentAlertReq,
-  postCommentAlertMultipleIdsReq,
-  postCommentActionsReq,
-  postCommentActionsReleaseReq,
-  postExternalReferenceESReq,
-  persistableStateAttachment,
-} from '../../../common/lib/mock';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import expect from '@kbn/expect';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  persistableStateAttachment,
+  postCommentActionsReleaseReq,
+  postCommentActionsReq,
+  postCommentAlertMultipleIdsReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+  postExternalReferenceESReq,
+} from '../../../common/lib/mock';
+import { arraysToEqual } from '../../../common/lib/validation';
 
 import {
-  pushCase,
-  deleteAllCaseItems,
   bulkCreateAttachments,
   createCaseWithConnector,
+  deleteAllCaseItems,
   getRecordingServiceNowSimulatorServer,
+  pushCase,
 } from '../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export

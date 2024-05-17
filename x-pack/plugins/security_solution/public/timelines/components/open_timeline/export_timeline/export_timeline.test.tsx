@@ -7,14 +7,14 @@
 
 import React from 'react';
 
+import { downloadBlob } from '../../../../common/utils/download_blob';
+import * as i18n from '../translations';
 import { TimelineDownloader } from './export_timeline';
 import { mockSelectedTimeline } from './mocks';
-import * as i18n from '../translations';
-import { downloadBlob } from '../../../../common/utils/download_blob';
 
+import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { LogDocument } from '@kbn/discover-utils/src';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { LogDocument } from '@kbn/discover-utils/src';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import React from 'react';
 import * as constants from '../../../../../common/data_types/logs/constants';
-import { getUnformattedResourceFields } from './utils/resource';
 import { ChipWithPopover } from '../../../data_types/logs/popover_chip';
+import { getUnformattedResourceFields } from './utils/resource';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 

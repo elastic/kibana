@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
-import { Panel } from './types';
 import { ExpandableFlyout } from '.';
 import {
   LEFT_SECTION_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
   RIGHT_SECTION_TEST_ID,
 } from './components/test_ids';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
 import { type State } from './state';
 import { TestProvider } from './test/provider';
-import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
+import { Panel } from './types';
 
 const id = REDUX_ID_FOR_MEMORY_STORAGE;
 const registeredPanels: Panel[] = [

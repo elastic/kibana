@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -19,16 +11,24 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query } from '@kbn/es-query';
-import { ChartsGridContainer } from './charts_grid';
-import { FieldsConfig } from './fields_config';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDataSource } from '../../hooks/use_data_source';
-import { ChangePointTypeFilter } from './change_point_type_filter';
-import { SearchBarWrapper } from './search_bar';
 import { useChangePointDetectionContext } from './change_point_detection_context';
+import { ChangePointTypeFilter } from './change_point_type_filter';
+import { ChartsGridContainer } from './charts_grid';
 import { type ChangePointType } from './constants';
+import { FieldsConfig } from './fields_config';
+import { SearchBarWrapper } from './search_bar';
 
 export const ChangePointDetectionPage: FC = () => {
   const [isFlyoutVisible, setFlyoutVisible] = useState<boolean>(false);

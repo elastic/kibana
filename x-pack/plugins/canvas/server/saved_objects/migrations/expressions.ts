@@ -1,3 +1,4 @@
+import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +6,13 @@
  * 2.0.
  */
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
-import { Serializable } from '@kbn/utility-types';
-import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { flowRight, mapValues } from 'lodash';
 import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { Serializable } from '@kbn/utility-types';
+import { flowRight, mapValues } from 'lodash';
 import {
   CanvasElement,
-  CanvasTemplateElement,
   CanvasTemplate,
+  CanvasTemplateElement,
   CustomElement,
   CustomElementContent,
   CustomElementNode,
@@ -24,8 +24,8 @@ type ToSerializable<Type> = {
   [K in keyof Type]: Type[K] extends unknown[]
     ? ToSerializable<Type[K]>
     : Type[K] extends {}
-    ? ToSerializable<Type[K]>
-    : Serializable;
+      ? ToSerializable<Type[K]>
+      : Serializable;
 };
 
 type ExprAst = ToSerializable<Ast>;

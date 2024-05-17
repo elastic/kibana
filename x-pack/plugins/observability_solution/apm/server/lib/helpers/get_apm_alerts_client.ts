@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { isEmpty } from 'lodash';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;

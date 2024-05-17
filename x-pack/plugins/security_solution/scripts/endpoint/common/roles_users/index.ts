@@ -6,23 +6,23 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
-import { getRuleAuthor } from './rule_author';
-import { getT3Analyst } from './t3_analyst';
-import { getT1Analyst } from './t1_analyst';
-import { getT2Analyst } from './t2_analyst';
-import { getHunter } from './hunter';
-import { getThreatIntelligenceAnalyst } from './threat_intelligence_analyst';
-import { getSocManager } from './soc_manager';
-import { getPlatformEngineer } from './platform_engineer';
+import { getDetectionsEngineer } from './detections_engineer';
 import { getEndpointOperationsAnalyst } from './endpoint_operations_analyst';
 import {
   getEndpointSecurityPolicyManagementReadRole,
   getEndpointSecurityPolicyManager,
 } from './endpoint_security_policy_manager';
-import { getDetectionsEngineer } from './detections_engineer';
+import { getHunter } from './hunter';
+import { getPlatformEngineer } from './platform_engineer';
+import { getRuleAuthor } from './rule_author';
+import { getSocManager } from './soc_manager';
+import { getT1Analyst } from './t1_analyst';
+import { getT2Analyst } from './t2_analyst';
+import { getT3Analyst } from './t3_analyst';
+import { getThreatIntelligenceAnalyst } from './threat_intelligence_analyst';
+import { getWithArtifactReadPrivilegesRole } from './with_artifact_read_privileges_role';
 import { getWithResponseActionsRole } from './with_response_actions_role';
 import { getNoResponseActionsRole } from './without_response_actions_role';
-import { getWithArtifactReadPrivilegesRole } from './with_artifact_read_privileges_role';
 
 export * from './with_response_actions_role';
 export * from './without_response_actions_role';

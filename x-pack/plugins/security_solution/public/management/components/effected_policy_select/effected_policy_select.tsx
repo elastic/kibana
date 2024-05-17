@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
 import type { EuiButtonGroupOptionProps, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
@@ -18,17 +17,18 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
+import { Loader } from '../../../common/components/loader';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useAppUrl } from '../../../common/lib/kibana/hooks';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { useAppUrl } from '../../../common/lib/kibana/hooks';
-import { Loader } from '../../../common/components/loader';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };

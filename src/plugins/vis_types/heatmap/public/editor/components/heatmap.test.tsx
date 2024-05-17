@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import HeatmapOptions, { HeatmapOptionsProps } from './heatmap';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import HeatmapOptions, { HeatmapOptionsProps } from './heatmap';
 
 describe('PalettePicker', function () {
   let props: HeatmapOptionsProps;

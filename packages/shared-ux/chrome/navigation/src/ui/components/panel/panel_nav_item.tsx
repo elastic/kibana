@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback } from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { EuiListGroupItem } from '@elastic/eui';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import React, { FC, useCallback } from 'react';
 
 import { useNavigation as useServices } from '../../../services';
-import { NavItemLabel } from './panel_nav_item_label';
 import { usePanel } from './context';
+import { NavItemLabel } from './panel_nav_item_label';
 
 interface Props {
   item: ChromeProjectNavigationNode;

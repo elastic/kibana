@@ -6,10 +6,10 @@
  */
 
 import { connect } from 'react-redux';
-import { AttributionControl } from './attribution_control';
+import { MapStoreState } from '../../../reducers/store';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { getIsFullScreen } from '../../../selectors/ui_selectors';
-import { MapStoreState } from '../../../reducers/store';
+import { AttributionControl } from './attribution_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

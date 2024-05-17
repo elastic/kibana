@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ComponentProps } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { EuiFlexItem } from '@elastic/eui';
-import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { HttpStart } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ComponentProps } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAlertDataView } from '../..';
-import { FilterGroupLoading } from './loading';
 import { DEFAULT_CONTROLS } from './constants';
 import { FilterGroup } from './filter_group';
+import { FilterGroupLoading } from './loading';
 import { FilterControlConfig } from './types';
 
 export type AlertFilterControlsProps = Omit<

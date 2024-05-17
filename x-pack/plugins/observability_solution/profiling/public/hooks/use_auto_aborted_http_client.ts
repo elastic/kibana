@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core/public';
 import { useEffect, useMemo, useRef } from 'react';
 import { Overwrite, ValuesType } from 'utility-types';
-import { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core/public';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 const HTTP_METHODS = ['fetch', 'get', 'post', 'put', 'delete', 'patch'] as const;

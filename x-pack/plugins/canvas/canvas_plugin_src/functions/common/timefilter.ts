@@ -6,8 +6,8 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
+import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { ExpressionFunctionDefinition, ExpressionValueFilter } from '../../../types';
 
 interface Arguments {
   column: string;

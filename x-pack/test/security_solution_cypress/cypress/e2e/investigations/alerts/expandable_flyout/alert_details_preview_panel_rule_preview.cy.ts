@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { getNewRule } from '../../../../objects/rule';
 import {
-  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE,
   DOCUMENT_DETAILS_FLYOUT_CREATED_BY,
-  DOCUMENT_DETAILS_FLYOUT_UPDATED_BY,
-  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_UPDATED_BY,
 } from '../../../../screens/expandable_flyout/alert_details_preview_panel_rule_preview';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   toggleRulePreviewAboutSection,
   toggleRulePreviewDefinitionSection,
   toggleRulePreviewScheduleSection,
 } from '../../../../tasks/expandable_flyout/alert_details_preview_panel_rule_preview';
 import { clickRuleSummaryButton } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout rule preview panel',

@@ -8,8 +8,6 @@
     "type": "preboot",
     "server": true,
     "browser": true,
-    "configPath": [
-      "interactiveSetup"
-    ]
+    "configPath": ["interactiveSetup"]
   }
 }

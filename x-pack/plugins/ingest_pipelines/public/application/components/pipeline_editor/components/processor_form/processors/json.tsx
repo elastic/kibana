@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import {
   FIELD_TYPES,
-  UseField,
   ToggleField,
+  UseField,
   useFormContext,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, from, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
-import { TargetField, TARGET_FIELD_PATH } from './common_fields/target_field';
+import { TARGET_FIELD_PATH, TargetField } from './common_fields/target_field';
+import { FieldsConfig, from, to } from './shared';
 
 const ADD_TO_ROOT_FIELD_PATH = 'fields.add_to_root';
 

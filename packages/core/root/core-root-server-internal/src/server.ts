@@ -6,57 +6,57 @@
  * Side Public License, v 1.
  */
 
-import apm from 'elastic-apm-node';
-import { firstValueFrom } from 'rxjs';
-import type { Logger, LoggerFactory } from '@kbn/logging';
-import type { NodeRoles } from '@kbn/core-node-server';
-import { CriticalError } from '@kbn/core-base-server-internal';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
-import { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
-import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
-import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
+import { CoreAppsService } from '@kbn/core-apps-server-internal';
+import { CriticalError } from '@kbn/core-base-server-internal';
+import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
+import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
+import { DocLinksService } from '@kbn/core-doc-links-server-internal';
+import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
-import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { HttpService } from '@kbn/core-http-server-internal';
-import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService } from '@kbn/core-metrics-server-internal';
-import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
-import { I18nService } from '@kbn/core-i18n-server-internal';
-import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
-import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
-import { StatusService } from '@kbn/core-status-server-internal';
-import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
-import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
-import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
+import type {
+  PrebootRequestHandlerContext,
+  RequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
 } from '@kbn/core-http-request-handler-context-server-internal';
-import type {
-  RequestHandlerContext,
-  PrebootRequestHandlerContext,
-} from '@kbn/core-http-request-handler-context-server';
-import { RenderingService } from '@kbn/core-rendering-server-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import { HttpService } from '@kbn/core-http-server-internal';
+import { I18nService } from '@kbn/core-i18n-server-internal';
 import type {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
+import { ILoggingSystem, LoggingService } from '@kbn/core-logging-server-internal';
+import { MetricsService } from '@kbn/core-metrics-server-internal';
+import type { NodeRoles } from '@kbn/core-node-server';
+import { NodeService } from '@kbn/core-node-server-internal';
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
-import { CoreAppsService } from '@kbn/core-apps-server-internal';
+import { PrebootService } from '@kbn/core-preboot-server-internal';
+import { RenderingService } from '@kbn/core-rendering-server-internal';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import { StatusService } from '@kbn/core-status-server-internal';
+import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
+import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
-import { registerServiceConfig } from './register_service_config';
+import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
+import type { Logger, LoggerFactory } from '@kbn/logging';
+import apm from 'elastic-apm-node';
+import { firstValueFrom } from 'rxjs';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
-import { coreConfig, type CoreConfigType } from './core_config';
-import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
+import { type CoreConfigType, coreConfig } from './core_config';
+import { type UptimeSteps, registerRootEvents, reportKibanaStartedEvent } from './events';
+import { registerServiceConfig } from './register_service_config';
 
 const coreId = Symbol('core');
 

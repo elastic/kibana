@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import { FleetServerOnPremUnhealthyCallout as FleetServerOnPremUnhealthyCalloutComponent } from './fleet_server_on_prem_unhealthy_callout';
 import { FleetServerCloudUnhealthyCallout as FleetServerCloudUnhealthyCalloutComponent } from './fleet_server_cloud_unhealthy_callout';
 import { FleetServerOnPremRequiredCallout as FleetServerOnPremRequiredCalloutComponent } from './fleet_server_on_prem_required_callout';
+import { FleetServerOnPremUnhealthyCallout as FleetServerOnPremUnhealthyCalloutComponent } from './fleet_server_on_prem_unhealthy_callout';
 
 interface Args {
   width: number;

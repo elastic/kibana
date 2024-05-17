@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
 import { EuiButton, EuiPageHeader } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC } from 'react';
 
 interface HeaderProps {
   canCreate: boolean;

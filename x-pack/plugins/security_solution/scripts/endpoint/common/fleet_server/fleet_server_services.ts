@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
-import execa from 'execa';
-import chalk from 'chalk';
 import assert from 'assert';
+import * as https from 'https';
+import { resolve } from 'path';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  CA_TRUSTED_FINGERPRINT,
+  FLEET_SERVER_CERT_PATH,
+  FLEET_SERVER_KEY_PATH,
+  fleetServerDevServiceAccount,
+} from '@kbn/dev-utils';
+import { SERVERLESS_NODES, maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
@@ -18,6 +24,10 @@ import {
   FLEET_SERVER_SERVERS_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
+import {
+  fleetServerHostsRoutesService,
+  outputRoutesService,
+} from '@kbn/fleet-plugin/common/services';
 import type {
   FleetServerHost,
   GetOneOutputResponse,
@@ -27,28 +37,16 @@ import type {
   PostFleetServerHostsRequest,
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
-import {
-  fleetServerHostsRoutesService,
-  outputRoutesService,
-} from '@kbn/fleet-plugin/common/services';
+import type { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
-import * as https from 'https';
+import chalk from 'chalk';
+import execa from 'execa';
 import {
-  CA_TRUSTED_FINGERPRINT,
-  FLEET_SERVER_CERT_PATH,
-  FLEET_SERVER_KEY_PATH,
-  fleetServerDevServiceAccount,
-} from '@kbn/dev-utils';
-import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
-import { resolve } from 'path';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
-import {
-  createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
+  createToolingLogger,
   retryOnError,
 } from '../../../../common/endpoint/data_loaders/utils';
-import { isServerlessKibanaFlavor } from '../stack_services';
 import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {
@@ -62,8 +60,10 @@ import {
   getFleetElasticsearchOutputHost,
   waitForHostToEnroll,
 } from '../fleet_services';
-import { getLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
+import { getLocalhostRealIp } from '../network_services';
+import { isServerlessKibanaFlavor } from '../stack_services';
+import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 
 export const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 

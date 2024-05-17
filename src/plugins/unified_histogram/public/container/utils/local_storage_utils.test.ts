@@ -9,11 +9,11 @@
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   CHART_HIDDEN_KEY,
+  HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  HISTOGRAM_HEIGHT_KEY,
   getBreakdownField,
   getChartHidden,
   getTopPanelHeight,
-  HISTOGRAM_BREAKDOWN_FIELD_KEY,
-  HISTOGRAM_HEIGHT_KEY,
   setBreakdownField,
   setChartHidden,
   setTopPanelHeight,

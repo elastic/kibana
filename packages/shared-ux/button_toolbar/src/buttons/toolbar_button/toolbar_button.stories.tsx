@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { ToolbarButton as Component } from './toolbar_button';
 import mdx from '../../../README.mdx';
+import { ToolbarButton as Component } from './toolbar_button';
 
 export default {
   title: 'Button Toolbar/Buttons',

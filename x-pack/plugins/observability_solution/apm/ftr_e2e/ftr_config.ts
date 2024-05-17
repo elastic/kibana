@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { cypressTestRunner } from './cypress_test_runner';
 import { FtrProviderContext } from './ftr_provider_context';
 

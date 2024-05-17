@@ -18,11 +18,11 @@ import type {
   SpaceHealthSnapshot,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
+import { installAssetsForRuleMonitoring } from './assets/install_assets_for_rule_monitoring';
+import type { IDetectionEngineHealthClient } from './detection_engine_health_client_interface';
 import type { IEventLogHealthClient } from './event_log/event_log_health_client';
 import type { IRuleObjectsHealthClient } from './rule_objects/rule_objects_health_client';
 import type { IRuleSpacesClient } from './rule_spaces/rule_spaces_client';
-import type { IDetectionEngineHealthClient } from './detection_engine_health_client_interface';
-import { installAssetsForRuleMonitoring } from './assets/install_assets_for_rule_monitoring';
 
 export const createDetectionEngineHealthClient = (
   ruleSpacesClient: IRuleSpacesClient,

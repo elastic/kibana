@@ -8,8 +8,8 @@
 import { ActionResult } from '@kbn/actions-plugin/server';
 import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
-import { RulesFactory } from '../../../../rules';
 import { handleError } from '../../../../lib/errors';
+import { RulesFactory } from '../../../../rules';
 import { MonitoringCore, RouteDependencies } from '../../../../types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';

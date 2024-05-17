@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import getopts from 'getopts';
-import { ToolingLog } from '@kbn/tooling-log';
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { basename } from 'path';
-import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import { Cluster } from '../cluster';
+import { createCliError } from '../errors';
+import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import {
-  ES_SERVERLESS_REPO_ELASTICSEARCH,
-  ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
+  ES_SERVERLESS_DEFAULT_IMAGE,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
   ServerlessOptions,
   isServerlessProjectType,
   serverlessProjectTypes,
 } from '../utils';
 import { Command } from './types';
-import { createCliError } from '../errors';
 
 const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();
 

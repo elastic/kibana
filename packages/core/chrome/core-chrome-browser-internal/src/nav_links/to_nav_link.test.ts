@@ -8,8 +8,8 @@
 
 import {
   AppStatus,
-  type PublicAppInfo,
   type PublicAppDeepLinkInfo,
+  type PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { toNavLink } from './to_nav_link';

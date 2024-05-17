@@ -6,8 +6,8 @@
  */
 
 import { once } from 'lodash';
-import { HORIZONTAL_LINE } from '../../common/constants';
 import { getElapsedTime } from '../../../../common/endpoint/data_loaders/utils';
+import { HORIZONTAL_LINE } from '../../common/constants';
 import type {
   ProgressReporterInterface,
   ProgressReporterState,

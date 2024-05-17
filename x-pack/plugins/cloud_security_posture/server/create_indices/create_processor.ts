@@ -1,3 +1,5 @@
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * @param logger - logger

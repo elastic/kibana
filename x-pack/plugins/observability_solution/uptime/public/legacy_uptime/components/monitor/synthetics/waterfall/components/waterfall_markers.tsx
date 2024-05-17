@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React, { useMemo } from 'react';
 import { useWaterfallContext } from '..';
 import { MarkerItems } from '../context/waterfall_chart';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';

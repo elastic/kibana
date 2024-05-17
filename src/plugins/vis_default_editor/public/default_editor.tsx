@@ -9,18 +9,18 @@
 import './index.scss';
 import 'brace/mode/json';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import {
-  Vis,
-  VisualizeEmbeddableContract,
-  EditorRenderProps,
-} from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import {
+  EditorRenderProps,
+  Vis,
+  VisualizeEmbeddableContract,
+} from '@kbn/visualizations-plugin/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';

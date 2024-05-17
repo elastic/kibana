@@ -6,7 +6,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { OriginalColumn, MapToColumnsExpressionFunction } from './types';
+import type { MapToColumnsExpressionFunction, OriginalColumn } from './types';
 
 function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {
   if (originalColumn?.operationType === 'date_histogram') {

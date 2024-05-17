@@ -7,8 +7,8 @@
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
+import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
 
 interface ResourceBucket {
   key: string | undefined;

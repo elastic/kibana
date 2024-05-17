@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiFormRowProps, EuiSuperSelectOption } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFormRow, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { EuiSuperSelectOption, EuiFormRowProps } from '@elastic/eui';
-import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import { euiThemeVars } from '@kbn/ui-theme';

@@ -8,15 +8,15 @@
 import type { RenderHookResult, RenderResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { securityMock } from '@kbn/security-plugin/public/mocks';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { licenseService } from '../../../hooks/use_license';
-import { useEndpointPrivileges } from './use_endpoint_privileges';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
+import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { getEndpointPrivilegesInitialState } from './utils';
 
 jest.mock('../../../lib/kibana');

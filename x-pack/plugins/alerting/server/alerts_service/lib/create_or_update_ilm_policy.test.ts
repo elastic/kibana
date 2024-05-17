@@ -1,3 +1,4 @@
+import { errors as EsErrors } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIlmPolicy } from './create_or_update_ilm_policy';
 import { getDataStreamAdapter } from './data_stream_adapter';
 

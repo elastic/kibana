@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ArchivePackage, RegistryPackage, PackageVerificationResult } from '../../../types';
 import { appContextService } from '../..';
+import type { ArchivePackage, PackageVerificationResult, RegistryPackage } from '../../../types';
 
 type SharedKeyString = string;
 

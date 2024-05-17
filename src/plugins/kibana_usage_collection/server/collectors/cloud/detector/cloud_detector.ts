@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CloudService } from './cloud_service';
 import type { CloudServiceResponseJson } from './cloud_response';
+import type { CloudService } from './cloud_service';
 
 import { AWSCloudService } from './aws';
 import { AzureCloudService } from './azure';

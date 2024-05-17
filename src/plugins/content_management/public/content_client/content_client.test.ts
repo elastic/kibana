@@ -8,10 +8,10 @@
 
 import { lastValueFrom } from 'rxjs';
 import { takeWhile, toArray } from 'rxjs';
+import type { CreateIn, DeleteIn, GetIn, MSearchIn, SearchIn, UpdateIn } from '../../common';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
-import { ContentClient } from './content_client';
-import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, MSearchIn } from '../../common';
 import { ContentTypeRegistry } from '../registry';
+import { ContentClient } from './content_client';
 
 const setup = () => {
   const crudClient = createCrudClientMock();

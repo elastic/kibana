@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render as testLibRender } from '@testing-library/react';
+import React from 'react';
 
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import { PluginContext } from '../context/plugin_context';

@@ -7,9 +7,9 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { DownloadSourceNotFound, FleetError } from '../../errors';
 import { downloadSourceService } from '../../services';
 import type { AgentPolicy } from '../../types';
-import { FleetError, DownloadSourceNotFound } from '../../errors';
 
 export const getSourceUriForAgentPolicy = async (
   soClient: SavedObjectsClientContract,

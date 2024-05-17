@@ -5,9 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getUrlPrefix } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function findMaintenanceWindowTests({ getService }: FtrProviderContext) {

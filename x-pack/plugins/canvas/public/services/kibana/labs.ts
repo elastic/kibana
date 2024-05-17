@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { projectIDs } from '@kbn/presentation-util-plugin/common';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { UI_SETTINGS } from '../../../common';
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasLabsService } from '../labs';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { action } from '@storybook/addon-actions';
 
 import type { ProjectSwitcherProps, Services } from '../src/types';
 

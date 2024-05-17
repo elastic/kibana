@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isWriteOperation, Operations } from '.';
+import { Operations, isWriteOperation } from '.';
 import type { OperationDetails } from './types';
 
 describe('index tests', () => {

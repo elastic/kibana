@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { mergeCountWithOther } from './merge_other_count';
 import { MobileProperty, MobilePropertyType } from '../../../../common/mobile_types';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDeviceOSApp } from '../get_device_os_app';
 import { getNCT } from '../get_nct';
+import { mergeCountWithOther } from './merge_other_count';
 
 export type MobileMostUsedChartResponse = Array<{
   key: MobilePropertyType;

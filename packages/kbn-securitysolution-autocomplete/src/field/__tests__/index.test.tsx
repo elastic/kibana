@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import React from 'react';
 import '@testing-library/jest-dom';
 
 import { FieldComponent } from '..';

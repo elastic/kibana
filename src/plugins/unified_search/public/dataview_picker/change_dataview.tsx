@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
-  EuiPopover,
-  EuiPanel,
-  EuiHorizontalRule,
   EuiButton,
-  EuiContextMenuPanel,
+  EuiButtonEmpty,
   EuiContextMenuItem,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  EuiIcon,
-  EuiText,
+  EuiContextMenuPanel,
   EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPanel,
+  EuiPopover,
+  EuiText,
   EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { type DataViewPickerPropsExtended } from './data_view_picker';
-import type { DataViewListItemEnhanced } from './dataview_list';
-import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
+import { type DataViewPickerPropsExtended } from './data_view_picker';
 import { DataViewSelector } from './data_view_selector';
+import type { DataViewListItemEnhanced } from './dataview_list';
+import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';

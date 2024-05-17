@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import _ from 'lodash';
 import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set';
+import _ from 'lodash';
 
 interface Field {
   path: string;

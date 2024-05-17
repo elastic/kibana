@@ -8,12 +8,12 @@
 
 import { omit } from 'lodash';
 
-import type { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 import { schema } from '@kbn/config-schema';
-import { validate, disableTransformsCache } from '../../utils';
-import { ContentRegistry } from '../../core/registry';
-import { createMockedStorage } from '../../core/mocks';
+import type { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 import { EventBus } from '../../core/event_bus';
+import { createMockedStorage } from '../../core/mocks';
+import { ContentRegistry } from '../../core/registry';
+import { disableTransformsCache, validate } from '../../utils';
 import { deleteProc } from './delete';
 
 disableTransformsCache();

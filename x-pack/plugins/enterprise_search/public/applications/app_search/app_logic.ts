@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
 
 import { LicensingLogic } from '../shared/licensing';
 
-import { ConfiguredLimits, Account, Role } from './types';
+import { Account, ConfiguredLimits, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
 

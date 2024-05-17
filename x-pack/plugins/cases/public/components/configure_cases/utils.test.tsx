@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 import { mappings } from './__mock__';
 import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
-import type { CaseConnectorMapping } from '../../containers/configure/types';
 
 describe('FieldMappingRow', () => {
   test('it should change the action type', () => {

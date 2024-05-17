@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
-import { discoverServiceMock } from '../../__mocks__/services';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 
 describe('Doc table component', () => {
   const mountComponent = (customProps?: Partial<DocTableWrapperProps>) => {

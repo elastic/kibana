@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useCallback } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { getCoreStart } from '../../services';
 
 const LOCAL_STORAGE_KEY = 'TSVB_INDEX_PATTERN_CALLOUT_HIDDEN';

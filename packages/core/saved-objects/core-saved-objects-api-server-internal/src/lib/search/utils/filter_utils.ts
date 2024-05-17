@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import { get, cloneDeep } from 'lodash';
-import * as esKuery from '@kbn/es-query';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import * as esKuery from '@kbn/es-query';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, get } from 'lodash';
 
 type KueryNode = any;
 

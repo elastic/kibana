@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { SavedObjectReference } from '@kbn/core/server';
-import { injectReferencesIntoActions } from '../../../rules_client/common';
+import { omit } from 'lodash';
 import { RuleAttributes } from '../../../data/rule/types';
+import { injectReferencesIntoActions } from '../../../rules_client/common';
 import { RawRule } from '../../../types';
 import { RuleDomain } from '../types';
 

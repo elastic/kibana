@@ -7,11 +7,11 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { hostsUrl } from '../../../../urls/navigation';
-import { postDataView } from '../../../../tasks/api_calls/common';
 import { TOASTER } from '../../../../screens/configure_cases';
-import { visit } from '../../../../tasks/navigation';
+import { postDataView } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { hostsUrl } from '../../../../urls/navigation';
 
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 

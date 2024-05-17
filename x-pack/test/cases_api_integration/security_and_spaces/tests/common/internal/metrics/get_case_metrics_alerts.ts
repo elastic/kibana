@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import expect from '@kbn/expect';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';

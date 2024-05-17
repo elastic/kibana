@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import {
+  EuiBadge,
   EuiCheckableCard,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiPanelProps,
   EuiSpacer,
   EuiText,
   EuiThemeProvider,
   EuiTitle,
-  EuiBadge,
-  EuiPanelProps,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import React, { useState } from 'react';
 import { OverviewPanel } from '..';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 

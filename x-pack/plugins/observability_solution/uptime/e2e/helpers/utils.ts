@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, Page } from '@elastic/synthetics';
+import { Page, expect } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {

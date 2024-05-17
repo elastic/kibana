@@ -8,15 +8,15 @@
 import React from 'react';
 import deepEqual from 'react-fast-compare';
 import { useDispatch, useSelector } from 'react-redux';
-// @ts-expect-error unconverted component
-import { elementLayer } from '../../state/actions/elements';
-import { getSelectedPage, getNodes, getSelectedToplevelNodes } from '../../state/selectors/workpad';
+import { State } from '../../../types';
 // @ts-expect-error unconverted lib
 import { flatten } from '../../lib/aeroelastic/functional';
 import { layerHandlerCreators } from '../../lib/element_handler_creators';
 // @ts-expect-error unconverted component
+import { elementLayer } from '../../state/actions/elements';
+import { getNodes, getSelectedPage, getSelectedToplevelNodes } from '../../state/selectors/workpad';
+// @ts-expect-error unconverted component
 import { crawlTree } from '../workpad_page/integration_utils';
-import { State } from '../../../types';
 import { SidebarHeader as Component } from './sidebar_header.component';
 
 const getSelectedNodes = (state: State, pageId: string): Array<string | undefined> => {
@@ -40,10 +40,13 @@ const createHandlers = function <T>(
   handlers: Record<keyof T, (...args: any[]) => any>,
   context: Record<string, unknown>
 ) {
-  return Object.keys(handlers).reduce<Record<keyof T, (...args: any[]) => any>>((acc, val) => {
-    acc[val as keyof T] = handlers[val as keyof T](context);
-    return acc;
-  }, {} as Record<keyof T, (...args: any[]) => any>);
+  return Object.keys(handlers).reduce<Record<keyof T, (...args: any[]) => any>>(
+    (acc, val) => {
+      acc[val as keyof T] = handlers[val as keyof T](context);
+      return acc;
+    },
+    {} as Record<keyof T, (...args: any[]) => any>
+  );
 };
 
 interface Props {

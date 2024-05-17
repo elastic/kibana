@@ -1,3 +1,4 @@
+import { FieldFormatEditorFactory } from '../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { formatId } from './constants';
-import { FieldFormatEditorFactory } from '../types';
 import { UrlFormatEditorFormatParams } from './url';
 
 export type { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';

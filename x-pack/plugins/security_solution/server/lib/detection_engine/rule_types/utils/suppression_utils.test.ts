@@ -5,14 +5,14 @@
  * 2.0.
  */
 import {
-  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_INSTANCE_ID,
-  ALERT_SUPPRESSION_TERMS,
-  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 
-import { getSuppressionTerms, getSuppressionAlertFields } from './suppression_utils';
+import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 
 describe('getSuppressionAlertFields', () => {
   const suppressionTerms = [

@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { ReactNode, useRef, useState, useEffect } from 'react';
 
-import { SolutionName, ProjectStatus, ProjectID, Project, EnvironmentName } from '../../../common';
-import { pluginServices } from '../../services';
+import { EnvironmentName, Project, ProjectID, ProjectStatus, SolutionName } from '../../../common';
 import { LabsStrings } from '../../i18n';
+import { pluginServices } from '../../services';
 
 import { ProjectList } from './project_list';
 

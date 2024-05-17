@@ -5,58 +5,58 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { encode } from '@kbn/rison';
 
+import type { SortFieldTimeline } from '../../../../common/api/timeline';
+import { SecurityPageName } from '../../../../common/constants';
+import { TimelineId } from '../../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useNavigation } from '../../../common/lib/kibana';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
 } from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { useNavigation } from '../../../common/lib/kibana';
-import { SecurityPageName } from '../../../../common/constants';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import type { SortFieldTimeline } from '../../../../common/api/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
-import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
+import type { TimelineModel } from '../../store/model';
 
 import { useGetAllTimeline } from '../../containers/all';
 
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
-import { OpenTimeline } from './open_timeline';
+import type { Direction } from '../../../../common/search_strategy';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { deleteTimelinesByIds } from '../../containers/api';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
+import { OpenTimeline } from './open_timeline';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import type {
   ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
+  OnCreateRuleFromTimeline,
+  OnDeleteOneTimeline,
   OnDeleteSelected,
   OnOpenTimeline,
   OnQueryChange,
   OnSelectionChange,
   OnTableChange,
   OnTableChangeParams,
-  OpenTimelineProps,
   OnToggleOnlyFavorites,
-  OpenTimelineResult,
   OnToggleShowNotes,
-  OnDeleteOneTimeline,
-  OnCreateRuleFromTimeline,
+  OpenTimelineProps,
+  OpenTimelineResult,
 } from './types';
-import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
-import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
-import { deleteTimelinesByIds } from '../../containers/api';
-import type { Direction } from '../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
-import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { useTimelineTypes } from './use_timeline_types';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */

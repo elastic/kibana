@@ -6,17 +6,17 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, ClientMessage } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import type { ClientMessage, Conversation } from '@kbn/elastic-assistant';
 import React from 'react';
 
+import styled from '@emotion/styled';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
-import styled from '@emotion/styled';
 import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
-import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
+import { StreamComment } from './stream';
 import * as i18n from './translations';
 
 // Matches EuiAvatar L
@@ -102,7 +102,7 @@ export const getComments = ({
               regenerateMessage={regenerateMessageOfConversation}
               isEnabledLangChain={isEnabledLangChain}
               setIsStreaming={setIsStreaming}
-              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              transformMessage={() => ({ content: '' }) as unknown as ContentMessage}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}

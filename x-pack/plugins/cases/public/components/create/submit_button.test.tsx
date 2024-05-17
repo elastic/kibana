@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
 
-import { SubmitCaseButton } from './submit_button';
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
-import userEvent from '@testing-library/user-event';
+import { SubmitCaseButton } from './submit_button';
 
 describe('SubmitCaseButton', () => {
   let appMockRender: AppMockRenderer;

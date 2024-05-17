@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rootEffect } from './root_effect';
 import { rootReducer } from './root_reducer';
 

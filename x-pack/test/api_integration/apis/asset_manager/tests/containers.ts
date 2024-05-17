@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { timerange, infra } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
-import { Asset } from '@kbn/assetManager-plugin/common/types_api';
+import { infra, timerange } from '@kbn/apm-synthtrace-client';
 import * as routePaths from '@kbn/assetManager-plugin/common/constants_routes';
+import { Asset } from '@kbn/assetManager-plugin/common/types_api';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../types';
 
 export default function ({ getService }: FtrProviderContext) {

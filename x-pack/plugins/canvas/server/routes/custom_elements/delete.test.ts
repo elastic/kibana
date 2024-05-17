@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import {
+  RequestHandler,
+  RequestHandlerContext,
+  SavedObjectsErrorHelpers,
+  kibanaResponseFactory,
+} from '@kbn/core/server';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AwaitedProperties } from '@kbn/utility-types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
-import { initializeDeleteCustomElementRoute } from './delete';
-import {
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
+import { initializeDeleteCustomElementRoute } from './delete';
 
 const mockRouteContext = {
   core: {

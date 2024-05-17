@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { UiCounterMetricType } from '@kbn/analytics';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import {
+  ApplicationStart,
   ChromeStart,
   DocLinksStart,
   HttpStart,
+  I18nStart,
+  IUiSettingsClient,
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
-  IUiSettingsClient,
-  ApplicationStart,
   ThemeServiceStart,
-  I18nStart,
 } from '@kbn/core/public';
-import { UiCounterMetricType } from '@kbn/analytics';
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { TutorialService } from '../services/tutorials';
-import { AddDataService } from '../services/add_data';
-import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
-import { EnvironmentService } from '../services/environment';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { ConfigSchema } from '../../config';
+import { AddDataService } from '../services/add_data';
+import { EnvironmentService } from '../services/environment';
+import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
+import { TutorialService } from '../services/tutorials';
 import type { WelcomeService } from '../services/welcome';
 
 export interface HomeKibanaServices {

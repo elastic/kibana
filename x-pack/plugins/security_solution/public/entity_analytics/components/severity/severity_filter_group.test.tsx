@@ -1,3 +1,4 @@
+import { fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { SeverityFilterGroup } from './severity_filter_group';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
-import { TestProviders } from '../../../common/mock';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { TestProviders } from '../../../common/mock';
+import { SeverityFilterGroup } from './severity_filter_group';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {

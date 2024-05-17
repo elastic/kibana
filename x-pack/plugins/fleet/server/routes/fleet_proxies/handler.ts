@@ -5,33 +5,33 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
 import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectsClientContract,
   type ElasticsearchClient,
+  type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
 
+import { defaultFleetErrorHandler } from '../../errors';
+import { agentPolicyService } from '../../services';
 import {
-  listFleetProxies,
   createFleetProxy,
   deleteFleetProxy,
   getFleetProxy,
-  updateFleetProxy,
   getFleetProxyRelatedSavedObjects,
+  listFleetProxies,
+  updateFleetProxy,
 } from '../../services/fleet_proxies';
-import { defaultFleetErrorHandler } from '../../errors';
 import type {
+  DownloadSource,
+  FleetServerHost,
   GetOneFleetProxyRequestSchema,
+  Output,
   PostFleetProxyRequestSchema,
   PutFleetProxyRequestSchema,
-  FleetServerHost,
-  Output,
-  DownloadSource,
 } from '../../types';
-import { agentPolicyService } from '../../services';
 
 async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,

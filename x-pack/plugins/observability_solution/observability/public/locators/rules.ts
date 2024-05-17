@@ -6,9 +6,9 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { rulesLocatorID } from '../../common';
 import { RULES_PATH } from '../../common/locators/paths';
 

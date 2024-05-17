@@ -10,9 +10,9 @@ import React, { Component } from 'react';
 
 import {
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
   EuiFormRow,
   keys,
 } from '@elastic/eui';

@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useContext, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiRangeProps } from '@elastic/eui';
-import { EuiPanel, EuiIcon } from '@elastic/eui';
-import { useSelector, useDispatch } from 'react-redux';
-import { SideEffectContext } from '../side_effect_context';
-import type { Vector2 } from '../../types';
-import * as selectors from '../../store/selectors';
-import { useColors } from '../use_colors';
+import { EuiIcon, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useContext, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { State } from '../../../common/store/types';
 import {
   userClickedZoomIn,
   userClickedZoomOut,
-  userSetZoomLevel,
   userNudgedCamera,
   userSetPositionOfCamera,
+  userSetZoomLevel,
 } from '../../store/camera/action';
-import type { State } from '../../../common/store/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SourcererButton } from './sourcerer_selection';
+import * as selectors from '../../store/selectors';
+import type { Vector2 } from '../../types';
+import { SideEffectContext } from '../side_effect_context';
+import { useColors } from '../use_colors';
 import { DateSelectionButton } from './date_picker';
-import { StyledGraphControls, StyledGraphControlsColumn, StyledEuiRange } from './styles';
 import { NodeLegend } from './legend';
 import { SchemaInformation } from './schema';
+import { SourcererButton } from './sourcerer_selection';
+import { StyledEuiRange, StyledGraphControls, StyledGraphControlsColumn } from './styles';
 
 export const GraphControls = React.memo(
   ({

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { sortBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { sortBy } from 'lodash';
+import React, { useMemo } from 'react';
 
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CasesConfigurationUI } from '../../../common/ui';
-import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
-import * as i18n from './translations';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;

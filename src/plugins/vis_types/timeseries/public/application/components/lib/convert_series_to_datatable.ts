@@ -1,3 +1,4 @@
+import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,15 +7,14 @@
  * Side Public License, v 1.
  */
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DatatableRow, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { Query } from '@kbn/es-query';
-import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-plugin/common';
-import { TimeseriesVisParams } from '../../../types';
-import type { PanelData, Metric } from '../../../../common/types';
-import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
+import { DatatableColumn, DatatableColumnType, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { getFieldsForTerms, getMultiFieldLabel } from '../../../../common/fields_utils';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
+import type { Metric, PanelData } from '../../../../common/types';
 import { getDataStart, getDataViewsStart } from '../../../services';
+import { TimeseriesVisParams } from '../../../types';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import type { TSVBTables } from './types';
 

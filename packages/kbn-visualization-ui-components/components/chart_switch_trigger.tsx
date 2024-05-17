@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
+import React from 'react';
 
 export const ChartSwitchTrigger = function ({
   label,

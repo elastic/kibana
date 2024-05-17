@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { stringifyRequest, getOptions } from 'loader-utils';
+import { getOptions, stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
+import { ALL_THEMES, ThemeTag, parseThemeTags } from '../common';
 
 const getVersion = (tag: ThemeTag) => 8;
 const getIsDark = (tag: ThemeTag) => tag.includes('dark');

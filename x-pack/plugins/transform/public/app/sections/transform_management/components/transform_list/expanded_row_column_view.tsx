@@ -14,8 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';

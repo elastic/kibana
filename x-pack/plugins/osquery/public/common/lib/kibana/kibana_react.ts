@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { useHistory } from 'react-router-dom';
-import { FieldIcon } from '@kbn/react-field';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaContextProvider,
+  reactRouterNavigate,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
-  reactRouterNavigate,
 } from '@kbn/kibana-react-plugin/public';
+import { FieldIcon } from '@kbn/react-field';
+import type React from 'react';
+import { useHistory } from 'react-router-dom';
 import type { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;

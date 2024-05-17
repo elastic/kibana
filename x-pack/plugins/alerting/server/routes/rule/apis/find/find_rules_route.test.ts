@@ -1,3 +1,4 @@
+import { httpServiceMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { findRulesRoute } from './find_rules_route';
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
+import { findRulesRoute } from './find_rules_route';
 
 const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();

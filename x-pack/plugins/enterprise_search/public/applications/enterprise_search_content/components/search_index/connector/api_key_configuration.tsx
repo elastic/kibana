@@ -10,13 +10,13 @@ import React, { useEffect, useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiButton,
+  EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButton,
   EuiSpacer,
-  EuiConfirmModal,
-  EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

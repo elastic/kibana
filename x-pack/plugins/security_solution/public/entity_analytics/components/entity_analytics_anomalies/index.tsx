@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -13,29 +6,36 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { SecurityPageName } from '../../../app/types';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
-import * as i18n from './translations';
-import { useAggregatedAnomaliesByJob } from '../../../common/components/ml/anomaly/use_anomalies_search';
-import { useAnomaliesColumns } from './columns';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
 import {
   LinkAnchor,
   LinkButton,
   useGetSecuritySolutionLinkProps,
 } from '../../../common/components/links';
-import { HostsTableType } from '../../../explore/hosts/store/model';
-import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
-import { SecurityPageName } from '../../../app/types';
-import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../explore/users/store/model';
-import { useKibana } from '../../../common/lib/kibana';
+import { useAggregatedAnomaliesByJob } from '../../../common/components/ml/anomaly/use_anomalies_search';
 import type { SecurityJob } from '../../../common/components/ml_popover/types';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useKibana } from '../../../common/lib/kibana';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import { UsersTableType } from '../../../explore/users/store/model';
+import { useAnomaliesColumns } from './columns';
+import * as i18n from './translations';
 
 const TABLE_QUERY_ID = 'entityAnalyticsDashboardAnomaliesTable';
 

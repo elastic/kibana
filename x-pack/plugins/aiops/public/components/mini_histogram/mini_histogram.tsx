@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 
 import type { PartialTheme } from '@elastic/charts';
-import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
+import { BarSeries, Chart, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
 import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR } from '@kbn/aiops-log-rate-analysis';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItemHistogramItem } from '@kbn/ml-agg-utils';
-import { i18n } from '@kbn/i18n';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useEuiTheme } from '../../hooks/use_eui_theme';

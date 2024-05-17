@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
-import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 export interface PageProps {
   nextStepPath: string;

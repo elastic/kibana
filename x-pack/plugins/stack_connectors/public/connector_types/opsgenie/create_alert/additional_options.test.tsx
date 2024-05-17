@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
-import { screen, render, within, fireEvent } from '@testing-library/react';
 import { AdditionalOptions } from './additional_options';
 
 describe('AdditionalOptions', () => {

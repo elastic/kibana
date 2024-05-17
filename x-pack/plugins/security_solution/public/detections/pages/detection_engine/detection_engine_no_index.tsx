@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 
 import { EmptyPage } from '../../../common/components/empty_page';
-import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
+import * as i18n from './translations';
 
 const buildMessage = (needsListsIndex: boolean, needsSignalsIndex: boolean): string => {
   if (needsSignalsIndex && needsListsIndex) {

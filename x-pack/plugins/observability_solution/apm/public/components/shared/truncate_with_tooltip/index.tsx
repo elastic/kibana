@@ -6,8 +6,8 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import { truncate } from '../../../utils/style';
 
 const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';

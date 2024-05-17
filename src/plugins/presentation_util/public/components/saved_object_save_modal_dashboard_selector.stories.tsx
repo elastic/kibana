@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
+import React, { useState } from 'react';
 
 import { StorybookParams } from '../services/plugin_services.story';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';

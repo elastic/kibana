@@ -6,24 +6,24 @@
  */
 
 import {
-  EuiPanel,
-  EuiTitle,
-  EuiIconTip,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
   EuiProgress,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getComparisonChartTheme } from '../../../../shared/time_comparison/get_comparison_chart_theme';
-import { TimeseriesChartWithContext } from '../../../../shared/charts/timeseries_chart_with_context';
 import { isPending, useFetcher } from '../../../../../hooks/use_fetcher';
+import { TimeseriesChartWithContext } from '../../../../shared/charts/timeseries_chart_with_context';
+import { getComparisonChartTheme } from '../../../../shared/time_comparison/get_comparison_chart_theme';
 
+import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../../shared/charts/helper/get_timeseries_color';
-import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
 const INITIAL_STATE = {
   currentPeriod: { timeseries: [] },

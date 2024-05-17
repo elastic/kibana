@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { documentField } from '../datasources/form_based/document_field';
 import {
+  buildIndexPatternField,
   ensureIndexPattern,
   loadIndexPatternRefs,
   loadIndexPatterns,
-  buildIndexPatternField,
 } from './loader';
-import { sampleIndexPatterns, mockDataViewsService } from './mocks';
-import { documentField } from '../datasources/form_based/document_field';
+import { mockDataViewsService, sampleIndexPatterns } from './mocks';
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {

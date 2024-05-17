@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
 export const BackButton = () => {
   const navigate = useNavigate();

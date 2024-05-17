@@ -9,8 +9,8 @@ import { RefObject, useCallback, useState } from 'react';
 
 import {
   ElementClickListener,
-  ProjectionClickListener,
   ProjectedValues,
+  ProjectionClickListener,
   XYChartElementEvent,
 } from '@elastic/charts';
 

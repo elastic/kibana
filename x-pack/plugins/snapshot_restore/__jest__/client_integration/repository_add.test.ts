@@ -7,11 +7,11 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { API_BASE_PATH } from '../../common';
-import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers } from './helpers';
+import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
+import { getRepository } from '../../test/fixtures';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;

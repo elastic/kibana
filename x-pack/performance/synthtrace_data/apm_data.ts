@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { apm, httpExitSpan, timerange } from '@kbn/apm-synthtrace-client';
-import { Readable } from 'stream';
 
 export function generateApmData({ from, to }: { from: Date; to: Date }) {
   const range = timerange(from.toISOString(), to.toISOString());

@@ -10,16 +10,16 @@ import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/p
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
-import { getColorPalette } from '../synthetics/single_metric_config';
-import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
-import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
+import { ColumnFilter, MetricOption } from '../../types';
+import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import {
-  buildNumberColumn,
   LayerConfig,
   LensAttributes,
+  buildNumberColumn,
   parseCustomFieldName,
 } from '../lens_attributes';
+import { getColorPalette } from '../synthetics/single_metric_config';
 
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;

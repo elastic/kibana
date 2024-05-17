@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ThresholdFormatterType } from '../types';
 import { createBytesFormatter } from './bytes';
+import { formatHighPrecision } from './high_precision';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
-import { ThresholdFormatterType } from '../types';
-import { formatHighPrecision } from './high_precision';
 import { InfraWaffleMapDataFormat } from './types';
 
 export const FORMATTERS = {

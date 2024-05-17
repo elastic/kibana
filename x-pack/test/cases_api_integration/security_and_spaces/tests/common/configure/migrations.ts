@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getConfiguration,

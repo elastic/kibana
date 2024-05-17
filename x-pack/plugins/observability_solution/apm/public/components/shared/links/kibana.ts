@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
 import { IBasePath } from '@kbn/core/public';
+import rison from '@kbn/rison';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function getUpgradeAssistantHref(basePath: IBasePath) {

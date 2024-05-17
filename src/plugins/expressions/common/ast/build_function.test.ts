@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression } from './types';
 import { buildExpression } from './build_expression';
 import { buildExpressionFunction } from './build_function';
+import { ExpressionAstExpression } from './types';
 
 describe('buildExpressionFunction()', () => {
   let subexp: ExpressionAstExpression;

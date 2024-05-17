@@ -1,3 +1,7 @@
+import Path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
+import dedent from 'dedent';
+import Fsp from 'fs/promises';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +10,13 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import { ToolingLog } from '@kbn/tooling-log';
-import dedent from 'dedent';
-import Fsp from 'fs/promises';
-import Path from 'path';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import {
   ApiDeclaration,
   ApiReference,
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
 } from '../types';
-import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 export async function writeDeprecationDueByTeam(
@@ -49,13 +49,16 @@ export async function writeDeprecationDueByTeam(
     .map((key) => {
       const groupedDeprecationReferences: {
         [key: string]: { api: ApiDeclaration; refs: ApiReference[] };
-      } = groupedByTeam[key].reduce((acc, deprecation) => {
-        if (acc[deprecation.deprecatedApi.id] === undefined) {
-          acc[deprecation.deprecatedApi.id] = { api: deprecation.deprecatedApi, refs: [] };
-        }
-        acc[deprecation.deprecatedApi.id].refs.push(deprecation.ref);
-        return acc;
-      }, {} as { [key: string]: { api: ApiDeclaration; refs: ApiReference[] } });
+      } = groupedByTeam[key].reduce(
+        (acc, deprecation) => {
+          if (acc[deprecation.deprecatedApi.id] === undefined) {
+            acc[deprecation.deprecatedApi.id] = { api: deprecation.deprecatedApi, refs: [] };
+          }
+          acc[deprecation.deprecatedApi.id].refs.push(deprecation.ref);
+          return acc;
+        },
+        {} as { [key: string]: { api: ApiDeclaration; refs: ApiReference[] } }
+      );
 
       return `
     ## ${key}

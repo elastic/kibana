@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import { LensStoreDeps } from '..';
 import { loadInitial as loadInitialAction } from '..';
-import { loadInitial } from './load_initial';
-import { readFromStorage } from '../../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
+import { readFromStorage } from '../../settings_storage';
+import { loadInitial } from './load_initial';
 
 const autoApplyDisabled = () => {
   return readFromStorage(new Storage(localStorage), AUTO_APPLY_DISABLED_STORAGE_KEY) === 'true';

@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import { EuiFlyoutBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import { EuiSpacer, EuiFlyoutBody, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import deepEqual from 'fast-deep-equal';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import deepEqual from 'fast-deep-equal';
 
-import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { getRawData } from '../../../../assistant/helpers';
-import type { BrowserFields } from '../../../../common/containers/source';
-import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
-import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
-import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
-import { useHostIsolationTools } from './use_host_isolation_tools';
-import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
-import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import {
-  ALERT_SUMMARY_CONVERSATION_ID,
+  PROMPT_CONTEXTS,
+  PROMPT_CONTEXT_ALERT_CATEGORY,
+  PROMPT_CONTEXT_EVENT_CATEGORY,
+} from '../../../../assistant/content/prompt_contexts';
+import { getRawData } from '../../../../assistant/helpers';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
+import {
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
+  ALERT_SUMMARY_CONVERSATION_ID,
   ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-  EVENT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONTEXT_DESCRIPTION,
+  EVENT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   SUMMARY_VIEW,
   TIMELINE_VIEW,
 } from '../../../../common/components/event_details/translations';
-import {
-  PROMPT_CONTEXT_ALERT_CATEGORY,
-  PROMPT_CONTEXT_EVENT_CATEGORY,
-  PROMPT_CONTEXTS,
-} from '../../../../assistant/content/prompt_contexts';
+import type { BrowserFields } from '../../../../common/containers/source';
+import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
+import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
+import { FlyoutBody, FlyoutFooter, FlyoutHeader } from './flyout';
+import { getAlertIndexAlias, useBasicDataFromDetailsData } from './helpers';
+import { useHostIsolationTools } from './use_host_isolation_tools';
 
 const FlyoutFooterContainerPanel = styled(EuiPanel)`
   .side-panel-flyout-footer {

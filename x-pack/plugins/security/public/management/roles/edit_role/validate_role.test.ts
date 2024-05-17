@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RoleValidator } from './validate_role';
 import type { Role } from '../../../../common';
+import { RoleValidator } from './validate_role';
 
 let validator: RoleValidator;
 

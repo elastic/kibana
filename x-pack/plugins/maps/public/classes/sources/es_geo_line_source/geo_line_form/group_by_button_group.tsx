@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TIME_SERIES_LABEL, TERMS_LABEL } from './i18n_constants';
+import React from 'react';
+import { TERMS_LABEL, TIME_SERIES_LABEL } from './i18n_constants';
 
 const GROUP_BY_TIME_SERIES = 'timeseries';
 const GROUP_BY_TERM = 'terms';

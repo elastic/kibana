@@ -9,9 +9,9 @@ import type { EuiFieldTextProps } from '@elastic/eui';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { FC, ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 import { composeValidators } from '../../common';
 import { timeIntervalInputValidator } from '../../common/util/validators';
+import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 
 type TimeIntervalControlProps = Omit<EuiFieldTextProps, 'value' | 'onChange'> & {
   label: string | ReactNode;

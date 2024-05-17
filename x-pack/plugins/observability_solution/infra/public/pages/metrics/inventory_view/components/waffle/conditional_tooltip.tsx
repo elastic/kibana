@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import {
   InventoryItemType,
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
+import { first } from 'lodash';
+import React, { useRef } from 'react';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
+import { SNAPSHOT_METRIC_TRANSLATIONS } from '../../../../../../common/inventory_models/intl_strings';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
-import { useSnapshot } from '../../hooks/use_snaphot';
-import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
-import { SNAPSHOT_METRIC_TRANSLATIONS } from '../../../../../../common/inventory_models/intl_strings';
-import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import { useSnapshot } from '../../hooks/use_snaphot';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
 
 export interface Props {
   currentTime: number;

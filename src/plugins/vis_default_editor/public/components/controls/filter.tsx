@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
-import type { Query } from '@kbn/es-query';
 import { IAggConfig } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 

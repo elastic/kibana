@@ -7,16 +7,16 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
+  CreateMetricsExplorerViewAttributesRequestPayload,
   CreateMetricsExplorerViewResponsePayload,
-  createMetricsExplorerViewRequestPayloadRT,
   FindMetricsExplorerViewResponsePayload,
-  findMetricsExplorerViewResponsePayloadRT,
   GetMetricsExplorerViewResponsePayload,
+  UpdateMetricsExplorerViewAttributesRequestPayload,
+  UpdateMetricsExplorerViewResponsePayload,
+  createMetricsExplorerViewRequestPayloadRT,
+  findMetricsExplorerViewResponsePayloadRT,
   getMetricsExplorerViewUrl,
   metricsExplorerViewResponsePayloadRT,
-  UpdateMetricsExplorerViewResponsePayload,
-  CreateMetricsExplorerViewAttributesRequestPayload,
-  UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
 import {
   DeleteMetricsExplorerViewError,

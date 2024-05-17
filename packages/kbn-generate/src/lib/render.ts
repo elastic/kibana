@@ -9,11 +9,11 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { sortPackageJson } from '@kbn/sort-package-json';
+import { ToolingLog } from '@kbn/tooling-log';
 import Ejs from 'ejs';
 import normalizePath from 'normalize-path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { sortPackageJson } from '@kbn/sort-package-json';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 export type Vars = Record<string, unknown>;
 export interface RenderContext extends Vars {

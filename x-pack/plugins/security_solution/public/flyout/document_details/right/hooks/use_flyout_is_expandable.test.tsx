@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useFlyoutIsExpandable } from './use_flyout_is_expandable';
-import { renderHook } from '@testing-library/react-hooks';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { renderHook } from '@testing-library/react-hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useFlyoutIsExpandable } from './use_flyout_is_expandable';
 
 const getFieldsData = jest.fn();
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({

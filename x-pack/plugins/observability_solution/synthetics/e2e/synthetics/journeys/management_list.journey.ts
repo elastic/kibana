@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, after } from '@elastic/synthetics';
-import { byTestId } from '../../helpers/utils';
+import { after, before, expect, journey, step } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
+import { byTestId } from '../../helpers/utils';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey(`MonitorManagementList`, async ({ page, params }) => {
   recordVideo(page);

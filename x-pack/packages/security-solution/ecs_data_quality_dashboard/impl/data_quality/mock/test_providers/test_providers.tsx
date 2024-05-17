@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import { I18nProvider } from '@kbn/i18n-react';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';

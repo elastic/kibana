@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
 
 const uxConfig = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

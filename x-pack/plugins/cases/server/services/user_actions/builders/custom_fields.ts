@@ -9,7 +9,7 @@ import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import type { UserActionAction } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
-import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
+import type { EventDetails, UserActionEvent, UserActionParameters } from '../types';
 
 export class CustomFieldsUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'customFields'>): UserActionEvent {

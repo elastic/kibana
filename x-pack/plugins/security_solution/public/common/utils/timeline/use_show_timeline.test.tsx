@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
-import { updateAppLinks } from '../../links';
-import { appLinks } from '../../../app_links';
-import { useShowTimeline } from './use_show_timeline';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { appLinks } from '../../../app_links';
+import { updateAppLinks } from '../../links';
+import { useShowTimeline } from './use_show_timeline';
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {

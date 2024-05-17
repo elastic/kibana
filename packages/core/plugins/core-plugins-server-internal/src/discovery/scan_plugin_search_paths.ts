@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PathLike, readdir, stat, Stats } from 'fs';
+import { PathLike, Stats, readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, Observable } from 'rxjs';
-import { catchError, mergeMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
+import { Observable, bindNodeCallback, from } from 'rxjs';
+import { catchError, mergeMap } from 'rxjs';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const fsReadDir$ = bindNodeCallback<[string], [string[]]>(readdir);

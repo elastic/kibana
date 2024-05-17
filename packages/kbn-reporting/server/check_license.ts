@@ -105,8 +105,11 @@ export function checkLicense(
     makeManagementFeature(exportTypes),
   ];
 
-  return reportingFeatures.reduce((result, feature) => {
-    result[feature.id] = feature.checkLicense(license);
-    return result;
-  }, {} as Record<string, LicenseCheckResult>);
+  return reportingFeatures.reduce(
+    (result, feature) => {
+      result[feature.id] = feature.checkLicense(license);
+      return result;
+    },
+    {} as Record<string, LicenseCheckResult>
+  );
 }

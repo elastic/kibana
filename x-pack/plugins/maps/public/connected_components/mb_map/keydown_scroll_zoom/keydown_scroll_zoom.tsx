@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import classNames from 'classnames';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
+import type { MapMouseEvent, Map as MbMap } from '@kbn/mapbox-gl';
+import classNames from 'classnames';
+import React, { Component } from 'react';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getDeleteQueryFilter, SloOrphanSummaryCleanupTask } from './orphan_summary_cleanup_task';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { SloOrphanSummaryCleanupTask, getDeleteQueryFilter } from './orphan_summary_cleanup_task';
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { times } from 'lodash';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { times } from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 const taskManagerSetup = taskManagerMock.createSetup();

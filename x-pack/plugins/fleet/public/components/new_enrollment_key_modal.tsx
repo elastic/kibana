@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import { EuiConfirmModal, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
 
+import { sendCreateEnrollmentAPIKey, useInput, useStartServices } from '../hooks';
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
-import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
 
 function validatePolicyId(value: string) {
   if (value === '') {

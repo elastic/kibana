@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FeatureRegistry } from './feature_registry';
-import { ElasticsearchFeatureConfig, KibanaFeatureConfig } from '../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { ElasticsearchFeatureConfig, KibanaFeatureConfig } from '../common';
+import { FeatureRegistry } from './feature_registry';
 
 describe('FeatureRegistry', () => {
   describe('Kibana Features', () => {
@@ -504,8 +504,9 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() => featureRegistry.registerKibanaFeature(feature))
-        .toThrowErrorMatchingInlineSnapshot(`
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(`
         "[privileges]: types that failed validation:
         - [privileges.0]: expected value to equal [null]
         - [privileges.1.foo]: definition for this key is missing"

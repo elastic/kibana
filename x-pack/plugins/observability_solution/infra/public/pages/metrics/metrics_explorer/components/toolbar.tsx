@@ -6,26 +6,26 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
-  MetricsExplorerMetric,
   MetricsExplorerAggregation,
+  MetricsExplorerMetric,
 } from '../../../../../common/http_api/metrics_explorer';
+import { DerivedIndexPattern } from '../../../../containers/metrics_source';
+import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import {
+  MetricsExplorerChartOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { MetricsExplorerKueryBar } from './kuery_bar';
-import { MetricsExplorerMetrics } from './metrics';
-import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
+import { MetricsExplorerGroupBy } from './group_by';
+import { MetricsExplorerKueryBar } from './kuery_bar';
+import { MetricsExplorerMetrics } from './metrics';
 
 interface Props {
   derivedIndexPattern: DerivedIndexPattern;

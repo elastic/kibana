@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { RoleMapping } from '../../../../../common';
 import {
   validateRoleMappingForSave,
   validateRoleMappingName,
-  validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
+  validateRoleMappingRoles,
   validateRoleMappingRules,
 } from './role_mapping_validation';
-import type { RoleMapping } from '../../../../../common';
 
 describe('validateRoleMappingName', () => {
   it('requires a value', () => {
@@ -27,8 +27,9 @@ describe('validateRoleMappingName', () => {
 
 describe('validateRoleMappingRoles', () => {
   it('requires a value', () => {
-    expect(validateRoleMappingRoles({ roles: [] } as unknown as RoleMapping))
-      .toMatchInlineSnapshot(`
+    expect(
+      validateRoleMappingRoles({ roles: [] } as unknown as RoleMapping)
+    ).toMatchInlineSnapshot(`
       Object {
         "error": "At least one role is required.",
         "isInvalid": true,
@@ -39,8 +40,9 @@ describe('validateRoleMappingRoles', () => {
 
 describe('validateRoleMappingRoleTemplates', () => {
   it('requires a value', () => {
-    expect(validateRoleMappingRoleTemplates({ role_templates: [] } as unknown as RoleMapping))
-      .toMatchInlineSnapshot(`
+    expect(
+      validateRoleMappingRoleTemplates({ role_templates: [] } as unknown as RoleMapping)
+    ).toMatchInlineSnapshot(`
       Object {
         "error": "At least one role template is required.",
         "isInvalid": true,
@@ -61,8 +63,9 @@ describe('validateRoleMappingRules', () => {
 
   // more exhaustive testing is done in other unit tests
   it('requires rules to be valid', () => {
-    expect(validateRoleMappingRules({ rules: { something: [] } } as unknown as RoleMapping))
-      .toMatchInlineSnapshot(`
+    expect(
+      validateRoleMappingRules({ rules: { something: [] } } as unknown as RoleMapping)
+    ).toMatchInlineSnapshot(`
       Object {
         "error": "Unknown rule type: something.",
         "isInvalid": true,

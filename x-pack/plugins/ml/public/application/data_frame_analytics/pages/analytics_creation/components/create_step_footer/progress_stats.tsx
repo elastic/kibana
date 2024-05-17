@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -16,6 +14,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
 import type { AnalyticsProgressStats } from './create_step_footer';
 
 interface Props {

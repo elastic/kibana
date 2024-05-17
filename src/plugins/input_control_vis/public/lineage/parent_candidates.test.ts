@@ -7,9 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { CONTROL_TYPES, newControl } from '../editor_utils';
 import { getLineageMap } from './lineage_map';
 import { getParentCandidates } from './parent_candidates';
-import { CONTROL_TYPES, newControl } from '../editor_utils';
 
 function createControlParams(id: any) {
   const controlParams = newControl(CONTROL_TYPES.LIST);

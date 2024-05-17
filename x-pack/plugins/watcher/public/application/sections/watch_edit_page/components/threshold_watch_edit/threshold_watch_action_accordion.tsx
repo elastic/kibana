@@ -5,49 +5,49 @@
  * 2.0.
  */
 
-import React, { Fragment, useContext, useState } from 'react';
 import { css } from '@emotion/react';
+import React, { Fragment, useContext, useState } from 'react';
 
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
   EuiForm,
-  EuiCallOut,
+  EuiIcon,
   EuiLink,
-  EuiText,
   EuiSpacer,
-  useEuiTheme,
+  EuiText,
+  EuiTitle,
   euiCanAnimate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Action } from '../../../../models/action';
-import { WatchHistoryItem } from '../../../../models/watch_history_item';
-import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 import { ExecuteDetails } from '../../../../models/execute_details';
+import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
+import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
+import { ACTION_MODES, ACTION_TYPES } from '../../../../../../common/constants';
 import { ActionType } from '../../../../../../common/types/action_types';
-import { ACTION_TYPES, ACTION_MODES } from '../../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
 
-import {
-  WebhookActionFields,
-  LoggingActionFields,
-  IndexActionFields,
-  SlackActionFields,
-  EmailActionFields,
-  PagerDutyActionFields,
-  JiraActionFields,
-} from './action_fields';
-import { executeWatch } from '../../../../lib/api';
-import { SectionError } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
+import { SectionError } from '../../../../components';
+import { executeWatch } from '../../../../lib/api';
+import {
+  EmailActionFields,
+  IndexActionFields,
+  JiraActionFields,
+  LoggingActionFields,
+  PagerDutyActionFields,
+  SlackActionFields,
+  WebhookActionFields,
+} from './action_fields';
 
 const actionFieldsComponentMap = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,

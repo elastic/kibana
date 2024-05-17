@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -15,7 +16,6 @@ import {
   PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME,
   PageOverlay,
 } from './page_overlay';
-import { act, waitFor } from '@testing-library/react';
 
 describe('When using PageOverlay component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

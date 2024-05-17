@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../hooks';
 

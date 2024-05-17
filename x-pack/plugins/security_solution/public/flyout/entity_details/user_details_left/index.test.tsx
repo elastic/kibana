@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { UserDetailsPanel } from '.';
+import { TestProviders } from '../../../common/mock';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 describe('LeftPanel', () => {

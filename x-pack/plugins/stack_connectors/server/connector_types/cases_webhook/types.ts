@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,

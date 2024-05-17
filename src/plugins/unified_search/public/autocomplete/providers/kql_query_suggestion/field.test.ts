@@ -8,12 +8,12 @@
 
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
-import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
-import type { KueryNode } from '@kbn/es-query';
-import { setupGetFieldSuggestions } from './field';
-import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 import { coreMock } from '@kbn/core/public/mocks';
+import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { KueryNode } from '@kbn/es-query';
+import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
+import { setupGetFieldSuggestions } from './field';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 

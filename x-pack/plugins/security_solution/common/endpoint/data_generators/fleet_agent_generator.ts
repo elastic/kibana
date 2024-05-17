@@ -6,18 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DeepPartial } from 'utility-types';
-import { merge } from 'lodash';
 import type {
   Agent,
   AgentStatus,
   FleetServerAgent,
   FleetServerAgentComponentStatus,
 } from '@kbn/fleet-plugin/common';
-import { FleetServerAgentComponentStatuses, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX, FleetServerAgentComponentStatuses } from '@kbn/fleet-plugin/common';
+import { merge } from 'lodash';
 import moment from 'moment';
-import { BaseDataGenerator } from './base_data_generator';
+import type { DeepPartial } from 'utility-types';
 import { ENDPOINT_ERROR_CODES } from '../constants';
+import { BaseDataGenerator } from './base_data_generator';
 
 // List of computed (as in, done in code is kibana via
 // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44

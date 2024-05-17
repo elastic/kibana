@@ -9,15 +9,15 @@
 import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { FormatFactory } from '../types';
 import {
   CommonXYDataLayerConfig,
   DataDecorationConfig,
-  YAxisConfig,
   ReferenceLineDecorationConfig,
-  YAxisConfigResult,
   XAxisConfigResult,
+  YAxisConfig,
+  YAxisConfigResult,
 } from '../../common';
+import { FormatFactory } from '../types';
 import { LayersFieldFormats } from './layers';
 
 export interface Series {

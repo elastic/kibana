@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
-import moment from 'moment';
-import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import {
+  LogColumnHeader,
+  LogColumnHeadersWrapper,
   LogEntryColumn,
+  LogEntryColumnWidths,
+  LogEntryContextMenu,
   LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-  LogEntryContextMenu,
-  LogEntryColumnWidths,
   iconColumnId,
-  LogColumnHeadersWrapper,
-  LogColumnHeader,
 } from '@kbn/logs-shared-plugin/public';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { shouldHandleLinkEvent, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { encode } from '@kbn/rison';
+import moment from 'moment';
+import React, { useMemo, useCallback, useState } from 'react';
+import { localizedDate } from '../../../../../../common/formatters/datetime';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time/time_range';
-import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import { LogEntryAnomaly } from '../../../../../../common/log_analysis';
+import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
+import { TimeRange } from '../../../../../../common/time/time_range';
+import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   LogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
   isFieldLogColumnConfiguration,
   isMessageLogColumnConfiguration,
+  isTimestampLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
-import { localizedDate } from '../../../../../../common/formatters/datetime';
-import { LogEntryAnomaly } from '../../../../../../common/log_analysis';
-import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;

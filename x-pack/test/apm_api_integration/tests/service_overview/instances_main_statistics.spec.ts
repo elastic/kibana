@@ -1,3 +1,7 @@
+import { InstancesSortField } from '@kbn/apm-plugin/common/instances';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { Instance, apm, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,10 +15,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { apm, Instance, timerange } from '@kbn/apm-synthtrace-client';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { InstancesSortField } from '@kbn/apm-plugin/common/instances';
 import { sum } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';

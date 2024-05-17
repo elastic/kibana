@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import { shallow } from 'enzyme';
 import { Sparkline } from '.';
 
 jest.mock('./sparkline_flot_chart', () => ({

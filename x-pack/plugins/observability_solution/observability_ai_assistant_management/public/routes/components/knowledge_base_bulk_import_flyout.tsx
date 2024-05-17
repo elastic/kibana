@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -26,10 +24,12 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
+import React, { useState } from 'react';
 import { useAppContext } from '../../hooks/use_app_context';
+import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
 
 export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void }) {
   const {

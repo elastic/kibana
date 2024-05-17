@@ -25,7 +25,7 @@ const ON_STATE_CHANGE_DEBOUNCE = 100;
  */
 export const ReactEmbeddableRenderer = <
   StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>,
 >({
   maybeId,
   type,

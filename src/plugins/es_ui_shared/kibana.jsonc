@@ -6,9 +6,7 @@
     "id": "esUiShared",
     "server": true,
     "browser": true,
-    "requiredBundles": [
-      "dataViews"
-    ],
+    "requiredBundles": ["dataViews"],
     "extraPublicDirs": [
       "static/validators/string",
       "static/forms/hook_form_lib",

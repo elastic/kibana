@@ -6,21 +6,16 @@
  */
 
 import type {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 
-import { ReplaySubject, type Subject } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import type {
-  EcsDataQualityDashboardPluginSetup,
-  EcsDataQualityDashboardPluginStart,
-  PluginSetupDependencies,
-  DataQualityDashboardRequestHandlerContext,
-} from './types';
+import { ReplaySubject, type Subject } from 'rxjs';
+import { ResultsDataStream } from './lib/data_stream/results_data_stream';
 import {
   getILMExplainRoute,
   getIndexMappingsRoute,
@@ -28,7 +23,12 @@ import {
   getUnallowedFieldValuesRoute,
   resultsRoutes,
 } from './routes';
-import { ResultsDataStream } from './lib/data_stream/results_data_stream';
+import type {
+  DataQualityDashboardRequestHandlerContext,
+  EcsDataQualityDashboardPluginSetup,
+  EcsDataQualityDashboardPluginStart,
+  PluginSetupDependencies,
+} from './types';
 
 export class EcsDataQualityDashboardPlugin
   implements Plugin<EcsDataQualityDashboardPluginSetup, EcsDataQualityDashboardPluginStart>

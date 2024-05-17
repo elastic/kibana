@@ -7,20 +7,20 @@
  */
 import { Stream } from 'stream';
 import type {
-  IKibanaResponse,
-  HttpResponsePayload,
-  ResponseError,
-  HttpResponseOptions,
-  RedirectResponseOptions,
   CustomHttpResponseOptions,
-  FileHttpResponseOptions,
   ErrorHttpResponseOptions,
+  FileHttpResponseOptions,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  IKibanaResponse,
   KibanaErrorResponseFactory,
-  KibanaRedirectionResponseFactory,
   KibanaNotModifiedResponseFactory,
-  KibanaSuccessResponseFactory,
+  KibanaRedirectionResponseFactory,
   KibanaResponseFactory,
+  KibanaSuccessResponseFactory,
   LifecycleResponseFactory,
+  RedirectResponseOptions,
+  ResponseError,
 } from '@kbn/core-http-server';
 import mime from 'mime';
 
@@ -101,8 +101,8 @@ export const fileResponseFactory = {
       typeof fileContentSize === 'number'
         ? fileContentSize
         : Buffer.isBuffer(responseBody)
-        ? responseBody.length
-        : '';
+          ? responseBody.length
+          : '';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,

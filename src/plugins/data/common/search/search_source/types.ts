@@ -7,13 +7,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Query, AggregateQuery } from '@kbn/es-query';
-import { SerializableRecord } from '@kbn/utility-types';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import { ISearchOptions } from '@kbn/search-types';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { ISearchOptions } from '@kbn/search-types';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
 

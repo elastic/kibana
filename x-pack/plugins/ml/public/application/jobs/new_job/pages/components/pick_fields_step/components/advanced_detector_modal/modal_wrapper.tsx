@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 const MAX_MODAL_WIDTH = 1200;
 

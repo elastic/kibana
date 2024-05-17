@@ -1,3 +1,25 @@
+import {
+  CONTROL_GROUP_TYPE,
+  ControlGroupInput,
+  getDefaultControlGroupInput,
+  getDefaultControlGroupPersistableInput,
+} from '@kbn/controls-plugin/common';
+import {
+  type ControlGroupContainer,
+  ControlGroupContainerFactory,
+  ControlGroupOutput,
+} from '@kbn/controls-plugin/public';
+import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { EmbeddableFactory, ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  AggregateQuery,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+  compareFilters,
+} from '@kbn/es-query';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,33 +28,10 @@
  * Side Public License, v 1.
  */
 import deepEqual from 'fast-deep-equal';
-import {
-  ControlGroupInput,
-  CONTROL_GROUP_TYPE,
-  getDefaultControlGroupInput,
-  getDefaultControlGroupPersistableInput,
-} from '@kbn/controls-plugin/common';
-import {
-  ControlGroupContainerFactory,
-  ControlGroupOutput,
-  type ControlGroupContainer,
-} from '@kbn/controls-plugin/public';
-import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  AggregateQuery,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-} from '@kbn/es-query';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { map, distinctUntilChanged, startWith } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
+import { distinctUntilChanged, map, startWith } from 'rxjs';
 import { v4 } from 'uuid';
-import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -51,6 +50,7 @@ import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffin
 import { DashboardPublicState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
+import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';

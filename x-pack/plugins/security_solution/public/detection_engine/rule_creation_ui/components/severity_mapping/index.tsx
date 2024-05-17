@@ -6,15 +6,15 @@
  */
 
 import {
-  EuiFormRow,
   EuiCheckbox,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
+  EuiFormRow,
   EuiIcon,
   EuiSpacer,
   EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
@@ -23,8 +23,8 @@ import styled from 'styled-components';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  FieldComponent,
   AutocompleteFieldMatchComponent,
+  FieldComponent,
 } from '@kbn/securitysolution-autocomplete';
 import type {
   Severity,
@@ -32,9 +32,9 @@ import type {
   SeverityMappingItem,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import type { SeverityOptionItem } from '../step_about_rule/data';
-import type { AboutStepSeverity } from '../../../../detections/pages/detection_engine/rules/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { AboutStepSeverity } from '../../../../detections/pages/detection_engine/rules/types';
+import type { SeverityOptionItem } from '../step_about_rule/data';
 import * as i18n from './translations';
 
 const NestedContent = styled.div`

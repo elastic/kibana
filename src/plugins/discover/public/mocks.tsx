@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import React from 'react';
 import { DiscoverSetup, DiscoverStart } from '.';
 import { getDiscoverStateMock } from './__mocks__/discover_state.mock';
 

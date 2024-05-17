@@ -6,28 +6,32 @@
  */
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { getTrustedAppsListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import type {
+  CreateExceptionListItemSchema,
+  DeleteExceptionListItemSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  FindExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+  ReadExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import type {
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-  FindExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  ReadExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  DeleteExceptionListItemSchema,
-  ExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { getTrustedAppsListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../common/endpoint/service/artifacts/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
 } from '../../common/mock/endpoint/http_handler_mock_factory';
-import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
   FleetGetAgentPolicyListHttpMockInterface,
   FleetGetEndpointPackagePolicyListHttpMockInterface,
@@ -36,10 +40,6 @@ import {
   fleetGetAgentPolicyListHttpMock,
   fleetGetEndpointPackagePolicyListHttpMock,
 } from './fleet_mocks';
-import {
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-  GLOBAL_ARTIFACT_TAG,
-} from '../../../common/endpoint/service/artifacts/constants';
 
 interface FindExceptionListItemSchemaQueryParams
   extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {

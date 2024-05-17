@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsStart, SavedObjectSetup } from './plugin';
+import { SavedObjectSetup, SavedObjectsStart } from './plugin';
 
 const createStartContract = (): SavedObjectsStart => {
   return {

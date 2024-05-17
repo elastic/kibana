@@ -7,23 +7,23 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiButtonEmpty,
-  EuiText,
-  EuiLink,
-  EuiSpacer,
-  EuiPanel,
   EuiBadge,
+  EuiButtonEmpty,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

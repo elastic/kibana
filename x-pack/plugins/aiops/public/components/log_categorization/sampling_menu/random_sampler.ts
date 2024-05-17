@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { i18n } from '@kbn/i18n';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { BehaviorSubject } from 'rxjs';
 
 export const RANDOM_SAMPLER_PROBABILITIES = [
   0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5,
@@ -23,7 +23,8 @@ export const RANDOM_SAMPLER_OPTION = {
   OFF: 'off',
 } as const;
 
-export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
+export type RandomSamplerOption =
+  (typeof RANDOM_SAMPLER_OPTION)[keyof typeof RANDOM_SAMPLER_OPTION];
 export type RandomSamplerProbability = number | null;
 
 export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{

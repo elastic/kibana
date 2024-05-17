@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
-import {
-  TaskInstance,
-  TaskStatus,
-  TaskLifecycleResult,
-  SerializedConcreteTaskInstance,
-} from './task';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { mockLogger } from './test_utils';
+import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr } from './lib/result_type';
-import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  SerializedConcreteTaskInstance,
+  TaskInstance,
+  TaskLifecycleResult,
+  TaskStatus,
+} from './task';
+import { AggregationOpts, SearchOpts, TaskStore } from './task_store';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import { mockLogger } from './test_utils';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();

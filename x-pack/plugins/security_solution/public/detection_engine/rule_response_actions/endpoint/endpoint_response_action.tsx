@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ConfigFields } from './config_fields';
 import type { ArrayItem } from '../../../shared_imports';
-import { CommentField } from './comment_field';
 import { ActionTypeField } from './action_type_field';
 import { EndpointActionCallout } from './callout';
+import { CommentField } from './comment_field';
+import { ConfigFields } from './config_fields';
 
 interface EndpointResponseActionProps {
   item: ArrayItem;

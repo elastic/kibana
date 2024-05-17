@@ -26,10 +26,10 @@ export type DeepPartial<T> = {
 export type DeepReadonly<T> = T extends Array<infer R>
   ? ReadonlyArray<DeepReadonly<T>>
   : T extends Function
-  ? T
-  : T extends object
-  ? DeepReadonlyObject<T>
-  : T;
+    ? T
+    : T extends object
+      ? DeepReadonlyObject<T>
+      : T;
 
 type DeepReadonlyObject<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>;

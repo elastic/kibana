@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import moment from 'moment';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
-import type { MLSavedObjectService } from '../../saved_objects';
-import type { MlClient } from '../../lib/ml_client';
-import type { JobMessage } from '../../../common/types/audit_message';
 import type { AuditMessage } from '../../../common/types/anomaly_detection_jobs';
+import type { JobMessage } from '../../../common/types/audit_message';
+import type { MlClient } from '../../lib/ml_client';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
 
 type LevelName = keyof typeof LEVEL;
-type LevelValue = typeof LEVEL[keyof typeof LEVEL];
+type LevelValue = (typeof LEVEL)[keyof typeof LEVEL];
 
 // filter to match job_type: 'anomaly_detector' or no job_type field at all
 // if no job_type field exist, we can assume the message is for an anomaly detector job

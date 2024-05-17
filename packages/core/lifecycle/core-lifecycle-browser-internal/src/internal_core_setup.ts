@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { InternalApplicationSetup } from '@kbn/core-application-browser-internal';
-import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-browser-internal';
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-browser-internal';
 

@@ -8,8 +8,8 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { deleteWatches } from '../lib/api';
 import { useAppContext } from '../app_context';
+import { deleteWatches } from '../lib/api';
 
 export const DeleteWatchesModal = ({
   watchesToDelete,

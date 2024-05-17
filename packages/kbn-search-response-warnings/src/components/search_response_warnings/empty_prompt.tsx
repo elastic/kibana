@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { ViewDetailsPopover } from './view_details_popover';
-import { getWarningsDescription } from './i18n_utils';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { SearchResponseWarning } from '../../types';
+import { getWarningsDescription } from './i18n_utils';
+import { ViewDetailsPopover } from './view_details_popover';
 
 interface Props {
   warnings: SearchResponseWarning[];

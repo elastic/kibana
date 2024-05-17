@@ -1,3 +1,4 @@
+import { UserProfileWithAvatar, UserProfilesSelectable } from '@kbn/user-profile-components';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import React, { FunctionComponent, useState } from 'react';
-import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const SelectableDemo: FunctionComponent = () => {

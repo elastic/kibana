@@ -1,3 +1,4 @@
+import { Router as ReactRouter } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +8,6 @@
  */
 import { History } from 'history';
 import React from 'react';
-import { Router as ReactRouter } from '@kbn/shared-ux-router';
 
 import { RouteMap, Router } from './types';
 import { RouterContextProvider } from './use_router';

@@ -7,8 +7,8 @@
  */
 
 import { PluginPackage } from '@kbn/repo-packages';
+import { Task, read, write } from '../../lib';
 import { findUsedDependencies } from './find_used_dependencies';
-import { read, write, Task } from '../../lib';
 
 export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',

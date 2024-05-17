@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import moment from 'moment';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
-import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
-  type HttpConfigType,
-  type ExternalUrlConfigType,
   type CspConfigType,
+  type ExternalUrlConfigType,
+  type HttpConfigType,
   HttpService,
   config,
 } from '@kbn/core-http-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { REPO_ROOT } from '@kbn/repo-info';
+import moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiSpacer,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 

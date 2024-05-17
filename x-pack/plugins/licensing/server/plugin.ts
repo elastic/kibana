@@ -6,39 +6,39 @@
  */
 
 import {
-  map,
-  Observable,
-  Subject,
-  Subscription,
-  switchMap,
-  takeUntil,
-  filter,
-  throttleTime,
-  distinctUntilChanged,
-  ReplaySubject,
-  timer,
-} from 'rxjs';
-import moment from 'moment';
-import type { MaybePromise } from '@kbn/utility-types';
-import {
   CoreSetup,
+  IClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
-  IClusterClient,
   ServiceStatusLevels,
 } from '@kbn/core/server';
+import type { MaybePromise } from '@kbn/utility-types';
+import moment from 'moment';
+import {
+  Observable,
+  ReplaySubject,
+  Subject,
+  Subscription,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  takeUntil,
+  throttleTime,
+  timer,
+} from 'rxjs';
+import { createLicenseUpdate } from '../common/license_update';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 import type { ILicense } from '../common/types';
-import type { LicensingPluginSetup, LicensingPluginStart } from './types';
-import { createLicenseUpdate } from '../common/license_update';
-import { registerRoutes } from './routes';
-import { FeatureUsageService } from './services';
+import { getLicenseFetcher } from './license_fetcher';
 import type { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { getPluginStatus$ } from './plugin_status';
-import { getLicenseFetcher } from './license_fetcher';
+import { registerRoutes } from './routes';
+import { FeatureUsageService } from './services';
+import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 
 /**
  * @public

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import { join } from 'path';
-import dedent from 'dedent';
 import type { SavedObjectsImportFailure } from '@kbn/core/server';
+import expect from '@kbn/expect';
+import dedent from 'dedent';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const createConflictError = (

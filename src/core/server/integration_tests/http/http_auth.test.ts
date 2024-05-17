@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, RouteConfigOptions, HttpAuth } from '@kbn/core-http-server';
+import type { HttpAuth, IRouter, RouteConfigOptions } from '@kbn/core-http-server';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('http auth', () => {

@@ -6,28 +6,47 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { first } from 'rxjs';
 
-import {
-  injectSearchSourceReferences,
-  extractSearchSourceReferences,
-  SerializedSearchSourceFields,
-} from '@kbn/data-plugin/public';
 import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import {
+  SerializedSearchSourceFields,
+  extractSearchSourceReferences,
+  injectSearchSourceReferences,
+} from '@kbn/data-plugin/public';
 
 import {
+  AttributeService,
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
-  AttributeService,
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { VisualizationsStartDeps } from '../plugin';
+import { getCapabilities, getTypes } from '../services';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
+import {
+  extractControlsReferences,
+  extractTimeSeriesReferences,
+  injectControlsReferences,
+  injectTimeSeriesReferences,
+} from '../utils/saved_visualization_references';
+import {
+  convertToSerializedVis,
+  getFullPath,
+  getSavedVisualization,
+  saveVisualization,
+} from '../utils/saved_visualize_utils';
+import type { SerializedVis, Vis } from '../vis';
+import { createVisAsync } from '../vis_async';
+import { showNewVisModal } from '../wizard';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
@@ -36,25 +55,6 @@ import type {
   VisualizeOutput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import type { SerializedVis, Vis } from '../vis';
-import { createVisAsync } from '../vis_async';
-import { getCapabilities, getTypes } from '../services';
-import { showNewVisModal } from '../wizard';
-import {
-  convertToSerializedVis,
-  getSavedVisualization,
-  saveVisualization,
-  getFullPath,
-} from '../utils/saved_visualize_utils';
-import {
-  extractControlsReferences,
-  extractTimeSeriesReferences,
-  injectTimeSeriesReferences,
-  injectControlsReferences,
-} from '../utils/saved_visualization_references';
-import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   title: string;

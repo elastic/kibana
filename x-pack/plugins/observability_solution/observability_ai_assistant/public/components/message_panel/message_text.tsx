@@ -5,12 +5,12 @@
  * 2.0.
  */
 import {
-  EuiTable,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableHeaderCell,
   EuiMarkdownFormat,
   EuiSpacer,
+  EuiTable,
+  EuiTableHeaderCell,
+  EuiTableRow,
+  EuiTableRowCell,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,

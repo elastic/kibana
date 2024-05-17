@@ -7,22 +7,22 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { logStateTransition, logActionResponse } from '../common/utils';
-import { type Next, stateActionMachine } from '../state_action_machine';
-import { cleanup } from '../migrations_state_machine_cleanup';
-import type {
-  State,
-  OutdatedDocumentsSearchTransformState,
-  OutdatedDocumentsSearchBulkIndexState,
-} from './state';
-import type { MigratorContext } from './context';
+import type { Logger } from '@kbn/logging';
 import { redactBulkOperationBatches } from '../common/redact_state';
+import { logActionResponse, logStateTransition } from '../common/utils';
+import { cleanup } from '../migrations_state_machine_cleanup';
+import { type Next, stateActionMachine } from '../state_action_machine';
+import type { MigratorContext } from './context';
+import type {
+  OutdatedDocumentsSearchBulkIndexState,
+  OutdatedDocumentsSearchTransformState,
+  State,
+} from './state';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -68,7 +68,7 @@ export async function migrationStateActionMachine({
           ...newState,
           outdatedDocuments: (
             (newState as OutdatedDocumentsSearchTransformState).outdatedDocuments ?? []
-          ).map((doc) => ({ _id: doc._id } as SavedObjectsRawDoc)),
+          ).map((doc) => ({ _id: doc._id }) as SavedObjectsRawDoc),
           bulkOperationBatches: redactBulkOperationBatches(
             (newState as OutdatedDocumentsSearchBulkIndexState).bulkOperationBatches ?? [[]]
           ),

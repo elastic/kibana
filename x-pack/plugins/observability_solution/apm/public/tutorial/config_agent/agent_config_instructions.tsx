@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { OpenTelemetryInstructions } from './opentelemetry_instructions';
+import React from 'react';
+import { AgentConfigurationTable } from './agent_config_table';
 import {
   getApmAgentCommands,
-  getApmAgentVariables,
-  getApmAgentLineNumbers,
   getApmAgentHighlightLang,
+  getApmAgentLineNumbers,
+  getApmAgentVariables,
 } from './commands/get_apm_agent_commands';
-import { AgentConfigurationTable } from './agent_config_table';
+import { OpenTelemetryInstructions } from './opentelemetry_instructions';
 
 export function AgentConfigInstructions({
   variantId,

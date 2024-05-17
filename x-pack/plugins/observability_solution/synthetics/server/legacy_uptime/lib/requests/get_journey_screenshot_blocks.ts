@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UptimeEsClient } from '../../../lib';
 import { ScreenshotBlockDoc } from '../../../../common/runtime_types';
+import { UptimeEsClient } from '../../../lib';
 
 interface ScreenshotBlockResultType {
   _id: string;

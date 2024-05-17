@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import d3 from 'd3';
 import { getAnomalyScoreExplanationImpactValue } from '@kbn/ml-anomaly-utils';
-import { calculateTextWidth } from './string_utils';
+import d3 from 'd3';
 import moment from 'moment';
-import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/locator';
+import { CHART_TYPE } from '../explorer/explorer_constants';
+import { calculateTextWidth } from './string_utils';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;

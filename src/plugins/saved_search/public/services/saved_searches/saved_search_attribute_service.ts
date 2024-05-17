@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type { AttributeService, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import type { AttributeService, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearchAttributes } from '../../../common';
+import {
+  convertToSavedSearch,
+  getSearchSavedObject,
+} from '../../../common/service/get_saved_searches';
+import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
+import { saveSearchSavedObject } from './save_saved_searches';
+import type { SavedSearchesServiceDeps } from './saved_searches_service';
 import type {
   SavedSearch,
   SavedSearchByValueAttributes,
   SearchByReferenceInput,
   SearchByValueInput,
 } from './types';
-import type { SavedSearchesServiceDeps } from './saved_searches_service';
-import {
-  getSearchSavedObject,
-  convertToSavedSearch,
-} from '../../../common/service/get_saved_searches';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
-import { saveSearchSavedObject } from './save_saved_searches';
-import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
 export interface SavedSearchUnwrapMetaInfo {
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];

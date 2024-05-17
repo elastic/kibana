@@ -12,9 +12,7 @@
         "description": [
           "Converts an array index, which starts at zero, to an aria index, which starts at one"
         ],
-        "signature": [
-          "(arrayIndex: number) => number"
-        ],
+        "signature": ["(arrayIndex: number) => number"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -26,9 +24,7 @@
             "tags": [],
             "label": "arrayIndex",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -44,12 +40,8 @@
         "type": "Function",
         "tags": [],
         "label": "elementOrChildrenHasFocus",
-        "description": [
-          "Returns `true` when the element, or one of it's children has focus"
-        ],
-        "signature": [
-          "(element: HTMLElement | null | undefined) => boolean"
-        ],
+        "description": ["Returns `true` when the element, or one of it's children has focus"],
+        "signature": ["(element: HTMLElement | null | undefined) => boolean"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -61,9 +53,7 @@
             "tags": [],
             "label": "element",
             "description": [],
-            "signature": [
-              "HTMLElement | null | undefined"
-            ],
+            "signature": ["HTMLElement | null | undefined"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -118,9 +108,7 @@
                 "tags": [],
                 "label": "containerElement",
                 "description": [],
-                "signature": [
-                  "Element | null"
-                ],
+                "signature": ["Element | null"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -170,9 +158,7 @@
         "type": "Function",
         "tags": [],
         "label": "getFocusedAriaColindexCell",
-        "description": [
-          "\nReturns the focused cell for tables that use `aria-colindex`"
-        ],
+        "description": ["\nReturns the focused cell for tables that use `aria-colindex`"],
         "signature": [
           "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
         ],
@@ -198,9 +184,7 @@
                 "tags": [],
                 "label": "containerElement",
                 "description": [],
-                "signature": [
-                  "HTMLElement | null"
-                ],
+                "signature": ["HTMLElement | null"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -228,9 +212,7 @@
         "type": "Function",
         "tags": [],
         "label": "getFocusedDataColindexCell",
-        "description": [
-          "\nReturns the focused cell for tables that use `data-colindex`"
-        ],
+        "description": ["\nReturns the focused cell for tables that use `data-colindex`"],
         "signature": [
           "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
         ],
@@ -256,9 +238,7 @@
                 "tags": [],
                 "label": "containerElement",
                 "description": [],
-                "signature": [
-                  "HTMLElement | null"
-                ],
+                "signature": ["HTMLElement | null"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -287,9 +267,7 @@
         "tags": [],
         "label": "getNotesContainerClassName",
         "description": [],
-        "signature": [
-          "(ariaRowindex: number) => string"
-        ],
+        "signature": ["(ariaRowindex: number) => string"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -301,9 +279,7 @@
             "tags": [],
             "label": "ariaRowindex",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -320,9 +296,7 @@
         "tags": [],
         "label": "getRowRendererClassName",
         "description": [],
-        "signature": [
-          "(ariaRowindex: number) => string"
-        ],
+        "signature": ["(ariaRowindex: number) => string"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -334,9 +308,7 @@
             "tags": [],
             "label": "ariaRowindex",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -383,9 +355,7 @@
                 "tags": [],
                 "label": "containerElement",
                 "description": [],
-                "signature": [
-                  "HTMLElement | null"
-                ],
+                "signature": ["HTMLElement | null"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -439,9 +409,7 @@
                 "tags": [],
                 "label": "tableHasFocus",
                 "description": [],
-                "signature": [
-                  "(containerElement: HTMLElement | null) => boolean"
-                ],
+                "signature": ["(containerElement: HTMLElement | null) => boolean"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -453,9 +421,7 @@
                     "tags": [],
                     "label": "containerElement",
                     "description": [],
-                    "signature": [
-                      "HTMLElement | null"
-                    ],
+                    "signature": ["HTMLElement | null"],
                     "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -517,9 +483,7 @@
                 "tags": [],
                 "label": "onSkipFocusBackwards",
                 "description": [],
-                "signature": [
-                  "() => void"
-                ],
+                "signature": ["() => void"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -533,9 +497,7 @@
                 "tags": [],
                 "label": "onSkipFocusForward",
                 "description": [],
-                "signature": [
-                  "() => void"
-                ],
+                "signature": ["() => void"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -568,12 +530,8 @@
         "type": "Function",
         "tags": [],
         "label": "isArrowDownOrArrowUp",
-        "description": [
-          "Returns `true` if the down or up arrow was pressed"
-        ],
-        "signature": [
-          "(event: React.KeyboardEvent<Element>) => boolean"
-        ],
+        "description": ["Returns `true` if the down or up arrow was pressed"],
+        "signature": ["(event: React.KeyboardEvent<Element>) => boolean"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -585,9 +543,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "React.KeyboardEvent<Element>"
-            ],
+            "signature": ["React.KeyboardEvent<Element>"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -603,12 +559,8 @@
         "type": "Function",
         "tags": [],
         "label": "isArrowUp",
-        "description": [
-          "Returns `true` if the up arrow key was pressed"
-        ],
-        "signature": [
-          "(event: React.KeyboardEvent<Element>) => boolean"
-        ],
+        "description": ["Returns `true` if the up arrow key was pressed"],
+        "signature": ["(event: React.KeyboardEvent<Element>) => boolean"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -620,9 +572,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "React.KeyboardEvent<Element>"
-            ],
+            "signature": ["React.KeyboardEvent<Element>"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -638,12 +588,8 @@
         "type": "Function",
         "tags": [],
         "label": "isEscape",
-        "description": [
-          "Returns `true` if the escape key was pressed"
-        ],
-        "signature": [
-          "(event: React.KeyboardEvent<Element>) => boolean"
-        ],
+        "description": ["Returns `true` if the escape key was pressed"],
+        "signature": ["(event: React.KeyboardEvent<Element>) => boolean"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -655,9 +601,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "React.KeyboardEvent<Element>"
-            ],
+            "signature": ["React.KeyboardEvent<Element>"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -673,12 +617,8 @@
         "type": "Function",
         "tags": [],
         "label": "isTab",
-        "description": [
-          "Returns `true` if the tab key was pressed"
-        ],
-        "signature": [
-          "(event: React.KeyboardEvent<Element>) => boolean"
-        ],
+        "description": ["Returns `true` if the tab key was pressed"],
+        "signature": ["(event: React.KeyboardEvent<Element>) => boolean"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -690,9 +630,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "React.KeyboardEvent<Element>"
-            ],
+            "signature": ["React.KeyboardEvent<Element>"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -749,9 +687,7 @@
                 "tags": [],
                 "label": "containerElement",
                 "description": [],
-                "signature": [
-                  "HTMLDivElement | null"
-                ],
+                "signature": ["HTMLDivElement | null"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -763,9 +699,7 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": [
-                  "React.KeyboardEvent<Element>"
-                ],
+                "signature": ["React.KeyboardEvent<Element>"],
                 "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -849,9 +783,7 @@
         "description": [
           "\nThis function has side effects: It stops propagation of the provided\n`KeyboardEvent` and prevents the browser's default behavior."
         ],
-        "signature": [
-          "(event: React.KeyboardEvent<Element>) => void"
-        ],
+        "signature": ["(event: React.KeyboardEvent<Element>) => void"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -863,9 +795,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "React.KeyboardEvent<Element>"
-            ],
+            "signature": ["React.KeyboardEvent<Element>"],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -950,9 +880,7 @@
             "tags": [],
             "label": "draggableId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -993,9 +921,7 @@
             "tags": [],
             "label": "timelineType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1053,9 +979,7 @@
         "description": [
           "\nThe name of the ARIA attribute representing a column, used in conjunction with\nthe ARIA: grid role https://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html"
         ],
-        "signature": [
-          "\"aria-colindex\""
-        ],
+        "signature": ["\"aria-colindex\""],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1070,9 +994,7 @@
         "description": [
           "\nThe name of the ARIA attribute representing a row, used in conjunction with\nthe ARIA: grid role https://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html"
         ],
-        "signature": [
-          "\"aria-rowindex\""
-        ],
+        "signature": ["\"aria-rowindex\""],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1087,9 +1009,7 @@
         "description": [
           "\nThis alternative attribute to `aria-colindex` is used to decorate the data\nin existing `EuiTable`s to enable keyboard navigation with minimal\nrefactoring of existing code until we're ready to migrate to `EuiDataGrid`.\nIt may be applied directly to keyboard-focusable elements and thus doesn't\nhave exactly the same semantics as `aria-colindex`."
         ],
-        "signature": [
-          "\"data-colindex\""
-        ],
+        "signature": ["\"data-colindex\""],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1104,9 +1024,7 @@
         "description": [
           "\nThis alternative attribute to `aria-rowindex` is used to decorate the data\nin existing `EuiTable`s to enable keyboard navigation with minimal\nrefactoring of existing code until we're ready to migrate to `EuiDataGrid`.\nIt's typically applied to `<tr>` elements via `EuiTable`'s `rowProps` prop."
         ],
-        "signature": [
-          "\"data-rowindex\""
-        ],
+        "signature": ["\"data-rowindex\""],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1118,12 +1036,8 @@
         "type": "number",
         "tags": [],
         "label": "FIRST_ARIA_INDEX",
-        "description": [
-          "`aria-colindex` and `aria-rowindex` start at one"
-        ],
-        "signature": [
-          "1"
-        ],
+        "description": ["`aria-colindex` and `aria-rowindex` start at one"],
+        "signature": ["1"],
         "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1217,15 +1131,10 @@
           "parentPluginId": "timelines",
           "id": "def-public.TimelinesUIStart.getHoverActions",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "getHoverActions",
           "description": [],
-          "signature": [
-            "() => ",
-            "HoverActionsConfig"
-          ],
+          "signature": ["() => ", "HoverActionsConfig"],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": true,
           "trackAdoption": false,
@@ -1265,9 +1174,7 @@
           "tags": [],
           "label": "getTimelineReducer",
           "description": [],
-          "signature": [
-            "() => any"
-          ],
+          "signature": ["() => any"],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1299,9 +1206,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "LoadingPanelProps"
-              ],
+              "signature": ["LoadingPanelProps"],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1335,9 +1240,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "LastUpdatedAtProps"
-              ],
+              "signature": ["LastUpdatedAtProps"],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1353,12 +1256,7 @@
           "tags": [],
           "label": "getUseAddToTimeline",
           "description": [],
-          "signature": [
-            "() => (props: ",
-            "UseAddToTimelineProps",
-            ") => ",
-            "UseAddToTimeline"
-          ],
+          "signature": ["() => (props: ", "UseAddToTimelineProps", ") => ", "UseAddToTimeline"],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1372,11 +1270,7 @@
           "tags": [],
           "label": "getUseAddToTimelineSensor",
           "description": [],
-          "signature": [
-            "() => (api: ",
-            "SensorAPI",
-            ") => void"
-          ],
+          "signature": ["() => (api: ", "SensorAPI", ") => void"],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1390,13 +1284,7 @@
           "tags": [],
           "label": "setTimelineEmbeddedStore",
           "description": [],
-          "signature": [
-            "(store: ",
-            "Store",
-            "<any, ",
-            "AnyAction",
-            ">) => void"
-          ],
+          "signature": ["(store: ", "Store", "<any, ", "AnyAction", ">) => void"],
           "path": "x-pack/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1408,12 +1296,7 @@
               "tags": [],
               "label": "store",
               "description": [],
-              "signature": [
-                "Store",
-                "<any, ",
-                "AnyAction",
-                ">"
-              ],
+              "signature": ["Store", "<any, ", "AnyAction", ">"],
               "path": "x-pack/plugins/timelines/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1471,9 +1354,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.BrowserField",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "BrowserField",
         "description": [],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -1707,9 +1588,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1721,9 +1600,7 @@
             "tags": [],
             "label": "example",
             "description": [],
-            "signature": [
-              "string | number | null"
-            ],
+            "signature": ["string | number | null"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1768,9 +1645,7 @@
             "tags": [],
             "label": "indexes",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1815,9 +1690,7 @@
             "tags": [],
             "label": "esTypes",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1896,10 +1769,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1911,10 +1781,7 @@
             "tags": [],
             "label": "tiebreaker",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1939,9 +1806,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Uniquely identifies a data provider"
-            ],
+            "description": ["Uniquely identifies a data provider"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1952,9 +1817,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "Human readable"
-            ],
+            "description": ["Human readable"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1991,9 +1854,7 @@
             "type": "string",
             "tags": [],
             "label": "kqlQuery",
-            "description": [
-              "\nReturns the KQL query who have been added by user"
-            ],
+            "description": ["\nReturns the KQL query who have been added by user"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2049,13 +1910,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nReturns a DataProviderType"
-            ],
-            "signature": [
-              "DataProviderType",
-              " | undefined"
-            ],
+            "description": ["\nReturns a DataProviderType"],
+            "signature": ["DataProviderType", " | undefined"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2067,9 +1923,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.DeprecatedRowRenderer",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "DeprecatedRowRenderer",
         "description": [
           "\nThis interface should not be used anymore.\nUse the one from `plugins/security_solution/common/types/timeline`."
@@ -2103,9 +1957,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "DeprecatedRowRendererId"
-            ],
+            "signature": ["DeprecatedRowRendererId"],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2196,9 +2048,7 @@
                     "tags": [],
                     "label": "contextId",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2271,10 +2121,7 @@
             "tags": [],
             "label": "keywordFields",
             "description": [],
-            "signature": [
-              "EuiComboBoxOptionOption",
-              "<string | number | string[] | undefined>[]"
-            ],
+            "signature": ["EuiComboBoxOptionOption", "<string | number | string[] | undefined>[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2286,10 +2133,7 @@
             "tags": [],
             "label": "dateFields",
             "description": [],
-            "signature": [
-              "EuiComboBoxOptionOption",
-              "<string | number | string[] | undefined>[]"
-            ],
+            "signature": ["EuiComboBoxOptionOption", "<string | number | string[] | undefined>[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2301,10 +2145,7 @@
             "tags": [],
             "label": "nonDateFields",
             "description": [],
-            "signature": [
-              "EuiComboBoxOptionOption",
-              "<string | number | string[] | undefined>[]"
-            ],
+            "signature": ["EuiComboBoxOptionOption", "<string | number | string[] | undefined>[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2330,9 +2171,7 @@
             "tags": [],
             "label": "eventCategoryField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2344,9 +2183,7 @@
             "tags": [],
             "label": "tiebreakerField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2358,9 +2195,7 @@
             "tags": [],
             "label": "timestampField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2372,9 +2207,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2386,9 +2219,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2425,9 +2256,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2439,9 +2268,7 @@
             "tags": [],
             "label": "example",
             "description": [],
-            "signature": [
-              "string | number | undefined"
-            ],
+            "signature": ["string | number | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2453,9 +2280,7 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2478,9 +2303,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2523,9 +2346,7 @@
             "type": "string",
             "tags": [],
             "label": "category",
-            "description": [
-              "Where the field belong"
-            ],
+            "description": ["Where the field belong"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2536,13 +2357,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "example",
-            "description": [
-              "Example of field's value"
-            ],
-            "signature": [
-              "Maybe",
-              "<string | number> | undefined"
-            ],
+            "description": ["Example of field's value"],
+            "signature": ["Maybe", "<string | number> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2553,13 +2369,8 @@
             "type": "Array",
             "tags": [],
             "label": "indexes",
-            "description": [
-              "whether the field's belong to an alias index"
-            ],
-            "signature": [
-              "Maybe",
-              "<string>[]"
-            ],
+            "description": ["whether the field's belong to an alias index"],
+            "signature": ["Maybe", "<string>[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2570,13 +2381,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "description",
-            "description": [
-              "Description of the field"
-            ],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "description": ["Description of the field"],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2588,10 +2394,7 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2603,9 +2406,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.IndexFieldsStrategyResponse",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "IndexFieldsStrategyResponse",
         "description": [],
         "signature": [
@@ -2684,9 +2485,7 @@
             "tags": [],
             "label": "indicesExist",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2698,11 +2497,7 @@
             "tags": [],
             "label": "runtimeMappings",
             "description": [],
-            "signature": [
-              "{ [x: string]: ",
-              "MappingRuntimeField",
-              "; }"
-            ],
+            "signature": ["{ [x: string]: ", "MappingRuntimeField", "; }"],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2728,9 +2523,7 @@
             "tags": [],
             "label": "dsl",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2756,10 +2549,7 @@
             "tags": [],
             "label": "hostName",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2771,10 +2561,7 @@
             "tags": [],
             "label": "userName",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2786,10 +2573,7 @@
             "tags": [],
             "label": "ip",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2853,9 +2637,7 @@
             "type": "number",
             "tags": [],
             "label": "querySize",
-            "description": [
-              "The querySize parameter is the number of items to be returned"
-            ],
+            "description": ["The querySize parameter is the number of items to be returned"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2892,9 +2674,7 @@
             "tags": [],
             "label": "displayField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2906,9 +2686,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string | number | boolean | (string | number | boolean)[]"
-            ],
+            "signature": ["string | number | boolean | (string | number | boolean)[]"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2920,9 +2698,7 @@
             "tags": [],
             "label": "displayValue",
             "description": [],
-            "signature": [
-              "string | number | boolean | undefined"
-            ],
+            "signature": ["string | number | boolean | undefined"],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2934,9 +2710,7 @@
             "tags": [],
             "label": "operator",
             "description": [],
-            "signature": [
-              "\"includes\" | \":\" | \":*\""
-            ],
+            "signature": ["\"includes\" | \":\" | \":*\""],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2972,9 +2746,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "Field"
-            ],
+            "signature": ["Field"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3126,9 +2898,7 @@
             "tags": [],
             "label": "pageInfo",
             "description": [],
-            "signature": [
-              "{ activePage: number; querySize: number; }"
-            ],
+            "signature": ["{ activePage: number; querySize: number; }"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3193,9 +2963,7 @@
             "tags": [],
             "label": "consumers",
             "description": [],
-            "signature": [
-              "{ [x: string]: number; }"
-            ],
+            "signature": ["{ [x: string]: number; }"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3239,9 +3007,7 @@
             "tags": [],
             "label": "pageInfo",
             "description": [],
-            "signature": [
-              "{ activePage: number; querySize: number; }"
-            ],
+            "signature": ["{ activePage: number; querySize: number; }"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3290,10 +3056,7 @@
             "tags": [],
             "label": "ariaRowindex",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<number> | undefined"
-            ],
+            "signature": ["Maybe", "<number> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3305,9 +3068,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3330,10 +3091,7 @@
             "tags": [],
             "label": "values",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string[]> | undefined"
-            ],
+            "signature": ["Maybe", "<string[]> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3345,9 +3103,7 @@
             "tags": [],
             "label": "originalValue",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3471,10 +3227,7 @@
             "tags": [],
             "label": "rawEventData",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<object> | undefined"
-            ],
+            "signature": ["Maybe", "<object> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3518,9 +3271,7 @@
             "tags": [],
             "label": "lastSeen",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3580,10 +3331,7 @@
             "tags": [],
             "label": "_index",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string> | undefined"
-            ],
+            "signature": ["Maybe", "<string> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3771,10 +3519,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "Maybe",
-              "<string[]> | undefined"
-            ],
+            "signature": ["Maybe", "<string[]> | undefined"],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3812,9 +3557,7 @@
             "type": "string",
             "tags": [],
             "label": "to",
-            "description": [
-              "The end of the timerange"
-            ],
+            "description": ["The end of the timerange"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3825,9 +3568,7 @@
             "type": "string",
             "tags": [],
             "label": "from",
-            "description": [
-              "The beginning of the timerange"
-            ],
+            "description": ["The beginning of the timerange"],
             "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3915,9 +3656,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.BeatFields",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "BeatFields",
         "description": [],
         "signature": [
@@ -3958,9 +3697,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.BrowserFields",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "BrowserFields",
         "description": [],
         "signature": [
@@ -4499,9 +4236,7 @@
         "type": "Type",
         "tags": [],
         "label": "ColumnHeaderOptions",
-        "description": [
-          "The specification of a column header"
-        ],
+        "description": ["The specification of a column header"],
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
@@ -4556,9 +4291,7 @@
         "tags": [],
         "label": "DELETED_SECURITY_SOLUTION_DATA_VIEW",
         "description": [],
-        "signature": [
-          "\"DELETED_SECURITY_SOLUTION_DATA_VIEW\""
-        ],
+        "signature": ["\"DELETED_SECURITY_SOLUTION_DATA_VIEW\""],
         "path": "x-pack/plugins/timelines/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4568,9 +4301,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.DeprecatedCellValueElementProps",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "DeprecatedCellValueElementProps",
         "description": [
           "\nThe following props are provided to the function called by `renderCellValue`.\nWarning: This type might be outdated. Therefore, migrate to the new one from\n`plugins/security_solution/common/types/timeline/cells/index.ts`."
@@ -4679,9 +4410,7 @@
         "tags": [],
         "label": "EntityType",
         "description": [],
-        "signature": [
-          "\"events\" | \"sessions\""
-        ],
+        "signature": ["\"events\" | \"sessions\""],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4693,12 +4422,8 @@
         "type": "string",
         "tags": [],
         "label": "EXISTS_OPERATOR",
-        "description": [
-          "The `exists` operator in a KQL query"
-        ],
-        "signature": [
-          "\":*\""
-        ],
+        "description": ["The `exists` operator in a KQL query"],
+        "signature": ["\":*\""],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4730,9 +4455,7 @@
         "parentPluginId": "timelines",
         "id": "def-common.IndexFieldsStrategyRequest",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "IndexFieldsStrategyRequest",
         "description": [],
         "signature": [
@@ -4778,12 +4501,8 @@
         "type": "string",
         "tags": [],
         "label": "IS_OPERATOR",
-        "description": [
-          "Represents the Timeline data providers\nThe `is` operator in a KQL query"
-        ],
-        "signature": [
-          "\":\""
-        ],
+        "description": ["Represents the Timeline data providers\nThe `is` operator in a KQL query"],
+        "signature": ["\":\""],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4795,12 +4514,8 @@
         "type": "Type",
         "tags": [],
         "label": "QueryOperator",
-        "description": [
-          "The operator applied to a field"
-        ],
-        "signature": [
-          "\"includes\" | \":\" | \":*\""
-        ],
+        "description": ["The operator applied to a field"],
+        "signature": ["\"includes\" | \":\" | \":*\""],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4959,9 +4674,7 @@
         "tags": [],
         "label": "EntityType",
         "description": [],
-        "signature": [
-          "{ readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
-        ],
+        "signature": ["{ readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
         "trackAdoption": false,

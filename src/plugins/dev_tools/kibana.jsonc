@@ -6,9 +6,7 @@
     "id": "devTools",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "urlForwarding"
-    ],
+    "requiredPlugins": ["urlForwarding"],
     "requiredBundles": []
   }
 }

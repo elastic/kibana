@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils/src/format_errors';
+import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 type ErrorFactory = (message: string) => Error;
 export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
   throw createError(formatErrors(errors).join());

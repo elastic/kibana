@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { IndexedFieldItem } from '../../types';
-import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { shallow } from 'enzyme';
+import React from 'react';
+import { IndexedFieldItem } from '../../types';
+import { Table, getConflictModalContent, renderFieldName, showDelete } from './table';
 
 const coreStart = coreMock.createStart();
 

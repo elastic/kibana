@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { BasicParametersSection } from '../edit_field';
-import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
+import { Field, UseField } from '../../../../shared_imports';
+import { BasicParametersSection } from '../edit_field';
 
 export const DenseVectorType = () => {
   return (

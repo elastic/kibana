@@ -6,14 +6,15 @@
  */
 
 import numeral from '@elastic/numeral';
+import { render, screen, within } from '@testing-library/react';
 import { get } from 'lodash/fp';
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
 
+import { ID_FIELD_NAME } from '../../../../common/components/event_details/event_id';
 import { asArrayIfExists } from '../../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { ID_FIELD_NAME } from '../../../../common/components/event_details/event_id';
+import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import {
@@ -22,9 +23,16 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from './source_destination_arrows';
-import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 
 import { SourceDestination } from '.';
+import {
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from './field_names';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -37,14 +45,6 @@ import {
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
-import {
-  NETWORK_BYTES_FIELD_NAME,
-  NETWORK_COMMUNITY_ID_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
-  NETWORK_PROTOCOL_FIELD_NAME,
-  NETWORK_TRANSPORT_FIELD_NAME,
-} from './field_names';
 
 jest.mock('../../../../common/lib/kibana');
 

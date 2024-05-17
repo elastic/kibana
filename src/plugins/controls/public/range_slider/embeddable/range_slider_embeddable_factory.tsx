@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
   createRangeSliderExtract,
   createRangeSliderInject,
 } from '../../../common/range_slider/range_slider_persistable_state';
 import {
-  RangeSliderEmbeddableInput,
   RANGE_SLIDER_CONTROL,
+  RangeSliderEmbeddableInput,
 } from '../../../common/range_slider/types';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 import { RangeSliderEditorOptions } from '../components/range_slider_editor_options';

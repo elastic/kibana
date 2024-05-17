@@ -9,11 +9,11 @@
 import {
   PatternLayout as BasePatternLayout,
   type Conversion,
-  LoggerConversion,
-  LevelConversion,
-  MetaConversion,
-  MessageConversion,
   DateConversion,
+  LevelConversion,
+  LoggerConversion,
+  MessageConversion,
+  MetaConversion,
 } from '@kbn/core-logging-common-internal';
 
 const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;

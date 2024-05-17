@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';

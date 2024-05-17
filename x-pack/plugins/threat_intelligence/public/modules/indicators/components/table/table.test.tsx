@@ -7,12 +7,12 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsTable, IndicatorsTableProps } from './table';
+import { Indicator, generateMockIndicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 import { INDICATORS_FLYOUT_TITLE_TEST_ID } from '../flyout/test_ids';
+import { IndicatorsTable, IndicatorsTableProps } from './table';
+import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 
 const stub = () => {};
 

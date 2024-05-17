@@ -8,15 +8,15 @@
 import { CoreSetup } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-import { StartDependencies, ILicense } from '../types';
+import { renderApp } from '.';
+import { ILicense, StartDependencies } from '../types';
 import {
-  documentationService,
-  uiMetricService,
   apiService,
   breadcrumbService,
+  documentationService,
   fileReaderService,
+  uiMetricService,
 } from './services';
-import { renderApp } from '.';
 
 export interface AppParams extends ManagementAppMountParams {
   license: ILicense | null;

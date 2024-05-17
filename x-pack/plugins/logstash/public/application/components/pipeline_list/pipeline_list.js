@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { InfoAlerts } from './info_alerts';
 import { PipelinesTable } from './pipelines_table';
-import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 class PipelineListUi extends React.Component {
   constructor(props) {

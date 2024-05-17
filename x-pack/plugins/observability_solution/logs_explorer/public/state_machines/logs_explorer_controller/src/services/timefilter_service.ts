@@ -6,7 +6,7 @@
  */
 
 import type { QueryStart } from '@kbn/data-plugin/public';
-import { map, merge, Observable } from 'rxjs';
+import { Observable, map, merge } from 'rxjs';
 import { ActionFunction, actions } from 'xstate';
 import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 

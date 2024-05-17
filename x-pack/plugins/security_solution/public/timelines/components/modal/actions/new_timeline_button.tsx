@@ -7,8 +7,8 @@
 
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useMemo, useState, useCallback } from 'react';
-import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
+import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import * as i18n from './translations';
 
 interface NewTimelineButtonProps {

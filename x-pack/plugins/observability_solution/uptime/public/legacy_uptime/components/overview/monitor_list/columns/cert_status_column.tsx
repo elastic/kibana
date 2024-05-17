@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
-import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
+import React from 'react';
+import styled from 'styled-components';
+import { CERT_STATUS } from '../../../../../../common/constants';
 import { X509Expiry } from '../../../../../../common/runtime_types';
 import { useCertStatus } from '../../../../hooks';
 import { EXPIRED, EXPIRES, EXPIRES_SOON } from '../../../certificates/translations';
-import { CERT_STATUS } from '../../../../../../common/constants';
 
 interface Props {
   expiry: X509Expiry;

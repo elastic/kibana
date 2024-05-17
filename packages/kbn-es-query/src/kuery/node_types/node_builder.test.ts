@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { nodeBuilder } from './node_builder';
 import { toElasticsearchQuery } from '..';
 import { buildNode } from './literal';
+import { nodeBuilder } from './node_builder';
 
 describe('nodeBuilder', () => {
   describe('is method', () => {

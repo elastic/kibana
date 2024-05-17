@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 import { importExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
 export {
   importQuerySchema as importExceptionsRequestQuery,

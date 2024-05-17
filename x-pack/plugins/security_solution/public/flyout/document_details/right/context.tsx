@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { TableId } from '@kbn/securitysolution-data-table';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TableId } from '@kbn/securitysolution-data-table';
 
-import { useEventDetails } from '../shared/hooks/use_event_details';
-import { FlyoutError } from '../../shared/components/flyout_error';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import type { SearchHit } from '../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import type { RightPanelProps } from '.';
+import type { SearchHit } from '../../../../common/search_strategy';
 import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { FlyoutError } from '../../shared/components/flyout_error';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { useEventDetails } from '../shared/hooks/use_event_details';
 
 export interface RightPanelContext {
   /**

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { assign, get } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { assign, get } from 'lodash';
 
-import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
-import { MetricSeries as metric } from './vis_types/metric/series';
-import { TopNSeries as topN } from './vis_types/top_n/series';
-import { TableSeries as table } from './vis_types/table/series';
-import { GaugeSeries as gauge } from './vis_types/gauge/series';
-import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { VisDataContext } from '../contexts/vis_data_context';
+import { GaugeSeries as gauge } from './vis_types/gauge/series';
+import { MarkdownSeries as markdown } from './vis_types/markdown/series';
+import { MetricSeries as metric } from './vis_types/metric/series';
+import { TableSeries as table } from './vis_types/table/series';
+import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
+import { TopNSeries as topN } from './vis_types/top_n/series';
 
 const lookup = {
   top_n: topN,

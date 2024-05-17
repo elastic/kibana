@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
 import {
-  EuiPopover,
-  EuiButtonIcon,
-  EuiText,
   EuiButtonEmpty,
-  EuiSelectable,
-  EuiSpacer,
-  EuiHighlight,
-  useEuiTheme,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
+  EuiPopover,
   EuiPopoverFooter,
-  EuiToolTip,
+  EuiSelectable,
   EuiSelectableOption,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-types';
+import React, { useMemo, useState } from 'react';
 import './add_message_variables.scss';
-import { TruncatedText } from './truncated_text';
 import * as i18n from './translations';
+import { TruncatedText } from './truncated_text';
 
 interface Props {
   buttonTitle?: string;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getContainedAlertContext, getRecoveredAlertContext } from './alert_context';
 import { OTHER_CATEGORY } from '../constants';
+import { getContainedAlertContext, getRecoveredAlertContext } from './alert_context';
 
 test('getContainedAlertContext', () => {
   expect(

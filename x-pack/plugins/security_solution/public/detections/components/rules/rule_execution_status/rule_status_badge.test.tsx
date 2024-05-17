@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleStatusBadge } from './rule_status_badge';

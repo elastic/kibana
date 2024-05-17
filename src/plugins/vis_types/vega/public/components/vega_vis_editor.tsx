@@ -7,19 +7,19 @@
  */
 
 import { XJsonLang } from '@kbn/monaco';
-import useMount from 'react-use/lib/useMount';
 import hjson from 'hjson';
+import useMount from 'react-use/lib/useMount';
 
-import React, { useCallback, useState } from 'react';
-import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
+import compactStringify from 'json-stringify-pretty-compact';
+import React, { useCallback, useState } from 'react';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJsonLang } from '@kbn/code-editor';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
-import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
+import { VegaHelpMenu } from './vega_help_menu';
 
 import './vega_editor.scss';
 

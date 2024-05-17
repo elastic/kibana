@@ -6,8 +6,8 @@
  */
 
 import type { Store } from 'redux';
+import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import createSagaMiddleware from 'redux-saga';
-import { createStore as createReduxStore, applyMiddleware } from 'redux';
 
 import { rootReducer } from '../reducers';
 import { fetchJourneyStepsEffect } from './journey';

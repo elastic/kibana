@@ -9,8 +9,8 @@ import { Client } from '@elastic/elasticsearch';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
-  createLogger,
   LogLevel,
+  createLogger,
 } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 

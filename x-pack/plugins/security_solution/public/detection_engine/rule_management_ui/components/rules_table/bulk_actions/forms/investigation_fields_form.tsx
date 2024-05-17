@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
-import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 
@@ -21,12 +21,12 @@ import type { BulkActionEditPayload } from '../../../../../../../common/api/dete
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
-  Field,
-  getUseField,
-  useFormData,
-  useForm,
   FIELD_TYPES,
+  Field,
   fieldValidators,
+  getUseField,
+  useForm,
+  useFormData,
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
@@ -120,8 +120,8 @@ const InvestigationFieldsFormComponent = ({
     const event = data.overwrite
       ? TELEMETRY_EVENT.SET_INVESTIGATION_FIELDS
       : editAction === 'delete_investigation_fields'
-      ? TELEMETRY_EVENT.DELETE_INVESTIGATION_FIELDS
-      : TELEMETRY_EVENT.ADD_INVESTIGATION_FIELDS;
+        ? TELEMETRY_EVENT.DELETE_INVESTIGATION_FIELDS
+        : TELEMETRY_EVENT.ADD_INVESTIGATION_FIELDS;
     track(METRIC_TYPE.CLICK, event);
 
     onConfirm({

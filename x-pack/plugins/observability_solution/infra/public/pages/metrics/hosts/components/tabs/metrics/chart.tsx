@@ -1,3 +1,4 @@
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +6,14 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
-import { useDataView } from '../../../../../../hooks/use_data_view';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { useDataView } from '../../../../../../hooks/use_data_view';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
-import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
+import { useHostsTableContext } from '../../../hooks/use_hosts_table';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
 export type ChartProps = LensConfig & {
   id: string;

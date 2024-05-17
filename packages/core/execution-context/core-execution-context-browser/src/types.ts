@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { Observable } from 'rxjs';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;

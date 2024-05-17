@@ -10,20 +10,20 @@ import { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';
-import { Plugin } from './plugin';
-import { EsContext } from './es';
-import { EventLogService } from './event_log_service';
 import { millisToNanos } from '../common';
+import { EsContext } from './es';
+import { Doc } from './es/cluster_client_adapter';
+import { EventLogService } from './event_log_service';
+import { Plugin } from './plugin';
 import {
-  IEvent,
-  IValidatedEvent,
-  IEventLogger,
-  IEventLogService,
   ECS_VERSION,
   EventSchema,
+  IEvent,
+  IEventLogService,
+  IEventLogger,
+  IValidatedEvent,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 

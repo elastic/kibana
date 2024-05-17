@@ -7,7 +7,7 @@
 
 import { FC } from 'react';
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -16,8 +16,8 @@ import {
   ApplicationStart,
   Capabilities,
   ChromeBreadcrumb,
-  ScopedHistory,
   IUiSettingsClient,
+  ScopedHistory,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -35,7 +35,7 @@ import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../co
 import { ESConfig } from '../../../plugin';
 
 import { HttpLogic } from '../http';
-import { createHref, CreateHrefOptions } from '../react_router_helpers';
+import { CreateHrefOptions, createHref } from '../react_router_helpers';
 
 type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];

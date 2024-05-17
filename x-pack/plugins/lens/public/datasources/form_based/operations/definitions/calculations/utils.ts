@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { IndexPattern } from '../../../../../types';
-import { LayerType } from '../../../../../../common/types';
+import { operationDefinitionMap } from '..';
 import type { TimeScaleUnit } from '../../../../../../common/expressions';
+import { LayerType } from '../../../../../../common/types';
+import type { IndexPattern } from '../../../../../types';
+import { IndexPatternField } from '../../../../../types';
 import type { FormBasedLayer } from '../../../types';
+import { FieldBasedIndexPatternColumn } from '../../../types';
+import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
-import { operationDefinitionMap } from '..';
-import { FieldBasedIndexPatternColumn } from '../../../types';
-import { IndexPatternField } from '../../../../../types';
 
 export const buildLabelFunction =
   (ofName: (name?: string) => string) =>

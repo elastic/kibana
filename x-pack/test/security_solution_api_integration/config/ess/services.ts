@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { services as essServices } from '../../../api_integration/services';
+import { SpacesServiceProvider } from '../../../common/services/spaces';
 
 export const services = {
   ...essServices,

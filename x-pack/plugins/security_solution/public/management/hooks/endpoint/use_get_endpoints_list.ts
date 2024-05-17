@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useHttp } from '../../../common/lib/kibana';
-import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
+import { useHttp } from '../../../common/lib/kibana';
 
 type GetEndpointsListResponse = Array<{
   id: HostInfo['metadata']['agent']['id'];

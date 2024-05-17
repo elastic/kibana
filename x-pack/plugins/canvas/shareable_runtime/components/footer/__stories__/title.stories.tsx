@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { storiesOf } from '@storybook/react';
+import React from 'react';
 
 import { ExampleContext } from '../../../test/context_example';
 import { Title, TitleComponent } from '../title';

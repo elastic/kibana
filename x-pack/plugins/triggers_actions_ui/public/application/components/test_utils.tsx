@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
-import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, FormData, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { I18nProvider } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 
 import { ConnectorServices } from '../../types';
 import { ConnectorProvider } from '../context/connector_context';

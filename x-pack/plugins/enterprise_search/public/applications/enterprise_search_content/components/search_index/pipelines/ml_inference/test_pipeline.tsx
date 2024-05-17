@@ -7,7 +7,7 @@
 
 import React, { useRef } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -16,12 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
-  EuiTitle,
   EuiText,
+  EuiTitle,
   useIsWithinMaxBreakpoint,
-  EuiPanel,
 } from '@elastic/eui';
 
 import { CodeEditor } from '@kbn/code-editor';
@@ -232,8 +232,8 @@ export const TestPipeline: React.FC = () => {
                       {simulatePipelineErrors.length > 0
                         ? JSON.stringify(simulatePipelineErrors, null, 2)
                         : simulatePipelineResult
-                        ? JSON.stringify(simulatePipelineResult, null, 2)
-                        : '{}'}
+                          ? JSON.stringify(simulatePipelineResult, null, 2)
+                          : '{}'}
                     </EuiCodeBlock>
                   </EuiResizablePanel>
                 </>

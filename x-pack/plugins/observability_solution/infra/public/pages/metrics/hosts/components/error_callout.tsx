@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
+  EuiCodeBlock,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiCodeBlock,
 } from '@elastic/eui';
 import { KQLSyntaxError } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 

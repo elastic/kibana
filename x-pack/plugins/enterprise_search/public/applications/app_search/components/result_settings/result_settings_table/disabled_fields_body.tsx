@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiTableRow, EuiTableRowCell, EuiText, EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiTableRow, EuiTableRowCell, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '..';

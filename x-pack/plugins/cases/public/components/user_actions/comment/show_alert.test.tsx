@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { UserActionShowAlert } from './show_alert';
+import React from 'react';
 import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
+import { UserActionShowAlert } from './show_alert';
 
 const props = {
   id: 'action-id',

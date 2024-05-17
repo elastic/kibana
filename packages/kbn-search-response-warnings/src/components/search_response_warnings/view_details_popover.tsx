@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiIcon,
-  EuiLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiIcon,
+  EuiLink,
   EuiPopover,
 } from '@elastic/eui';
-import { viewDetailsLabel } from './i18n_utils';
+import React, { useState } from 'react';
 import type { SearchResponseWarning } from '../../types';
+import { viewDetailsLabel } from './i18n_utils';
 
 interface Props {
   displayAsLink?: boolean;

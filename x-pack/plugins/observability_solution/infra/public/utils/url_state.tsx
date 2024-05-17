@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
-import { History, Location } from 'history';
-import React from 'react';
+import { RisonValue, decode } from '@kbn/rison';
 import { Route } from '@kbn/shared-ux-router';
-import { decode, RisonValue } from '@kbn/rison';
+import { History, Location } from 'history';
 import { throttle } from 'lodash';
+import { parse } from 'query-string';
+import React from 'react';
 import { replaceStateKeyInQueryString } from '../../common/url_state_storage_service';
 
 interface UrlStateContainerProps<UrlState> {

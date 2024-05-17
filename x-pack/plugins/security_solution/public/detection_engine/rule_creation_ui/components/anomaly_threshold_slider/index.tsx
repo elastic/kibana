@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
 import type { EuiRangeProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 import type { FieldHook } from '../../../../shared_imports';
 

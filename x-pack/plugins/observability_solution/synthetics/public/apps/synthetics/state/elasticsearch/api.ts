@@ -1,3 +1,8 @@
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import { ESSearchResponse } from '@kbn/es-types';
+import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +10,8 @@
  * 2.0.
  */
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { isRunningResponse } from '@kbn/data-plugin/common';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESSearchResponse } from '@kbn/es-types';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
-import { kibanaService } from '../../../../utils/kibana_service';
 import { apiService } from '../../../../utils/api_service';
+import { kibanaService } from '../../../../utils/kibana_service';
 
 export const executeEsQueryAPI = async ({
   params,

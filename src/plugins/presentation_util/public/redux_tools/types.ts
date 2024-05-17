@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CaseReducer, PayloadAction, EnhancedStore } from '@reduxjs/toolkit';
+import { CaseReducer, EnhancedStore, PayloadAction } from '@reduxjs/toolkit';
 
 /**
  * The Redux Tools Selector is a react redux selector function that can be used to grab values from the state, and to make a component
@@ -22,7 +22,7 @@ export type ReduxToolsSelect<ReduxStateType extends unknown> = <Selected extends
  */
 export type ReduxToolsSetters<
   ReduxStateType extends unknown,
-  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>
+  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>,
 > = {
   [ReducerKey in keyof ReducerType]: (
     payload: Parameters<ReducerType[ReducerKey]>[1]['payload']
@@ -35,7 +35,7 @@ export type ReduxToolsSetters<
  */
 export interface ReduxTools<
   ReduxStateType extends unknown,
-  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>
+  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>,
 > {
   store: EnhancedStore<ReduxStateType>;
   select: ReduxToolsSelect<ReduxStateType>;

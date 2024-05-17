@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/data-plugin/common/query';
+import type { Filter } from '@kbn/es-query';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { FieldVisConfig } from '../../../../common/types/field_vis_config';
 import type { RandomSamplerOption } from '../constants/random_sampler';

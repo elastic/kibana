@@ -27,19 +27,19 @@ const importObjects = [
   },
 ];
 
-import supertest from 'supertest';
-import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
-import {
-  coreUsageStatsClientMock,
-  coreUsageDataServiceMock,
-} from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import {
-  registerLegacyImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
+  registerLegacyImportRoute,
 } from '@kbn/core-saved-objects-server-internal';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageDataServiceMock,
+  coreUsageStatsClientMock,
+} from '@kbn/core-usage-data-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import supertest from 'supertest';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;

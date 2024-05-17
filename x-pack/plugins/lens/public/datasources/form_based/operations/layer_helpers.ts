@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
-import memoizeOne from 'memoize-one';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { mapValues, partition, pickBy } from 'lodash';
+import memoizeOne from 'memoize-one';
+import type { DataType } from '../../..';
+import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { DateRange } from '../../../../common/types';
+import { generateId } from '../../../id_generator';
 import type {
   DatasourceFixAction,
   FramePublicAPI,
@@ -19,29 +22,26 @@ import type {
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../../types';
+import { documentField } from '../document_field';
+import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
 import {
-  operationDefinitionMap,
-  operationDefinitions,
+  type FieldBasedOperationErrorMessage,
+  type GenericOperationDefinition,
+  type OperationDefinition,
   type OperationType,
   type RequiredReference,
-  type OperationDefinition,
-  type GenericOperationDefinition,
   type TermsIndexPatternColumn,
-  type FieldBasedOperationErrorMessage,
+  operationDefinitionMap,
+  operationDefinitions,
 } from './definitions';
-import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
-import { getSortScoreByPriorityForField } from './operations';
-import { generateId } from '../../../id_generator';
 import {
+  BaseIndexPatternColumn,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
 } from './definitions/column_types';
 import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
-import type { TimeScaleUnit } from '../../../../common/expressions';
-import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import type { DataType } from '../../..';
+import { getSortScoreByPriorityForField } from './operations';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;

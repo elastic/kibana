@@ -17,8 +17,8 @@ import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
-import { DatePickerWrapper } from './date_picker_wrapper';
 import { useRefreshIntervalUpdates } from '../..';
+import { DatePickerWrapper } from './date_picker_wrapper';
 
 jest.mock('@elastic/eui', () => {
   const EuiButtonMock = jest.fn(() => {

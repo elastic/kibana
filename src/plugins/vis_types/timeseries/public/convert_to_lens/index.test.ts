@@ -7,8 +7,8 @@
  */
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import type { Panel } from '../../common/types';
 import { convertTSVBtoLensConfiguration } from '.';
+import type { Panel } from '../../common/types';
 
 const model = {
   axis_position: 'left',

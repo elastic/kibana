@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createContext } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { createContext } from 'react';
 
 export interface PluginContextValue {
   appMountParameters: AppMountParameters;

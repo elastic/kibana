@@ -7,7 +7,7 @@
 
 import deepMerge from 'deepmerge';
 
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { TaskRunMetrics } from '@kbn/reporting-common/types';
 import { PLUGIN_ID } from '@kbn/reporting-server';
 import { ActionType } from '.';

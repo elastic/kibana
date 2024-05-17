@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { SearchApi, Services, SearchSerializedState } from './types';
+import { SearchApi, SearchSerializedState, Services } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: ReactEmbeddableFactory<SearchSerializedState, SearchApi> = {

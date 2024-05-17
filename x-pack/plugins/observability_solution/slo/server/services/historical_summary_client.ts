@@ -10,9 +10,9 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   BudgetingMethod,
-  calendarAlignedTimeWindowSchema,
   DurationUnit,
   FetchHistoricalSummaryParams,
+  calendarAlignedTimeWindowSchema,
   fetchHistoricalSummaryResponseSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,

@@ -7,6 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import {
+  createAlertsIndex,
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
@@ -17,12 +23,6 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

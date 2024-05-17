@@ -8,8 +8,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { HostPanelHeader } from './header';
 import { mockObservedHostData } from '../mocks';
+import { HostPanelHeader } from './header';
 
 const mockProps = {
   hostName: 'test',

@@ -6,25 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { partition } from 'lodash';
-import { queryToAst } from '@kbn/data-plugin/common';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import { queryToAst } from '@kbn/data-plugin/common';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-  isRangeAnnotationConfig,
-  isQueryAnnotationConfig,
-  defaultAnnotationLabel,
-  type EventAnnotationGroupContent,
   type EventAnnotationConfig,
   type EventAnnotationGroupConfig,
+  type EventAnnotationGroupContent,
+  defaultAnnotationColor,
+  defaultAnnotationLabel,
+  defaultAnnotationRangeColor,
+  isQueryAnnotationConfig,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { EventAnnotationGroupSavedObjectFinder } from '../components/event_annotation_group_saved_object_finder';
+import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { partition } from 'lodash';
+import React from 'react';
 import { CONTENT_ID } from '../../common/content_management';
 import type {
   EventAnnotationGroupCreateIn,
@@ -40,6 +39,7 @@ import type {
   EventAnnotationGroupUpdateIn,
   EventAnnotationGroupUpdateOut,
 } from '../../common/content_management';
+import { EventAnnotationGroupSavedObjectFinder } from '../components/event_annotation_group_saved_object_finder';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';

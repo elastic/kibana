@@ -9,10 +9,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  euiPaletteColorBlind,
   EuiPanel,
   EuiTitle,
   PropertySort,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';

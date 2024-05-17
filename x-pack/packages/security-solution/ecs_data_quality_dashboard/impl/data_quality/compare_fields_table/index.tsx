@@ -6,11 +6,11 @@
  */
 
 import type { EuiTableFieldDataColumnType, Search } from '@elastic/eui';
-import { EuiInMemoryTable, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import * as i18n from './translations';
 import type { EnrichedFieldMetadata } from '../types';
+import * as i18n from './translations';
 
 const search: Search = {
   box: {

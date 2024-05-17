@@ -7,23 +7,23 @@
  */
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { Logger } from '@kbn/logging';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type {
+  CapabilitiesProvider,
+  CapabilitiesSetup,
+  CapabilitiesStart,
+  CapabilitiesSwitcher,
+  CapabilitiesSwitcherOptions,
+} from '@kbn/core-capabilities-server';
 import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import type {
-  CapabilitiesProvider,
-  CapabilitiesSwitcher,
-  CapabilitiesStart,
-  CapabilitiesSetup,
-  CapabilitiesSwitcherOptions,
-} from '@kbn/core-capabilities-server';
-import type { SwitcherWithOptions } from './types';
+import type { Logger } from '@kbn/logging';
 import { mergeCapabilities } from './merge_capabilities';
-import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
+import { CapabilitiesResolver, getCapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
+import type { SwitcherWithOptions } from './types';
 
 interface PrebootSetupDeps {
   http: InternalHttpServicePreboot;

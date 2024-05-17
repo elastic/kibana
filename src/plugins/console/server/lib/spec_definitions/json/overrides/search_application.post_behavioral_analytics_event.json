@@ -31,9 +31,7 @@
           }
         ],
         "results": {
-          "items": [
-            { "document": { "index": "", "id": "" }, "page": { "url": "" } }
-          ],
+          "items": [{ "document": { "index": "", "id": "" }, "page": { "url": "" } }],
           "total_results": 0
         }
       },

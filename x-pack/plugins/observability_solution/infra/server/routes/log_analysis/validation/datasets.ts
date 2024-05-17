@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import Boom from '@hapi/boom';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 
-import { createValidationFunction } from '../../../../common/runtime_types';
 import { logAnalysisValidationV1 } from '../../../../common/http_api';
+import { createValidationFunction } from '../../../../common/runtime_types';
 
 export const initValidateLogAnalysisDatasetsRoute = ({
   framework,

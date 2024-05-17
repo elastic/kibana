@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from '../action_types';
 import { API_STATUS } from '../../constants';
+import * as t from '../action_types';
 
 export const apiRequestStart = ({ label, scope, status = API_STATUS.LOADING }) => ({
   type: t.API_REQUEST_START,

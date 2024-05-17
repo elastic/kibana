@@ -6,16 +6,16 @@
  */
 
 import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } from 'react';
-import { useStyles } from './styles';
 import type {
-  ProcessEventAlertCategory,
+  AlertTypeCount,
   ProcessEvent,
   ProcessEventAlert,
-  AlertTypeCount,
+  ProcessEventAlertCategory,
 } from '../../../common';
-import { ProcessTreeAlert } from '../process_tree_alert';
 import { DEFAULT_ALERT_FILTER_VALUE, MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
+import { ProcessTreeAlert } from '../process_tree_alert';
 import { ProcessTreeAlertsFilter } from '../process_tree_alerts_filter';
+import { useStyles } from './styles';
 
 export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];

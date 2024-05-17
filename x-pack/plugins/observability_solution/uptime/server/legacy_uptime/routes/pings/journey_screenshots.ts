@@ -1,3 +1,4 @@
+import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +6,14 @@
  * 2.0.
  */
 import { IKibanaResponse } from '@kbn/core-http-server';
-import { schema } from '@kbn/config-schema';
-import { isRefResult, RefResult } from '../../../../common/runtime_types/ping/synthetics';
+import { API_URLS } from '../../../../common/constants';
+import { RefResult, isRefResult } from '../../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import {
-  getJourneyScreenshot,
   ScreenshotReturnTypesUnion,
+  getJourneyScreenshot,
 } from '../../lib/requests/get_journey_screenshot';
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
-import { API_URLS } from '../../../../common/constants';
 
 export interface ClientContract {
   screenshotRef: RefResult;

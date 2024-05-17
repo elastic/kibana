@@ -1,3 +1,7 @@
+import { DataView } from '@kbn/data-views-plugin/common';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +10,9 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { LogsOverview } from './logs_overview';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
+import { setUnifiedDocViewerServices } from '../../plugin';
+import { LogsOverview } from './logs_overview';
 
 const DATASET_NAME = 'logs.overview';
 const NAMESPACE = 'default';

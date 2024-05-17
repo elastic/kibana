@@ -7,22 +7,22 @@
 
 import React from 'react';
 
-import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
-import { renderHook } from '@testing-library/react-hooks';
-import { useLensAttributes } from './use_lens_attributes';
-import { ReportTypes } from '../configurations/constants';
-import { mockDataView } from '../rtl_helpers';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import * as theme from '@kbn/observability-shared-plugin/public/hooks/use_theme';
+import { renderHook } from '@testing-library/react-hooks';
+import { ReportTypes } from '../configurations/constants';
 import { TRANSACTION_DURATION } from '../configurations/constants/elasticsearch_fieldnames';
 import * as lensAttributes from '../configurations/lens_attributes';
-import * as useAppDataViewHook from './use_app_data_view';
-import * as theme from '@kbn/observability-shared-plugin/public/hooks/use_theme';
-import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_config';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
+import { mockDataView } from '../rtl_helpers';
+import * as useAppDataViewHook from './use_app_data_view';
+import { useLensAttributes } from './use_lens_attributes';
 import * as lensHook from './use_lens_formula_helper';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { UrlStorageContextProvider, allSeriesKey, reportTypeKey } from './use_series_storage';
 
 const mockSingleSeries = [
   {

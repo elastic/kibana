@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
-  updateLoadingStateAction,
   type AiopsLogRateAnalysisApiAction,
+  updateLoadingStateAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 
 /**

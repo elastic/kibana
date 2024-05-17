@@ -6,21 +6,21 @@
  */
 
 import { EuiComment } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
+import React, { useState, useEffect } from 'react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { EmptyPrompt } from '../../routes/components/empty_prompt';
-import { useKibana } from '../../common/lib/kibana';
-import type { StartPlugins } from '../../types';
-import { queryClient } from '../../query_client';
-import { AlertAttachmentContext } from '../../common/contexts';
-import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
-import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import { ATTACHED_QUERY } from '../../agents/translations';
+import { AlertAttachmentContext } from '../../common/contexts';
+import { useKibana } from '../../common/lib/kibana';
+import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+import { queryClient } from '../../query_client';
+import { EmptyPrompt } from '../../routes/components/empty_prompt';
+import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultProps } from './types';
 
 // eslint-disable-next-line react/display-name

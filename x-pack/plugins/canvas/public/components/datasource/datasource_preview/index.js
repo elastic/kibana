@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { Loading } from '../../loading';
+import React, { useState, useEffect } from 'react';
 import { useExpressionsService } from '../../../services';
+import { Loading } from '../../loading';
 import { DatasourcePreview as Component } from './datasource_preview';
 
 export const DatasourcePreview = (props) => {

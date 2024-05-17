@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { createSeries } from '../__mocks__';
-import {
-  createFormulaColumn,
-  convertMathToFormulaColumn,
-  convertOtherAggsToFormulaColumn,
-} from './formula';
-import { FormulaColumn } from './types';
-import { Metric } from '../../../../common/types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
   createStubDataView,
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
+import { createSeries } from '../__mocks__';
+import {
+  convertMathToFormulaColumn,
+  convertOtherAggsToFormulaColumn,
+  createFormulaColumn,
+} from './formula';
+import { FormulaColumn } from './types';
 
 describe('createFormulaColumn', () => {
   const dataView = stubLogstashDataView;

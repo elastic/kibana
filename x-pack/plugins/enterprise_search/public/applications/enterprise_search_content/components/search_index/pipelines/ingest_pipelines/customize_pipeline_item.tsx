@@ -19,8 +19,8 @@ import { Status } from '../../../../../../../common/types/api';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import {
-  LicensingCallout,
   LICENSING_FEATURE,
+  LicensingCallout,
 } from '../../../../../shared/licensing_callout/licensing_callout';
 import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custom_pipeline_api_logic';
 

@@ -28,9 +28,9 @@ jest.mock('fs', () => {
   };
 });
 
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, CYPRESS_REPORT } from './__fixtures__';
-import { parseTestReport } from './test_report';
+import { CYPRESS_REPORT, FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 import { addMessagesToReport } from './add_messages_to_report';
+import { parseTestReport } from './test_report';
 
 beforeEach(() => {
   jest.resetAllMocks();

@@ -54,5 +54,5 @@ export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEve
         operator: IS_OPERATOR,
       },
       and: [],
-    } as DataProvider)
+    }) as DataProvider
 );

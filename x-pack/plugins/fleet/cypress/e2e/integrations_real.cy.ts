@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { INTEGRATIONS, navigateTo } from '../tasks/navigation';
-import {
-  addIntegration,
-  installPackageWithVersion,
-  deleteIntegrations,
-  clickIfVisible,
-} from '../tasks/integrations';
+import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import {
   AGENT_POLICY_NAME_LINK,
   FLYOUT_CLOSE_BTN_SEL,
-  getIntegrationCard,
+  INTEGRATIONS_SEARCHBAR,
+  INTEGRATION_LIST,
   INTEGRATION_NAME_LINK,
+  INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
   LATEST_VERSION,
   PACKAGE_VERSION,
   POLICIES_TAB,
+  SETTINGS,
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
-  INTEGRATIONS_SEARCHBAR,
-  SETTINGS,
-  INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
-  INTEGRATION_LIST,
+  getIntegrationCard,
   getIntegrationCategories,
 } from '../screens/integrations';
-import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
-import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
+import { CONFIRM_MODAL, LOADING_SPINNER } from '../screens/navigation';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { request } from '../tasks/common';
+import {
+  addIntegration,
+  clickIfVisible,
+  deleteIntegrations,
+  installPackageWithVersion,
+} from '../tasks/integrations';
 import { login } from '../tasks/login';
+import { INTEGRATIONS, navigateTo } from '../tasks/navigation';
 
 function setupIntegrations() {
   cy.intercept(

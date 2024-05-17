@@ -7,22 +7,22 @@
 
 import { isEmpty, isInteger } from 'lodash/fp';
 import type {
-  TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
+  TimelineTypeLiteralWithNull,
 } from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
 import type { TimelineStatusAction } from './common';
 import { TimelineStatusActions } from './common';
-import { TimelineObject } from './timeline_object';
 import {
   checkIsCreateFailureCases,
-  checkIsUpdateFailureCases,
   checkIsCreateViaImportFailureCases,
+  checkIsUpdateFailureCases,
   checkIsUpdateViaImportFailureCases,
   commonFailureChecker,
 } from './failure_cases';
+import { TimelineObject } from './timeline_object';
 
 interface GivenTimelineInput {
   id: string | null | undefined;

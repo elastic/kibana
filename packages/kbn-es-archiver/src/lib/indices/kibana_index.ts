@@ -9,16 +9,16 @@
 import { inspect } from 'util';
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
 import {
-  MAIN_SAVED_OBJECT_INDEX,
   ALL_SAVED_OBJECT_INDICES,
+  MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
+import { KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
-import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 /**
  * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices

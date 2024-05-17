@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
-import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { type EmsSpriteSheet, TMSService, type blendMode } from '@elastic/ems-client';
 import { EuiIcon } from '@elastic/eui';
-import { RGBAImage } from './image_utils';
-import { AbstractLayer, type LayerIcon } from '../layer';
+import { i18n } from '@kbn/i18n';
+import type { LayerSpecification, Map as MbMap, StyleSpecification } from '@kbn/mapbox-gl';
+import _ from 'lodash';
+import React from 'react';
 import {
   AUTOSELECT_EMS_LOCALE,
+  LAYER_TYPE,
   NO_EMS_LOCALE,
   SOURCE_DATA_REQUEST_ID,
-  LAYER_TYPE,
 } from '../../../../common/constants';
 import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
-import { DataRequest } from '../../util/data_request';
-import { isRetina } from '../../../util';
 import { DataRequestContext } from '../../../actions';
+import { isRetina } from '../../../util';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
 import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
+import { DataRequest } from '../../util/data_request';
+import { AbstractLayer, type LayerIcon } from '../layer';
+import { RGBAImage } from './image_utils';
 
 interface SourceRequestMeta {
   tileLayerId: string;

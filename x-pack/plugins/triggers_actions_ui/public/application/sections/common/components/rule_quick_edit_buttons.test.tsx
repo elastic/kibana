@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import * as React from 'react';
 import { RuleTableItem } from '../../../../types';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from './rule_quick_edit_buttons';
 

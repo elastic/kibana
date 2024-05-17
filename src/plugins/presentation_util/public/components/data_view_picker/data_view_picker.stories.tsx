@@ -8,12 +8,12 @@
 
 import React, { useState } from 'react';
 
-import useMount from 'react-use/lib/useMount';
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import { DataViewPicker } from './data_view_picker';
-import { injectStorybookDataView } from '../../services/data_views/data_views.story';
+import useMount from 'react-use/lib/useMount';
 import { storybookFlightsDataView } from '../../mocks';
-import { pluginServices, registry, StorybookParams } from '../../services/plugin_services.story';
+import { injectStorybookDataView } from '../../services/data_views/data_views.story';
+import { StorybookParams, pluginServices, registry } from '../../services/plugin_services.story';
+import { DataViewPicker } from './data_view_picker';
 
 export default {
   component: DataViewPicker,

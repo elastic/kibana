@@ -7,8 +7,8 @@
 
 import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import { Direction } from '../../../../common/search_strategy';
-import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
+import { buildEqlDsl, parseEqlResponse } from './helpers';
 const defaultArgs = {
   defaultIndex: ['logs-endpoint.events*'],
   runtimeMappings: {},

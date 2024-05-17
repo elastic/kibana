@@ -7,10 +7,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewBase } from '@kbn/es-query';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
 import { each, mapValues, pick, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
@@ -18,14 +18,14 @@ import type {
   DataViewFieldMap,
   DataViewSpec,
   FieldConfiguration,
+  FieldSpec,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeType,
-  FieldSpec,
 } from '../types';
-import { removeFieldAttrs } from './utils';
 import { AbstractDataView } from './abstract_data_views';
 import { flattenHitWrapper } from './flatten_hit';
+import { removeFieldAttrs } from './utils';
 
 interface DataViewDeps {
   spec?: DataViewSpec;
@@ -80,15 +80,18 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   getScriptedFieldsForQuery() {
-    return this.getScriptedFields().reduce((scriptFields, field) => {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script as string,
-          lang: field.lang,
-        },
-      };
-      return scriptFields;
-    }, {} as Record<string, estypes.ScriptField>);
+    return this.getScriptedFields().reduce(
+      (scriptFields, field) => {
+        scriptFields[field.name] = {
+          script: {
+            source: field.script as string,
+            lang: field.lang,
+          },
+        };
+        return scriptFields;
+      },
+      {} as Record<string, estypes.ScriptField>
+    );
   }
 
   getEtag = () => this.etag;

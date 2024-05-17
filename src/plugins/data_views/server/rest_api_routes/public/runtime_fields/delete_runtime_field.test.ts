@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { deleteRuntimeField } from './delete_runtime_field';
+import { DataViewLazy } from '../../../../common';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataViewLazy } from '../../../../common';
+import { deleteRuntimeField } from './delete_runtime_field';
 
 describe('delete runtime field', () => {
   it('call usageCollection', async () => {
@@ -20,7 +20,7 @@ describe('delete runtime field', () => {
         ({
           removeRuntimeField: jest.fn(),
           getRuntimeField: jest.fn().mockReturnValueOnce({}),
-        } as unknown as DataViewLazy)
+        }) as unknown as DataViewLazy
     );
 
     await deleteRuntimeField({

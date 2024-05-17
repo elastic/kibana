@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
-import { CasesCell } from './cell';
-import { CellComponentProps } from '../types';
-import { Alert } from '../../../../types';
-import { getCasesMockMap } from './index.mock';
-import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import userEvent from '@testing-library/user-event';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
-import { useCaseViewNavigation } from './use_case_view_navigation';
+import React from 'react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { Alert } from '../../../../types';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
+import { CellComponentProps } from '../types';
+import { CasesCell } from './cell';
+import { getCasesMockMap } from './index.mock';
+import { useCaseViewNavigation } from './use_case_view_navigation';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../common/lib/kibana', () => ({

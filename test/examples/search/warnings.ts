@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import assert from 'assert';
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import assert from 'assert';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

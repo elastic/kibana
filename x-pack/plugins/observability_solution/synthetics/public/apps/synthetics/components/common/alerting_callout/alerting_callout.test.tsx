@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { waitFor } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_callout';
 

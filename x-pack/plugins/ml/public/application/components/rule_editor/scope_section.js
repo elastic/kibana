@@ -14,12 +14,12 @@ import React from 'react';
 
 import { EuiCallOut, EuiCheckbox, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { ScopeExpression } from './scope_expression';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { ScopeExpression } from './scope_expression';
+import { getScopeFieldDefaults } from './utils';
 
 function NoFilterListsCallOut() {
   const mlLocator = useMlLocator();

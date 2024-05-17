@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
-import { actions, createMachine, InterpreterFrom } from 'xstate';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { InterpreterFrom, actions, createMachine } from 'xstate';
+import {
+  createController,
+  subscribeToLogsExplorerPublicEvents,
+  subscribeToLogsExplorerState,
+} from './controller_service';
 import { DEFAULT_CONTEXT } from './defaults';
+import { createDataReceivedTelemetryEventEmitter } from './telemetry_events';
+import { initializeFromTimeFilterService } from './time_filter_service';
 import {
   ObservabilityLogsExplorerContext,
   ObservabilityLogsExplorerEvent,
   ObservabilityLogsExplorerTypeState,
 } from './types';
 import { initializeFromUrl, updateUrlFromLogsExplorerState } from './url_state_storage_service';
-import {
-  createController,
-  subscribeToLogsExplorerPublicEvents,
-  subscribeToLogsExplorerState,
-} from './controller_service';
-import { initializeFromTimeFilterService } from './time_filter_service';
-import { createDataReceivedTelemetryEventEmitter } from './telemetry_events';
 
 export const createPureObservabilityLogsExplorerStateMachine = (
   initialContext: ObservabilityLogsExplorerContext

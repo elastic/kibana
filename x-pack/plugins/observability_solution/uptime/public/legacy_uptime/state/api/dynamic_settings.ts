@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { API_URLS, INITIAL_REST_VERSION } from '../../../../common/constants';
 import {
-  DynamicSettingsCodec,
   DynamicSettings,
-  DynamicSettingsSaveResponse,
+  DynamicSettingsCodec,
   DynamicSettingsSaveCodec,
+  DynamicSettingsSaveResponse,
 } from '../../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS, INITIAL_REST_VERSION } from '../../../../common/constants';
 
 interface SaveApiRequest {
   settings: DynamicSettings;

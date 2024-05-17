@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { performance } from 'perf_hooks';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import { performance } from 'perf_hooks';
 
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
 } from '@kbn/securitysolution-utils';
+import { createEnrichEventsFunction } from '../utils/enrichments';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
-import { wrapEsqlAlerts } from './wrap_esql_alerts';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import { rowToDocument } from './utils';
+import { wrapEsqlAlerts } from './wrap_esql_alerts';
 
 import type { RunOpts } from '../types';
 
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { EsqlRuleParams } from '../../rule_schema';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
-  makeFloatString,
-  getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getUnprocessedExceptionsWarnings,
+  makeFloatString,
 } from '../utils/utils';
-import type { EsqlRuleParams } from '../../rule_schema';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 /**
  * ES|QL returns results as a single page. max size of 10,000

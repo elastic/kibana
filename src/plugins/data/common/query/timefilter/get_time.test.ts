@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { RangeFilter } from '@kbn/es-query';
 import moment from 'moment';
 import sinon from 'sinon';
-import { getTime, getRelativeTime, getAbsoluteTimeRange } from './get_time';
+import { getAbsoluteTimeRange, getRelativeTime, getTime } from './get_time';
 
 describe('get_time', () => {
   describe('getTime', () => {

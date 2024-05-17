@@ -6,11 +6,11 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiPanel, EuiComboBox } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiComboBox, EuiPanel } from '@elastic/eui';
 import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
+import styled from 'styled-components';
+import { MOBILE_PANEL_HEIGHT, PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 

@@ -6,15 +6,15 @@
  */
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
-  KibanaRequest,
 } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
-  savedObjectsClientMock,
   httpServerMock,
+  savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
 import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';

@@ -6,10 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { TelemetryChannel } from './types';
-import type { ITaskMetricsService, TaskMetric, Trace } from './task_metrics.types';
-import { TaskMetricsService } from './task_metrics';
 import type { ITelemetryEventsSender } from './sender';
+import { TaskMetricsService } from './task_metrics';
+import type { ITaskMetricsService, TaskMetric, Trace } from './task_metrics.types';
+import { TelemetryChannel } from './types';
 
 /**
  * Preview telemetry events sender for the telemetry route.
@@ -24,7 +24,10 @@ export class PreviewTaskMetricsService implements ITaskMetricsService {
 
   private readonly composite: TaskMetricsService;
 
-  constructor(logger: Logger, private readonly sender: ITelemetryEventsSender) {
+  constructor(
+    logger: Logger,
+    private readonly sender: ITelemetryEventsSender
+  ) {
     this.logger = logger;
     this.composite = new TaskMetricsService(logger, sender);
   }

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPopover,
   EuiFilterButton,
   EuiFilterSelectItem,
+  EuiPopover,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useState } from 'react';
 
 export interface TypeFilterProps {
   options: Array<{

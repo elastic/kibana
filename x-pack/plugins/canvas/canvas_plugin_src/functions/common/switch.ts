@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Case } from '../../../types';
+import { Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
 import { getFunctionHelp } from '../../../i18n';
+import { Case } from '../../../types';
 
 interface Arguments {
   case: Array<() => Observable<Case>>;

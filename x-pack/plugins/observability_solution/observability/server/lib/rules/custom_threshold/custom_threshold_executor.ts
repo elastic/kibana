@@ -5,51 +5,51 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { IBasePath, Logger } from '@kbn/core/server';
 import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
-  ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
-  ALERT_REASON,
+  ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { IBasePath, Logger } from '@kbn/core/server';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { Group } from '../../../../common/custom_threshold_rule/types';
-import { getEvaluationValues, getThreshold } from './lib/get_values';
+import { isEqual } from 'lodash';
+import { ObservabilityConfig } from '../../..';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
-import { ObservabilityConfig } from '../../..';
+import { Group } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
-import {
-  AlertStates,
-  CustomThresholdRuleTypeParams,
-  CustomThresholdRuleTypeState,
-  CustomThresholdAlertState,
-  CustomThresholdAlertContext,
-  CustomThresholdSpecificActionGroups,
-  CustomThresholdActionGroup,
-  CustomThresholdAlert,
-} from './types';
+import { getEvaluationValues, getThreshold } from './lib/get_values';
 import {
   buildFiredAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
 } from './messages';
 import {
+  AlertStates,
+  CustomThresholdActionGroup,
+  CustomThresholdAlert,
+  CustomThresholdAlertContext,
+  CustomThresholdAlertState,
+  CustomThresholdRuleTypeParams,
+  CustomThresholdRuleTypeState,
+  CustomThresholdSpecificActionGroups,
+} from './types';
+import {
   createScopedLogger,
+  flattenAdditionalContext,
+  getContextForRecoveredAlerts,
+  getFormattedGroupBy,
   hasAdditionalContext,
   validGroupByForContext,
-  flattenAdditionalContext,
-  getFormattedGroupBy,
-  getContextForRecoveredAlerts,
 } from './utils';
 
-import { formatAlertResult, getLabel } from './lib/format_alert_result';
-import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
+import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { formatAlertResult, getLabel } from './lib/format_alert_result';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -187,8 +187,8 @@ export const createCustomThresholdExecutor = ({
       const nextState = isNoData
         ? AlertStates.NO_DATA
         : shouldAlertFire
-        ? AlertStates.ALERT
-        : AlertStates.OK;
+          ? AlertStates.ALERT
+          : AlertStates.OK;
 
       let reason;
       if (nextState === AlertStates.ALERT) {
@@ -232,8 +232,8 @@ export const createCustomThresholdExecutor = ({
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
-            ? NO_DATA_ACTIONS_ID
-            : FIRED_ACTIONS_ID;
+              ? NO_DATA_ACTIONS_ID
+              : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0

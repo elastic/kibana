@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { render, waitFor } from '@testing-library/react';
-import { APMAlertingFailedTransactionsChart } from './chart';
-import { ApmEmbeddableContext } from '../../embeddable_context';
-import { MOCK_ALERT, MOCK_RULE, MOCK_DEPS } from '../testing/fixtures';
+import React from 'react';
 import * as transactionFetcher from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { ApmEmbeddableContext } from '../../embeddable_context';
+import { MOCK_ALERT, MOCK_DEPS, MOCK_RULE } from '../testing/fixtures';
+import { APMAlertingFailedTransactionsChart } from './chart';
 
 jest.mock('../../../context/apm_service/use_service_agent_fetcher', () => ({
   useServiceAgentFetcher: jest.fn(() => ({

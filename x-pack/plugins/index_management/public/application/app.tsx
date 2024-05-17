@@ -8,22 +8,22 @@
 import React, { useEffect } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
 
-import { UIM_APP_LOAD, Section } from '../../common/constants';
-import { IndexManagementHome, homeSections } from './sections/home';
-import { TemplateCreate } from './sections/template_create';
-import { TemplateClone } from './sections/template_clone';
-import { TemplateEdit } from './sections/template_edit';
-import { EnrichPolicyCreate } from './sections/enrich_policy_create';
+import { Section, UIM_APP_LOAD } from '../../common/constants';
 import { useAppContext } from './app_context';
 import {
+  ComponentTemplateClone,
   ComponentTemplateCreate,
   ComponentTemplateEdit,
-  ComponentTemplateClone,
 } from './components';
+import { EnrichPolicyCreate } from './sections/enrich_policy_create';
+import { IndexManagementHome, homeSections } from './sections/home';
+import { TemplateClone } from './sections/template_clone';
+import { TemplateCreate } from './sections/template_create';
+import { TemplateEdit } from './sections/template_edit';
 
 export const App = ({ history }: { history: ScopedHistory }) => {
   const { services } = useAppContext();

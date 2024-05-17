@@ -7,14 +7,14 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import qs from 'query-string';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import qs from 'query-string';
 
-import { WithHeaderLayout } from '../../../components/layouts';
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { useRouterNavigate } from '../../../common/lib/kibana';
+import { WithHeaderLayout } from '../../../components/layouts';
+import { LiveQuery } from '../../../live_queries';
 
 interface LocationState {
   form: Record<string, unknown>;

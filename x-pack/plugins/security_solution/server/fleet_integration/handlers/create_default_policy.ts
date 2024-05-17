@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
-import type { LicenseService } from '../../../common/license/license';
-import type { PolicyConfig } from '../../../common/endpoint/types';
-import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
-import {
-  ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
-  ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
-  ENDPOINT_CONFIG_PRESET_NGAV,
-  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
-} from '../constants';
 import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
 } from '../../../common/endpoint/models/policy_config_helpers';
+import type { PolicyConfig } from '../../../common/endpoint/types';
+import type { LicenseService } from '../../../common/license/license';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
+  ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
+  ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
+  ENDPOINT_CONFIG_PRESET_NGAV,
+} from '../constants';
+import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 
 /**
  * Create the default endpoint policy based on the current license and configuration type
@@ -68,10 +68,13 @@ export const createDefaultPolicy = (
  * Create a copy of an object with all keys set to false
  */
 const falsyObjectKeys = <T extends Record<string, unknown>>(obj: T): Record<keyof T, boolean> => {
-  return Object.keys(obj).reduce((accumulator, key) => {
-    accumulator[key as keyof T] = false;
-    return accumulator;
-  }, {} as Record<keyof T, boolean>);
+  return Object.keys(obj).reduce(
+    (accumulator, key) => {
+      accumulator[key as keyof T] = false;
+      return accumulator;
+    },
+    {} as Record<keyof T, boolean>
+  );
 };
 
 const getEndpointPolicyConfigPreset = (config: PolicyCreateEndpointConfig | undefined) => {

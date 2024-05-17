@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
+import { lazy } from 'react';
+import { SwimlaneActionParams, SwimlaneConfig, SwimlaneSecrets } from './types';
 
 export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
   'xpack.stackConnectors.components.swimlane.selectMessageText',

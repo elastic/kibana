@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { mount } from 'enzyme';
-import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import { mount } from 'enzyme';
+import React from 'react';
 
-import { UXAppRoot } from './ux_app';
-import { RumHome } from '../components/app/rum_dashboard/rum_home';
 import { coreMock } from '@kbn/core/public/mocks';
-import { merge } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { merge } from 'lodash';
+import { RumHome } from '../components/app/rum_dashboard/rum_home';
+import { UXAppRoot } from './ux_app';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),

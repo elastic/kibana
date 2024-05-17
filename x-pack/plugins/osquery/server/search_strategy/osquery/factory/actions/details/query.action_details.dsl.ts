@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
-import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
+import { getQueryFilter } from '../../../../../utils/build_query';
 
 export const buildActionDetailsQuery = ({
   actionId,

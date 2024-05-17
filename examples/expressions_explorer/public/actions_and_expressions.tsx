@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPageBody,
-  EuiPageTemplate,
-  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiPageSection,
+  EuiPageTemplate,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ExpressionEditor } from './editor/expression_editor';
+import React, { useState } from 'react';
 import { NAVIGATE_TRIGGER_ID } from './actions/navigate_trigger';
+import { ExpressionEditor } from './editor/expression_editor';
 
 interface Props {
   expressions: ExpressionsStart;

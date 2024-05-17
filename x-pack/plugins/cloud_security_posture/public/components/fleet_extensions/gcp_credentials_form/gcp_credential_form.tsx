@@ -1,14 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useEffect, useRef } from 'react';
-import semverLt from 'semver/functions/lt';
-import semverCoerce from 'semver/functions/coerce';
-import semverValid from 'semver/functions/valid';
-import { css } from '@emotion/react';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -21,27 +10,38 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { css } from '@emotion/react';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useEffect, useRef } from 'react';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 
-import { GcpCredentialsType } from '../../../../common/types_old';
 import { CLOUDBEAT_GCP } from '../../../../common/constants';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import {
-  getCspmCloudShellDefaultValue,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
+import { GcpCredentialsType } from '../../../../common/types_old';
 import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
-import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
 import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from '../../test_subjects';
+import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
+import {
+  NewPackagePolicyPostureInput,
+  getCspmCloudShellDefaultValue,
+  getPosturePolicy,
+} from '../utils';
 
 export const GCP_SETUP_ACCESS = {
   CLOUD_SHELL: 'google_cloud_shell',

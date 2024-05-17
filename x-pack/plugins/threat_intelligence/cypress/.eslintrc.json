@@ -1,8 +1,6 @@
 {
   "plugins": ["cypress"],
-  "extends": [
-    "plugin:cypress/recommended"
-  ],
+  "extends": ["plugin:cypress/recommended"],
   "env": {
     "cypress/globals": true
   },

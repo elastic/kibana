@@ -16,7 +16,7 @@ const INVALID_DATE = 'invalid';
 const PREVIOUS_DATE = 'previous';
 const START_AT_ANCHOR = 'startAt';
 
-type AllowedUnit = typeof ALLOWED_UNITS[number];
+type AllowedUnit = (typeof ALLOWED_UNITS)[number];
 type PreviousDateType = typeof PREVIOUS_DATE;
 type InvalidDateType = typeof INVALID_DATE;
 

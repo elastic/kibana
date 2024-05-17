@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MissingMonitoringDataRule } from './missing_monitoring_data_rule';
-import { RULE_MISSING_MONITORING_DATA } from '../../common/constants';
-import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_MISSING_MONITORING_DATA } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
+import { MissingMonitoringDataRule } from './missing_monitoring_data_rule';
 
 const RealDate = Date;
 

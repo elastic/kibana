@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { copyToClipboard, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, copyToClipboard } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import {

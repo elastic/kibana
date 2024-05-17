@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DeepPartial } from 'utility-types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import type { DeepPartial } from 'utility-types';
 
 export const createMockConfigSchema = (
   overrides: DeepPartial<ReportingConfigType> = {}

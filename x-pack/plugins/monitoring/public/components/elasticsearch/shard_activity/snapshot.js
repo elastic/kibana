@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
 export const Snapshot = ({ isSnapshot, repo, snapshot }) => {
   return isSnapshot ? (

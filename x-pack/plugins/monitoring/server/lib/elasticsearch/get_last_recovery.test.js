@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { handleLegacyLastRecoveries, filterOldShardActivity } from './get_last_recovery';
+import { filterOldShardActivity, handleLegacyLastRecoveries } from './get_last_recovery';
 
 describe('get_last_recovery', () => {
   // Note: times are from the epoch!

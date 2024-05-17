@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { replaceVars } from './replace_vars';
 import { emptyLabel } from '../../../../common/empty_label';
+import { replaceVars } from './replace_vars';
 
 describe('replaceVars(str, args, vars)', () => {
   test('replaces vars with values', () => {

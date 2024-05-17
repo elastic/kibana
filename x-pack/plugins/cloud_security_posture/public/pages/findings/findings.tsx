@@ -1,3 +1,6 @@
+import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +8,14 @@
  * 2.0.
  */
 import React from 'react';
+import { Redirect, matchPath, useHistory, useLocation } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import { Configurations } from '../configurations';
-import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
-import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/constants';
-import { VULNERABILITIES_INDEX_NAME, FINDINGS_INDEX_NAME } from '../../../common/constants';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { FINDINGS_INDEX_NAME, VULNERABILITIES_INDEX_NAME } from '../../../common/constants';
 import { getStatusForIndexName } from '../../../common/utils/helpers';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/constants';
+import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
+import { Configurations } from '../configurations';
 import { Vulnerabilities } from '../vulnerabilities';
 
 type FindingsTabKey = 'vuln_mgmt' | 'configurations';

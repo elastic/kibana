@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
 import { geoPointFunction } from './geo_point';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#geoPoint', () => {
   const fn = functionWrapper(geoPointFunction);

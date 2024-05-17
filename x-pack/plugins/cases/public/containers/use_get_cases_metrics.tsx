@@ -7,14 +7,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { CaseMetricsFeature } from '../../common/types/api';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
-import * as i18n from './translations';
-import { useHttp } from '../common/lib/kibana';
 import { getCasesMetrics } from '../api';
-import type { CasesMetrics } from './types';
+import { useHttp } from '../common/lib/kibana';
 import { useCasesToast } from '../common/use_cases_toast';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
+import * as i18n from './translations';
+import type { CasesMetrics } from './types';
 
 export const useGetCasesMetrics = () => {
   const http = useHttp();

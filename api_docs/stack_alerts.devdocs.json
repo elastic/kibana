@@ -26,11 +26,7 @@
             "tags": [],
             "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata = { adHocDataViewList: [], isManagementPage: true },\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "DataViewSelectPopoverProps",
-              ">"
-            ],
+            "signature": ["React.PropsWithChildren<", "DataViewSelectPopoverProps", ">"],
             "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -59,9 +55,7 @@
         "tags": [],
         "label": "Config",
         "description": [],
-        "signature": [
-          "{}"
-        ],
+        "signature": ["{}"],
         "path": "x-pack/plugins/stack_alerts/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -74,9 +68,7 @@
         "tags": [],
         "label": "ID",
         "description": [],
-        "signature": [
-          "\".index-threshold\""
-        ],
+        "signature": ["\".index-threshold\""],
         "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -134,9 +126,7 @@
             "tags": [],
             "label": "comparator",
             "description": [],
-            "signature": [
-              "Comparator"
-            ],
+            "signature": ["Comparator"],
             "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -149,9 +139,7 @@
             "tags": [],
             "label": "threshold",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -164,9 +152,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -183,11 +169,7 @@
         "tags": [],
         "label": "getHumanReadableComparator",
         "description": [],
-        "signature": [
-          "(comparator: ",
-          "Comparator",
-          ") => string | undefined"
-        ],
+        "signature": ["(comparator: ", "Comparator", ") => string | undefined"],
         "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -199,9 +181,7 @@
             "tags": [],
             "label": "comparator",
             "description": [],
-            "signature": [
-              "Comparator"
-            ],
+            "signature": ["Comparator"],
             "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -218,9 +198,7 @@
         "tags": [],
         "label": "rowToDocument",
         "description": [],
-        "signature": [
-          "(columns: EsqlResultColumn[], row: EsqlResultRow) => EsqlDocument"
-        ],
+        "signature": ["(columns: EsqlResultColumn[], row: EsqlResultRow) => EsqlDocument"],
         "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -232,9 +210,7 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": [
-              "EsqlResultColumn[]"
-            ],
+            "signature": ["EsqlResultColumn[]"],
             "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -247,9 +223,7 @@
             "tags": [],
             "label": "row",
             "description": [],
-            "signature": [
-              "EsqlResultRow"
-            ],
+            "signature": ["EsqlResultRow"],
             "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -380,9 +354,7 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": [
-              "EsqlResultColumn[]"
-            ],
+            "signature": ["EsqlResultColumn[]"],
             "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -394,9 +366,7 @@
             "tags": [],
             "label": "values",
             "description": [],
-            "signature": [
-              "EsqlResultRow[]"
-            ],
+            "signature": ["EsqlResultRow[]"],
             "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -414,9 +384,7 @@
         "tags": [],
         "label": "ES_QUERY_MAX_HITS_PER_EXECUTION",
         "description": [],
-        "signature": [
-          "10000"
-        ],
+        "signature": ["10000"],
         "path": "x-pack/plugins/stack_alerts/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -429,9 +397,7 @@
         "tags": [],
         "label": "ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS",
         "description": [],
-        "signature": [
-          "100"
-        ],
+        "signature": ["100"],
         "path": "x-pack/plugins/stack_alerts/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -446,11 +412,7 @@
         "tags": [],
         "label": "ComparatorFnNames",
         "description": [],
-        "signature": [
-          "Set<",
-          "Comparator",
-          ">"
-        ],
+        "signature": ["Set<", "Comparator", ">"],
         "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -463,13 +425,7 @@
         "tags": [],
         "label": "ComparatorFns",
         "description": [],
-        "signature": [
-          "Map<",
-          "Comparator",
-          ", ",
-          "ComparatorFn",
-          ">"
-        ],
+        "signature": ["Map<", "Comparator", ", ", "ComparatorFn", ">"],
         "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
         "deprecated": false,
         "trackAdoption": false,

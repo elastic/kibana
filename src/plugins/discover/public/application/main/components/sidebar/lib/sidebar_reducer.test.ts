@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import {
-  stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
+  stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
-  discoverSidebarReducer,
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerState,
   DiscoverSidebarReducerStatus,
+  discoverSidebarReducer,
   getInitialState,
 } from './sidebar_reducer';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {

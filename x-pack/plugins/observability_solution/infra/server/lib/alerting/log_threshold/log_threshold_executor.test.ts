@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import {
-  getGroupedESQuery,
-  processUngroupedResults,
-  processGroupByResults,
-  LogThresholdAlertReporter,
-  getUngroupedESQuery,
-} from './log_threshold_executor';
-import {
-  Comparator,
-  RuleParams,
-  Criterion,
-  UngroupedSearchQueryResponse,
-  GroupedSearchQueryResponse,
-} from '../../../../common/alerting/logs/log_threshold';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  positiveComparators,
-  negativeComparators,
+  Comparator,
+  Criterion,
+  GroupedSearchQueryResponse,
+  RuleParams,
+  UngroupedSearchQueryResponse,
+} from '../../../../common/alerting/logs/log_threshold';
+import {
   buildFiltersFromCriteria,
+  negativeComparators,
+  positiveComparators,
   queryMappings,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
+import {
+  LogThresholdAlertReporter,
+  getGroupedESQuery,
+  getUngroupedESQuery,
+  processGroupByResults,
+  processUngroupedResults,
+} from './log_threshold_executor';
 
 // Mocks //
 const numericField = {

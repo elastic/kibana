@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { map } from 'lodash';
-import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
-import { ElementControls } from './element_controls';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { CustomElement } from '../../../types';
 import { ElementCard } from '../element_card';
+import { ElementControls } from './element_controls';
 
 export interface Props {
   /**

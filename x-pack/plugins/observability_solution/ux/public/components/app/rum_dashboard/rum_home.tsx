@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
-import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { WebApplicationSelect } from './panels/web_application_select';
-import { UserPercentile } from './user_percentile';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { useHasRumData } from './hooks/use_has_rum_data';
-import { RumDatePicker } from './rum_datepicker';
-import { EmptyStateLoading } from './empty_state_loading';
-import { useKibanaServices } from '../../../hooks/use_kibana_services';
-import { UxEnvironmentFilter } from './environment_filter';
+import { i18n } from '@kbn/i18n';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
+import React, { useEffect } from 'react';
 import { RumOverview } from '.';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { EmptyStateLoading } from './empty_state_loading';
+import { UxEnvironmentFilter } from './environment_filter';
+import { useHasRumData } from './hooks/use_has_rum_data';
+import { WebApplicationSelect } from './panels/web_application_select';
+import { RumDatePicker } from './rum_datepicker';
+import { UserPercentile } from './user_percentile';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
   defaultMessage: 'Dashboard',

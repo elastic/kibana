@@ -13,34 +13,34 @@ import {
   ColorVariant,
   LineSeriesProps,
   ScaleType,
+  SeriesColorAccessorFn,
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
-  SeriesColorAccessorFn,
 } from '@elastic/charts';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import {
-  getPalette,
   AVAILABLE_PALETTES,
   NeutralPalette,
   SPECIAL_TOKENS_STRING_CONVERTION,
+  getPalette,
 } from '@kbn/coloring';
-import { getColorCategories } from '@kbn/chart-expressions-common';
-import { isDataLayer } from '../../common/utils/layer_types_guards';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
+import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { FormatFactory } from '../types';
-import { getSeriesColor } from './state';
-import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
-import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
-import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
+import { ColorAssignments } from './color_assignment';
+import { getFormat } from './format';
+import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
+import { getSeriesColor } from './state';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 

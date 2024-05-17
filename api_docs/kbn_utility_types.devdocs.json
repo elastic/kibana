@@ -123,9 +123,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ObservableLike",
-        "description": [
-          "\nMinimal interface for an object resembling an `Observable`."
-        ],
+        "description": ["\nMinimal interface for an object resembling an `Observable`."],
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
@@ -147,9 +145,7 @@
             "tags": [],
             "label": "subscribe",
             "description": [],
-            "signature": [
-              "(observer: (value: T) => void) => void"
-            ],
+            "signature": ["(observer: (value: T) => void) => void"],
             "path": "packages/kbn-utility-types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -161,9 +157,7 @@
                 "tags": [],
                 "label": "observer",
                 "description": [],
-                "signature": [
-                  "(value: T) => void"
-                ],
+                "signature": ["(value: T) => void"],
                 "path": "packages/kbn-utility-types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,17 +238,10 @@
         "parentPluginId": "@kbn/utility-types",
         "id": "def-common.$Values",
         "type": "Type",
-        "tags": [
-          "desc",
-          "see"
-        ],
+        "tags": ["desc", "see"],
         "label": "$Values",
-        "description": [
-          "\n$Values"
-        ],
-        "signature": [
-          "T[keyof T]"
-        ],
+        "description": ["\n$Values"],
+        "signature": ["T[keyof T]"],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -267,9 +254,7 @@
         "tags": [],
         "label": "ArrayElement",
         "description": [],
-        "signature": [
-          "A extends readonly (infer T)[] ? T : never"
-        ],
+        "signature": ["A extends readonly (infer T)[] ? T : never"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -279,16 +264,10 @@
         "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Assign",
         "type": "Type",
-        "tags": [
-          "desc"
-        ],
+        "tags": ["desc"],
         "label": "Assign",
-        "description": [
-          "\nAssign"
-        ],
-        "signature": [
-          "{ [P in keyof I]: I[P]; }"
-        ],
+        "description": ["\nAssign"],
+        "signature": ["{ [P in keyof I]: I[P]; }"],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -298,17 +277,10 @@
         "parentPluginId": "@kbn/utility-types",
         "id": "def-common.AugmentedRequired",
         "type": "Type",
-        "tags": [
-          "desc"
-        ],
+        "tags": ["desc"],
         "label": "AugmentedRequired",
-        "description": [
-          "\nRequired"
-        ],
-        "signature": [
-          "Omit",
-          "<T, K> & Required<Pick<T, K>>"
-        ],
+        "description": ["\nRequired"],
+        "signature": ["Omit", "<T, K> & Required<Pick<T, K>>"],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -320,12 +292,8 @@
         "type": "Type",
         "tags": [],
         "label": "AwaitedProperties",
-        "description": [
-          "\nUnwrap all promise attributes of the given type"
-        ],
-        "signature": [
-          "{ [K in keyof T]: Awaited<T[K]>; }"
-        ],
+        "description": ["\nUnwrap all promise attributes of the given type"],
+        "signature": ["{ [K in keyof T]: Awaited<T[K]>; }"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -335,17 +303,10 @@
         "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Class",
         "type": "Type",
-        "tags": [
-          "desc",
-          "see"
-        ],
+        "tags": ["desc", "see"],
         "label": "Class",
-        "description": [
-          "\nClass"
-        ],
-        "signature": [
-          "new (...args: any[]) => T"
-        ],
+        "description": ["\nClass"],
+        "signature": ["new (...args: any[]) => T"],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -380,9 +341,7 @@
         "type": "Type",
         "tags": [],
         "label": "DeepPartial",
-        "description": [
-          "\nDeep partial version of a type."
-        ],
+        "description": ["\nDeep partial version of a type."],
         "signature": [
           "T extends any[] ? ",
           {
@@ -455,12 +414,8 @@
         "type": "Type",
         "tags": [],
         "label": "Ensure",
-        "description": [
-          "\nEnsures T is of type X."
-        ],
-        "signature": [
-          "T extends X ? T : never"
-        ],
+        "description": ["\nEnsures T is of type X."],
+        "signature": ["T extends X ? T : never"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -503,12 +458,8 @@
         "type": "Type",
         "tags": [],
         "label": "MaybePromise",
-        "description": [
-          "\nA type that may or may not be a `Promise`."
-        ],
-        "signature": [
-          "T | Promise<T>"
-        ],
+        "description": ["\nA type that may or may not be a `Promise`."],
+        "signature": ["T | Promise<T>"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -520,9 +471,7 @@
         "type": "Type",
         "tags": [],
         "label": "MethodKeysOf",
-        "description": [
-          "\nReturns public method names"
-        ],
+        "description": ["\nReturns public method names"],
         "signature": [
           "{ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never; }[keyof T]"
         ],
@@ -552,17 +501,10 @@
         "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Optional",
         "type": "Type",
-        "tags": [
-          "desc"
-        ],
+        "tags": ["desc"],
         "label": "Optional",
-        "description": [
-          "\nOptional"
-        ],
-        "signature": [
-          "Omit",
-          "<T, K> & Partial<Pick<T, K>>"
-        ],
+        "description": ["\nOptional"],
+        "signature": ["Omit", "<T, K> & Partial<Pick<T, K>>"],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -574,12 +516,8 @@
         "type": "Type",
         "tags": [],
         "label": "PublicContract",
-        "description": [
-          "\nReturns an object with public keys only."
-        ],
-        "signature": [
-          "{ [P in keyof T]: T[P]; }"
-        ],
+        "description": ["\nReturns an object with public keys only."],
+        "signature": ["{ [P in keyof T]: T[P]; }"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -591,12 +529,8 @@
         "type": "Type",
         "tags": [],
         "label": "PublicKeys",
-        "description": [
-          "\nReturns public keys of an object."
-        ],
-        "signature": [
-          "keyof T"
-        ],
+        "description": ["\nReturns public keys of an object."],
+        "signature": ["keyof T"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -608,9 +542,7 @@
         "type": "Type",
         "tags": [],
         "label": "PublicMethodsOf",
-        "description": [
-          "\n Returns an object with public methods only."
-        ],
+        "description": ["\n Returns an object with public methods only."],
         "signature": [
           "{ [P in ",
           {
@@ -747,9 +679,7 @@
         "description": [
           "\nConverts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function."
         ],
-        "signature": [
-          "T extends Promise<infer U> ? Promise<U> : Promise<T>"
-        ],
+        "signature": ["T extends Promise<infer U> ? Promise<U> : Promise<T>"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -778,9 +708,7 @@
         "type": "Type",
         "tags": [],
         "label": "UnwrapObservable",
-        "description": [
-          "\nReturns wrapped type of an observable."
-        ],
+        "description": ["\nReturns wrapped type of an observable."],
         "signature": [
           "T extends ",
           {
@@ -803,12 +731,8 @@
         "type": "Type",
         "tags": [],
         "label": "Values",
-        "description": [
-          "\nReturns types or array or object values."
-        ],
-        "signature": [
-          "T extends any[] ? T[number] : T extends object ? T[keyof T] : never"
-        ],
+        "description": ["\nReturns types or array or object values."],
+        "signature": ["T extends any[] ? T[number] : T extends object ? T[keyof T] : never"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -820,12 +744,8 @@
         "type": "Type",
         "tags": [],
         "label": "WithRequiredProperty",
-        "description": [
-          "\nTakes a type and makes selected properties required.\n"
-        ],
-        "signature": [
-          "Omit<Type, Key> & { [Property in Key]-?: Type[Property]; }"
-        ],
+        "description": ["\nTakes a type and makes selected properties required.\n"],
+        "signature": ["Omit<Type, Key> & { [Property in Key]-?: Type[Property]; }"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -837,12 +757,8 @@
         "type": "Type",
         "tags": [],
         "label": "Writable",
-        "description": [
-          "\n Makes an object with readonly properties mutable."
-        ],
-        "signature": [
-          "{ -readonly [K in keyof T]: T[K]; }"
-        ],
+        "description": ["\n Makes an object with readonly properties mutable."],
+        "signature": ["{ -readonly [K in keyof T]: T[K]; }"],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,

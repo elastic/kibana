@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type {
+  SavedObjectAttribute,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  SavedObjectAttribute,
 } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 import type { LegacyRuleNotificationAlertType } from './types';
 

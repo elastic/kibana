@@ -7,10 +7,10 @@
 
 import { Logger } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
-import { createTimeSeriesQueryRoute } from './time_series_query';
+import { getService } from '..';
 import { createFieldsRoute } from './fields';
 import { createIndicesRoute } from './indices';
-import { getService } from '..';
+import { createTimeSeriesQueryRoute } from './time_series_query';
 
 interface RegisterRoutesParams {
   logger: Logger;

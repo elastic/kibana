@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo } from 'react';
-import { css } from '@emotion/css';
 import { EuiCommentList } from '@elastic/eui';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { omit } from 'lodash';
+import { css } from '@emotion/css';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatActionClickPayload,
@@ -18,10 +15,13 @@ import {
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { omit } from 'lodash';
+import React, { type ReactNode, useMemo } from 'react';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { ChatItem } from './chat_item';
-import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../../utils/get_timeline_items_from_conversation';
+import { ChatConsolidatedItems } from './chat_consolidated_items';
+import { ChatItem } from './chat_item';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {

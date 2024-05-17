@@ -19,7 +19,7 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     rule_id: 'rule-1',
     immutable: false,
     ...rewrites,
-  } as RuleToImport);
+  }) as RuleToImport;
 
 export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
   id: '6afb8ce1-ea94-4790-8653-fd0b021d2113',
@@ -88,7 +88,7 @@ export const getImportThreatMatchRulesSchemaMock = (
     ],
     immutable: false,
     ...rewrites,
-  } as RuleToImport);
+  }) as RuleToImport;
 
 export const webHookConnector = {
   id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',

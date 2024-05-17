@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBadge } from '@elastic/eui';
+import React from 'react';
 import {
+  ServiceHealthStatus,
   getServiceHealthStatusBadgeColor,
   getServiceHealthStatusLabel,
-  ServiceHealthStatus,
 } from '../../../../../common/service_health_status';
 import { useTheme } from '../../../../hooks/use_theme';
 

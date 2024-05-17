@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
+import { TestProviders } from '../../../common/mock';
 import { AssetCriticalitySelector } from './asset_criticality_selector';
 import type { State } from './use_asset_criticality';
 

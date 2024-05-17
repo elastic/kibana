@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -17,8 +17,8 @@ import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import {
-  LicensingCallout,
   LICENSING_FEATURE,
+  LicensingCallout,
 } from '../../../../shared/licensing_callout/licensing_callout';
 import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
 import { CannotConnect } from '../../search_index/components/cannot_connect';

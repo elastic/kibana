@@ -119,9 +119,7 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "signature": [
-              "GenerateOpenApiDocumentOptions"
-            ],
+            "signature": ["GenerateOpenApiDocumentOptions"],
             "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false,

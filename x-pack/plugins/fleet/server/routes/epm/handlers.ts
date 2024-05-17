@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import semverValid from 'semver/functions/valid';
 import type { HttpResponseOptions } from '@kbn/core/server';
+import semverValid from 'semver/functions/valid';
 
 import { pick } from 'lodash';
 
@@ -16,70 +16,70 @@ import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/t
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
 import type {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-  GetLimitedPackagesResponse,
+  AssetSOObject,
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  IBulkInstallPackageHTTPError,
-  GetStatsResponse,
-  UpdatePackageResponse,
-  GetVerificationKeyIdResponse,
+  DeletePackageResponse,
   GetBulkAssetsResponse,
-  GetInstalledPackagesResponse,
+  GetCategoriesResponse,
   GetEpmDataStreamsResponse,
-  AssetSOObject,
+  GetInfoResponse,
+  GetInstalledPackagesResponse,
+  GetLimitedPackagesResponse,
+  GetPackagesResponse,
+  GetStatsResponse,
+  GetVerificationKeyIdResponse,
+  IBulkInstallPackageHTTPError,
+  InstallPackageResponse,
+  UpdatePackageResponse,
 } from '../../../common/types';
-import type {
-  GetCategoriesRequestSchema,
-  GetPackagesRequestSchema,
-  GetInstalledPackagesRequestSchema,
-  GetDataStreamsRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageFromRegistryRequestSchema,
-  InstallPackageByUploadRequestSchema,
-  DeletePackageRequestSchema,
-  BulkInstallPackagesFromRegistryRequestSchema,
-  GetStatsRequestSchema,
-  FleetRequestHandler,
-  UpdatePackageRequestSchema,
-  GetLimitedPackagesRequestSchema,
-  GetBulkAssetsRequestSchema,
-  CreateCustomIntegrationRequestSchema,
-  GetInputsRequestSchema,
-} from '../../types';
+import { FleetError, defaultFleetErrorHandler, fleetErrorToResponseOptions } from '../../errors';
+import { appContextService, checkAllowedPackages } from '../../services';
+import { getDataStreams } from '../../services/epm/data_streams';
 import {
   bulkInstallPackages,
-  getCategories,
-  getPackages,
-  getInstalledPackages,
-  getPackageInfo,
-  isBulkInstallError,
-  installPackage,
-  removeInstallation,
-  getLimitedPackages,
   getBulkAssets,
+  getCategories,
+  getInstalledPackages,
+  getLimitedPackages,
+  getPackageInfo,
+  getPackages,
   getTemplateInputs,
+  installPackage,
+  isBulkInstallError,
+  removeInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { appContextService, checkAllowedPackages } from '../../services';
-import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { updatePackage } from '../../services/epm/packages/update';
-import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import type {
-  ReauthorizeTransformRequestSchema,
-  PackageListItem,
-  PackageList,
-  PackageInfo,
-  InstallationInfo,
-} from '../../types';
-import { getDataStreams } from '../../services/epm/data_streams';
-import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
+import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
+import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
+import { updatePackage } from '../../services/epm/packages/update';
+import type {
+  BulkInstallPackagesFromRegistryRequestSchema,
+  CreateCustomIntegrationRequestSchema,
+  DeletePackageRequestSchema,
+  FleetRequestHandler,
+  GetBulkAssetsRequestSchema,
+  GetCategoriesRequestSchema,
+  GetDataStreamsRequestSchema,
+  GetInfoRequestSchema,
+  GetInputsRequestSchema,
+  GetInstalledPackagesRequestSchema,
+  GetLimitedPackagesRequestSchema,
+  GetPackagesRequestSchema,
+  GetStatsRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  UpdatePackageRequestSchema,
+} from '../../types';
+import type {
+  InstallationInfo,
+  PackageInfo,
+  PackageList,
+  PackageListItem,
+  ReauthorizeTransformRequestSchema,
+} from '../../types';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -277,20 +277,19 @@ export const updatePackageHandler: FleetRequestHandler<
   }
 };
 
-export const getStatsHandler: FleetRequestHandler<
-  TypeOf<typeof GetStatsRequestSchema.params>
-> = async (context, request, response) => {
-  try {
-    const { pkgName } = request.params;
-    const savedObjectsClient = (await context.fleet).internalSoClient;
-    const body: GetStatsResponse = {
-      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
-    };
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
+export const getStatsHandler: FleetRequestHandler<TypeOf<typeof GetStatsRequestSchema.params>> =
+  async (context, request, response) => {
+    try {
+      const { pkgName } = request.params;
+      const savedObjectsClient = (await context.fleet).internalSoClient;
+      const body: GetStatsResponse = {
+        response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
+      };
+      return response.ok({ body });
+    } catch (error) {
+      return defaultFleetErrorHandler({ error, response });
+    }
+  };
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,

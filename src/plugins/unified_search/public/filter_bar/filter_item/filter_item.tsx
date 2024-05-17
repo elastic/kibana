@@ -16,14 +16,18 @@ import {
   euiShadowMedium,
   useEuiTheme,
 } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
+import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   Filter,
   isFilterPinned,
+  toggleFilterDisabled,
   toggleFilterNegated,
   toggleFilterPinned,
-  toggleFilterDisabled,
 } from '@kbn/es-query';
+import { InjectedIntl } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, {
   MouseEvent,
@@ -33,18 +37,14 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { css } from '@emotion/react';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterEditor } from '../filter_editor/filter_editor';
-import { FilterView } from '../filter_view';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 import { FilterPanelOption } from '../../types';
 import {
-  withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
+  withCloseFilterEditorConfirmModal,
 } from '../filter_editor';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import { FilterEditor } from '../filter_editor/filter_editor';
+import { FilterView } from '../filter_view';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;

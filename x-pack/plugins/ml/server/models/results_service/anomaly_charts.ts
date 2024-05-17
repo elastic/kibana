@@ -5,57 +5,57 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { extent, max, min } from 'd3';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { isDefined } from '@kbn/ml-is-defined';
 import {
-  aggregationTypeTransform,
-  getEntityFieldList,
-  isMultiBucketAnomaly,
+  DOC_COUNT,
+  ES_AGGREGATION,
   type InfluencersFilterQuery,
+  ML_JOB_AGGREGATION,
   type MlAnomalyRecordDoc,
   type MlEntityField,
   type MlRecordForInfluencer,
   _DOC_COUNT,
-  DOC_COUNT,
-  ES_AGGREGATION,
-  ML_JOB_AGGREGATION,
+  aggregationTypeTransform,
+  getEntityFieldList,
+  isMultiBucketAnomaly,
 } from '@kbn/ml-anomaly-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { MlClient } from '../../lib/ml_client';
+import { extent, max, min } from 'd3';
+import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type {
+  ChartPoint,
+  ChartRecord,
+  ExplorerChartsData,
   MetricData,
   ModelPlotOutput,
   RecordsForCriteria,
   ScheduledEventsByBucket,
-  SeriesConfigWithMetadata,
-  ChartRecord,
-  ChartPoint,
   SeriesConfig,
-  ExplorerChartsData,
+  SeriesConfigWithMetadata,
 } from '../../../common/types/results';
 import {
+  ML_MEDIAN_PERCENTS,
   isMappableJob,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
   isSourceDataChartableForDetector,
-  ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
-import type { CombinedJob, Datafeed } from '../../shared';
 import { parseInterval } from '../../../common/util/parse_interval';
+import type { MlClient } from '../../lib/ml_client';
+import type { CombinedJob, Datafeed } from '../../shared';
+import type { CriteriaField } from './results_service';
 
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { findAggField } from '../../../common/util/validation_utils';
+import type { MlJob } from '../..';
 import type { ChartType } from '../../../common/constants/charts';
 import { CHART_TYPE } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import type { MlJob } from '../..';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { findAggField } from '../../../common/util/validation_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
@@ -1191,10 +1191,13 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     data.seriesToPlot = seriesToPlot;
 
     data.errorMessages = errorMessages
-      ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
-          acc[errorMessage] = Array.from(jobs);
-          return acc;
-        }, {} as Record<string, string[]>)
+      ? Object.entries(errorMessages!).reduce(
+          (acc, [errorMessage, jobs]) => {
+            acc[errorMessage] = Array.from(jobs);
+            return acc;
+          },
+          {} as Record<string, string[]>
+        )
       : undefined;
 
     return data;

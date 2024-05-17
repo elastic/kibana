@@ -1,14 +1,14 @@
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parseAlertsTypeData, parseAlertsRuleData } from './helpers';
-import * as mockType from './mock_type_data';
+import { parseAlertsRuleData, parseAlertsTypeData } from './helpers';
 import * as mockRule from './mock_rule_data';
-import type { AlertsByTypeAgg, AlertsByRuleAgg } from './types';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import * as mockType from './mock_type_data';
+import type { AlertsByRuleAgg, AlertsByTypeAgg } from './types';
 
 describe('parse alerts by type data', () => {
   test('parse alerts with data', () => {

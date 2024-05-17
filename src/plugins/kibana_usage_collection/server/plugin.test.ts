@@ -15,9 +15,9 @@ import {
   CollectorOptions,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
 import { plugin } from '.';
 import type { KibanaUsageCollectionPlugin } from './plugin';
+import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
 
 describe('kibana_usage_collection', () => {
   let pluginInstance: KibanaUsageCollectionPlugin;

@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compressToEncodedURIComponent } from 'lz-string';
+import React from 'react';
 
 import {
-  EuiFlyout,
-  EuiFlyoutProps,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiButtonEmpty,
-  EuiText,
-  EuiSpacer,
   EuiCodeBlock,
   EuiCopy,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlyoutProps,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { APP_WRAPPER_CLASS, ApplicationStart } from '@kbn/core/public';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
-import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;

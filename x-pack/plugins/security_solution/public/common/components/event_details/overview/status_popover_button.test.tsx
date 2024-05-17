@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { StatusPopoverButton } from './status_popover_button';
-import { TestProviders } from '../../../mock';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { TestProviders } from '../../../mock';
+import { StatusPopoverButton } from './status_popover_button';
 const props = {
   eventId: 'testid',
   contextId: 'alerts-page',

@@ -23,12 +23,12 @@ jest.mock(
 );
 
 import Path from 'path';
-import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import fs from 'fs/promises';
 import '../jest_matchers';
+import { getBaseMigratorParams, getFooType } from '../fixtures/zdt_base.fixtures';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'root_field_addition.test.log');
 

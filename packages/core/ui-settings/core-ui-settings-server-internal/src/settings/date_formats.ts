@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
+import { TIMEZONE_OPTIONS, UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsParams, TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import moment from 'moment-timezone';
 
 export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
   const weekdays = moment.weekdays().slice();

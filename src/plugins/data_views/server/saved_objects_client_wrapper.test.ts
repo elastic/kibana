@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
 
 import { DataViewSavedObjectConflictError } from '../common';
 

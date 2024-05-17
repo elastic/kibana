@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiCode } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const contentLabel = i18n.translate('xpack.logsExplorer.dataTable.header.popover.content', {
   defaultMessage: 'Content',

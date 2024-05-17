@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { PROCESSOR_EVENT, SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { INDEX, PROCESSOR_EVENT, SERVICE_NAME, TIER } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
-  getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
-  getIndicesLifecycleStatus,
   getIndicesInfo,
+  getIndicesLifecycleStatus,
+  getTotalIndicesStats,
 } from './indices_stats_helpers';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getStorageDetailsPerProcessorEvent({
   apmEventClient,

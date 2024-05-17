@@ -6,14 +6,7 @@
     "id": "alertsRestrictedFixtures",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "taskManager",
-      "features",
-      "actions",
-      "alerting"
-    ],
-    "optionalPlugins": [
-      "spaces"
-    ]
+    "requiredPlugins": ["taskManager", "features", "actions", "alerting"],
+    "optionalPlugins": ["spaces"]
   }
 }

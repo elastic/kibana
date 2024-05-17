@@ -7,9 +7,9 @@
  */
 
 import { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export const [getDataActions, setDataActions] =

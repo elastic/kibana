@@ -6,8 +6,6 @@
     "id": "ftrApis",
     "server": true,
     "browser": false,
-    "configPath": [
-      "ftr_apis"
-    ]
+    "configPath": ["ftr_apis"]
   }
 }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
+import React from 'react';
 
-import { AlertsHistogram } from './alerts_histogram';
 import { TestProviders } from '../../../../common/mock';
+import { AlertsHistogram } from './alerts_histogram';
 
 jest.mock('../../../../common/lib/kibana');
 

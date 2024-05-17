@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { IEvent, IEventLogService, IEventLogger } from '.';
 import { nanosToMillis } from '../common';
-import { IEvent, IEventLogger, IEventLogService } from '.';
-import { ECS_VERSION } from './types';
-import { EventLogService } from './event_log_service';
 import { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { delay } from './lib/delay';
+import { EventLogService } from './event_log_service';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
+import { delay } from './lib/delay';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
+import { ECS_VERSION } from './types';
 
 const KIBANA_SERVER_UUID = '424-24-2424';
 const WRITE_LOG_WAIT_MILLIS = 3000;

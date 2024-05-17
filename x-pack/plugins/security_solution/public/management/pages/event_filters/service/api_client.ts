@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 import type { EndpointSuggestionsBody } from '../../../../../common/api/endpoint';
 import { SUGGESTIONS_ROUTE } from '../../../../../common/endpoint/constants';

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  CoreRequestHandlerContext,
-} from '@kbn/core/server';
-import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  CoreRequestHandlerContext,
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import chalk from 'chalk';
 import { SYNTHETICS_API_URLS } from '../common/constants';
-import { SyntheticsServerSetup } from './types';
 import { savedObjectsAdapter } from './saved_objects/saved_objects';
+import { SyntheticsServerSetup } from './types';
 
 export interface CountResponse {
   result: {

@@ -7,22 +7,22 @@
  */
 
 import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { ArgumentType } from './arguments';
-import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
+import { ExpressionAstFunction } from '../ast';
 import { ExecutionContext } from '../execution/types';
+import { TypeString, TypeToString, UnmappedTypeStrings } from '../types/common';
+import { ArgumentType } from './arguments';
 import {
   ExpressionFunctionClog,
-  ExpressionFunctionFont,
-  ExpressionFunctionVarSet,
-  ExpressionFunctionVar,
-  ExpressionFunctionTheme,
   ExpressionFunctionCumulativeSum,
   ExpressionFunctionDerivative,
+  ExpressionFunctionFont,
+  ExpressionFunctionMathColumn,
   ExpressionFunctionMovingAverage,
   ExpressionFunctionOverallMetric,
-  ExpressionFunctionMathColumn,
+  ExpressionFunctionTheme,
+  ExpressionFunctionVar,
+  ExpressionFunctionVarSet,
 } from './specs';
-import { ExpressionAstFunction } from '../ast';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -33,7 +33,7 @@ export interface ExpressionFunctionDefinition<
   Input,
   Arguments extends Record<keyof unknown, unknown>,
   Output,
-  Context extends ExecutionContext = ExecutionContext
+  Context extends ExecutionContext = ExecutionContext,
 > extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.

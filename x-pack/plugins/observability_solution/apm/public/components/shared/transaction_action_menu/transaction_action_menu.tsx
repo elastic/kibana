@@ -7,35 +7,35 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import {
   ActionMenu,
   ActionMenuDivider,
-  getContextMenuItemsFromActions,
   Section,
   SectionLink,
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
+  getContextMenuItemsFromActions,
 } from '@kbn/observability-shared-plugin/public';
+import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { CustomLinkFlyout } from './custom_link_flyout';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
-import { CustomLinkFlyout } from './custom_link_flyout';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 interface Props {
   readonly transaction?: Transaction;

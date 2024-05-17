@@ -8,11 +8,11 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { StaticValueParams } from '@kbn/visualizations-plugin/common';
-import { createSeries } from '../__mocks__';
-import { Metric } from '../../../../common/types';
-import { StaticValueColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
+import { createSeries } from '../__mocks__';
 import { convertToStaticValueColumn, convertToStaticValueParams } from './static_value';
+import { StaticValueColumn } from './types';
 
 describe('convertToStaticValueParams', () => {
   test.each<[string, Parameters<typeof convertToStaticValueParams>, StaticValueParams]>([

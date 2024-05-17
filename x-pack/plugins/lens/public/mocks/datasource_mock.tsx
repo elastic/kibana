@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { DatasourcePublicAPI, Datasource } from '../types';
+import { Datasource, DatasourcePublicAPI } from '../types';
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;

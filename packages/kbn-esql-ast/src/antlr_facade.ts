@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CommonTokenStream, type CharStream, type ErrorListener } from 'antlr4';
+import { type CharStream, CommonTokenStream, type ErrorListener } from 'antlr4';
 
 import { default as ESQLLexer } from './antlr/esql_lexer';
 import { default as ESQLParser } from './antlr/esql_parser';

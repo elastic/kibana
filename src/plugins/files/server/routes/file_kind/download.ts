@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Readable } from 'stream';
+import { schema } from '@kbn/config-schema';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
-import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
+import { fileNameWithExt } from '../common_schemas';
 import { getById } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 
 export const method = 'get' as const;
 

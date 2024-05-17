@@ -8,9 +8,9 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { of } from 'rxjs';
 import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
+import { useKibana } from '../../lib/kibana';
 import { TourContextProvider, useTourContext } from './tour';
 import { SecurityStepId, securityTourConfig } from './tour_config';
-import { useKibana } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_experimental_features', () => ({

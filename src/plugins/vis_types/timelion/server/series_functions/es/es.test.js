@@ -8,16 +8,16 @@
 
 import { of } from 'rxjs';
 import es from '.';
+import esResponse from '../fixtures/es_response';
 import tlConfigFn from '../fixtures/tl_config';
 import * as aggResponse from './lib/agg_response_to_series_list';
 import buildRequest from './lib/build_request';
 import createDateAgg from './lib/create_date_agg';
-import esResponse from '../fixtures/es_response';
 
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import _ from 'lodash';
 import sinon from 'sinon';
 import invoke from '../test_helpers/invoke_series_fn';
-import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 describe('es', () => {
   let tlConfig;

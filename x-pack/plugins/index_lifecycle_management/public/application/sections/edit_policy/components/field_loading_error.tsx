@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { EuiCallOut, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
 
 interface Props {
   title: React.ReactNode;

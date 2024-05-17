@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { calculatePopoverPosition, EuiPortal, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { EuiPortal, WithEuiThemeProps, calculatePopoverPosition, withEuiTheme } from '@elastic/eui';
 // @ts-expect-error style types not defined
 import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
 import { css } from '@emotion/react';

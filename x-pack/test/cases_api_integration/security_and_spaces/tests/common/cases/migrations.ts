@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
 } from '@kbn/cases-plugin/server/common/types/case';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
+  findCases,
   getCase,
   getCaseSavedObjectsFromES,
   resolveCase,
-  findCases,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 

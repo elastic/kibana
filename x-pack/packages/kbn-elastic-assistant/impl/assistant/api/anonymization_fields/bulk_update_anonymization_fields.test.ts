@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { IToasts } from '@kbn/core-notifications-browser';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { IToasts } from '@kbn/core-notifications-browser';
 import { bulkUpdateAnonymizationFields } from './bulk_update_anonymization_fields';
 
 const anonymizationField1 = {

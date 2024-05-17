@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useEffect } from 'react';
 
 export const useReadOnlyBadge = (isReadOnly = false) => {
   const chrome = useKibana().services.chrome;

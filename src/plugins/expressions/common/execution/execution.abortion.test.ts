@@ -8,10 +8,10 @@
 
 import { waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
-import { Execution } from './execution';
 import { parseExpression } from '../ast';
-import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../expression_functions';
+import { createUnitTestExecutor } from '../test_helpers';
+import { Execution } from './execution';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

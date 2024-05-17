@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import _ from 'lodash';
-import { createQuery } from '../create_query';
-import { ElasticsearchMetric } from '../metrics';
+import moment from 'moment';
 import {
-  ElasticsearchResponse,
   ElasticsearchIndexRecoveryShard,
   ElasticsearchMetricbeatIndexRecoveryShard,
+  ElasticsearchResponse,
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
+import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { ElasticsearchMetric } from '../metrics';
 
 /**
  * Filter out shard activity that we do not care about.

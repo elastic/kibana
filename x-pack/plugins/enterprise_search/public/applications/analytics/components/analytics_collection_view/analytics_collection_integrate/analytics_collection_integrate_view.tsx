@@ -11,15 +11,15 @@ import { useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiSteps,
   EuiTab,
   EuiTabs,
-  EuiLink,
   EuiText,
-  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';

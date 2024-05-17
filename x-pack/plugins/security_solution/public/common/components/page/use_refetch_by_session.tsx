@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
-import { useCallback, useRef, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { MutableRefObject } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';

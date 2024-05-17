@@ -16,6 +16,8 @@ import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import type {
   HostInfo,
   HostMetadata,
@@ -25,34 +27,32 @@ import type {
   UnitedAgentMetadataPersistedData,
 } from '../../../../common/endpoint/types';
 import {
-  EndpointHostNotFoundError,
-  EndpointHostUnEnrolledError,
-  FleetAgentNotFoundError,
-  FleetAgentPolicyNotFoundError,
-  FleetEndpointPackagePolicyNotFoundError,
-} from './errors';
-import {
   buildUnitedIndexQuery,
   getESQueryHostMetadataByFleetAgentIds,
   getESQueryHostMetadataByID,
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
+import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import {
   mapToHostMetadata,
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from '../../routes/metadata/support/query_strategies';
 import {
-  catchAndWrapError,
   DEFAULT_ENDPOINT_HOST_STATUS,
+  catchAndWrapError,
   fleetAgentStatusToEndpointHostStatus,
   wrapErrorIfNeeded,
 } from '../../utils';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
-import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
-import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import {
+  EndpointHostNotFoundError,
+  EndpointHostUnEnrolledError,
+  FleetAgentNotFoundError,
+  FleetAgentPolicyNotFoundError,
+  FleetEndpointPackagePolicyNotFoundError,
+} from './errors';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -383,9 +383,8 @@ export class EndpointMetadataService {
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
     try {
-      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadataPersistedData>(
-        unitedIndexQuery
-      );
+      unitedMetadataQueryResponse =
+        await esClient.search<UnitedAgentMetadataPersistedData>(unitedIndexQuery);
     } catch (error) {
       const errorType = error?.meta?.body?.error?.type ?? '';
       if (errorType === 'index_not_found_exception') {

@@ -7,11 +7,11 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { NewTimelineButton } from './new_timeline_button';
 import { TimelineId } from '../../../../../common/types';
+import { TestProviders } from '../../../../common/mock';
 import { timelineActions } from '../../../store';
 import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
-import { TestProviders } from '../../../../common/mock';
+import { NewTimelineButton } from './new_timeline_button';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../../common/hooks/use_selector');

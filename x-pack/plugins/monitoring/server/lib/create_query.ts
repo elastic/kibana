@@ -7,9 +7,9 @@
 
 import { defaults } from 'lodash';
 import moment from 'moment';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 import { MissingRequiredError } from './error_missing_required';
 import { standaloneClusterFilter } from './standalone_clusters';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 export interface TimerangeFilter {
   range: {

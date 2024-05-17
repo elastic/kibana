@@ -6,20 +6,9 @@
     "id": "logstash",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "logstash"
-    ],
-    "requiredPlugins": [
-      "licensing",
-      "management",
-      "features"
-    ],
-    "optionalPlugins": [
-      "home",
-      "monitoring",
-      "security"
-    ],
+    "configPath": ["xpack", "logstash"],
+    "requiredPlugins": ["licensing", "management", "features"],
+    "optionalPlugins": ["home", "monitoring", "security"],
     "requiredBundles": []
   }
 }

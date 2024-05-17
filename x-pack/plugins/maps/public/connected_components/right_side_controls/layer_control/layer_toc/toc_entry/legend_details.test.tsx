@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { LegendDetails } from './legend_details';
+import React from 'react';
 import type { ILayer } from '../../../../../classes/layers/layer';
+import { LegendDetails } from './legend_details';
 
 describe('LegendDetails', () => {
   const mockLayer = {

@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 
-import { stringifyRequest } from 'loader-utils';
-import webpack from 'webpack';
-// @ts-expect-error
-import TerserPlugin from 'terser-webpack-plugin';
-import webpackMerge from 'webpack-merge';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import { stringifyRequest } from 'loader-utils';
+// @ts-expect-error
+import TerserPlugin from 'terser-webpack-plugin';
+import webpack from 'webpack';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import webpackMerge from 'webpack-merge';
 // @ts-expect-error
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
-import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
+import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 

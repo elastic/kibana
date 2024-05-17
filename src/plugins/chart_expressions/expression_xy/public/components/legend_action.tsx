@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import type { LayerCellValueActions, FilterEvent } from '../types';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import React from 'react';
 import type { CommonXYDataLayerConfig } from '../../common';
-import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
 import {
   DatatablesWithFormatInfo,
-  getSeriesName,
-  hasMultipleLayersWithSplits,
   LayersAccessorsTitles,
   LayersFieldFormats,
+  getSeriesName,
+  hasMultipleLayersWithSplits,
 } from '../helpers';
+import type { FilterEvent, LayerCellValueActions } from '../types';
+import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ManagementAppLocatorDefinition, ManagementAppLocatorParams } from '../common/locator';

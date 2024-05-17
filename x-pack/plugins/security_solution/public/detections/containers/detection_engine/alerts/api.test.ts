@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
-  alertsMock,
-  mockAlertsQuery,
-  mockStatusAlertQuery,
-  mockSignalIndex,
-  mockUserPrivilege,
-  mockHostIsolation,
-} from './mock';
-import {
+  createHostIsolation,
+  createSignalIndex,
   fetchQueryAlerts,
   getSignalIndex,
   getUserPrivilege,
-  createSignalIndex,
-  createHostIsolation,
-  updateAlertStatusByQuery,
   updateAlertStatusByIds,
+  updateAlertStatusByQuery,
 } from './api';
-import { coreMock } from '@kbn/core/public/mocks';
+import {
+  alertsMock,
+  mockAlertsQuery,
+  mockHostIsolation,
+  mockSignalIndex,
+  mockStatusAlertQuery,
+  mockUserPrivilege,
+} from './mock';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

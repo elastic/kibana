@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  FormHook,
-  FieldHook,
-  FieldConfig,
-  FieldValidateResponse,
-  ValidationError,
-  FormData,
-  ValidationConfig,
-  FieldValidationData,
-  ValidationCancelablePromise,
-} from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
+import {
+  FieldConfig,
+  FieldHook,
+  FieldValidateResponse,
+  FieldValidationData,
+  FormData,
+  FormHook,
+  ValidationCancelablePromise,
+  ValidationConfig,
+  ValidationError,
+} from '../types';
 
 export interface InternalFieldConfig<T> {
   initialValue: T;

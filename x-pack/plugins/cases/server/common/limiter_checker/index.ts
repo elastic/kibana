@@ -10,10 +10,10 @@ import Boom from '@hapi/boom';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import type { AttachmentRequest } from '../../../common/types/api';
 import type { AttachmentService } from '../../services';
-import type { Limiter } from './types';
 import { AlertLimiter } from './limiters/alerts';
 import { FileLimiter } from './limiters/files';
 import { PersistableStateAndExternalReferencesLimiter } from './limiters/persistable_state_and_external_references';
+import type { Limiter } from './types';
 
 export class AttachmentLimitChecker {
   private readonly limiters: Limiter[];

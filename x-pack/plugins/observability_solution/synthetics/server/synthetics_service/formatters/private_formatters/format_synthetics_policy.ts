@@ -7,13 +7,13 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
-import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
-import { throttlingFormatter } from './browser_formatters';
-import { replaceStringWithParams } from '../formatting_utils';
-import { syntheticsPolicyFormatters } from './formatters';
+import { ConfigKey, MonitorFields, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
+import { replaceStringWithParams } from '../formatting_utils';
+import { throttlingFormatter } from './browser_formatters';
+import { syntheticsPolicyFormatters } from './formatters';
+import { processorsFormatter } from './processors_formatter';
 
 export interface ProcessorFields {
   location_name: string;

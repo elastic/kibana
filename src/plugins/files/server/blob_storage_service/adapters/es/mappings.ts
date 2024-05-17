@@ -7,8 +7,8 @@
  */
 
 import type {
-  MappingTypeMapping,
   MappingProperty,
+  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**

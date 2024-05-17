@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
 import { ICustomClusterClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { ILicense, LicenseFeature } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { Logger } from '@kbn/core/server';
+import { Subscription } from 'rxjs';
 import { MonitoringConfig } from './config';
 import { MonitoringLicenseService } from './types';
 

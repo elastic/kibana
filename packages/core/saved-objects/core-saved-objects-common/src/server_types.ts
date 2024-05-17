@@ -14,7 +14,7 @@
  * See https://github.com/elastic/kibana/issues/149098.
  */
 
-import type { SavedObjectsMigrationVersion, SavedObjectError } from './saved_objects';
+import type { SavedObjectError, SavedObjectsMigrationVersion } from './saved_objects';
 
 /**
  * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}

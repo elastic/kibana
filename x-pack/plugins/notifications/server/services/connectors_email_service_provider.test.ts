@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { LicensedEmailService } from './licensed_email_service';
-import { EmailServiceProvider } from './connectors_email_service_provider';
-import { ConnectorsEmailService } from './connectors_email_service';
+import { loggerMock } from '@kbn/logging-mocks';
 import { PLUGIN_ID } from '../../common';
+import { ConnectorsEmailService } from './connectors_email_service';
+import { EmailServiceProvider } from './connectors_email_service_provider';
+import { LicensedEmailService } from './licensed_email_service';
 
 jest.mock('./licensed_email_service');
 jest.mock('./connectors_email_service');

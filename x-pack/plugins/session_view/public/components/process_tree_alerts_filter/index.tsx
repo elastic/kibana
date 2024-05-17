@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
 import {
+  EuiButtonEmpty,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiPopover,
   EuiText,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback, useMemo } from 'react';
+import type { AlertTypeCount, ProcessEventAlertCategory } from '../../../common';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
-import type { ProcessEventAlertCategory, AlertTypeCount } from '../../../common';
 import { useStyles } from './styles';
 import { FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
 

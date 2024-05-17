@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useRef } from 'react';
 
 import {
-  IAggConfig,
   AggParam,
-  OptionedValueProp,
+  IAggConfig,
   OptionedParamType,
+  OptionedValueProp,
 } from '@kbn/data-plugin/public';
 import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 

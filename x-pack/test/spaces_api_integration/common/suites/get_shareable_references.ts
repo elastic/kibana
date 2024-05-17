@@ -5,15 +5,13 @@
  * 2.0.
  */
 
+import {
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from '@kbn/core/server';
 import expect from '@kbn/expect';
 import { deepFreeze } from '@kbn/std';
 import { SuperTest } from 'supertest';
-import {
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectReferenceWithContext,
-} from '@kbn/core/server';
-import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { SPACES } from '../lib/spaces';
 import {
   expectResponses,
   getUrlPrefix,
@@ -23,6 +21,8 @@ import {
   TestDefinition,
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
+import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES } from '../lib/spaces';
 
 export interface GetShareableReferencesTestDefinition extends TestDefinition {
   request: {

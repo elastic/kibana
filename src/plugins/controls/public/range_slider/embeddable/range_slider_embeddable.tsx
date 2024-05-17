@@ -11,17 +11,17 @@ import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { lastValueFrom, Subscription, switchMap } from 'rxjs';
+import { Subscription, lastValueFrom, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import {
-  buildRangeFilter,
-  compareFilters,
   COMPARE_ALL_OPTIONS,
   Filter,
   RangeFilterParams,
+  buildRangeFilter,
+  compareFilters,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -31,8 +31,8 @@ import {
   ControlGroupContainer,
   ControlInput,
   ControlOutput,
-  RangeSliderEmbeddableInput,
   RANGE_SLIDER_CONTROL,
+  RangeSliderEmbeddableInput,
 } from '../..';
 import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';

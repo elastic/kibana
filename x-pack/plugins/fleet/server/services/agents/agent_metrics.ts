@@ -7,9 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { DATA_TIERS } from '../../../common/constants';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
-import { DATA_TIERS } from '../../../common/constants';
 
 const AGGREGATION_MAX_SIZE = 1000;
 
@@ -43,13 +43,16 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
   });
 
   const formattedResults =
-    res.aggregations?.agents.buckets.reduce((acc, bucket) => {
-      acc[bucket.key] = {
-        sum_memory_size: bucket.sum_memory_size.value,
-        sum_cpu: bucket.sum_cpu.value,
-      };
-      return acc;
-    }, {} as Record<string, { sum_memory_size: number; sum_cpu: number }>) ?? {};
+    res.aggregations?.agents.buckets.reduce(
+      (acc, bucket) => {
+        acc[bucket.key] = {
+          sum_memory_size: bucket.sum_memory_size.value,
+          sum_cpu: bucket.sum_cpu.value,
+        };
+        return acc;
+      },
+      {} as Record<string, { sum_memory_size: number; sum_cpu: number }>
+    ) ?? {};
 
   return agents.map((agent) => {
     const results = formattedResults[agent.id];

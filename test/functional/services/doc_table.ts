@@ -75,9 +75,10 @@ export class DocTableService extends FtrService {
     );
   }
 
-  public async getRowActions({ isAnchorRow = false, rowIndex = 0 }: SelectOptions = {}): Promise<
-    WebElementWrapper[]
-  > {
+  public async getRowActions({
+    isAnchorRow = false,
+    rowIndex = 0,
+  }: SelectOptions = {}): Promise<WebElementWrapper[]> {
     const detailsRow = isAnchorRow
       ? await this.getAnchorDetailsRow()
       : (await this.getDetailsRows())[rowIndex];

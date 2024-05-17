@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { act, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import React from 'react';
+import { APP_UI_ID } from '../../../../common/constants';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { ContextMenuWithRouterSupportProps } from './context_menu_with_router_support';
 import { ContextMenuWithRouterSupport } from './context_menu_with_router_support';
-import { act, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import { APP_UI_ID } from '../../../../common/constants';
 
 describe('When using the ContextMenuWithRouterSupport component', () => {
   let appTestContext: AppContextTestRender;

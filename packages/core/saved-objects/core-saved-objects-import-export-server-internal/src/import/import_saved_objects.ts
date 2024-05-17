@@ -7,24 +7,24 @@
  */
 
 import { Readable } from 'stream';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
 import {
-  checkReferenceOrigins,
-  validateReferences,
-  checkOriginConflicts,
-  createSavedObjects,
   checkConflicts,
-  regenerateIds,
+  checkOriginConflicts,
+  checkReferenceOrigins,
   collectSavedObjects,
+  createSavedObjects,
   executeImportHooks,
+  regenerateIds,
+  validateReferences,
 } from './lib';
 
 /**

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { NetworkRequestsTotal } from './network_requests_total';
 import { render } from '../../../../../utils/testing';
+import { NetworkRequestsTotal } from './network_requests_total';
 
 describe('NetworkRequestsTotal', () => {
   it('message in case total is greater than fetched', () => {

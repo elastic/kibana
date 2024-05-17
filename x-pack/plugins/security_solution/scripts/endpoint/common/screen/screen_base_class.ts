@@ -7,18 +7,18 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdin, stdout } from 'node:process';
 import * as readline from 'node:readline';
-import { blue, green, red, bold, cyan } from 'chalk';
+import type { WriteStream as TtyWriteStream } from 'tty';
+import { blue, bold, cyan, green, red } from 'chalk';
 import type { QuestionCollection } from 'inquirer';
 import inquirer from 'inquirer';
-import { QuitChoice } from './common_choices';
-import type { Choice } from './types';
-import { ChoiceMenuFormatter } from './choice_menu_formatter';
-import { DataFormatter } from './data_formatter';
 import { HORIZONTAL_LINE } from '../constants';
+import { ChoiceMenuFormatter } from './choice_menu_formatter';
+import { QuitChoice } from './common_choices';
 import { SCREEN_ROW_MAX_WIDTH } from './constants';
+import { DataFormatter } from './data_formatter';
+import type { Choice } from './types';
 
 const CONTENT_60_PERCENT = Math.floor(SCREEN_ROW_MAX_WIDTH * 0.6);
 const CONTENT_40_PERCENT = Math.floor(SCREEN_ROW_MAX_WIDTH * 0.4);

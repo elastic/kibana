@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER } from '../constants';
 import { strings } from '../i18n';
+import { ExtendedDataLayerFn } from '../types';
 import { commonDataLayerArgs } from './common_data_layer_args';
 
 export const extendedDataLayerFunction: ExtendedDataLayerFn = {

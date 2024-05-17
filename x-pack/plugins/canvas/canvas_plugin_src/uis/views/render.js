@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
-import { CSS } from '../../../i18n/constants';
 import { ViewStrings } from '../../../i18n';
+import { CSS } from '../../../i18n/constants';
 
 const { Render: strings } = ViewStrings;
 

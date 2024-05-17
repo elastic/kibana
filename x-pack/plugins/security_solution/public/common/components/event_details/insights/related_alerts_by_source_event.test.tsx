@@ -10,11 +10,11 @@ import React from 'react';
 
 import { TestProviders } from '../../../mock';
 
-import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
-import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
-import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
-import { SOURCE_EVENT_LOADING, SOURCE_EVENT_ERROR, SOURCE_EVENT_COUNT } from './translations';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
+import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
+import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
+import { SOURCE_EVENT_COUNT, SOURCE_EVENT_ERROR, SOURCE_EVENT_LOADING } from './translations';
 
 jest.mock('../table/use_action_cell_data_provider', () => ({
   useActionCellDataProvider: jest.fn(),

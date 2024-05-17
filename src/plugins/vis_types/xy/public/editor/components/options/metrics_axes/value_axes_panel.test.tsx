@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { ValueAxis, SeriesParam } from '../../../../types';
+import { SeriesParam, ValueAxis } from '../../../../types';
+import { seriesParam, valueAxis } from './mocks';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
-import { valueAxis, seriesParam } from './mocks';
 
 describe('ValueAxesPanel component', () => {
   let setParamByIndex: jest.Mock;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseDateString, validateHistoryWindowStart, transformBucketsToValues } from './utils';
+import { parseDateString, transformBucketsToValues, validateHistoryWindowStart } from './utils';
 
 describe('new terms utils', () => {
   describe('parseDateString', () => {

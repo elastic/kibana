@@ -7,8 +7,8 @@
  */
 
 import { get } from 'lodash';
-import { isValidUrl } from './url';
 import { missingImage } from './missing_asset';
+import { isValidUrl } from './url';
 
 /*
  * NOTE: args.dataurl can come as an expression here.

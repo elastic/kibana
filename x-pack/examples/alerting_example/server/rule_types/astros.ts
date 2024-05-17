@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import {
+  AlertsClientError,
   DEFAULT_AAD_CONFIG,
   RuleType,
   RuleTypeParams,
   RuleTypeState,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import { schema } from '@kbn/config-schema';
+import axios from 'axios';
+import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 
 interface PeopleInSpace {
   people: Array<{

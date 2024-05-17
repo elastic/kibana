@@ -6,8 +6,8 @@
  */
 
 import { Logger, SavedObject } from '@kbn/core/server';
-import { RawRule } from '../types';
 import { RuleTypeRegistry } from '../rule_type_registry';
+import { RawRule } from '../types';
 
 export function isRuleExportable(
   rule: SavedObject,

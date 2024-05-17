@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
-import { useAppContext } from '../../../../../app_context';
 import { Index } from '../../../../../../../common';
+import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
 
 export const StorageDetails: FunctionComponent<{

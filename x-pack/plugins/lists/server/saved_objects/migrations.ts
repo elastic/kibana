@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
   EntriesArray,
@@ -18,6 +17,7 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import * as t from 'io-ts';
 
 import { ExceptionListSoSchema } from '../schemas/saved_objects';
 

@@ -6,13 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { useCanvasShareableState, setPageAction, setScrubberVisibleAction } from '../context';
-import { Page } from './page';
-import { Footer, FOOTER_HEIGHT } from './footer';
 import { getTimeInterval } from '../../public/lib/time_interval';
+import { setPageAction, setScrubberVisibleAction, useCanvasShareableState } from '../context';
+import { FOOTER_HEIGHT, Footer } from './footer';
+import { Page } from './page';
 
+import { CanvasRenderedWorkpad, Refs, Settings, Stage } from '../types';
 import css from './canvas.module.scss';
-import { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
 
 let timeout: number = 0;
 

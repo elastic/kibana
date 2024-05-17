@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
-  EuiHorizontalRule,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 
 import {
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
+  isIntegrationPolicyTemplate,
 } from '../../../../../../../../common/services';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
+import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../../../types';
 
 import type { PackagePolicyValidationResults } from '../../services';
 

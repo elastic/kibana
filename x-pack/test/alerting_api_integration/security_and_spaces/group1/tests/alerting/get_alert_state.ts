@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  getUrlPrefix,
   ObjectRemover,
   getTestRuleData,
   getUnauthorizedErrorMessage,
+  getUrlPrefix,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export

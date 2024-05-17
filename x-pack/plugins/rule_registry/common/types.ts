@@ -9,8 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import * as t from 'io-ts';
 
-import type { IFieldSubType } from '@kbn/es-query';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { IFieldSubType } from '@kbn/es-query';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { IndicesForm } from './indices_form';
 import { shallowWithRouter } from '../../lib';
+import { IndicesForm } from './indices_form';
 
 describe('CertificateForm', () => {
   it('shallow renders expected elements for valid props', () => {

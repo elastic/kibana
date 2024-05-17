@@ -8,20 +8,21 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { EuiSelect, EuiFormRow, EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { Field, FieldToValueMap, Frequency } from '../../types/cron_editor';
 import {
-  MINUTE_OPTIONS,
-  HOUR_OPTIONS,
-  DAY_OPTIONS,
   DATE_OPTIONS,
+  DAY_OPTIONS,
+  EVERY_MINUTE_OPTIONS,
+  HOUR_OPTIONS,
+  MINUTE_OPTIONS,
   MONTH_OPTIONS,
   UNITS,
-  frequencyToFieldsMap,
   frequencyToBaselineFieldsMap,
-  EVERY_MINUTE_OPTIONS,
+  frequencyToFieldsMap,
 } from './constants';
 import { CronDaily } from './cron_daily';
 import { CronHourly } from './cron_hourly';
@@ -30,7 +31,6 @@ import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
 import { cronExpressionToParts, cronPartsToExpression } from './services';
-import { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
 
 const excludeBlockListedFrequencies = (
   units: EuiSelectOption[],

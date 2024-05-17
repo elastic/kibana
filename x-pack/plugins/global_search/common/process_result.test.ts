@@ -7,9 +7,9 @@
 
 import { convertResultUrlMock } from './process_result.test.mocks';
 
-import { IBasePath } from './utils';
-import { GlobalSearchProviderResult } from './types';
 import { processProviderResult } from './process_result';
+import { GlobalSearchProviderResult } from './types';
+import { IBasePath } from './utils';
 
 const createResult = (parts: Partial<GlobalSearchProviderResult>): GlobalSearchProviderResult => ({
   id: 'id',

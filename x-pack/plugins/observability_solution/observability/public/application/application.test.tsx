@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { renderApp } from '.';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
-import { renderApp } from '.';
-import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 describe('renderApp', () => {
   const originalConsole = global.console;

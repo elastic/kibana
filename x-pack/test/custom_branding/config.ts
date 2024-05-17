@@ -6,7 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services, pageObjects } from './ftr_provider_context';
+import { pageObjects, services } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(

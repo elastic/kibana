@@ -6,14 +6,14 @@
  */
 
 import {
-  isRefResult,
-  isFullScreenshot,
-  isScreenshotRef,
-  isScreenshotImageBlob,
-  RefResult,
   FullScreenshot,
+  RefResult,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
+  isFullScreenshot,
+  isRefResult,
+  isScreenshotImageBlob,
+  isScreenshotRef,
 } from './synthetics';
 
 describe('synthetics runtime types', () => {

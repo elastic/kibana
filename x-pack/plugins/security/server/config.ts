@@ -6,8 +6,8 @@
  */
 
 import crypto from 'crypto';
-import type { Duration } from 'moment';
 import path from 'path';
+import type { Duration } from 'moment';
 
 import type { Type, TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';

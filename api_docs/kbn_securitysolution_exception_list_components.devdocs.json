@@ -26,9 +26,7 @@
         "tags": [],
         "label": "EmptyViewerState",
         "description": [],
-        "signature": [
-          "React.NamedExoticComponent<EmptyViewerStateProps>"
-        ],
+        "signature": ["React.NamedExoticComponent<EmptyViewerStateProps>"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/empty_viewer_state/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -41,9 +39,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -81,9 +77,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -121,9 +115,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -138,11 +130,7 @@
         "tags": [],
         "label": "ExceptionItemCardConditions",
         "description": [],
-        "signature": [
-          "React.NamedExoticComponent<",
-          "CriteriaConditionsProps",
-          ">"
-        ],
+        "signature": ["React.NamedExoticComponent<", "CriteriaConditionsProps", ">"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/conditions/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -155,9 +143,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -195,9 +181,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -235,9 +219,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -252,9 +234,7 @@
         "tags": [],
         "label": "ExceptionItems",
         "description": [],
-        "signature": [
-          "React.NamedExoticComponent<ExceptionItemsProps>"
-        ],
+        "signature": ["React.NamedExoticComponent<ExceptionItemsProps>"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/exception_items/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -267,9 +247,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -284,9 +262,7 @@
         "tags": [],
         "label": "ExceptionListHeader",
         "description": [],
-        "signature": [
-          "React.NamedExoticComponent<ExceptionListHeaderComponentProps>"
-        ],
+        "signature": ["React.NamedExoticComponent<ExceptionListHeaderComponentProps>"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -299,9 +275,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -330,9 +304,7 @@
             "tags": [],
             "label": "{\n  dataTestSubj,\n  linkedRules,\n  securityLinkAnchorComponent,\n  leftIcon = '',\n}",
             "description": [],
-            "signature": [
-              "MenuItemLinkedRulesProps"
-            ],
+            "signature": ["MenuItemLinkedRulesProps"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -349,9 +321,7 @@
         "tags": [],
         "label": "HeaderMenu",
         "description": [],
-        "signature": [
-          "React.NamedExoticComponent<HeaderMenuComponentProps>"
-        ],
+        "signature": ["React.NamedExoticComponent<HeaderMenuComponentProps>"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -364,9 +334,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -404,9 +372,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -421,9 +387,7 @@
         "tags": [],
         "label": "SearchBar",
         "description": [],
-        "signature": [
-          "React.NamedExoticComponent<SearchBarProps>"
-        ],
+        "signature": ["React.NamedExoticComponent<SearchBarProps>"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/search_bar/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -436,9 +400,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -467,9 +429,7 @@
             "tags": [],
             "label": "{\n  value,\n  tooltipIconType = 'iInCircle',\n  tooltipIconText,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<ValueWithSpaceWarningProps>"
-            ],
+            "signature": ["React.PropsWithChildren<ValueWithSpaceWarningProps>"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -486,9 +446,7 @@
         "tags": [],
         "label": "WildCardWithWrongOperatorCallout",
         "description": [],
-        "signature": [
-          "() => JSX.Element"
-        ],
+        "signature": ["() => JSX.Element"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/wildcard_with_wrong_operator_callout/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -538,9 +496,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": [
-              "string | boolean"
-            ],
+            "signature": ["string | boolean"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -552,9 +508,7 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -566,9 +520,7 @@
             "tags": [],
             "label": "onClick",
             "description": [],
-            "signature": [
-              "(e: React.MouseEvent<Element, MouseEvent>) => void"
-            ],
+            "signature": ["(e: React.MouseEvent<Element, MouseEvent>) => void"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -580,9 +532,7 @@
                 "tags": [],
                 "label": "e",
                 "description": [],
-                "signature": [
-                  "React.MouseEvent<Element, MouseEvent>"
-                ],
+                "signature": ["React.MouseEvent<Element, MouseEvent>"],
                 "path": "packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -634,9 +584,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -648,9 +596,7 @@
             "tags": [],
             "label": "onNavigate",
             "description": [],
-            "signature": [
-              "(path: string) => void"
-            ],
+            "signature": ["(path: string) => void"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -662,9 +608,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -694,10 +638,7 @@
             "tags": [],
             "label": "comments",
             "description": [],
-            "signature": [
-              "EuiCommentProps",
-              "[]"
-            ],
+            "signature": ["EuiCommentProps", "[]"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -709,9 +650,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -765,9 +704,7 @@
             "tags": [],
             "label": "disableActions",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -892,9 +829,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -906,9 +841,7 @@
             "tags": [],
             "label": "disableActions",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -975,9 +908,7 @@
             "tags": [],
             "label": "editActionLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -989,9 +920,7 @@
             "tags": [],
             "label": "deleteActionLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1193,9 +1122,7 @@
             "tags": [],
             "label": "namespaceType",
             "description": [],
-            "signature": [
-              "\"single\" | \"agnostic\""
-            ],
+            "signature": ["\"single\" | \"agnostic\""],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1221,9 +1148,7 @@
             "tags": [],
             "label": "pagination",
             "description": [],
-            "signature": [
-              "Pagination"
-            ],
+            "signature": ["Pagination"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1235,9 +1160,7 @@
             "tags": [],
             "label": "lastUpdated",
             "description": [],
-            "signature": [
-              "string | number | null"
-            ],
+            "signature": ["string | number | null"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1263,11 +1186,7 @@
             "tags": [],
             "label": "pagination",
             "description": [],
-            "signature": [
-              "(",
-              "Pagination",
-              " & { pageSize: number; }) | undefined"
-            ],
+            "signature": ["(", "Pagination", " & { pageSize: number; }) | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1279,9 +1198,7 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1293,9 +1210,7 @@
             "tags": [],
             "label": "filters",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1332,9 +1247,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1360,9 +1273,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1374,9 +1285,7 @@
             "tags": [],
             "label": "ariaLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1388,10 +1297,7 @@
             "tags": [],
             "label": "pagination",
             "description": [],
-            "signature": [
-              "Pagination",
-              " & { pageSize: number; }"
-            ],
+            "signature": ["Pagination", " & { pageSize: number; }"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1567,9 +1473,7 @@
             "tags": [],
             "label": "listId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1647,9 +1551,7 @@
         "tags": [],
         "label": "ViewerFlyoutName",
         "description": [],
-        "signature": [
-          "\"addException\" | \"editException\" | null"
-        ],
+        "signature": ["\"addException\" | \"editException\" | null"],
         "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,

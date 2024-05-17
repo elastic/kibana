@@ -8,15 +8,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 import type { LabelRotation, Labels } from '@kbn/charts-plugin/public';
+import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';
+import { TruncateLabelsOption } from '../../common';
 
 export type SetAxisLabel = <T extends keyof Labels>(paramName: T, value: Labels[T]) => void;
 export interface LabelOptionsProps {

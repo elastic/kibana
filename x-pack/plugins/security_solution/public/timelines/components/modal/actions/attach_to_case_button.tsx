@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { CaseUI } from '@kbn/cases-plugin/common';
-import { UNTITLED_TIMELINE } from '../../timeline/properties/translations';
-import { selectTimelineById } from '../../../store/selectors';
-import type { State } from '../../../../common/store';
-import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
-import { setInsertTimeline, showTimeline } from '../../../store/actions';
-import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
+import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { SecurityPageName } from '../../../../app/types';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../common/components/link_to';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { State } from '../../../../common/store';
+import { setInsertTimeline, showTimeline } from '../../../store/actions';
+import { selectTimelineById } from '../../../store/selectors';
+import { UNTITLED_TIMELINE } from '../../timeline/properties/translations';
 import * as i18n from './translations';
 
 interface AttachToCaseButtonProps {

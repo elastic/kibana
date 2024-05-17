@@ -14,8 +14,8 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_DELETE_CONTROL } from '.';
 import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
 import { ControlEmbeddable, DataControlInput } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import { isControlGroup } from '../embeddable/control_group_helpers';
 
 export interface DeleteControlActionContext {

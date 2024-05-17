@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { demodata } from '../../../canvas_plugin_src/functions/server/demodata';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { DemoRows } from '../../../canvas_plugin_src/functions/server/demodata/demo_rows_types';
+import { FunctionFactory } from '../../../types';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
   help: i18n.translate('xpack.canvas.functions.demodataHelpText', {

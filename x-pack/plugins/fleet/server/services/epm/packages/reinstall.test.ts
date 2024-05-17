@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Installation } from '../../../../common';
 
-import { reinstallPackageForInstallation } from './reinstall';
-import { installPackage } from './install';
 import { getBundledPackageForInstallation } from './bundled_packages';
+import { installPackage } from './install';
+import { reinstallPackageForInstallation } from './reinstall';
 
 jest.mock('./install');
 jest.mock('./bundled_packages');

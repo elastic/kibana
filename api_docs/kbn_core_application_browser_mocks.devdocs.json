@@ -91,9 +91,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<ApplicationServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<ApplicationServiceContract>"],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -155,11 +153,7 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalApplicationSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalApplicationSetup", ">"],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -190,9 +184,7 @@
                 "tags": [],
                 "label": "currentAppId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

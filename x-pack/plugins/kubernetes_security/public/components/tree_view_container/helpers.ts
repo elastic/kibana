@@ -15,9 +15,9 @@ import {
   ORCHESTRATOR_RESOURCE_ID,
 } from '../../../common/constants';
 import type {
-  QueryDslQueryContainerBool,
-  KubernetesCollectionMap,
   KubernetesCollection,
+  KubernetesCollectionMap,
+  QueryDslQueryContainerBool,
   TreeViewIconProps,
 } from '../../types';
 

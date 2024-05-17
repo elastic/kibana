@@ -7,9 +7,9 @@
 
 import {
   createLiteralValueFromUndefinedRT,
-  inRangeFromStringRt,
   dateRt,
   datemathStringRt,
+  inRangeFromStringRt,
 } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createMemoryHistory, createLocation } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createLocation, createMemoryHistory } from 'history';
+import * as React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 import TriggersActionsUIHome, { MatchParams } from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
-import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');

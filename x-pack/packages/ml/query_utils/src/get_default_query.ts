@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { cloneDeep } from 'lodash';
 
 const DEFAULT_QUERY = {
   bool: {

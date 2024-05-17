@@ -11,8 +11,8 @@ import {
   allCasesPermissions,
   noCasesCapabilities,
   noCasesPermissions,
-  readCasesPermissions,
   readCasesCapabilities,
+  readCasesPermissions,
   writeCasesCapabilities,
   writeCasesPermissions,
 } from '../../common/mock';

@@ -97,9 +97,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileBulkGetParams",
-        "description": [
-          "\nParameters for the bulk get API."
-        ],
+        "description": ["\nParameters for the bulk get API."],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -110,12 +108,8 @@
             "type": "Object",
             "tags": [],
             "label": "uids",
-            "description": [
-              "\nList of user profile identifiers."
-            ],
-            "signature": [
-              "Set<string>"
-            ],
+            "description": ["\nList of user profile identifiers."],
+            "signature": ["Set<string>"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -129,9 +123,7 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -145,9 +137,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileGetCurrentParams",
-        "description": [
-          "\nParameters for the get user profile for the current user API."
-        ],
+        "description": ["\nParameters for the get user profile for the current user API."],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -185,9 +175,7 @@
             "type": "Function",
             "tags": [],
             "label": "getUserProfile$",
-            "description": [
-              "\nRetrieve an observable emitting when the user profile is loaded."
-            ],
+            "description": ["\nRetrieve an observable emitting when the user profile is loaded."],
             "signature": [
               "() => ",
               "Observable",
@@ -253,9 +241,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "Get current user profile operation parameters."
-                ],
+                "description": ["Get current user profile operation parameters."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
@@ -280,9 +266,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
-            "description": [
-              "\nRetrieves multiple user profiles by their identifiers."
-            ],
+            "description": ["\nRetrieves multiple user profiles by their identifiers."],
             "signature": [
               "<D extends ",
               {
@@ -320,9 +304,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "Bulk get operation parameters."
-                ],
+                "description": ["Bulk get operation parameters."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
@@ -386,12 +368,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "path",
-                "description": [
-                  "Path to your app's suggest endpoint."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["Path to your app's suggest endpoint."],
+                "signature": ["string"],
                 "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -403,9 +381,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "Suggest operation parameters."
-                ],
+                "description": ["Suggest operation parameters."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
@@ -429,9 +405,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\nUpdates user profile data of the current user."
-            ],
+            "description": ["\nUpdates user profile data of the current user."],
             "signature": [
               "<D extends ",
               {
@@ -453,12 +427,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
-                "description": [
-                  "Application data to be written (merged with existing data)."
-                ],
-                "signature": [
-                  "D"
-                ],
+                "description": ["Application data to be written (merged with existing data)."],
+                "signature": ["D"],
                 "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -497,12 +467,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
-                "description": [
-                  "Application data to be merged with existing data."
-                ],
-                "signature": [
-                  "D"
-                ],
+                "description": ["Application data to be merged with existing data."],
+                "signature": ["D"],
                 "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -520,9 +486,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileServiceSetup",
-        "description": [
-          "\nSetup contract for Core's userProfile service.\n"
-        ],
+        "description": ["\nSetup contract for Core's userProfile service.\n"],
         "path": "packages/core/user-profile/core-user-profile-browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -584,9 +548,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileSuggestParams",
-        "description": [
-          "\nParameters for the suggest API."
-        ],
+        "description": ["\nParameters for the suggest API."],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -610,12 +572,8 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": [
-              "\nDesired number of suggestions to return. The default value is 10."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nDesired number of suggestions to return. The default value is 10."],
+            "signature": ["number | undefined"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -629,9 +587,7 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -681,9 +637,7 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileServiceStart",
-        "description": [
-          "\nStart contract for Core's userProfile service.\n"
-        ],
+        "description": ["\nStart contract for Core's userProfile service.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",

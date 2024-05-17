@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const FormKeyUpdateWarning: React.FC = () => (

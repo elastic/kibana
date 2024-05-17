@@ -7,8 +7,8 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { extractIndexPatternsFromSpec } from './extract_index_pattern';
 import { setDataViews } from '../services';
+import { extractIndexPatternsFromSpec } from './extract_index_pattern';
 
 import type { VegaSpec } from '../data_model/types';
 

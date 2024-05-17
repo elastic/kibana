@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCallOut, EuiLink, EuiPanel, EuiSwitch, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { docLinks } from '../../../../../shared/doc_links';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
@@ -17,10 +17,10 @@ import { NAV } from '../../../../constants';
 import {
   LEARN_MORE_LINK,
   SOURCE_SYNCHRONIZATION_DESCRIPTION,
-  SYNCHRONIZATION_DISABLED_TITLE,
-  SYNCHRONIZATION_DISABLED_DESCRIPTION,
-  SOURCE_SYNCHRONIZATION_TOGGLE_LABEL,
   SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION,
+  SOURCE_SYNCHRONIZATION_TOGGLE_LABEL,
+  SYNCHRONIZATION_DISABLED_DESCRIPTION,
+  SYNCHRONIZATION_DISABLED_TITLE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';

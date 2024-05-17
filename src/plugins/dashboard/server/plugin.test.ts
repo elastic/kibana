@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DashboardPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
+import { DashboardPlugin } from './plugin';
+import { TASK_ID, scheduleDashboardTelemetry } from './usage/dashboard_telemetry_collection_task';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),

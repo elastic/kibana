@@ -1,3 +1,4 @@
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
 
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
 import { MlJobsDescription } from './ml_jobs_description';
 

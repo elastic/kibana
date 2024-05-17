@@ -5,30 +5,43 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import {
   ConcreteTaskInstance,
-  createTaskRunError,
   TaskErrorSource,
+  createTaskRunError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
-import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
-import { ExecutionHandler, RunResult } from './execution_handler';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import apm from 'elastic-apm-node';
+import { omit } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
-  RuleRunnerErrorStackTraceLog,
-  RuleTaskInstance,
-  RuleTaskRunResult,
-  RuleTaskStateAndMetrics,
-  RunRuleParams,
-  TaskRunnerContext,
-} from './types';
-import { getExecutorServices } from './get_executor_services';
+  AlertInstanceContext,
+  AlertInstanceState,
+  RawAlertInstance,
+  RuleAlertData,
+  RuleLastRunOutcomeOrderMap,
+  RuleTypeParams,
+  RuleTypeState,
+  parseDuration,
+} from '../../common';
+import { initializeAlertsClient } from '../alerts_client';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ElasticsearchError, getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { getEsErrorMessage } from '../lib/errors';
+import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
+import { lastRunToRaw } from '../lib/last_run_status';
+import { Result, asErr, asOk, isErr, isOk, map, resolveErr } from '../lib/result_type';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
+import { RuleResultService } from '../monitoring/rule_result_service';
+import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE, partiallyUpdateRule } from '../saved_objects';
 import {
   IntervalSchedule,
   RawRuleExecutionStatus,
@@ -39,36 +52,23 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
 } from '../types';
-import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  parseDuration,
-  RawAlertInstance,
-  RuleAlertData,
-  RuleLastRunOutcomeOrderMap,
-  RuleTypeParams,
-  RuleTypeState,
-} from '../../common';
-import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
-import { getEsErrorMessage } from '../lib/errors';
-import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
-import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
-import { lastRunToRaw } from '../lib/last_run_status';
-import { RuleRunningHandler } from './rule_running_handler';
-import { RuleResultService } from '../monitoring/rule_result_service';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { ExecutionHandler, RunResult } from './execution_handler';
+import { getExecutorServices } from './get_executor_services';
 import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
-import { RuleTypeRunner } from './rule_type_runner';
-import { initializeAlertsClient } from '../alerts_client';
 import { processRunResults } from './lib';
+import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
+import { RuleRunningHandler } from './rule_running_handler';
+import { RuleTypeRunner } from './rule_type_runner';
+import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
+import {
+  RuleRunnerErrorStackTraceLog,
+  RuleTaskInstance,
+  RuleTaskRunResult,
+  RuleTaskStateAndMetrics,
+  RunRuleParams,
+  TaskRunnerContext,
+} from './types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -81,7 +81,7 @@ interface TaskRunnerConstructorParams<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   context: TaskRunnerContext;
   inMemoryMetrics: InMemoryMetrics;
@@ -107,7 +107,7 @@ export class TaskRunner<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private context: TaskRunnerContext;
   private logger: Logger;

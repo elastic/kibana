@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   IScopedClusterClient,
+  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-  KibanaRequest,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
-import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 import { error } from '../../lib/reindexing/error';
+import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 
 interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;

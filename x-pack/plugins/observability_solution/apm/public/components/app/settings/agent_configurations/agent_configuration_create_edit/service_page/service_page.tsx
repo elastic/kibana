@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiCallOut } from '@elastic/eui';
-import React from 'react';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import React from 'react';
 import {
-  omitAllOption,
-  getOptionLabel,
   ALL_OPTION_VALUE,
+  getOptionLabel,
+  omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
-import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
-import { FormRowSelect } from './form_row_select';
-import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
-import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
-import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
+import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
+import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
 import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import { FETCH_STATUS, useFetcher } from '../../../../../../hooks/use_fetcher';
+import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
+import { FormRowSelect } from './form_row_select';
+import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 
 interface Props {
   newConfig: AgentConfigurationIntake;

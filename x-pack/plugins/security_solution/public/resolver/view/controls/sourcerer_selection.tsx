@@ -1,3 +1,5 @@
+import { EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +7,10 @@
  * 2.0.
  */
 import React, { useCallback, memo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiPopover } from '@elastic/eui';
-import { StyledEuiButtonIcon } from './styles';
-import { useColors } from '../use_colors';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useColors } from '../use_colors';
+import { StyledEuiButtonIcon } from './styles';
 
 const nodeLegendButtonTitle = i18n.translate(
   'xpack.securitySolution.resolver.graphControls.sourcererButtonTitle',

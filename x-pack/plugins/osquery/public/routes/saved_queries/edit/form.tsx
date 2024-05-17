@@ -7,14 +7,14 @@
 
 import {
   EuiBottomBar,
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { FormProvider } from 'react-hook-form';
 import { useRouterNavigate } from '../../../common/lib/kibana';

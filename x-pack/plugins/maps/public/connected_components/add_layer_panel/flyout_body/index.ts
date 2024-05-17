@@ -6,9 +6,9 @@
  */
 
 import { connect } from 'react-redux';
-import { FlyoutBody } from './flyout_body';
 import { MapStoreState } from '../../../reducers/store';
 import { getMapColors, getMostCommonDataViewId } from '../../../selectors/map_selectors';
+import { FlyoutBody } from './flyout_body';
 
 function mapStateToProps(state: MapStoreState) {
   return {

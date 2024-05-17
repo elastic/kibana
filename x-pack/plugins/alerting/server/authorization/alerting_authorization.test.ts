@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from '@kbn/core/server';
-import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import {
-  AlertingAuthorization,
-  WriteOperations,
-  ReadOperations,
-  AlertingAuthorizationEntity,
-} from './alerting_authorization';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { NormalizedRuleType, RegistryRuleType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import {
+  AlertingAuthorization,
+  AlertingAuthorizationEntity,
+  ReadOperations,
+  WriteOperations,
+} from './alerting_authorization';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
-import { schema } from '@kbn/config-schema';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();

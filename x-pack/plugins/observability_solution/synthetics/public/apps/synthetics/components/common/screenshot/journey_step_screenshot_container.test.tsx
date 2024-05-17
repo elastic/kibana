@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
+import React from 'react';
 import { render } from '../../../utils/testing';
 import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
 import { getScreenshotUrl } from './journey_screenshot_dialog';
+import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 

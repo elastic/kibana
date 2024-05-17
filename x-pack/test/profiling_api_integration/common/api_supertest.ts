@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { format } from 'url';
 import { formatRequest } from '@kbn/server-route-repository';
 import request from 'superagent';
 import supertest from 'supertest';
-import { format } from 'url';
 
 export function createProfilingApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async (options: {

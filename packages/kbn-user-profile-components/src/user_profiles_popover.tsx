@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
+import type { EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
-import { EuiPopover, EuiContextMenuPanel, useGeneratedHtmlId } from '@elastic/eui';
 
-import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
 import type { UserProfileWithAvatar } from './user_avatar';
+import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
 
 /**
  * Props of {@link UserProfilesPopover} component

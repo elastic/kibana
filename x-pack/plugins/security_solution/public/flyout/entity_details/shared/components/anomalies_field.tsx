@@ -7,12 +7,12 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import type { EntityAnomalies } from './observed_entity/types';
 import { AnomalyScores } from '../../../../common/components/ml/score/anomaly_scores';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import type { EntityAnomalies } from './observed_entity/types';
 
 export const AnomaliesField = ({ anomalies }: { anomalies: EntityAnomalies }) => {
   const { to, from } = useGlobalTime();

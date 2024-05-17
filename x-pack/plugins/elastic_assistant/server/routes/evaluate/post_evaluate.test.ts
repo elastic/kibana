@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { postEvaluateRoute } from './post_evaluate';
-import { serverMock } from '../../__mocks__/server';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { getPostEvaluateRequest } from '../../__mocks__/request';
 import type {
   PostEvaluateRequestBodyInput,
   PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
+import { getPostEvaluateRequest } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { serverMock } from '../../__mocks__/server';
+import { postEvaluateRoute } from './post_evaluate';
 
 const defaultBody: PostEvaluateRequestBodyInput = {
   dataset: undefined,

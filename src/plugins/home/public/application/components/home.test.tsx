@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
 import type { HomeProps } from './home';
 import { Home } from './home';

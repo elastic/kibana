@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { RiskSeverity } from '../../../../../../common/search_strategy';
 import type {
-  ManagedUserHits,
   ManagedUserFields,
+  ManagedUserHits,
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
 import type { ManagedUserData } from '../types';
 
 const userRiskScore = {

@@ -8,8 +8,8 @@
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  type DiscoverUrlConfig,
   type DashboardUrlConfig,
+  type DiscoverUrlConfig,
   type OtherUrlConfig,
 } from '../../../services/ml/data_frame_analytics_edit';
 

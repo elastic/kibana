@@ -7,47 +7,47 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
-import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
-import { getActionRequestExpiration } from '../../utils';
-import { ResponseActionsClientError } from '../errors';
-import { stringify } from '../../../../utils/stringify';
-import type { HapiReadableStream } from '../../../../../types';
-import type {
-  ResponseActionsApiCommandNames,
-  ResponseActionAgentType,
-} from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
-import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetails,
-  HostMetadata,
+  EndpointActionDataParameterTypes,
   GetProcessesActionOutputContent,
+  HostMetadata,
   KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
+  LogsEndpointAction,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithPidOrEntityId,
-  ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionsExecuteParameters,
   SuspendProcessActionOutputContent,
-  LogsEndpointAction,
-  EndpointActionDataParameterTypes,
   UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
+import type { HapiReadableStream } from '../../../../../types';
+import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
+import { stringify } from '../../../../utils/stringify';
+import { getActionRequestExpiration } from '../../utils';
+import { ResponseActionsClientError } from '../errors';
+import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {
   CommonResponseActionMethodOptions,
   GetFileDownloadMethodResponse,
 } from '../lib/types';
-import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
@@ -79,7 +79,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
     TResponse extends ActionDetails = ActionDetails,
-    TMethodOptions extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+    TMethodOptions extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions,
   >(
     command: ResponseActionsApiCommandNames,
     actionReq: TOptions,

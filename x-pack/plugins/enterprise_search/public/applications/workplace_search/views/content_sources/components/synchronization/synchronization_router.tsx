@@ -8,15 +8,15 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import {
-  SYNC_FREQUENCY_PATH,
-  BLOCKED_TIME_WINDOWS_PATH,
   ASSETS_AND_OBJECTS_PATH,
-  SOURCE_SYNCHRONIZATION_PATH,
-  getSourcesPath,
+  BLOCKED_TIME_WINDOWS_PATH,
   OLD_OBJECTS_AND_ASSETS_PATH,
+  SOURCE_SYNCHRONIZATION_PATH,
+  SYNC_FREQUENCY_PATH,
+  getSourcesPath,
 } from '../../../../routes';
 
 import { AssetsAndObjects } from './assets_and_objects';

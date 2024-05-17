@@ -6,13 +6,13 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-// @ts-expect-error untyped local
-import { getState, getStore } from '../../state/store';
 import { State } from '../../../types';
-import { getGlobalFilters, getWorkpadVariablesAsObject } from '../../state/selectors/workpad';
 import { CanvasStartDeps } from '../../plugin';
 // @ts-expect-error untyped local
 import { setFilter } from '../../state/actions/elements';
+import { getGlobalFilters, getWorkpadVariablesAsObject } from '../../state/selectors/workpad';
+// @ts-expect-error untyped local
+import { getState, getStore } from '../../state/store';
 
 export class FiltersService {
   constructor() {}

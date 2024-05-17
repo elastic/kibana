@@ -6,14 +6,14 @@
  */
 
 import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
   Logger,
+  SavedObjectsClientContract,
   SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 
 export interface GetCasesOptions {
   savedObjectsClient: SavedObjectsClientContract;

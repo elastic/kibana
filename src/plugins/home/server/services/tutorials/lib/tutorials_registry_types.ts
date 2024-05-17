@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest, IStaticAssets } from '@kbn/core/server';
+import type { IStaticAssets, KibanaRequest } from '@kbn/core/server';
 import type { TutorialSchema } from './tutorial_schema';
 export { TutorialsCategory } from '../../../../common/constants';
 

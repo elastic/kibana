@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { mockUxSeries, render } from '../../rtl_helpers';
 import { SeriesName } from './series_name';
 

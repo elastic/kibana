@@ -13,10 +13,10 @@ import { compact, findLastIndex, merge, orderBy } from 'lodash';
 import qs from 'query-string';
 import {
   MatchedRoute,
-  matchRoutes as matchRoutesConfig,
   RouteConfig as ReactRouterConfig,
+  matchRoutes as matchRoutesConfig,
 } from 'react-router-config';
-import { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
+import { FlattenRoutesOf, Route, RouteMap, RouteWithPath, Router } from './types';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');

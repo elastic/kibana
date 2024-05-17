@@ -6,7 +6,7 @@
  */
 
 import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
-import type { RawBucket, FlattenedBucket } from '../../types';
+import type { FlattenedBucket, RawBucket } from '../../types';
 
 export const flattenBucket = ({
   bucket,

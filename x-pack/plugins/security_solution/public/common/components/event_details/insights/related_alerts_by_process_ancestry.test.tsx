@@ -11,16 +11,16 @@ import React from 'react';
 
 import { TestProviders } from '../../../mock';
 
-import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
-import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
+import type { StatsNode } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
+import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import {
   PROCESS_ANCESTRY,
   PROCESS_ANCESTRY_COUNT,
-  PROCESS_ANCESTRY_ERROR,
   PROCESS_ANCESTRY_EMPTY,
+  PROCESS_ANCESTRY_ERROR,
 } from './translations';
-import type { StatsNode } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
 
 jest.mock('../../../containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),

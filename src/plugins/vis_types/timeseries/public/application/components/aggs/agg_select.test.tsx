@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { AggSelect } from './agg_select';
-import { METRIC, SERIES } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { Metric } from '../../../../common/types';
+import { METRIC, SERIES } from '../../../test_utils';
+import { AggSelect } from './agg_select';
 
 describe('TSVB AggSelect', () => {
   const setup = (panelType: string, value: string) => {

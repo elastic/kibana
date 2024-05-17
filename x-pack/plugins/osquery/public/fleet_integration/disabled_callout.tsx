@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 const DisabledCalloutComponent = () => (
   <>

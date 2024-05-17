@@ -8,13 +8,13 @@
 import type { SearchHit } from '@kbn/es-types';
 
 import type {
+  ActionStatus,
   Agent,
   AgentAction,
-  ActionStatus,
-  CurrentUpgrade,
-  NewAgentAction,
   AgentDiagnostics,
   AgentStatus,
+  CurrentUpgrade,
+  NewAgentAction,
 } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -153,7 +153,7 @@ export interface PostBulkAgentReassignRequest {
 }
 
 export enum RequestDiagnosticsAdditionalMetrics {
-  'CPU' = 'CPU',
+  CPU = 'CPU',
 }
 
 export interface PostRequestDiagnosticsRequest {

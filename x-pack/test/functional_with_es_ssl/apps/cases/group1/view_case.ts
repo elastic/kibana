@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { v4 as uuidv4 } from 'uuid';
 import {
   AttachmentType,
   CaseSeverity,
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { v4 as uuidv4 } from 'uuid';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { users, roles, casesAllUser, casesAllUser2 } from '../common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { casesAllUser, casesAllUser2, roles, users } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');

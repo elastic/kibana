@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
-import { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import { updateDefaultAlertingAction } from '../alert_rules';
+import { Action } from 'redux-actions';
+import { call, put, takeLatest, takeLeading } from 'redux-saga/effects';
 import { DynamicSettings } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import {
-  getConnectorsAction,
-  setDynamicSettingsAction,
-  getDynamicSettingsAction,
-  syncGlobalParamsAction,
-  getLocationMonitorsAction,
-} from './actions';
+import { updateDefaultAlertingAction } from '../alert_rules';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
+  getConnectorsAction,
+  getDynamicSettingsAction,
+  getLocationMonitorsAction,
+  setDynamicSettingsAction,
+  syncGlobalParamsAction,
+} from './actions';
+import {
   fetchConnectors,
+  fetchLocationMonitors,
+  getDynamicSettings,
   setDynamicSettings,
   syncGlobalParamsAPI,
-  getDynamicSettings,
-  fetchLocationMonitors,
 } from './api';
 
 export function* syncGlobalParamsEffect() {

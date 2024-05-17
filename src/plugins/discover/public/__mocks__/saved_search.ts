@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { dataViewWithTimefieldMock } from './data_view_with_timefield';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from './data_view_complex';
 import { dataViewEsql } from './data_view_esql';
+import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',

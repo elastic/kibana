@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { setupEnvironment } from '../../helpers';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
+import { setupEnvironment } from '../../helpers';
 import {
-  getDefaultHotPhasePolicy,
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
+  getDefaultHotPhasePolicy,
 } from '../constants';
 import { SerializationTestBed, setupSerializationTestBed } from './policy_serialization.helpers';
 

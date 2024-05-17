@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { act, renderHook } from '@testing-library/react-hooks';
 
+import { DataViewFieldBase } from '@kbn/es-query';
 import {
   UseFieldValueAutocompleteProps,
   UseFieldValueAutocompleteReturn,
   useFieldValueAutocomplete,
 } from '.';
-import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';
-import { DataViewFieldBase } from '@kbn/es-query';
+import { getField } from '../../fields/index.mock';
 
 // Copied from "src/plugins/data/common/index_patterns/index_pattern.stub.ts"
 // TODO: Remove this in favor of the above if/when it is ported, https://github.com/elastic/kibana/issues/100715

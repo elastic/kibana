@@ -26,11 +26,7 @@
         "tags": [],
         "label": "getWarningsDescription",
         "description": [],
-        "signature": [
-          "(warnings: ",
-          "SearchResponseIncompleteWarning",
-          "[]) => string"
-        ],
+        "signature": ["(warnings: ", "SearchResponseIncompleteWarning", "[]) => string"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,10 +38,7 @@
             "tags": [],
             "label": "warnings",
             "description": [],
-            "signature": [
-              "SearchResponseIncompleteWarning",
-              "[]"
-            ],
+            "signature": ["SearchResponseIncompleteWarning", "[]"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -62,11 +55,7 @@
         "tags": [],
         "label": "getWarningsTitle",
         "description": [],
-        "signature": [
-          "(warnings: ",
-          "SearchResponseIncompleteWarning",
-          "[]) => string"
-        ],
+        "signature": ["(warnings: ", "SearchResponseIncompleteWarning", "[]) => string"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -78,10 +67,7 @@
             "tags": [],
             "label": "warnings",
             "description": [],
-            "signature": [
-              "SearchResponseIncompleteWarning",
-              "[]"
-            ],
+            "signature": ["SearchResponseIncompleteWarning", "[]"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -98,11 +84,7 @@
         "tags": [],
         "label": "hasUnsupportedDownsampledAggregationFailure",
         "description": [],
-        "signature": [
-          "(warning: ",
-          "SearchResponseIncompleteWarning",
-          ") => boolean"
-        ],
+        "signature": ["(warning: ", "SearchResponseIncompleteWarning", ") => boolean"],
         "path": "packages/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -114,9 +96,7 @@
             "tags": [],
             "label": "warning",
             "description": [],
-            "signature": [
-              "SearchResponseIncompleteWarning"
-            ],
+            "signature": ["SearchResponseIncompleteWarning"],
             "path": "packages/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,9 +113,7 @@
         "tags": [],
         "label": "SearchResponseWarningsBadge",
         "description": [],
-        "signature": [
-          "(props: Props) => JSX.Element | null"
-        ],
+        "signature": ["(props: Props) => JSX.Element | null"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -147,9 +125,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,9 +142,7 @@
         "tags": [],
         "label": "SearchResponseWarningsBadgePopoverContent",
         "description": [],
-        "signature": [
-          "(props: Props) => JSX.Element"
-        ],
+        "signature": ["(props: Props) => JSX.Element"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -180,9 +154,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -199,9 +171,7 @@
         "tags": [],
         "label": "SearchResponseWarningsCallout",
         "description": [],
-        "signature": [
-          "(props: Props) => JSX.Element | null"
-        ],
+        "signature": ["(props: Props) => JSX.Element | null"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -213,9 +183,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -232,9 +200,7 @@
         "tags": [],
         "label": "SearchResponseWarningsEmptyPrompt",
         "description": [],
-        "signature": [
-          "(props: Props) => JSX.Element"
-        ],
+        "signature": ["(props: Props) => JSX.Element"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -246,9 +212,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -265,9 +229,7 @@
         "tags": [],
         "label": "ViewDetailsPopover",
         "description": [],
-        "signature": [
-          "(props: Props) => JSX.Element | null"
-        ],
+        "signature": ["(props: Props) => JSX.Element | null"],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -279,9 +241,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -301,12 +261,8 @@
         "type": "Type",
         "tags": [],
         "label": "SearchResponseWarning",
-        "description": [
-          "\nA warning object for a search response with warnings"
-        ],
-        "signature": [
-          "SearchResponseIncompleteWarning"
-        ],
+        "description": ["\nA warning object for a search response with warnings"],
+        "signature": ["SearchResponseIncompleteWarning"],
         "path": "packages/kbn-search-response-warnings/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -344,9 +300,7 @@
             "tags": [],
             "label": "warning",
             "description": [],
-            "signature": [
-              "SearchResponseIncompleteWarning"
-            ],
+            "signature": ["SearchResponseIncompleteWarning"],
             "path": "packages/kbn-search-response-warnings/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

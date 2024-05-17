@@ -8,14 +8,14 @@
 import { RouteDependencies } from '../types';
 
 import {
-  registerGetRoutes,
   registerCreateRoute,
-  registerUpdateRoute,
-  registerPrivilegesRoute,
   registerDeleteRoute,
-  registerSimulateRoute,
   registerDocumentsRoute,
+  registerGetRoutes,
   registerParseCsvRoute,
+  registerPrivilegesRoute,
+  registerSimulateRoute,
+  registerUpdateRoute,
 } from './api';
 
 export class ApiRoutes {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { NoDataPopover } from './no_data_popover';
 import { EuiTourStep } from '@elastic/eui';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { NoDataPopover } from './no_data_popover';
 
 describe('NoDataPopover', () => {
   const createMockStorage = () => ({

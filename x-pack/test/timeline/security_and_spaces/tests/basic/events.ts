@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { ALERT_UUID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_UUID } from '@kbn/rule-data-utils';
+import { JsonObject } from '@kbn/utility-types';
 
-import { TimelineEdges, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   Direction,
   TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { User } from '../../../../rule_registry/common/lib/authentication/types';
+import { TimelineEdges, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
+import { User } from '../../../../rule_registry/common/lib/authentication/types';
 
 import {
-  superUser,
   globalRead,
+  noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadSpace2,
+  obsOnlySpace2,
+  obsOnlySpacesAll,
   obsSec,
+  obsSecAllSpace2,
   obsSecRead,
+  obsSecReadSpace2,
+  obsSecSpacesAll,
   secOnly,
   secOnlyRead,
-  secOnlySpace2,
   secOnlyReadSpace2,
-  obsSecAllSpace2,
-  obsSecReadSpace2,
-  obsOnlySpace2,
-  obsOnlyReadSpace2,
-  obsOnlySpacesAll,
-  obsSecSpacesAll,
+  secOnlySpace2,
   secOnlySpacesAll,
-  noKibanaPrivileges,
+  superUser,
 } from '../../../../rule_registry/common/lib/authentication/users';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 

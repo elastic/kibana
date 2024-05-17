@@ -26,9 +26,7 @@
         "tags": [],
         "label": "addToRules",
         "description": [],
-        "signature": [
-          "(otherRules: any, embedUnder: any) => void"
-        ],
+        "signature": ["(otherRules: any, embedUnder: any) => void"],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,9 +38,7 @@
             "tags": [],
             "label": "otherRules",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,9 +51,7 @@
             "tags": [],
             "label": "embedUnder",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -74,9 +68,7 @@
         "tags": [],
         "label": "ElasticsearchSqlHighlightRules",
         "description": [],
-        "signature": [
-          "(this: any) => void"
-        ],
+        "signature": ["(this: any) => void"],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/elasticsearch_sql_highlight_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -91,11 +83,7 @@
         "tags": [],
         "label": "installXJsonMode",
         "description": [],
-        "signature": [
-          "(editor: ",
-          "Editor",
-          ") => void"
-        ],
+        "signature": ["(editor: ", "Editor", ") => void"],
         "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -107,9 +95,7 @@
             "tags": [],
             "label": "editor",
             "description": [],
-            "signature": [
-              "Editor"
-            ],
+            "signature": ["Editor"],
             "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -126,9 +112,7 @@
         "tags": [],
         "label": "ScriptHighlightRules",
         "description": [],
-        "signature": [
-          "(this: any) => void"
-        ],
+        "signature": ["(this: any) => void"],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -140,9 +124,7 @@
             "tags": [],
             "label": "this",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -159,9 +141,7 @@
         "tags": [],
         "label": "XJsonHighlightRules",
         "description": [],
-        "signature": [
-          "(this: any) => void"
-        ],
+        "signature": ["(this: any) => void"],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -173,9 +153,7 @@
             "tags": [],
             "label": "this",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -196,9 +174,7 @@
         "tags": [],
         "label": "XJsonMode",
         "description": [],
-        "signature": [
-          "any"
-        ],
+        "signature": ["any"],
         "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React, { useMemo } from 'react';
 
+import { formatMillisecond } from '../../../common/network_data/data_formatting';
 import { MarkerItems, useWaterfallContext } from '../context/waterfall_context';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
-import { formatMillisecond } from '../../../common/network_data/data_formatting';
 
 export const FIELD_SYNTHETICS_LCP = 'browser.experience.lcp.us';
 export const FIELD_SYNTHETICS_FCP = 'browser.experience.fcp.us';

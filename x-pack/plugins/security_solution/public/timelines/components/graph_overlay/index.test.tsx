@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { render, cleanup } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { GraphOverlay } from '.';
+import { TimelineId } from '../../../../common/types/timeline';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
-import { TimelineId } from '../../../../common/types/timeline';
-import { GraphOverlay } from '.';
+import { TestProviders, createMockStore, mockGlobalState } from '../../../common/mock';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
-import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),

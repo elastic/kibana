@@ -9,12 +9,12 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { ErrorSummary } from '../../../types';
 import {
   ERRORS_CONTAINER_MAX_WIDTH,
   ERRORS_CONTAINER_MIN_WIDTH,
   getErrorsViewerTableColumns,
 } from './helpers';
-import type { ErrorSummary } from '../../../types';
 
 const ErrorsViewerContainer = styled.div`
   max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;

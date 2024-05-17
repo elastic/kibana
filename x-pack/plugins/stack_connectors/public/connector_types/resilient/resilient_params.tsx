@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  EuiFormRow,
   EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
   EuiSelect,
+  EuiSelectOption,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiComboBoxOptionOption,
-  EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -23,6 +22,7 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ResilientActionParams } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';

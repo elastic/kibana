@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import {
   FieldDefinition,
   OnInputChangeFn,
   SettingType,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 
 /**
  * Contextual services used by a {@link FieldInput} component.

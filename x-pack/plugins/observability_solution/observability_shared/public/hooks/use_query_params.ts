@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useLocation } from 'react-router-dom';
-import { useMemo } from 'react';
-import { parse } from 'query-string';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { getAbsoluteTime } from '../utils/date';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { parse } from 'query-string';
+import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { TimePickerTimeDefaults } from '../types';
+import { getAbsoluteTime } from '../utils/date';
 
 const getParsedParams = (search: string) => {
   return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};

@@ -8,12 +8,12 @@
 import {
   KibanaRequest,
   Logger,
-  SavedObjectsServiceStart,
   SECURITY_EXTENSION_ID,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { RulesSettingsClient } from './rules_settings_client';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
+import { RulesSettingsClient } from './rules_settings_client';
 
 export interface RulesSettingsClientFactoryOpts {
   logger: Logger;

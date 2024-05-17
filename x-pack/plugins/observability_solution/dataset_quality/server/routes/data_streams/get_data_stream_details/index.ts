@@ -8,17 +8,17 @@
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
-  findInventoryFields,
   InventoryItemType,
+  findInventoryFields,
   inventoryModels,
 } from '@kbn/metrics-data-access-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 
+import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
 import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
-import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
-import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService } from '../../../services';
+import { createDatasetQualityESClient } from '../../../utils';
 
 export async function getDataStreamSettings({
   esClient,

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { EuiText, keys } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
-import { keys, EuiText } from '@elastic/eui';
 
 import './_ui_ace_keyboard_mode.scss';
 

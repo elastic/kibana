@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../test/context_jest';
-import { getScrubber as scrubber, getPageControlsCenter as center } from '../../test/selectors';
+import { getPageControlsCenter as center, getScrubber as scrubber } from '../../test/selectors';
 import { Footer } from './footer';
 
 jest.mock('../../supported_renderers');

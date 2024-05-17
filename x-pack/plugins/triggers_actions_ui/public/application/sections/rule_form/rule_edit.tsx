@@ -5,55 +5,55 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
   EuiFlyoutBody,
-  EuiPortal,
-  EuiCallOut,
-  EuiSpacer,
-  EuiLoadingSpinner,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiIconTip,
+  EuiLoadingSpinner,
+  EuiPortal,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { cloneDeep, omit } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import {
-  Rule,
-  RuleFlyoutCloseReason,
-  RuleEditProps,
-  IErrorObject,
-  RuleType,
-  RuleTypeParams,
-  RuleTypeMetaData,
-  TriggersActionsUiConfig,
-  RuleNotifyWhenType,
-  RuleUiAction,
-  RuleAction,
-} from '../../../types';
-import { RuleForm } from './rule_form';
-import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { getRuleReducer } from './rule_reducer';
-import { updateRule } from '../../lib/rule_api/update';
-import { loadRuleTypes } from '../../lib/rule_api/rule_types';
-import { HealthCheck } from '../../components/health_check';
-import { HealthContextProvider } from '../../context/health_context';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { cloneDeep, omit } from 'lodash';
+import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { useKibana } from '../../../common/lib/kibana';
+import {
+  IErrorObject,
+  Rule,
+  RuleAction,
+  RuleEditProps,
+  RuleFlyoutCloseReason,
+  RuleNotifyWhenType,
+  RuleType,
+  RuleTypeMetaData,
+  RuleTypeParams,
+  RuleUiAction,
+  TriggersActionsUiConfig,
+} from '../../../types';
+import { HealthCheck } from '../../components/health_check';
+import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { HealthContextProvider } from '../../context/health_context';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
+import { updateRule } from '../../lib/rule_api/update';
+import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
-import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { triggersActionsUiConfig } from '../../../common/lib/config_api';
-import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
+import { RuleForm } from './rule_form';
+import { getRuleReducer } from './rule_reducer';
 import { ShowRequestModal } from './show_request_modal';
 
 const defaultUpdateRuleErrorMessage = i18n.translate(
@@ -104,7 +104,7 @@ export type RuleEditComponent = typeof RuleEdit;
 
 export const RuleEdit = <
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 >({
   initialRule,
   onClose,

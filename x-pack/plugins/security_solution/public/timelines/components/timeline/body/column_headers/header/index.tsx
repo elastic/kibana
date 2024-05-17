@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 import type { ColumnHeaderOptions } from '../../../../../../../common/types';
 import {
@@ -20,8 +20,8 @@ import type { OnFilterChange } from '../../../events';
 import type { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
-import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
+import { getNewSortDirectionOnClick } from './helpers';
 import { isEqlOnSelector } from './selectors';
 
 interface Props {

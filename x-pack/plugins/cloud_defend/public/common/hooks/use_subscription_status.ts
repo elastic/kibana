@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { useContext } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { SetupContext } from '../../application/setup_context';
 import { isSubscriptionAllowed } from '../../../common/utils/subscription';
+import { SetupContext } from '../../application/setup_context';
 import { useKibana } from './use_kibana';
 
 const SUBSCRIPTION_QUERY_KEY = 'cloud_defend_subscription_query_key';

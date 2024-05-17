@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { prefixedOutputLogger } from '../../../../scripts/endpoint/common/utils';
 import type { RuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
+import { prefixedOutputLogger } from '../../../../scripts/endpoint/common/utils';
 
 const RUNTIME_SERVICES_CACHE = new WeakMap<Cypress.PluginConfigOptions, RuntimeServices>();
 

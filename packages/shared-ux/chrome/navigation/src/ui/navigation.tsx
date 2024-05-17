@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import type {
   ChromeProjectNavigationNode,
-  RootNavigationItemDefinition,
-  RecentlyAccessedDefinition,
   NavigationTreeDefinitionUI,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
+import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { EuiCollapsibleNavBeta } from '@elastic/eui';
-import {
-  RecentlyAccessed,
-  NavigationPanel,
-  PanelProvider,
-  type PanelContentProvider,
-} from './components';
 import { useNavigation as useNavigationService } from '../services';
+import {
+  NavigationPanel,
+  type PanelContentProvider,
+  PanelProvider,
+  RecentlyAccessed,
+} from './components';
 import { NavigationSectionUI } from './components/navigation_section_ui';
 
 const isRecentlyAccessedDefinition = (

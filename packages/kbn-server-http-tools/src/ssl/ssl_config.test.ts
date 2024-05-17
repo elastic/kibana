@@ -12,7 +12,7 @@ import {
   mockReadPkcs12Truststore,
 } from './ssl_config.test.mocks';
 
-import { sslSchema, SslConfig } from './ssl_config';
+import { SslConfig, sslSchema } from './ssl_config';
 
 describe('#SslConfig', () => {
   const createConfig = (obj: any) => new SslConfig(sslSchema.validate(obj));
@@ -365,8 +365,9 @@ describe('#sslSchema', () => {
 - [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
 - [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
 `);
-      expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
-        .toThrowErrorMatchingInlineSnapshot(`
+      expect(() =>
+        sslSchema.validate(allKnownWithOneUnknownProtocols)
+      ).toThrowErrorMatchingInlineSnapshot(`
 "[supportedProtocols.4]: types that failed validation:
 - [supportedProtocols.4.0]: expected value to equal [TLSv1]
 - [supportedProtocols.4.1]: expected value to equal [TLSv1.1]

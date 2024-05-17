@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parsedPidOrEntityIdParameter, parsedExecuteTimeout } from './utils';
+import { parsedExecuteTimeout, parsedPidOrEntityIdParameter } from './utils';
 
 describe('Endpoint Responder - Utilities', () => {
   describe('when using parsedPidOrEntityIdParameter()', () => {

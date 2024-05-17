@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { map, omit } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
 import type { FieldErrors } from 'react-hook-form';
 import { useFieldArray } from 'react-hook-form';
-import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { map, omit } from 'lodash';
+import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { usePack } from '../../packs/use_pack';
-import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import LiveQueryQueryField from '../../live_queries/form/live_query_query_field';
+import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
+import { usePack } from '../../packs/use_pack';
 import { PackFieldWrapper } from './pack_field_wrapper';
 
 interface OsqueryResponseActionsValues {

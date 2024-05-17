@@ -11,19 +11,19 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
-import * as i18n from './translations';
-import { KpiPanel } from '../common/components';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { FieldSelection } from '../../../../common/components/field_selection';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { KpiPanel } from '../common/components';
+import * as i18n from './translations';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 

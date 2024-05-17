@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isCrossClusterSearch } from './is_cross_cluster_search';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { isCrossClusterSearch } from './is_cross_cluster_search';
 
 describe('isCrossClusterSearch', () => {
   it('returns false when there are no remote clusters in APM indices', () => {

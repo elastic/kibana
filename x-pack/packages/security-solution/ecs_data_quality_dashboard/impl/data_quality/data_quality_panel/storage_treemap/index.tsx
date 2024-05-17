@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type {
   Datum,
   ElementClickListener,
@@ -20,19 +19,20 @@ import type {
 } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { ChartLegendItem } from '../../ecs_summary_donut_chart/chart_legend/chart_legend_item';
+import { PatternRollup, SelectedIndex } from '../../types';
 import {
   FlattenedBucket,
   getLayersMultiDimensional,
   getLegendItems,
   getPathToFlattenedBucketMap,
 } from '../body/data_quality_details/storage_details/helpers';
-import { ChartLegendItem } from '../../ecs_summary_donut_chart/chart_legend/chart_legend_item';
-import { NoData } from './no_data';
 import { ChartFlexItem, LegendContainer } from '../tabs/styles';
-import { PatternRollup, SelectedIndex } from '../../types';
+import { NoData } from './no_data';
 
 export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 export const LEGEND_WIDTH = 220; // px

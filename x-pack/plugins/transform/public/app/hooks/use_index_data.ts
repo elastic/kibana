@@ -11,37 +11,37 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { buildBaseFilterCriteria, isDefaultQuery, matchAllQuery } from '@kbn/ml-query-utils';
 import {
-  getFieldType,
-  getDataGridSchemaFromKibanaFieldType,
+  type EsSorting,
+  INDEX_STATUS,
+  type UseIndexDataReturnType,
   getDataGridSchemaFromESFieldType,
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldType,
   getFieldsFromKibanaDataView,
+  getProcessedFields,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
-  getProcessedFields,
-  type EsSorting,
-  type UseIndexDataReturnType,
-  INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { buildBaseFilterCriteria, isDefaultQuery, matchAllQuery } from '@kbn/ml-query-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
+import { getErrorMessage } from '../../../common/utils/errors';
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
   removeKeywordPostfix,
 } from '../../../common/utils/field_utils';
-import { getErrorMessage } from '../../../common/utils/errors';
 
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import type { TransformConfigQuery } from '../common';
-import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
-import type { SearchItems } from './use_search_items';
-import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
 import { useDataSearch } from './use_data_search';
+import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
+import type { SearchItems } from './use_search_items';
 
 export const useIndexData = (
   dataView: SearchItems['dataView'],

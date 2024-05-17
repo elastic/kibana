@@ -7,23 +7,23 @@
 
 import React from 'react';
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelAlertTab } from '.';
-import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import { formatDate } from '@elastic/eui';
 import { fireEvent } from '@testing-library/react';
-import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE, ALERTS_TAB_EMPTY_STATE_TEST_ID } from '.';
+import { DetailPanelAlertTab } from '.';
+import { ALERTS_TAB_EMPTY_STATE_TEST_ID, INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE } from '.';
+import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import { useDateFormat } from '../../hooks';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import {
-  ALERT_LIST_ITEM_TEST_ID,
-  ALERT_LIST_ITEM_ARGS_TEST_ID,
-  ALERT_LIST_ITEM_TIMESTAMP_TEST_ID,
-} from '../detail_panel_alert_list_item';
-import {
-  ALERT_GROUP_ITEM_TEST_ID,
   ALERT_GROUP_ITEM_COUNT_TEST_ID,
+  ALERT_GROUP_ITEM_TEST_ID,
   ALERT_GROUP_ITEM_TITLE_TEST_ID,
 } from '../detail_panel_alert_group_item';
-import { useDateFormat } from '../../hooks';
-import { formatDate } from '@elastic/eui';
+import {
+  ALERT_LIST_ITEM_ARGS_TEST_ID,
+  ALERT_LIST_ITEM_TEST_ID,
+  ALERT_LIST_ITEM_TIMESTAMP_TEST_ID,
+} from '../detail_panel_alert_list_item';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;

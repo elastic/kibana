@@ -7,7 +7,7 @@
  */
 
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../../common/enums';
-import type { Series, Panel } from '../../../../common/types';
+import type { Panel, Series } from '../../../../common/types';
 
 const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
 

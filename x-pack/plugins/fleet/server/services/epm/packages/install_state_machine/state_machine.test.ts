@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
+import { createAppContextStartContractMock } from '../../../../mocks';
 
 import { handleState } from './state_machine';
 

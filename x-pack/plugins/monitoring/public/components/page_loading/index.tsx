@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiPage, EuiPageBody, EuiPageTemplate, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPage, EuiPageBody, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 
 function PageLoadingUI() {
   return (

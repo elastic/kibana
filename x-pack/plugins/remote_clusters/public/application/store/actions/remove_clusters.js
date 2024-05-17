@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { toasts } from '../../services/notification';
 import { UIM_CLUSTER_REMOVE, UIM_CLUSTER_REMOVE_MANY } from '../../constants';
+import { toasts } from '../../services/notification';
 
 import {
+  METRIC_TYPE,
   removeClusterRequest as sendRemoveClusterRequest,
   trackUiMetric,
-  METRIC_TYPE,
 } from '../../services';
 
-import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
+import { REMOVE_CLUSTERS_FINISH, REMOVE_CLUSTERS_START } from '../action_types';
 
-import { closeDetailPanel } from './detail_panel';
 import { getDetailPanelClusterName } from '../selectors';
+import { closeDetailPanel } from './detail_panel';
 
 function getErrorTitle(count, name = null) {
   if (count === 1) {

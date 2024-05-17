@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { ConsoleFooter } from './components/console_footer';
-import { ConsoleHeader } from './components/console_header';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { CommandInputProps } from './components/command_input';
 import { CommandInput } from './components/command_input';
-import type { ConsoleProps } from './types';
-import { ConsoleStateProvider } from './components/console_state';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { ConsoleFooter } from './components/console_footer';
+import { ConsoleHeader } from './components/console_header';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
+import { ConsoleStateProvider } from './components/console_state';
 import { HistoryOutput } from './components/history_output';
 import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item';
+import type { ConsoleProps } from './types';
 
 const ConsoleWindow = styled.div`
   height: 100%;

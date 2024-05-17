@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiStat, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import styled from 'styled-components';
+import * as React from 'react';
 import { useContext, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip, EuiIconTip } from '@elastic/eui';
+import styled from 'styled-components';
 import { useClientMetricsQuery } from '../../../../hooks/use_client_metrics_query';
+import { CsmSharedContext } from '../csm_shared_context';
 import { I18LABELS } from '../translations';
 import { formatToSec } from '../ux_metrics/key_ux_metrics';
-import { CsmSharedContext } from '../csm_shared_context';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
   flex-direction: row;

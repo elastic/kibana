@@ -11,8 +11,8 @@ import {
   ALERT_SEVERITY,
   ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
-import { EventKind } from '../constants/event_kinds';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { EventKind } from '../constants/event_kinds';
 
 export const mockFieldData: Record<string, string[]> = {
   [ALERT_SEVERITY]: ['low'],

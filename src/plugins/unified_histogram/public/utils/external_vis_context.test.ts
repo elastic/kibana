@@ -8,15 +8,15 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { getLensVisMock } from '../__mocks__/lens_vis';
+import { tableMock, tableQueryMock } from '../__mocks__/table';
+import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 import {
   canImportVisContext,
   exportVisContext,
   isSuggestionShapeAndVisContextCompatible,
 } from './external_vis_context';
-import { getLensVisMock } from '../__mocks__/lens_vis';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
-import { tableMock, tableQueryMock } from '../__mocks__/table';
-import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 
 describe('external_vis_context', () => {
   const dataView: DataView = dataViewWithTimefieldMock;

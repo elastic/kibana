@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type {
-  SuggestionRequest,
-  TableSuggestionColumn,
-  VisualizationSuggestion,
-} from '../../types';
-import { PieVisualizationState } from '../../../common/types';
+import { partition } from 'lodash';
+import { layerTypes } from '../..';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
 } from '../../../common/constants';
-import { isPartitionShape } from '../../../common/visualizations';
+import { PieVisualizationState } from '../../../common/types';
 import type { PieChartType } from '../../../common/types';
-import { PartitionChartsMeta } from './partition_charts_meta';
-import { layerTypes } from '../..';
+import { isPartitionShape } from '../../../common/visualizations';
+import type {
+  SuggestionRequest,
+  TableSuggestionColumn,
+  VisualizationSuggestion,
+} from '../../types';
 import { getColorMappingDefaults } from '../../utils';
+import { PartitionChartsMeta } from './partition_charts_meta';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
@@ -144,8 +144,8 @@ export function suggestions({
                 colorMapping: !mainPalette
                   ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
-                  ? mainPalette.value
-                  : state.layers[0].colorMapping,
+                    ? mainPalette.value
+                    : state.layers[0].colorMapping,
               }
             : {
                 layerId: table.layerId,
@@ -159,8 +159,8 @@ export function suggestions({
                 colorMapping: !mainPalette
                   ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
-                  ? mainPalette.value
-                  : undefined,
+                    ? mainPalette.value
+                    : undefined,
               },
         ],
       },

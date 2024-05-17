@@ -7,8 +7,8 @@
  */
 
 import { configServiceMock } from '@kbn/config-mocks';
-import { ensureValidConfiguration } from './ensure_valid_configuration';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { ensureValidConfiguration } from './ensure_valid_configuration';
 
 describe('ensureValidConfiguration', () => {
   let configService: ReturnType<typeof configServiceMock.create>;

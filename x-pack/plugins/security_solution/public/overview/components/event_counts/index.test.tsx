@@ -8,9 +8,9 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { TestProviders, mockIndexPattern } from '../../../common/mock';
 import type { OverviewHostProps } from '../overview_host';
 import type { OverviewNetworkProps } from '../overview_network';
-import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { EventCounts } from '.';
 

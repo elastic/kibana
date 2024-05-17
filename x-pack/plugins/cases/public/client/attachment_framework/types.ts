@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EuiButtonProps, EuiCommentProps, IconType } from '@elastic/eui';
 import type React from 'react';
-import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,

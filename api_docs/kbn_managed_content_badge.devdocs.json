@@ -26,9 +26,7 @@
             "tags": [],
             "label": "tooltipText",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-managed-content-badge/index.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -9,7 +9,7 @@ import {
   SINGLE_DATASET_LOCATOR_ID,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { Query, AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { useSelector } from '@xstate/react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';

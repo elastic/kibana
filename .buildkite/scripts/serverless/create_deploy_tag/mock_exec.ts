@@ -10,7 +10,7 @@
  * This file has a wrapper for exec, that stores answers for queries from a file, to be able to use it in tests.
  */
 
-import { execSync, ExecSyncOptions } from 'child_process';
+import { ExecSyncOptions, execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { getKibanaDir } from '#pipeline-utils';

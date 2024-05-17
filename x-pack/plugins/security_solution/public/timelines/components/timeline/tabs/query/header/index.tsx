@@ -6,26 +6,26 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import type { FilterManager } from '@kbn/data-plugin/public';
-import { InPortal } from 'react-reverse-portal';
-import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import styled from '@emotion/styled';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
-import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
-import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
+import React, { useMemo } from 'react';
+import { InPortal } from 'react-reverse-portal';
 import type { TimelineStatusLiteralWithNull } from '../../../../../../../common/api/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
-import { timelineSelectors } from '../../../../../store';
+import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
+import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
+import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
+import { timelineSelectors } from '../../../../../store';
 import { timelineDefaults } from '../../../../../store/defaults';
-import * as i18n from './translations';
-import { StatefulSearchOrFilter } from '../../../search_or_filter';
 import { DataProviders } from '../../../data_providers';
-import { StyledEuiFlyoutHeader, EventsCountBadge, TabHeaderContainer } from '../../shared/layout';
+import { StatefulSearchOrFilter } from '../../../search_or_filter';
+import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
+import * as i18n from './translations';
 
 interface Props {
   activeTab: TimelineTabs;

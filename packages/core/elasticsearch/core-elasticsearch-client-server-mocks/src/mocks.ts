@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Client, TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
-import type { PublicKeys } from '@kbn/utility-types';
-import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
+import type { Client, TransportRequestOptions, TransportResult } from '@elastic/elasticsearch';
 import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
+import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
+import type { PublicKeys } from '@kbn/utility-types';
 
 const omittedProps = [
   'diagnostic',
@@ -56,7 +56,7 @@ export interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInst
 
 const createMockedApi = <
   T = unknown,
-  Y extends [any, TransportRequestOptions] = [any, TransportRequestOptions]
+  Y extends [any, TransportRequestOptions] = [any, TransportRequestOptions],
 >(): ClientApiMockInstance<T, Y> => {
   const mock: ClientApiMockInstance<T, Y> = jest.fn() as any;
 

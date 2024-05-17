@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import { LandingPage } from './landing';
 import { Router } from '@kbn/shared-ux-router';
+import { render } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { LandingPage } from './landing';
 
 jest.mock('../../common/components/landing_page');
 jest.mock('../../common/components/page_wrapper', () => ({

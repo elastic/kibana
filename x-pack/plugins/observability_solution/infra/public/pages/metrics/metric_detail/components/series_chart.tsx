@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   AreaSeries,
-  BarSeries,
-  ScaleType,
-  RecursivePartial,
-  BarSeriesStyle,
   AreaSeriesStyle,
+  BarSeries,
+  BarSeriesStyle,
+  RecursivePartial,
+  ScaleType,
 } from '@elastic/charts';
 import { InventoryVisType } from '@kbn/metrics-data-access-plugin/common';
+import React from 'react';
 import { NodeDetailsDataSeries } from '../../../../../common/http_api/node_details_api';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 

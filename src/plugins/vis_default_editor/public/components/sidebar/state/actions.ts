@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Vis, VisParams, Schema } from '@kbn/visualizations-plugin/public';
 import type { IAggConfig } from '@kbn/data-plugin/public';
+import { Schema, Vis, VisParams } from '@kbn/visualizations-plugin/public';
 
 import { EditorStateActionTypes } from './constants';
 

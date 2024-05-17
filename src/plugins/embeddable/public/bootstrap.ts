@@ -8,14 +8,14 @@
 
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
+  cellValueTrigger,
   contextMenuTrigger,
   multiValueClickTrigger,
   panelBadgeTrigger,
+  panelHoverTrigger,
   panelNotificationTrigger,
   selectRangeTrigger,
   valueClickTrigger,
-  cellValueTrigger,
-  panelHoverTrigger,
 } from './lib';
 
 /**

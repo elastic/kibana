@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 /** Only exported for tests */
 export const MISSING_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMissingDismissed`;

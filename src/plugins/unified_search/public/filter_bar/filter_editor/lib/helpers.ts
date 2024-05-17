@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter, isCombinedFilter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { validateParams } from './filter_editor_utils';
 
 export const strings = {

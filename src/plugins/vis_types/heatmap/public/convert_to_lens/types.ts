@@ -7,7 +7,7 @@
  */
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { NavigateToLensContext, HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import { HeatmapConfiguration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams } from '../types';
 

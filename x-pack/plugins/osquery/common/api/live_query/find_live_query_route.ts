@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 
 export const findLiveQueryRequestQuerySchema = t.type({
   kuery: t.union([t.string, t.undefined]),

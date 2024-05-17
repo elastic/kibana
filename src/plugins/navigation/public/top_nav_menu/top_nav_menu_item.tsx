@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { upperFirst, isFunction } from 'lodash';
+import { EuiBetaBadge, EuiButton, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { isFunction, upperFirst } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {

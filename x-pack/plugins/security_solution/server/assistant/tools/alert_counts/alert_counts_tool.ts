@@ -8,10 +8,10 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DynamicTool } from '@langchain/core/tools';
 
-import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { getAlertsCountQuery } from './get_alert_counts_query';
+import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { APP_UI_ID } from '../../../../common';
+import { getAlertsCountQuery } from './get_alert_counts_query';
 
 export interface AlertCountsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;

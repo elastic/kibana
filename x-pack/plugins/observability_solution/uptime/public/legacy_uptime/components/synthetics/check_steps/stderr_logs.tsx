@@ -17,18 +17,18 @@ import {
   EuiTitle,
   formatDate,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { EuiInMemoryTable } from '@elastic/eui';
-import moment from 'moment';
-import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useStdErrorLogs } from './use_std_error_logs';
+import moment from 'moment';
+import { useSelector } from 'react-redux';
+import { Ping } from '../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../plugin';
 import { selectDynamicSettings } from '../../../state/selectors';
-import { Ping } from '../../../../../common/runtime_types';
+import { useStdErrorLogs } from './use_std_error_logs';
 
 export const StdErrorLogs = ({
   monitorId,

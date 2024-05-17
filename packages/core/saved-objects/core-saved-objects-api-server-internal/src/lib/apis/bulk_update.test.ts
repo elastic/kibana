@@ -9,49 +9,49 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
-  pointInTimeFinderMock,
   mockGetBulkOperationError,
   mockGetCurrentTime,
   mockGetSearchDsl,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
-import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Payload } from '@hapi/boom';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsRepository } from '../repository';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   SavedObjectsSerializer,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  NAMESPACE_AGNOSTIC_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   HIDDEN_TYPE,
-  mockTimestampFields,
-  mockTimestamp,
-  mappings,
-  createRegistry,
-  createDocumentMigrator,
-  getMockMgetResponse,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  NAMESPACE_AGNOSTIC_TYPE,
   type TypeIdTuple,
-  createSpySerializer,
   bulkUpdateSuccess,
-  getMockBulkUpdateResponse,
-  expectErrorResult,
-  expectErrorNotFound,
-  expectError,
   createBadRequestErrorPayload,
+  createDocumentMigrator,
+  createRegistry,
+  createSpySerializer,
+  expectError,
+  expectErrorNotFound,
+  expectErrorResult,
   expectUpdateResult,
+  getMockBulkUpdateResponse,
+  getMockMgetResponse,
+  mappings,
+  mockTimestamp,
+  mockTimestampFields,
 } from '../../test_helpers/repository.test.common';
 
 interface ExpectedErrorResult {

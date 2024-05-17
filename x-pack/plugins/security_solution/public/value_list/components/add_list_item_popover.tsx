@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFieldText,
@@ -14,19 +7,26 @@ import {
   EuiFormRow,
   EuiPopover,
 } from '@elastic/eui';
-import { useFormik } from 'formik';
 import { useCreateListItemMutation } from '@kbn/securitysolution-list-hooks';
+import { useFormik } from 'formik';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useState } from 'react';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import {
-  ADD_LIST_ITEM,
-  SUCCESSFULLY_ADDED_ITEM,
-  VALUE_REQUIRED,
-  VALUE_LABEL,
-  ADDING_LIST_ITEM_BUTTON,
-  ADD_LIST_ITEM_BUTTON,
-} from '../translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import {
+  ADDING_LIST_ITEM_BUTTON,
+  ADD_LIST_ITEM,
+  ADD_LIST_ITEM_BUTTON,
+  SUCCESSFULLY_ADDED_ITEM,
+  VALUE_LABEL,
+  VALUE_REQUIRED,
+} from '../translations';
 
 export const AddListItemPopover = ({ listId }: { listId: string }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

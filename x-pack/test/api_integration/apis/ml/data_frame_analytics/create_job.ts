@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import {
-  type DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const jobTypes = Object.values(ANALYSIS_CONFIG_TYPE);
-  type JobType = typeof jobTypes[number];
+  type JobType = (typeof jobTypes)[number];
   const jobAnalyses = {
     classification: {
       dependent_variable: 'y',

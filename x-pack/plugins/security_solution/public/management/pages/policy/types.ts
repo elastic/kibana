@@ -6,24 +6,24 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import type {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import type {
   AppLocation,
   Immutable,
-  ProtectionFields,
-  PolicyData,
-  UIPolicyConfig,
   MaybeImmutable,
+  PolicyData,
+  ProtectionFields,
+  UIPolicyConfig,
 } from '../../../../common/endpoint/types';
-import type { ServerApiError } from '../../../common/types';
 import type { ImmutableMiddlewareAPI } from '../../../common/store';
 import type { AppAction } from '../../../common/store/actions';
+import type { ServerApiError } from '../../../common/types';
 
 export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 

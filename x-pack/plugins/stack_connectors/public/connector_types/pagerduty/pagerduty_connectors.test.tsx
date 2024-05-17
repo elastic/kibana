@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import PagerDutyActionConnectorFields from './pagerduty_connectors';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import PagerDutyActionConnectorFields from './pagerduty_connectors';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

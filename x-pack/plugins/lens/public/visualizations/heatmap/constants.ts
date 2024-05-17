@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { IconChartHeatmap } from '@kbn/chart-icons';
+import { i18n } from '@kbn/i18n';
 
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 

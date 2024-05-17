@@ -6,8 +6,8 @@
  */
 
 import { TransformSource } from '@elastic/elasticsearch/lib/api/types';
-import { getSLOTransformTemplate } from './slo_transform_template';
 import { createKQLCustomIndicator, createSLO } from '../../services/fixtures/slo';
+import { getSLOTransformTemplate } from './slo_transform_template';
 
 describe('slo transform template', () => {
   const transformId = 'irrelevant';

@@ -7,9 +7,9 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { shapeRendererFactory, progressRendererFactory } from './expression_renderers';
-import { shapeFunction, progressFunction } from '../common/expression_functions';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { progressFunction, shapeFunction } from '../common/expression_functions';
+import { progressRendererFactory, shapeRendererFactory } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIconTip,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { discardChanges, EditorAction } from './state';
+import { EditorAction, discardChanges } from './state';
 
 interface DefaultEditorControlsProps {
   applyChanges(): void;

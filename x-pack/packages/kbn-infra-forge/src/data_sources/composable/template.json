@@ -10,9 +10,7 @@
     "ecs_8.0.0_metricset",
     "ecs_8.0.0_system"
   ],
-  "index_patterns": [
-    "kbn-data-forge-fake_hosts"
-  ],
+  "index_patterns": ["kbn-data-forge-fake_hosts"],
   "priority": 1,
   "template": {
     "mappings": {

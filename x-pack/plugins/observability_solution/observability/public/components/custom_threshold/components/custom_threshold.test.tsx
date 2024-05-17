@@ -8,9 +8,9 @@
 import { LIGHT_THEME } from '@elastic/charts';
 
 import { render } from '@testing-library/react';
-import { Props, Threshold } from './custom_threshold';
 import React from 'react';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Props, Threshold } from './custom_threshold';
 
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 const has = _.has;
 
 const getRootCause = (err: Record<string, any> | string) => _.get(err, 'resp.error.root_cause');

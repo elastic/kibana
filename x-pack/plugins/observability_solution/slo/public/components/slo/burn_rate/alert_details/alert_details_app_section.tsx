@@ -6,12 +6,12 @@
  */
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { AlertSummaryField } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import React, { useEffect } from 'react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
-import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
+import { useKibana } from '../../../../utils/kibana_react';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
+import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 import { BurnRateAlert, BurnRateRule } from './types';
 
 interface AppSectionProps {

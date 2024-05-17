@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
-import { registerActionStateRoutes } from './state';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
+import { registerActionStateRoutes } from './state';
 
 interface CallRouteInterface {
   authz?: Partial<EndpointAuthz>;

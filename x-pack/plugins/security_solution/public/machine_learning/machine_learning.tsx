@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React from 'react';
 import { useRootNavLink } from '../common/links/nav_links';
 
 export const MachineLearning: React.FC = () => {

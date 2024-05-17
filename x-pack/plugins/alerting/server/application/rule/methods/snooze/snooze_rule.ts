@@ -7,20 +7,20 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { getRuleSavedObject } from '../../../../rules_client/lib';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
+import { updateRuleSo } from '../../../../data/rule';
+import { RuleMutedError } from '../../../../lib/errors/rule_muted';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { validateSnoozeStartDate } from '../../../../lib/validate_snooze_date';
-import { RuleMutedError } from '../../../../lib/errors/rule_muted';
-import { RulesClientContext } from '../../../../rules_client/types';
 import {
   getSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
 } from '../../../../rules_client/common';
-import { updateRuleSo } from '../../../../data/rule';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 

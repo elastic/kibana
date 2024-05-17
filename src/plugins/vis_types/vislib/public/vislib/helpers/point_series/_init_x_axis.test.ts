@@ -10,10 +10,10 @@ import moment from 'moment';
 
 import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
-import { initXAxis } from './_init_x_axis';
+import { Column, Table } from '../../types';
 import { makeFakeXAspect } from './_fake_x_aspect';
+import { initXAxis } from './_init_x_axis';
 import { Aspects, Chart, DateHistogramOrdered, HistogramOrdered } from './point_series';
-import { Table, Column } from '../../types';
 
 describe('initXAxis', function () {
   let chart: Chart;

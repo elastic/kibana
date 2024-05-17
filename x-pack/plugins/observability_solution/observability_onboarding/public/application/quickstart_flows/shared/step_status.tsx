@@ -6,13 +6,13 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStepsProps,
-  EuiPanel,
-  EuiText,
-  EuiCallOut,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiStepsProps,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 

@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Readable } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 

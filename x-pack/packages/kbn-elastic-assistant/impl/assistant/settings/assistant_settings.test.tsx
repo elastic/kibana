@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { alertConvo, customConvo, welcomeConvo } from '../../mock/conversation';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import { useAssistantContext } from '../../assistant_context';
-import { fireEvent, render, act } from '@testing-library/react';
+import { alertConvo, customConvo, welcomeConvo } from '../../mock/conversation';
+import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import {
-  AssistantSettings,
   ANONYMIZATION_TAB,
+  AssistantSettings,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './assistant_settings';
-import React from 'react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,

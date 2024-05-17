@@ -12,15 +12,15 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
 } from '@kbn/core/public';
+import { OBLT_PROFILING_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
-import { OBLT_PROFILING_APP_ID } from '@kbn/deeplinks-observability';
+import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
 export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;
@@ -96,7 +96,7 @@ export class ProfilingPlugin implements Plugin {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./app');
@@ -136,7 +136,7 @@ export class ProfilingPlugin implements Plugin {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
-          unknown
+          unknown,
         ];
         return {
           coreStart,

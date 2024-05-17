@@ -7,18 +7,18 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import type { TransformListRowWithStats } from '../../../../common/transform_list';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import type { TransformListAction, TransformListRow } from '../../../../common';
-import { useTransformCapabilities, useResetTransforms } from '../../../../hooks';
+import { useResetTransforms, useTransformCapabilities } from '../../../../hooks';
 
 import {
-  resetActionNameText,
-  isResetActionDisabled,
   ResetActionName,
   getResetActionDisabledMessage,
+  isResetActionDisabled,
+  resetActionNameText,
 } from './reset_action_name';
 
 export type ResetAction = ReturnType<typeof useResetAction>;

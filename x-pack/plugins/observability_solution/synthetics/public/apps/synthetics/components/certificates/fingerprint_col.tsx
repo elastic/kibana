@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 import { Cert } from '../../../../../common/runtime_types';
 import { COPY_FINGERPRINT } from './translations';

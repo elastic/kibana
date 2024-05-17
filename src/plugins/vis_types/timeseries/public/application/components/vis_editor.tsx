@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import * as Rx from 'rxjs';
-import { share } from 'rxjs';
-import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import { css } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
+import { debounce, isEmpty, isEqual } from 'lodash';
+import React, { Component } from 'react';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs';
 
 import type { TimeRange } from '@kbn/es-query';
 import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
-import { VisEditorVisualization } from './vis_editor_visualization';
-import { PanelConfig } from './panel_config';
-import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
-import { VisPicker } from './vis_picker';
-import { fetchFields, VisFields } from '../lib/fetch_fields';
-import { getDataStart, getCoreStart, getUnifiedSearchStart } from '../../services';
+import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
+import { getCoreStart, getDataStart, getUnifiedSearchStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
+import { VisFields, fetchFields } from '../lib/fetch_fields';
+import { PanelConfig } from './panel_config';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
+import { VisEditorVisualization } from './vis_editor_visualization';
+import { VisPicker } from './vis_picker';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';

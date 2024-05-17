@@ -8,8 +8,8 @@
 
 import { get, omit } from 'lodash';
 import fetch from 'node-fetch';
-import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
+import { CloudService } from './cloud_service';
 
 // 2017-04-02 is the first GA release of this API
 const SERVICE_ENDPOINT = 'http://169.254.169.254/metadata/instance?api-version=2017-04-02';

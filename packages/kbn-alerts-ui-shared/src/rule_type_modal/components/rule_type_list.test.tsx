@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render, screen, within } from '@testing-library/react';
-import { RuleTypeList } from './rule_type_list';
+import React from 'react';
 import { RuleTypeWithDescription } from '../types';
+import { RuleTypeList } from './rule_type_list';
 
 const ruleTypes: RuleTypeWithDescription[] = [
   {

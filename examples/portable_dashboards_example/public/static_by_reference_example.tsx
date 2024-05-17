@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { css } from '@emotion/react';
+import React from 'react';
 
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { DashboardCreationOptions, DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { Filter, buildPhraseFilter } from '@kbn/es-query';
 
 export const StaticByReferenceExample = ({
   dashboardId,

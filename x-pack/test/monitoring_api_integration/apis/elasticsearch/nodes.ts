@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import nodesResponse from '../../fixtures/elasticsearch/nodes.json';
 import nodeDetailResponse from '../../fixtures/elasticsearch/node_detail.json';
 import nodeDetailAdvancedResponse from '../../fixtures/elasticsearch/node_detail_advanced.json';
+import nodesResponse from '../../fixtures/elasticsearch/nodes.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

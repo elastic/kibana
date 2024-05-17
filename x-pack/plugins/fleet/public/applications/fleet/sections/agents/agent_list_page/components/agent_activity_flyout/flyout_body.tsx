@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -13,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
 } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +24,7 @@ import { Loading } from '../../../components';
 import { ActivitySection } from './activity_section';
 import { GoToDate } from './go_to_date';
 
-import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
+import { getOtherDaysActions, getTodayActions } from './agent_activity_helper';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {

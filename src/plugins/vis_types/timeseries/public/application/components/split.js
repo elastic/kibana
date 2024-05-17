@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { get } from 'lodash';
-import { SplitByTerms } from './splits/terms';
-import { SplitByFilter } from './splits/filter';
-import { SplitByFilters } from './splits/filters';
-import { SplitByEverything } from './splits/everything';
-import { SplitUnsupported } from './splits/unsupported_split';
 import { isGroupByFieldsEnabled } from '../../../common/check_ui_restrictions';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
+import { SplitByEverything } from './splits/everything';
+import { SplitByFilter } from './splits/filter';
+import { SplitByFilters } from './splits/filters';
+import { SplitByTerms } from './splits/terms';
+import { SplitUnsupported } from './splits/unsupported_split';
 
 const SPLIT_MODES = {
   FILTERS: 'filters',

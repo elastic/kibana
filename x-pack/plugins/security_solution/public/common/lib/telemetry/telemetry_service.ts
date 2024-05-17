@@ -7,13 +7,13 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { of } from 'rxjs';
 
-import type {
-  TelemetryServiceSetupParams,
-  TelemetryClientStart,
-  TelemetryEventParams,
-} from './types';
 import { telemetryEvents } from './events/telemetry_events';
 import { TelemetryClient } from './telemetry_client';
+import type {
+  TelemetryClientStart,
+  TelemetryEventParams,
+  TelemetryServiceSetupParams,
+} from './types';
 
 /**
  * Service that interacts with the Core's analytics module

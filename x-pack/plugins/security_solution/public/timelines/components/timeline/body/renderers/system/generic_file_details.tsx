@@ -13,20 +13,20 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 
-import * as i18n from './translations';
-import { NetflowRenderer } from '../netflow';
-import { UserHostWorkingDir } from '../user_host_working_dir';
-import { Details, isProcessStoppedOrTerminationEvent, showVia, TokensFlexItem } from '../helpers';
-import { ProcessDraggableWithNonExistentProcess } from '../process_draggable';
+import { Badge } from '../../../../../../common/components/page';
 import { Args } from '../args';
-import { AuthSsh } from './auth_ssh';
 import { ExitCodeDraggable } from '../exit_code_draggable';
 import { FileDraggable } from '../file_draggable';
 import { FileHash } from '../file_hash';
-import { Package } from './package';
-import { Badge } from '../../../../../../common/components/page';
+import { Details, TokensFlexItem, isProcessStoppedOrTerminationEvent, showVia } from '../helpers';
+import { NetflowRenderer } from '../netflow';
 import { ParentProcessDraggable } from '../parent_process_draggable';
+import { ProcessDraggableWithNonExistentProcess } from '../process_draggable';
 import { ProcessHash } from '../process_hash';
+import { UserHostWorkingDir } from '../user_host_working_dir';
+import { AuthSsh } from './auth_ssh';
+import { Package } from './package';
+import * as i18n from './translations';
 
 interface Props {
   args: string[] | null | undefined;

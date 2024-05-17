@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiCallOut,
@@ -17,8 +14,11 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { WmsClient } from './wms_client';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import _ from 'lodash';
+import React, { Component, Fragment } from 'react';
+import { WmsClient } from './wms_client';
 
 const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {
   defaultMessage: 'Layers',

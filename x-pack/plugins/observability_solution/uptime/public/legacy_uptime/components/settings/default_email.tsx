@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
 import { EuiDescribedFormGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnFieldChangeType } from './certificate_form';
-import { connectorsSelector } from '../../state/alerts/alerts';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { DefaultEmail as DefaultEmailType } from '../../../../common/runtime_types';
 import { UptimePluginServices } from '../../../plugin';
 import { SettingsPageFieldErrors } from '../../pages/settings';
+import { connectorsSelector } from '../../state/alerts/alerts';
+import { OnFieldChangeType } from './certificate_form';
 
 export function DefaultEmail({
   errors,

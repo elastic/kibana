@@ -57,11 +57,14 @@ export const processAggregations = (
     for (const { key, doc_count: size, policies: platformPolicies } of platformTerms.buckets) {
       platforms.push({ name: key, id: key, size });
       if (platformPolicies?.buckets && policies.length > 0) {
-        overlap[key] = platformPolicies.buckets.reduce((acc: { [key: string]: number }, pol) => {
-          acc[pol.key] = pol.doc_count;
+        overlap[key] = platformPolicies.buckets.reduce(
+          (acc: { [key: string]: number }, pol) => {
+            acc[pol.key] = pol.doc_count;
 
-          return acc;
-        }, {} as { [key: string]: number });
+            return acc;
+          },
+          {} as { [key: string]: number }
+        );
       }
     }
   }

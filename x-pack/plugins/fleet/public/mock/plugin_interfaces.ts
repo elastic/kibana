@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UIExtensionsStorage } from '../types';
 import { createExtensionRegistrationCallback } from '../services/ui_extensions';
+import type { UIExtensionsStorage } from '../types';
 
 import type { MockedFleetStart } from './types';
 

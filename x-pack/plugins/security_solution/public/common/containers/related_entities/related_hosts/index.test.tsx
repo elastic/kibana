@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../mock';
 import { useUserRelatedHosts } from '.';
+import { TestProviders } from '../../../mock';
 import { useSearchStrategy } from '../../use_search_strategy';
 
 jest.mock('../../use_search_strategy', () => ({

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { DraggableProvided } from '@hello-pangea/dnd';
+import React from 'react';
 
 export interface BucketContainerProps {
   children: React.ReactNode;

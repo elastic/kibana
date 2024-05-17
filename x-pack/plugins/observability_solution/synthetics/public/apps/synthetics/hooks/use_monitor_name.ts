@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDebounce } from 'react-use';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 
 import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../state';
 

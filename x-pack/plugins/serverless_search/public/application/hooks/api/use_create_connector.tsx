@@ -1,3 +1,5 @@
+import { Connector } from '@kbn/search-connectors';
+import { useMutation } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  */
 import { useEffect } from 'react';
 import { generatePath } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
 import { EDIT_CONNECTOR_PATH } from '../../constants';
 import { useKibanaServices } from '../use_kibana';
 

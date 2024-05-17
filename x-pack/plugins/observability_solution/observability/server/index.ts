@@ -8,17 +8,17 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import type { ObservabilityPluginSetup } from './plugin';
-import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
-import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
+import {
+  WrappedElasticsearchClientError,
+  unwrapEsResponse,
+} from '../common/utils/unwrap_es_response';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
 import { CustomThresholdLocators } from './lib/rules/custom_threshold/custom_threshold_executor';
-import {
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-} from '../common/utils/unwrap_es_response';
+import type { ObservabilityPluginSetup } from './plugin';
+import { Mappings, createOrUpdateIndex } from './utils/create_or_update_index';
+import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
 
 export { rangeQuery, kqlQuery, termQuery, termsQuery, wildcardQuery } from './utils/queries';
 export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';

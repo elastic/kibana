@@ -7,15 +7,15 @@
  */
 
 import { Server as HapiServer } from '@hapi/hapi';
-import type { OpsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 import {
-  ProcessMetricsCollector,
-  OsMetricsCollector,
-  type OpsMetricsCollectorOptions,
-  ServerMetricsCollector,
   ElasticsearchClientsMetricsCollector,
+  type OpsMetricsCollectorOptions,
+  OsMetricsCollector,
+  ProcessMetricsCollector,
+  ServerMetricsCollector,
 } from '@kbn/core-metrics-collectors-server-internal';
+import type { MetricsCollector, OpsMetrics } from '@kbn/core-metrics-server';
 
 export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly processCollector: ProcessMetricsCollector;

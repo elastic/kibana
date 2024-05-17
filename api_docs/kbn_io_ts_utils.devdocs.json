@@ -42,9 +42,7 @@
             "tags": [],
             "label": "literalValue",
             "description": [],
-            "signature": [
-              "LiteralValue"
-            ],
+            "signature": ["LiteralValue"],
             "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -61,9 +59,7 @@
         "tags": [],
         "label": "createPlainError",
         "description": [],
-        "signature": [
-          "(message: string) => Error"
-        ],
+        "signature": ["(message: string) => Error"],
         "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -75,9 +71,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -118,10 +112,7 @@
             "tags": [],
             "label": "runtimeType",
             "description": [],
-            "signature": [
-              "Type",
-              "<DecodedValue, EncodedValue, InputValue>"
-            ],
+            "signature": ["Type", "<DecodedValue, EncodedValue, InputValue>"],
             "path": "packages/kbn-io-ts-utils/src/route_validation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -154,10 +145,7 @@
             "tags": [],
             "label": "runtimeType",
             "description": [],
-            "signature": [
-              "Type",
-              "<DecodedValue, EncodedValue, InputValue>"
-            ],
+            "signature": ["Type", "<DecodedValue, EncodedValue, InputValue>"],
             "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -170,9 +158,7 @@
             "tags": [],
             "label": "createError",
             "description": [],
-            "signature": [
-              "ErrorFactory"
-            ],
+            "signature": ["ErrorFactory"],
             "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -189,9 +175,7 @@
         "tags": [],
         "label": "deepExactRt",
         "description": [],
-        "signature": [
-          "(type: T) => T"
-        ],
+        "signature": ["(type: T) => T"],
         "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -203,9 +187,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -270,11 +252,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "Type",
-              "<any, any, unknown> | ",
-              "ParseableType"
-            ],
+            "signature": ["Type", "<any, any, unknown> | ", "ParseableType"],
             "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -291,11 +269,7 @@
         "tags": [],
         "label": "formatErrors",
         "description": [],
-        "signature": [
-          "(errors: ",
-          "ValidationError",
-          "[]) => string"
-        ],
+        "signature": ["(errors: ", "ValidationError", "[]) => string"],
         "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -307,10 +281,7 @@
             "tags": [],
             "label": "errors",
             "description": [],
-            "signature": [
-              "ValidationError",
-              "[]"
-            ],
+            "signature": ["ValidationError", "[]"],
             "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -327,11 +298,7 @@
         "tags": [],
         "label": "inRangeFromStringRt",
         "description": [],
-        "signature": [
-          "(start: number, end: number) => ",
-          "Type",
-          "<number, number, unknown>"
-        ],
+        "signature": ["(start: number, end: number) => ", "Type", "<number, number, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -343,9 +310,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -358,9 +323,7 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -377,11 +340,7 @@
         "tags": [],
         "label": "inRangeRt",
         "description": [],
-        "signature": [
-          "(start: number, end: number) => ",
-          "Type",
-          "<number, number, unknown>"
-        ],
+        "signature": ["(start: number, end: number) => ", "Type", "<number, number, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -393,9 +352,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -408,9 +365,7 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -453,9 +408,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-io-ts-utils/src/is_greater_or_equal/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -472,11 +425,7 @@
         "tags": [],
         "label": "mergeRt",
         "description": [],
-        "signature": [
-          "(a: T1, b: T2) => ",
-          "MergeType",
-          "<T1, T2>"
-        ],
+        "signature": ["(a: T1, b: T2) => ", "MergeType", "<T1, T2>"],
         "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -488,9 +437,7 @@
             "tags": [],
             "label": "a",
             "description": [],
-            "signature": [
-              "T1"
-            ],
+            "signature": ["T1"],
             "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -503,9 +450,7 @@
             "tags": [],
             "label": "b",
             "description": [],
-            "signature": [
-              "T2"
-            ],
+            "signature": ["T2"],
             "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -546,10 +491,7 @@
             "tags": [],
             "label": "types",
             "description": [],
-            "signature": [
-              "Any",
-              "[]"
-            ],
+            "signature": ["Any", "[]"],
             "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -566,11 +508,7 @@
         "tags": [],
         "label": "strictKeysRt",
         "description": [],
-        "signature": [
-          "(type: T) => ",
-          "Type",
-          "<any, any, unknown>"
-        ],
+        "signature": ["(type: T) => ", "Type", "<any, any, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/strict_keys_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -582,9 +520,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-io-ts-utils/src/strict_keys_rt/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -601,11 +537,7 @@
         "tags": [],
         "label": "throwErrors",
         "description": [],
-        "signature": [
-          "(createError: ErrorFactory) => (errors: ",
-          "Errors",
-          ") => never"
-        ],
+        "signature": ["(createError: ErrorFactory) => (errors: ", "Errors", ") => never"],
         "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -617,9 +549,7 @@
             "tags": [],
             "label": "createError",
             "description": [],
-            "signature": [
-              "ErrorFactory"
-            ],
+            "signature": ["ErrorFactory"],
             "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -654,11 +584,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "Type",
-              "<any, any, unknown> | ",
-              "ParseableType"
-            ],
+            "signature": ["Type", "<any, any, unknown> | ", "ParseableType"],
             "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -823,13 +749,7 @@
         "tags": [],
         "label": "IndexPattern",
         "description": [],
-        "signature": [
-          "string & ",
-          "Brand",
-          "<",
-          "IndexPatternBrand",
-          ">"
-        ],
+        "signature": ["string & ", "Brand", "<", "IndexPatternBrand", ">"],
         "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -892,9 +812,7 @@
         "tags": [],
         "label": "MinimalTimeKey",
         "description": [],
-        "signature": [
-          "{ time: string; tiebreaker: number; }"
-        ],
+        "signature": ["{ time: string; tiebreaker: number; }"],
         "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -949,10 +867,7 @@
         "tags": [],
         "label": "DateFromStringOrNumber",
         "description": [],
-        "signature": [
-          "Type",
-          "<string, string | number, unknown>"
-        ],
+        "signature": ["Type", "<string, string | number, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -965,10 +880,7 @@
         "tags": [],
         "label": "datemathStringRt",
         "description": [],
-        "signature": [
-          "Type",
-          "<string, string, unknown>"
-        ],
+        "signature": ["Type", "<string, string, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/datemath_string_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -981,14 +893,7 @@
         "tags": [],
         "label": "dateRt",
         "description": [],
-        "signature": [
-          "BrandC",
-          "<",
-          "StringC",
-          ", ",
-          "DateBrand",
-          ">"
-        ],
+        "signature": ["BrandC", "<", "StringC", ", ", "DateBrand", ">"],
         "path": "packages/kbn-io-ts-utils/src/date_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1001,14 +906,7 @@
         "tags": [],
         "label": "indexPatternRt",
         "description": [],
-        "signature": [
-          "BrandC",
-          "<",
-          "StringC",
-          ", ",
-          "IndexPatternBrand",
-          ">"
-        ],
+        "signature": ["BrandC", "<", "StringC", ", ", "IndexPatternBrand", ">"],
         "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1021,10 +919,7 @@
         "tags": [],
         "label": "isoToEpochRt",
         "description": [],
-        "signature": [
-          "Type",
-          "<number, string, unknown>"
-        ],
+        "signature": ["Type", "<number, string, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1037,10 +932,7 @@
         "tags": [],
         "label": "isoToEpochSecsRt",
         "description": [],
-        "signature": [
-          "Type",
-          "<number, string, unknown>"
-        ],
+        "signature": ["Type", "<number, string, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_secs_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1053,10 +945,7 @@
         "tags": [],
         "label": "jsonRt",
         "description": [],
-        "signature": [
-          "Type",
-          "<any, string, unknown>"
-        ],
+        "signature": ["Type", "<any, string, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/json_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1115,10 +1004,7 @@
         "tags": [],
         "label": "toBooleanRt",
         "description": [],
-        "signature": [
-          "Type",
-          "<boolean, boolean, unknown>"
-        ],
+        "signature": ["Type", "<boolean, boolean, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/to_boolean_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1131,10 +1017,7 @@
         "tags": [],
         "label": "toNumberRt",
         "description": [],
-        "signature": [
-          "Type",
-          "<number, number, unknown>"
-        ],
+        "signature": ["Type", "<number, number, unknown>"],
         "path": "packages/kbn-io-ts-utils/src/to_number_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,

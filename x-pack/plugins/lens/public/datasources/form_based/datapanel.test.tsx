@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { EuiCallOut, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { DataView } from '@kbn/data-views-plugin/public';
 import {
-  dataViewPluginMocks,
   Start as DataViewPublicStart,
+  dataViewPluginMocks,
 } from '@kbn/data-views-plugin/public/mocks';
-import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { FieldListGrouped } from '@kbn/unified-field-list';
 import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
-import { FieldItem } from '../common/field_item';
-import { act } from 'react-dom/test-utils';
-import { coreMock } from '@kbn/core/public/mocks';
-import { FormBasedPrivateState } from './types';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiCallOut, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
-import { documentField } from './document_field';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { getFieldByNameFactory } from './pure_helpers';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { TermsIndexPatternColumn } from './operations';
-import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
-import { createMockFramePublicAPI } from '../../mocks';
-import { DataViewsState } from '../../state_management';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { act } from 'react-dom/test-utils';
+import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
+import { createMockFramePublicAPI } from '../../mocks';
+import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
+import { DataViewsState } from '../../state_management';
 import { IndexPatternField } from '../../types';
+import { FieldItem } from '../common/field_item';
+import { FormBasedDataPanel, InnerFormBasedDataPanel } from './datapanel';
+import { documentField } from './document_field';
+import { TermsIndexPatternColumn } from './operations';
+import { getFieldByNameFactory } from './pure_helpers';
+import { FormBasedPrivateState } from './types';
 
 const fieldsOne = [
   {
@@ -322,7 +322,7 @@ describe('FormBased Data Panel', () => {
   let defaultProps: Parameters<typeof InnerFormBasedDataPanel>[0] & {
     showNoDataPopover: () => void;
   };
-  let core: ReturnType<typeof coreMock['createStart']>;
+  let core: ReturnType<(typeof coreMock)['createStart']>;
   let dataViews: DataViewPublicStart;
 
   beforeEach(() => {

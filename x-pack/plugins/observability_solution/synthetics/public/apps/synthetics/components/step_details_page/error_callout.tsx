@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { JourneyStep } from '../../../../../common/runtime_types';
 
 export const ErrorCallOut = ({ step }: { step?: JourneyStep }) => {

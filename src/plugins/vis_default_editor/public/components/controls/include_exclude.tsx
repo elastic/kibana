@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
 import { search } from '@kbn/data-plugin/public';
+import React, { useEffect } from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
-import { StringParamEditor } from './string';
 import { SimpleNumberList } from './components/simple_number_list';
+import { StringParamEditor } from './string';
 const { isNumberType } = search.aggs;
 
 export function IncludeExcludeParamEditor(props: AggParamEditorProps<string | Array<number | ''>>) {

@@ -7,10 +7,10 @@
 
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAlertFlyoutVisibility } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { useMonitorId } from '../../../hooks';
 import { anomalyAlertSelector, getAnomalyAlertAction } from '../../../state/alerts/alerts';
+import { selectAlertFlyoutVisibility } from '../../../state/selectors';
 
 export const useAnomalyAlert = () => {
   const { lastRefresh } = useContext(UptimeRefreshContext);

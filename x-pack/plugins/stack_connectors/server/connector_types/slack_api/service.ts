@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
-import { SLACK_CONNECTOR_NAME } from './translations';
-import type {
-  PostMessageSubActionParams,
-  PostBlockkitSubActionParams,
-  SlackApiService,
-  PostMessageResponse,
-  SlackAPiResponse,
-  ValidChannelResponse,
-} from '../../../common/slack_api/types';
+import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import axios, { AxiosResponse } from 'axios';
+import { getOrElse, map } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import {
-  retryResultSeconds,
-  retryResult,
-  serviceErrorResult,
   errorResult,
+  retryResult,
+  retryResultSeconds,
+  serviceErrorResult,
   successResult,
 } from '../../../common/slack_api/lib';
-import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
+import type {
+  PostBlockkitSubActionParams,
+  PostMessageResponse,
+  PostMessageSubActionParams,
+  SlackAPiResponse,
+  SlackApiService,
+  ValidChannelResponse,
+} from '../../../common/slack_api/types';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { SLACK_CONNECTOR_NAME } from './translations';
 
 const buildSlackExecutorErrorResponse = ({
   slackApiError,

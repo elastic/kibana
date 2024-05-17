@@ -7,22 +7,22 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
 
+import { SERVER_APP_ID } from '../../../../../common/constants';
+import {
+  ALERT_ANCESTORS,
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_DEPTH,
+  ALERT_GROUP_ID,
+} from '../../../../../common/field_maps/field_names';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import type { QueryRuleParams } from '../../rule_schema';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
 import { sampleDocNoSortId, sampleRuleGuid } from '../__mocks__/es_results';
 import {
   buildAlertGroupFromSequence,
   objectArrayIntersection,
   objectPairIntersection,
 } from './build_alert_group_from_sequence';
-import { SERVER_APP_ID } from '../../../../../common/constants';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
-import type { QueryRuleParams } from '../../rule_schema';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_GROUP_ID,
-} from '../../../../../common/field_maps/field_names';
 
 const SPACE_ID = 'space';
 const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';

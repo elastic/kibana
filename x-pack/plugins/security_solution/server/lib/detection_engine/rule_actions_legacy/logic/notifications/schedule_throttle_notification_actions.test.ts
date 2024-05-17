@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { scheduleThrottledNotificationActions } from './schedule_throttle_notification_actions';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';
 import { scheduleNotificationActions } from './schedule_notification_actions';
+import { scheduleThrottledNotificationActions } from './schedule_throttle_notification_actions';
 
 jest.mock('./schedule_notification_actions', () => ({
   scheduleNotificationActions: jest.fn(),

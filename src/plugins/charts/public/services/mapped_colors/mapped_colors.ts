@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import Color from 'color';
+import _ from 'lodash';
 
 import { CoreSetup } from '@kbn/core/public';
 

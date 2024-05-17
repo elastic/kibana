@@ -1,3 +1,5 @@
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { EuiAvatarProps } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  */
 import type { CSSProperties } from 'react';
 import React, { memo, useCallback } from 'react';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { EuiAvatarProps } from '@elastic/eui';
 
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 

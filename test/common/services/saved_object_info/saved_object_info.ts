@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Client, HttpConnection } from '@elastic/elasticsearch';
 import url from 'url';
-import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
-import { flow, pipe } from 'fp-ts/function';
-import * as TE from 'fp-ts/lib/TaskEither';
-import * as T from 'fp-ts/lib/Task';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import { Either, chain, fromNullable, getOrElse, toError } from 'fp-ts/Either';
+import { flow, pipe } from 'fp-ts/function';
+import * as T from 'fp-ts/lib/Task';
+import * as TE from 'fp-ts/lib/TaskEither';
 import { FtrService } from '../../ftr_provider_context';
 import { print } from './utils';
 

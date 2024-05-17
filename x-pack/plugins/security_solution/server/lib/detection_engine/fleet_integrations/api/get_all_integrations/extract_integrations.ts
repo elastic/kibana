@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { capitalize } from 'lodash';
 import type { PackageList, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { capitalize } from 'lodash';
 import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations/model/integrations';
 
 export function extractIntegrations(

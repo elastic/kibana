@@ -11,23 +11,23 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import { offsetRt } from '../../../../common/comparison_rt';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
-import { offsetRt } from '../../../../common/comparison_rt';
 import {
-  getMobileErrorGroupPeriods,
   MobileErrorGroupPeriodsResponse,
+  getMobileErrorGroupPeriods,
 } from './get_mobile_error_group_detailed_statistics';
 import {
   MobileErrorGroupMainStatisticsResponse,
   getMobileErrorGroupMainStatistics,
 } from './get_mobile_error_group_main_statistics';
 import {
-  getMobileErrorsTermsByField,
   MobileErrorTermsByFieldResponse,
+  getMobileErrorsTermsByField,
 } from './get_mobile_errors_terms_by_field';
 import { MobileHttpErrorsTimeseries, getMobileHttpErrors } from './get_mobile_http_errors';
 

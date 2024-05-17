@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { stateActionMachine } from './state_action_machine';
 import * as E from 'fp-ts/lib/Either';
+import { stateActionMachine } from './state_action_machine';
 
 describe('state action machine', () => {
   const state = { controlState: 'INIT', count: 1 };

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { SyntheticEvent } from 'react';
-import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
+import type { SyntheticEvent } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink, UserDetailsLink } from '../../../common/components/links';
-import { RiskScoreLevel } from '../severity/common';
-import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
 import type {
   HostRiskScore,
   Maybe,
@@ -21,15 +17,19 @@ import type {
   UserRiskScore,
 } from '../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../common/search_strategy';
-import * as i18n from './translations';
-import { FormattedCount } from '../../../common/components/formatted_number';
 import {
-  SecurityCellActions,
   CellActionsMode,
-  SecurityCellActionsTrigger,
   SecurityCellActionType,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { FormattedCount } from '../../../common/components/formatted_number';
+import { HostDetailsLink, UserDetailsLink } from '../../../common/components/links';
+import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
+import { RiskScoreLevel } from '../severity/common';
+import * as i18n from './translations';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 

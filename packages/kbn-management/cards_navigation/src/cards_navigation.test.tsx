@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { cleanup, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, cleanup } from '@testing-library/react';
 
 import { APP_BASE_PATH, sectionsMock } from '../mocks/mocks';
 import { CardsNavigation } from './cards_navigation';

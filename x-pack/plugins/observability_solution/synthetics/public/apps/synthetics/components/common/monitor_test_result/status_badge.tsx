@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBadge, EuiSkeletonText, EuiThemeComputed, IconColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, IconColor, EuiThemeComputed, EuiSkeletonText } from '@elastic/eui';
+import React from 'react';
 
 type MonitorStatus = 'succeeded' | 'failed' | 'skipped' | 'unknown';
 export const StatusBadge = ({ status }: { status: MonitorStatus }) => {

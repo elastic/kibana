@@ -7,7 +7,6 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { loop } from './utils';
 import type { ExecutionThrottler } from '../../common/execution_throttler';
 import {
   addEndpointIntegrationToAgentPolicy,
@@ -15,6 +14,7 @@ import {
   createAgentPolicy,
 } from '../../common/fleet_services';
 import type { ReportProgressCallback } from './types';
+import { loop } from './utils';
 
 interface CreatePoliciesOptions {
   kbnClient: KbnClient;

@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { getIcon } from '../helpers/style_choices';
-import { WorkspaceField, ServerResultNode } from '../types';
+import { ServerResultNode, WorkspaceField } from '../types';
 
 const DEFAULT_SHARD_SIZE = 5000;
 

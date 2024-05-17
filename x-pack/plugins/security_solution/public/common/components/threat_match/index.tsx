@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ListItemComponent } from './list_item';
+import React, { useCallback, useEffect, useReducer } from 'react';
+import styled from 'styled-components';
 import { AndOrBadge } from '../and_or_badge';
+import { filterItems, getDefaultEmptyEntry, getNewItem } from './helpers';
+import { ListItemComponent } from './list_item';
 import { LogicButtons } from './logic_buttons';
-import type { ThreatMapEntries } from './types';
 import type { State } from './reducer';
 import { reducer } from './reducer';
-import { getDefaultEmptyEntry, getNewItem, filterItems } from './helpers';
+import type { ThreatMapEntries } from './types';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;

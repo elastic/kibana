@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => PluginsServiceMock"
-            ],
+            "signature": ["() => PluginsServiceMock"],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,10 +103,7 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": [
-              "() => ",
-              "InternalPluginsServiceSetup"
-            ],
+            "signature": ["() => ", "InternalPluginsServiceSetup"],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -122,10 +117,7 @@
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
-            "signature": [
-              "() => ",
-              "InternalPluginsServiceStart"
-            ],
+            "signature": ["() => ", "InternalPluginsServiceStart"],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

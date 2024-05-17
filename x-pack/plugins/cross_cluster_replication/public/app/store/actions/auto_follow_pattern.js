@@ -6,21 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getToasts } from '../../services/notifications';
-import { SECTIONS, API_STATUS } from '../../constants';
+import { API_STATUS, SECTIONS } from '../../constants';
 import {
-  loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
-  getAutoFollowPattern as getAutoFollowPatternRequest,
   createAutoFollowPattern as createAutoFollowPatternRequest,
-  updateAutoFollowPattern as updateAutoFollowPatternRequest,
   deleteAutoFollowPattern as deleteAutoFollowPatternRequest,
+  getAutoFollowPattern as getAutoFollowPatternRequest,
+  loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
   pauseAutoFollowPattern as pauseAutoFollowPatternRequest,
   resumeAutoFollowPattern as resumeAutoFollowPatternRequest,
+  updateAutoFollowPattern as updateAutoFollowPatternRequest,
 } from '../../services/api';
+import { getToasts } from '../../services/notifications';
 import { routing } from '../../services/routing';
 import * as t from '../action_types';
-import { sendApiRequest } from './api';
 import { getSelectedAutoFollowPatternId } from '../selectors';
+import { sendApiRequest } from './api';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 

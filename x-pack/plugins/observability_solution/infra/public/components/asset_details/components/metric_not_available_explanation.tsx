@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { Popover } from '../tabs/common/popover';
+import React from 'react';
 import { useDatePickerContext } from '../hooks/use_date_picker';
+import { Popover } from '../tabs/common/popover';
 
 export const MetricNotAvailableExplanationTooltip = ({ metricName }: { metricName: string }) => {
   const { getDateRangeInTimestamp } = useDatePickerContext();

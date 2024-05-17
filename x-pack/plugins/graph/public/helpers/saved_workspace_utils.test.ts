@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { ContentClient } from '@kbn/content-management-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { GraphWorkspaceSavedObject } from '../types';
 import { saveSavedWorkspace } from './saved_workspace_utils';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AIConnector } from '../connectorland/connector_selector';
 import {
   getBlockBotConversation,
   getDefaultConnector,
@@ -12,7 +13,6 @@ import {
   mergeBaseWithPersistedConversations,
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
-import { AIConnector } from '../connectorland/connector_selector';
 const defaultConversation = {
   id: 'conversation_id',
   category: 'assistant',

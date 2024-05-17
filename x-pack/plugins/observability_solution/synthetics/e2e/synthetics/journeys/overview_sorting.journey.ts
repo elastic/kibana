@@ -7,12 +7,12 @@
 
 import { before, expect, journey, step } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('OverviewSorting', async ({ page, params }) => {
   recordVideo(page);

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { cloneDeep } from 'lodash';
 
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
-import { getQueryWithParams } from './get_query_with_params';
 import type { FetchCategoriesResponse } from './fetch_categories';
+import { getQueryWithParams } from './get_query_with_params';
 
 const isMsearchResponseItem = (arg: unknown): arg is estypes.MsearchMultiSearchItem =>
   isPopulatedObject(arg, ['hits']);

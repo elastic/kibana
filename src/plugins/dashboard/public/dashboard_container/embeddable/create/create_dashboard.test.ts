@@ -9,26 +9,26 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import {
+  ControlGroupContainer,
+  ControlGroupContainerFactory,
+  ControlGroupInput,
+} from '@kbn/controls-plugin/public';
+import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
-import {
-  ControlGroupInput,
-  ControlGroupContainer,
-  ControlGroupContainerFactory,
-} from '@kbn/controls-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { createDashboard } from './create_dashboard';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { getSampleDashboardPanel } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { createDashboard } from './create_dashboard';
 
 test("doesn't throw error when no data views are available", async () => {
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest

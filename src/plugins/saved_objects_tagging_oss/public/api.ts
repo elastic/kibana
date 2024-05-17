@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { EuiComboBoxProps, EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { SavedObject as SavedObjectClass } from '@kbn/saved-objects-plugin/public';
-import { TagDecoratedSavedObject } from './decorator';
+import type { FunctionComponent } from 'react';
+import { Observable } from 'rxjs';
 import { ITagsClient, Tag, TagWithOptionalId } from '../common';
+import { TagDecoratedSavedObject } from './decorator';
 
 /**
  * @public

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
-import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
 import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
+import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
+import { registryForSampleDataMock, registryForTutorialsMock } from './plugin.test.mocks';
 
 describe('HomeServerPlugin', () => {
   let homeServerPluginSetupDependenciesMock: HomeServerPluginSetupDependencies;

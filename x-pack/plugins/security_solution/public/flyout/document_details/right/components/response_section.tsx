@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { ResponseButton } from './response_button';
-import { ExpandableSection } from './expandable_section';
-import { useRightPanelContext } from '../context';
-import { getField } from '../../shared/utils';
+import React, { memo } from 'react';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { getField } from '../../shared/utils';
+import { useRightPanelContext } from '../context';
+import { useExpandSection } from '../hooks/use_expand_section';
+import { ExpandableSection } from './expandable_section';
+import { ResponseButton } from './response_button';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
 
 const KEY = 'response';

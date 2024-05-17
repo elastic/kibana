@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
-import styled from 'styled-components';
 import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useSeriesStorage } from './hooks/use_series_storage';
-import { useKibana } from './hooks/use_kibana';
-import { useExpViewTimeRange } from './hooks/use_time_range';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import styled from 'styled-components';
 import { parseRelativeDate } from './components/date_range_picker';
-import { trackTelemetryOnLoad } from './utils/telemetry';
 import type { ChartTimeRange } from './header/last_updated';
+import { useKibana } from './hooks/use_kibana';
+import { useSeriesStorage } from './hooks/use_series_storage';
+import { useExpViewTimeRange } from './hooks/use_time_range';
+import { trackTelemetryOnLoad } from './utils/telemetry';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import React from 'react';
 
 interface Props {
   extension?: MountPoint<HTMLDivElement>;

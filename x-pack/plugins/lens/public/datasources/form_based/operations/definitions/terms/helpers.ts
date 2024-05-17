@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
-import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
+import { buildEsQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
+import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
+import { uniq } from 'lodash';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
-import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
+import { defaultLabel } from '../filters';
 
-import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
-import type { TermsIndexPatternColumn } from './types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
 import type { LastValueIndexPatternColumn } from '../last_value';
-import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import type { PercentileIndexPatternColumn } from '../percentile';
+import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
+import type { TermsIndexPatternColumn } from './types';
 
 import type { FormBasedLayer } from '../../../types';
-import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import { isColumnOfType } from '../helpers';
+import { MAX_TERMS_OTHER_ENABLED, MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
 

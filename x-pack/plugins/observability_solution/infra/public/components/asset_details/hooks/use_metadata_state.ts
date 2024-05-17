@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEffect, useCallback } from 'react';
 import createContainer from 'constate';
+import { useCallback, useEffect } from 'react';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
-import { useDatePickerContext } from './use_date_picker';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
+import { useDatePickerContext } from './use_date_picker';
+import { useMetadata } from './use_metadata';
 import { useRequestObservable } from './use_request_observable';
 
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;

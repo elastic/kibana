@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadRuleAggregations, useKibana } from '../../../..';
 
 const Stat = styled(EuiStat)`

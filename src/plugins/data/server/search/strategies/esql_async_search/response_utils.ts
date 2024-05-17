@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 

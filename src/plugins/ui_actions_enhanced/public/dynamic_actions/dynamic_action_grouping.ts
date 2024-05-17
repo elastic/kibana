@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { UiActionsPresentableGrouping as PresentableGrouping } from '@kbn/ui-actions-plugin/public';
 
 export const dynamicActionGrouping: PresentableGrouping<{

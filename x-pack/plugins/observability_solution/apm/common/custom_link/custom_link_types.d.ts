@@ -6,8 +6,8 @@
  */
 
 import {
-  SERVICE_NAME,
   SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../es_fields/apm';
@@ -24,7 +24,7 @@ export interface CustomLinkES {
   [TRANSACTION_TYPE]?: string[];
 }
 
-export type FilterKey = typeof FILTER_OPTIONS[number];
+export type FilterKey = (typeof FILTER_OPTIONS)[number];
 
 export interface Filter {
   key: FilterKey | '';

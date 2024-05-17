@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { SanitizedRule, RawAlertInstance, AlertInstanceContext } from '@kbn/alerting-plugin/common';
+import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { BaseRule } from './base_rule';
-import {
-  AlertData,
-  AlertCluster,
-  AlertState,
-  AlertMessage,
-  IndexShardSizeUIMeta,
-  AlertMessageTimeToken,
-  AlertMessageLinkToken,
-  AlertInstanceState,
-  CommonAlertParams,
-  CommonAlertFilter,
-  IndexShardSizeStats,
-} from '../../common/types/alerts';
-import { RULE_LARGE_SHARD_SIZE, RULE_DETAILS } from '../../common/constants';
-import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
+import { RULE_DETAILS, RULE_LARGE_SHARD_SIZE } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { AlertingDefaults, createLink } from './alert_helpers';
+import {
+  AlertCluster,
+  AlertData,
+  AlertInstanceState,
+  AlertMessage,
+  AlertMessageLinkToken,
+  AlertMessageTimeToken,
+  AlertState,
+  CommonAlertFilter,
+  CommonAlertParams,
+  IndexShardSizeStats,
+  IndexShardSizeUIMeta,
+} from '../../common/types/alerts';
+import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { Globals } from '../static_globals';
+import { AlertingDefaults, createLink } from './alert_helpers';
+import { BaseRule } from './base_rule';
 
 export class LargeShardSizeRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {

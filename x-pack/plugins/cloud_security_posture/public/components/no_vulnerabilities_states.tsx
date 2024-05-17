@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiLoadingLogo,
-  EuiEmptyPrompt,
-  EuiIcon,
-  EuiMarkdownFormat,
   EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiImage,
   EuiLink,
+  EuiLoadingLogo,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
-import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
-import { FullSizeCenteredPage } from './full_size_centered_page';
-import { CloudPosturePage } from './cloud_posture_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails } from '../../common/types_old';
-import {
-  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
-  CNVM_NOT_INSTALLED_ACTION_SUBJ,
-} from './test_subjects';
+import { PostureTypes } from '../../common/types_old';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
-import { PostureTypes } from '../../common/types_old';
+import { CloudPosturePage } from './cloud_posture_page';
+import { FullSizeCenteredPage } from './full_size_centered_page';
+import {
+  CNVM_NOT_INSTALLED_ACTION_SUBJ,
+  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+} from './test_subjects';
 
 const REFETCH_INTERVAL_MS = 20000;
 

@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
+  EuiCallOut,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiIconTip,
   EuiSpacer,
-  EuiComboBoxOptionOption,
-  EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
+import React, { useEffect, useState } from 'react';
 import {
-  useForm,
+  ComboBoxField,
+  FIELD_TYPES,
   Form,
-  fieldValidators,
   FormSchema,
   UseField,
-  FIELD_TYPES,
-  ComboBoxField,
+  fieldValidators,
+  useForm,
 } from '../../../../shared_imports';
 
-import type { IndexWithFields, FieldItem } from '../../../../../common';
+import type { FieldItem, IndexWithFields } from '../../../../../common';
 import { getFieldsFromIndices } from '../../../services/api';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import { DraftPolicy, useCreatePolicyContext } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;

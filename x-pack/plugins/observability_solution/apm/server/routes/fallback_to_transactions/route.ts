@@ -6,10 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getIsUsingTransactionEvents } from '../../lib/helpers/transactions/get_is_using_transaction_events';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const fallbackToTransactionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fallback_to_transactions',

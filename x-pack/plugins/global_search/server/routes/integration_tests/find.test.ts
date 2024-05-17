@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
+import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../common/types';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalFindRoute } from '../find';
 

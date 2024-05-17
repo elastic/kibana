@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { WMSCreateSourceEditor } from './wms_create_source_editor';
-import { sourceTitle, WMSSource } from './wms_source';
+import React from 'react';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
+import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
-import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { WebMapServiceLayerIcon } from '../../layers/wizards/icons/web_map_service_layer_icon';
-import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
+// @ts-ignore
+import { WMSCreateSourceEditor } from './wms_create_source_editor';
+import { WMSSource, sourceTitle } from './wms_source';
 export const wmsLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.WMS_LAYER,
   order: 10,

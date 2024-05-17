@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { overlayServiceMock } from '@kbn/core/public/mocks';
 import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
-import { overlayServiceMock } from '@kbn/core/public/mocks';
 
 test('throws if no overlays service provided', () => {
   const overlays = createReactOverlays({});

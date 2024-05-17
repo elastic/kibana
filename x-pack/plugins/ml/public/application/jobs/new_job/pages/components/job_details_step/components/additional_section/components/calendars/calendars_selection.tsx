@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -20,14 +17,17 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobCreatorContext } from '../../../../../job_creator_context';
-import { Description } from './description';
-import { ml } from '../../../../../../../../../services/ml_api_service';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
-import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
+import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import { useMlKibana } from '../../../../../../../../../contexts/kibana';
+import { ml } from '../../../../../../../../../services/ml_api_service';
+import { JobCreatorContext } from '../../../../../job_creator_context';
+import { Description } from './description';
 
 export const CalendarsSelection: FC = () => {
   const {

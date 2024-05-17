@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { calcAutoIntervalNear, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 
 export type ExpressionFunctionFormulaTimeRange = ExpressionFunctionDefinition<
   'formula_time_range',

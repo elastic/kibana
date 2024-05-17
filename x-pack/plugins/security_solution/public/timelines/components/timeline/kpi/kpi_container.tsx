@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { isEmpty, pick } from 'lodash/fp';
-import { useSelector } from 'react-redux';
+import { EuiPanel } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
-import { EuiPanel } from '@elastic/eui';
+import { isEmpty, pick } from 'lodash/fp';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { TimelineId } from '../../../../../common/types';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import type { State } from '../../../../common/store';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineKPIs } from './kpis';
-import { useTimelineKpis } from '../../../containers/kpis';
-import { useKibana } from '../../../../common/lib/kibana';
-import { timelineSelectors } from '../../../store';
-import { timelineDefaults } from '../../../store/defaults';
-import { combineQueries } from '../../../../common/lib/kuery';
 import {
   endSelector,
   startSelector,
 } from '../../../../common/components/super_date_picker/selectors';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../common/lib/kibana';
+import { combineQueries } from '../../../../common/lib/kuery';
+import type { State } from '../../../../common/store';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useTimelineKpis } from '../../../containers/kpis';
+import { timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
+import { TimelineKPIs } from './kpis';
 
 interface KpiExpandedProps {
   timelineId: string;

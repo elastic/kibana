@@ -29,9 +29,9 @@ import type {
   RuleTagArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
+  AlertSuppressionCamel,
   AlertsIndex,
   AlertsIndexNamespace,
-  AlertSuppressionCamel,
   AnomalyThreshold,
   BuildingBlockType,
   ConcurrentSearches,

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
+import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { SidebarToggleState } from '../../application/types';

@@ -18,8 +18,8 @@ import type {
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import { Pattern } from '../../../pattern';
 import { PatternRollup, SelectedIndex } from '../../../../types';
+import { Pattern } from '../../../pattern';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;

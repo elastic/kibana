@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
+import { useEffect, useState } from 'react';
 
 import {
   sendRequest as _sendRequest,

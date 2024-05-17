@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
 import { badRequest } from '@hapi/boom';
-import { BaseWatch } from './base_watch';
-import { WATCH_TYPES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import { merge } from 'lodash';
+import { WATCH_TYPES } from '../../../common/constants';
+import { BaseWatch } from './base_watch';
 
 export class MonitoringWatch extends BaseWatch {
   // This constructor should not be used directly.

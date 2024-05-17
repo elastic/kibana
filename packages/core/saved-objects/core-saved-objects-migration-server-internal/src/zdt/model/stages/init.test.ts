@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import {
-  getCurrentIndexMock,
-  checkVersionCompatibilityMock,
-  buildIndexMappingsMock,
-  generateAdditiveMappingDiffMock,
-  getAliasActionsMock,
-  checkIndexCurrentAlgorithmMock,
-  getAliasesMock,
-  getCreationAliasesMock,
-} from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
-import { createContextMock, MockedMigratorContext } from '../../test_helpers';
 import type { InitState } from '../../state';
+import { MockedMigratorContext, createContextMock } from '../../test_helpers';
 import type { StateActionResponse } from '../types';
 import { init } from './init';
+import {
+  buildIndexMappingsMock,
+  checkIndexCurrentAlgorithmMock,
+  checkVersionCompatibilityMock,
+  generateAdditiveMappingDiffMock,
+  getAliasActionsMock,
+  getAliasesMock,
+  getCreationAliasesMock,
+  getCurrentIndexMock,
+} from './init.test.mocks';
 
 describe('Stage: init', () => {
   let context: MockedMigratorContext;

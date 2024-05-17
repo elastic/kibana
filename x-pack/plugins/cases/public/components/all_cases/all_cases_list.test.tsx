@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment-timezone';
-import { render, waitFor, screen, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import moment from 'moment-timezone';
+import React from 'react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import {
+  TestProviders,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   readCasesPermissions,
-  TestProviders,
 } from '../../common/mock';
-import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
+import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 
-import { SortFieldCase } from '../../../common/ui/types';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { getEmptyCellValue } from '../empty_value';
-import { useKibana } from '../../common/lib/kibana';
-import { AllCasesList } from './all_cases_list';
-import type { GetCasesColumn, UseCasesColumnsReturnValue } from './use_cases_columns';
-import { useCasesColumns } from './use_cases_columns';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { SortFieldCase } from '../../../common/ui/types';
+import { useKibana } from '../../common/lib/kibana';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { waitForComponentToUpdate } from '../../common/test_utils';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useGetCategories } from '../../containers/use_get_categories';
-import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCases } from '../../containers/use_get_cases';
-import {
-  DEFAULT_QUERY_PARAMS,
-  DEFAULT_FILTER_OPTIONS,
-  DEFAULT_CASES_TABLE_STATE,
-} from '../../containers/constants';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
-import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import {
+  DEFAULT_CASES_TABLE_STATE,
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_QUERY_PARAMS,
+} from '../../containers/constants';
+import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useUpdateCase } from '../../containers/use_update_case';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { getEmptyCellValue } from '../empty_value';
+import { AllCasesList } from './all_cases_list';
+import type { GetCasesColumn, UseCasesColumnsReturnValue } from './use_cases_columns';
+import { useCasesColumns } from './use_cases_columns';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');

@@ -15,12 +15,11 @@ interface PolicyStatusContextProviderProps {
   config: ClientConfigType;
 }
 
-export const PolicyStatusContextProvider: FC<
-  PropsWithChildren<PolicyStatusContextProviderProps>
-> = ({ children, ...props }) => {
-  return props.config.statefulSettings.enabled ? (
-    <IlmPolicyStatusContextProvider>{children}</IlmPolicyStatusContextProvider>
-  ) : (
-    <PolicyStatusContext.Provider value={undefined}>{children}</PolicyStatusContext.Provider>
-  );
-};
+export const PolicyStatusContextProvider: FC<PropsWithChildren<PolicyStatusContextProviderProps>> =
+  ({ children, ...props }) => {
+    return props.config.statefulSettings.enabled ? (
+      <IlmPolicyStatusContextProvider>{children}</IlmPolicyStatusContextProvider>
+    ) : (
+      <PolicyStatusContext.Provider value={undefined}>{children}</PolicyStatusContext.Provider>
+    );
+  };

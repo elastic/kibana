@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useCallback, useMemo } from 'react';
-import { uniqBy } from 'lodash';
 import { EuiFilterButton, EuiPanel, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { uniqBy } from 'lodash';
+import React, { type FC, useState, useCallback, useMemo } from 'react';
 import { MlEntitySelector, type MlEntitySelectorProps } from '../../components/ml_entity_selector';
 
 /**

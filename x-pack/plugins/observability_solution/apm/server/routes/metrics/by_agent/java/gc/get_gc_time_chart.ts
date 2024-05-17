@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { METRIC_JAVA_GC_TIME } from '../../../../../../common/es_fields/apm';
-import { fetchAndTransformGcMetrics, TIME } from './fetch_and_transform_gc_metrics';
-import { ChartBase } from '../../../types';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { APMConfig } from '../../../../..';
+import { METRIC_JAVA_GC_TIME } from '../../../../../../common/es_fields/apm';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ChartBase } from '../../../types';
+import { TIME, fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 
 const series = {
   [METRIC_JAVA_GC_TIME]: {

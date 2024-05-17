@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { subj } from '@kbn/test-subj-selector';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
 
-import { toMs, type TimeOrMilliseconds } from './lib/time';
+import { type TimeOrMilliseconds, toMs } from './lib/time';
 
 export class ToastsService {
-  constructor(private readonly log: ToolingLog, private readonly page: Page) {}
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly page: Page
+  ) {}
 
   /**
    * Wait for a toast with some bit of text matching the provided `textSnipped`, then clear

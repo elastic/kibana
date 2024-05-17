@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { ReactWrapper, mount, shallow } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, shallow, ReactWrapper } from 'enzyme';
-import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
-import { IAggConfig, AggParam } from '@kbn/data-plugin/public';
+import { AggParam, IAggConfig } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ComboBoxGroupedOptions } from '../../utils';
-import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { EditorVisState } from '../sidebar/state/reducers';
+import { FieldParamEditor, FieldParamEditorProps } from './field';
 
 function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {
   const comboBoxProps = comp.find(EuiComboBox).props() as EuiComboBoxProps<any>;

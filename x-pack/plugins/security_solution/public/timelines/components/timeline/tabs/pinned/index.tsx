@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, memo } from 'react';
-import styled from 'styled-components';
-import type { Dispatch } from 'redux';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import type { ControlColumnProps } from '../../../../../../common/types';
-import { timelineActions, timelineSelectors } from '../../../../store';
+import deepEqual from 'fast-deep-equal';
+import { isEmpty } from 'lodash/fp';
+import React, { useMemo, useCallback, memo } from 'react';
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
+import type { Dispatch } from 'redux';
+import styled from 'styled-components';
 import type { Direction } from '../../../../../../common/search_strategy';
-import { useTimelineEvents } from '../../../../containers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
-import { StatefulBody } from '../../body';
-import { Footer, footerHeight } from '../../footer';
-import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../../store/defaults';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
-import type { TimelineModel } from '../../../../store/model';
-import type { State } from '../../../../../common/store';
-import { calculateTotalPages } from '../../helpers';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { DetailsPanel } from '../../../side_panel';
+import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { State } from '../../../../../common/store';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
+import { useTimelineEvents } from '../../../../containers';
+import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineDefaults } from '../../../../store/defaults';
+import type { TimelineModel } from '../../../../store/model';
+import { DetailsPanel } from '../../../side_panel';
+import { StatefulBody } from '../../body';
+import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
+import { Footer, footerHeight } from '../../footer';
+import { calculateTotalPages } from '../../helpers';
 import {
   FullWidthFlexGroup,
   ScrollableFlexItem,

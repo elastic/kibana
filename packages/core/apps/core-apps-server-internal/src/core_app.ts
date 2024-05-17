@@ -8,24 +8,24 @@
 
 import { stringify } from 'querystring';
 import { Env, IConfigService } from '@kbn/config';
-import { schema, ValidationError } from '@kbn/config-schema';
-import { fromRoot } from '@kbn/repo-info';
-import type { Logger } from '@kbn/logging';
+import { ValidationError, schema } from '@kbn/config-schema';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type {
-  IRouter,
-  IKibanaResponse,
-  KibanaResponseFactory,
-  KibanaRequest,
-  IBasePath,
-} from '@kbn/core-http-server';
-import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
-import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type {
+  IBasePath,
+  IKibanaResponse,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core-http-server';
 import type { InternalStaticAssets } from '@kbn/core-http-server-internal';
-import { firstValueFrom, map, type Observable } from 'rxjs';
-import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
+import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import type { Logger } from '@kbn/logging';
+import { fromRoot } from '@kbn/repo-info';
+import { type Observable, firstValueFrom, map } from 'rxjs';
 import { registerBundleRoutes } from './bundle_routes';
+import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
 /** @internal */

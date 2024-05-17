@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
 import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 

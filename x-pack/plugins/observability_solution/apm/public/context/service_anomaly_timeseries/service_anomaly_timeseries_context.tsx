@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { useEnvironmentsContext } from '../environments_context/use_environments_context';
 import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
+import { isActivePlatinumLicense } from '../../../common/license_check';
 import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../apm_service/use_apm_service_context';
-import { isActivePlatinumLicense } from '../../../common/license_check';
+import { useEnvironmentsContext } from '../environments_context/use_environments_context';
 import { useLicenseContext } from '../license/use_license_context';
 
 export const ServiceAnomalyTimeseriesContext = React.createContext<{

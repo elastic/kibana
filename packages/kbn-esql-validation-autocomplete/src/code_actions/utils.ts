@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
 
 export function wrapAsEditorMessage(
   type: 'error' | 'warning',

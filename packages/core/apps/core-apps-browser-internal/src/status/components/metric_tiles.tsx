@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiStat } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiCard, EuiStat } from '@elastic/eui';
-import { DataType, formatNumber, Metric } from '../lib';
+import { DataType, Metric, formatNumber } from '../lib';
 
 /*
  * Displays metadata for a metric.

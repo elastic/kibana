@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
-import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { networkItems as mockNetworkItems } from './data_formatting.test';
+import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 
-import { extractItems, isHighlightedItem } from './data_formatting';
 import { BAR_HEIGHT } from '../../waterfall/components/constants';
-import { MimeType } from './types';
 import {
+  FILTER_COLLAPSE_REQUESTS_LABEL,
   FILTER_POPOVER_OPEN_LABEL,
   FILTER_REQUESTS_LABEL,
-  FILTER_COLLAPSE_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
+import { extractItems, isHighlightedItem } from './data_formatting';
+import { MimeType } from './types';
 
 const getHighLightedItems = (query: string, filters: string[]) => {
   return NETWORK_EVENTS.events.filter((item) => isHighlightedItem(item, query, filters));

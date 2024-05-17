@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
+import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IUiSettingsClient } from '@kbn/core/server';
 import { ISearchOptions } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../../common';
-import { getDefaultSearchParams } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
 import {
   getCommonDefaultAsyncGetParams,
   getCommonDefaultAsyncSubmitParams,
 } from '../common/async_utils';
+import { getDefaultSearchParams } from '../es_search';
 
 /**
  * @internal

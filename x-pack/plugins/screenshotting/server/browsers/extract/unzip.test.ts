@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import mockFs from 'mock-fs';
 import { readFile } from 'fs/promises';
+import mockFs from 'mock-fs';
 import { ExtractError } from './extract_error';
 import { unzip } from './unzip';
 

@@ -28,8 +28,9 @@ describe('queryFilterToAst', () => {
   });
 
   it('should construct a query filter in sub-expressions', () => {
-    expect(queryFilterToAst({ input: { query: 'a: b', language: 'kuery' } }))
-      .toMatchInlineSnapshot(`
+    expect(
+      queryFilterToAst({ input: { query: 'a: b', language: 'kuery' } })
+    ).toMatchInlineSnapshot(`
       Object {
         "chain": Array [
           Object {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
+import { Moment } from 'moment';
 import { getInitialByWeekday } from './get_initial_by_weekday';
 
 export const getPresets = (startDate: Moment) => {

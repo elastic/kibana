@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { act, waitFor } from '@testing-library/react';
-import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import moment from 'moment';
-import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SearchUsageCollector, SessionsClient } from '../../../..';
-import { SearchSessionStatus } from '../../../../../../common';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { LocaleWrapper } from '../../__mocks__';
-import { SearchSessionsMgmtTable } from './table';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { act, waitFor } from '@testing-library/react';
+import { ReactWrapper, mount } from 'enzyme';
+import moment from 'moment';
+import React from 'react';
+import { SearchUsageCollector, SessionsClient } from '../../../..';
+import { SearchSessionStatus } from '../../../../../../common';
 import { SearchSessionsConfigSchema } from '../../../../../../config';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
+import { LocaleWrapper } from '../../__mocks__';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { SearchSessionsMgmtTable } from './table';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;

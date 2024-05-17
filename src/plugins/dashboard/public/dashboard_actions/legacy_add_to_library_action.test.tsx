@@ -10,8 +10,8 @@ import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { pluginServices } from '../services/plugin_services';
 import {
-  LegacyAddToLibraryAction,
   LegacyAddPanelToLibraryActionApi,
+  LegacyAddToLibraryAction,
 } from './legacy_add_to_library_action';
 
 describe('Add to library action', () => {

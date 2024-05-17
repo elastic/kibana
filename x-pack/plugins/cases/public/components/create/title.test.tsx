@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+import { mount } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Title } from './title';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FormProps } from './schema';
 import { schema } from './schema';
+import { Title } from './title';
 
 describe('Title', () => {
   let globalForm: FormHook;

@@ -1,3 +1,7 @@
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,23 +9,19 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { useKibana } from '../../common/lib/kibana';
 import {
-  getSuccessfulDeletionNotificationText,
-  getFailedDeletionNotificationText,
-  getPartialSuccessDeletionNotificationText,
-  getPartialSuccessEnablingNotificationText,
-  getPartialSuccessDisablingNotificationText,
-  getFailedEnablingNotificationText,
-  getFailedDisablingNotificationText,
-  getSuccessfulEnablingNotificationText,
-  getSuccessfulDisablingNotificationText,
-  SINGLE_RULE_TITLE,
   MULTIPLE_RULE_TITLE,
+  SINGLE_RULE_TITLE,
+  getFailedDeletionNotificationText,
+  getFailedDisablingNotificationText,
+  getFailedEnablingNotificationText,
+  getPartialSuccessDeletionNotificationText,
+  getPartialSuccessDisablingNotificationText,
+  getPartialSuccessEnablingNotificationText,
+  getSuccessfulDeletionNotificationText,
+  getSuccessfulDisablingNotificationText,
+  getSuccessfulEnablingNotificationText,
 } from '../sections/rules_list/translations';
 
 const actionToToastMapping = {

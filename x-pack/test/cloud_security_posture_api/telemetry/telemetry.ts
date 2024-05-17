@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { data, MockTelemetryFindings } from './data';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { MockTelemetryFindings, data } from './data';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 

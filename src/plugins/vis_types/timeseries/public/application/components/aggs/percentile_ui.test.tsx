@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { ColorPicker } from '../color_picker';
 // @ts-ignore not-typed yet
 import { Percentiles } from './percentile_ui';
-import { ColorPicker } from '../color_picker';
 
 describe('Percentiles', () => {
   const props = {

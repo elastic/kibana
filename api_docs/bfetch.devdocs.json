@@ -30,9 +30,7 @@
             "tags": [],
             "label": "delimiter",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/bfetch/public/streaming/split.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -53,9 +51,7 @@
         "tags": [],
         "label": "BatchedFunc",
         "description": [],
-        "signature": [
-          "(payload: Payload, signal?: AbortSignal | undefined) => Promise<Result>"
-        ],
+        "signature": ["(payload: Payload, signal?: AbortSignal | undefined) => Promise<Result>"],
         "path": "src/plugins/bfetch/public/batching/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -68,9 +64,7 @@
             "tags": [],
             "label": "payload",
             "description": [],
-            "signature": [
-              "Payload"
-            ],
+            "signature": ["Payload"],
             "path": "src/plugins/bfetch/public/batching/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -82,9 +76,7 @@
             "tags": [],
             "label": "signal",
             "description": [],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
+            "signature": ["AbortSignal | undefined"],
             "path": "src/plugins/bfetch/public/batching/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -99,9 +91,7 @@
         "tags": [],
         "label": "DISABLE_BFETCH",
         "description": [],
-        "signature": [
-          "\"bfetch:disable\""
-        ],
+        "signature": ["\"bfetch:disable\""],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -145,9 +135,7 @@
               "tags": [],
               "label": "params",
               "description": [],
-              "signature": [
-                "FetchStreamingParams"
-              ],
+              "signature": ["FetchStreamingParams"],
               "path": "src/plugins/bfetch/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -187,10 +175,7 @@
               "tags": [],
               "label": "params",
               "description": [],
-              "signature": [
-                "StreamingBatchedFunctionParams",
-                "<Payload, Result>"
-              ],
+              "signature": ["StreamingBatchedFunctionParams", "<Payload, Result>"],
               "path": "src/plugins/bfetch/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -236,9 +221,7 @@
             "tags": [],
             "label": "onBatchItem",
             "description": [],
-            "signature": [
-              "(data: BatchItemData) => Promise<BatchItemResult>"
-            ],
+            "signature": ["(data: BatchItemData) => Promise<BatchItemResult>"],
             "path": "src/plugins/bfetch/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -250,9 +233,7 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": [
-                  "BatchItemData"
-                ],
+                "signature": ["BatchItemData"],
                 "path": "src/plugins/bfetch/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -316,9 +297,7 @@
               "tags": [],
               "label": "path",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -419,9 +398,7 @@
               "tags": [],
               "label": "path",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -473,9 +450,7 @@
               "tags": [],
               "label": "method",
               "description": [],
-              "signature": [
-                "\"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | undefined"
-              ],
+              "signature": ["\"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | undefined"],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -565,9 +540,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -603,9 +576,7 @@
             "type": "number",
             "tags": [],
             "label": "length",
-            "description": [
-              "\nGet current buffer size."
-            ],
+            "description": ["\nGet current buffer size."],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -616,12 +587,8 @@
             "type": "Function",
             "tags": [],
             "label": "write",
-            "description": [
-              "\nAdd item to the buffer."
-            ],
-            "signature": [
-              "(item: Item) => void"
-            ],
+            "description": ["\nAdd item to the buffer."],
+            "signature": ["(item: Item) => void"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -633,9 +600,7 @@
                 "tags": [],
                 "label": "item",
                 "description": [],
-                "signature": [
-                  "Item"
-                ],
+                "signature": ["Item"],
                 "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -650,12 +615,8 @@
             "type": "Function",
             "tags": [],
             "label": "clear",
-            "description": [
-              "\nRemove all items from the buffer."
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nRemove all items from the buffer."],
+            "signature": ["() => void"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -668,12 +629,8 @@
             "type": "Function",
             "tags": [],
             "label": "flush",
-            "description": [
-              "\nCall `.onFlush` method and clear buffer."
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nCall `.onFlush` method and clear buffer."],
+            "signature": ["() => void"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -689,9 +646,7 @@
             "description": [
               "\nSame as `.flush()` but asynchronous, and returns a promise, which\nrejects if `.onFlush` throws."
             ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -737,9 +692,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -776,9 +729,7 @@
             "tags": [],
             "label": "write",
             "description": [],
-            "signature": [
-              "(item: Item) => void"
-            ],
+            "signature": ["(item: Item) => void"],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -790,9 +741,7 @@
                 "tags": [],
                 "label": "item",
                 "description": [],
-                "signature": [
-                  "Item"
-                ],
+                "signature": ["Item"],
                 "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -808,9 +757,7 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -824,9 +771,7 @@
             "tags": [],
             "label": "flush",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -840,9 +785,7 @@
             "tags": [],
             "label": "flushAsync",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -861,9 +804,7 @@
         "tags": [],
         "label": "appendQueryParam",
         "description": [],
-        "signature": [
-          "(url: string, key: string, value: string) => string"
-        ],
+        "signature": ["(url: string, key: string, value: string) => string"],
         "path": "src/plugins/bfetch/common/util/query_params.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -875,9 +816,7 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/bfetch/common/util/query_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -890,9 +829,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/bfetch/common/util/query_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -905,9 +842,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/bfetch/common/util/query_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1010,9 +945,7 @@
             "tags": [],
             "label": "err",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/bfetch/common/util/normalize_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1029,9 +962,7 @@
         "tags": [],
         "label": "removeLeadingSlash",
         "description": [],
-        "signature": [
-          "(text: string) => string"
-        ],
+        "signature": ["(text: string) => string"],
         "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1043,9 +974,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1085,9 +1014,7 @@
             "tags": [],
             "label": "onCall",
             "description": [],
-            "signature": [
-              "(...args: Parameters<Func>) => [ReturnType<Func>, BatchEntry]"
-            ],
+            "signature": ["(...args: Parameters<Func>) => [ReturnType<Func>, BatchEntry]"],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1099,9 +1026,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": [
-                  "Parameters<Func>"
-                ],
+                "signature": ["Parameters<Func>"],
                 "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1117,9 +1042,7 @@
             "tags": [],
             "label": "onBatch",
             "description": [],
-            "signature": [
-              "(items: BatchEntry[]) => void"
-            ],
+            "signature": ["(items: BatchEntry[]) => void"],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1131,9 +1054,7 @@
                 "tags": [],
                 "label": "items",
                 "description": [],
-                "signature": [
-                  "BatchEntry[]"
-                ],
+                "signature": ["BatchEntry[]"],
                 "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1149,9 +1070,7 @@
             "tags": [],
             "label": "flushOnMaxItems",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1163,9 +1082,7 @@
             "tags": [],
             "label": "maxItemAge",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1237,9 +1154,7 @@
             "tags": [],
             "label": "batch",
             "description": [],
-            "signature": [
-              "Item[]"
-            ],
+            "signature": ["Item[]"],
             "path": "src/plugins/bfetch/common/batch.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1286,9 +1201,7 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": [
-              "Result | undefined"
-            ],
+            "signature": ["Result | undefined"],
             "path": "src/plugins/bfetch/common/batch.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1300,9 +1213,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
+            "signature": ["Error | undefined"],
             "path": "src/plugins/bfetch/common/batch.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1365,9 +1276,7 @@
             "description": [
               "\nFlushes buffer automatically if number of items in the buffer reaches\nthis number. Omit it or set to `Infinity` to never flush on max buffer\nsize automatically."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1381,9 +1290,7 @@
             "description": [
               "\nCallback that is called every time buffer is flushed. It receives a single\nargument which is a list of all buffered items. If `.flush()` is called\nwhen buffer is empty, `.onflush` is called with empty array."
             ],
-            "signature": [
-              "(items: Item[]) => void | Promise<void>"
-            ],
+            "signature": ["(items: Item[]) => void | Promise<void>"],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1395,9 +1302,7 @@
                 "tags": [],
                 "label": "items",
                 "description": [],
-                "signature": [
-                  "Item[]"
-                ],
+                "signature": ["Item[]"],
                 "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1437,11 +1342,7 @@
             "tags": [],
             "label": "getResponseStream",
             "description": [],
-            "signature": [
-              "(payload: Payload) => ",
-              "Observable",
-              "<Response>"
-            ],
+            "signature": ["(payload: Payload) => ", "Observable", "<Response>"],
             "path": "src/plugins/bfetch/common/streaming/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1453,9 +1354,7 @@
                 "tags": [],
                 "label": "payload",
                 "description": [],
-                "signature": [
-                  "Payload"
-                ],
+                "signature": ["Payload"],
                 "path": "src/plugins/bfetch/common/streaming/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1505,9 +1404,7 @@
             "description": [
               "\nFlushes buffer when oldest item reaches age specified by this parameter,\nin milliseconds."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1525,9 +1422,7 @@
         "tags": [],
         "label": "BFETCH_ROUTE_VERSION_LATEST",
         "description": [],
-        "signature": [
-          "\"1\""
-        ],
+        "signature": ["\"1\""],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1540,9 +1435,7 @@
         "tags": [],
         "label": "DISABLE_BFETCH",
         "description": [],
-        "signature": [
-          "\"bfetch:disable\""
-        ],
+        "signature": ["\"bfetch:disable\""],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1555,9 +1448,7 @@
         "tags": [],
         "label": "DISABLE_BFETCH_COMPRESSION",
         "description": [],
-        "signature": [
-          "\"bfetch:disableCompression\""
-        ],
+        "signature": ["\"bfetch:disableCompression\""],
         "path": "src/plugins/bfetch/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

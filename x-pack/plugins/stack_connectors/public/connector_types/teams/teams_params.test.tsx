@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import TeamsParamsFields from './teams_params';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
+import { ApmAlertFields, createApmRule, runRuleSoon } from '../alerts/helpers/alerting_api_helper';
+import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
-import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;

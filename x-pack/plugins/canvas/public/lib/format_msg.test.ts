@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { formatMsg, formatESMsg } from './format_msg';
+import { formatESMsg, formatMsg } from './format_msg';
 
 describe('formatMsg', () => {
   test('should prepend the second argument to result', () => {

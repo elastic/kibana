@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
+import { AssistantAvatar } from '@kbn/elastic-assistant';
 
 import React from 'react';
 

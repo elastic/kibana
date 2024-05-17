@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState, useEffect } from 'react';
 import { getDataViewsStart } from '../../../../services';
 
 import { SwitchModePopover } from './switch_mode_popover';
 
-import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternValue } from '../../../../../common/types';
+import type { SelectIndexComponentProps } from './types';
 
 /** @internal **/
 type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;

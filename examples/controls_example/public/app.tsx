@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiSpacer } from '@elastic/eui';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ControlsExampleStartDeps } from './plugin';
+import { AddButtonExample } from './add_button_example';
 import { BasicReduxExample } from './basic_redux_example';
 import { EditExample } from './edit_example';
+import { ControlsExampleStartDeps } from './plugin';
 import { SearchExample } from './search_example';
-import { AddButtonExample } from './add_button_example';
 
 export const renderApp = async (
   { data, navigation }: ControlsExampleStartDeps,

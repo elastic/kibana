@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../../common/constants';
+import { BaseWatch } from './base_watch';
 
 /**
  * {@code MonitoringWatch} system defined watches created by the Monitoring plugin.

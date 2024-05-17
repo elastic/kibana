@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import yaml from 'js-yaml';
 import { identity, pickBy } from 'lodash';
 

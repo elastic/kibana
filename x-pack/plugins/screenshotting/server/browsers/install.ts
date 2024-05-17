@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import del from 'del';
 import path from 'path';
 import type { Logger } from '@kbn/core/server';
+import del from 'del';
 import { ChromiumArchivePaths, PackageInfo } from './chromium';
 import { download } from './download';
 import { sha256 } from './download/checksum';

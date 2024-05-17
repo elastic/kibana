@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { CoreUsageStats } from './core_usage_stats';
 import type {
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import type { CoreUsageStats } from './core_usage_stats';
 
 /**
  * Internal API for getting Core's usage data payload.

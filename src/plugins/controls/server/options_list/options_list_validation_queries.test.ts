@@ -55,8 +55,9 @@ describe('options list queries', () => {
         allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
-      expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
+      expect(
+        validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
+      ).toMatchInlineSnapshot(`
         Object {
           "validation": Object {
             "filters": Object {
@@ -95,8 +96,9 @@ describe('options list queries', () => {
         allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
-      expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
+      expect(
+        validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
+      ).toMatchInlineSnapshot(`
         Object {
           "nestedValidation": Object {
             "aggs": Object {

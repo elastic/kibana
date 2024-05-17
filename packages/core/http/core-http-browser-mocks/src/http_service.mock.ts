@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { type HttpService, BasePath } from '@kbn/core-http-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { BasePath, type HttpService } from '@kbn/core-http-browser-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { BehaviorSubject } from 'rxjs';
 import { basePathMock } from './base_path.mock';
 
 export type HttpSetupMock = jest.Mocked<HttpSetup> & {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+import React, { memo } from 'react';
 import { useRightPanelContext } from '../context';
+import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 
 /**
  * Document details risk score displayed in flyout right section header

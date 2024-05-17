@@ -7,8 +7,8 @@
 
 import { EuiHeaderLink } from '@elastic/eui';
 import {
-  DatasetQualityLocatorParams,
   DATASET_QUALITY_LOCATOR_ID,
+  DatasetQualityLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
 import { LogsExplorerPublicState } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';

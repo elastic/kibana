@@ -5,37 +5,40 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { PublicContract } from '@kbn/utility-types';
-import { getOrElse } from 'fp-ts/lib/Either';
-import { v4 } from 'uuid';
-import { difference } from 'lodash';
 import {
-  RuleExecutorOptions,
   Alert,
   AlertInstanceContext,
   AlertInstanceState,
+  RuleExecutorOptions,
   RuleTypeParams,
   RuleTypeState,
   isValidAlertIndexName,
 } from '@kbn/alerting-plugin/server';
 import { isFlapping } from '@kbn/alerting-plugin/server/lib';
-import { wrappedStateRt, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
+import { WrappedLifecycleRuleState, wrappedStateRt } from '@kbn/alerting-state-types';
+import type { Logger } from '@kbn/logging';
+import type { PublicContract } from '@kbn/utility-types';
+import { getOrElse } from 'fp-ts/lib/Either';
+import { difference } from 'lodash';
+import { v4 } from 'uuid';
 export type {
   TrackedLifecycleAlertState,
   WrappedLifecycleRuleState,
 } from '@kbn/alerting-state-types';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import {
-  ALERT_TIME_RANGE,
   ALERT_DURATION,
   ALERT_END,
+  ALERT_FLAPPING,
   ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -43,17 +46,14 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
-  ALERT_FLAPPING,
-  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
+import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
+import { getAlertsForNotification } from './get_alerts_for_notification';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
-import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
-import { getAlertsForNotification } from './get_alerts_for_notification';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -67,7 +67,7 @@ type ExplicitAlertFields = Record<string, unknown> & // every field can have val
 export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 > = (alert: {
   id: string;
   fields: ExplicitAlertFields;
@@ -76,7 +76,7 @@ export type LifecycleAlertService<
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
@@ -91,7 +91,7 @@ export type LifecycleRuleExecutor<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 > = (
   options: AlertExecutorOptionsWithExtraServices<
     Params,
@@ -110,7 +110,7 @@ export const createLifecycleExecutor =
     State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
-    ActionGroupIds extends string = never
+    ActionGroupIds extends string = never,
   >(
     wrappedExecutor: LifecycleRuleExecutor<
       Params,

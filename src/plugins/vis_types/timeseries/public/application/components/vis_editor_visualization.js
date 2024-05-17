@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
 import {
-  keys,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiFlexItem,
   EuiButton,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiSwitch,
+  EuiText,
+  keys,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { pluck } from 'rxjs';
 
 import './_vis_editor_visualization.scss';

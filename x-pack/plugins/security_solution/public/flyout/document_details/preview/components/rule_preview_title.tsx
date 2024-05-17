@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { EuiTitle, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DELETED_RULE } from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import {
-  RULE_PREVIEW_TITLE_TEST_ID,
   RULE_PREVIEW_RULE_CREATED_BY_TEST_ID,
-  RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
   RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID,
+  RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
+  RULE_PREVIEW_TITLE_TEST_ID,
 } from './test_ids';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export interface RulePreviewTitleProps {
   /**

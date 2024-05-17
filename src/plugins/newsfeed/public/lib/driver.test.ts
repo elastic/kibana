@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { convertItemsMock } from './driver.test.mocks';
 // @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import { take } from 'rxjs';
 import { NewsfeedApiDriver } from './driver';
+import { convertItemsMock } from './driver.test.mocks';
 import { storageMock } from './storage.mock';
 
 const kibanaVersion = '8.0.0';

@@ -8,19 +8,19 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  createJob as sendCreateJobRequest,
-  serializeJob,
   deserializeJob,
   getRouter,
+  createJob as sendCreateJobRequest,
+  serializeJob,
 } from '../../services';
 
 import { startJobs } from './change_job_status';
 
 import {
+  CLEAR_CREATE_JOB_ERRORS,
+  CREATE_JOB_FAILURE,
   CREATE_JOB_START,
   CREATE_JOB_SUCCESS,
-  CREATE_JOB_FAILURE,
-  CLEAR_CREATE_JOB_ERRORS,
 } from '../action_types';
 
 import { getFatalErrors } from '../../../kibana_services';

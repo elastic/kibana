@@ -7,21 +7,11 @@
       "pretty": "__flag__",
       "wait_for_advance": "__flag__",
       "wait_for_index": "__flag__",
-      "checkpoints": [
-        ""
-      ],
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ]
+      "checkpoints": [""],
+      "timeout": ["30s", "-1", "0"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "{index}/_fleet/global_checkpoints"
-    ],
+    "methods": ["GET"],
+    "patterns": ["{index}/_fleet/global_checkpoints"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-global-checkpoints.html",
     "availability": {
       "stack": true,

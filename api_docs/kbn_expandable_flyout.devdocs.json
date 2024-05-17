@@ -160,9 +160,7 @@
             "type": "Function",
             "tags": [],
             "label": "openFlyout",
-            "description": [
-              "\nOpen the flyout with left, right and/or preview panels"
-            ],
+            "description": ["\nOpen the flyout with left, right and/or preview panels"],
             "signature": [
               "(panels: { left?: ",
               {
@@ -279,9 +277,7 @@
             "type": "Function",
             "tags": [],
             "label": "openRightPanel",
-            "description": [
-              "\nReplaces the current right panel with a new one"
-            ],
+            "description": ["\nReplaces the current right panel with a new one"],
             "signature": [
               "(panel: ",
               {
@@ -327,9 +323,7 @@
             "type": "Function",
             "tags": [],
             "label": "openLeftPanel",
-            "description": [
-              "\nReplaces the current left panel with a new one"
-            ],
+            "description": ["\nReplaces the current left panel with a new one"],
             "signature": [
               "(panel: ",
               {
@@ -375,9 +369,7 @@
             "type": "Function",
             "tags": [],
             "label": "openPreviewPanel",
-            "description": [
-              "\nAdd a new preview panel to the list of current preview panels"
-            ],
+            "description": ["\nAdd a new preview panel to the list of current preview panels"],
             "signature": [
               "(panel: ",
               {
@@ -423,12 +415,8 @@
             "type": "Function",
             "tags": [],
             "label": "closeRightPanel",
-            "description": [
-              "\nCloses right panel"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nCloses right panel"],
+            "signature": ["() => void"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -441,12 +429,8 @@
             "type": "Function",
             "tags": [],
             "label": "closeLeftPanel",
-            "description": [
-              "\nCloses left panel"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nCloses left panel"],
+            "signature": ["() => void"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -459,12 +443,8 @@
             "type": "Function",
             "tags": [],
             "label": "closePreviewPanel",
-            "description": [
-              "\nCloses all preview panels"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nCloses all preview panels"],
+            "signature": ["() => void"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -477,12 +457,8 @@
             "type": "Function",
             "tags": [],
             "label": "previousPreviewPanel",
-            "description": [
-              "\nGo back to previous preview panel"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nGo back to previous preview panel"],
+            "signature": ["() => void"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -495,12 +471,8 @@
             "type": "Function",
             "tags": [],
             "label": "closeFlyout",
-            "description": [
-              "\nClose all panels and closes flyout"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nClose all panels and closes flyout"],
+            "signature": ["() => void"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -539,13 +511,8 @@
             "type": "Array",
             "tags": [],
             "label": "registeredPanels",
-            "description": [
-              "\nList of all registered panels available for render"
-            ],
-            "signature": [
-              "Panel",
-              "[]"
-            ],
+            "description": ["\nList of all registered panels available for render"],
+            "signature": ["Panel", "[]"],
             "path": "packages/kbn-expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -556,9 +523,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "customStyles",
-            "description": [
-              "\nAllows for custom styles to be passed to the EuiFlyout component"
-            ],
+            "description": ["\nAllows for custom styles to be passed to the EuiFlyout component"],
             "signature": [
               "InterpolationPrimitive",
               " | ",
@@ -595,9 +560,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique key to identify the panel"
-            ],
+            "description": ["\nUnique key to identify the panel"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -611,9 +574,7 @@
             "description": [
               "\nAny parameters necessary for the initial requests within the flyout"
             ],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -647,12 +608,8 @@
             "type": "Object",
             "tags": [],
             "label": "state",
-            "description": [
-              "\nTracks visual state such as whether the panel is collapsed"
-            ],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "description": ["\nTracks visual state such as whether the panel is collapsed"],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -677,9 +634,7 @@
             "type": "Object",
             "tags": [],
             "label": "left",
-            "description": [
-              "\nPanel to render in the left section"
-            ],
+            "description": ["\nPanel to render in the left section"],
             "signature": [
               {
                 "pluginId": "@kbn/expandable-flyout",
@@ -700,9 +655,7 @@
             "type": "Object",
             "tags": [],
             "label": "right",
-            "description": [
-              "\nPanel to render in the right section"
-            ],
+            "description": ["\nPanel to render in the right section"],
             "signature": [
               {
                 "pluginId": "@kbn/expandable-flyout",
@@ -723,9 +676,7 @@
             "type": "Array",
             "tags": [],
             "label": "preview",
-            "description": [
-              "\nPanels to render in the preview section"
-            ],
+            "description": ["\nPanels to render in the preview section"],
             "signature": [
               {
                 "pluginId": "@kbn/expandable-flyout",
@@ -760,9 +711,7 @@
             "type": "string",
             "tags": [],
             "label": "tab",
-            "description": [
-              "\nTop level tab that to be displayed"
-            ],
+            "description": ["\nTop level tab that to be displayed"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -773,12 +722,8 @@
             "type": "string",
             "tags": [],
             "label": "subTab",
-            "description": [
-              "\nOptional secondary level to be displayed under top level tab"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional secondary level to be displayed under top level tab"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

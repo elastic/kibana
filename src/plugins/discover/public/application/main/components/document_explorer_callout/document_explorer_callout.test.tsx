@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CALLOUT_STATE_KEY, DocumentExplorerCallout } from './document_explorer_callout';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { DiscoverServices } from '../../../../build_services';
+import { CALLOUT_STATE_KEY, DocumentExplorerCallout } from './document_explorer_callout';
 
 const defaultServices = {
   addBasePath: () => '',

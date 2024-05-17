@@ -1,3 +1,4 @@
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { of } from 'rxjs';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { serviceContractMock } from './service_contract.mock';
 
 const mockCustomBranding: CustomBranding = {

@@ -6,12 +6,7 @@
     "id": "cloud",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "cloud"
-    ],
-    "optionalPlugins": [
-      "usageCollection"
-    ]
+    "configPath": ["xpack", "cloud"],
+    "optionalPlugins": ["usageCollection"]
   }
 }

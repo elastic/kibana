@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import { EventEmitter } from 'events';
+import Path from 'path';
 
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { CliArgs } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/repo-info';
 import * as Rx from 'rxjs';
 import {
+  concatMap,
+  distinctUntilChanged,
+  filter,
   map,
   mapTo,
-  filter,
-  take,
-  tap,
-  distinctUntilChanged,
   switchMap,
-  concatMap,
+  take,
   takeUntil,
+  tap,
 } from 'rxjs';
-import { CliArgs } from '@kbn/config';
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Log, CliLog } from './log';
-import { Optimizer } from './optimizer';
-import { DevServer } from './dev_server';
-import { Watcher } from './watcher';
 import { BasePathProxyServer } from './base_path_proxy_server';
-import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
 import { CliDevConfig } from './config';
+import { DevServer } from './dev_server';
+import { CliLog, Log } from './log';
+import { Optimizer } from './optimizer';
+import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
+import { Watcher } from './watcher';
 
 // signal that emits undefined once a termination signal has been sent
 const exitSignal$ = new Rx.ReplaySubject<undefined>(1);
@@ -338,16 +338,18 @@ export class CliDevMode {
       //  - true if they are started successfully
       //  - false if they failed to start
       //  - undefined if they are still coming up
-      this.devServer.getPhase$().pipe(
-        map((phase) => {
-          if (phase === 'listening') {
-            return true;
-          }
-          if (phase === 'fatal exit') {
-            return false;
-          }
-        })
-      ),
+      this.devServer
+        .getPhase$()
+        .pipe(
+          map((phase) => {
+            if (phase === 'listening') {
+              return true;
+            }
+            if (phase === 'fatal exit') {
+              return false;
+            }
+          })
+        ),
       this.optimizer.getPhase$().pipe(
         map((phase) => {
           if (phase === 'issue') {

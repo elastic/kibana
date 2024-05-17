@@ -7,16 +7,16 @@
 
 import { cloneDeep, get, pick } from 'lodash';
 
-import { validateId } from './validate_id';
-import { validateIndexPattern } from './validate_index_pattern';
-import { validateRollupIndex } from './validate_rollup_index';
-import { validateRollupCron } from './validate_rollup_cron';
-import { validateRollupPageSize } from './validate_rollup_page_size';
-import { validateRollupDelay } from './validate_rollup_delay';
 import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
 import { validateHistogramInterval } from './validate_histogram_interval';
+import { validateId } from './validate_id';
+import { validateIndexPattern } from './validate_index_pattern';
 import { validateMetrics } from './validate_metrics';
+import { validateRollupCron } from './validate_rollup_cron';
+import { validateRollupDelay } from './validate_rollup_delay';
+import { validateRollupIndex } from './validate_rollup_index';
+import { validateRollupPageSize } from './validate_rollup_page_size';
 
 export const STEP_LOGISTICS = 'STEP_LOGISTICS';
 export const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';

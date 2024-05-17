@@ -7,7 +7,7 @@
  */
 import { ContentCrud } from '../core/crud';
 import { EventBus } from '../core/event_bus';
-import { createMemoryStorage, type FooContent } from '../core/mocks';
+import { type FooContent, createMemoryStorage } from '../core/mocks';
 import { ContentClient } from './content_client';
 
 describe('ContentClient', () => {

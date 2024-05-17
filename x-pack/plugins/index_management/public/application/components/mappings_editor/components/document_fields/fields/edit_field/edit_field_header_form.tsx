@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import { FormDataProvider } from '../../../../shared_imports';
-import { MainType, SubType, Field, DataTypeDefinition } from '../../../../types';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
+import { FormDataProvider } from '../../../../shared_imports';
+import { DataTypeDefinition, Field, MainType, SubType } from '../../../../types';
+import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { FieldDescriptionSection } from './field_description_section';
 

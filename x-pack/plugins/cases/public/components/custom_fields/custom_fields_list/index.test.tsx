@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { screen, within, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
+import { CustomFieldsList } from '.';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
-import { CustomFieldsList } from '.';
 
 describe('CustomFieldsList', () => {
   let appMockRender: AppMockRenderer;

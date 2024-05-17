@@ -6,9 +6,9 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { externalServiceMock, apiParams } from './mocks';
-import { ExternalService } from './types';
 import { api } from './api';
+import { apiParams, externalServiceMock } from './mocks';
+import { ExternalService } from './types';
 let mockedLogger: jest.Mocked<Logger>;
 
 describe('api', () => {

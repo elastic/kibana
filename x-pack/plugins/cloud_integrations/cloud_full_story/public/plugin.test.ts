@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { duration } from 'moment';
 import { CloudFullStoryConfig, CloudFullStoryPlugin } from './plugin';
 

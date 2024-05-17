@@ -8,17 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React, { FunctionComponent, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { useKibana } from '../../../../../shared_imports';
 
 import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import {
-  calculateRelativeFromAbsoluteMilliseconds,
-  PhaseAgeInMilliseconds,
   AbsoluteTimings,
+  PhaseAgeInMilliseconds,
+  calculateRelativeFromAbsoluteMilliseconds,
 } from '../../lib';
 
 import { InfinityIcon, LearnMoreLink } from '..';

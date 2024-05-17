@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { getDocId } from './get_doc_id';
 

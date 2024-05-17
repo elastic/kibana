@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { services as commonServices } from '../../../common/services';
 import { FeaturesProvider } from './features';
 import { UICapabilitiesProvider } from './ui_capabilities';
-import { services as commonServices } from '../../../common/services';
 
 export const services = {
   ...commonServices,

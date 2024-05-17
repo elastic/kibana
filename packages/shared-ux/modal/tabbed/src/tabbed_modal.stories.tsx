@@ -1,3 +1,4 @@
+import { EuiCheckboxGroup, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +7,13 @@
  * Side Public License, v 1.
  */
 import React, { Fragment } from 'react';
-import { EuiText, EuiCheckboxGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   StorybookMock as TabbedModalStorybookMock,
   type Params as TabbedModalStorybookParams,
 } from '../storybook/setup';
 
-import { TabbedModal, type IModalTabDeclaration } from './tabbed_modal';
+import { type IModalTabDeclaration, TabbedModal } from './tabbed_modal';
 
 export default {
   title: 'Modal/Tabbed Modal',

@@ -10,8 +10,8 @@ import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import {
-  convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
+  convertSavedDashboardPanelToPanelState,
 } from '../../../common';
 import { SavedDashboardPanel } from '../../../common/content_management';
 

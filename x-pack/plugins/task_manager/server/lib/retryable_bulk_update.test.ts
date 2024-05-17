@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { taskManagerMock } from '../mocks';
+import { TaskStatus } from '../task';
+import { taskStoreMock } from '../task_store.mock';
 import { asErr, asOk } from './result_type';
 import { retryableBulkUpdate } from './retryable_bulk_update';
-import { taskStoreMock } from '../task_store.mock';
-import { TaskStatus } from '../task';
-import { taskManagerMock } from '../mocks';
 
 describe('retryableBulkUpdate()', () => {
   const taskIds = ['1', '2', '3'];

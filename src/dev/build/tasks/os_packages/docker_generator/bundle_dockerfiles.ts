@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { copyFile } from 'fs/promises';
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 import Mustache from 'mustache';
 
-import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
-import { dockerfileTemplate } from './templates';
+import { Config, compressTar, copyAll, mkdirp, write } from '../../../lib';
 import { TemplateContext } from './template_context';
+import { dockerfileTemplate } from './templates';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
   log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);

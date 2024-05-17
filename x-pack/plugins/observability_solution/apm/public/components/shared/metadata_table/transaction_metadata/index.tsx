@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { getSectionsFromFields } from '../helper';
+import React, { useMemo } from 'react';
 import { MetadataTable } from '..';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { getSectionsFromFields } from '../helper';
 
 interface Props {
   transaction: Transaction;

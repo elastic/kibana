@@ -9,22 +9,22 @@ import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 
 import {
-  EuiButtonEmpty,
-  EuiModalFooter,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiInMemoryTable,
-  EuiFlexGroup,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiInMemoryTable,
+  EuiModalFooter,
   EuiPortal,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
-import { SavedViewOperations, SavedViewItem } from '../../../common/saved_views';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SavedViewItem, SavedViewOperations } from '../../../common/saved_views';
 
 export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem> {
   views?: SavedViewItem[];

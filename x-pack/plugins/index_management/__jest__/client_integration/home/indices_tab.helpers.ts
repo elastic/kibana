@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import {
+  AsyncTestBedConfig,
+  TestBed,
+  findTestSubject,
+  registerTestBed,
+} from '@kbn/test-jest-helpers';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import { TestSubjects, WithAppDependencies, services } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),

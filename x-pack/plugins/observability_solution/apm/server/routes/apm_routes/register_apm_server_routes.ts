@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import * as t from 'io-ts';
-import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import agent from 'elastic-apm-node';
+import Boom from '@hapi/boom';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { VersionedRouteRegistrar } from '@kbn/core-http-server';
+import { KibanaRequest, KibanaResponseFactory, Logger, RouteRegistrar } from '@kbn/core/server';
+import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
-import { merge } from 'lodash';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import agent from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
-import { VersionedRouteRegistrar } from '@kbn/core-http-server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import * as t from 'io-ts';
+import { merge } from 'lodash';
+import type { APMConfig } from '../..';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { pickKeys } from '../../../common/utils/pick_keys';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import type {
   APMCore,
   MinimalApmPluginRequestHandlerContext,
   TelemetryUsageCounter,
 } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import type { APMConfig } from '../..';
-import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
 const inspectRt = t.exact(
   t.partial({

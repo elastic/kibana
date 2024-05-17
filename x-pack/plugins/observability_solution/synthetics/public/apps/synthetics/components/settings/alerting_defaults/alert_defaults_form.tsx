@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,21 +14,23 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty, isEqual } from 'lodash';
-import { hasInvalidEmail } from './validation';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
-import { DefaultEmail } from './default_email';
-import { selectDynamicSettings } from '../../../state/settings/selectors';
+import { DynamicSettings } from '../../../../../../common/runtime_types';
 import {
   getDynamicSettingsAction,
   setDynamicSettingsAction,
 } from '../../../state/settings/actions';
+import { selectDynamicSettings } from '../../../state/settings/selectors';
 import { DefaultConnectorField } from './connector_field';
-import { DynamicSettings } from '../../../../../../common/runtime_types';
+import { DefaultEmail } from './default_email';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
+import { hasInvalidEmail } from './validation';
 
 interface FormFields extends Omit<DynamicSettings, 'defaultEmail'> {
   defaultEmail: Partial<DynamicSettings['defaultEmail']>;

@@ -39,9 +39,7 @@
             "type": "Function",
             "tags": [],
             "label": "getAllDeprecations",
-            "description": [
-              "\nGrabs deprecations details for all domains."
-            ],
+            "description": ["\nGrabs deprecations details for all domains."],
             "signature": [
               "() => Promise<",
               {
@@ -65,9 +63,7 @@
             "type": "Function",
             "tags": [],
             "label": "getDeprecations",
-            "description": [
-              "\nGrabs deprecations for a specific domain.\n"
-            ],
+            "description": ["\nGrabs deprecations for a specific domain.\n"],
             "signature": [
               "(domainId: string) => Promise<",
               {
@@ -90,9 +86,7 @@
                 "tags": [],
                 "label": "domainId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -220,9 +214,7 @@
         "description": [
           "\nResponse from correctiveActions.api call from automatically resolving the deprecation"
         ],
-        "signature": [
-          "{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"
-        ],
+        "signature": ["{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"],
         "path": "packages/core/deprecations/core-deprecations-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

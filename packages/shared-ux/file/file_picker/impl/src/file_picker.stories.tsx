@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import type { FileImageMetadata, FileKindBrowser } from '@kbn/shared-ux-file-types';
 import type { FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
-import { FilesContext } from '@kbn/shared-ux-file-context';
+import { action } from '@storybook/addon-actions';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
 
 type ListResponse = ReturnType<FilesClient['list']>;
@@ -23,7 +23,7 @@ const getFileKind = (id: string) =>
     id: kind,
     http: {},
     allowedMimeTypes: ['*'],
-  } as FileKindBrowser);
+  }) as FileKindBrowser;
 
 const defaultProps: FilePickerProps = {
   kind,

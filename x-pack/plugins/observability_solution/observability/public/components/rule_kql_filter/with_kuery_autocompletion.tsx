@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import {
-  withKibana,
   KibanaReactContextValue,
   KibanaServices,
+  withKibana,
 } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import React from 'react';
 import { InfraClientStartDeps, RendererFunction } from '../custom_threshold/types';
 
 interface WithKueryAutocompletionLifecycleProps {

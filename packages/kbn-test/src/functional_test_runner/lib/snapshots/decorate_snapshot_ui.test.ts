@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 

@@ -1,3 +1,6 @@
+import deepEqual from 'fast-deep-equal';
+import { safeLoad } from 'js-yaml';
+import { omit } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import { v5 as uuidv5 } from 'uuid';
-import { omit } from 'lodash';
-import { safeLoad } from 'js-yaml';
-import deepEqual from 'fast-deep-equal';
 
 import type {
   ElasticsearchClient,
@@ -27,45 +27,46 @@ import {
   outputYmlIncludesReservedPerformanceKey,
 } from '../../common/services/output_helpers';
 
-import type {
-  NewOutput,
-  Output,
-  OutputSOAttributes,
-  AgentPolicy,
-  OutputSoKafkaAttributes,
-  OutputSoRemoteElasticsearchAttributes,
-  PolicySecretReference,
-} from '../types';
+import {
+  RESERVED_CONFIG_YML_KEYS,
+  SO_SEARCH_LIMIT,
+  kafkaAcknowledgeReliabilityLevel,
+  kafkaCompressionType,
+  kafkaPartitionType,
+  kafkaSaslMechanism,
+  outputType,
+} from '../../common/constants';
+import { normalizeHostsForAgents } from '../../common/services';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
-  OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
+  OUTPUT_SAVED_OBJECT_TYPE,
 } from '../constants';
 import {
-  SO_SEARCH_LIMIT,
-  outputType,
-  kafkaSaslMechanism,
-  kafkaPartitionType,
-  kafkaCompressionType,
-  kafkaAcknowledgeReliabilityLevel,
-  RESERVED_CONFIG_YML_KEYS,
-} from '../../common/constants';
-import { normalizeHostsForAgents } from '../../common/services';
-import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
+  FleetError,
   OutputInvalidError,
   OutputUnauthorizedError,
-  FleetError,
 } from '../errors';
+import type {
+  AgentPolicy,
+  NewOutput,
+  Output,
+  OutputSOAttributes,
+  OutputSoKafkaAttributes,
+  OutputSoRemoteElasticsearchAttributes,
+  PolicySecretReference,
+} from '../types';
 
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
-import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
+import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteOutputSecrets,
   deleteSecrets,
@@ -73,7 +74,6 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
-import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 

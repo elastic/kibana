@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createSelectHandler, HandleChange } from './create_select_handler';
+import { HandleChange, createSelectHandler } from './create_select_handler';
 
 describe('createSelectHandler', () => {
   describe('createSelectHandler()', () => {

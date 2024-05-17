@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import execa from 'execa';
+import { LogLevel, ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import { ToolingLog, LogLevel } from '@kbn/tooling-log';
+import execa from 'execa';
 
 import { watchStdioForLine } from './watch_stdio_for_line';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { ChangeEvent, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import styled from 'styled-components';
 import * as labels from './translations';
 
 const WrapFieldSearch = styled('div')`

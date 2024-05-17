@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { merge as lodashMerge, unset } from 'lodash';
 import type {
-  SavedObjectsModelChange,
   SavedObjectModelTransformationFn,
-  SavedObjectsModelUnsafeTransformChange,
+  SavedObjectsModelChange,
   SavedObjectsModelDataBackfillChange,
   SavedObjectsModelDataRemovalChange,
+  SavedObjectsModelUnsafeTransformChange,
 } from '@kbn/core-saved-objects-server';
+import { merge as lodashMerge, unset } from 'lodash';
 
 /**
  * Build the transform function  for given model version, by chaining the transformations from its model changes.

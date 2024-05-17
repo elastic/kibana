@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  getFieldValidityAndErrorMessage,
   UseField,
+  getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';

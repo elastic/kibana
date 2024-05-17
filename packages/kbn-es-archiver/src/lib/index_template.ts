@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { merge } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
+import { merge } from 'lodash';
 
 import { ES_CLIENT_HEADERS } from '../client_headers';
 

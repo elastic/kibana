@@ -7,13 +7,13 @@
 
 import React, { memo, Suspense } from 'react';
 
-import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '../../../common/lib/kibana';
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 
 interface ConnectorFormFieldsProps {

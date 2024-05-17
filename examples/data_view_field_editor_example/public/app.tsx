@@ -7,7 +7,6 @@
  */
 
 import {
-  EuiProvider,
   DefaultItemAction,
   EuiButton,
   EuiCheckbox,
@@ -15,6 +14,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiPageTemplate,
+  EuiProvider,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,

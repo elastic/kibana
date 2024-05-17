@@ -23,53 +23,53 @@ import { useParams } from 'react-router-dom';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import { isEsqlRule } from '../../../../../common/detection_engine/utils';
-import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
+import { CustomHeaderPageMemo } from '..';
 import type {
   RuleResponse,
   RuleUpdateProps,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { useRule, useUpdateRule } from '../../../rule_management/logic';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import {
-  getRuleDetailsUrl,
-  getDetectionEngineUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { useUserData } from '../../../../detections/components/user_info';
-import { StepPanel } from '../../../rule_creation/components/step_panel';
-import { StepAboutRule } from '../../components/step_about_rule';
-import { StepDefineRule } from '../../components/step_define_rule';
-import { StepScheduleRule } from '../../components/step_schedule_rule';
-import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
-import { formatRule } from '../rule_creation/helpers';
-import {
-  getStepsData,
-  redirectToDetections,
-  getActionMessageParams,
-  MaxWidthEuiFlexItem,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
-import * as i18n from './translations';
-import { SecurityPageName } from '../../../../app/types';
-import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
+import { isEsqlRule } from '../../../../../common/detection_engine/utils';
+import { SecurityPageName } from '../../../../app/types';
+import {
+  getDetectionEngineUrl,
+  getRuleDetailsUrl,
+} from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
+import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { useUserData } from '../../../../detections/components/user_info';
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import {
+  MaxWidthEuiFlexItem,
+  getActionMessageParams,
+  getStepsData,
+  redirectToDetections,
+} from '../../../../detections/pages/detection_engine/rules/helpers';
+import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useRuleForms, useRuleIndexPattern } from '../form';
+import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
+import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
+import { useRule, useUpdateRule } from '../../../rule_management/logic';
+import { RulePreview } from '../../components/rule_preview';
+import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
+import { StepAboutRule } from '../../components/step_about_rule';
+import { StepDefineRule } from '../../components/step_define_rule';
+import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
-import { CustomHeaderPageMemo } from '..';
+import { useRuleForms, useRuleIndexPattern } from '../form';
+import { formatRule } from '../rule_creation/helpers';
+import * as i18n from './translations';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const [, dispatchToaster] = useStateToaster();

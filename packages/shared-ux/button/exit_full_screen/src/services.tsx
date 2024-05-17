@@ -9,9 +9,9 @@
 import React, { FC, useContext, PropsWithChildren } from 'react';
 
 import type {
-  Services,
-  ExitFullScreenButtonServices,
   ExitFullScreenButtonKibanaDependencies,
+  ExitFullScreenButtonServices,
+  Services,
 } from '../types';
 
 const ExitFullScreenButtonContext = React.createContext<Services | null>(null);

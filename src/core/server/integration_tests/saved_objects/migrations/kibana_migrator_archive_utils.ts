@@ -7,8 +7,8 @@
  */
 /* eslint-disable no-console */
 
-import Path from 'path';
 import { exec } from 'child_process';
+import Path from 'path';
 import { promisify } from 'util';
 const execPromise = promisify(exec);
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   ElasticsearchClient,
-  SavedObjectsServiceStart,
   HttpServiceSetup,
-  Logger,
   KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { CoreKibanaRequest } from '@kbn/core/server';
 
@@ -24,30 +24,30 @@ import type {
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
-import type { FleetConfigType } from '../../common/types';
+import type { MessageSigningServiceInterface } from '..';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { FleetConfigType } from '../../common/types';
+import type { FleetAppContext } from '../plugin';
+import type { TelemetryEventsSender } from '../telemetry/sender';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
-  PostPackagePolicyDeleteCallback,
-  PostPackagePolicyCreateCallback,
-  PostPackagePolicyPostDeleteCallback,
-  PostPackagePolicyPostCreateCallback,
-  PutPackagePolicyUpdateCallback,
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyPostDeleteCallback,
+  PutPackagePolicyUpdateCallback,
 } from '../types';
-import type { FleetAppContext } from '../plugin';
-import type { TelemetryEventsSender } from '../telemetry/sender';
-import type { MessageSigningServiceInterface } from '..';
 
 import type { BulkActionsResolver } from './agents';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
@@ -250,16 +250,16 @@ class AppContextService {
         T extends 'agentPolicyCreate'
           ? PostAgentPolicyCreateCallback
           : T extends 'agentPolicyUpdate'
-          ? PostAgentPolicyUpdateCallback
-          : T extends 'packagePolicyCreate'
-          ? PostPackagePolicyCreateCallback
-          : T extends 'packagePolicyDelete'
-          ? PostPackagePolicyDeleteCallback
-          : T extends 'packagePolicyPostDelete'
-          ? PostPackagePolicyPostDeleteCallback
-          : T extends 'packagePolicyPostCreate'
-          ? PostPackagePolicyPostCreateCallback
-          : PutPackagePolicyUpdateCallback
+            ? PostAgentPolicyUpdateCallback
+            : T extends 'packagePolicyCreate'
+              ? PostPackagePolicyCreateCallback
+              : T extends 'packagePolicyDelete'
+                ? PostPackagePolicyDeleteCallback
+                : T extends 'packagePolicyPostDelete'
+                  ? PostPackagePolicyPostDeleteCallback
+                  : T extends 'packagePolicyPostCreate'
+                    ? PostPackagePolicyPostCreateCallback
+                    : PutPackagePolicyUpdateCallback
       >
     | undefined {
     if (this.externalCallbacks) {
@@ -267,16 +267,16 @@ class AppContextService {
         T extends 'agentPolicyCreate'
           ? PostAgentPolicyCreateCallback
           : T extends 'agentPolicyUpdate'
-          ? PostAgentPolicyUpdateCallback
-          : T extends 'packagePolicyCreate'
-          ? PostPackagePolicyCreateCallback
-          : T extends 'packagePolicyDelete'
-          ? PostPackagePolicyDeleteCallback
-          : T extends 'packagePolicyPostDelete'
-          ? PostPackagePolicyPostDeleteCallback
-          : T extends 'packagePolicyPostCreate'
-          ? PostPackagePolicyPostCreateCallback
-          : PutPackagePolicyUpdateCallback
+            ? PostAgentPolicyUpdateCallback
+            : T extends 'packagePolicyCreate'
+              ? PostPackagePolicyCreateCallback
+              : T extends 'packagePolicyDelete'
+                ? PostPackagePolicyDeleteCallback
+                : T extends 'packagePolicyPostDelete'
+                  ? PostPackagePolicyPostDeleteCallback
+                  : T extends 'packagePolicyPostCreate'
+                    ? PostPackagePolicyPostCreateCallback
+                    : PutPackagePolicyUpdateCallback
       >;
     }
   }

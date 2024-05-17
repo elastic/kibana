@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useRef, useState } from 'react';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash';
+import { useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 const STORAGE_DEBOUNCE_TIME = 500;
 

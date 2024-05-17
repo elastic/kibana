@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { HttpSetup } from '@kbn/core-http-browser';
+import React from 'react';
 import { ENTERPRISE } from '../../content/prompts/welcome/translations';
 import { UpgradeButtons } from '../../upgrade/upgrade_buttons';
 

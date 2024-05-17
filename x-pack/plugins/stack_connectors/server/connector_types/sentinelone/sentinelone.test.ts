@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { sentinelOneConnectorMocks } from './mocks';
+import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
 import {
   SentinelOneDownloadAgentFileParams,
   SentinelOneFetchAgentFilesParams,
   SentinelOneGetActivitiesParams,
 } from '../../../common/sentinelone/types';
+import { sentinelOneConnectorMocks } from './mocks';
 import { API_PATH } from './sentinelone';
-import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
 
 describe('SentinelOne Connector', () => {
   let connectorInstance: ReturnType<typeof sentinelOneConnectorMocks.create>;

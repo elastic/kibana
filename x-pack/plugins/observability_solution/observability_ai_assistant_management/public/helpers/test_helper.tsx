@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createMemoryHistory } from 'history';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import translations from '@kbn/translations-plugin/translations/ja-JP.json';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import translations from '@kbn/translations-plugin/translations/ja-JP.json';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render as testLibRender } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import React from 'react';
 import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';

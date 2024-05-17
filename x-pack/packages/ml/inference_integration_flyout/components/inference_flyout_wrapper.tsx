@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTab,
-  EuiTitle,
-  EuiTabs,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiFlyoutFooter,
   EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import React, { useState } from 'react';
+import { flyoutHeaderDescriptions } from '../lib/shared_values';
 import type { ModelConfig, Tab } from '../types';
 import { TabType } from '../types';
-import { ElandPythonClient } from './eland_python_client';
 import { ConnectToApi } from './connect_to_api';
+import { ElandPythonClient } from './eland_python_client';
 import { ElasticsearchModels } from './elasticsearch_models';
-import { flyoutHeaderDescriptions } from '../lib/shared_values';
 const tabs: Tab[] = [
   {
     id: TabType.elasticsearch_models,

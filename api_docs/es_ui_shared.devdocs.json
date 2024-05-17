@@ -32,10 +32,7 @@
             "tags": [],
             "label": "getDerivedStateFromProps",
             "description": [],
-            "signature": [
-              "(props: Props) => ",
-              "FieldToValueMap"
-            ],
+            "signature": ["(props: Props) => ", "FieldToValueMap"],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -47,9 +44,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "Props"
-                ],
+                "signature": ["Props"],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -65,9 +60,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -79,9 +72,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "Props"
-                ],
+                "signature": ["Props"],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -143,11 +134,7 @@
             "tags": [],
             "label": "onChangeFields",
             "description": [],
-            "signature": [
-              "(fields: ",
-              "FieldToValueMap",
-              ") => void"
-            ],
+            "signature": ["(fields: ", "FieldToValueMap", ") => void"],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -159,9 +146,7 @@
                 "tags": [],
                 "label": "fields",
                 "description": [],
-                "signature": [
-                  "FieldToValueMap"
-                ],
+                "signature": ["FieldToValueMap"],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -177,9 +162,7 @@
             "tags": [],
             "label": "renderForm",
             "description": [],
-            "signature": [
-              "() => JSX.Element | undefined"
-            ],
+            "signature": ["() => JSX.Element | undefined"],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -193,9 +176,7 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
+            "signature": ["() => JSX.Element"],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -214,9 +195,7 @@
         "tags": [],
         "label": "attemptToURIDecode",
         "description": [],
-        "signature": [
-          "(value?: string | undefined) => string | undefined"
-        ],
+        "signature": ["(value?: string | undefined) => string | undefined"],
         "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -228,9 +207,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -247,9 +224,7 @@
         "tags": [],
         "label": "AuthorizationProvider",
         "description": [],
-        "signature": [
-          "({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"
-        ],
+        "signature": ["({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -261,9 +236,7 @@
             "tags": [],
             "label": "{ privilegesEndpoint, httpClient, children }",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -280,11 +253,7 @@
         "tags": [],
         "label": "extractQueryParams",
         "description": [],
-        "signature": [
-          "(queryString: string) => ",
-          "ParsedQuery",
-          "<string>"
-        ],
+        "signature": ["(queryString: string) => ", "ParsedQuery", "<string>"],
         "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -296,9 +265,7 @@
             "tags": [],
             "label": "queryString",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -330,9 +297,7 @@
             "tags": [],
             "label": "__0",
             "description": [],
-            "signature": [
-              "Props<T>"
-            ],
+            "signature": ["Props<T>"],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -347,9 +312,7 @@
         "tags": [],
         "label": "NotAuthorizedSection",
         "description": [],
-        "signature": [
-          "({ title, message, dataTestSubj }: Props) => JSX.Element"
-        ],
+        "signature": ["({ title, message, dataTestSubj }: Props) => JSX.Element"],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -361,9 +324,7 @@
             "tags": [],
             "label": "{ title, message, dataTestSubj }",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -394,9 +355,7 @@
             "tags": [],
             "label": "{\n  title,\n  error,\n  actions,\n  isCentered,\n  ...rest\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
+            "signature": ["React.PropsWithChildren<Props>"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -413,9 +372,7 @@
         "tags": [],
         "label": "PageLoading",
         "description": [],
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
+        "signature": ["({ children }: { children?: React.ReactNode; }) => JSX.Element"],
         "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -427,9 +384,7 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "signature": [
-              "{ children?: React.ReactNode; }"
-            ],
+            "signature": ["{ children?: React.ReactNode; }"],
             "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -460,9 +415,7 @@
             "tags": [],
             "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
+            "signature": ["React.PropsWithChildren<Props>"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -493,9 +446,7 @@
             "tags": [],
             "label": "{\n  inline,\n  'data-test-subj': dataTestSubj,\n  children,\n  ...rest\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
+            "signature": ["React.PropsWithChildren<Props>"],
             "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -596,10 +547,7 @@
         "tags": [],
         "label": "useAuthorizationContext",
         "description": [],
-        "signature": [
-          "() => ",
-          "Authorization"
-        ],
+        "signature": ["() => ", "Authorization"],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -698,9 +646,7 @@
         "tags": [],
         "label": "ViewApiRequestFlyout",
         "description": [],
-        "signature": [
-          "(props: ViewApiRequestFlyoutProps) => JSX.Element"
-        ],
+        "signature": ["(props: ViewApiRequestFlyoutProps) => JSX.Element"],
         "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -712,9 +658,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "ViewApiRequestFlyoutProps"
-            ],
+            "signature": ["ViewApiRequestFlyoutProps"],
             "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -745,9 +689,7 @@
             "tags": [],
             "label": "{ privileges: requiredPrivileges, children }",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -788,10 +730,7 @@
             "tags": [],
             "label": "apiError",
             "description": [],
-            "signature": [
-              "Error",
-              " | null"
-            ],
+            "signature": ["Error", " | null"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -848,9 +787,7 @@
             "tags": [],
             "label": "cause",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -862,9 +799,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -900,9 +835,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "{ raw: string; format(): T; }"
-            ],
+            "signature": ["{ raw: string; format(): T; }"],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -914,9 +847,7 @@
             "tags": [],
             "label": "validate",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -930,9 +861,7 @@
             "tags": [],
             "label": "isValid",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -958,9 +887,7 @@
             "tags": [],
             "label": "[key: string]: string[] | undefined",
             "description": [],
-            "signature": [
-              "[key: string]:  string[] | undefined"
-            ],
+            "signature": ["[key: string]:  string[] | undefined"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1042,9 +969,7 @@
             "tags": [],
             "label": "method",
             "description": [],
-            "signature": [
-              "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
-            ],
+            "signature": ["\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1077,9 +1002,7 @@
             "tags": [],
             "label": "body",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1093,9 +1016,7 @@
             "description": [
               "\nIf set, flags this as a \"system request\" to indicate that this is not a user-initiated request. For more information, see\nHttpFetchOptions#asSystemRequest."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1107,9 +1028,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1145,9 +1064,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "D | null"
-            ],
+            "signature": ["D | null"],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1159,9 +1076,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "E | null"
-            ],
+            "signature": ["E | null"],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1204,9 +1119,7 @@
             "tags": [],
             "label": "pollIntervalMs",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1218,9 +1131,7 @@
             "tags": [],
             "label": "initialData",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1232,9 +1143,7 @@
             "tags": [],
             "label": "deserializer",
             "description": [],
-            "signature": [
-              "((data: any) => any) | undefined"
-            ],
+            "signature": ["((data: any) => any) | undefined"],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1246,9 +1155,7 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1310,9 +1217,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "E | null"
-            ],
+            "signature": ["E | null"],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1324,9 +1229,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "D | null | undefined"
-            ],
+            "signature": ["D | null | undefined"],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1338,9 +1241,7 @@
             "tags": [],
             "label": "resendRequest",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1360,9 +1261,7 @@
         "tags": [],
         "label": "Frequency",
         "description": [],
-        "signature": [
-          "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
-        ],
+        "signature": ["\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""],
         "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1424,11 +1323,7 @@
         "tags": [],
         "label": "AuthorizationContext",
         "description": [],
-        "signature": [
-          "React.Context<",
-          "Authorization",
-          ">"
-        ],
+        "signature": ["React.Context<", "Authorization", ">"],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1452,9 +1347,7 @@
             "tags": [],
             "label": "INDEX_ILLEGAL_CHARACTERS_VISIBLE",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1466,9 +1359,7 @@
             "tags": [],
             "label": "indexNameBeginsWithPeriod",
             "description": [],
-            "signature": [
-              "(indexName?: string | undefined) => boolean"
-            ],
+            "signature": ["(indexName?: string | undefined) => boolean"],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1481,9 +1372,7 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1497,9 +1386,7 @@
             "tags": [],
             "label": "findIllegalCharactersInIndexName",
             "description": [],
-            "signature": [
-              "(indexName: string) => string[]"
-            ],
+            "signature": ["(indexName: string) => string[]"],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1525,9 +1412,7 @@
             "tags": [],
             "label": "indexNameContainsSpaces",
             "description": [],
-            "signature": [
-              "(indexName: string) => boolean"
-            ],
+            "signature": ["(indexName: string) => boolean"],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1558,13 +1443,9 @@
         "parentPluginId": "esUiShared",
         "id": "def-server.handleEsError",
         "type": "Function",
-        "tags": [
-          "throws"
-        ],
+        "tags": ["throws"],
         "label": "handleEsError",
-        "description": [
-          "\nFor errors returned by the new elasticsearch js client.\n"
-        ],
+        "description": ["\nFor errors returned by the new elasticsearch js client.\n"],
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
           {
@@ -1587,9 +1468,7 @@
             "tags": [],
             "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
             "description": [],
-            "signature": [
-              "EsErrorHandlerParams"
-            ],
+            "signature": ["EsErrorHandlerParams"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1606,9 +1485,7 @@
         "tags": [],
         "label": "parseEsError",
         "description": [],
-        "signature": [
-          "(err: string) => ParsedError"
-        ],
+        "signature": ["(err: string) => ParsedError"],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1620,9 +1497,7 @@
             "tags": [],
             "label": "err",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1660,9 +1535,7 @@
             "tags": [],
             "label": "[key: string]: string[] | undefined",
             "description": [],
-            "signature": [
-              "[key: string]:  string[] | undefined"
-            ],
+            "signature": ["[key: string]:  string[] | undefined"],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false

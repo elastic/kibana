@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { EmbeddedConsoleViewButtonProps } from '@kbn/console-plugin/public';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export const SearchNotebooksButton = ({ activeView, onClick }: EmbeddedConsoleViewButtonProps) => {
   if (activeView) {

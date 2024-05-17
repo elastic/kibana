@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18nLoader } from '@kbn/i18n';
-import { size } from 'lodash';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { I18nServiceSetup } from '@kbn/core/server';
-import { getIntegrityHashes, Integrities } from './file_integrity';
+import { i18nLoader } from '@kbn/i18n';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { size } from 'lodash';
+import { Integrities, getIntegrityHashes } from './file_integrity';
 
 export interface UsageStats {
   locale: string;

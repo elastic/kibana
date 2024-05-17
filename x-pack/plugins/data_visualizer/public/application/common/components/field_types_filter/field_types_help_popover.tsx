@@ -18,12 +18,12 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { getFieldTypeDescription } from '@kbn/field-utils/src/utils/get_field_type_description';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon } from '@kbn/react-field';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getFieldTypeDescription } from '@kbn/field-utils/src/utils/get_field_type_description';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface FieldTypeTableItem {

@@ -74,9 +74,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -280,9 +278,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -334,9 +330,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "\"ACTION_EXPLORE_DATA_CHART\""
-            ],
+            "signature": ["\"ACTION_EXPLORE_DATA_CHART\""],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -348,9 +342,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"ACTION_EXPLORE_DATA_CHART\""
-            ],
+            "signature": ["\"ACTION_EXPLORE_DATA_CHART\""],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -362,9 +354,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "200"
-            ],
+            "signature": ["200"],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -376,11 +366,7 @@
             "tags": [],
             "label": "isCompatible",
             "description": [],
-            "signature": [
-              "(context: ",
-              "ExploreDataChartActionContext",
-              ") => Promise<boolean>"
-            ],
+            "signature": ["(context: ", "ExploreDataChartActionContext", ") => Promise<boolean>"],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -392,9 +378,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "ExploreDataChartActionContext"
-                ],
+                "signature": ["ExploreDataChartActionContext"],
                 "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -428,9 +412,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "ExploreDataChartActionContext"
-                ],
+                "signature": ["ExploreDataChartActionContext"],
                 "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -490,9 +472,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "\"ACTION_EXPLORE_DATA\""
-            ],
+            "signature": ["\"ACTION_EXPLORE_DATA\""],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -504,9 +484,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"ACTION_EXPLORE_DATA\""
-            ],
+            "signature": ["\"ACTION_EXPLORE_DATA\""],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -518,9 +496,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "200"
-            ],
+            "signature": ["200"],
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
             "deprecated": false,
             "trackAdoption": false

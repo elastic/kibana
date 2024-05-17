@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
-import { linkToSnapshots } from './application/services/navigation';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { PLUGIN } from '../common/constants';
+import { linkToSnapshots } from './application/services/navigation';
 
 export const SNAPSHOT_RESTORE_LOCATOR_ID = 'SNAPSHOT_RESTORE_LOCATOR';
 

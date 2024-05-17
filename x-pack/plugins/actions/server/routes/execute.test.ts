@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { executeActionRoute } from './execute';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { asHttpRequestExecutionSource } from '../lib';
 import { actionsClientMock } from '../actions_client/actions_client.mock';
+import { asHttpRequestExecutionSource } from '../lib';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { ActionTypeExecutorResult } from '../types';
+import { executeActionRoute } from './execute';
+import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 jest.mock('./verify_access_and_context', () => ({

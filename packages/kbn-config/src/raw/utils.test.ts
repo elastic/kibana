@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { splitKey, getUnsplittableKey, replaceEnvVarRefs } from './utils';
+import { getUnsplittableKey, replaceEnvVarRefs, splitKey } from './utils';
 
 describe('splitKey', () => {
   it('correctly splits on the dot delimiter', () => {

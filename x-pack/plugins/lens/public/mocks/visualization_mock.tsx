@@ -1,3 +1,5 @@
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { toExpression } from '@kbn/interpreter';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React from 'react';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { toExpression } from '@kbn/interpreter';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(

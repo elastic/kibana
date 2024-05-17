@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { RiskSeverity } from '../../../../common/search_strategy';
-import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { SeverityCount } from '../severity/types';
+import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 
 describe('useRiskDonutChartData', () => {
   it('returns the total', () => {

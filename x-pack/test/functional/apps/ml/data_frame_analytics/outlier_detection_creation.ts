@@ -7,13 +7,13 @@
 
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import type { FieldStatsType } from '../common/types';
 import {
-  type DiscoverUrlConfig,
   type DashboardUrlConfig,
+  type DiscoverUrlConfig,
   type OtherUrlConfig,
 } from '../../../services/ml/data_frame_analytics_edit';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FieldStatsType } from '../common/types';
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',

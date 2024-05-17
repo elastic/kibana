@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
-import React, { memo, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiHorizontalRule,
-  EuiText,
-  EuiShowFor,
-  EuiPanel,
-  EuiTextColor,
   EuiIconTip,
+  EuiPanel,
+  EuiShowFor,
   EuiSpacer,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC, ReactNode } from 'react';
+import React, { memo, useContext } from 'react';
 
-import { ThemeContext } from 'styled-components';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { ThemeContext } from 'styled-components';
 import { OS_TITLES } from '../../../../../common/translations';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const TITLES = {
   type: i18n.translate('xpack.securitySolution.endpoint.policyDetailType', {

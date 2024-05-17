@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
-import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import { FieldSelector as Component, Props } from './field_selector';
+import { FormProvider, useForm } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
+import { FieldSelector as Component, Props } from './field_selector';
 
 export default {
   component: Component,

@@ -6,8 +6,8 @@
  */
 import { type AggregateQuery, getAggregateQueryMode } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { getAllColumns } from './utils';
 import type { TextBasedLayerColumn } from './types';
+import { getAllColumns } from './utils';
 
 const cachedColumns = new Map<string, DatatableColumn[]>();
 

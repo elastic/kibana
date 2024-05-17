@@ -9,9 +9,9 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../test/context_jest';
 import {
-  getPageControlsPrevious as previous,
   getPageControlsCenter as current,
   getPageControlsNext as next,
+  getPageControlsPrevious as previous,
 } from '../../test/selectors';
 import { PageControls } from './page_controls';
 

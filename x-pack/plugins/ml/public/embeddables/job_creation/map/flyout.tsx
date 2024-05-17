@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { MapApi } from '@kbn/maps-plugin/public';
-import { Layer } from './map_vis_layer_selection_flyout/layer';
+import { getPanelTitle } from '@kbn/presentation-publishing';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_map';
 import { VisualizationExtractor } from '../../../application/jobs/new_job/job_from_map';
+import { Layer } from './map_vis_layer_selection_flyout/layer';
 
 interface Props {
   embeddable: MapApi;

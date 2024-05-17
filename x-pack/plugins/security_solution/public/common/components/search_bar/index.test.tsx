@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import { SearchBarComponent } from '.';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { SearchBarComponent } from '.';
+import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 

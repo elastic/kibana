@@ -1,3 +1,8 @@
+import path from 'path';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+import { REPO_ROOT } from '@kbn/repo-info';
+import expect from 'expect';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +10,14 @@
  * 2.0.
  */
 import fs from 'fs/promises';
-import path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
-import expect from 'expect';
-import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   getPrebuiltRulesStatus,
   installPrebuiltRulesPackageByVersion,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');

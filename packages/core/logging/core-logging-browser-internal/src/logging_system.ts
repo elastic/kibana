@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { LogLevel, Logger, LoggerFactory, DisposableAppender } from '@kbn/logging';
-import { getLoggerContext, BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
-import type { LoggerConfigType } from './types';
-import { BaseLogger } from './logger';
-import { PatternLayout } from './layouts';
+import { BrowserLoggingConfig, getLoggerContext } from '@kbn/core-logging-common-internal';
+import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
 import { ConsoleAppender } from './appenders';
+import { PatternLayout } from './layouts';
+import { BaseLogger } from './logger';
+import type { LoggerConfigType } from './types';
 
 const CONSOLE_APPENDER_ID = 'console';
 

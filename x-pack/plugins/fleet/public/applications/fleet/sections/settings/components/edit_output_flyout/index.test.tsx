@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 
-import type { Output } from '../../../../types';
-import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../../../services';
-import { useStartServices, sendPutOutput } from '../../../../hooks';
+import { sendPutOutput, useStartServices } from '../../../../hooks';
+import type { Output } from '../../../../types';
 
 import { EditOutputFlyout } from '.';
 

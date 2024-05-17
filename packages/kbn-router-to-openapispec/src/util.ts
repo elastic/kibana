@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
 import {
-  getRequestValidation,
   type RouteConfigOptionsBody,
-  type RouterRoute,
   type RouteValidatorConfig,
+  type RouterRoute,
+  getRequestValidation,
 } from '@kbn/core-http-server';
+import type { OpenAPIV3 } from 'openapi-types';
 import { KnownParameters } from './type';
 
 export const getPathParameters = (path: string): KnownParameters => {
@@ -59,7 +59,7 @@ export const getVersionedHeaderParam = (
 });
 
 export const prepareRoutes = <
-  R extends { path: string; options: { access?: 'public' | 'internal' } }
+  R extends { path: string; options: { access?: 'public' | 'internal' } },
 >(
   routes: R[],
   pathStartsWith?: string

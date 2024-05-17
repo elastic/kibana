@@ -10,22 +10,22 @@ import expect from 'expect';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  getRuleWithWebHookAction,
-  updateRule,
-  installMockPrebuiltRules,
-  fetchRule,
-  createWebHookRuleAction,
-  findImmutableRuleById,
-  ruleToUpdateSchema,
-  getCustomQueryRuleParams,
-  getPrebuiltRulesAndTimelinesStatus,
-} from '../../../utils';
-import {
-  deleteAllRules,
   deleteAllAlerts,
+  deleteAllRules,
   waitForRuleSuccess,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  createWebHookRuleAction,
+  fetchRule,
+  findImmutableRuleById,
+  getCustomQueryRuleParams,
+  getPrebuiltRulesAndTimelinesStatus,
+  getRuleWithWebHookAction,
+  installMockPrebuiltRules,
+  ruleToUpdateSchema,
+  updateRule,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

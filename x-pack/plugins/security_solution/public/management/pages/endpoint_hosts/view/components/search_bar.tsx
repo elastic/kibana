@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import { encode } from '@kbn/rison';
-import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { urlFromQueryParams } from '../url_from_query_params';
-import { useEndpointSelector } from '../hooks';
-import * as selectors from '../../store/selectors';
+import { encode } from '@kbn/rison';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import React, { memo, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { clone } from '../../models/index_pattern';
+import * as selectors from '../../store/selectors';
+import { useEndpointSelector } from '../hooks';
+import { urlFromQueryParams } from '../url_from_query_params';
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();

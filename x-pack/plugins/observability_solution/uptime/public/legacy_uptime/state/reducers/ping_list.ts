@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
+import { Action, handleActions } from 'redux-actions';
 import { PingsResponse } from '../../../../common/runtime_types';
-import { clearPings, getPings, getPingsSuccess, getPingsFail } from '../actions';
+import { clearPings, getPings, getPingsFail, getPingsSuccess } from '../actions';
 
 export interface PingListState {
   pingList: PingsResponse;

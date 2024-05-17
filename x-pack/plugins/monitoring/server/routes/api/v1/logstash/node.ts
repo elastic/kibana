@@ -9,17 +9,17 @@ import {
   postLogstashNodeRequestParamsRT,
   postLogstashNodeRequestPayloadRT,
 } from '../../../../../common/http_api/logstash';
-import { getNodeInfo } from '../../../../lib/logstash/get_node_info';
-import { handleError } from '../../../../lib/errors';
+import { getLogstashDataset } from '../../../../lib/cluster/get_index_patterns';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import {
+  NamedMetricDescriptor,
   getMetrics,
   isNamedMetricDescriptor,
-  NamedMetricDescriptor,
 } from '../../../../lib/details/get_metrics';
-import { metricSets } from './metric_set_node';
+import { handleError } from '../../../../lib/errors';
+import { getNodeInfo } from '../../../../lib/logstash/get_node_info';
 import { MonitoringCore } from '../../../../types';
-import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getLogstashDataset } from '../../../../lib/cluster/get_index_patterns';
+import { metricSets } from './metric_set_node';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 

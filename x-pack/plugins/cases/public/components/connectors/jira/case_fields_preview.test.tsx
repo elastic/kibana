@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
 
-import { connector } from '../mock';
-import { useGetIssueTypes } from './use_get_issue_types';
-import FieldsPreview from './case_fields_preview';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
+import { connector } from '../mock';
+import FieldsPreview from './case_fields_preview';
+import { useGetIssueTypes } from './use_get_issue_types';
 
 jest.mock('./use_get_issue_types');
 

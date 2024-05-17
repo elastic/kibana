@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
 import { TopNFunctions } from '@kbn/profiling-utils';
-import expect from '@kbn/expect';
+import { getBettertest } from '../common/bettertest';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { loadProfilingData, setupProfiling } from '../utils/profiling_data';
-import { getBettertest } from '../common/bettertest';
 
 const profilingRoutePaths = getRoutePaths();
 

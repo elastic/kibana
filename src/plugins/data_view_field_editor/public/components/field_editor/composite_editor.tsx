@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
-  EuiNotificationBadge,
+  EuiButtonEmpty,
+  EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiNotificationBadge,
   EuiSpacer,
   EuiText,
-  EuiFieldText,
-  EuiComboBox,
-  EuiFormRow,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ScriptField } from './form_fields';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { RuntimePrimitiveTypes } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
+import { ScriptField } from './form_fields';
 import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 export interface CompositeEditorProps {
   onReset: () => void;

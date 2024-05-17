@@ -7,9 +7,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 

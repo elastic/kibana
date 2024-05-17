@@ -1,3 +1,14 @@
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { of, throwError as throwErrorRx } from 'rxjs';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { FetchDeps } from './fetch_all';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +17,6 @@
  * Side Public License, v 1.
  */
 import { fetchDocuments } from './fetch_documents';
-import { throwError as throwErrorRx, of } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FetchDeps } from './fetch_all';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 
 const getDeps = () =>
   ({
@@ -27,7 +27,7 @@ const getDeps = () =>
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
     getAppState: () => ({ sampleSize: 100 }),
-  } as unknown as FetchDeps);
+  }) as unknown as FetchDeps;
 
 describe('test fetchDocuments', () => {
   test('resolves with returned documents', async () => {

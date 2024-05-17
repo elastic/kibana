@@ -6,9 +6,9 @@
  */
 
 import { connect } from 'react-redux';
-import { SourceDetails } from './source_details';
-import { getDataFilters } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
+import { getDataFilters } from '../../../selectors/map_selectors';
+import { SourceDetails } from './source_details';
 
 function mapStateToProps(state: MapStoreState) {
   return {

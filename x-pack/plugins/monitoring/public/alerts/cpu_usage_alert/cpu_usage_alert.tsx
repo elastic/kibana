@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 import { RULE_CPU_USAGE, RULE_DETAILS, RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import type { MonitoringConfig } from '../../types';
 import {

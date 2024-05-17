@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Rule, AST } from 'eslint';
+import type { AST, Rule } from 'eslint';
 import { PROTECTED_RULES, getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';

@@ -7,9 +7,9 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPatternsFetcher } from '.';
-import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { IndexPatternsFetcher } from '.';
 import { DataViewMissingIndices, DataViewType } from '../../common';
 
 const rollupResponse = {

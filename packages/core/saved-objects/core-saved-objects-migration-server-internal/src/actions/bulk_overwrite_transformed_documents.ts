@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
-  catchRetryableEsClientErrors,
-  type RetryableEsClientError,
-} from './catch_retryable_es_client_errors';
-import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
-import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException, IndexNotFound } from '.';
+import type { IndexNotFound, RequestEntityTooLargeException, TargetIndexHadWriteBlock } from '.';
 import type { BulkOperation } from '../model/create_batches';
+import {
+  type RetryableEsClientError,
+  catchRetryableEsClientErrors,
+} from './catch_retryable_es_client_errors';
+import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
+import { isIndexNotFoundException, isWriteBlockException } from './es_errors';
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {

@@ -8,13 +8,13 @@
 jest.mock('./kibana_services', () => ({}));
 jest.mock('./licensed_features', () => ({}));
 
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { ES_GEO_FIELD_TYPE } from '../common/constants';
 import {
-  getSourceFields,
   getAggregatableGeoFieldTypes,
+  getSourceFields,
   supportsGeoTileAgg,
 } from './index_pattern_util';
-import { ES_GEO_FIELD_TYPE } from '../common/constants';
-import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {

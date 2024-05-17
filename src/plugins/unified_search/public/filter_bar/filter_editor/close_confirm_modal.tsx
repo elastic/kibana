@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
 
 interface CloseFilterEditorConfirmModalProps {
   onCancel: () => void;

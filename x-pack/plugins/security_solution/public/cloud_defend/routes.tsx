@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import type {
   CloudDefendPageId,
   CloudDefendSecuritySolutionContext,
 } from '@kbn/cloud-defend-plugin/public';
 import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
+import React from 'react';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
-import { useKibana } from '../common/lib/kibana';
-import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
-import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
+import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { useKibana } from '../common/lib/kibana';
+import { SpyRoute } from '../common/utils/route/spy_routes';
 
 // This exists only for the type signature cast
 const CloudDefendSpyRoute = ({ pageName, ...rest }: { pageName?: CloudDefendPageId }) => (

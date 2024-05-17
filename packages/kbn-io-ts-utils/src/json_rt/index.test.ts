@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Either, fold, isLeft, isRight } from 'fp-ts/lib/Either';
+import { Right } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 import { jsonRt } from '.';
-import { isRight, Either, isLeft, fold } from 'fp-ts/lib/Either';
-import { Right } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
 
 function getValueOrThrow<TEither extends Either<any, any>>(either: TEither): Right<TEither> {
   const value = pipe(

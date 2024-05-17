@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
-import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
+  NonEmptyEndpointEntriesArray,
   endpointEntriesArray,
   nonEmptyEndpointEntriesArray,
-  NonEmptyEndpointEntriesArray,
 } from '.';
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { getEntryExistsMock } from '../../entries_exist/index.mock';
+import { getEntryListMock } from '../../entries_list/index.mock';
+import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
+import { getEndpointEntryMatchWildcardMock } from '../entry_match_wildcard/index.mock';
 import { getEndpointEntryNestedMock } from '../entry_nested/index.mock';
 import { getEndpointEntriesArrayMock } from './index.mock';
-import { getEntryListMock } from '../../entries_list/index.mock';
-import { getEntryExistsMock } from '../../entries_exist/index.mock';
-import { getEndpointEntryMatchWildcardMock } from '../entry_match_wildcard/index.mock';
 
 describe('Endpoint', () => {
   describe('entriesArray', () => {

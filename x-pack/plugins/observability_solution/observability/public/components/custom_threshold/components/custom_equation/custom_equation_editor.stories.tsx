@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
+import { TimeUnitChar } from '../../../../../common';
 import {
   Aggregators,
   Comparator,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../../../common';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 
-import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
-import { aggregationType } from '../expression_row';
 import { MetricExpression } from '../../types';
+import { aggregationType } from '../expression_row';
 import { validateCustomThreshold } from '../validation';
+import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 
 export default {
   title: 'app/Alerts/CustomEquationEditor',

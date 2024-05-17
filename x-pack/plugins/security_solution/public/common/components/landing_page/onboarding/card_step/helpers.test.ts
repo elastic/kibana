@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { autoCheckPrebuildRuleStepCompleted } from './helpers';
-import { fetchRuleManagementFilters } from '../apis';
 import type { HttpSetup } from '@kbn/core/public';
+import { fetchRuleManagementFilters } from '../apis';
+import { autoCheckPrebuildRuleStepCompleted } from './helpers';
 
 jest.mock('../apis');
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
+import React, { memo } from 'react';
 
 import { borderCss } from './conditions.styles';
 import { EntryContent } from './entry_content';

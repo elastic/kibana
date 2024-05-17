@@ -35,15 +35,13 @@ export function enhanceRouter({ router, fileKind }: Args): FileKindRouter {
   return new Proxy<FileKindRouter>(router as FileKindRouter, {
     get(target, prop, receiver) {
       if (['get', 'post', 'put', 'patch', 'delete'].includes(prop as string)) {
-        const manInTheMiddleRegistrar: RouteRegistrar<
-          RouteMethod,
-          FileKindsRequestHandlerContext
-        > = (opts, handler): void => {
-          return Reflect.apply(target[prop as keyof FileKindRouter] as Function, target, [
-            opts,
-            handlerWrapper(handler as FileKindHandler),
-          ]);
-        };
+        const manInTheMiddleRegistrar: RouteRegistrar<RouteMethod, FileKindsRequestHandlerContext> =
+          (opts, handler): void => {
+            return Reflect.apply(target[prop as keyof FileKindRouter] as Function, target, [
+              opts,
+              handlerWrapper(handler as FileKindHandler),
+            ]);
+          };
         return manInTheMiddleRegistrar;
       }
       return Reflect.get(target, prop, receiver);

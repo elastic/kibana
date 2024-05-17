@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { CtiEnabledModule } from './cti_enabled_module';
+import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { CtiEnabledModule } from './cti_enabled_module';
+import { mockCtiLinksResponse, mockProps, mockTiDataSources } from './mock';
 
 jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
 const useTiDataSourcesMock = useTiDataSources as jest.Mock;

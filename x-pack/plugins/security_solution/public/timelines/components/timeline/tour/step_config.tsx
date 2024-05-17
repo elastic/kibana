@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiText, EuiCode } from '@elastic/eui';
-import React from 'react';
+import { EuiCode, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { TimelineTabs } from '../../../../../common/types';
 import * as i18n from './translations';

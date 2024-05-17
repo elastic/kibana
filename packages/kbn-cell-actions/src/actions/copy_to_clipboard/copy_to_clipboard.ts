@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import copy from 'copy-to-clipboard';
-import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
-import { isString } from 'lodash/fp';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import copy from 'copy-to-clipboard';
+import { isString } from 'lodash/fp';
 import { COPY_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
 import {
   filterOutNullableValues,
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
   valueToArray,
 } from '../utils';
-import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
 
 const ICON = 'copyClipboard';
 const COPY_TO_CLIPBOARD = i18n.translate('cellActions.actions.copyToClipboard.displayName', {

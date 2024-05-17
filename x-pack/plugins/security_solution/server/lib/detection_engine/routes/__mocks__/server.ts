@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { requestContextMock } from './request_context';
-import { responseMock as responseFactoryMock } from './response_factory';
-import { requestMock } from '.';
-import { responseAdapter } from './test_adapters';
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RegisteredVersionedRoute } from '@kbn/core-http-router-server-mocks';
 import { getRequestValidation } from '@kbn/core-http-server';
+import type { KibanaRequest, RequestHandler, RouteConfig } from '@kbn/core/server';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { requestMock } from '.';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import { requestContextMock } from './request_context';
+import { responseMock as responseFactoryMock } from './response_factory';
+import { responseAdapter } from './test_adapters';
 
 interface Route {
   validate: RouteConfig<

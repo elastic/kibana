@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { flatMap, uniq } from 'lodash';
 import {
   builtinConstants,
   builtinFunctions,
@@ -13,7 +14,6 @@ import {
   keywords,
   osqueryTableNames,
 } from './osquery_highlight_rules';
-import { flatMap, uniq } from 'lodash';
 
 describe('Osquery Editor', () => {
   const regex = /\s*[\s,]\s*/;

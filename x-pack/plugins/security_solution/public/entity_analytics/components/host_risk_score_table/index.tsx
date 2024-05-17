@@ -9,29 +9,29 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Columns, Criteria, ItemsPerRow } from '../../../explore/components/paginated_table';
-import { PaginatedTable } from '../../../explore/components/paginated_table';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { hostsActions, hostsModel, hostsSelectors } from '../../../explore/hosts/store';
-import { getHostRiskScoreColumns } from './columns';
 import type {
   HostRiskScore,
+  RiskScoreFields,
   RiskScoreItem,
   RiskScoreSortField,
   RiskSeverity,
-  RiskScoreFields,
 } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
+import type { Columns, Criteria, ItemsPerRow } from '../../../explore/components/paginated_table';
+import { PaginatedTable } from '../../../explore/components/paginated_table';
 import * as i18n from '../../../explore/hosts/components/hosts_table/translations';
+import { hostsActions, hostsModel, hostsSelectors } from '../../../explore/hosts/store';
+import { getHostRiskScoreColumns } from './columns';
 import * as i18nHosts from './translations';
 
 import { SeverityBadges } from '../severity/severity_badges';
 import { SeverityBar } from '../severity/severity_bar';
 import { SeverityFilterGroup } from '../severity/severity_filter_group';
 
-import type { SeverityCount } from '../severity/types';
 import { RiskInformationButtonEmpty } from '../risk_information';
+import type { SeverityCount } from '../severity/types';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -62,7 +62,7 @@ export type HostRiskScoreColumns = [
   Columns<RiskScoreItem[RiskScoreFields.hostName]>,
   Columns<RiskScoreItem[RiskScoreFields.timestamp]>,
   Columns<RiskScoreItem[RiskScoreFields.hostRiskScore]>,
-  Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
+  Columns<RiskScoreItem[RiskScoreFields.hostRisk]>,
 ];
 
 const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({

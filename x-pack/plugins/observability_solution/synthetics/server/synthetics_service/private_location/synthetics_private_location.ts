@@ -1,3 +1,4 @@
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,27 +8,26 @@
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
-import {
-  BROWSER_TEST_NOW_RUN,
-  LIGHTWEIGHT_TEST_NOW_RUN,
-} from '../synthetics_monitor/synthetics_monitor_client';
-import { scheduleCleanUpTask } from './clean_up_task';
-import {
-  getAgentPoliciesAsInternalUser,
-  getAgentPolicyAsInternalUser,
-} from '../../routes/settings/private_locations/get_agent_policies';
-import { SyntheticsServerSetup } from '../../types';
-import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,
   HeartbeatConfig,
   MonitorFields,
   SourceType,
 } from '../../../common/runtime_types';
-import { stringifyString } from '../formatters/private_formatters/formatting_utils';
+import {
+  getAgentPoliciesAsInternalUser,
+  getAgentPolicyAsInternalUser,
+} from '../../routes/settings/private_locations/get_agent_policies';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsServerSetup } from '../../types';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { stringifyString } from '../formatters/private_formatters/formatting_utils';
+import {
+  BROWSER_TEST_NOW_RUN,
+  LIGHTWEIGHT_TEST_NOW_RUN,
+} from '../synthetics_monitor/synthetics_monitor_client';
+import { scheduleCleanUpTask } from './clean_up_task';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;

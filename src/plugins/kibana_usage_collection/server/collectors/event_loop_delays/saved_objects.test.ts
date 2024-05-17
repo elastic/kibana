@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  storeHistogram,
-  serializeSavedObjectId,
-  deleteHistogramSavedObjects,
-} from './saved_objects';
-import { savedObjectsRepositoryMock, metricsServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { metricsServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  deleteHistogramSavedObjects,
+  serializeSavedObjectId,
+  storeHistogram,
+} from './saved_objects';
 
 describe('serializeSavedObjectId', () => {
   it('returns serialized id', () => {

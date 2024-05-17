@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 
 import type { InstallablePackage, Installation } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
-import { sendTelemetryEvents } from '../../upgrade_sender';
-import { licenseService } from '../../license';
-import { auditLoggingService } from '../../audit_logging';
-import { appContextService } from '../../app_context';
 import { ConcurrentInstallOperationError, FleetError, PackageNotFoundError } from '../../../errors';
+import { appContextService } from '../../app_context';
+import { auditLoggingService } from '../../audit_logging';
+import { licenseService } from '../../license';
+import { sendTelemetryEvents } from '../../upgrade_sender';
 
-import * as Registry from '../registry';
 import { dataStreamService } from '../../data_streams';
+import * as Registry from '../registry';
 
+import * as install from './_install_package';
+import { getBundledPackageByPkgKey } from './bundled_packages';
 import {
   createInstallation,
   handleInstallPackageFailure,
@@ -28,12 +30,10 @@ import {
   installPackage,
   isPackageVersionOrLaterInstalled,
 } from './install';
-import * as install from './_install_package';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
-import { getBundledPackageByPkgKey } from './bundled_packages';
 
-import { getInstalledPackageWithAssets, getInstallationObject } from './get';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+import { getInstallationObject, getInstalledPackageWithAssets } from './get';
 
 jest.mock('../../data_streams');
 jest.mock('./get');

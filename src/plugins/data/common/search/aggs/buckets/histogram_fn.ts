@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { omit } from 'lodash';
+import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '..';
 import { ExtendedBoundsOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggHistogramFnName = 'aggHistogram';
 

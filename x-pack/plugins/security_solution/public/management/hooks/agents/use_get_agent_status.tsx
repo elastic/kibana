@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AgentStatusInfo, AgentStatusRecords } from '../../../../common/endpoint/types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useHttp } from '../../../common/lib/kibana';
 
 interface ErrorType {

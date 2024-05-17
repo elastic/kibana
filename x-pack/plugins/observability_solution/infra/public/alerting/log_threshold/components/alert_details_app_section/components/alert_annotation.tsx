@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
-import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import moment from 'moment';
+import React from 'react';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   const { uiSettings } = useKibanaContextForPlugin().services;

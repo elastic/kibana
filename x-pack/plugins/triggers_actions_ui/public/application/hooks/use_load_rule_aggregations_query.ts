@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
+import { useKibana } from '../../common/lib/kibana';
 import { RulesListFilters } from '../../types';
 import { loadRuleAggregationsWithKueryFilter } from '../lib/rule_api/aggregate_kuery_filter';
-import { useKibana } from '../../common/lib/kibana';
 
 const initializeAggregationResult = (values: readonly string[]) => {
   return values.reduce<Record<string, number>>(

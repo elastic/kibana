@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { get } from 'lodash';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import expect from '@kbn/expect';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_END,
   ALERT_RULE_CATEGORY,
@@ -31,19 +33,17 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
-  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { get } from 'lodash';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { Spaces } from '../../../../scenarios';
 import {
+  ObjectRemover,
+  TaskManagerDoc,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../../common/lib';
+import { Spaces } from '../../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataAlertDelayInstallResourcesTest({

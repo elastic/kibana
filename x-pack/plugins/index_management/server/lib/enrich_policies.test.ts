@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { serializeEnrichmentPolicies } from './enrich_policies';
 import { createTestESEnrichPolicy } from '../test/helpers';
+import { serializeEnrichmentPolicies } from './enrich_policies';
 
 describe('serializeEnrichmentPolicies', () => {
   it('knows how to serialize a list of policies', async () => {

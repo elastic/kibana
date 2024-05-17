@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
 import SuperTest from 'supertest';
-import expect from '@kbn/expect';
-import { getUrlPrefix } from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getUrlPrefix } from '../../../../../common/lib';
 import { createSupertestErrorLogger } from '../../../../../common/lib/log_supertest_errors';
 
 // eslint-disable-next-line import/no-default-export

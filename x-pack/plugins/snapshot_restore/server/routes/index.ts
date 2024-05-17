@@ -7,10 +7,10 @@
 
 import { RouteDependencies } from '../types';
 import { registerAppRoutes } from './api/app';
-import { registerRepositoriesRoutes } from './api/repositories';
-import { registerSnapshotsRoutes } from './api/snapshots';
-import { registerRestoreRoutes } from './api/restore';
 import { registerPolicyRoutes } from './api/policy';
+import { registerRepositoriesRoutes } from './api/repositories';
+import { registerRestoreRoutes } from './api/restore';
+import { registerSnapshotsRoutes } from './api/snapshots';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {

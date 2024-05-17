@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type Boom from '@hapi/boom';
+import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type { VersionedRouter } from '../versioning';
-import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
+import type { RouteConfig, RouteMethod } from './route';
 import type { RouteConfigOptions } from './route';
 import { RouteValidator } from './route_validator';
 
@@ -22,7 +22,7 @@ import { RouteValidator } from './route_validator';
  */
 export type RouteRegistrar<
   Method extends RouteMethod,
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
 > = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Context, Method>

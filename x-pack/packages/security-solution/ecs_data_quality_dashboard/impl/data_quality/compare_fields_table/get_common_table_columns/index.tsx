@@ -10,12 +10,12 @@ import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
 import { SameFamily } from '../../data_quality_panel/same_family';
-import { EcsAllowedValues } from '../ecs_allowed_values';
 import { getIsInSameFamily } from '../../helpers';
-import { IndexInvalidValues } from '../index_invalid_values';
 import { CodeDanger, CodeSuccess } from '../../styles';
-import * as i18n from '../translations';
 import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../../types';
+import { EcsAllowedValues } from '../ecs_allowed_values';
+import { IndexInvalidValues } from '../index_invalid_values';
+import * as i18n from '../translations';
 
 export const EMPTY_PLACEHOLDER = '--';
 

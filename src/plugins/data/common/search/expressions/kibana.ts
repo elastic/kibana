@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExecutionContext, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ExpressionValueSearchContext } from './kibana_context_type';
 

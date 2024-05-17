@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { omit, pick, uniqBy } from 'lodash';
 import ts from 'typescript';
-import { uniqBy, pick, omit } from 'lodash';
 import {
-  getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,
   getModuleSpecifier,
+  getResolvedModuleSourceFile,
 } from './utils';
 
 export enum TelemetryKinds {
@@ -43,10 +43,13 @@ export function isObjectDescriptor(value: any) {
 }
 
 export function descriptorToObject(descriptor: Descriptor | DescriptorValue) {
-  return Object.entries(descriptor).reduce((acc, [key, value]) => {
-    acc[key] = value.kind ? kindToDescriptorName(value.kind) : descriptorToObject(value);
-    return acc;
-  }, {} as Record<string, any>);
+  return Object.entries(descriptor).reduce(
+    (acc, [key, value]) => {
+      acc[key] = value.kind ? kindToDescriptorName(value.kind) : descriptorToObject(value);
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 }
 
 export function kindToDescriptorName(kind: number) {

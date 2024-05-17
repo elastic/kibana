@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -18,12 +16,14 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getCombinedRuntimeMappings, isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDataSource } from '../../../../../contexts/ml';
 import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';

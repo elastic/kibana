@@ -8,7 +8,6 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -19,11 +18,12 @@ import {
   EuiText,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
-import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
+import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
 import type { SearchApi, SearchSerializedState } from '../react_embeddables/search/types';
 
 export const RenderExamples = () => {

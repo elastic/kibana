@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import {
-  policySelector,
-  durationSelector,
-  kindSelector,
-  startSelector,
-  endSelector,
-  fromStrSelector,
-  toStrSelector,
-  isLoadingSelector,
-  queriesSelector,
-} from './selectors';
-import type { InputsRange, AbsoluteTimeRange, RelativeTimeRange } from '../../store/inputs/model';
 import { cloneDeep } from 'lodash/fp';
 import { mockGlobalState } from '../../mock';
 import type { State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
+import type { AbsoluteTimeRange, InputsRange, RelativeTimeRange } from '../../store/inputs/model';
+import {
+  durationSelector,
+  endSelector,
+  fromStrSelector,
+  isLoadingSelector,
+  kindSelector,
+  policySelector,
+  queriesSelector,
+  startSelector,
+  toStrSelector,
+} from './selectors';
 
 describe('selectors', () => {
   let absoluteTime: AbsoluteTimeRange = {

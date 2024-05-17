@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import {
   MAX_QUERY_DELAY,
   MIN_QUERY_DELAY,
@@ -13,15 +21,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiSpacer,
-  EuiText,
-  EuiEmptyPrompt,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { memo } from 'react';
 import { RulesSettingsRange } from '../rules_settings_range';
 
 const queryDelayDescription = i18n.translate(

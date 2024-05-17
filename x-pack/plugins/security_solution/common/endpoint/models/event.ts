@@ -6,10 +6,10 @@
  */
 
 import type {
+  ECSField,
   LegacyEndpointEvent,
   ResolverEvent,
   SafeResolverEvent,
-  ECSField,
   WinlogEvent,
 } from '../types';
 import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';

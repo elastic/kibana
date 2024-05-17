@@ -9,9 +9,9 @@ import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { AreaSeries, Axis, ScaleType } from '@elastic/charts';
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import type { ChartSeriesData } from './common';
-import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 

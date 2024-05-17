@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { call, select, takeLatest } from 'redux-saga/effects';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { select, takeLatest, call } from 'redux-saga/effects';
-import { i18n } from '@kbn/i18n';
-import { GraphState, GraphStoreDependencies } from './store';
-import { reset } from './global';
 import { setBreadcrumbs } from '../services/url';
+import { reset } from './global';
+import { GraphState, GraphStoreDependencies } from './store';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/metaData');
 

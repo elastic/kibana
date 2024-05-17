@@ -10,34 +10,34 @@
 import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
+import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import {
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
+  HOST_METADATA_GET_ROUTE,
   METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_DATASTREAM,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
-  HOST_METADATA_GET_ROUTE,
-  METADATA_DATASTREAM,
+  metadataCurrentIndexPattern,
+  metadataTransformPrefix,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import {
-  deleteIndexedHostsAndAlerts,
-  IndexedHostsAndAlertsResponse,
-  indexHostsAndAlerts,
-} from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
-import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
+import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
-import { DeepPartial } from 'utility-types';
-import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
+import {
+  IndexedHostsAndAlertsResponse,
+  deleteIndexedHostsAndAlerts,
+  indexHostsAndAlerts,
+} from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
+import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { merge } from 'lodash';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
-import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
+import { DeepPartial } from 'utility-types';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the

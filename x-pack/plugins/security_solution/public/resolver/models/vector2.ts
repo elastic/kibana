@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Vector2, Matrix3 } from '../types';
+import type { Matrix3, Vector2 } from '../types';
 
 /**
  * Returns a vector which is the sum of `a` and `b`.

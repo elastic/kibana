@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import {} from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createFileServiceFactoryMock, createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { CasePlugin } from './plugin';
-import type { ConfigType } from './config';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import type { ConfigType } from './config';
+import { CasePlugin } from './plugin';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 
 function getConfig(overrides = {}) {

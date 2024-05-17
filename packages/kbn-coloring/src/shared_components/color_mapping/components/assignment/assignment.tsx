@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { ColorMapping } from '../../config';
+import { getPalette } from '../../palettes';
 import {
   removeAssignment,
   updateAssignmentColor,
   updateAssignmentRule,
 } from '../../state/color_mapping';
-import { ColorMapping } from '../../config';
-import { Range } from './range';
 import { Match } from './match';
-import { getPalette } from '../../palettes';
+import { Range } from './range';
 
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 const tags = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 

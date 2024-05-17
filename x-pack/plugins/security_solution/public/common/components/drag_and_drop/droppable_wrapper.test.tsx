@@ -11,9 +11,9 @@ import React from 'react';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 

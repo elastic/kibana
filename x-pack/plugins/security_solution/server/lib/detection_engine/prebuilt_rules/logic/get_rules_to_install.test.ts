@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getRulesToInstall } from './get_rules_to_install';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
-import { getPrebuiltRuleMock } from '../mocks';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
+import { getPrebuiltRuleMock } from '../mocks';
+import { getRulesToInstall } from './get_rules_to_install';
 import { rulesToMap } from './utils';
 
 describe('get_rules_to_install', () => {

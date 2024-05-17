@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { mockGetAppUrl, mockNavigateTo } from '../../mocks/navigation';
 import { LinkCategoryType, SecurityPageName } from '../constants';
-import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
 import type { AccordionLinkCategory, NavigationLink, TitleLinkCategory } from '../types';
 import { LandingLinksIconsCategoriesGroups } from './landing_links_icons_categories_groups';
 

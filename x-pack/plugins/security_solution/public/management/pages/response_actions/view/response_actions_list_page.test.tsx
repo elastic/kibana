@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import * as reactTestingLibrary from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import userEvent from '@testing-library/user-event';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import * as reactTestingLibrary from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { MANAGEMENT_PATH } from '../../../../../common/constants';
+import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import {
   type AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../common/mock/endpoint';
-import { ResponseActionsListPage } from './response_actions_list_page';
-import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
-import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
+import { ResponseActionsListPage } from './response_actions_list_page';
 
 jest.mock('../../../../common/experimental_features_service');
 

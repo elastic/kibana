@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
-import { FIELD_TYPES, fieldValidators, fieldFormatters, FormSchema } from '../../../shared_imports';
+import { FIELD_TYPES, FormSchema, fieldFormatters, fieldValidators } from '../../../shared_imports';
 
 const { emptyField, containsCharsField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;

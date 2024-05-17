@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '..';
 import { SAMPLER_AGG_NAME } from './sampler';
 

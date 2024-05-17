@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent } from '@testing-library/react';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { fireEvent } from '@testing-library/react';
+import React from 'react';
 
-import { render } from '../../../utils/test_helper';
+import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { render } from '../../../utils/test_helper';
 import { alertWithTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
-import { HeaderActions } from './header_actions';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
+import { HeaderActions } from './header_actions';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');

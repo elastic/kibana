@@ -1,8 +1,6 @@
 {
   "description": "Metricbeat filesystem: Detect unusual increases in disk utilization (ECS)",
-  "groups": [
-    "metricbeat"
-  ],
+  "groups": ["metricbeat"],
   "analysis_config": {
     "bucket_span": "10m",
     "detectors": [
@@ -13,9 +11,7 @@
         "partition_field_name": "host.name",
         "custom_rules": [
           {
-            "actions": [
-              "skip_result"
-            ],
+            "actions": ["skip_result"],
             "conditions": [
               {
                 "applies_to": "actual",
@@ -27,9 +23,7 @@
         ]
       }
     ],
-    "influencers": [
-      "host.name"
-    ]
+    "influencers": ["host.name"]
   },
   "analysis_limits": {
     "model_memory_limit": "25mb"

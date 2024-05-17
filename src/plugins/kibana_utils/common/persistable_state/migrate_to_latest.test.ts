@@ -7,8 +7,8 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunction } from './types';
 import { migrateToLatest } from './migrate_to_latest';
+import { MigrateFunction } from './types';
 
 interface StateV1 extends SerializableRecord {
   name: string;

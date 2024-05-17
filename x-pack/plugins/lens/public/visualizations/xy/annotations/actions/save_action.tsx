@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ToastsStart } from '@kbn/core-notifications-browser';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import React, { useState } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
   StartServices,
   StateSetter,
 } from '../../../../types';
-import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+import { XYAnnotationLayerConfig, XYByReferenceAnnotationLayerConfig, XYState } from '../../types';
 import {
   getAnnotationLayerTitle,
   getGroupMetadataFromAnnotationLayer,

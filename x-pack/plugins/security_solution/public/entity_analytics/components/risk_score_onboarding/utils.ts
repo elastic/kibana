@@ -7,20 +7,20 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { StartRenderServices } from '../../../types';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import * as utils from '../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../common/store';
+import type { StartRenderServices } from '../../../types';
 
 import {
+  bulkCreatePrebuiltSavedObjects,
+  bulkDeletePrebuiltSavedObjects,
+  deleteIngestPipelines,
   deleteStoredScripts,
   deleteTransforms,
-  deleteIngestPipelines,
-  bulkDeletePrebuiltSavedObjects,
   installRiskScore,
-  bulkCreatePrebuiltSavedObjects,
-  stopTransforms,
   startTransforms,
+  stopTransforms,
 } from '../../deprecated_risk_engine/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,

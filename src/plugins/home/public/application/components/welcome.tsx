@@ -12,10 +12,10 @@
  * in Elasticsearch.
  */
 
-import React from 'react';
-import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPortal } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPortal, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';

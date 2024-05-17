@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act, render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { applicationFields, mappings } from './mocks';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
-import { applicationFields, mappings } from './mocks';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { waitFor, render, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('./use_get_application');

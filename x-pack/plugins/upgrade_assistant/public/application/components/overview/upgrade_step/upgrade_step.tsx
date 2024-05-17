@@ -8,16 +8,16 @@
 import React from 'react';
 
 import {
-  EuiText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {

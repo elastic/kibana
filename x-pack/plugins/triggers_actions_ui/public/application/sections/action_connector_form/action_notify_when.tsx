@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldNumber,
+  EuiPopover,
   EuiSelect,
-  EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
+  EuiText,
 } from '@elastic/eui';
-import { some, filter, map } from 'fp-ts/lib/Option';
+import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { filter, map, some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { RuleNotifyWhenType, NotifyWhenSelectOptions } from '../../../types';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { getTimeOptions } from '../../../common/lib/get_time_options';
+import { NotifyWhenSelectOptions, RuleNotifyWhenType } from '../../../types';
 
 export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {

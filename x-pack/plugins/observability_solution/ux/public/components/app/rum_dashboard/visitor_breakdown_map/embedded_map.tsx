@@ -9,11 +9,11 @@ import React from 'react';
 import styled from 'styled-components';
 
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
-import { useLayerList } from './use_layer_list';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { MapToolTip } from './map_tooltip';
-import { useMapFilters } from './use_map_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { MapToolTip } from './map_tooltip';
+import { useLayerList } from './use_layer_list';
+import { useMapFilters } from './use_map_filters';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { ResponseBodyIndexField } from './index_response_body_field';
 import { ResponseBodyIndexPolicy } from '../types';
+import { ResponseBodyIndexField } from './index_response_body_field';
 
 describe('<ResponseBodyIndexField/>', () => {
   const defaultDefaultValue = ResponseBodyIndexPolicy.ON_ERROR;

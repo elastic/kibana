@@ -6,21 +6,21 @@
  */
 
 import {
-  renderFunctions as embeddableFunctions,
   renderFunctionFactories as embeddableFactories,
+  renderFunctions as embeddableFunctions,
 } from './embeddable';
 
 import {
-  renderFunctions as filterFunctions,
   renderFunctionFactories as filterFactories,
+  renderFunctions as filterFunctions,
 } from './filters';
 
 import {
-  renderFunctions as externalFunctions,
   renderFunctionFactories as externalFactories,
+  renderFunctions as externalFunctions,
 } from './external';
 
-import { renderFunctions as coreFunctions, renderFunctionFactories as coreFactories } from './core';
+import { renderFunctionFactories as coreFactories, renderFunctions as coreFunctions } from './core';
 
 export const renderFunctions = [
   ...coreFunctions,

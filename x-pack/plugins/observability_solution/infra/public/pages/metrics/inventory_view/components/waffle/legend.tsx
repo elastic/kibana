@@ -9,16 +9,16 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
+  GradientLegendRT,
   InfraFormatter,
   InfraWaffleMapBounds,
   InfraWaffleMapLegend,
-  SteppedGradientLegendRT,
   StepLegendRT,
-  GradientLegendRT,
+  SteppedGradientLegendRT,
 } from '../../../../../lib/lib';
 import { GradientLegend } from './gradient_legend';
-import { StepLegend } from './steps_legend';
 import { SteppedGradientLegend } from './stepped_gradient_legend';
+import { StepLegend } from './steps_legend';
 interface Props {
   legend: InfraWaffleMapLegend;
   bounds: InfraWaffleMapBounds;

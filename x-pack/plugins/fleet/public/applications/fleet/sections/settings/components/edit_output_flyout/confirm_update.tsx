@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import type { Output } from '../../../../types';
 import type { useConfirmModal } from '../../hooks/use_confirm_modal';

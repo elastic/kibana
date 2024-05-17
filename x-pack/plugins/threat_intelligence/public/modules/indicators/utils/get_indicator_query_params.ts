@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { THREAT_QUERY_BASE } from '../../../constants/common';
+import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { THREAT_QUERY_BASE } from '../../../constants/common';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
 

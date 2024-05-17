@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { get, identity } from 'lodash';
 import {
-  ScriptedRangeFilter,
-  RangeFilter,
-  isScriptedRangeFilter,
-  isRangeFilter,
-  Filter,
   FILTERS,
+  Filter,
+  RangeFilter,
+  ScriptedRangeFilter,
+  isRangeFilter,
+  isScriptedRangeFilter,
 } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { get, identity } from 'lodash';
 
 export function getRangeDisplayValue(
   { meta: { params } }: RangeFilter | ScriptedRangeFilter,

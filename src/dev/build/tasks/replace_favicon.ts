@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { copy, Task } from '../lib';
+import { Task, copy } from '../lib';
 
 export const ReplaceFavicon: Task = {
   description: 'Replacing favicons with built version',

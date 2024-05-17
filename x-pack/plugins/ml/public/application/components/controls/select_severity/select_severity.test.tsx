@@ -1,3 +1,5 @@
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +7,8 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { render, act, fireEvent, waitFor } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
+import { SEVERITY_OPTIONS, SelectSeverity } from './select_severity';
 
 // The following mock setup is necessary so that we can simulate
 // both triggering the update callback and the internal state update

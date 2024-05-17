@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
+import React, { memo } from 'react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 interface ConfirmArtifactModalProps {

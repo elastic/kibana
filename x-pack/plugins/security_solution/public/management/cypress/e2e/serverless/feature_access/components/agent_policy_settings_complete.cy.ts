@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { login } from '../../../../tasks/login';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import {
   checkForAgentTamperProtectionAvailability,
   navigateToFleetAgentPolicySettings,
 } from '../../../../screens/fleet/agent_settings';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../../tasks/fleet';
+import { login } from '../../../../tasks/login';
 
 describe(
   'Agent Policy Settings - Complete',

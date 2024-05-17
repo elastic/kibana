@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useBarCharts } from './use_bar_charts';
 import { renderHook } from '@testing-library/react-hooks';
-import { IWaterfallContext } from './context/waterfall_context';
 import { CANVAS_MAX_ITEMS } from './constants';
+import { IWaterfallContext } from './context/waterfall_context';
+import { useBarCharts } from './use_bar_charts';
 
 const generateTestData = (
   {

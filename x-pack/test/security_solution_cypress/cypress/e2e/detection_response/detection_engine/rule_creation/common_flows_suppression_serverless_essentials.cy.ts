@@ -6,16 +6,16 @@
  */
 
 import {
-  selectThresholdRuleType,
-  selectIndicatorMatchType,
-  selectNewTermsRuleType,
-} from '../../../../tasks/create_new_rule';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import {
   ALERT_SUPPRESSION_FIELDS_INPUT,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
 } from '../../../../screens/create_new_rule';
+import {
+  selectIndicatorMatchType,
+  selectNewTermsRuleType,
+  selectThresholdRuleType,
+} from '../../../../tasks/create_new_rule';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 describe(

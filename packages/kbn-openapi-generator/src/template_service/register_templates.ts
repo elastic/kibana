@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import path from 'path';
 import type Handlebars from '@kbn/handlebars';
 import fs from 'fs/promises';
-import path from 'path';
 
 export async function registerTemplates(
   templatesPath: string,

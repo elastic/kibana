@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MobileErrorsOverview } from '../errors_overview';
+import React from 'react';
 import { MobileCrashesOverview } from '../crashes_overview';
+import { MobileErrorsOverview } from '../errors_overview';
 
 export enum MobileErrorTabIds {
   ERRORS = 'errors',

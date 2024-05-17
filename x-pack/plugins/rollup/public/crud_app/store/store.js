@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 
 import { rollupJobs } from './reducers';
 
-import { detailPanel, cloneJob } from './middleware';
+import { cloneJob, detailPanel } from './middleware';
 
 export function createRollupJobsStore(initialState = {}) {
   const enhancers = [applyMiddleware(thunk, detailPanel, cloneJob)];

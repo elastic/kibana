@@ -122,10 +122,11 @@ export const reportingCsvShareProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: (
+            toastMessage:
               // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
-            ) as unknown as string,
+              (
+                <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
+              ) as unknown as string,
           });
         });
     };

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 
-import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
-import { useTourContext } from '../../guided_onboarding_tour';
-import { useKibana, useToasts } from '../../../lib/kibana';
-import { CaseDetailsLink } from '../../links';
 import { APP_ID } from '../../../../../common/constants';
+import { useKibana, useToasts } from '../../../lib/kibana';
+import { useTourContext } from '../../guided_onboarding_tour';
+import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
+import { CaseDetailsLink } from '../../links';
 import type { InsightAccordionState } from './insight_accordion';
 import { InsightAccordion } from './insight_accordion';
-import { CASES_LOADING, CASES_ERROR, CASES_ERROR_TOAST, CASES_COUNT } from './translations';
+import { CASES_COUNT, CASES_ERROR, CASES_ERROR_TOAST, CASES_LOADING } from './translations';
 
 type RelatedCaseList = Array<{ id: string; title: string }>;
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { set } from '@kbn/safer-lodash-set';
-import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 export interface Result {
   mappings: SavedObjectsTypeMappingDefinitions;

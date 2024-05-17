@@ -6,21 +6,21 @@
  */
 
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
-import { createMockedIndexPattern } from '../../../mocks';
 import {
-  formulaOperation,
-  type GenericOperationDefinition,
   type GenericIndexPatternColumn,
+  type GenericOperationDefinition,
+  formulaOperation,
 } from '..';
-import type { FormulaIndexPatternColumn } from './formula';
-import { insertOrReplaceFormulaColumn } from './parse';
-import type { FormBasedLayer } from '../../../types';
 import { IndexPattern } from '../../../../../types';
-import { TermsIndexPatternColumn } from '../terms';
+import { createMockedIndexPattern } from '../../../mocks';
+import type { FormBasedLayer } from '../../../types';
 import type { MovingAverageIndexPatternColumn } from '../calculations';
-import { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
+import { StaticValueIndexPatternColumn } from '../static_value';
+import { TermsIndexPatternColumn } from '../terms';
+import type { FormulaIndexPatternColumn } from './formula';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
+import { insertOrReplaceFormulaColumn } from './parse';
 
 jest.mock('../../layer_helpers', () => {
   return {

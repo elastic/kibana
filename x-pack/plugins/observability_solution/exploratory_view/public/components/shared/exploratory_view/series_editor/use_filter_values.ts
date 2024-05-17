@@ -1,3 +1,4 @@
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESFilter } from '@kbn/es-types';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { useValuesList } from '@kbn/observability-shared-plugin/public';
-import { FilterProps } from './columns/filter_expanded';
 import { useAppDataViewContext } from '../hooks/use_app_data_view';
+import { FilterProps } from './columns/filter_expanded';
 
 export function useFilterValues(
   { field, series, baseFilters, label }: FilterProps,

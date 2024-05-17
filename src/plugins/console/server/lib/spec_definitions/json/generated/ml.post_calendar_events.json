@@ -6,12 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "_ml/calendars/{calendar_id}/events"
-    ],
+    "methods": ["POST"],
+    "patterns": ["_ml/calendars/{calendar_id}/events"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-calendar-event.html",
     "availability": {
       "stack": true,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
-import { WithAppDependencies } from './setup_environment';
+import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { ComponentTemplateDetailsFlyoutContent } from '../../../component_template_details';
+import { WithAppDependencies } from './setup_environment';
 
 export type ComponentTemplateDetailsTestBed = TestBed<ComponentTemplateDetailsTestSubjects> & {
   actions: ReturnType<typeof createActions>;

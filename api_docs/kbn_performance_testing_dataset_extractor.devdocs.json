@@ -26,11 +26,7 @@
         "tags": [],
         "label": "extractor",
         "description": [],
-        "signature": [
-          "({ param, client, log }: ",
-          "CLIParams",
-          ") => Promise<void>"
-        ],
+        "signature": ["({ param, client, log }: ", "CLIParams", ") => Promise<void>"],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +38,7 @@
             "tags": [],
             "label": "{ param, client, log }",
             "description": [],
-            "signature": [
-              "CLIParams"
-            ],
+            "signature": ["CLIParams"],
             "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -61,9 +55,7 @@
         "tags": [],
         "label": "runExtractor",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,

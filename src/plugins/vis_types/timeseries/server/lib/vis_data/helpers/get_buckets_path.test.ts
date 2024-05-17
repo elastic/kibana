@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getBucketsPath } from './get_buckets_path';
 import type { Metric } from '../../../../common/types';
+import { getBucketsPath } from './get_buckets_path';
 
 describe('getBucketsPath', () => {
   const metrics = [

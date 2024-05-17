@@ -10,6 +10,29 @@ import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
+} from '../../common/constants';
+import { shouldProviderUseLoginForm } from '../../common/model';
+import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
+import type { ConfigType } from '../config';
+import { getErrorStatusCode } from '../errors';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import {
+  type Session,
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionUnexpectedError,
+  type SessionValue,
+  getPrintableSessionId,
+} from '../session_management';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -30,29 +53,6 @@ import {
   TokenAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
-import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
-import {
-  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
-  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
-  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
-  LOGOUT_REASON_QUERY_STRING_PARAMETER,
-  NEXT_URL_QUERY_STRING_PARAMETER,
-  SESSION_ERROR_REASON_HEADER,
-} from '../../common/constants';
-import { shouldProviderUseLoginForm } from '../../common/model';
-import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
-import type { ConfigType } from '../config';
-import { getErrorStatusCode } from '../errors';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import {
-  getPrintableSessionId,
-  type Session,
-  SessionConcurrencyLimitError,
-  SessionExpiredError,
-  SessionUnexpectedError,
-  type SessionValue,
-} from '../session_management';
-import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
  * List of query string parameters used to pass various authentication related metadata that should
@@ -301,10 +301,10 @@ export class Authenticator {
       isLoginAttemptWithProviderName(attempt) && this.providers.has(attempt.provider.name)
         ? [[attempt.provider.name, this.providers.get(attempt.provider.name)!]]
         : isLoginAttemptWithProviderType(attempt)
-        ? [...this.providerIterator(existingSessionValue?.provider.name)].filter(
-            ([, { type }]) => type === attempt.provider.type
-          )
-        : [];
+          ? [...this.providerIterator(existingSessionValue?.provider.name)].filter(
+              ([, { type }]) => type === attempt.provider.type
+            )
+          : [];
 
     if (providers.length === 0) {
       this.logger.warn(
@@ -1040,8 +1040,8 @@ export class Authenticator {
       (providerType
         ? shouldProviderUseLoginForm(providerType)
         : this.options.config.authc.sortedProviders.length > 0
-        ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
-        : false)
+          ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
+          : false)
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }

@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UptimeEsClient } from '../../../lib';
 import { Ping } from '../../../../common/runtime_types/ping';
+import { UptimeEsClient } from '../../../lib';
 
 export interface GetStepScreenshotParams {
   monitorId: string;

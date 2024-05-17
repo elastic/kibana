@@ -6,37 +6,37 @@
  */
 
 import expect from '@kbn/expect';
-import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
-import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
-import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getInitialMlJobUsage } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/get_initial_usage';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
+import { getInitialMlJobUsage } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/get_initial_usage';
+import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
 import {
   getInitialMaxAvgMin,
   getInitialSingleEventLogUsage,
   getInitialSingleEventMetric,
 } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
+import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
+import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import {
+  createAlertsIndex,
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+  getRuleForAlertTesting,
+  waitForAlertsToBePresent,
+  waitForRuleSuccess,
+} from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  deleteAllEventLogExecutionEvents,
   getEqlRuleForAlertTesting,
   getSimpleThreatMatch,
   getStats,
   getThresholdRuleForAlertTesting,
-  deleteAllEventLogExecutionEvents,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { map } from 'lodash';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { getAgentTypeName } from '../../../../common/translations';
+import React, { memo, useMemo } from 'react';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   isExecuteAction,
   isGetFileAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
-import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { OUTPUT_MESSAGES } from '../translations';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
-import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAgentTypeName } from '../../../../common/translations';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
+import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
+import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
+import { OUTPUT_MESSAGES } from '../translations';
 
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
 

@@ -6,12 +6,12 @@
  */
 
 import {
-  LogEntry,
   LogColumn,
-  LogMessageColumn,
+  LogEntry,
   LogFieldColumn,
-  LogMessagePart,
+  LogMessageColumn,
   LogMessageFieldPart,
+  LogMessagePart,
 } from '../../../common/log_entry';
 
 export interface LogEntryHighlightsMap {

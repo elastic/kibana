@@ -1,3 +1,6 @@
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { QuerySchema, getMonitors, isMonitorsQueryFiltered } from '../common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { mapSavedObjectToMonitor } from './helper';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({

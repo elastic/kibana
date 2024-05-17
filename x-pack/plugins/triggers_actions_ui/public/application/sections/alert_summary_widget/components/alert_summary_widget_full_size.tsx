@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import React from 'react';
 import {
   Axis,
   Chart,
@@ -19,9 +17,11 @@ import {
 } from '@elastic/charts';
 import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React from 'react';
+import { Alert, ChartProps, DependencyProps } from '../types';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
-import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;

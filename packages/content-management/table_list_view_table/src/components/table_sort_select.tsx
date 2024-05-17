@@ -1,3 +1,15 @@
+import {
+  Direction,
+  EuiFilterButton,
+  EuiIcon,
+  EuiPopover,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +18,6 @@
  * Side Public License, v 1.
  */
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiSelectable,
-  EuiPopover,
-  EuiFilterButton,
-  EuiSelectableOption,
-  EuiIcon,
-  Direction,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { State } from '../table_list_view_table';
 

@@ -10,12 +10,12 @@ import {
   MetricsExplorerSeries,
 } from '../../../common/http_api/metrics_explorer';
 import {
+  MetricsExplorerChartOptions,
+  MetricsExplorerChartType,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartType,
-  MetricsExplorerYAxisMode,
-  MetricsExplorerChartOptions,
   MetricsExplorerTimestamp,
+  MetricsExplorerYAxisMode,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { NodesChangedRule } from './nodes_changed_rule';
-import { RULE_NODES_CHANGED } from '../../common/constants';
-import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_NODES_CHANGED } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
+import { NodesChangedRule } from './nodes_changed_rule';
 
 const RealDate = Date;
 

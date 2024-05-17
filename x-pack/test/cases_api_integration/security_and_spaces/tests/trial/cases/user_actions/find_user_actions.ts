@@ -6,18 +6,18 @@
  */
 
 import http from 'http';
-import expect from '@kbn/expect';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { getPostCaseRequest } from '../../../../../common/lib/mock';
+import expect from '@kbn/expect';
 import {
-  deleteAllCaseItems,
   createCase,
-  updateCase,
-  pushCase,
   createCaseWithConnector,
-  getServiceNowSimulationServer,
+  deleteAllCaseItems,
   findCaseUserActions,
+  getServiceNowSimulationServer,
+  pushCase,
+  updateCase,
 } from '../../../../../common/lib/api';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';

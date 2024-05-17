@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { toKnownError } from './error_utils';
 import { nestedProcessorsErrorFixture } from '../../../../../__jest__/client_integration/fixtures';
+import { toKnownError } from './error_utils';
 
 describe('toKnownError', () => {
   test('undefined, null, numbers, arrays and bad objects', () => {

@@ -6,13 +6,13 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import type { inputsModel } from '../../../store';
-import type { InspectResponse } from '../../../../types';
 import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/security_solution/related_entities';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import type { InspectResponse } from '../../../../types';
+import type { inputsModel } from '../../../store';
 import { useSearchStrategy } from '../../use_search_strategy';
 import { FAIL_RELATED_HOSTS } from './translations';
-import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface UseUserRelatedHostsResult {
   inspect: InspectResponse;

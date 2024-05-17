@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import {
-  NoDataViewsPromptServices,
   NoDataViewsPromptProps,
+  NoDataViewsPromptServices,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { action } from '@storybook/addon-actions';
 
 type ServiceArguments = Pick<
   NoDataViewsPromptServices,

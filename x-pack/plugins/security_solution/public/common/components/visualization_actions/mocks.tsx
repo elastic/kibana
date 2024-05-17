@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash/fp';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import React from 'react';
-import { cloneDeep } from 'lodash/fp';
 
-import { TestProviders, mockGlobalState, createMockStore } from '../../mock';
+import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
 import type { LensAttributes } from './types';
 
 export const queryFromSearchBar = {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getTitle, ControlParams } from '../editor_utils';
+import { ControlParams, getTitle } from '../editor_utils';
 
 export function getParentCandidates(
   controlParamsList: ControlParams[],

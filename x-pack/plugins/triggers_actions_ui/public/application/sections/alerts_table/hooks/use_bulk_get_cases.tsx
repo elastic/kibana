@@ -11,7 +11,7 @@ import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 import { ServerError } from '../types';
-import { bulkGetCases, Case, CasesBulkGetResponse } from './apis/bulk_get_cases';
+import { Case, CasesBulkGetResponse, bulkGetCases } from './apis/bulk_get_cases';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',

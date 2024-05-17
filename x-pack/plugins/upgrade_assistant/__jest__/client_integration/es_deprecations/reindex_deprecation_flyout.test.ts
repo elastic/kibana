@@ -7,14 +7,14 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ReindexStatus, ReindexStep, ReindexStatusResponse } from '../../../common/types';
+import { ReindexStatus, ReindexStatusResponse, ReindexStep } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import {
-  esDeprecationsMockResponse,
-  MOCK_SNAPSHOT_ID,
   MOCK_JOB_ID,
   MOCK_REINDEX_DEPRECATION,
+  MOCK_SNAPSHOT_ID,
+  esDeprecationsMockResponse,
 } from './mocked_responses';
 
 const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {

@@ -7,8 +7,8 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
 import { ApiScope, PluginOrPackage, TextWithLinks } from '../types';
+import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
 import { getRelativePath, pathsOutsideScopes } from './utils';
 
 /**

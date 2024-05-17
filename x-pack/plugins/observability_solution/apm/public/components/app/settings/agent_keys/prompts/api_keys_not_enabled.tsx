@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 
 export function ApiKeysNotEnabled() {
   const {

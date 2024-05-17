@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
-import * as Rx from 'rxjs';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import * as Rx from 'rxjs';
+import {
+  GraphState,
+  fieldsSelector,
+  removeTemplate,
+  saveTemplate,
+  settingsSelector,
+  templatesSelector,
+  updateSettings,
+} from '../../state_management';
+import { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
-import { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
-import {
-  GraphState,
-  settingsSelector,
-  templatesSelector,
-  fieldsSelector,
-  updateSettings,
-  saveTemplate,
-  removeTemplate,
-} from '../../state_management';
 
 const tabs = [
   {

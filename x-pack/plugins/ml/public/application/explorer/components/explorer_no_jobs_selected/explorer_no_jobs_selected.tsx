@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * React component for rendering EuiEmptyPrompt when no jobs were found.
  */
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt } from '@elastic/eui';
 
 export const ExplorerNoJobsSelected: FC = () => {
   return (

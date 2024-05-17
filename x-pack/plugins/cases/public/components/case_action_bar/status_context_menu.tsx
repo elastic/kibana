@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { CaseStatuses } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
-import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
+import { StatusPopoverButton } from '../status';
 
 interface Props {
   currentStatus: CaseStatuses;

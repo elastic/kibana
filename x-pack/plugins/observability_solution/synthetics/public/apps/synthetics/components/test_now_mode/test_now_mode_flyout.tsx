@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -18,9 +16,11 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { TestNowMode } from './test_now_mode';
 
 export interface TestRun {

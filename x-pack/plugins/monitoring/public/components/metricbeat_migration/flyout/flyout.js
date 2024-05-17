@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
   EuiButton,
-  EuiSteps,
-  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
   EuiLink,
-  EuiText,
-  EuiCallOut,
   EuiSpacer,
-  EuiCheckbox,
+  EuiSteps,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  STORAGE_KEY,
-  ELASTICSEARCH_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
-} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import React, { Fragment, Component } from 'react';
 import {
-  INSTRUCTION_STEP_SET_MONITORING_URL,
-  INSTRUCTION_STEP_ENABLE_METRICBEAT,
-  INSTRUCTION_STEP_DISABLE_INTERNAL,
-} from '../constants';
+  ELASTICSEARCH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  STORAGE_KEY,
+} from '../../../../common/constants';
 import { Legacy } from '../../../legacy_shims';
-import { getIdentifier, formatProductName } from '../../setup_mode/formatting';
+import { formatProductName, getIdentifier } from '../../setup_mode/formatting';
+import {
+  INSTRUCTION_STEP_DISABLE_INTERNAL,
+  INSTRUCTION_STEP_ENABLE_METRICBEAT,
+  INSTRUCTION_STEP_SET_MONITORING_URL,
+} from '../constants';
+import { getInstructionSteps } from '../instruction_steps';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;

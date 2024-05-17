@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
-import fs from 'fs/promises';
 import path from 'path';
 import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 import { NotebookDefinition } from '@kbn/ipynb';
+import type { Logger } from '@kbn/logging';
+import fs from 'fs/promises';
+import fetch from 'node-fetch';
 
 import {
   NotebookCatalog,
-  NotebookInformation,
   NotebookCatalogSchema,
+  NotebookInformation,
   NotebookSchema,
 } from '../../common/types';
 
@@ -103,10 +103,13 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
   ],
 };
 export const NOTEBOOKS_MAP: Record<string, NotebookInformation> =
-  DEFAULT_NOTEBOOKS.notebooks.reduce((nbMap, nb) => {
-    nbMap[nb.id] = nb;
-    return nbMap;
-  }, {} as Record<string, NotebookInformation>);
+  DEFAULT_NOTEBOOKS.notebooks.reduce(
+    (nbMap, nb) => {
+      nbMap[nb.id] = nb;
+      return nbMap;
+    },
+    {} as Record<string, NotebookInformation>
+  );
 
 const NOTEBOOK_IDS = DEFAULT_NOTEBOOKS.notebooks.map(({ id }) => id);
 

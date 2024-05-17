@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
-import { noop } from 'lodash/fp';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiIcon, useGeneratedHtmlId } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { noop } from 'lodash/fp';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 const StyledAccordion = euiStyled(EuiAccordion)`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};

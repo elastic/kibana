@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { I18LABELS } from '../translations';
+import React, { useState } from 'react';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { I18LABELS } from '../translations';
 
 export function PageViewsTrend() {
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);

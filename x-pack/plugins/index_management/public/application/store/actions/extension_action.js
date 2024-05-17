@@ -6,8 +6,8 @@
  */
 
 import { reloadIndices } from '.';
-import { notificationService } from '../../services/notification';
 import { httpService } from '../../services/http';
+import { notificationService } from '../../services/notification';
 
 export const performExtensionAction =
   ({ requestMethod, indexNames, successMessage }) =>

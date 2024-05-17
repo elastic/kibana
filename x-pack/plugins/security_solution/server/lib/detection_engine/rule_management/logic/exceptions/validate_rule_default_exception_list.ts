@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { findRules } from '../search/find_rules';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
+import { findRules } from '../search/find_rules';
 
 export class ExceptionListError extends Error {
   public readonly statusCode: number;

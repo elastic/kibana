@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Chance } from 'chance';
 import { cloudPosturePages } from './constants';
 import { getSecuritySolutionLink } from './security_solution_links';
-import { Chance } from 'chance';
 import type { CspPage } from './types';
 
 const chance = new Chance();

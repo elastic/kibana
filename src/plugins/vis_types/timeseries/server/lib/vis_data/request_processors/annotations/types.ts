@@ -8,8 +8,8 @@
 
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { EsQueryConfig } from '@kbn/es-query';
-import type { VisTypeTimeseriesVisDataRequest } from '../../../../types';
 import type { Annotation, FetchedIndexPattern, Panel } from '../../../../../common/types';
+import type { VisTypeTimeseriesVisDataRequest } from '../../../../types';
 import type { SearchCapabilities } from '../../../search_strategies';
 
 import type { ProcessorFunction } from '../../build_processor_function';

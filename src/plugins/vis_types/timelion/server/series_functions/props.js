@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
-import _ from 'lodash';
 
 function unflatten(data) {
   if (Object(data) !== data || Array.isArray(data)) return data;

@@ -1,3 +1,4 @@
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,21 +6,20 @@
  * 2.0.
  */
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AgentPolicy,
-  PackagePolicy,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
-import type { CloudDefendInstallationStats } from './types';
-import type { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
-import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL } from '../../../../common/constants';
+import { INPUT_CONTROL, INTEGRATION_PACKAGE_NAME } from '../../../../common/constants';
 import {
   getInputFromPolicy,
   getSelectorsAndResponsesFromYaml,
 } from '../../../../common/utils/helpers';
+import type { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
+import type { CloudDefendInstallationStats } from './types';
 
 export const getInstallationStats = async (
   esClient: ElasticsearchClient,

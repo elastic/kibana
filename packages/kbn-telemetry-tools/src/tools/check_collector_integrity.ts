@@ -7,10 +7,10 @@
  */
 
 import { reduce } from 'lodash';
-import { difference, flattenKeys, pickDeep } from './utils';
-import { ParsedUsageCollection } from './ts_parser';
-import { generateMapping, compatibleSchemaTypes } from './manage_schema';
+import { compatibleSchemaTypes, generateMapping } from './manage_schema';
 import { kindToDescriptorName } from './serializer';
+import { ParsedUsageCollection } from './ts_parser';
+import { difference, flattenKeys, pickDeep } from './utils';
 
 export function checkMatchingMapping(
   UsageCollections: ParsedUsageCollection[],

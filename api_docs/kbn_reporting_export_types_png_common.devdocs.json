@@ -189,10 +189,7 @@
         "tags": [],
         "label": "JobParamsPNGDeprecated",
         "description": [],
-        "signature": [
-          "BaseParamsPNG & ",
-          "BaseParams"
-        ],
+        "signature": ["BaseParamsPNG & ", "BaseParams"],
         "path": "packages/kbn-reporting/export_types/png_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -205,9 +202,7 @@
         "tags": [],
         "label": "PNG_JOB_TYPE",
         "description": [],
-        "signature": [
-          "\"PNG\""
-        ],
+        "signature": ["\"PNG\""],
         "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -220,9 +215,7 @@
         "tags": [],
         "label": "PNG_JOB_TYPE_V2",
         "description": [],
-        "signature": [
-          "\"PNGV2\""
-        ],
+        "signature": ["\"PNGV2\""],
         "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -235,9 +228,7 @@
         "tags": [],
         "label": "PNG_REPORT_TYPE",
         "description": [],
-        "signature": [
-          "\"PNG\""
-        ],
+        "signature": ["\"PNG\""],
         "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -250,9 +241,7 @@
         "tags": [],
         "label": "PNG_REPORT_TYPE_V2",
         "description": [],
-        "signature": [
-          "\"pngV2\""
-        ],
+        "signature": ["\"pngV2\""],
         "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -265,10 +254,7 @@
         "tags": [],
         "label": "TaskPayloadPNG",
         "description": [],
-        "signature": [
-          "BaseParamsPNG & ",
-          "BasePayload"
-        ],
+        "signature": ["BaseParamsPNG & ", "BasePayload"],
         "path": "packages/kbn-reporting/export_types/png_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

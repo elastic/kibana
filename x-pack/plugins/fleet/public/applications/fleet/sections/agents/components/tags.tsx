@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiToolTip, EuiText, type EuiTextProps } from '@elastic/eui';
+import { EuiText, type EuiTextProps, EuiToolTip } from '@elastic/eui';
 import { take } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';

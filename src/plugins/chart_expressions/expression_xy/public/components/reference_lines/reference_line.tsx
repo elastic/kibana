@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { Position } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import React, { FC } from 'react';
 import { ReferenceLineConfig } from '../../../common/types';
-import { ReferenceLineAnnotations } from './reference_line_annotations';
 import { AxesMap, GroupsConfiguration } from '../../helpers';
+import { ReferenceLineAnnotations } from './reference_line_annotations';
 import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {

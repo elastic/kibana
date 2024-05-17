@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getHighlightHtml } from '../utils';
 import { FieldFormat } from '../field_format';
 import {
-  TextContextTypeConvert,
-  HtmlContextTypeConvert,
-  FieldFormatMetaParams,
   FIELD_FORMAT_IDS,
+  FieldFormatMetaParams,
   FieldFormatParams,
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
 } from '../types';
+import { getHighlightHtml } from '../utils';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://'];

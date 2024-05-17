@@ -9,8 +9,8 @@
 import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
 import { keys } from '@elastic/eui';
-import { Resizer, ResizerMouseEvent, ResizerKeyDownEvent } from './resizer';
 import { PanelContextProvider, PanelRegistry } from '../../contexts';
+import { Resizer, ResizerKeyDownEvent, ResizerMouseEvent } from './resizer';
 
 export interface Props {
   children: ReactNode;

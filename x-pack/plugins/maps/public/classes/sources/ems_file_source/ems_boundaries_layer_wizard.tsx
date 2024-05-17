@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { GeoJsonVectorLayer } from '../../layers/vector_layer';
+import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, getSourceTitle } from './ems_file_source';
 
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
 import { getEMSSettings } from '../../../kibana_services';
-import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
-import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { EMSBoundariesLayerIcon } from '../../layers/wizards/icons/ems_boundaries_layer_icon';
 
 function getDescription() {

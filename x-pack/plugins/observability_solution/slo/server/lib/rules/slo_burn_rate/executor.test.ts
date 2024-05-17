@@ -6,6 +6,7 @@
  */
 
 import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
@@ -27,7 +28,12 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { Rule } from '@kbn/alerting-plugin/common';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
@@ -44,24 +50,18 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-  SLO_BURN_RATE_RULE_TYPE_ID,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
 import { getRuleExecutor } from './executor';
 import {
+  LONG_WINDOW,
+  SHORT_WINDOW,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateStatsKey,
   generateWindowId,
-  LONG_WINDOW,
-  SHORT_WINDOW,
 } from './lib/build_query';
 import { EvaluationBucket } from './lib/evaluate';
 import {

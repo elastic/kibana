@@ -12,7 +12,10 @@ import { TagValidation } from '../../../common';
  * validation failed.
  */
 export class TagValidationError extends Error {
-  constructor(message: string, public readonly validation: TagValidation) {
+  constructor(
+    message: string,
+    public readonly validation: TagValidation
+  ) {
     super(message);
     Object.setPrototypeOf(this, TagValidationError.prototype);
   }

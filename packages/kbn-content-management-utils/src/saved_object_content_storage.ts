@@ -7,27 +7,27 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SearchQuery, SearchIn } from '@kbn/content-management-plugin/common';
+import type { SearchIn, SearchQuery } from '@kbn/content-management-plugin/common';
 import type {
   ContentStorage,
-  StorageContext,
   MSearchConfig,
+  StorageContext,
 } from '@kbn/content-management-plugin/server';
 import type {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsFindOptions,
   SavedObjectsCreateOptions,
-  SavedObjectsUpdateOptions,
+  SavedObjectsFindOptions,
   SavedObjectsFindResult,
+  SavedObjectsUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { pick } from 'lodash';
 import type {
   CMCrudTypes,
-  ServicesDefinitionSet,
   SOWithMetadata,
   SOWithMetadataPartial,
+  ServicesDefinitionSet,
 } from './types';
 import { tagsToFindOptions } from './utils';
 

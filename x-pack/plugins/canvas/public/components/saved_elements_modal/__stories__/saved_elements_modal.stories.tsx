@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
+import { CustomElement } from '../../../../types';
 import { SavedElementsModal } from '../saved_elements_modal.component';
 import { getTestCustomElements } from './fixtures/test_elements';
-import { CustomElement } from '../../../../types';
 
 storiesOf('components/SavedElementsModal', module)
   .add('no custom elements', () => (

@@ -7,15 +7,15 @@
 
 import React from 'react';
 
+import { MAX_CATEGORY_FILTER_LENGTH, MAX_TAGS_FILTER_LENGTH } from '../../../../common/constants';
 import type { CaseStatuses } from '../../../../common/types/domain';
-import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
+import type { CurrentUserProfile } from '../../types';
+import { AssigneesFilterPopover } from '../assignees_filter';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
+import { SeverityFilter } from '../severity_filter';
 import { SolutionFilter } from '../solution_filter';
 import { StatusFilter } from '../status_filter';
 import * as i18n from '../translations';
-import { SeverityFilter } from '../severity_filter';
-import { AssigneesFilterPopover } from '../assignees_filter';
-import type { CurrentUserProfile } from '../../types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 
 interface UseFilterConfigProps {

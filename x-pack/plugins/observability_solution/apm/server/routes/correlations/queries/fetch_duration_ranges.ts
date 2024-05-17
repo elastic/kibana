@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sumBy } from 'lodash';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
-import { getDurationField, getEventType } from '../utils';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../lib/helpers/transactions';
+import { getDurationField, getEventType } from '../utils';
+import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 export const fetchDurationRanges = async ({
   rangeSteps,

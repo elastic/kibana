@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import type { AxesSettingsConfig } from '../../../visualizations/xy/types';
+import React, { useCallback, useMemo } from 'react';
 import { type LabelMode, VisLabel } from '../..';
+import type { AxesSettingsConfig } from '../../../visualizations/xy/types';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -49,8 +49,8 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
         !axisTitle && isAxisTitleVisible
           ? 'auto'
           : isAxisTitleVisible
-          ? 'custom'
-          : ('none' as LabelMode),
+            ? 'custom'
+            : ('none' as LabelMode),
     }),
     [axisTitle, isAxisTitleVisible]
   );

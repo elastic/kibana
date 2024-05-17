@@ -18,6 +18,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTable,
@@ -26,7 +27,6 @@ import {
   EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,19 +36,19 @@ import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
+import { CUSTOM_SERVICE_TYPE, NAV } from '../../../constants';
 import { SourceContentItem } from '../../../types';
 import {
-  NO_CONTENT_MESSAGE,
-  CUSTOM_DOCUMENTATION_LINK,
-  TITLE_HEADING,
-  LAST_UPDATED_HEADING,
-  GO_BUTTON,
-  RESET_BUTTON,
-  SOURCE_CONTENT_TITLE,
-  SEARCH_CONTENT_PLACEHOLDER,
-  FILTER_CONTENT_PLACEHOLDER,
   CONTENT_LOADING_TEXT,
+  CUSTOM_DOCUMENTATION_LINK,
+  FILTER_CONTENT_PLACEHOLDER,
+  GO_BUTTON,
+  LAST_UPDATED_HEADING,
+  NO_CONTENT_MESSAGE,
+  RESET_BUTTON,
+  SEARCH_CONTENT_PLACEHOLDER,
+  SOURCE_CONTENT_TITLE,
+  TITLE_HEADING,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 

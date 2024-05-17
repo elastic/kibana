@@ -1,3 +1,4 @@
+import { ComponentMeta } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +7,10 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
 
 import { STORYBOOK_SECTION } from '../constants';
-import { UseArray } from './use_array';
 import { useArrayStories } from './__stories__';
+import { UseArray } from './use_array';
 
 const { UseArrayBasic, UseArrayReorder, UseArrayComplex, UseArrayDynamicData } = useArrayStories;
 

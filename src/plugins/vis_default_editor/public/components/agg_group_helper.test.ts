@@ -10,10 +10,10 @@ import type { IAggConfig } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import {
-  isAggRemovable,
   calcAggIsTooLow,
-  isInvalidAggsTouched,
   getEnabledMetricAggsCount,
+  isAggRemovable,
+  isInvalidAggsTouched,
 } from './agg_group_helper';
 import { AggsState } from './agg_group_state';
 

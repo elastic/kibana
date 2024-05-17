@@ -7,9 +7,9 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
+import { ApmCustomRolename, customRoles } from '../authentication';
 import { Elasticsearch, Kibana } from '../create_apm_users';
 import { callKibana } from './call_kibana';
-import { customRoles, ApmCustomRolename } from '../authentication';
 
 export async function createCustomRole({
   elasticsearch,

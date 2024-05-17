@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { RISK_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
 import {
-  serverMock,
   requestContextMock,
   requestMock,
+  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { deleteStoredScriptRoute } from './delete_script_route';
-import { RISK_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
 import { deleteStoredScript } from './lib/delete_script';
 
 jest.mock('./lib/delete_script', () => {

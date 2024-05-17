@@ -7,9 +7,6 @@
 
 import React from 'react';
 
-import { Props, StylePropEditor } from '../style_prop_editor';
-import { DynamicIconForm } from './dynamic_icon_form';
-import { StaticIconForm } from './static_icon_form';
 import {
   CustomIcon,
   IconDynamicOptions,
@@ -17,6 +14,9 @@ import {
 } from '../../../../../../common/descriptor_types';
 import { DynamicIconProperty } from '../../properties/dynamic_icon_property';
 import { StaticIconProperty } from '../../properties/static_icon_property';
+import { Props, StylePropEditor } from '../style_prop_editor';
+import { DynamicIconForm } from './dynamic_icon_form';
+import { StaticIconForm } from './static_icon_form';
 
 type IconEditorProps = Omit<Props<IconStaticOptions, IconDynamicOptions>, 'children'>;
 

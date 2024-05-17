@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -19,16 +15,20 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { getDataTestSubject } from '../../util/get_data_test_subject';
-import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { RandomSamplerOption } from '../../../index_data_visualizer/constants/random_sampler';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
   RANDOM_SAMPLER_SELECT_OPTIONS,
 } from '../../../index_data_visualizer/constants/random_sampler';
+import { getDataTestSubject } from '../../util/get_data_test_subject';
 import { ProbabilityUsedMessage } from './probability_used';
+import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 
 interface Props {
   randomSampler: RandomSampler;

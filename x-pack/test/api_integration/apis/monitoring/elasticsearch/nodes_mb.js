@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import nodesListingFixtureGreen from './fixtures/nodes_listing_green.json';
 import { getLifecycleMethods } from '../data_stream';
+import nodesListingFixtureGreen from './fixtures/nodes_listing_green.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

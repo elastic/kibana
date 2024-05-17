@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { createTSVBLink, createFilterFromOptions } from './create_tsvb_link';
 import {
-  source,
-  options,
-  timeRange,
   chartOptions,
+  options,
+  source,
+  timeRange,
 } from '../../../../../utils/fixtures/metrics_explorer';
 import {
-  MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
+  MetricsExplorerYAxisMode,
 } from '../../hooks/use_metrics_explorer_options';
 import { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
+import { createFilterFromOptions, createTSVBLink } from './create_tsvb_link';
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('test-id'),
 }));

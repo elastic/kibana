@@ -1,21 +1,18 @@
 {
-    "job_id": "JOB_ID",
-    "indices": [
-      "INDEX_PATTERN_NAME"
-    ],
-    "max_empty_searches": 10,
-    "query": {
-        "bool":
-        {
-          "filter": [
-            {"term": {"event.category": "network"}},
-            {"term": {"event.type": "start"}}
-          ],
-          "must": [
+  "job_id": "JOB_ID",
+  "indices": ["INDEX_PATTERN_NAME"],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "event.category": "network" } },
+        { "term": { "event.type": "start" } }
+      ],
+      "must": [
         {
           "bool": {
             "should": [
-               {
+              {
                 "match": {
                   "host.os.type": {
                     "query": "linux",
@@ -31,7 +28,7 @@
                   }
                 }
               },
-               {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "redhat",
@@ -39,7 +36,7 @@
                   }
                 }
               },
-                 {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "suse",
@@ -47,7 +44,7 @@
                   }
                 }
               },
-               {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "ubuntu",
@@ -59,19 +56,19 @@
           }
         }
       ],
-          "must_not": [
-            {
-              "bool": {
-                "should": [
-                  {"term": {"destination.ip": "127.0.0.1"}},
-                  {"term": {"destination.ip": "127.0.0.53"}},
-                  {"term": {"destination.ip": "::"}},
-                  {"term": {"destination.ip": "::1"}},
-                  {"term": {"user.name":"jenkins"}}
-                ]
-              }
-            }
-          ]
+      "must_not": [
+        {
+          "bool": {
+            "should": [
+              { "term": { "destination.ip": "127.0.0.1" } },
+              { "term": { "destination.ip": "127.0.0.53" } },
+              { "term": { "destination.ip": "::" } },
+              { "term": { "destination.ip": "::1" } },
+              { "term": { "user.name": "jenkins" } }
+            ]
+          }
         }
+      ]
     }
+  }
 }

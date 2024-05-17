@@ -13,7 +13,7 @@ import { WatchHistoryItem } from '../models/watch_history_item';
 import { WatchStatus } from '../models/watch_status';
 
 import { BaseWatch, ExecutedWatchDetails } from '../../../common/types/watch_types';
-import { useRequest, sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 import { ROUTES } from '../../../common/constants';
 

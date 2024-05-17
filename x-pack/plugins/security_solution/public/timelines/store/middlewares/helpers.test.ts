@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
-import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { persistTimeline } from '../../containers/api';
 import { ensureTimelineIsSaved } from './helpers';
 

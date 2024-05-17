@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common';
+import { Datafeed, Job } from '@kbn/ml-plugin/common';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Store } from 'redux';
 import { ReactWrapper as GenericReactWrapper } from 'enzyme';
 import { LocationDescriptor } from 'history';
+import { Store } from 'redux';
 
 export type AsyncSetupFunc<T, P extends object = any> = (props?: P) => Promise<TestBed<T>>;
 export type SyncSetupFunc<T, P extends object = any> = (props?: P) => TestBed<T>;

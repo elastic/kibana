@@ -11,11 +11,11 @@ import {
   getUpdatedRootFieldsMock,
 } from './generate_additive_mapping_diff.test.mocks';
 
+import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import type { IndexMappingMeta, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { generateAdditiveMappingDiff } from './generate_additive_mapping_diff';
 import { getBaseMappings } from '../../core/build_active_mappings';
 import { createType } from '../test_helpers';
+import { generateAdditiveMappingDiff } from './generate_additive_mapping_diff';
 
 describe('generateAdditiveMappingDiff', () => {
   const deletedTypes = ['deletedType'];

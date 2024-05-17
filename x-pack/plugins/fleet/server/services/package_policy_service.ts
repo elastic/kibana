@@ -13,20 +13,20 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
+import type { ExternalCallback } from '..';
 import type {
-  PostDeletePackagePoliciesResponse,
-  UpgradePackagePolicyResponse,
-  PackageInfo,
-  ListWithKuery,
   ListResult,
+  ListWithKuery,
+  PackageInfo,
+  PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyDryRunResponseItem,
+  UpgradePackagePolicyResponse,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
   ExperimentalDataStreamFeature,
 } from '../../common/types';
-import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
-import type { ExternalCallback } from '..';
+import type { NewPackagePolicy, PackagePolicy, UpdatePackagePolicy } from '../types';
 
 import type { NewPackagePolicyWithId } from './package_policy';
 
@@ -167,12 +167,12 @@ export interface PackagePolicyClient {
     packagePolicy: A extends 'packagePolicyDelete'
       ? DeletePackagePoliciesResponse
       : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyUpdate'
-      ? UpdatePackagePolicy
-      : NewPackagePolicy,
+        ? PostDeletePackagePoliciesResponse
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyUpdate'
+            ? UpdatePackagePolicy
+            : NewPackagePolicy,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
@@ -181,12 +181,12 @@ export interface PackagePolicyClient {
     A extends 'packagePolicyDelete'
       ? void
       : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyUpdate'
-      ? UpdatePackagePolicy
-      : NewPackagePolicy
+        ? void
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyUpdate'
+            ? UpdatePackagePolicy
+            : NewPackagePolicy
   >;
 
   runDeleteExternalCallbacks(

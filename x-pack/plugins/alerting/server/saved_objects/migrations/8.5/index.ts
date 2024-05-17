@@ -9,12 +9,12 @@ import {
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isSerializedSearchSource } from '@kbn/data-plugin/common';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { pick } from 'lodash';
 import { RawRule } from '../../../types';
-import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
 import { AlertLogMeta } from '../types';
+import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
 
 function stripOutRuntimeFieldsInOldESQuery(
   doc: SavedObjectUnsanitizedDoc<RawRule>,

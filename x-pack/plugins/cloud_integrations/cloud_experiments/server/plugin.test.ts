@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { coreMock } from '@kbn/core/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   createIndexPatternsStartMock,
   dataViewsService,
 } from '@kbn/data-views-plugin/server/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { config } from './config';
-import { CloudExperimentsPlugin } from './plugin';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { FEATURE_FLAG_NAMES } from '../common/constants';
+import { config } from './config';
 import { LaunchDarklyClient } from './launch_darkly_client';
+import { CloudExperimentsPlugin } from './plugin';
 jest.mock('./launch_darkly_client');
 
 describe('Cloud Experiments server plugin', () => {

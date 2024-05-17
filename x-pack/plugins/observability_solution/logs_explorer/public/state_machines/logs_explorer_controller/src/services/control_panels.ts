@@ -11,10 +11,10 @@ import deepEqual from 'fast-deep-equal';
 import { mapValues, pick } from 'lodash';
 import { InvokeCreator } from 'xstate';
 import {
-  availableControlPanelFields,
-  controlPanelConfigs,
   ControlPanelRT,
   ControlPanels,
+  availableControlPanelFields,
+  controlPanelConfigs,
 } from '../../../../../common';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 

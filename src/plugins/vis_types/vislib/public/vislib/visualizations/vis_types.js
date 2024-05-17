@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PointSeries } from './point_series';
 import { GaugeChart } from './gauge_chart';
+import { PointSeries } from './point_series';
 
 export const visTypes = {
   point_series: PointSeries,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { cleanup, generate } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { cleanup, generate } from '@kbn/infra-forge';
 import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 
 import {
-  getSLOSummaryPipelineId,
   SLO_SUMMARY_TEMP_INDEX_NAME,
+  getSLOSummaryPipelineId,
 } from '@kbn/slo-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

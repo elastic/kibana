@@ -7,8 +7,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { UsageCountersService, UsageCountersServiceSetup } from './usage_counters_service';
 import type { UsageCounter } from './usage_counter';
+import type { UsageCountersService, UsageCountersServiceSetup } from './usage_counters_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<UsageCountersServiceSetup> = {

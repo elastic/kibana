@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
 import { formatErrors } from '../format_errors';
 
 /*

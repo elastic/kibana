@@ -15,9 +15,9 @@ import { i18n } from '@kbn/i18n';
 
 import { AggParam, IAggConfig, IFieldParamType, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
-import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
+import { AggParamEditorProps } from '../agg_param_props';
+import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 
 const label = i18n.translate('visDefaultEditor.controls.field.fieldLabel', {
   defaultMessage: 'Field',

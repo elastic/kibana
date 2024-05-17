@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import React from 'react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { Relationships, RelationshipsProps } from './relationships';
 

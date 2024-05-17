@@ -11,16 +11,16 @@ import {
   DEFAULT_EMS_ROADMAP_ID,
 } from '@kbn/maps-ems-plugin/common';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../constants';
+import type { MapAttributes } from '../content_management';
 import {
-  EMSTMSSourceDescriptor,
   EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
-  LayerDescriptor,
   JoinDescriptor,
+  LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {

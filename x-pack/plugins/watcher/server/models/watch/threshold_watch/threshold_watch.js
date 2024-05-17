@@ -6,9 +6,9 @@
  */
 
 import { merge } from 'lodash';
-import { BaseWatch } from '../base_watch';
-import { WATCH_TYPES, COMPARATORS, SORT_ORDERS } from '../../../../common/constants';
+import { COMPARATORS, SORT_ORDERS, WATCH_TYPES } from '../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../common/lib/serialization';
+import { BaseWatch } from '../base_watch';
 
 import { buildVisualizeQuery } from './build_visualize_query';
 import { formatVisualizeData } from './format_visualize_data';

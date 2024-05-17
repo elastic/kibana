@@ -56,9 +56,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -74,9 +72,7 @@
         "parentPluginId": "embeddableEnhanced",
         "id": "def-public.EnhancedEmbeddableContext",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "EnhancedEmbeddableContext",
         "description": [],
         "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
@@ -434,9 +430,7 @@
               "tags": [],
               "label": "uuid",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -449,9 +443,7 @@
               "tags": [],
               "label": "getTitle",
               "description": [],
-              "signature": [
-                "() => string | undefined"
-              ],
+              "signature": ["() => string | undefined"],
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -464,9 +456,7 @@
               "tags": [],
               "label": "state",
               "description": [],
-              "signature": [
-                "DynamicActionsSerializedState"
-              ],
+              "signature": ["DynamicActionsSerializedState"],
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,

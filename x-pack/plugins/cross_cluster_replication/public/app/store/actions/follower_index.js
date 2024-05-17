@@ -7,21 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { routing } from '../../services/routing';
-import { getToasts } from '../../services/notifications';
-import { SECTIONS, API_STATUS } from '../../constants';
+import { API_STATUS, SECTIONS } from '../../constants';
 import {
-  loadFollowerIndices as loadFollowerIndicesRequest,
-  getFollowerIndex as getFollowerIndexRequest,
   createFollowerIndex as createFollowerIndexRequest,
+  getFollowerIndex as getFollowerIndexRequest,
+  loadFollowerIndices as loadFollowerIndicesRequest,
   pauseFollowerIndex as pauseFollowerIndexRequest,
   resumeFollowerIndex as resumeFollowerIndexRequest,
   unfollowLeaderIndex as unfollowLeaderIndexRequest,
   updateFollowerIndex as updateFollowerIndexRequest,
 } from '../../services/api';
+import { getToasts } from '../../services/notifications';
+import { routing } from '../../services/routing';
 import * as t from '../action_types';
-import { sendApiRequest } from './api';
 import { getSelectedFollowerIndexId } from '../selectors';
+import { sendApiRequest } from './api';
 
 const { FOLLOWER_INDEX: scope } = SECTIONS;
 

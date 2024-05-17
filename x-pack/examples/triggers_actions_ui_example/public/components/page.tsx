@@ -8,7 +8,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { EuiPageTemplate, EuiTitle, EuiBreadcrumbs } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiPageTemplate, EuiTitle } from '@elastic/eui';
 
 interface PageProps {
   title: string;

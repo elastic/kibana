@@ -1,3 +1,4 @@
+import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +8,6 @@
  */
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from './get_sort_for_search_source';
-import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
 
 describe('getSortForSearchSource function', function () {
   test('should be a function', function () {

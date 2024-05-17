@@ -9,15 +9,15 @@ import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { omit } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import { ACTION_COLUMN_WIDTH } from './common_styles';
+import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineId } from '../../../../../common/types';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
 import * as i18n from '../translations';
 import type { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { TimelineId } from '../../../../../common/types';
+import { ACTION_COLUMN_WIDTH } from './common_styles';
 
 const LineClampTextContainer = styled.span`
   text-overflow: ellipsis;

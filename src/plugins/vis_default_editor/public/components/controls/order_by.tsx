@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import { search } from '@kbn/data-plugin/public';
+import { AggParamEditorProps } from '../agg_param_props';
 import {
   isCompatibleAggregation,
   useAvailableOptions,
   useFallbackMetric,
   useValidation,
 } from './utils';
-import { AggParamEditorProps } from '../agg_param_props';
 
 const { termsAggFilter } = search.aggs;
 const DEFAULT_VALUE = '_key';

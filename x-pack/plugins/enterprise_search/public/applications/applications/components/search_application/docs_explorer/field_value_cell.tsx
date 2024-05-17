@@ -9,7 +9,7 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 
 import { FieldValue, isFieldValue } from './convert_results';
 

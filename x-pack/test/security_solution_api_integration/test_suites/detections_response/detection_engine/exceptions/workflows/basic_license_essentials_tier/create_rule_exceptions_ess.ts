@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { CreateRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  getRuleSOById,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFields,
-  checkInvestigationFieldSoValue,
-} from '../../../../utils';
-import {
   createAlertsIndex,
-  deleteAllRules,
   deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../../common/utils/security_solution';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import {
+  checkInvestigationFieldSoValue,
+  createRuleThroughAlertingEndpoint,
+  getRuleSOById,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+} from '../../../../utils';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',

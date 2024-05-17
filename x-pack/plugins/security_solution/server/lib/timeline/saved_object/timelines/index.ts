@@ -9,41 +9,41 @@ import { getOr } from 'lodash/fp';
 
 import {
   type SavedObjectsClientContract,
-  type SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
+  type SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
-  Note,
-  PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
+  Note,
   PageInfoTimeline,
-  ResponseTimelines,
+  PinnedEvent,
+  ResolvedTimelineWithOutcomeSavedObject,
   ResponseFavoriteTimeline,
   ResponseTimeline,
+  ResponseTimelines,
+  SavedTimeline,
   SortTimeline,
   TimelineResult,
-  TimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
-  ResolvedTimelineWithOutcomeSavedObject,
   TimelineSavedObject,
-  SavedTimeline,
+  TimelineStatusLiteralWithNull,
+  TimelineTypeLiteralWithNull,
   TimelineWithoutExternalRefs,
 } from '../../../../../common/api/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
+import { draftTimelineDefaults } from '../../utils/default_timeline';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
 import { deleteSearchByTimelineId } from '../saved_search';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-import { pickSavedTimeline } from './pick_saved_timeline';
-import { timelineSavedObjectType } from '../../saved_object_mappings';
-import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { timelineFieldsMigrator } from './field_migrator';
+import { pickSavedTimeline } from './pick_saved_timeline';
 
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
@@ -136,11 +136,11 @@ const getTimelineTypeFilter = (
     timelineType == null
       ? null
       : timelineType === TimelineType.template
-      ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
-      : /** Show me every timeline whose timelineType is not "template".
-         * which includes timelineType === 'default' and
-         * those timelineType doesn't exists */
-        `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+        ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+        : /** Show me every timeline whose timelineType is not "template".
+           * which includes timelineType === 'default' and
+           * those timelineType doesn't exists */
+          `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
 
   /** Show me every timeline whose status is not "draft".
    * which includes status === 'active' and
@@ -154,8 +154,8 @@ const getTimelineTypeFilter = (
     status == null
       ? null
       : status === TimelineStatus.immutable
-      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`
-      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`;
+        ? `siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`
+        : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`;
 
   const filters = [typeFilter, draftFilter, immutableFilter];
   return combineFilters(filters);
@@ -710,9 +710,8 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  const savedObjects = await savedObjectsClient.find<SavedObjectTimelineWithoutExternalRefs>(
-    options
-  );
+  const savedObjects =
+    await savedObjectsClient.find<SavedObjectTimelineWithoutExternalRefs>(options);
 
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {

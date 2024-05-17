@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { LogsExplorerTabs } from '../../../../components/logs_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { useDiscoverTopNav } from './use_discover_topnav';
 
 export const DiscoverTopNavInline = ({
   stateContainer,

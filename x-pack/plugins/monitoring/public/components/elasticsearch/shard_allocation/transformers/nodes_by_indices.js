@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { find, some, reduce, values, sortBy, get } from 'lodash';
-import { hasPrimaryChildren } from '../lib/has_primary_children';
+import { find, get, reduce, some, sortBy, values } from 'lodash';
 import { decorateShards } from '../lib/decorate_shards';
+import { hasPrimaryChildren } from '../lib/has_primary_children';
 
 export function nodesByIndices() {
   return function nodesByIndicesFn(shards, nodes) {

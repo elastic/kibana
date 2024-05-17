@@ -66,5 +66,5 @@ export const CreateIntegrationNotificationEventSelectors = {
   initialized: () =>
     ({
       type: 'CREATE_INITIALIZED',
-    } as CreateCustomIntegrationNotificationEvent),
+    }) as CreateCustomIntegrationNotificationEvent,
 };

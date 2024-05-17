@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Mutable } from 'utility-types';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { Mutable } from 'utility-types';
 
 /**
  * @note mutates the response object

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { format } from 'url';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import expect from '@kbn/expect';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
-import { getSyntraceClient, generateData } from '../helpers/syntrace';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
+import { createDataView, deleteDataView } from '../helpers/data_view';
+import { generateData, getSyntraceClient } from '../helpers/syntrace';
 import { ActionDocument } from './typings';
 
 // eslint-disable-next-line import/no-default-export

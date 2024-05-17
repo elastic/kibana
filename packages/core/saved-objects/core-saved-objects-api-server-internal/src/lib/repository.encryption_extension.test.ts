@@ -7,33 +7,36 @@
  */
 
 import {
-  pointInTimeFinderMock,
   mockGetCurrentTime,
-  mockPreflightCheckForCreate,
   mockGetSearchDsl,
+  mockPreflightCheckForCreate,
+  pointInTimeFinderMock,
 } from './repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsRepository } from './repository';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { kibanaMigratorMock } from '../mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  MAIN_SAVED_OBJECT_INDEX,
   type ISavedObjectsEncryptionExtension,
+  MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
+import { kibanaMigratorMock } from '../mocks';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import {
+  ENCRYPTED_TYPE,
+  MULTI_NAMESPACE_ENCRYPTED_TYPE,
+  type TypeIdTuple,
   bulkCreateSuccess,
   bulkGetSuccess,
   bulkUpdateSuccess,
   createDocumentMigrator,
   createRegistry,
   createSpySerializer,
-  ENCRYPTED_TYPE,
   findSuccess,
   getMockGetResponse,
   mappings,
@@ -41,11 +44,8 @@ import {
   mockTimestampFields,
   mockVersion,
   mockVersionProps,
-  MULTI_NAMESPACE_ENCRYPTED_TYPE,
   updateSuccess,
-  type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
-import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
-import { JobCreatorContext } from '../../../job_creator_context';
-import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
-import type { LineChartData } from '../../../../../common/chart_loader';
-import type { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
-import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
-import { MetricSelector } from './metric_selector';
-import { ChartGrid } from './chart_grid';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import type { LineChartData } from '../../../../../common/chart_loader';
+import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import { defaultChartSettings, getChartSettings } from '../../../charts/common/settings';
+import { JobCreatorContext } from '../../../job_creator_context';
+import type { DropDownLabel, DropDownProps } from '../agg_select';
+import { ChartGrid } from './chart_grid';
+import { MetricSelector } from './metric_selector';
 
 interface Props {
   setIsValid: (na: boolean) => void;

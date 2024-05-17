@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import {
   EuiColorPicker,
   EuiFlexItem,
@@ -16,8 +15,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
+import { Map as MapboxMap, maplibregl } from '@kbn/mapbox-gl';
+import React, { Component } from 'react';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
 
 export interface Props {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import { registerConnectorTypes } from './connector_types';
-import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { StackConnectorsConfigType } from '../common/types';
+import { registerConnectorTypes } from './connector_types';
+import { getWellKnownEmailServiceRoute, validSlackApiChannelsRoute } from './routes';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cloneDeep, flatten } from 'lodash';
 import type { ComponentProps } from 'react';
 import React, { useEffect } from 'react';
-import QueryTabContent from '.';
-import { defaultRowRenderers } from '../../body/renderers';
-import { TimelineId } from '../../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../../containers';
-import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
-import {
-  createSecuritySolutionStorageMock,
-  mockTimelineData,
-  TestProviders,
-} from '../../../../../common/mock';
-import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, fireEvent, within, cleanup } from '@testing-library/react';
-import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
-import type { StartServices } from '../../../../../types';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useDispatch } from 'react-redux';
-import { timelineActions } from '../../../../store';
+import QueryTabContent from '.';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { cloneDeep, flatten } from 'lodash';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
+import {
+  TestProviders,
+  createSecuritySolutionStorageMock,
+  mockTimelineData,
+} from '../../../../../common/mock';
+import type { StartServices } from '../../../../../types';
+import { useTimelineEvents } from '../../../../containers';
+import { useTimelineEventsDetails } from '../../../../containers/details';
+import { timelineActions } from '../../../../store';
+import { defaultRowRenderers } from '../../body/renderers';
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),

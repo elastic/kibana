@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { readCliArgs } from './args';
 
@@ -188,8 +188,9 @@ it('limits packages if --deb passed with --all-platforms', () => {
 });
 
 it('limits packages if --docker passed with --all-platforms', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker-images']))
-    .toMatchInlineSnapshot(`
+  expect(
+    readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker-images'])
+  ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
@@ -279,8 +280,9 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
 });
 
 it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-ubuntu']))
-    .toMatchInlineSnapshot(`
+  expect(
+    readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-ubuntu'])
+  ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
@@ -321,8 +323,9 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
 });
 
 it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-fips']))
-    .toMatchInlineSnapshot(`
+  expect(
+    readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-fips'])
+  ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,

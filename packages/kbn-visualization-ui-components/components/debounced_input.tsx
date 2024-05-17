@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import React from 'react';
 import { useDebouncedValue } from './debounced_value';
 
 type Props = {

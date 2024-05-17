@@ -5,83 +5,63 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import Boom from '@hapi/boom';
 import url from 'url';
+import Boom from '@hapi/boom';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { v4 as uuidv4 } from 'uuid';
 
-import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined, compact, uniq } from 'lodash';
 import {
   IScopedClusterClient,
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
   KibanaRequest,
-  SavedObjectsUtils,
   Logger,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectsUtils,
 } from '@kbn/core/server';
+import { KueryNode } from '@kbn/es-query';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { i18n } from '@kbn/i18n';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { KueryNode } from '@kbn/es-query';
-import { ConnectorWithExtraFindData } from '../application/connector/types';
-import { ConnectorType } from '../application/connector/types';
-import { get } from '../application/connector/methods/get';
-import { getAll } from '../application/connector/methods/get_all';
-import { listTypes } from '../application/connector/methods/list_types';
+import { compact, isUndefined, omitBy, uniq } from 'lodash';
 import {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
 } from '../../common';
 import { ActionTypeRegistry } from '../action_type_registry';
-import {
-  validateConfig,
-  validateSecrets,
-  ActionExecutorContract,
-  validateConnector,
-  ActionExecutionSource,
-  parseDate,
-} from '../lib';
-import {
-  ActionResult,
-  RawAction,
-  InMemoryConnector,
-  ActionTypeExecutorResult,
-  ConnectorTokenClientContract,
-} from '../types';
-import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
-import { ExecuteOptions } from '../lib/action_executor';
-import {
-  ExecutionEnqueuer,
-  ExecuteOptions as EnqueueExecutionOptions,
-  BulkExecutionEnqueuer,
-  ExecutionResponse,
-} from '../create_execute_function';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
+import { get } from '../application/connector/methods/get';
+import { getAll } from '../application/connector/methods/get_all';
+import { getAllSystemConnectors } from '../application/connector/methods/get_all/get_all';
+import { listTypes } from '../application/connector/methods/list_types';
+import { ListTypesParams } from '../application/connector/methods/list_types/types';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { ConnectorType } from '../application/connector/types';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
-  getAuthorizationModeBySource,
-  bulkGetAuthorizationModeBySource,
   AuthorizationMode,
+  bulkGetAuthorizationModeBySource,
+  getAuthorizationModeBySource,
 } from '../authorization/get_authorization_mode_by_source';
-import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
-import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
-import { ActionsConfigurationUtilities } from '../actions_config';
 import {
-  OAuthClientCredentialsParams,
-  OAuthJwtParams,
-  OAuthParams,
-} from '../routes/get_oauth_access_token';
+  BulkExecutionEnqueuer,
+  ExecuteOptions as EnqueueExecutionOptions,
+  ExecutionEnqueuer,
+  ExecutionResponse,
+} from '../create_execute_function';
 import {
-  getOAuthJwtAccessToken,
-  GetOAuthJwtConfig,
-  GetOAuthJwtSecrets,
-} from '../lib/get_oauth_jwt_access_token';
-import {
-  getOAuthClientCredentialsAccessToken,
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../lib/get_oauth_client_credentials_access_token';
+  ActionExecutionSource,
+  ActionExecutorContract,
+  parseDate,
+  validateConfig,
+  validateConnector,
+  validateSecrets,
+} from '../lib';
+import { ExecuteOptions } from '../lib/action_executor';
+import { ConnectorAuditAction, connectorAuditEvent } from '../lib/audit_events';
+import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,
@@ -89,9 +69,29 @@ import {
   getExecutionKPIAggregation,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
-import { ListTypesParams } from '../application/connector/methods/list_types/types';
-import { getAllSystemConnectors } from '../application/connector/methods/get_all/get_all';
+import {
+  GetOAuthClientCredentialsConfig,
+  GetOAuthClientCredentialsSecrets,
+  getOAuthClientCredentialsAccessToken,
+} from '../lib/get_oauth_client_credentials_access_token';
+import {
+  GetOAuthJwtConfig,
+  GetOAuthJwtSecrets,
+  getOAuthJwtAccessToken,
+} from '../lib/get_oauth_jwt_access_token';
+import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
+import {
+  OAuthClientCredentialsParams,
+  OAuthJwtParams,
+  OAuthParams,
+} from '../routes/get_oauth_access_token';
+import {
+  ActionResult,
+  ActionTypeExecutorResult,
+  ConnectorTokenClientContract,
+  InMemoryConnector,
+  RawAction,
+} from '../types';
 
 interface ActionUpdate {
   name: string;
@@ -413,9 +413,9 @@ export class ActionsClient {
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<
-    ConnectorWithExtraFindData[]
-  > {
+  public async getAll({
+    includeSystemActions = false,
+  } = {}): Promise<ConnectorWithExtraFindData[]> {
     return getAll({ context: this.context, includeSystemActions });
   }
 
@@ -483,9 +483,8 @@ export class ActionsClient {
     ];
 
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
-    const bulkGetResult = await this.context.unsecuredSavedObjectsClient.bulkGet<RawAction>(
-      bulkGetOpts
-    );
+    const bulkGetResult =
+      await this.context.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
     bulkGetResult.saved_objects.forEach(({ id, error }) => {
       if (!error && this.context.auditLogger) {

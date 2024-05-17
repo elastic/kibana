@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
-import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
+import classNames from 'classnames';
+import React, { PureComponent } from 'react';
 
 import {
   EuiButton,
@@ -20,42 +20,42 @@ import {
   EuiOutsideClickDetector,
   EuiPortal,
   EuiTextArea,
-  htmlIdGenerator,
   PopoverAnchorPosition,
+  htmlIdGenerator,
   toSentenceCase,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
-import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { PersistedLog } from '@kbn/data-plugin/public';
 import {
-  getFieldSubtypeNested,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+  getFieldSubtypeNested,
 } from '@kbn/data-plugin/common';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { Filter, buildQueryFromFilters } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { matchPairs } from './match_pairs';
-import { toUser } from './to_user';
-import { fromUser } from './from_user';
-import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
-import { QueryLanguageSwitcher } from './language_switcher';
+import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
+import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
+import { getAnalytics, getI18n, getTheme } from '../services';
+import { SuggestionsComponent } from '../typeahead';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
-import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
-import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { getAnalytics, getI18n, getTheme } from '../services';
+import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
+import { fromUser } from './from_user';
+import { QueryLanguageSwitcher } from './language_switcher';
+import { matchPairs } from './match_pairs';
+import { toUser } from './to_user';
 import './query_string_input.scss';
 
 export const strings = {

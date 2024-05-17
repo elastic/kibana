@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/kibana_mb.json';
 import { getLifecycleMethods } from '../../data_stream';
+import fixture from './fixtures/kibana_mb.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

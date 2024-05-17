@@ -8,12 +8,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { getRouter } from '../../../public/application/services';
 import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
+import { getRouter } from '../../../public/application/services';
 
 import { PROXY_MODE } from '../../../common/constants';
 
-import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
+import { findTestSubject, getRandomString, setupEnvironment } from '../helpers';
 
 import { setup } from './remote_clusters_list.helpers';
 

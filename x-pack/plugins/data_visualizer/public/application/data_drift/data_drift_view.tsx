@@ -1,3 +1,15 @@
+import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
+import { ProgressControls } from '@kbn/aiops-components';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useTableState } from '@kbn/ml-in-memory-table';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +17,15 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import { i18n } from '@kbn/i18n';
-import type { Query } from '@kbn/es-query';
-import { ProgressControls } from '@kbn/aiops-components';
-import { isEqual } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
-import { useTableState } from '@kbn/ml-in-memory-table';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
+import { DataDriftPromptHint } from './data_drift_hint';
+import { DataDriftOverviewTable } from './data_drift_overview_table';
+import type { DataDriftField, Feature, TimeRange } from './types';
 import {
-  getDataComparisonType,
   type InitialSettings,
+  getDataComparisonType,
   useFetchDataComparisonResult,
 } from './use_data_drift_result';
-import type { DataDriftField, Feature, TimeRange } from './types';
-import { DataDriftOverviewTable } from './data_drift_overview_table';
-import { DataDriftPromptHint } from './data_drift_hint';
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
   'xpack.dataVisualizer.dataDrift.showOnlyDriftedFieldsOptionLabel',

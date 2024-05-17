@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
-import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
+import { FleetServerHostUnauthorizedError, defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 
 import {

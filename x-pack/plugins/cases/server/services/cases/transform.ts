@@ -7,13 +7,13 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
@@ -25,15 +25,15 @@ import {
   STATUS_ESMODEL_TO_EXTERNAL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import {
-  findConnectorIdReference,
-  transformFieldsToESModel,
-  transformESConnectorOrUseDefault,
-  transformESConnectorToExternalModel,
-} from '../transform';
-import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
 import type { ExternalServicePersisted } from '../../common/types/external_service';
+import { ConnectorReferenceHandler } from '../connector_reference_handler';
+import {
+  findConnectorIdReference,
+  transformESConnectorOrUseDefault,
+  transformESConnectorToExternalModel,
+  transformFieldsToESModel,
+} from '../transform';
 
 export function transformUpdateResponseToExternalModel(
   updatedCase: SavedObjectsUpdateResponse<CasePersistedAttributes>
@@ -114,8 +114,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     ...(external_service
       ? { external_service: restExternalService }
       : external_service === null
-      ? { external_service: null }
-      : {}),
+        ? { external_service: null }
+        : {}),
   };
 
   return {

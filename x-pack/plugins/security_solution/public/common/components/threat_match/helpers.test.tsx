@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
+import type { EmptyEntry, Entry, FormattedEntry, ThreatMapEntries } from './types';
 
+import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
+  customValidators,
   filterItems,
   getEntryOnFieldChange,
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
-  customValidators,
 } from './helpers';
-import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -30,7 +30,7 @@ const getMockIndexPattern = (): DataViewBase =>
     id: '1234',
     title: 'logstash-*',
     fields,
-  } as DataViewBase);
+  }) as DataViewBase;
 
 const getMockEntry = (): FormattedEntry => ({
   id: '123',

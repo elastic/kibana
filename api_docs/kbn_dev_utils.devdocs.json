@@ -28,9 +28,7 @@
         "description": [
           "\nProduces a diff string which is nicely formatted to show the differences between two strings. This will\nbe a multi-line string so it's generally a good idea to include a `\\n` before this first line of the diff\nif you are concatenating it with another message."
         ],
-        "signature": [
-          "(expected: string, received: string) => string | undefined"
-        ],
+        "signature": ["(expected: string, received: string) => string | undefined"],
         "path": "packages/kbn-dev-utils/src/diff_strings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +40,7 @@
             "tags": [],
             "label": "expected",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,9 +53,7 @@
             "tags": [],
             "label": "received",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,9 +86,7 @@
             "tags": [],
             "label": "{\n  archivePath,\n  targetDir,\n  stripComponents = 0,\n  setModifiedTimes,\n}",
             "description": [],
-            "signature": [
-              "Options"
-            ],
+            "signature": ["Options"],
             "path": "packages/kbn-dev-utils/src/extract.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -132,9 +124,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,9 +163,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -192,9 +180,7 @@
         "tags": [],
         "label": "runPluginListCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -278,9 +264,7 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "signature": [
-              "undefined"
-            ],
+            "signature": ["undefined"],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -318,10 +302,7 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "signature": [
-              "AxiosResponse",
-              "<T, any>"
-            ],
+            "signature": ["AxiosResponse", "<T, any>"],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -351,9 +332,7 @@
         "tags": [],
         "label": "CA_TRUSTED_FINGERPRINT",
         "description": [],
-        "signature": [
-          "\"F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84\""
-        ],
+        "signature": ["\"F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84\""],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -414,9 +393,7 @@
         "tags": [],
         "label": "ES_P12_PASSWORD",
         "description": [],
-        "signature": [
-          "\"storepass\""
-        ],
+        "signature": ["\"storepass\""],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -465,9 +442,7 @@
         "tags": [],
         "label": "FLEET_SERVER_P12_PASSWORD",
         "description": [],
-        "signature": [
-          "\"storepass\""
-        ],
+        "signature": ["\"storepass\""],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -516,9 +491,7 @@
         "tags": [],
         "label": "KBN_P12_PASSWORD",
         "description": [],
-        "signature": [
-          "\"storepass\""
-        ],
+        "signature": ["\"storepass\""],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,

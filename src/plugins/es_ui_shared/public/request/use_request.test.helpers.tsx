@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ReactWrapper, mount } from 'enzyme';
 import React, { useState, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
 
-import { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
+import { HttpFetchOptions, HttpSetup } from '@kbn/core/public';
 import { SendRequestConfig, SendRequestResponse } from './send_request';
-import { useRequest, UseRequestResponse, UseRequestConfig } from './use_request';
+import { UseRequestConfig, UseRequestResponse, useRequest } from './use_request';
 
 export interface UseRequestHelpers {
   advanceTime: (ms: number) => Promise<void>;
@@ -83,13 +83,16 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
         return new Promise((resolve, reject) => {
           // Increase the time it takes to resolve a request so we have time to inspect the hook
           // as it goes through various states.
-          setTimeout(() => {
-            try {
-              resolve(sendRequestSpy(path, options));
-            } catch (e) {
-              reject(e);
-            }
-          }, (requestTimings && requestTimings[requestCount++]) || REQUEST_TIME);
+          setTimeout(
+            () => {
+              try {
+                resolve(sendRequestSpy(path, options));
+              } catch (e) {
+                reject(e);
+              }
+            },
+            (requestTimings && requestTimings[requestCount++]) || REQUEST_TIME
+          );
         });
       },
     };

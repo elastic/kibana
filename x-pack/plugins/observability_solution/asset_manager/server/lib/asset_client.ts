@@ -8,10 +8,10 @@
 import { orderBy } from 'lodash';
 import { Asset } from '../../common/types_api';
 import { GetAssetsOptionsPublic } from '../../common/types_client';
-import { getContainers, GetContainersOptions } from './accessors/containers/get_containers';
-import { getHosts, GetHostsOptions } from './accessors/hosts/get_hosts';
-import { getServices, GetServicesOptions } from './accessors/services/get_services';
-import { getPods, GetPodsOptions } from './accessors/pods/get_pods';
+import { GetContainersOptions, getContainers } from './accessors/containers/get_containers';
+import { GetHostsOptions, getHosts } from './accessors/hosts/get_hosts';
+import { GetPodsOptions, getPods } from './accessors/pods/get_pods';
+import { GetServicesOptions, getServices } from './accessors/services/get_services';
 import { AssetClientBaseOptions, AssetClientOptionsWithInjectedValues } from './asset_client_types';
 import { AssetClientDependencies } from './asset_client_types';
 

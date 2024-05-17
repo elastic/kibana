@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObject, Logger } from '@kbn/core/server';
-import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import type { Alert } from '@kbn/alerting-plugin/server';
-import type { RuleParams } from '../../../rule_schema';
-import { deconflictSignalsAndResults, getNotificationResultsLink } from './utils';
+import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
+import type { RuleParams } from '../../../rule_schema';
+import type { AlertAttributes } from '../../../rule_types/types';
 import { getSignals } from './get_signals';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';
 import { scheduleNotificationActions } from './schedule_notification_actions';
-import type { AlertAttributes } from '../../../rule_types/types';
+import { deconflictSignalsAndResults, getNotificationResultsLink } from './utils';
 
 interface ScheduleThrottledNotificationActionsOptions {
   id: SavedObject['id'];

@@ -1,3 +1,5 @@
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +8,12 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
-import { useSavedSearchInitial } from '../state_management/discover_state_provider';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
-import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
+import { useSavedSearchInitial } from '../state_management/discover_state_provider';
+import { getValidViewMode } from '../utils/get_valid_view_mode';
 
 const MAX_NUM_OF_COLUMNS = 50;
 // For ES|QL we want in case of the following commands to display a table view, otherwise display a document view

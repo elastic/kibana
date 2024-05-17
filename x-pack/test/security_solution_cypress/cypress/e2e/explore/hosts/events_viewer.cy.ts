@@ -22,20 +22,20 @@ import {
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../../tasks/fields_browser';
-import { login } from '../../../tasks/login';
-import { visitWithTimeRange } from '../../../tasks/navigation';
-import { openEvents } from '../../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
   openEventsViewerFieldsBrowser,
   waitsForEventsToBeLoaded,
 } from '../../../tasks/hosts/events';
+import { openEvents } from '../../../tasks/hosts/main';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 
-import { hostsUrl } from '../../../urls/navigation';
-import { resetFields } from '../../../tasks/timeline';
 import { DATA_GRID_EMPTY_STATE } from '../../../screens/events_viewer';
+import { resetFields } from '../../../tasks/timeline';
+import { hostsUrl } from '../../../urls/navigation';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },

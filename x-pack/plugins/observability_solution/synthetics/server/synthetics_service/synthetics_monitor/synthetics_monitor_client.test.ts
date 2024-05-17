@@ -1,3 +1,5 @@
+import { CoreStart, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +7,17 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { KibanaRequest, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import { SyntheticsMonitorClient } from './synthetics_monitor_client';
-import { SyntheticsService } from '../synthetics_service';
 import times from 'lodash/times';
 import {
   LocationStatus,
   MonitorFields,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
-import { mockEncryptedSO } from '../utils/mocks';
-import { SyntheticsServerSetup } from '../../types';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsServerSetup } from '../../types';
+import { SyntheticsService } from '../synthetics_service';
+import { mockEncryptedSO } from '../utils/mocks';
+import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 

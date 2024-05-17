@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiDataGridCustomToolbarProps,
   EuiDataGridToolBarVisibilityOptions,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import React from 'react';
 import './render_custom_toolbar.scss';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {

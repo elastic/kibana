@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import classNames from 'classnames';
-import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DropType } from '../types';
+import classNames from 'classnames';
+import React from 'react';
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
+import { DropType } from '../types';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
   switch (type) {

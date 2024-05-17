@@ -7,12 +7,12 @@
  */
 
 import Path from 'path';
-import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import fs from 'fs/promises';
 import '../jest_matchers';
+import { getBarType, getBaseMigratorParams, getFooType } from '../fixtures/zdt_base.fixtures';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType, getBarType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'rerun_same_version.test.log');
 

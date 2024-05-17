@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { ElementType, FC, memo } from 'react';
-import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
+import { EuiExpression, EuiFlexGroup, EuiToken } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import React, { ElementType, FC, memo } from 'react';
+import * as i18n from '../../translations';
 import {
+  expressionContainerCss,
   nestedGroupSpaceCss,
   valueContainerCss,
-  expressionContainerCss,
 } from '../conditions.styles';
 import type { Entry } from '../types';
-import * as i18n from '../../translations';
 import { getValue, getValueExpression } from './entry_content.helper';
 
 interface EntryContentProps {

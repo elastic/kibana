@@ -6,8 +6,8 @@
  */
 
 import { capitalize } from 'lodash';
-import { formatMetric } from '../../../lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
+import { formatMetric } from '../../../lib/format_number';
 
 const getIpAndPort = (transport) => {
   if (transport !== undefined) {

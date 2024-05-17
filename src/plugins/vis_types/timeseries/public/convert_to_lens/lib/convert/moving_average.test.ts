@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { convertToMovingAverageParams } from './moving_average';
-import { Metric } from '../../../../common/types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
+import { convertToMovingAverageParams } from './moving_average';
 
 describe('convertToMovingAverageParams', () => {
   const metric: Metric = {

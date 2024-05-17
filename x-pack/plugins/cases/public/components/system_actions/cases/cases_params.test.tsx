@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { useAlertDataViews } from '../hooks/use_alert_data_view';
 import { CasesParamsFields } from './cases_params';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('../../../common/lib/kibana/use_application');

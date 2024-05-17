@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Logger, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
-import { createSession, Session } from '../lib/session';
+import { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { createDeferred } from '../lib/deferred';
+import { Session, createSession } from '../lib/session';
 
 type StopProfilingFn = () => Promise<any>;
 type StartProfilingFn<ArgType> = (session: Session, args: ArgType) => Promise<StopProfilingFn>;

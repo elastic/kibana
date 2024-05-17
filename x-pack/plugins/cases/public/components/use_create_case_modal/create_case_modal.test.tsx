@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
-import { CreateCaseModal } from './create_case_modal';
-import { TestProviders } from '../../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { TestProviders } from '../../common/mock';
 import { CreateCase } from '../create';
+import { CreateCaseModal } from './create_case_modal';
 
 jest.mock('../create', () => ({
   CreateCase: jest.fn(),

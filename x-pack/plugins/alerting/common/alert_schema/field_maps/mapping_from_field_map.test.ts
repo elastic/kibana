@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { alertFieldMap, legacyAlertFieldMap, type FieldMap } from '@kbn/alerts-as-data-utils';
+import { type FieldMap, alertFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from './mapping_from_field_map';
 
 export const testFieldMap: FieldMap = {

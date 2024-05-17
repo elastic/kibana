@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_TERMS,
   ALERT_LAST_DETECTED,
-  TIMESTAMP,
   ALERT_START,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_TERMS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
-import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -28,18 +28,18 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { createRule } from '../../../../../../../common/utils/security_solution';
-import {
-  getOpenAlerts,
-  getPreviewAlerts,
-  previewRule,
-  previewRuleWithExceptionEntries,
-  patchRule,
-  setAlertStatus,
-  dataGeneratorFactory,
-} from '../../../../utils';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import {
+  dataGeneratorFactory,
+  getOpenAlerts,
+  getPreviewAlerts,
+  patchRule,
+  previewRule,
+  previewRuleWithExceptionEntries,
+  setAlertStatus,
+} from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

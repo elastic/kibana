@@ -7,23 +7,23 @@
 
 import {
   EuiButtonIcon,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatTechnique, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { MitreSubTechnique, MitreTechnique } from '../../../../detections/mitre/types';
 import * as Rulei18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
-import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type { MitreTechnique, MitreSubTechnique } from '../../../../detections/mitre/types';
+import * as i18n from './translations';
 
 const lazyMitreConfiguration = () => {
   /**

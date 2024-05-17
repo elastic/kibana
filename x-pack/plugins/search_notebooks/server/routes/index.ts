@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { NotebookDefinition } from '@kbn/ipynb';
 
 import { INTRODUCTION_NOTEBOOK } from '../../common/constants';
-import { getNotebookCatalog, getNotebook, getNotebookMetadata } from '../lib/notebook_catalog';
+import { getNotebook, getNotebookCatalog, getNotebookMetadata } from '../lib/notebook_catalog';
 import type { RouteDependencies } from '../types';
 
 export function defineRoutes({ config, notebooksCache, logger, router }: RouteDependencies) {

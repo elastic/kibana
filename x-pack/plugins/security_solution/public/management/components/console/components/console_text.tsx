@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { memo } from 'react';
 import type { EuiTextColorProps, EuiTextProps } from '@elastic/eui';
 import { EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 
 type ConsoleTextProps = PropsWithChildren<{
   size?: EuiTextProps['size'];

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
+import * as esKuery from '@kbn/es-query';
 import { getReferencesFilter } from './references_filter';
 
 type KueryNode = any;

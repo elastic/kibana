@@ -7,11 +7,11 @@
 
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { KeyValueTable } from '../key_value_table';
 import { flattenObject } from '../../../utils/flatten_object';
+import { KeyValueTable } from '../key_value_table';
 
 const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};

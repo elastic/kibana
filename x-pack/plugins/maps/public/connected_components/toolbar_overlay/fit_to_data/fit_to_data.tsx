@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import classNames from 'classnames';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import React from 'react';
 
 export interface Props {
   autoFitToDataBounds: boolean;

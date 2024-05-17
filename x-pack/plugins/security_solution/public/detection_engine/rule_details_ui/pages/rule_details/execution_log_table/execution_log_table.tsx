@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import moment from 'moment';
-import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
+import type { OnRefreshChangeProps, OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
 import {
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiSpacer,
-  EuiSwitch,
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
+import moment from 'moment';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
-import type { Filter, Query } from '@kbn/es-query';
-import { buildFilter, FILTERS } from '@kbn/es-query';
-import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { Filter, Query } from '@kbn/es-query';
+import { FILTERS, buildFilter } from '@kbn/es-query';
+import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
-import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleDetailTabs } from '../use_rule_details_tabs';
+import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {
   UtilityBar,
@@ -60,17 +59,18 @@ import type {
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useExecutionResults } from '../../../../rule_monitoring';
-import { useRuleDetailsContext } from '../rule_details_context';
 import { useExpandableRows } from '../../../../rule_monitoring/components/basic/tables/use_expandable_rows';
 import { TextBlock } from '../../../../rule_monitoring/components/basic/text/text_block';
-import * as i18n from './translations';
+import { useRuleDetailsContext } from '../rule_details_context';
+import { RuleDetailTabs } from '../use_rule_details_tabs';
 import {
   EXECUTION_LOG_COLUMNS,
-  getMessageColumn,
-  getExecutionLogMetricsColumns,
   expanderColumn,
+  getExecutionLogMetricsColumns,
+  getMessageColumn,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import * as i18n from './translations';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 

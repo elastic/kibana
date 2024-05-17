@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { BaseWatch } from './base_watch';
-import { v4 as uuidv4 } from 'uuid';
-import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from '../../../../common/constants';
-import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
+import { COMPARATORS, SORT_ORDERS, WATCH_TYPES } from '../../../../common/constants';
+import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
 import { aggTypes } from './agg_types';
-import { groupByTypes } from './group_by_types';
+import { BaseWatch } from './base_watch';
 import { comparators } from './comparators';
+import { groupByTypes } from './group_by_types';
 const { BETWEEN } = COMPARATORS;
 const DEFAULT_VALUES = {
   AGG_TYPE: 'count',

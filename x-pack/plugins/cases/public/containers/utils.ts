@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { isEmpty, isObject, snakeCase, transform } from 'lodash';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
-import {
-  AttachmentType,
-  CaseRt,
-  CasesRt,
-  ConfigurationRt,
-  ConfigurationsRt,
-  UserActionsRt,
-} from '../../common/types/domain';
+import { throwErrors } from '../../common/api';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
   CasePatchRequest,
   CaseResolveResponse,
@@ -31,6 +24,14 @@ import {
   CaseUserActionStatsResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/types/api';
+import {
+  AttachmentType,
+  CaseRt,
+  CasesRt,
+  ConfigurationRt,
+  ConfigurationsRt,
+  UserActionsRt,
+} from '../../common/types/domain';
 import type {
   Case,
   Cases,
@@ -39,11 +40,10 @@ import type {
   User,
   UserActions,
 } from '../../common/types/domain';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import { throwErrors } from '../../common/api';
-import type { CaseUI, FilterOptions, UpdateByKey } from './types';
-import * as i18n from './translations';
+import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
+import * as i18n from './translations';
+import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 

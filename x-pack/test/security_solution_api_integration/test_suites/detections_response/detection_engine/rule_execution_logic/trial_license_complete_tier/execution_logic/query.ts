@@ -5,72 +5,72 @@
  * 2.0.
  */
 
+import { Rule } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import {
+  ALERT_LAST_DETECTED,
   ALERT_RISK_SCORE,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_RULE_ID,
   ALERT_SEVERITY,
-  ALERT_WORKFLOW_STATUS,
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_TERMS,
+  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
-  ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
-import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  QueryRuleCreateProps,
-  BulkActionTypeEnum,
   AlertSuppressionMissingFieldsStrategyEnum,
+  BulkActionTypeEnum,
+  QueryRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import {
+  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
-} from '@kbn/security-solution-plugin/common/constants';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import moment from 'moment';
+import {
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
   createExceptionList,
   createExceptionListItem,
+  createRuleThroughAlertingEndpoint,
+  dataGeneratorFactory,
   getAlerts,
   getPreviewAlerts,
+  getRuleSOById,
+  getRuleSavedObjectWithLegacyInvestigationFields,
   getSimpleRule,
+  patchRule,
   previewRule,
   setAlertStatus,
-  getRuleSOById,
-  patchRule,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFields,
-  dataGeneratorFactory,
 } from '../../../../utils';
-import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
-} from '../../../../../../../common/utils/security_solution';
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors

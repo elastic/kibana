@@ -1,3 +1,10 @@
+import { IUiSettingsClient } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import {
+  defaultApmServiceEnvironment,
+  enableComparisonByDefault,
+} from '@kbn/observability-plugin/common';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +12,7 @@
  * 2.0.
  */
 import { Environment } from '../../common/environment_rt';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { APMServiceDetailLocator, APM_APP_LOCATOR_ID } from './service_detail_locator';
-import {
-  enableComparisonByDefault,
-  defaultApmServiceEnvironment,
-} from '@kbn/observability-plugin/common';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 
 describe('APMLocatorDefinition', () => {
   let locator: APMServiceDetailLocator;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType } from 'react';
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
+import { InjectedIntlProps, injectI18n } from '@kbn/i18n-react';
 import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import React, { ComponentType } from 'react';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;

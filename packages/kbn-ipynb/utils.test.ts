@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isDefined, combineSource } from './utils';
+import { combineSource, isDefined } from './utils';
 
 describe('isDefined', () => {
   it('returns true if value is defined', () => {

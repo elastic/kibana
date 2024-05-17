@@ -173,9 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const apacheAccessDatasetHumanName = 'Apache access logs';
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-      const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis(
-        excludeKeysFromServerless
-      );
+      const summaryBefore =
+        await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
 
       // Set time range to 3 days ago
       const flyoutBodyContainer = await testSubjects.find(
@@ -205,9 +204,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await PageObjects.datasetQuality.refreshFlyout();
-      const summaryAfter = await PageObjects.datasetQuality.parseFlyoutKpis(
-        excludeKeysFromServerless
-      );
+      const summaryAfter =
+        await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
 
       expect(parseInt(summaryAfter.docsCountTotal, 10)).to.be.greaterThan(
         parseInt(summaryBefore.docsCountTotal, 10)
@@ -231,9 +229,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const apacheAccessDatasetHumanName = 'Apache access logs';
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-      const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis(
-        excludeKeysFromServerless
-      );
+      const summaryBefore =
+        await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
       const testServices = ['test-srv-1', 'test-srv-2'];
 
       // Index 2 docs with different services
@@ -249,9 +246,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await PageObjects.datasetQuality.refreshFlyout();
-      const summaryAfter = await PageObjects.datasetQuality.parseFlyoutKpis(
-        excludeKeysFromServerless
-      );
+      const summaryAfter =
+        await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
 
       expect(parseInt(summaryAfter.services, 10)).to.eql(
         parseInt(summaryBefore.services, 10) + testServices.length

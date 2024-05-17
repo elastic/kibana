@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
-  EuiButton,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonIcon,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useEffect } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { SlmPolicy } from '../../../../../../common/types';
+import { Error, SectionError } from '../../../../../shared_imports';
 import { useServices } from '../../../../app_context';
-import { SectionError, Error } from '../../../../../shared_imports';
 import {
-  UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
+  UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
 } from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
 import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigation';
 
 import {
-  SectionLoading,
   InlineLoading,
-  PolicyExecuteProvider,
   PolicyDeleteProvider,
+  PolicyExecuteProvider,
+  SectionLoading,
 } from '../../../../components';
-import { TabSummary, TabHistory } from './tabs';
+import { TabHistory, TabSummary } from './tabs';
 
 interface Props {
   policyName: SlmPolicy['name'];

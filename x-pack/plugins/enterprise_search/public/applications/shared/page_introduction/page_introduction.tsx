@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 export interface PageIntroductionProps {
   actions?: React.ReactNode | React.ReactNode[];

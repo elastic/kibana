@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import {
-  StaticValueParams,
   StaticValueColumn as BaseStaticValueColumn,
+  StaticValueParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { CommonColumnsConverterArgs, FormulaColumn, StaticValueColumn } from './types';
+import { v4 as uuidv4 } from 'uuid';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';
+import { CommonColumnsConverterArgs, FormulaColumn, StaticValueColumn } from './types';
 
 export const convertToStaticValueParams = ({ value }: Metric): StaticValueParams => ({
   value,

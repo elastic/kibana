@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { htmlIdGenerator, euiDragDropReorder, DropResult } from '@elastic/eui';
+import { DropResult, euiDragDropReorder, htmlIdGenerator } from '@elastic/eui';
 import React, { useState, useCallback, ReactNode, useEffect } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 

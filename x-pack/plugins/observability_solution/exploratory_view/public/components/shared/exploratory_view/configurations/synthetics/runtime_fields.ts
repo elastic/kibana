@@ -6,17 +6,17 @@
  */
 
 import { RuntimeField } from '@kbn/data-views-plugin/public';
-import { MS_TO_HUMANIZE_PRECISE } from './field_formats';
 import {
-  SYNTHETICS_DNS_TIMINGS,
   SYNTHETICS_BLOCKED_TIMINGS,
   SYNTHETICS_CONNECT_TIMINGS,
-  SYNTHETICS_TOTAL_TIMINGS,
+  SYNTHETICS_DNS_TIMINGS,
   SYNTHETICS_RECEIVE_TIMINGS,
   SYNTHETICS_SEND_TIMINGS,
-  SYNTHETICS_WAIT_TIMINGS,
   SYNTHETICS_SSL_TIMINGS,
+  SYNTHETICS_TOTAL_TIMINGS,
+  SYNTHETICS_WAIT_TIMINGS,
 } from '../constants/field_names/synthetics';
+import { MS_TO_HUMANIZE_PRECISE } from './field_formats';
 
 const LONG_FIELD = {
   type: 'long' as const,

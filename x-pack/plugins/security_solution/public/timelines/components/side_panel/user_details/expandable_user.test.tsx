@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
 import React from 'react';
 
-import { mockGlobalState, TestProviders } from '../../../../common/mock';
-import { ExpandableUserDetails } from './expandable_user';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { Anomalies } from '../../../../common/components/ml/types';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { TestProviders, mockGlobalState } from '../../../../common/mock';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { ExpandableUserDetails } from './expandable_user';
 const mockDispatch = jest.fn();
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('react-redux', () => {

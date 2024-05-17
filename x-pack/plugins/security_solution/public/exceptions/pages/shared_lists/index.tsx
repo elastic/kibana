@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -22,19 +21,21 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
-import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import styled from 'styled-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../common/lib/kibana';
 
-import * as i18n from '../../translations/shared_list';
+import { patchRule } from '../../../detection_engine/rule_management/api/api';
+import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
 import {
   CreateSharedListFlyout,
   ExceptionsListCard,
@@ -43,14 +44,13 @@ import {
   ListsSearchBar,
 } from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
-import { patchRule } from '../../../detection_engine/rule_management/api/api';
+import * as i18n from '../../translations/shared_list';
 
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
+import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
@@ -214,18 +214,18 @@ export const SharedLists = React.memo(() => {
 
   const handleExport = useCallback(
     ({
-        id,
-        listId,
-        name,
-        namespaceType,
-        includeExpiredExceptions,
-      }: {
-        id: string;
-        listId: string;
-        name: string;
-        namespaceType: NamespaceType;
-        includeExpiredExceptions: boolean;
-      }) =>
+      id,
+      listId,
+      name,
+      namespaceType,
+      includeExpiredExceptions,
+    }: {
+      id: string;
+      listId: string;
+      name: string;
+      namespaceType: NamespaceType;
+      includeExpiredExceptions: boolean;
+    }) =>
       async () => {
         await exportExceptionList({
           id,
@@ -293,16 +293,16 @@ export const SharedLists = React.memo(() => {
 
   const handleDuplicate = useCallback(
     ({
-        listId,
-        name,
-        namespaceType,
-        includeExpiredExceptions,
-      }: {
-        listId: string;
-        name: string;
-        namespaceType: NamespaceType;
-        includeExpiredExceptions: boolean;
-      }) =>
+      listId,
+      name,
+      namespaceType,
+      includeExpiredExceptions,
+    }: {
+      listId: string;
+      name: string;
+      namespaceType: NamespaceType;
+      includeExpiredExceptions: boolean;
+    }) =>
       async () => {
         await duplicateExceptionList({
           includeExpiredExceptions,

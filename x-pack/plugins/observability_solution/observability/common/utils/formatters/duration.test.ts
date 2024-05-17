@@ -7,10 +7,10 @@
 
 import {
   asDuration,
-  asTransactionRate,
-  toMicroseconds,
   asMillisecondDuration,
+  asTransactionRate,
   formatDurationFromTimeUnitChar,
+  toMicroseconds,
 } from './duration';
 
 describe('duration formatters', () => {

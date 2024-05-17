@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import React, { memo, useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHighlight,
-  EuiComboBox,
   EuiFormRow,
+  EuiHighlight,
   EuiLink,
   EuiTextColor,
 } from '@elastic/eui';
-import type { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
-import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
 import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CaseAssignees } from '../../../common/types/domain';
+import type { UserProfile, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import { isEmpty } from 'lodash';
+import React, { memo, useCallback, useState } from 'react';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import type { CaseAssignees } from '../../../common/types/domain';
+import { useIsUserTyping } from '../../common/use_is_user_typing';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from './translations';
-import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { getAllPermissionsExceptFrom } from '../../utils/permissions';
-import { useIsUserTyping } from '../../common/use_is_user_typing';
 
 interface Props {
   isLoading: boolean;

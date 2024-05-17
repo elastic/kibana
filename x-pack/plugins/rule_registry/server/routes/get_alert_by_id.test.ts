@@ -7,12 +7,12 @@
 
 import {
   ALERT_INSTANCE_ID,
+  ALERT_RISK_SCORE,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
-  ALERT_RISK_SCORE,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
@@ -25,10 +25,10 @@ import {
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { getAlertByIdRoute } from './get_alert_by_id';
 import { requestContextMock } from './__mocks__/request_context';
 import { getReadRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
+import { getAlertByIdRoute } from './get_alert_by_id';
 
 const getMockAlert = (): ParsedTechnicalFields & { _index: string } => ({
   [ALERT_INSTANCE_ID]: 'fake-alert-id',

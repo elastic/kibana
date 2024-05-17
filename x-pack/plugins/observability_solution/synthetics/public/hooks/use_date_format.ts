@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 
 export type DateFormatter = (timestamp?: string) => string;
 export function useDateFormat(): DateFormatter {

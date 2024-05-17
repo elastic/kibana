@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import { PublishesUnsavedChanges, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
+import { Observable, combineLatest, debounceTime, of, startWith, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
@@ -196,13 +196,16 @@ export async function getDashboardUnsavedChanges(
         ).then((isEqual) => resolve({ key, isEqual }));
       })
   );
-  const inputChanges = (await Promise.allSettled(keyComparePromises)).reduce((changes, current) => {
-    if (current.status === 'fulfilled') {
-      const { key, isEqual } = current.value;
-      if (!isEqual) (changes as { [key: string]: unknown })[key] = input[key];
-    }
-    return changes;
-  }, {} as Partial<DashboardContainerInput>);
+  const inputChanges = (await Promise.allSettled(keyComparePromises)).reduce(
+    (changes, current) => {
+      if (current.status === 'fulfilled') {
+        const { key, isEqual } = current.value;
+        if (!isEqual) (changes as { [key: string]: unknown })[key] = input[key];
+      }
+      return changes;
+    },
+    {} as Partial<DashboardContainerInput>
+  );
   return inputChanges;
 }
 

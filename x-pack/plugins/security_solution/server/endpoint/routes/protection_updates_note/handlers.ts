@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   RequestHandler,
   SavedObjectReference,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { protectionUpdatesNoteSavedObjectType } from '../../lib/protection_updates_note/saved_object_mappings';
 import type {
   CreateUpdateProtectionUpdatesNoteSchema,
   GetProtectionUpdatesNoteSchema,
 } from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
+import { protectionUpdatesNoteSavedObjectType } from '../../lib/protection_updates_note/saved_object_mappings';
 
 const getProtectionNote = async (SOClient: SavedObjectsClientContract, packagePolicyId: string) => {
   return SOClient.find<{ note: string }>({

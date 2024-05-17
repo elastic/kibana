@@ -8,12 +8,12 @@
 import {
   KibanaRequest,
   Logger,
-  SavedObjectsServiceStart,
   SECURITY_EXTENSION_ID,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { MaintenanceWindowClient } from './maintenance_window_client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
+import { MaintenanceWindowClient } from './maintenance_window_client';
 
 export interface MaintenanceWindowClientFactoryOpts {
   logger: Logger;

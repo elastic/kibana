@@ -8,14 +8,14 @@
 import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
-  getNumExecutions,
-  getExecutionLogAggregation,
+  ExecutionUuidAggResult,
+  formatExecutionKPIResult,
   formatExecutionLogResult,
   formatSortForBucketSort,
   formatSortForTermSort,
-  ExecutionUuidAggResult,
   getExecutionKPIAggregation,
-  formatExecutionKPIResult,
+  getExecutionLogAggregation,
+  getNumExecutions,
 } from './get_execution_log_aggregation';
 
 describe('formatSortForBucketSort', () => {

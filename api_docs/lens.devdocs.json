@@ -103,9 +103,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -117,9 +115,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": [
-                  "LensEmbeddableDeps"
-                ],
+                "signature": ["LensEmbeddableDeps"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,10 +223,7 @@
                 "tags": [],
                 "label": "filters",
                 "description": [],
-                "signature": [
-                  "UserMessageFilters",
-                  " | undefined"
-                ],
+                "signature": ["UserMessageFilters", " | undefined"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -246,9 +239,7 @@
             "tags": [],
             "label": "reportsEmbeddableLoad",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -262,9 +253,7 @@
             "tags": [],
             "label": "supportedTriggers",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -325,9 +314,7 @@
             "tags": [],
             "label": "isTextBasedLanguage",
             "description": [],
-            "signature": [
-              "() => boolean | undefined"
-            ],
+            "signature": ["() => boolean | undefined"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -341,9 +328,7 @@
             "tags": [],
             "label": "getTextBasedLanguage",
             "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -373,9 +358,7 @@
                 "tags": [],
                 "label": "datasourceState",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -388,9 +371,7 @@
                 "tags": [],
                 "label": "visualizationState",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -403,9 +384,7 @@
                 "tags": [],
                 "label": "visualizationType",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -467,9 +446,7 @@
             "tags": [],
             "label": "updateByRefInput",
             "description": [],
-            "signature": [
-              "(savedObjectId: string) => void"
-            ],
+            "signature": ["(savedObjectId: string) => void"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -481,9 +458,7 @@
                 "tags": [],
                 "label": "savedObjectId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -515,9 +490,7 @@
                 "tags": [],
                 "label": "startDependencies",
                 "description": [],
-                "signature": [
-                  "LensPluginStartDependencies"
-                ],
+                "signature": ["LensPluginStartDependencies"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -530,9 +503,7 @@
                 "tags": [],
                 "label": "isNewPanel",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -545,9 +516,7 @@
                 "tags": [],
                 "label": "deletePanel",
                 "description": [],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
+                "signature": ["(() => void) | undefined"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -632,12 +601,8 @@
             "type": "Function",
             "tags": [],
             "label": "render",
-            "description": [
-              "\n"
-            ],
-            "signature": [
-              "(domNode: HTMLElement | Element) => void"
-            ],
+            "description": ["\n"],
+            "signature": ["(domNode: HTMLElement | Element) => void"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -649,9 +614,7 @@
                 "tags": [],
                 "label": "domNode",
                 "description": [],
-                "signature": [
-                  "HTMLElement | Element"
-                ],
+                "signature": ["HTMLElement | Element"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -667,9 +630,7 @@
             "tags": [],
             "label": "badgeDomNode",
             "description": [],
-            "signature": [
-              "HTMLDivElement | undefined"
-            ],
+            "signature": ["HTMLDivElement | undefined"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -727,9 +688,7 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -745,11 +704,7 @@
             "description": [
               "\nReturns the necessary arguments to view the underlying data in discover.\n\nOnly makes sense to call this after canViewUnderlyingData has been checked"
             ],
-            "signature": [
-              "() => ",
-              "ViewUnderlyingDataArgs",
-              " | undefined"
-            ],
+            "signature": ["() => ", "ViewUnderlyingDataArgs", " | undefined"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -763,9 +718,7 @@
             "tags": [],
             "label": "canViewUnderlyingData",
             "description": [],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
+            "signature": ["() => Promise<boolean>"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -779,9 +732,7 @@
             "tags": [],
             "label": "initializeOutput",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -795,9 +746,7 @@
             "tags": [],
             "label": "getIsEditable",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -830,11 +779,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "LensByValueInput",
-                  " | ",
-                  "LensByReferenceInput"
-                ],
+                "signature": ["LensByValueInput", " | ", "LensByReferenceInput"],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -850,11 +795,7 @@
             "tags": [],
             "label": "getInputAsRefType",
             "description": [],
-            "signature": [
-              "() => Promise<",
-              "LensByReferenceInput",
-              ">"
-            ],
+            "signature": ["() => Promise<", "LensByReferenceInput", ">"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -868,11 +809,7 @@
             "tags": [],
             "label": "getInputAsValueType",
             "description": [],
-            "signature": [
-              "() => Promise<",
-              "LensByValueInput",
-              ">"
-            ],
+            "signature": ["() => Promise<", "LensByValueInput", ">"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -885,9 +822,7 @@
             "type": "Function",
             "tags": [],
             "label": "getFilters",
-            "description": [
-              "\nGets the Lens embeddable's local filters"
-            ],
+            "description": ["\nGets the Lens embeddable's local filters"],
             "signature": [
               "() => ",
               {
@@ -903,9 +838,7 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": [
-              "Local/panel-level array of filters for Lens embeddable"
-            ]
+            "returnComment": ["Local/panel-level array of filters for Lens embeddable"]
           },
           {
             "parentPluginId": "lens",
@@ -913,9 +846,7 @@
             "type": "Function",
             "tags": [],
             "label": "getQuery",
-            "description": [
-              "\nGets the Lens embeddable's local query"
-            ],
+            "description": ["\nGets the Lens embeddable's local query"],
             "signature": [
               "() => ",
               {
@@ -931,9 +862,7 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": [
-              "Local/panel-level query for Lens embeddable"
-            ]
+            "returnComment": ["Local/panel-level query for Lens embeddable"]
           },
           {
             "parentPluginId": "lens",
@@ -966,9 +895,7 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -982,9 +909,7 @@
             "tags": [],
             "label": "getSelfStyledOptions",
             "description": [],
-            "signature": [
-              "() => { hideTitle: boolean | undefined; }"
-            ],
+            "signature": ["() => { hideTitle: boolean | undefined; }"],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1024,9 +949,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "x-pack/plugins/lens/public/embeddable/interfaces/lens_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1092,9 +1015,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1106,9 +1027,7 @@
             "tags": [],
             "label": "hide",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1120,9 +1039,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1134,10 +1051,7 @@
             "tags": [],
             "label": "position",
             "description": [],
-            "signature": [
-              "Position",
-              " | undefined"
-            ],
+            "signature": ["Position", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1149,9 +1063,7 @@
             "tags": [],
             "label": "labelColor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1163,9 +1075,7 @@
             "tags": [],
             "label": "showOverlappingLabels",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1177,9 +1087,7 @@
             "tags": [],
             "label": "showDuplicates",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1191,9 +1099,7 @@
             "tags": [],
             "label": "labelsOrientation",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1205,9 +1111,7 @@
             "tags": [],
             "label": "truncate",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1219,9 +1123,7 @@
             "tags": [],
             "label": "showLabels",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1233,9 +1135,7 @@
             "tags": [],
             "label": "showTitle",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1247,9 +1147,7 @@
             "tags": [],
             "label": "showGridLines",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1296,9 +1194,7 @@
             "tags": [],
             "label": "mode",
             "description": [],
-            "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
-            ],
+            "signature": ["\"full\" | \"custom\" | \"dataBounds\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1310,9 +1206,7 @@
             "tags": [],
             "label": "lowerBound",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1324,9 +1218,7 @@
             "tags": [],
             "label": "upperBound",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1338,9 +1230,7 @@
             "tags": [],
             "label": "enforce",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1352,9 +1242,7 @@
             "tags": [],
             "label": "niceValues",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1397,9 +1285,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"unique_count\""
-            ],
+            "signature": ["\"unique_count\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1441,10 +1327,7 @@
             "tags": [],
             "label": "layers",
             "description": [],
-            "signature": [
-              "ChartLayerDescriptor",
-              "[]"
-            ],
+            "signature": ["ChartLayerDescriptor", "[]"],
             "path": "x-pack/plugins/lens/public/chart_info_api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1488,9 +1371,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "{ query: string | { [key: string]: any; }; language: string; }"
-            ],
+            "signature": ["{ query: string | { [key: string]: any; }; language: string; }"],
             "path": "x-pack/plugins/lens/public/chart_info_api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1538,9 +1419,7 @@
             "tags": [],
             "label": "seriesType",
             "description": [],
-            "signature": [
-              "\"area\" | \"line\" | \"bar\""
-            ],
+            "signature": ["\"area\" | \"line\" | \"bar\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1574,9 +1453,7 @@
             "tags": [],
             "label": "simpleView",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1632,9 +1509,7 @@
             "tags": [],
             "label": "lineWidth",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1646,9 +1521,7 @@
             "tags": [],
             "label": "showPoints",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1660,9 +1533,7 @@
             "tags": [],
             "label": "showLines",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1674,9 +1545,7 @@
             "tags": [],
             "label": "pointsRadius",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1688,9 +1557,7 @@
             "tags": [],
             "label": "columnToLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1702,9 +1569,7 @@
             "tags": [],
             "label": "xScaleType",
             "description": [],
-            "signature": [
-              "\"time\" | \"linear\" | \"ordinal\""
-            ],
+            "signature": ["\"time\" | \"linear\" | \"ordinal\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1781,9 +1646,7 @@
             "tags": [],
             "label": "colorMapping",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1864,9 +1727,7 @@
             "tags": [],
             "label": "datasourceAliasIds",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1878,9 +1739,7 @@
             "tags": [],
             "label": "getTableSpec",
             "description": [],
-            "signature": [
-              "() => { columnId: string; fields: string[]; }[]"
-            ],
+            "signature": ["() => { columnId: string; fields: string[]; }[]"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1894,11 +1753,7 @@
             "tags": [],
             "label": "getOperationForColumnId",
             "description": [],
-            "signature": [
-              "(columnId: string) => ",
-              "OperationDescriptor",
-              " | null"
-            ],
+            "signature": ["(columnId: string) => ", "OperationDescriptor", " | null"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1910,9 +1765,7 @@
                 "tags": [],
                 "label": "columnId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1927,12 +1780,8 @@
             "type": "Function",
             "tags": [],
             "label": "getVisualDefaults",
-            "description": [
-              "\nCollect all default visual values given the current state"
-            ],
-            "signature": [
-              "() => Record<string, Record<string, unknown>>"
-            ],
+            "description": ["\nCollect all default visual values given the current state"],
+            "signature": ["() => Record<string, Record<string, unknown>>"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1945,12 +1794,8 @@
             "type": "Function",
             "tags": [],
             "label": "getSourceId",
-            "description": [
-              "\nRetrieve the specific source id for the current state"
-            ],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "description": ["\nRetrieve the specific source id for the current state"],
+            "signature": ["() => string | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1963,12 +1808,8 @@
             "type": "Function",
             "tags": [],
             "label": "isTextBasedLanguage",
-            "description": [
-              "\nReturns true if this is a text based language datasource"
-            ],
-            "signature": [
-              "() => boolean"
-            ],
+            "description": ["\nReturns true if this is a text based language datasource"],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2080,9 +1921,7 @@
             "description": [
               "\nReturns the maximum possible number of values for this column when it can be known, otherwise null\n(e.g. with a top 5 values operation, we can be sure that there will never be more than 5 values returned\n      or 6 if the \"Other\" bucket is enabled)"
             ],
-            "signature": [
-              "(columnId: string) => number | null"
-            ],
+            "signature": ["(columnId: string) => number | null"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2094,9 +1933,7 @@
                 "tags": [],
                 "label": "columnId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2112,9 +1949,7 @@
             "tags": [],
             "label": "hasDefaultTimeField",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2142,10 +1977,7 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": [
-              "ColumnState",
-              "[]"
-            ],
+            "signature": ["ColumnState", "[]"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2168,9 +2000,7 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
-            ],
+            "signature": ["\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2182,10 +2012,7 @@
             "tags": [],
             "label": "sorting",
             "description": [],
-            "signature": [
-              "SortingState",
-              " | undefined"
-            ],
+            "signature": ["SortingState", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2197,10 +2024,7 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "signature": [
-              "RowHeightMode",
-              " | undefined"
-            ],
+            "signature": ["RowHeightMode", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2212,10 +2036,7 @@
             "tags": [],
             "label": "headerRowHeight",
             "description": [],
-            "signature": [
-              "RowHeightMode",
-              " | undefined"
-            ],
+            "signature": ["RowHeightMode", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2227,9 +2048,7 @@
             "tags": [],
             "label": "rowHeightLines",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2241,9 +2060,7 @@
             "tags": [],
             "label": "headerRowHeightLines",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2255,10 +2072,7 @@
             "tags": [],
             "label": "paging",
             "description": [],
-            "signature": [
-              "PagingState",
-              " | undefined"
-            ],
+            "signature": ["PagingState", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2301,9 +2115,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"date_histogram\""
-            ],
+            "signature": ["\"date_histogram\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2390,9 +2202,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"filters\""
-            ],
+            "signature": ["\"filters\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/filters/filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2404,11 +2214,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "{ filters: ",
-              "Filter",
-              "[]; }"
-            ],
+            "signature": ["{ filters: ", "Filter", "[]; }"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/filters/filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2434,9 +2240,7 @@
             "tags": [],
             "label": "columnOrder",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2481,9 +2285,7 @@
             "tags": [],
             "label": "linkToLayers",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2517,9 +2319,7 @@
             "tags": [],
             "label": "sampling",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2531,9 +2331,7 @@
             "tags": [],
             "label": "ignoreGlobalFilters",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2606,9 +2404,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"formula\""
-            ],
+            "signature": ["\"formula\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2699,12 +2495,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- Formula column id"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- Formula column id"],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2739,9 +2531,7 @@
                     "tags": [],
                     "label": "label",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2774,9 +2564,7 @@
                     "tags": [],
                     "label": "reducedTimeRange",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2788,10 +2576,7 @@
                     "tags": [],
                     "label": "timeScale",
                     "description": [],
-                    "signature": [
-                      "TimeScaleUnit",
-                      " | undefined"
-                    ],
+                    "signature": ["TimeScaleUnit", " | undefined"],
                     "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2818,9 +2603,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "layer",
-                "description": [
-                  "- The layer to which the formula columns will be added"
-                ],
+                "description": ["- The layer to which the formula columns will be added"],
                 "signature": [
                   {
                     "pluginId": "lens",
@@ -2865,10 +2648,7 @@
                 "tags": [],
                 "label": "dateRange",
                 "description": [],
-                "signature": [
-                  "DateRange",
-                  " | undefined"
-                ],
+                "signature": ["DateRange", " | undefined"],
                 "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2898,9 +2678,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2912,9 +2690,7 @@
             "tags": [],
             "label": "sourceField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3004,9 +2780,7 @@
             "tags": [],
             "label": "lensEvent",
             "description": [],
-            "signature": [
-              "LensChartLoadEvent"
-            ],
+            "signature": ["LensChartLoadEvent"],
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3282,9 +3056,7 @@
             "tags": [],
             "label": "onCancel",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3298,9 +3070,7 @@
             "tags": [],
             "label": "container",
             "description": [],
-            "signature": [
-              "HTMLElement | null | undefined"
-            ],
+            "signature": ["HTMLElement | null | undefined"],
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3343,9 +3113,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"last_value\""
-            ],
+            "signature": ["\"last_value\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/last_value.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3387,9 +3155,7 @@
             "tags": [],
             "label": "autoScaleMetricAlignment",
             "description": [],
-            "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
-            ],
+            "signature": ["\"right\" | \"left\" | \"center\" | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3412,9 +3178,7 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3426,9 +3190,7 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
-            ],
+            "signature": ["\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3490,9 +3252,7 @@
             "tags": [],
             "label": "titlePosition",
             "description": [],
-            "signature": [
-              "\"top\" | \"bottom\" | undefined"
-            ],
+            "signature": ["\"top\" | \"bottom\" | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3504,9 +3264,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3518,9 +3276,7 @@
             "tags": [],
             "label": "textAlign",
             "description": [],
-            "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
-            ],
+            "signature": ["\"right\" | \"left\" | \"center\" | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3558,12 +3314,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "position",
-            "description": [
-              "\nPosition of the legend relative to the chart"
-            ],
-            "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
-            ],
+            "description": ["\nPosition of the legend relative to the chart"],
+            "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3577,9 +3329,7 @@
             "description": [
               "\nFlag whether the legend should be shown even with just a single series"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3590,12 +3340,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isInside",
-            "description": [
-              "\nFlag whether the legend is inside the chart"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nFlag whether the legend is inside the chart"],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3606,12 +3352,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "horizontalAlignment",
-            "description": [
-              "\nHorizontal Alignment of the legend when it is set inside chart"
-            ],
-            "signature": [
-              "\"right\" | \"left\" | undefined"
-            ],
+            "description": ["\nHorizontal Alignment of the legend when it is set inside chart"],
+            "signature": ["\"right\" | \"left\" | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3622,12 +3364,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "verticalAlignment",
-            "description": [
-              "\nVertical Alignment of the legend when it is set inside chart"
-            ],
-            "signature": [
-              "\"top\" | \"bottom\" | undefined"
-            ],
+            "description": ["\nVertical Alignment of the legend when it is set inside chart"],
+            "signature": ["\"top\" | \"bottom\" | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3638,12 +3376,8 @@
             "type": "number",
             "tags": [],
             "label": "floatingColumns",
-            "description": [
-              "\nNumber of columns when legend is set inside chart"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nNumber of columns when legend is set inside chart"],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3654,12 +3388,8 @@
             "type": "number",
             "tags": [],
             "label": "maxLines",
-            "description": [
-              "\nMaximum number of lines per legend item"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nMaximum number of lines per legend item"],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3670,12 +3400,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "shouldTruncate",
-            "description": [
-              "\nFlag whether the legend items are truncated or not"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nFlag whether the legend items are truncated or not"],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3709,9 +3435,7 @@
             "type": "Array",
             "tags": [],
             "label": "legendStats",
-            "description": [
-              "\nmetrics to display in the legend"
-            ],
+            "description": ["\nmetrics to display in the legend"],
             "signature": [
               {
                 "pluginId": "visualizations",
@@ -3796,9 +3520,7 @@
             "parentPluginId": "lens",
             "id": "def-public.LensPublicSetup.registerVisualization",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "registerVisualization",
             "description": [
               "\nRegister 3rd party visualization type\nSee `x-pack/examples/3rd_party_lens_vis` for exemplary usage.\n\nIn case the visualization is a function returning a promise, it will only be called once Lens is actually requiring it.\nThis can be used to lazy-load parts of the code to keep the initial bundle as small as possible.\n\nThis API might undergo breaking changes even in minor versions.\n"
@@ -3863,9 +3585,7 @@
             "parentPluginId": "lens",
             "id": "def-public.LensPublicSetup.registerTopNavMenuEntryGenerator",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "registerTopNavMenuEntryGenerator",
             "description": [
               "\nRegister a generic menu entry shown in the top nav\nSee `x-pack/examples/3rd_party_lens_navigation_prompt` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
@@ -3886,9 +3606,7 @@
                 "tags": [],
                 "label": "navigationPromptGenerator",
                 "description": [],
-                "signature": [
-                  "LensTopNavMenuEntryGenerator"
-                ],
+                "signature": ["LensTopNavMenuEntryGenerator"],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3915,9 +3633,7 @@
             "parentPluginId": "lens",
             "id": "def-public.LensPublicStart.EmbeddableComponent",
             "type": "CompoundType",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "EmbeddableComponent",
             "description": [
               "\nReact component which can be used to embed a Lens visualization into another application.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
@@ -3949,9 +3665,7 @@
             "parentPluginId": "lens",
             "id": "def-public.LensPublicStart.SaveModalComponent",
             "type": "CompoundType",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "SaveModalComponent",
             "description": [
               "\nReact component which can be used to embed a Lens Visualization Save Modal Component.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
@@ -3971,18 +3685,12 @@
             "parentPluginId": "lens",
             "id": "def-public.LensPublicStart.EditLensConfigPanelApi",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "EditLensConfigPanelApi",
             "description": [
               "\nReact component which can be used to embed a Lens Visualization Config Panel Component.\n\nThis API might undergo breaking changes even in minor versions.\n"
             ],
-            "signature": [
-              "() => Promise<",
-              "EditLensConfigPanelComponent",
-              ">"
-            ],
+            "signature": ["() => Promise<", "EditLensConfigPanelComponent", ">"],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3993,9 +3701,7 @@
             "parentPluginId": "lens",
             "id": "def-public.LensPublicStart.navigateToPrefilledEditor",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "navigateToPrefilledEditor",
             "description": [
               "\nMethod which navigates to the Lens editor, loading the state specified by the `input` parameter.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
@@ -4055,9 +3761,7 @@
                     "tags": [],
                     "label": "openInNewTab",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "x-pack/plugins/lens/public/plugin.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -4069,9 +3773,7 @@
                     "tags": [],
                     "label": "originatingApp",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "x-pack/plugins/lens/public/plugin.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -4083,9 +3785,7 @@
                     "tags": [],
                     "label": "originatingPath",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "x-pack/plugins/lens/public/plugin.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -4097,9 +3797,7 @@
                     "tags": [],
                     "label": "skipAppLeave",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "x-pack/plugins/lens/public/plugin.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -4118,9 +3816,7 @@
             "description": [
               "\nMethod which returns true if the user has permission to use Lens as defined by application capabilities."
             ],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4136,11 +3832,7 @@
             "description": [
               "\nMethod which returns xy VisualizationTypes array keeping this async as to not impact page load bundle"
             ],
-            "signature": [
-              "() => Promise<",
-              "VisualizationType",
-              "[]>"
-            ],
+            "signature": ["() => Promise<", "VisualizationType", "[]>"],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4215,9 +3907,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"math\""
-            ],
+            "signature": ["\"math\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/math.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4272,9 +3962,7 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
-            ],
+            "signature": ["\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4286,9 +3974,7 @@
             "tags": [],
             "label": "metricAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4300,9 +3986,7 @@
             "tags": [],
             "label": "secondaryMetricAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4314,9 +3998,7 @@
             "tags": [],
             "label": "maxAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4328,9 +4010,7 @@
             "tags": [],
             "label": "breakdownByAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4342,9 +4022,7 @@
             "tags": [],
             "label": "collapseFn",
             "description": [],
-            "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
-            ],
+            "signature": ["\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4356,9 +4034,7 @@
             "tags": [],
             "label": "subtitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4370,9 +4046,7 @@
             "tags": [],
             "label": "secondaryPrefix",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4384,10 +4058,7 @@
             "tags": [],
             "label": "progressDirection",
             "description": [],
-            "signature": [
-              "LayoutDirection",
-              " | undefined"
-            ],
+            "signature": ["LayoutDirection", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4399,9 +4070,7 @@
             "tags": [],
             "label": "showBar",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4413,9 +4082,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4456,9 +4123,7 @@
             "tags": [],
             "label": "maxCols",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4470,9 +4135,7 @@
             "tags": [],
             "label": "trendlineLayerId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4484,10 +4147,7 @@
             "tags": [],
             "label": "trendlineLayerType",
             "description": [],
-            "signature": [
-              "LayerType",
-              " | undefined"
-            ],
+            "signature": ["LayerType", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4499,9 +4159,7 @@
             "tags": [],
             "label": "trendlineTimeAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4513,9 +4171,7 @@
             "tags": [],
             "label": "trendlineMetricAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4527,9 +4183,7 @@
             "tags": [],
             "label": "trendlineSecondaryMetricAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4541,9 +4195,7 @@
             "tags": [],
             "label": "trendlineBreakdownByAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4569,9 +4221,7 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4611,9 +4261,7 @@
             "description": [
               "\nordinal: Each name is a unique value, but the names are in sorted order, like \"Top values\"\ninterval: Histogram data, like date or number histograms\nratio: Most number data is rendered as a ratio that includes 0"
             ],
-            "signature": [
-              "\"interval\" | \"ratio\" | \"ordinal\" | undefined"
-            ],
+            "signature": ["\"interval\" | \"ratio\" | \"ordinal\" | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4625,9 +4273,7 @@
             "tags": [],
             "label": "isStaticValue",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4670,9 +4316,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"percentile\""
-            ],
+            "signature": ["\"percentile\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4729,9 +4373,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"percentile_rank\""
-            ],
+            "signature": ["\"percentile_rank\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile_ranks.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4743,9 +4385,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "{ value: number; }"
-            ],
+            "signature": ["{ value: number; }"],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/percentile_ranks.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4771,9 +4411,7 @@
             "tags": [],
             "label": "shape",
             "description": [],
-            "signature": [
-              "\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""
-            ],
+            "signature": ["\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4785,10 +4423,7 @@
             "tags": [],
             "label": "layers",
             "description": [],
-            "signature": [
-              "PieLayerState",
-              "[]"
-            ],
+            "signature": ["PieLayerState", "[]"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4852,9 +4487,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"range\""
-            ],
+            "signature": ["\"range\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/ranges/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4898,9 +4531,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4912,9 +4543,7 @@
             "tags": [],
             "label": "accessors",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4926,9 +4555,7 @@
             "tags": [],
             "label": "columnToLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4996,9 +4623,7 @@
             "tags": [],
             "label": "metrics",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5010,9 +4635,7 @@
             "tags": [],
             "label": "primaryGroups",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5024,9 +4647,7 @@
             "tags": [],
             "label": "secondaryGroups",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5038,9 +4659,7 @@
             "tags": [],
             "label": "allowMultipleMetrics",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5052,9 +4671,7 @@
             "tags": [],
             "label": "colorsByDimension",
             "description": [],
-            "signature": [
-              "Record<string, string> | undefined"
-            ],
+            "signature": ["Record<string, string> | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5066,11 +4683,7 @@
             "tags": [],
             "label": "collapseFns",
             "description": [],
-            "signature": [
-              "Record<string, ",
-              "CollapseFunction",
-              "> | undefined"
-            ],
+            "signature": ["Record<string, ", "CollapseFunction", "> | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5082,9 +4695,7 @@
             "tags": [],
             "label": "numberDisplay",
             "description": [],
-            "signature": [
-              "\"value\" | \"hidden\" | \"percent\""
-            ],
+            "signature": ["\"value\" | \"hidden\" | \"percent\""],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5096,9 +4707,7 @@
             "tags": [],
             "label": "categoryDisplay",
             "description": [],
-            "signature": [
-              "\"default\" | \"hide\" | \"inside\""
-            ],
+            "signature": ["\"default\" | \"hide\" | \"inside\""],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5110,9 +4719,7 @@
             "tags": [],
             "label": "legendDisplay",
             "description": [],
-            "signature": [
-              "\"default\" | \"hide\" | \"show\""
-            ],
+            "signature": ["\"default\" | \"hide\" | \"show\""],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5124,10 +4731,7 @@
             "tags": [],
             "label": "legendPosition",
             "description": [],
-            "signature": [
-              "Position",
-              " | undefined"
-            ],
+            "signature": ["Position", " | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5160,9 +4764,7 @@
             "tags": [],
             "label": "nestedLegend",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5174,9 +4776,7 @@
             "tags": [],
             "label": "percentDecimals",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5188,9 +4788,7 @@
             "tags": [],
             "label": "emptySizeRatio",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5202,9 +4800,7 @@
             "tags": [],
             "label": "legendMaxLines",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5237,9 +4833,7 @@
             "tags": [],
             "label": "truncateLegend",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5251,10 +4845,7 @@
             "tags": [],
             "label": "colorMapping",
             "description": [],
-            "signature": [
-              "Config",
-              " | undefined"
-            ],
+            "signature": ["Config", " | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5291,9 +4882,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"static_value\""
-            ],
+            "signature": ["\"static_value\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/static_value.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5356,9 +4945,7 @@
             "tags": [],
             "label": "datasourceState",
             "description": [],
-            "signature": [
-              "V | undefined"
-            ],
+            "signature": ["V | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5370,9 +4957,7 @@
             "tags": [],
             "label": "datasourceId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5417,9 +5002,7 @@
             "tags": [],
             "label": "visualizationState",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5453,9 +5036,7 @@
             "tags": [],
             "label": "previewIcon",
             "description": [],
-            "signature": [
-              "string | React.ComponentType<{}>"
-            ],
+            "signature": ["string | React.ComponentType<{}>"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5467,9 +5048,7 @@
             "tags": [],
             "label": "hide",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5481,9 +5060,7 @@
             "tags": [],
             "label": "incomplete",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5509,9 +5086,7 @@
             "tags": [],
             "label": "keptLayerIds",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5548,9 +5123,7 @@
             "type": "Object",
             "tags": [],
             "label": "table",
-            "description": [
-              "\nA table configuration the datasource could provide."
-            ],
+            "description": ["\nA table configuration the datasource could provide."],
             "signature": [
               {
                 "pluginId": "lens",
@@ -5570,12 +5143,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
-            "description": [
-              "\nState is only passed if the visualization is active."
-            ],
-            "signature": [
-              "T | undefined"
-            ],
+            "description": ["\nState is only passed if the visualization is active."],
+            "signature": ["T | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5586,9 +5155,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "mainPalette",
-            "description": [
-              "\nPassing the legacy palette or the new color mapping if available"
-            ],
+            "description": ["\nPassing the legacy palette or the new color mapping if available"],
             "signature": [
               "{ type: \"legacyPalette\"; value: ",
               {
@@ -5613,9 +5180,7 @@
             "tags": [],
             "label": "isFromContext",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5626,12 +5191,8 @@
             "type": "Array",
             "tags": [],
             "label": "keptLayerIds",
-            "description": [
-              "\nThe visualization needs to know which table is being suggested"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["\nThe visualization needs to know which table is being suggested"],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5645,9 +5206,7 @@
             "description": [
               "\nDifferent suggestions can be generated for each subtype of the visualization"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5681,9 +5240,7 @@
             "tags": [],
             "label": "allowMixed",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5695,9 +5252,7 @@
             "tags": [],
             "label": "datasourceId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5740,10 +5295,7 @@
             "description": [
               "\nThe columns of the table. Each column has to be mapped to a dimension in a chart. If a visualization\ncan't use all columns of a suggestion, it should not return a `VisualizationSuggestion` based on it\nbecause there would be unreferenced columns"
             ],
-            "signature": [
-              "TableSuggestionColumn",
-              "[]"
-            ],
+            "signature": ["TableSuggestionColumn", "[]"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5770,9 +5322,7 @@
             "description": [
               "\nA label describing the table. This can be used to provide a title for the `VisualizationSuggestion`,\nbut the visualization can also decide to overwrite it."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5800,9 +5350,7 @@
             "tags": [],
             "label": "notAssignedMetrics",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5839,9 +5387,7 @@
             "tags": [],
             "label": "tagAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/tagcloud/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5853,9 +5399,7 @@
             "tags": [],
             "label": "valueAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/tagcloud/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5889,9 +5433,7 @@
             "tags": [],
             "label": "orientation",
             "description": [],
-            "signature": [
-              "\"single\" | \"right angled\" | \"multiple\""
-            ],
+            "signature": ["\"single\" | \"right angled\" | \"multiple\""],
             "path": "x-pack/plugins/lens/public/visualizations/tagcloud/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5935,10 +5477,7 @@
             "tags": [],
             "label": "colorMapping",
             "description": [],
-            "signature": [
-              "Config",
-              " | undefined"
-            ],
+            "signature": ["Config", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/tagcloud/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5981,9 +5520,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "\"terms\""
-            ],
+            "signature": ["\"terms\""],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/terms/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6042,9 +5579,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Plugin ID, such as \"lnsXY\""
-            ],
+            "description": ["Plugin ID, such as \"lnsXY\""],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6056,9 +5591,7 @@
             "tags": [],
             "label": "alias",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6116,9 +5649,7 @@
             "tags": [],
             "label": "getUsedDataView",
             "description": [],
-            "signature": [
-              "((state: T, layerId: string) => string | undefined) | undefined"
-            ],
+            "signature": ["((state: T, layerId: string) => string | undefined) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6130,9 +5661,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6145,9 +5674,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6162,12 +5689,8 @@
             "type": "Function",
             "tags": [],
             "label": "getUsedDataViews",
-            "description": [
-              "\nRetrieve the used DataViews in the visualization"
-            ],
-            "signature": [
-              "((state?: T | undefined) => string[]) | undefined"
-            ],
+            "description": ["\nRetrieve the used DataViews in the visualization"],
+            "signature": ["((state?: T | undefined) => string[]) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6179,9 +5702,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
+                "signature": ["T | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6221,9 +5742,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6241,9 +5760,7 @@
             "description": [
               "\nSupported triggers of this visualization type when embedded somewhere"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6257,10 +5774,7 @@
             "description": [
               "\nVisualizations must provide at least one type for the chart switcher,\nbut can register multiple subtypes"
             ],
-            "signature": [
-              "VisualizationType",
-              "[]"
-            ],
+            "signature": ["VisualizationType", "[]"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6274,9 +5788,7 @@
             "description": [
               "\nReturn the ID of the current visualization. Used to highlight\nthe active subtype of the visualization."
             ],
-            "signature": [
-              "(state: T) => string"
-            ],
+            "signature": ["(state: T) => string"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6288,9 +5800,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6306,11 +5816,7 @@
             "tags": [],
             "label": "hideFromChartSwitch",
             "description": [],
-            "signature": [
-              "((frame: ",
-              "FramePublicAPI",
-              ") => boolean) | undefined"
-            ],
+            "signature": ["((frame: ", "FramePublicAPI", ") => boolean) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6322,9 +5828,7 @@
                 "tags": [],
                 "label": "frame",
                 "description": [],
-                "signature": [
-                  "FramePublicAPI"
-                ],
+                "signature": ["FramePublicAPI"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6339,9 +5843,7 @@
             "type": "Function",
             "tags": [],
             "label": "switchVisualizationType",
-            "description": [
-              "\nIf the visualization has subtypes, update the subtype in state."
-            ],
+            "description": ["\nIf the visualization has subtypes, update the subtype in state."],
             "signature": [
               "((visualizationTypeId: string, state: T, layerId?: string | undefined) => T) | undefined"
             ],
@@ -6356,9 +5858,7 @@
                 "tags": [],
                 "label": "visualizationTypeId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6371,9 +5871,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6386,9 +5884,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6403,9 +5899,7 @@
             "type": "Function",
             "tags": [],
             "label": "getDescription",
-            "description": [
-              "Description is displayed as the clickable text in the chart switcher"
-            ],
+            "description": ["Description is displayed as the clickable text in the chart switcher"],
             "signature": [
               "(state: T, layerId?: string | undefined) => { icon?: ",
               "IconType",
@@ -6422,9 +5916,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6437,9 +5929,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6454,9 +5944,7 @@
             "type": "Function",
             "tags": [],
             "label": "getPersistableState",
-            "description": [
-              "Visualizations can have references as well"
-            ],
+            "description": ["Visualizations can have references as well"],
             "signature": [
               "((state: T) => { state: P; savedObjectReferences: ",
               {
@@ -6479,9 +5967,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6499,9 +5985,7 @@
             "description": [
               "Frame needs to know which layers the visualization is currently using"
             ],
-            "signature": [
-              "(state: T) => string[]"
-            ],
+            "signature": ["(state: T) => string[]"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6513,9 +5997,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6530,12 +6012,8 @@
             "type": "Function",
             "tags": [],
             "label": "clearLayer",
-            "description": [
-              "Reset button on each layer triggers this"
-            ],
-            "signature": [
-              "(state: T, layerId: string, indexPatternId: string) => T"
-            ],
+            "description": ["Reset button on each layer triggers this"],
+            "signature": ["(state: T, layerId: string, indexPatternId: string) => T"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6547,9 +6025,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6562,9 +6038,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6577,9 +6051,7 @@
                 "tags": [],
                 "label": "indexPatternId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6594,9 +6066,7 @@
             "type": "Function",
             "tags": [],
             "label": "cloneLayer",
-            "description": [
-              "Reset button on each layer triggers this"
-            ],
+            "description": ["Reset button on each layer triggers this"],
             "signature": [
               "((state: T, layerId: string, newLayerId: string, clonedIDsMap: Map<string, string>) => T) | undefined"
             ],
@@ -6611,9 +6081,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6626,9 +6094,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6641,9 +6107,7 @@
                 "tags": [],
                 "label": "newLayerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6656,9 +6120,7 @@
                 "tags": [],
                 "label": "clonedIDsMap",
                 "description": [],
-                "signature": [
-                  "Map<string, string>"
-                ],
+                "signature": ["Map<string, string>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6673,12 +6135,8 @@
             "type": "Function",
             "tags": [],
             "label": "removeLayer",
-            "description": [
-              "Optional, if the visualization supports multiple layers"
-            ],
-            "signature": [
-              "((state: T, layerId: string) => T) | undefined"
-            ],
+            "description": ["Optional, if the visualization supports multiple layers"],
+            "signature": ["((state: T, layerId: string) => T) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6690,9 +6148,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6705,9 +6161,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6722,9 +6176,7 @@
             "type": "Function",
             "tags": [],
             "label": "appendLayer",
-            "description": [
-              "Track added layers in internal state"
-            ],
+            "description": ["Track added layers in internal state"],
             "signature": [
               "((state: T, layerId: string, type: ",
               "LayerType",
@@ -6749,9 +6201,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6764,9 +6214,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6779,9 +6227,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "LayerType"
-                ],
+                "signature": ["LayerType"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6794,9 +6240,7 @@
                 "tags": [],
                 "label": "indexPatternId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6809,9 +6253,7 @@
                 "tags": [],
                 "label": "extraArg",
                 "description": [],
-                "signature": [
-                  "ExtraAppendLayerArg | undefined"
-                ],
+                "signature": ["ExtraAppendLayerArg | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6848,9 +6290,7 @@
             "type": "Function",
             "tags": [],
             "label": "getSupportedLayers",
-            "description": [
-              "Retrieve a list of supported layer types with initialization data"
-            ],
+            "description": ["Retrieve a list of supported layer types with initialization data"],
             "signature": [
               "(state?: T | undefined, frame?: Pick<",
               "FramePublicAPI",
@@ -6869,9 +6309,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
+                "signature": ["T | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6926,9 +6364,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6941,9 +6377,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6956,10 +6390,7 @@
                 "tags": [],
                 "label": "setState",
                 "description": [],
-                "signature": [
-                  "StateSetter",
-                  "<T, unknown>"
-                ],
+                "signature": ["StateSetter", "<T, unknown>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6972,9 +6403,7 @@
                 "tags": [],
                 "label": "registerLibraryAnnotationGroup",
                 "description": [],
-                "signature": [
-                  "RegisterLibraryAnnotationGroupFunction"
-                ],
+                "signature": ["RegisterLibraryAnnotationGroupFunction"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6987,9 +6416,7 @@
                 "tags": [],
                 "label": "isSaveable",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7021,9 +6448,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7036,9 +6461,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7053,9 +6476,7 @@
             "type": "Function",
             "tags": [],
             "label": "getLayerType",
-            "description": [
-              "returns the type string of the given layer"
-            ],
+            "description": ["returns the type string of the given layer"],
             "signature": [
               "(layerId: string, state?: T | undefined) => ",
               "LayerType",
@@ -7072,9 +6493,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7087,9 +6506,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
+                "signature": ["T | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7107,9 +6524,7 @@
             "description": [
               "\nGet the layers this one should be linked to (currently that means just keeping the data view in sync)"
             ],
-            "signature": [
-              "((state: T, newLayerId: string) => string[]) | undefined"
-            ],
+            "signature": ["((state: T, newLayerId: string) => string[]) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7121,9 +6536,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7136,9 +6549,7 @@
                 "tags": [],
                 "label": "newLayerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7153,12 +6564,8 @@
             "type": "Function",
             "tags": [],
             "label": "getLinkedDimensions",
-            "description": [
-              "\nReturns a set of dimensions that should be kept in sync"
-            ],
-            "signature": [
-              "((state: T) => DimensionLink[]) | undefined"
-            ],
+            "description": ["\nReturns a set of dimensions that should be kept in sync"],
+            "signature": ["((state: T) => DimensionLink[]) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7170,9 +6577,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7188,9 +6593,7 @@
             "tags": [],
             "label": "getRemoveOperation",
             "description": [],
-            "signature": [
-              "((state: T, layerId: string) => \"clear\" | \"remove\") | undefined"
-            ],
+            "signature": ["((state: T, layerId: string) => \"clear\" | \"remove\") | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7202,9 +6605,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7217,9 +6618,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7255,10 +6654,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationConfigProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationConfigProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7288,9 +6684,7 @@
                 "tags": [],
                 "label": "subtype1",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7303,9 +6697,7 @@
                 "tags": [],
                 "label": "subtype2",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7341,10 +6733,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationLayerWidgetProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationLayerWidgetProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7380,10 +6769,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationLayerWidgetProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationLayerWidgetProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7419,10 +6805,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationToolbarProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationToolbarProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7477,11 +6860,7 @@
             "description": [
               "\nThe frame is telling the visualization to remove a dimension. The visualization needs to\nlook at its internal state to determine which dimension is being affected."
             ],
-            "signature": [
-              "(props: ",
-              "VisualizationDimensionChangeProps",
-              "<T>) => T"
-            ],
+            "signature": ["(props: ", "VisualizationDimensionChangeProps", "<T>) => T"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7493,10 +6872,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationDimensionChangeProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationDimensionChangeProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7561,9 +6937,7 @@
                     "tags": [],
                     "label": "prevState",
                     "description": [],
-                    "signature": [
-                      "T"
-                    ],
+                    "signature": ["T"],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7575,9 +6949,7 @@
                     "tags": [],
                     "label": "target",
                     "description": [],
-                    "signature": [
-                      "DragDropOperation"
-                    ],
+                    "signature": ["DragDropOperation"],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7605,9 +6977,7 @@
                     "tags": [],
                     "label": "frame",
                     "description": [],
-                    "signature": [
-                      "FramePublicAPI"
-                    ],
+                    "signature": ["FramePublicAPI"],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7633,10 +7003,7 @@
                     "tags": [],
                     "label": "group",
                     "description": [],
-                    "signature": [
-                      "VisualizationDimensionGroupConfig",
-                      " | undefined"
-                    ],
+                    "signature": ["VisualizationDimensionGroupConfig", " | undefined"],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7677,10 +7044,7 @@
                 "tags": [],
                 "label": "dropProps",
                 "description": [],
-                "signature": [
-                  "GetDropPropsArgs",
-                  "<unknown>"
-                ],
+                "signature": ["GetDropPropsArgs", "<unknown>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7714,10 +7078,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationConfigProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationConfigProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7790,10 +7151,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationDimensionEditorProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationDimensionEditorProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7829,10 +7187,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationDimensionEditorProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationDimensionEditorProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7868,10 +7223,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationDimensionEditorProps",
-                  "<T>"
-                ],
+                "signature": ["VisualizationDimensionEditorProps", "<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7886,9 +7238,7 @@
             "type": "Function",
             "tags": [],
             "label": "DimensionTriggerComponent",
-            "description": [
-              "\nRenders dimension trigger. Used only for noDatasource layers"
-            ],
+            "description": ["\nRenders dimension trigger. Used only for noDatasource layers"],
             "signature": [
               "((props: { columnId: string; label: string; }) => React.ReactElement<{ columnId: string; label: string; }, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
@@ -7955,9 +7305,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "AddLayerButtonProps<T>"
-                ],
+                "signature": ["AddLayerButtonProps<T>"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7975,9 +7323,7 @@
             "description": [
               "\nCreates map of columns ids and unique lables. Used only for noDatasource layers"
             ],
-            "signature": [
-              "((state: T) => Record<string, string>) | undefined"
-            ],
+            "signature": ["((state: T) => Record<string, string>) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7989,9 +7335,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8102,9 +7446,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8140,9 +7482,7 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": [
-                  "Partial<{ title: string; description: string; }> | undefined"
-                ],
+                "signature": ["Partial<{ title: string; description: string; }> | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8221,9 +7561,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8305,9 +7643,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8331,9 +7667,7 @@
                     "tags": [],
                     "label": "frame",
                     "description": [],
-                    "signature": [
-                      "FramePublicAPI"
-                    ],
+                    "signature": ["FramePublicAPI"],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -8370,9 +7704,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8385,12 +7717,7 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": [
-                  "LensEditEvent",
-                  "<keyof ",
-                  "LensEditContextMapping",
-                  ">"
-                ],
+                "signature": ["LensEditEvent", "<keyof ", "LensEditContextMapping", ">"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8422,9 +7749,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8437,9 +7762,7 @@
                 "tags": [],
                 "label": "indexPatternId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8452,9 +7775,7 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8484,9 +7805,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8499,9 +7818,7 @@
                 "tags": [],
                 "label": "oldIndexPatternId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8514,9 +7831,7 @@
                 "tags": [],
                 "label": "newIndexPatternId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8532,9 +7847,7 @@
             "tags": [],
             "label": "getLayersToRemoveOnIndexPatternChange",
             "description": [],
-            "signature": [
-              "((state: T) => string[]) | undefined"
-            ],
+            "signature": ["((state: T) => string[]) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8546,9 +7859,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8563,14 +7874,8 @@
             "type": "Function",
             "tags": [],
             "label": "getDisplayOptions",
-            "description": [
-              "\nGets custom display options for showing the visualization."
-            ],
-            "signature": [
-              "(() => ",
-              "VisualizationDisplayOptions",
-              ") | undefined"
-            ],
+            "description": ["\nGets custom display options for showing the visualization."],
+            "signature": ["(() => ", "VisualizationDisplayOptions", ") | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8583,12 +7888,8 @@
             "type": "Function",
             "tags": [],
             "label": "getRenderEventCounters",
-            "description": [
-              "\nGet RenderEventCounters events for telemetry"
-            ],
-            "signature": [
-              "((state: T) => string[]) | undefined"
-            ],
+            "description": ["\nGet RenderEventCounters events for telemetry"],
+            "signature": ["((state: T) => string[]) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8600,9 +7901,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8640,9 +7939,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "VisualizationStateFromContextChangeProps"
-                ],
+                "signature": ["VisualizationStateFromContextChangeProps"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8690,9 +7987,7 @@
                 "tags": [],
                 "label": "state1",
                 "description": [],
-                "signature": [
-                  "P"
-                ],
+                "signature": ["P"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8727,9 +8022,7 @@
                 "tags": [],
                 "label": "state2",
                 "description": [],
-                "signature": [
-                  "P"
-                ],
+                "signature": ["P"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8764,9 +8057,7 @@
                 "tags": [],
                 "label": "annotationGroups",
                 "description": [],
-                "signature": [
-                  "AnnotationGroups"
-                ],
+                "signature": ["AnnotationGroups"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8800,9 +8091,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8815,10 +8104,7 @@
                 "tags": [],
                 "label": "frame",
                 "description": [],
-                "signature": [
-                  "FramePublicAPI",
-                  " | undefined"
-                ],
+                "signature": ["FramePublicAPI", " | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8836,9 +8122,7 @@
             "description": [
               "\nA visualization can return custom dimensions for the reporting tool"
             ],
-            "signature": [
-              "((state: T) => { height: number; width: number; }) | undefined"
-            ],
+            "signature": ["((state: T) => { height: number; width: number; }) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8850,9 +8134,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8867,9 +8149,7 @@
             "type": "Function",
             "tags": [],
             "label": "getSortedColumns",
-            "description": [
-              "\nA visualization can share how columns are visually sorted"
-            ],
+            "description": ["\nA visualization can share how columns are visually sorted"],
             "signature": [
               "((state: T, datasourceLayers?: Partial<Record<string, ",
               {
@@ -8892,9 +8172,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8932,12 +8210,8 @@
             "type": "Function",
             "tags": [],
             "label": "getTelemetryEventsOnSave",
-            "description": [
-              "\nreturns array of telemetry events for the visualization on save"
-            ],
-            "signature": [
-              "((state: T, prevState?: T | undefined) => string[]) | undefined"
-            ],
+            "description": ["\nreturns array of telemetry events for the visualization on save"],
+            "signature": ["((state: T, prevState?: T | undefined) => string[]) | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8949,9 +8223,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8964,9 +8236,7 @@
                 "tags": [],
                 "label": "prevState",
                 "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
+                "signature": ["T | undefined"],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9023,9 +8293,7 @@
             "description": [
               "\nFlag indicating whether this suggestion should not be advertised to the user. It is still\nconsidered in scenarios where the available suggestion with the highest suggestion is applied\ndirectly."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9036,12 +8304,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "incomplete",
-            "description": [
-              "\nFlag indicating whether this suggestion is incomplete"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nFlag indicating whether this suggestion is incomplete"],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9065,12 +8329,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
-            "description": [
-              "\nThe new state of the visualization if this suggestion is applied."
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["\nThe new state of the visualization if this suggestion is applied."],
+            "signature": ["T"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9081,12 +8341,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "previewIcon",
-            "description": [
-              "\nAn EUI icon type shown instead of the preview expression."
-            ],
-            "signature": [
-              "string | React.ComponentType<{}>"
-            ],
+            "description": ["\nAn EUI icon type shown instead of the preview expression."],
+            "signature": ["string | React.ComponentType<{}>"],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9171,9 +8427,7 @@
             "tags": [],
             "label": "emphasizeFitting",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9185,9 +8439,7 @@
             "tags": [],
             "label": "valueLabels",
             "description": [],
-            "signature": [
-              "\"hide\" | \"show\""
-            ],
+            "signature": ["\"hide\" | \"show\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9199,10 +8451,7 @@
             "tags": [],
             "label": "referenceLines",
             "description": [],
-            "signature": [
-              "ReferenceLineConfigResult",
-              "[]"
-            ],
+            "signature": ["ReferenceLineConfigResult", "[]"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9235,9 +8484,7 @@
             "tags": [],
             "label": "fillOpacity",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9249,9 +8496,7 @@
             "tags": [],
             "label": "hideEndzones",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9263,9 +8508,7 @@
             "tags": [],
             "label": "ariaLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9319,9 +8562,7 @@
             "tags": [],
             "label": "addTimeMarker",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9333,9 +8574,7 @@
             "tags": [],
             "label": "markSizeRatio",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9347,9 +8586,7 @@
             "tags": [],
             "label": "minTimeBarInterval",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9361,9 +8598,7 @@
             "tags": [],
             "label": "minBarHeight",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9419,9 +8654,7 @@
             "tags": [],
             "label": "detailedTooltip",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9433,9 +8666,7 @@
             "tags": [],
             "label": "orderBucketsBySum",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9472,9 +8703,7 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": [
-              "XYProps"
-            ],
+            "signature": ["XYProps"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9519,9 +8748,7 @@
             "tags": [],
             "label": "canNavigateToLens",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9640,9 +8867,7 @@
             "tags": [],
             "label": "accessors",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9654,9 +8879,7 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": [
-              "\"data\""
-            ],
+            "signature": ["\"data\""],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9682,9 +8905,7 @@
             "tags": [],
             "label": "xAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9696,9 +8917,7 @@
             "tags": [],
             "label": "simpleView",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9731,9 +8950,7 @@
             "tags": [],
             "label": "splitAccessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9766,10 +8983,7 @@
             "tags": [],
             "label": "collapseFn",
             "description": [],
-            "signature": [
-              "CollapseFunction",
-              " | undefined"
-            ],
+            "signature": ["CollapseFunction", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9802,9 +9016,7 @@
             "tags": [],
             "label": "isHistogram",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9816,9 +9028,7 @@
             "tags": [],
             "label": "columnToLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9830,10 +9040,7 @@
             "tags": [],
             "label": "colorMapping",
             "description": [],
-            "signature": [
-              "Config",
-              " | undefined"
-            ],
+            "signature": ["Config", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9870,9 +9077,7 @@
             "tags": [],
             "label": "accessors",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9905,9 +9110,7 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": [
-              "\"referenceLine\""
-            ],
+            "signature": ["\"referenceLine\""],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9933,9 +9136,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"render\""
-            ],
+            "signature": ["\"render\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9947,9 +9148,7 @@
             "tags": [],
             "label": "as",
             "description": [],
-            "signature": [
-              "\"xyVis\""
-            ],
+            "signature": ["\"xyVis\""],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10029,10 +9228,7 @@
             "tags": [],
             "label": "valueLabels",
             "description": [],
-            "signature": [
-              "ValueLabelConfig",
-              " | undefined"
-            ],
+            "signature": ["ValueLabelConfig", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10065,9 +9261,7 @@
             "tags": [],
             "label": "emphasizeFitting",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10184,9 +9378,7 @@
             "tags": [],
             "label": "xTitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10198,9 +9390,7 @@
             "tags": [],
             "label": "yTitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10212,9 +9402,7 @@
             "tags": [],
             "label": "yRightTitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10331,10 +9519,7 @@
             "tags": [],
             "label": "labelsOrientation",
             "description": [],
-            "signature": [
-              "LabelsOrientationConfig",
-              " | undefined"
-            ],
+            "signature": ["LabelsOrientationConfig", " | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10367,9 +9552,7 @@
             "tags": [],
             "label": "fillOpacity",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10381,9 +9564,7 @@
             "tags": [],
             "label": "minBarHeight",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10395,9 +9576,7 @@
             "tags": [],
             "label": "hideEndzones",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10409,9 +9588,7 @@
             "tags": [],
             "label": "showCurrentTimeMarker",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10448,9 +9625,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10462,9 +9637,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10476,9 +9649,7 @@
             "tags": [],
             "label": "lineWidth",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10490,9 +9661,7 @@
             "tags": [],
             "label": "lineStyle",
             "description": [],
-            "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
-            ],
+            "signature": ["\"solid\" | \"dashed\" | \"dotted\" | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10546,9 +9715,7 @@
             "tags": [],
             "label": "textVisibility",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10633,9 +9800,7 @@
         "tags": [],
         "label": "AxisExtentMode",
         "description": [],
-        "signature": [
-          "\"full\" | \"custom\" | \"dataBounds\""
-        ],
+        "signature": ["\"full\" | \"custom\" | \"dataBounds\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10748,10 +9913,7 @@
         "tags": [],
         "label": "DataType",
         "description": [],
-        "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"date\" | ",
-          "FieldOnlyDataType"
-        ],
+        "signature": ["\"string\" | \"number\" | \"boolean\" | \"date\" | ", "FieldOnlyDataType"],
         "path": "x-pack/plugins/lens/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10846,9 +10008,7 @@
         "tags": [],
         "label": "FillStyle",
         "description": [],
-        "signature": [
-          "\"none\" | \"above\" | \"below\""
-        ],
+        "signature": ["\"none\" | \"above\" | \"below\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10953,9 +10113,7 @@
         "tags": [],
         "label": "IconPosition",
         "description": [],
-        "signature": [
-          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
-        ],
+        "signature": ["\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10968,9 +10126,7 @@
         "tags": [],
         "label": "LayerType",
         "description": [],
-        "signature": [
-          "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
-        ],
+        "signature": ["\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11005,9 +10161,7 @@
         "tags": [],
         "label": "LENS_EMBEDDABLE_TYPE",
         "description": [],
-        "signature": [
-          "\"lens\""
-        ],
+        "signature": ["\"lens\""],
         "path": "x-pack/plugins/lens/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11116,11 +10270,7 @@
         "tags": [],
         "label": "LensEmbeddableInput",
         "description": [],
-        "signature": [
-          "LensByValueInput",
-          " | ",
-          "LensByReferenceInput"
-        ],
+        "signature": ["LensByValueInput", " | ", "LensByReferenceInput"],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -11290,9 +10440,7 @@
             "tags": [],
             "label": "excludedVisualizations",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11304,10 +10452,7 @@
             "tags": [],
             "label": "preferredChartType",
             "description": [],
-            "signature": [
-              "ChartType",
-              " | undefined"
-            ],
+            "signature": ["ChartType", " | undefined"],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11322,9 +10467,7 @@
         "tags": [],
         "label": "LineStyle",
         "description": [],
-        "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\""
-        ],
+        "signature": ["\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11429,9 +10572,7 @@
         "description": [
           "\nA union type of all available operation types. The operation type is a unique id of an operation.\nEach column is assigned to exactly one operation type."
         ],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11821,9 +10962,7 @@
         "tags": [],
         "label": "ValueLabelConfig",
         "description": [],
-        "signature": [
-          "\"hide\" | \"show\""
-        ],
+        "signature": ["\"hide\" | \"show\""],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11836,9 +10975,7 @@
         "tags": [],
         "label": "ValueLabelMode",
         "description": [],
-        "signature": [
-          "\"hide\" | \"show\""
-        ],
+        "signature": ["\"hide\" | \"show\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11851,9 +10988,7 @@
         "tags": [],
         "label": "XScaleType",
         "description": [],
-        "signature": [
-          "\"time\" | \"linear\" | \"ordinal\""
-        ],
+        "signature": ["\"time\" | \"linear\" | \"ordinal\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11883,9 +11018,7 @@
         "tags": [],
         "label": "XYCurveType",
         "description": [],
-        "signature": [
-          "\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""
-        ],
+        "signature": ["\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11935,9 +11068,7 @@
         "tags": [],
         "label": "YAxisMode",
         "description": [],
-        "signature": [
-          "\"right\" | \"left\" | \"bottom\" | \"auto\""
-        ],
+        "signature": ["\"right\" | \"left\" | \"bottom\" | \"auto\""],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11950,9 +11081,7 @@
         "tags": [],
         "label": "YScaleType",
         "description": [],
-        "signature": [
-          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
-        ],
+        "signature": ["\"log\" | \"time\" | \"linear\" | \"sqrt\""],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12009,9 +11138,7 @@
             "tags": [],
             "label": "visualizationType",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12034,9 +11161,7 @@
             "tags": [],
             "label": "expression",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12154,9 +11279,7 @@
               "tags": [],
               "label": "id",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/lens/server/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -12214,9 +11337,7 @@
             "tags": [],
             "label": "autoScaleMetricAlignment",
             "description": [],
-            "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
-            ],
+            "signature": ["\"right\" | \"left\" | \"center\" | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12239,9 +11360,7 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12253,9 +11372,7 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
-            ],
+            "signature": ["\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12317,9 +11434,7 @@
             "tags": [],
             "label": "titlePosition",
             "description": [],
-            "signature": [
-              "\"top\" | \"bottom\" | undefined"
-            ],
+            "signature": ["\"top\" | \"bottom\" | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12331,9 +11446,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12345,9 +11458,7 @@
             "tags": [],
             "label": "textAlign",
             "description": [],
-            "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
-            ],
+            "signature": ["\"right\" | \"left\" | \"center\" | undefined"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12390,9 +11501,7 @@
             "tags": [],
             "label": "meta",
             "description": [],
-            "signature": [
-              "PersistableFilterMeta"
-            ],
+            "signature": ["PersistableFilterMeta"],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12410,9 +11519,7 @@
         "tags": [],
         "label": "DOCUMENT_FIELD_NAME",
         "description": [],
-        "signature": [
-          "\"___records___\""
-        ],
+        "signature": ["\"___records___\""],
         "path": "x-pack/plugins/lens/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

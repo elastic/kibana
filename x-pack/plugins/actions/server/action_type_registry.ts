@@ -7,19 +7,19 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
+import { ILicenseState, TaskRunnerFactory, getActionTypeFeatureUsageName } from './lib';
+import { isBidirectionalConnectorType } from './lib/bidirectional_connectors';
 import {
   ActionType,
-  InMemoryConnector,
   ActionTypeConfig,
-  ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeSecrets,
+  InMemoryConnector,
 } from './types';
-import { isBidirectionalConnectorType } from './lib/bidirectional_connectors';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -129,7 +129,7 @@ export class ActionTypeRegistry {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
     if (this.has(actionType.id)) {
       throw new Error(
@@ -207,7 +207,7 @@ export class ActionTypeRegistry {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(id: string): ActionType<Config, Secrets, Params, ExecutorResultData> {
     if (!this.has(id)) {
       throw Boom.badRequest(

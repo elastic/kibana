@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import PropTypes from 'prop-types';
 import {
-  EuiFieldText,
-  EuiFieldNumber,
+  EuiAccordion,
   EuiBadge,
+  EuiButton,
   EuiButtonIcon,
-  EuiFormRow,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
-  EuiToolTip,
   EuiTextArea,
-  EuiAccordion,
-  EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { FC, useState } from 'react';
 
-import { VarConfig } from '../var_config';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { CanvasVariable } from '../../../types';
+import { VarConfig } from '../var_config';
 
 const strings = {
   getApplyStylesheetButtonLabel: () =>

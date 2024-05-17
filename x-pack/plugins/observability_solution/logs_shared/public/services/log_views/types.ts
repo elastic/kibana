@@ -12,8 +12,8 @@ import {
   LogView,
   LogViewAttributes,
   LogViewReference,
-  LogViewsStaticConfig,
   LogViewStatus,
+  LogViewsStaticConfig,
   ResolvedLogView,
 } from '../../../common/log_views';
 

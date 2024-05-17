@@ -13,19 +13,19 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import styled from 'styled-components';
 import {
-  isScreenshotRef as isAScreenshotRef,
   ScreenshotRefImageData,
+  isScreenshotRef as isAScreenshotRef,
 } from '../../../../common/runtime_types';
 import { UptimeRefreshContext, UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
-import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
+import { getJourneyScreenshot } from '../../state/api/journey';
 
 interface StepScreenshotDisplayProps {
   isFullScreenshot: boolean;

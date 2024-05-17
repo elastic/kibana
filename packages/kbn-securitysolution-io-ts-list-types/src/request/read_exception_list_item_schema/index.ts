@@ -9,10 +9,10 @@
 import * as t from 'io-ts';
 
 import { NamespaceType } from '../../common/default_namespace';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
 import { item_id } from '../../common/item_id';
 import { namespace_type } from '../../common/namespace_type';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const readExceptionListItemSchema = t.exact(
   t.partial({

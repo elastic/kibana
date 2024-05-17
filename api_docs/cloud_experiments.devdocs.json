@@ -49,12 +49,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nThe name of the metric {@link CloudExperimentsMetricNames}"
-            ],
-            "signature": [
-              "never"
-            ],
+            "description": ["\nThe name of the metric {@link CloudExperimentsMetricNames}"],
+            "signature": ["never"],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -68,9 +64,7 @@
             "description": [
               "\nAny optional data to enrich the context of the metric. Or if the conversion is based on a non-numeric value."
             ],
-            "signature": [
-              "Data | undefined"
-            ],
+            "signature": ["Data | undefined"],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -84,9 +78,7 @@
             "description": [
               "\nThe numeric value of the metric. Bear in mind that they are averaged by the underlying solution.\nTypical values to report here are time-to-action, number of panels in a loaded dashboard, and page load time."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -100,9 +92,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CloudExperimentsPluginStart",
-        "description": [
-          "\nThe contract of the start lifecycle method\n"
-        ],
+        "description": ["\nThe contract of the start lifecycle method\n"],
         "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -146,12 +136,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "defaultValue",
-                "description": [
-                  "The fallback value in case no variation is found."
-                ],
-                "signature": [
-                  "Data"
-                ],
+                "description": ["The fallback value in case no variation is found."],
+                "signature": ["Data"],
                 "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -190,9 +176,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "metric",
-                "description": [
-                  "{@link CloudExperimentsMetric }"
-                ],
+                "description": ["{@link CloudExperimentsMetric }"],
                 "signature": [
                   {
                     "pluginId": "cloudExperiments",
@@ -243,9 +227,7 @@
         "description": [
           "\nThe names of the metrics declared in Kibana.\nValid keys are defined in {@link METRIC_NAMES}. When reporting a new metric, add the name to the list.\n"
         ],
-        "signature": [
-          "never"
-        ],
+        "signature": ["never"],
         "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -1,3 +1,7 @@
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +9,10 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { LeftPanelInvestigationTab } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInvestigationTab } from '../../left';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,

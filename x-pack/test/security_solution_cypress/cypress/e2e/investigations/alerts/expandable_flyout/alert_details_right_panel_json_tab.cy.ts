@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { openJsonTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { getNewRule } from '../../../../objects/rule';
 import {
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB_COPY_TO_CLIPBOARD_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_json_tab';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { openJsonTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel json tab',

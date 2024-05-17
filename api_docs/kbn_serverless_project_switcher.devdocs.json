@@ -72,9 +72,7 @@
         "type": "Function",
         "tags": [],
         "label": "ProjectSwitcherKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
-        ],
+        "description": ["\nKibana-specific Provider that maps dependencies to services."],
         "signature": [
           "({ children, coreStart, projectChangeAPIUrl, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
@@ -142,11 +140,7 @@
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
-              "Services",
-              ">>"
-            ],
+            "signature": ["React.PropsWithChildren<React.PropsWithChildren<", "Services", ">>"],
             "path": "packages/serverless/project_switcher/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -209,11 +203,7 @@
         "tags": [],
         "label": "ProjectSwitcherProps",
         "description": [],
-        "signature": [
-          "{ currentProjectType: ",
-          "ProjectType",
-          "; }"
-        ],
+        "signature": ["{ currentProjectType: ", "ProjectType", "; }"],
         "path": "packages/serverless/project_switcher/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

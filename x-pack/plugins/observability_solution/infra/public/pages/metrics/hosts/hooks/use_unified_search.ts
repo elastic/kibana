@@ -1,3 +1,4 @@
+import { type Query, buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,24 +6,23 @@
  * 2.0.
  */
 import createContainer from 'constate';
+import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { map, skip, startWith } from 'rxjs';
 import { combineLatest } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { parseDateRange } from '../../../../utils/datemath';
-import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { parseDateRange } from '../../../../utils/datemath';
+import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
+import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { useMetricsDataViewContext } from './use_metrics_data_view';
 import {
   HostsSearchPayload,
-  useHostsUrlState,
   type HostsState,
   type StringDateRangeTimestamp,
+  useHostsUrlState,
 } from './use_unified_search_url_state';
-import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }

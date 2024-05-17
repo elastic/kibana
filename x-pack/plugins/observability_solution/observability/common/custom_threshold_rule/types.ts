@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
+import * as rt from 'io-ts';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({

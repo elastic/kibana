@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
 import { useRedirectPath } from '../../../../hooks/redirect_path';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
-import { ComponentTemplateDeserialized } from '../../shared_imports';
+import { IndexManagementBreadcrumb, breadcrumbService } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
+import { MANAGED_BY_FLEET } from '../../constants';
+import { ComponentTemplateDeserialized } from '../../shared_imports';
+import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useStepFromQueryString } from '../use_step_from_query_string';
-import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
-import { MANAGED_BY_FLEET } from '../../constants';
 
 interface Props {
   /**

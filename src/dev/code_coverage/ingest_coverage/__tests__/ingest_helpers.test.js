@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { RESEARCH_COVERAGE_INDEX, RESEARCH_TOTALS_INDEX, TOTALS_INDEX } from '../constants';
 import { whichIndex } from '../ingest_helpers';
-import { TOTALS_INDEX, RESEARCH_TOTALS_INDEX, RESEARCH_COVERAGE_INDEX } from '../constants';
 
 describe(`Ingest Helper fns`, () => {
   describe(`whichIndex`, () => {

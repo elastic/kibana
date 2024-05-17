@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
-import { useRequest, UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { UseRequestResponse, useRequest } from '@kbn/es-ui-shared-plugin/public';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
 import { useKibana } from '.';
 
 export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusResponse> => {

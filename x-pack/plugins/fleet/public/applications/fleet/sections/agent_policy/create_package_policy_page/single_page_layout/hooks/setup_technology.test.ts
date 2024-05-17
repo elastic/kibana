@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { SetupTechnology } from '../../../../../../../../common/types';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
+import { ExperimentalFeaturesService } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
 
 import { useSetupTechnology } from './setup_technology';

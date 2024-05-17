@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { createSavedObjects } from './create_saved_objects';
-import { extractErrors } from './extract_errors';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   LEGACY_URL_ALIAS_TYPE,
   LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { createSavedObjects } from './create_saved_objects';
+import { extractErrors } from './extract_errors';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];
 
@@ -102,7 +102,7 @@ const legacyUrlAliasForObj10 = createLegacyUrlAliasObject(obj10.originId!, obj10
 
 describe('#createSavedObjects', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let bulkCreate: typeof savedObjectsClient['bulkCreate'];
+  let bulkCreate: (typeof savedObjectsClient)['bulkCreate'];
 
   /**
    * Creates an options object to be used as an argument for createSavedObjects

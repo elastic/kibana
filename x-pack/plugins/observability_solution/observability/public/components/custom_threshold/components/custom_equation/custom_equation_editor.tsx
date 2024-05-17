@@ -6,33 +6,33 @@
  */
 
 import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIconTip,
   EuiButtonEmpty,
-  EuiSpacer,
   EuiExpression,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
   EuiPopover,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { range, first, xor, debounce } from 'lodash';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { convertToApiThreshold } from '../../helpers/threshold_unit';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { debounce, first, range, xor } from 'lodash';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Aggregators,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
+import { convertToApiThreshold } from '../../helpers/threshold_unit';
 
-import { MetricExpression } from '../../types';
-import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
-import { MetricRowWithAgg } from './metric_row_with_agg';
-import { ClosablePopoverTitle } from '../closable_popover_title';
 import { EQUATION_HELP_MESSAGE } from '../../i18n_strings';
+import { MetricExpression } from '../../types';
+import { ClosablePopoverTitle } from '../closable_popover_title';
+import { MetricRowWithAgg } from './metric_row_with_agg';
+import { AggregationTypes, CustomMetrics, NormalizedFields } from './types';
 
 export interface CustomEquationEditorProps {
   onChange: (expression: MetricExpression) => void;

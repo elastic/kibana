@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import { FieldTypeIcon } from './field_type_icon';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
+import { FieldTypeIcon } from './field_type_icon';
 
 describe('FieldTypeIcon', () => {
   it('renders label and icon but not tooltip content on mouseover if tooltipEnabled=false', async () => {

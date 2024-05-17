@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
-import * as React from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 
 const txtDismiss = i18n.translate(
   'uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.dismiss',

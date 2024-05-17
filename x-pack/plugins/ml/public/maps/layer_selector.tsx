@@ -10,9 +10,9 @@ import React, { Component } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ACTUAL_LABEL, TYPICAL_LABEL, TYPICAL_TO_ACTUAL } from './anomaly_source_field';
 import type { MlAnomalyLayersType } from './util';
 import { ML_ANOMALY_LAYERS } from './util';
-import { ACTUAL_LABEL, TYPICAL_LABEL, TYPICAL_TO_ACTUAL } from './anomaly_source_field';
 
 interface Props {
   onChange: (typicalActual: MlAnomalyLayersType) => void;

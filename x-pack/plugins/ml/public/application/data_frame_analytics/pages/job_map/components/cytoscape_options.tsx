@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type cytoscape from 'cytoscape';
 import { ANALYSIS_CONFIG_TYPE, JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import type cytoscape from 'cytoscape';
 import type { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
@@ -21,7 +21,7 @@ const MAP_SHAPES = {
   TRIANGLE: 'triangle',
   ROUND_RECTANGLE: 'round-rectangle',
 } as const;
-type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
+type MapShapes = (typeof MAP_SHAPES)[keyof typeof MAP_SHAPES];
 
 function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
   const type = el.data('type');

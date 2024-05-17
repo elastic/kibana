@@ -9,17 +9,17 @@ import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { initTelemetry, TelemetryService } from './common/lib/telemetry';
-import { KibanaServices } from './common/lib/kibana/services';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-import { licenseService } from './common/hooks/use_license';
-import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import type { PluginContract } from './plugin_contract';
 import type { ConfigSettings } from '../common/config_settings';
 import { parseConfigSettings } from '../common/config_settings';
 import { APP_UI_ID } from '../common/constants';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import { licenseService } from './common/hooks/use_license';
+import { KibanaServices } from './common/lib/kibana/services';
+import { TelemetryService, initTelemetry } from './common/lib/telemetry';
 import type { SecuritySolutionUiConfigType } from './common/types';
+import type { PluginContract } from './plugin_contract';
 import type {
   PluginStart,
   SetupPlugins,

@@ -1,3 +1,5 @@
+import { EuiButtonEmpty, EuiFilterButton, EuiFilterGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { UserProfileWithAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import React, { FunctionComponent, useState } from 'react';
-import { EuiButtonEmpty, EuiFilterGroup, EuiFilterButton, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const PopoverDemo: FunctionComponent = () => {

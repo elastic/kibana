@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { collectDashboardTelemetry, DashboardCollectorData } from './dashboard_telemetry';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { DashboardCollectorData, collectDashboardTelemetry } from './dashboard_telemetry';
 
 export function registerDashboardUsageCollector(
   usageCollection: UsageCollectionSetup,

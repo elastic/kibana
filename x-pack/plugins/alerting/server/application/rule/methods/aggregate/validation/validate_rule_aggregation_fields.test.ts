@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getRuleTagsAggregation } from '../../../../../../common';
 import { defaultRuleAggregationFactory } from '..';
+import { getRuleTagsAggregation } from '../../../../../../common';
 
 import { validateRuleAggregationFields } from './validate_rule_aggregation_fields';
 

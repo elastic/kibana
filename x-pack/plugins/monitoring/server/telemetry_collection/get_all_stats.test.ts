@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
-import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
+import { getAllStats, getStackStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { LogstashStatsByClusterUuid } from './get_logstash_stats';

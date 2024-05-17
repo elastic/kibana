@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  isEmpty,
-  pick,
-  reduce,
-  isArray,
+  difference,
   filter,
-  uniq,
+  intersection,
+  isArray,
+  isEmpty,
   map,
   mapKeys,
-  difference,
-  intersection,
+  pick,
+  reduce,
+  uniq,
 } from 'lodash';
 import { satisfies } from 'semver';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
+import type { Shard } from '../../../common/utils/converters';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 // @ts-expect-error update types

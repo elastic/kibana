@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFlyoutFooter, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlyoutFooter } from '@elastic/eui';
 
 import { CredentialsFlyoutFooter } from './footer';
 

@@ -1,3 +1,7 @@
+import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +9,13 @@
  * 2.0.
  */
 import { Subject } from 'rxjs';
-import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import type { SecurityAppStore } from '../../../../common/store/types';
-import { createAddToTimelineLensAction, getInvestigatedValue } from './add_to_timeline';
-import { KibanaServices } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
 import type { DataProvider } from '../../../../../common/types';
-import { TimelineId, EXISTS_OPERATOR } from '../../../../../common/types';
+import { EXISTS_OPERATOR, TimelineId } from '../../../../../common/types';
+import { KibanaServices } from '../../../../common/lib/kibana';
+import type { SecurityAppStore } from '../../../../common/store/types';
 import { addProvider } from '../../../../timelines/store/actions';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { createAddToTimelineLensAction, getInvestigatedValue } from './add_to_timeline';
 
 jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();

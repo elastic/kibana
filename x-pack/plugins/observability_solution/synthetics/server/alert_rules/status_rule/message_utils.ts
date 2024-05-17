@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { ALERT_REASON_MSG } from '../action_variables';
-import { MonitorSummaryStatusRule } from './types';
+import moment from 'moment';
+import { UNNAMED_LOCATION } from '../../../common/constants';
 import {
-  MONITOR_ID,
-  MONITOR_TYPE,
-  MONITOR_NAME,
-  OBSERVER_GEO_NAME,
-  URL_FULL,
-  ERROR_MESSAGE,
   AGENT_NAME,
+  ERROR_MESSAGE,
+  MONITOR_ID,
+  MONITOR_NAME,
+  MONITOR_TYPE,
+  OBSERVER_GEO_NAME,
   STATE_ID,
+  URL_FULL,
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
-import { UNNAMED_LOCATION } from '../../../common/constants';
+import { ALERT_REASON_MSG } from '../action_variables';
+import { MonitorSummaryStatusRule } from './types';
 
 export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule) => ({
   [MONITOR_ID]: monitorSummary.monitorId,

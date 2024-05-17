@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 
 interface Props {

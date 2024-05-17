@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiModal,
@@ -17,6 +15,8 @@ import {
   EuiModalHeaderTitle,
   EuiTextColor,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 interface ExternalUrlErrorModalProps {
   url: string;

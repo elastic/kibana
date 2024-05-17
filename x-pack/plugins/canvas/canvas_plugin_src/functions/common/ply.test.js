@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { getFunctionErrors } from '../../../i18n';
 import { testTable } from './__fixtures__/test_tables';
 import { ply } from './ply';

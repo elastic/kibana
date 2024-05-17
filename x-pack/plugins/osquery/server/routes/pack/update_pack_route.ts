@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-import { set } from '@kbn/safer-lodash-set';
-import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty } from 'lodash';
-import { produce } from 'immer';
+import type { IRouter } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set';
+import { produce } from 'immer';
+import { difference, filter, find, has, isEmpty, map, mapKeys, some, uniq, unset } from 'lodash';
+import moment from 'moment-timezone';
 
-import type {
-  UpdatePacksRequestParamsSchema,
-  UpdatePacksRequestBodySchema,
-} from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
+import type {
+  UpdatePacksRequestBodySchema,
+  UpdatePacksRequestParamsSchema,
+} from '../../../common/api';
+import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import {
-  convertSOQueriesToPack,
   convertPackQueriesToSO,
+  convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
-  getInitialPolicies,
   findMatchingShards,
+  getInitialPolicies,
 } from './utils';
 
-import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObject } from '../../common/types';
-import type { PackResponseData } from './types';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
+import type { PackSavedObject } from '../../common/types';
+import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
+import type { PackResponseData } from './types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

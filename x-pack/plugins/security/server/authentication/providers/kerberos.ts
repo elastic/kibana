@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -19,6 +18,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.

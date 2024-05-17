@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createDynamicQueries } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createDynamicQueries } from './create_queries';
 
 describe('create queries', () => {
   const defualtQueryParams = {

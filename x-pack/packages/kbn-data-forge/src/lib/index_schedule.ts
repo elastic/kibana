@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
+import parser from '@kbn/datemath';
+import { ToolingLog } from '@kbn/tooling-log';
+import { isNumber, isString } from 'lodash';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import parser from '@kbn/datemath';
-import { isNumber, isString } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
 import type { Config, ParsedSchedule, Schedule } from '../types';
 import { createEvents } from './create_events';
 
@@ -23,8 +23,8 @@ const parseSchedule =
     const endTs = isNumber(schedule.end)
       ? schedule.end
       : isString(schedule.end)
-      ? parser.parse(schedule.end, { forceNow: now.toDate(), roundUp: true })?.valueOf()
-      : false;
+        ? parser.parse(schedule.end, { forceNow: now.toDate(), roundUp: true })?.valueOf()
+        : false;
     if (startTs == null || endTs == null) {
       throw new Error(`Unable to parse ${schedule.start}`);
     }
@@ -41,8 +41,8 @@ export async function indexSchedule(config: Config, client: Client, logger: Tool
       schedule.end === false && startTs.isAfter(now)
         ? moment(schedule.start + interval)
         : isNumber(schedule.end)
-        ? moment(schedule.end)
-        : false;
+          ? moment(schedule.end)
+          : false;
     // We add one interval to the start to prevent overlap with the previous schedule.
     if (end !== false && end.isBefore(startTs)) {
       const errorMessage = `Start (${startTs.toISOString()} must come before the end (${end.toISOString()}))`;

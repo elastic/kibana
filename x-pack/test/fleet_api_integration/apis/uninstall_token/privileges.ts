@@ -7,10 +7,10 @@
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { generateNAgentPolicies } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
-import { generateNAgentPolicies } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

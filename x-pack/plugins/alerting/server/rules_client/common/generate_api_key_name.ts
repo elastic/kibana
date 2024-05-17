@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { truncate, trim } from 'lodash';
+import { trim, truncate } from 'lodash';
 
 export function generateAPIKeyName(alertTypeId: string, alertName: string) {
   return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });

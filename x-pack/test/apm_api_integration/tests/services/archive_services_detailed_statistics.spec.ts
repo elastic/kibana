@@ -1,3 +1,7 @@
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +10,9 @@
  */
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ApmApiError } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ApmApiError } from '../../common/apm_api_supertest';
 
 type ServicesDetailedStatisticsReturn =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;

@@ -10,9 +10,9 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
-  deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
+  deleteMetadataStream,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { targetTags } from '../../target_tags';
 

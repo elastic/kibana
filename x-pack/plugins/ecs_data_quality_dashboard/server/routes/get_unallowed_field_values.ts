@@ -7,9 +7,9 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
+import { GET_UNALLOWED_FIELD_VALUES, INTERNAL_API_VERSION } from '../../common/constants';
 import { getUnallowedFieldValues } from '../lib';
 import { buildResponse } from '../lib/build_response';
-import { GET_UNALLOWED_FIELD_VALUES, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetUnallowedFieldValuesBody } from '../schemas/get_unallowed_field_values';
 import { API_DEFAULT_ERROR_MESSAGE } from '../translations';

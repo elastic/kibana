@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_egs_regression",
     "mappings": {
       "properties": {

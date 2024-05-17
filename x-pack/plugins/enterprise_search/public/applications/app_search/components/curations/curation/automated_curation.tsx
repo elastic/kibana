@@ -8,9 +8,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EngineLogic } from '../../engine';
@@ -19,8 +19,8 @@ import { AutomatedIcon } from '../components/automated_icon';
 
 import {
   AUTOMATED_LABEL,
-  COVERT_TO_MANUAL_BUTTON_LABEL,
   CONVERT_TO_MANUAL_CONFIRMATION,
+  COVERT_TO_MANUAL_BUTTON_LABEL,
 } from '../constants';
 
 import { getCurationsBreadcrumbs } from '../utils';
@@ -29,7 +29,7 @@ import { AutomatedCurationHistory } from './automated_curation_history';
 import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { DeleteCurationButton } from './delete_curation_button';
-import { PromotedDocuments, OrganicDocuments } from './documents';
+import { OrganicDocuments, PromotedDocuments } from './documents';
 
 export const AutomatedCuration: React.FC = () => {
   const { curationId } = useParams<{ curationId: string }>();

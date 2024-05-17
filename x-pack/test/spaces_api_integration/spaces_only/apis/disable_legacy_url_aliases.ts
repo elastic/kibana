@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SPACES } from '../../common/lib/spaces';
 import {
-  disableLegacyUrlAliasesTestSuiteFactory,
   DisableLegacyUrlAliasesTestCase,
-  TEST_CASE_TARGET_TYPE,
   TEST_CASE_SOURCE_ID,
+  TEST_CASE_TARGET_TYPE,
+  disableLegacyUrlAliasesTestSuiteFactory,
 } from '../../common/suites/disable_legacy_url_aliases';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

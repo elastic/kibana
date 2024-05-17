@@ -7,16 +7,16 @@
 
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { InfraMetricsRequestOptions } from '../../lib/adapters/metrics';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
-import { InfraMetricsRequestOptions } from '../../lib/adapters/metrics';
 
 import {
-  NodeDetailsRequestRT,
   NodeDetailsMetricDataResponseRT,
+  NodeDetailsRequestRT,
 } from '../../../common/http_api/node_details_api';
 import { throwErrors } from '../../../common/runtime_types';
 

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import * as i18n from '../translations';
-import type { Rule } from '../../types';
-import { MetaInfoDetails } from './details_info';
-import { HeaderMenu } from '../../header_menu';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
+import { HeaderMenu } from '../../header_menu';
+import type { Rule } from '../../types';
+import * as i18n from '../translations';
+import { MetaInfoDetails } from './details_info';
 
 const itemCss = css`
   border-right: 1px solid #d3dae6;

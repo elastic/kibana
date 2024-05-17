@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { DocLinksStart } from '@kbn/core/public';
+import { act } from 'react-dom/test-utils';
 
 import '../../__jest__/setup_environment';
-import { registerTestBed, TestBed } from '../../test_utils';
+import { TestBed, registerTestBed } from '../../test_utils';
 import { RuntimeField } from '../../types';
-import { RuntimeFieldForm, FormState } from '../runtime_field_form/runtime_field_form';
-import { RuntimeFieldEditor, Props } from './runtime_field_editor';
+import { FormState, RuntimeFieldForm } from '../runtime_field_form/runtime_field_form';
+import { Props, RuntimeFieldEditor } from './runtime_field_editor';
 
 const setup = (props?: Props) =>
   registerTestBed(RuntimeFieldEditor, {

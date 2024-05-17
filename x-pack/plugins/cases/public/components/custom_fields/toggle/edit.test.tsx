@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 
-import { FormTestComponent } from '../../../common/test_utils';
-import { Edit } from './edit';
-import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
+import { FormTestComponent } from '../../../common/test_utils';
+import { customFieldsConfigurationMock, customFieldsMock } from '../../../containers/mock';
+import { Edit } from './edit';
 
 describe('Edit ', () => {
   const onSubmit = jest.fn();

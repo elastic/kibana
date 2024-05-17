@@ -11,8 +11,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { defineGetRolesRoutes } from './get';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetRolesRoutes } from './get';
 
 const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';

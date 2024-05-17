@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { ErrorEmptyPrompt } from '.';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 describe('ErrorEmptyPrompt', () => {
   test('it renders the expected content', () => {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
-import { EuiSkeletonText, EuiDelayRender } from '@elastic/eui';
-import type { MarkdownSimpleProps } from './markdown_simple';
 import type { MarkdownProps } from './markdown';
+import type { MarkdownSimpleProps } from './markdown_simple';
 
 const Fallback = () => (
   <EuiDelayRender>

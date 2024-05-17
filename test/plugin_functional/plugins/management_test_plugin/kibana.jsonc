@@ -6,11 +6,7 @@
     "id": "managementTestPlugin",
     "server": false,
     "browser": true,
-    "configPath": [
-      "management_test_plugin"
-    ],
-    "requiredPlugins": [
-      "management"
-    ]
+    "configPath": ["management_test_plugin"],
+    "requiredPlugins": ["management"]
   }
 }

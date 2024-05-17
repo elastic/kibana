@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  data as telemetryMockData,
-  MockTelemetryFindings,
-} from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import expect from '@kbn/expect';
 import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import {
+  MockTelemetryFindings,
+  data as telemetryMockData,
+} from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 

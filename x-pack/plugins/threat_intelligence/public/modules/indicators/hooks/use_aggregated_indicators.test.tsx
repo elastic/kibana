@@ -6,10 +6,10 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useAggregatedIndicators, UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
-import { mockedTimefilterService, TestProvidersComponent } from '../../../mocks/test_providers';
-import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
+import { TestProvidersComponent, mockedTimefilterService } from '../../../mocks/test_providers';
+import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
+import { UseAggregatedIndicatorsParam, useAggregatedIndicators } from './use_aggregated_indicators';
 
 jest.mock('../services/fetch_aggregated_indicators');
 

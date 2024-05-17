@@ -6,8 +6,8 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { cloneDeep } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { cloneDeep } from 'lodash';
 
 /**
  * Extends an existing query with a clause to exclude the frozen tier.

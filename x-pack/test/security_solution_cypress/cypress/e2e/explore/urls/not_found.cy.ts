@@ -10,18 +10,18 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import {
   ALERTS_URL,
-  ENDPOINTS_URL,
-  TRUSTED_APPS_URL,
-  EVENT_FILTERS_URL,
-  TIMELINES_URL,
-  EXCEPTIONS_URL,
   CREATE_RULE_URL,
+  ENDPOINTS_URL,
+  EVENT_FILTERS_URL,
+  EXCEPTIONS_URL,
+  TIMELINES_URL,
+  TRUSTED_APPS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 import { NOT_FOUND } from '../../../screens/common/page';
-import { ruleDetailsUrl } from '../../../urls/rule_details';
 import { editRuleUrl } from '../../../urls/edit_rule';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 

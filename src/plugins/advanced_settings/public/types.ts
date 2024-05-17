@@ -9,11 +9,11 @@
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type {
   SectionRegistrySetup,
   SectionRegistryStart,
 } from '@kbn/management-settings-section-registry';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export type AdvancedSettingsSetup = SectionRegistrySetup;
 export type AdvancedSettingsStart = SectionRegistryStart;

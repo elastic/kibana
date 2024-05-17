@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { rerender, getPageTitle } from '../../../test_helpers';
+import { getPageTitle, rerender } from '../../../test_helpers';
 import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
 
 import { ApiLogsTable, NewApiEventsPrompt } from './components';

@@ -10,12 +10,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const ENTERPRISE_SEARCH_USER = 'enterprise_search';
 const ENTERPRISE_SEARCH_PASSWORD = 'changeme';
 import {
+  IEngine,
   createEngine,
   createMetaEngine,
+  destroyEngine,
   indexData,
   waitForIndexedDocs,
-  destroyEngine,
-  IEngine,
 } from './app_search_client';
 
 export interface IUser {

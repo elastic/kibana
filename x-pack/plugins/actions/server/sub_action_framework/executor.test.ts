@@ -12,12 +12,12 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { buildExecutor } from './executor';
 import {
-  TestSecretsSchema,
-  TestConfigSchema,
-  TestNoSubActions,
   TestConfig,
-  TestSecrets,
+  TestConfigSchema,
   TestExecutor,
+  TestNoSubActions,
+  TestSecrets,
+  TestSecretsSchema,
 } from './mocks';
 import { IService, ServiceParams } from './types';
 

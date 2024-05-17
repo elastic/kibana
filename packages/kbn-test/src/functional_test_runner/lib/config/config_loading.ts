@@ -7,15 +7,15 @@
  */
 
 import Path from 'path';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
-import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
-import { Config } from './config';
 import { EsVersion } from '../es_version';
-import { FTR_CONFIGS_MANIFEST_REL, FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
+import { Config } from './config';
+import { FTR_CONFIGS_MANIFEST_PATHS, FTR_CONFIGS_MANIFEST_REL } from './ftr_configs_manifest';
 
 interface LoadSettingsOptions {
   path: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { Fragment } from 'react';
 
 import { Repository } from '../../../../../../../common/types';
 

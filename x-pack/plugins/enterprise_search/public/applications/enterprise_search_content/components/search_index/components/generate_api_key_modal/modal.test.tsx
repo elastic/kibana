@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiModal, EuiFieldText, EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiFieldText, EuiModal } from '@elastic/eui';
 
 const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
 

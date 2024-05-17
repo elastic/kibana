@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useInvestigateInTimeline } from '../hooks/use_investigate_in_timeline';
+import React, { VFC } from 'react';
 import { Indicator } from '../../../../common/types/indicator';
+import { useInvestigateInTimeline } from '../hooks/use_investigate_in_timeline';
 import { BUTTON_ICON_LABEL } from './translations';
 
 export interface InvestigateInTimelineProps {

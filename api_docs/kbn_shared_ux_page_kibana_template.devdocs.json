@@ -39,9 +39,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
+            "signature": ["P & { children?: React.ReactNode; }"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -53,9 +51,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -69,9 +65,7 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplateKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
-        ],
+        "description": ["\nKibana-specific Provider that maps dependencies to services."],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
@@ -152,11 +146,7 @@
         "tags": [],
         "label": "KibanaPageTemplateKibanaDependencies",
         "description": [],
-        "signature": [
-          "KibanaDependencies",
-          " & ",
-          "RedirectAppLinksKibanaDependencies"
-        ],
+        "signature": ["KibanaDependencies", " & ", "RedirectAppLinksKibanaDependencies"],
         "path": "packages/shared-ux/page/kibana_template/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -209,11 +199,7 @@
         "tags": [],
         "label": "KibanaPageTemplateServices",
         "description": [],
-        "signature": [
-          "Services",
-          " & ",
-          "RedirectAppLinksServices"
-        ],
+        "signature": ["Services", " & ", "RedirectAppLinksServices"],
         "path": "packages/shared-ux/page/kibana_template/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -226,9 +212,7 @@
         "tags": [],
         "label": "NoDataConfig",
         "description": [],
-        "signature": [
-          "NoDataPageProps"
-        ],
+        "signature": ["NoDataPageProps"],
         "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,

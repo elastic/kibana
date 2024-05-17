@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { DocLinks } from '@kbn/doc-links';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,27 +18,31 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { DocLinks } from '@kbn/doc-links';
+import { i18n } from '@kbn/i18n';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { useUrlParams } from '../../../hooks/use_url_params';
-import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
+import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import { useKibana, useToasts } from '../../../../common/lib/kibana';
+import { useGetArtifact } from '../../../hooks/artifacts';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { useUrlParams } from '../../../hooks/use_url_params';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
+import { ManagementPageLoader } from '../../management_page_loader';
+import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
+import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useSetUrlParams } from '../hooks/use_set_url_params';
+import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
   ArtifactListPageUrlParams,
 } from '../types';
-import { ManagementPageLoader } from '../../management_page_loader';
-import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-import { useKibana, useToasts } from '../../../../common/lib/kibana';
-import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
-import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
-import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
-import { useGetArtifact } from '../../../hooks/artifacts';
-import type { PolicyData } from '../../../../../common/endpoint/types';
 import { ArtifactConfirmModal } from './artifact_confirm_modal';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({

@@ -16,10 +16,10 @@ import {
   RISK_SCORE_PREVIEW_URL,
 } from '../../../../../common/constants';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { buildRiskScoreServiceForRequest } from './helpers';
 
 export const riskScorePreviewRoute = (

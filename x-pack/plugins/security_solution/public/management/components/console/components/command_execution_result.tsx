@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { ReactNode, PropsWithChildren, ComponentType } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import React, { memo, useMemo } from 'react';
+import type { ComponentType, PropsWithChildren, ReactNode } from 'react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { ConsoleText } from './console_text';
 
 const COMMAND_EXECUTION_RESULT_SUCCESS_TITLE = i18n.translate(
@@ -95,8 +95,8 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
                   {title
                     ? title
                     : showAs === 'success'
-                    ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
-                    : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
+                      ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
+                      : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
                 </ConsoleText>
 
                 <EuiSpacer size="s" />

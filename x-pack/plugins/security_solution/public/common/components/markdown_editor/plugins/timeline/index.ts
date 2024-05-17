@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { plugin } from './plugin';
 import { TimelineParser } from './parser';
+import { plugin } from './plugin';
 import { TimelineMarkDownRenderer } from './processor';
 
 export { plugin, TimelineParser as parser, TimelineMarkDownRenderer as renderer };

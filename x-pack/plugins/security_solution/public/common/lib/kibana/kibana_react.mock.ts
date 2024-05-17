@@ -5,16 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import React from 'react';
 
+import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { calculateBounds } from '@kbn/data-plugin/common';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { getDefaultConfigSettings } from '../../../../common/config_settings';
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -27,37 +46,18 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_REFRESH_RATE_INTERVAL,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_TO,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_TO,
   SERVER_APP_ID,
 } from '../../../../common/constants';
+import { noCasesPermissions } from '../../../cases_test_utils';
+import { contractStartServicesMock } from '../../../mocks';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { MockUrlService } from '@kbn/share-plugin/common/mocks';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { noCasesPermissions } from '../../../cases_test_utils';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { mockApm } from '../apm/service.mock';
-import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { contractStartServicesMock } from '../../../mocks';
-import { getDefaultConfigSettings } from '../../../../common/config_settings';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
-import { calculateBounds } from '@kbn/data-plugin/common';
-import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },

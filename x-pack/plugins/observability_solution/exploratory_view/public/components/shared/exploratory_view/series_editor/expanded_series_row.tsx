@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { SeriesConfig, SeriesUrl } from '../types';
 import { PERCENTILE } from '../configurations/constants';
-import { ReportDefinitionCol } from './columns/report_definition_col';
-import { OperationTypeSelect } from './columns/operation_type_select';
 import { parseCustomFieldName } from '../configurations/lens_attributes';
-import { SeriesFilter } from './columns/series_filter';
-import { DatePickerCol } from './columns/date_picker_col';
+import { SeriesConfig, SeriesUrl } from '../types';
 import { Breakdowns } from './breakdown/breakdowns';
 import { LabelsBreakdown } from './breakdown/label_breakdown';
+import { DatePickerCol } from './columns/date_picker_col';
+import { OperationTypeSelect } from './columns/operation_type_select';
+import { ReportDefinitionCol } from './columns/report_definition_col';
+import { SeriesFilter } from './columns/series_filter';
 
 function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {
   const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);

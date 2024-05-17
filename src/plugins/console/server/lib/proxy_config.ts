@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { values } from 'lodash';
+import { AgentOptions, Agent as HttpsAgent } from 'https';
 import { format as formatUrl } from 'url';
-import { Agent as HttpsAgent, AgentOptions } from 'https';
+import { values } from 'lodash';
 
 import { WildcardMatcher } from './wildcard_matcher';
 

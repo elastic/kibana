@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { QUERY_MODE, type QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { type QueryMode, QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { getLabels } from './labels';
 

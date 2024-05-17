@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -13,65 +12,66 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs';
 
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { AppStatus, type AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
+import type { MapsSetupApi, MapsStartApi } from '@kbn/maps-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
-import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import type { MlSharedServices } from './application/services/get_shared_ml_services';
-import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSection } from './application/management';
-import type { MlLocatorParams } from './locator';
-import { MlLocatorDefinition, type MlLocator } from './locator';
-import { setDependencyCache } from './application/util/dependency_cache';
-import { registerHomeFeature } from './register_home_feature';
-import { isFullLicense, isMlEnabled } from '../common/license';
 import {
-  initEnabledFeatures,
-  type MlFeatures,
-  ML_APP_ROUTE,
-  PLUGIN_ICON_SOLUTION,
-  PLUGIN_ID,
   type ConfigSchema,
   type ExperimentalFeatures,
+  ML_APP_ROUTE,
+  type MlFeatures,
+  PLUGIN_ICON_SOLUTION,
+  PLUGIN_ID,
+  initEnabledFeatures,
   initExperimentalFeatures,
 } from '../common/constants/app';
-import type { ElasticModels } from './application/services/elastic_models_service';
-import type { MlApiServices } from './application/services/ml_api_service';
+import { isFullLicense, isMlEnabled } from '../common/license';
 import type { MlCapabilities } from '../common/types/capabilities';
+import { registerManagementSection } from './application/management';
+import type { ElasticModels } from './application/services/elastic_models_service';
+import type { MlSharedServices } from './application/services/get_shared_ml_services';
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
+import type { MlApiServices } from './application/services/ml_api_service';
+import { setDependencyCache } from './application/util/dependency_cache';
+import type { MlLocatorParams } from './locator';
+import { type MlLocator, MlLocatorDefinition } from './locator';
+import { registerHomeFeature } from './register_home_feature';
 import { AnomalySwimLane } from './shared_components';
 
 export interface MlStartDependencies {

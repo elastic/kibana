@@ -1,3 +1,4 @@
+import { log, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import expect from '@kbn/expect';
 import moment from 'moment/moment';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from './config';
 
 const defaultLogColumns = ['@timestamp', 'resource', 'content'];

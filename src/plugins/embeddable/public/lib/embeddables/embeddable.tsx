@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
-import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableAppContext } from '@kbn/presentation-publishing';
-import { Adapters } from '../types';
+import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { IContainer } from '../containers';
+import { Adapters } from '../types';
+import {
+  CommonLegacyEmbeddable,
+  legacyEmbeddableToApi,
+} from './compatibility/legacy_embeddable_to_api';
+import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 import {
   EmbeddableError,
   EmbeddableOutput,
   IEmbeddable,
   LegacyEmbeddableAPI,
 } from './i_embeddable';
-import { EmbeddableInput, ViewMode } from '../../../common/types';
-import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
-import {
-  CommonLegacyEmbeddable,
-  legacyEmbeddableToApi,
-} from './compatibility/legacy_embeddable_to_api';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';
@@ -40,7 +40,7 @@ function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
-  TNode = any
+  TNode = any,
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;

@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import type {
-  ActionTypeConfig,
-  ActionTypeSecrets,
-  ActionTypeParams,
-  ActionType,
-} from '@kbn/actions-plugin/server/types';
-import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
-  PluginStartContract as FeaturesPluginStart,
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeParams,
+  ActionTypeSecrets,
+} from '@kbn/actions-plugin/server/types';
+import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
+import type {
   PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
-import type { CasesClient } from './client';
-import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
+import type { AttachmentFramework } from './attachment_framework/types';
+import type { CasesClient } from './client';
 
 export interface CasesServerSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -77,7 +77,7 @@ export type RegisterActionType = <
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
 ) => void;

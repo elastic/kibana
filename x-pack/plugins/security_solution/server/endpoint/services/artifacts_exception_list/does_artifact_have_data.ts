@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
 /**
  * Checks to see if a given artifact list id has data

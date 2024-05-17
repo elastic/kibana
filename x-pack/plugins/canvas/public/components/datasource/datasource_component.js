@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { Fragment, PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiSpacer,
-  EuiIcon,
-  EuiCallOut,
-  EuiButtonEmpty,
   EuiHorizontalRule,
+  EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Fragment, PureComponent } from 'react';
 
 import { pluginServices } from '../../services';
-import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
+import { DatasourceSelector } from './datasource_selector';
 
 const strings = {
   getExpressionArgDescription: () =>
@@ -193,7 +193,7 @@ export class DatasourceComponent extends PureComponent {
                     disabled={isInvalid}
                     size="s"
                     onClick={this.save}
-                    fill
+                    fill={true}
                     color="success"
                     data-test-subj="canvasSaveDatasourceButton"
                   >

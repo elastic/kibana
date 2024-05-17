@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { isLegacyTableEnabled } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
-import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
-import { dynamic } from '@kbn/shared-ux-utility';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import { isLegacyTableEnabled } from '@kbn/discover-utils';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { Storage, createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import React from 'react';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =

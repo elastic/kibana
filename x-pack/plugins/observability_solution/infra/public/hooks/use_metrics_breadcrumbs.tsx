@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { useBreadcrumbs, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useEffect, useMemo } from 'react';
 import { METRICS_APP } from '../../common/constants';
 import { metricsTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';

@@ -9,8 +9,8 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
 import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';
-import { getManifestClientMock } from './mocks';
 import { ManifestClient } from './manifest_client';
+import { getManifestClientMock } from './mocks';
 
 describe('manifest_client', () => {
   describe('ManifestClient checks', () => {

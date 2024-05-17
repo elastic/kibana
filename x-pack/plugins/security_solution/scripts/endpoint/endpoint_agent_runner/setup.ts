@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getRuntimeServices, startRuntimeServices, stopRuntimeServices } from './runtime';
-import { checkDependencies } from './pre_check';
-import { enrollEndpointHost } from './elastic_endpoint';
-import type { StartRuntimeServicesOptions } from './types';
 import { startFleetServerIfNecessary } from '../common/fleet_server/fleet_server_services';
+import { enrollEndpointHost } from './elastic_endpoint';
+import { checkDependencies } from './pre_check';
+import { getRuntimeServices, startRuntimeServices, stopRuntimeServices } from './runtime';
+import type { StartRuntimeServicesOptions } from './types';
 
 export const setupAll = async (options: StartRuntimeServicesOptions) => {
   await startRuntimeServices(options);

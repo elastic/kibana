@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { LayoutDirection } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import { Ast } from '@kbn/interpreter';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
 import {
   DatasourceLayers,
@@ -19,10 +22,7 @@ import {
   Visualization,
 } from '../../types';
 import { GROUP_ID } from './constants';
-import { getMetricVisualization, MetricVisualizationState } from './visualization';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { Ast } from '@kbn/interpreter';
-import { LayoutDirection } from '@elastic/charts';
+import { MetricVisualizationState, getMetricVisualization } from './visualization';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -365,8 +365,9 @@ describe('metric visualization', () => {
     });
 
     it('builds breakdown by metric', () => {
-      expect(visualization.toExpression({ ...fullState, collapseFn: undefined }, datasourceLayers))
-        .toMatchInlineSnapshot(`
+      expect(
+        visualization.toExpression({ ...fullState, collapseFn: undefined }, datasourceLayers)
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -446,8 +447,9 @@ describe('metric visualization', () => {
       };
 
       it('adds trendline if prerequisites are present', () => {
-        expect(getTrendlineExpression({ ...fullStateWTrend, collapseFn: undefined }))
-          .toMatchInlineSnapshot(`
+        expect(
+          getTrendlineExpression({ ...fullStateWTrend, collapseFn: undefined })
+        ).toMatchInlineSnapshot(`
           Object {
             "chain": Array [
               Object {
@@ -988,7 +990,7 @@ describe('metric visualization', () => {
     const columnId = 'col-id';
 
     const cases: Array<{
-      groupId: typeof GROUP_ID[keyof typeof GROUP_ID];
+      groupId: (typeof GROUP_ID)[keyof typeof GROUP_ID];
       accessor: keyof MetricVisualizationState;
     }> = [
       { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },

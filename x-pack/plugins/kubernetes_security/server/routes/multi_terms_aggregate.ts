@@ -5,25 +5,25 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  MULTI_TERMS_AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
-  ORCHESTRATOR_CLUSTER_ID,
-  ORCHESTRATOR_RESOURCE_ID,
-  ORCHESTRATOR_NAMESPACE,
-  ORCHESTRATOR_CLUSTER_NAME,
-  CONTAINER_IMAGE_NAME,
   CLOUD_INSTANCE_NAME,
+  CONTAINER_IMAGE_NAME,
   ENTRY_LEADER_ENTITY_ID,
-  ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_INTERACTIVE,
+  ENTRY_LEADER_USER_ID,
+  MULTI_TERMS_AGGREGATE_ROUTE,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_CLUSTER_NAME,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_RESOURCE_ID,
 } from '../../common/constants';
 import {
-  MultiTermsAggregateGroupBy,
   MultiTermsAggregateBucketPaginationResult,
+  MultiTermsAggregateGroupBy,
 } from '../../common/types';
 
 export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger) => {

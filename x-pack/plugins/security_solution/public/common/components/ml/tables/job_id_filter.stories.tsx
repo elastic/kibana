@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { euiLightVars } from '@kbn/ui-theme';
+import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-theme';
-import { action } from '@storybook/addon-actions';
 import { JobIdFilter } from './job_id_filter';
 
 const withTheme = (storyFn: () => ReactNode) => (

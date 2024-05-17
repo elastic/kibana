@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
-import styled from 'styled-components';
+import type { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useAppDataView } from './use_app_data_view';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import styled from 'styled-components';
 import type { ExploratoryViewPublicPluginsStart } from '../../../..';
-import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
+import type { ExploratoryEmbeddableComponentProps, ExploratoryEmbeddableProps } from './embeddable';
+import { useAppDataView } from './use_app_data_view';
 
 const Embeddable = React.lazy(() => import('./embeddable'));
 

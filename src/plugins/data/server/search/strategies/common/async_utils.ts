@@ -7,8 +7,8 @@
  */
 
 import {
-  AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
+  AsyncSearchSubmitRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '@kbn/search-types';
 import { SearchConfigSchema } from '../../../../config';

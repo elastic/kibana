@@ -29,9 +29,7 @@
         "tags": [],
         "label": "HEATMAP_MAX_BUCKETS_SETTING",
         "description": [],
-        "signature": [
-          "\"visualization:heatmap:maxBuckets\""
-        ],
+        "signature": ["\"visualization:heatmap:maxBuckets\""],
         "path": "src/plugins/vis_types/vislib/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

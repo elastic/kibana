@@ -6,12 +6,7 @@
     "id": "aadFixtures",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "taskManager",
-      "encryptedSavedObjects"
-    ],
-    "optionalPlugins": [
-      "spaces"
-    ]
+    "requiredPlugins": ["taskManager", "encryptedSavedObjects"],
+    "optionalPlugins": ["spaces"]
   }
 }

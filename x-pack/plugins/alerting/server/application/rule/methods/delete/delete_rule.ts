@@ -7,18 +7,18 @@
 
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RawRule } from '../../../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
-import { untrackRuleAlerts, migrateLegacyActions } from '../../../../rules_client/lib';
-import { RuleAttributes } from '../../../../data/rule/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { DeleteRuleParams } from './types';
-import { deleteRuleParamsSchema } from './schemas';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { migrateLegacyActions, untrackRuleAlerts } from '../../../../rules_client/lib';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { RawRule } from '../../../../types';
+import { deleteRuleParamsSchema } from './schemas';
+import { DeleteRuleParams } from './types';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {

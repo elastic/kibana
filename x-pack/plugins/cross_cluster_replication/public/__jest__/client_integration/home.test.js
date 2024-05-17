@@ -6,7 +6,7 @@
  */
 
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { nextTick, pageHelpers, setupEnvironment } from './helpers';
 
 const { setup } = pageHelpers.home;
 

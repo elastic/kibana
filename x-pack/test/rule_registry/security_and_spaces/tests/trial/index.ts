@@ -14,25 +14,25 @@ import {
 } from '../../../common/lib/authentication';
 
 import {
-  observabilityMinReadAlertsRead,
-  observabilityMinReadAlertsReadSpacesAll,
-  observabilityMinimalRead,
-  observabilityMinimalReadSpacesAll,
   observabilityMinReadAlertsAll,
   observabilityMinReadAlertsAllSpacesAll,
+  observabilityMinReadAlertsRead,
+  observabilityMinReadAlertsReadSpacesAll,
   observabilityMinimalAll,
   observabilityMinimalAllSpacesAll,
+  observabilityMinimalRead,
+  observabilityMinimalReadSpacesAll,
 } from '../../../common/lib/authentication/roles';
 import {
-  obsMinReadAlertsRead,
-  obsMinReadAlertsReadSpacesAll,
-  obsMinRead,
-  obsMinReadSpacesAll,
-  superUser,
-  obsMinReadAlertsAll,
-  obsMinReadAlertsAllSpacesAll,
   obsMinAll,
   obsMinAllSpacesAll,
+  obsMinRead,
+  obsMinReadAlertsAll,
+  obsMinReadAlertsAllSpacesAll,
+  obsMinReadAlertsRead,
+  obsMinReadAlertsReadSpacesAll,
+  obsMinReadSpacesAll,
+  superUser,
 } from '../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

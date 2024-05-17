@@ -8,10 +8,10 @@
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
-  GetPackagePoliciesResponse,
   GetInfoResponse,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { epmRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
 
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';

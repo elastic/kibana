@@ -7,7 +7,7 @@
 
 import type { HostMetadataInterface } from '../../../../common/endpoint/types';
 import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
-import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type {
   HostItem,
   HostRiskScore,
@@ -15,7 +15,7 @@ import type {
   UserRiskScore,
 } from '../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 const userRiskScore: UserRiskScore = {

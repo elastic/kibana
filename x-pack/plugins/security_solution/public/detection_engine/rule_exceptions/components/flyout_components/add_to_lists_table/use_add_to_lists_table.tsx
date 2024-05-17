@@ -22,11 +22,11 @@ import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import { getExceptionItemsReferences } from '../../../../../exceptions/api';
-import * as i18n from './translations';
-import * as commoni18n from '../translations';
 import type { RuleReferences } from '../../../logic/use_find_references';
-import { LinkListSwitch } from './link_list_switch';
+import * as commoni18n from '../translations';
 import { getSharedListsTableColumns } from '../utils';
+import { LinkListSwitch } from './link_list_switch';
+import * as i18n from './translations';
 
 export interface ExceptionsAddToListsComponentProps {
   /**

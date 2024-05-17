@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, MouseEventHandler, useRef, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import React, { FC, MouseEventHandler, useRef, useCallback, useEffect, useMemo } from 'react';
+import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
 import { CANVAS } from '../../../i18n';
+import { CanvasWorkpad, CommitFn } from '../../../types';
+import { getUntitledWorkpadLabel } from '../../lib/doc_title';
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
 import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
-import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
-import { CanvasWorkpad, CommitFn } from '../../../types';
-import { getUntitledWorkpadLabel } from '../../lib/doc_title';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 

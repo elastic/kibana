@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useRef } from 'react';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { monaco } from '@kbn/monaco';
+import { useRef } from 'react';
 
 /**
  * Hook that returns functions for setting up and destroying a {@link ResizeChecker}

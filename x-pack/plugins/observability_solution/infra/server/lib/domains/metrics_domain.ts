@@ -6,9 +6,9 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
-import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export class InfraMetricsDomain {
   private adapter: InfraMetricsAdapter;

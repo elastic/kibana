@@ -11,10 +11,10 @@
 
 import { Observable, Subject } from 'rxjs';
 
-import { Option, none } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
+import { Option, none } from 'fp-ts/lib/Option';
+import { Result, asErr, asOk } from '../lib/result_type';
 import { TaskErrorSource } from '../task_running';
-import { Result, asOk, asErr } from '../lib/result_type';
 
 type WorkFn<H> = () => Promise<H>;
 

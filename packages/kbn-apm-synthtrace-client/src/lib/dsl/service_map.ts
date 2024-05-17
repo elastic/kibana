@@ -9,7 +9,7 @@
 import { AgentName } from '../../types/agent_names';
 import { apm } from '../apm';
 import { Instance } from '../apm/instance';
-import { elasticsearchSpan, redisSpan, sqliteSpan, Span } from '../apm/span';
+import { Span, elasticsearchSpan, redisSpan, sqliteSpan } from '../apm/span';
 import { Transaction } from '../apm/transaction';
 
 const ENVIRONMENT = 'Synthtrace: service_map';

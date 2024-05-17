@@ -19,14 +19,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ReindexStatus } from '../../../../../../../common/types';
+import { useAppContext } from '../../../../../app_context';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
-import { useAppContext } from '../../../../../app_context';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {

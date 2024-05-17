@@ -28,9 +28,7 @@
         "description": [
           "\nRuns the generate CLI. Called by `node scripts/generate` and not intended for use outside of that script"
         ],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-generate/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,

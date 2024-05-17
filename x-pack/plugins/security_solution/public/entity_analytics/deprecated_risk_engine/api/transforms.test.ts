@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
 
 const mockRequest = jest.fn();

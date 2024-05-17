@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { hasUserDataView } from './has_user_data_view';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { hasUserDataView } from './has_user_data_view';
 
 describe('hasUserDataView', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;

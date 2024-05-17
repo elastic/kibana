@@ -6,7 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { createTestConfig, CreateTestConfig } from '../common/config';
+import { CreateTestConfig, createTestConfig } from '../common/config';
 
 const apmDebugLogger = {
   name: 'plugins.apm',

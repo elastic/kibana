@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import type { TrustedApp } from '../../../../common/endpoint/types';
 

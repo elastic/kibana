@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LogicMounter, setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { LogicMounter, setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiText, EuiModal } from '@elastic/eui';
+import { EuiModal, EuiText } from '@elastic/eui';
 
 import { EntSearchLogStream } from '../../../../../shared/log_stream';
 

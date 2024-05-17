@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Observable, of } from 'rxjs';
-import { catchError, map, share } from 'rxjs';
 import { History } from 'history';
 import { throttle } from 'lodash';
-import { IStateStorage } from './types';
+import { Observable, of } from 'rxjs';
+import { catchError, map, share } from 'rxjs';
 import {
+  IKbnUrlControls,
   createKbnUrlControls,
   getStateFromKbnUrl,
-  IKbnUrlControls,
   setStateToKbnUrl,
 } from '../../state_management/url';
+import { IStateStorage } from './types';
 
 /**
  * KbnUrlStateStorage is a state storage for {@link syncState} utility which:

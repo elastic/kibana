@@ -39,9 +39,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique identifier for the categories"
-            ],
+            "description": ["\nUnique identifier for the categories"],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -68,9 +66,7 @@
             "description": [
               "\nIf the visual label isn't appropriate for screen readers,\ncan override it here"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -84,9 +80,7 @@
             "description": [
               "\nThe order that categories will be sorted in\nPrefer large steps between categories to allow for further editing\n(Default categories are in steps of 1000)"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -100,9 +94,7 @@
             "description": [
               "\nDefine an icon to be used for the category\nIf the category is only 1 item, and no icon is defined, will default to the product icon\nDefaults to initials if no icon is defined"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -122,9 +114,7 @@
         "description": [
           "\nThe class name for top level *and* nested application wrappers to ensure proper layout"
         ],
-        "signature": [
-          "\"kbnAppWrapper\""
-        ],
+        "signature": ["\"kbnAppWrapper\""],
         "path": "packages/core/application/core-application-common/src/app_wrapper_class.ts",
         "deprecated": false,
         "trackAdoption": false,

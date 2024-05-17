@@ -1,26 +1,26 @@
+import { SavedObject } from '@kbn/core-saved-objects-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core-saved-objects-server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitorAttributes,
+  MonitorFields,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsServerSetup } from '../../../types';
 import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
 } from '../../telemetry/monitor_upgrade_sender';
-import {
-  ConfigKey,
-  MonitorFields,
-  SyntheticsMonitor,
-  EncryptedSyntheticsMonitorAttributes,
-  SyntheticsMonitorWithId,
-} from '../../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 
 export const deleteMonitorBulk = async ({
   savedObjectsClient,

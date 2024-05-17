@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
-import { TrustedAppsList } from './view/trusted_apps_list';
-import { MANAGEMENT_ROUTING_TRUSTED_APPS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
+import { MANAGEMENT_ROUTING_TRUSTED_APPS_PATH } from '../../common/constants';
+import { TrustedAppsList } from './view/trusted_apps_list';
 
 export const TrustedAppsContainer = memo(() => {
   return (

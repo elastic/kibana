@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
   PostPackagePolicyPostDeleteCallback,
   PutPackagePolicyUpdateCallback,
-  PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -22,38 +24,36 @@ import type {
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
-import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
-import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
-import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
-  isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isPolicySetToEventCollectionOnly,
 } from '../../common/endpoint/models/policy_config_helpers';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
+import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
-import type { IRequestContextFactory } from '../request_context_factory';
-import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
-import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
-import { createDefaultPolicy } from './handlers/create_default_policy';
-import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
-import { validateIntegrationConfig } from './handlers/validate_integration_config';
-import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
 import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
+import type { IRequestContextFactory } from '../request_context_factory';
+import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
+import { createDefaultPolicy } from './handlers/create_default_policy';
+import { createEventFilters } from './handlers/create_event_filters';
+import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
+import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
+import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
+import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
+import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
+import { validateIntegrationConfig } from './handlers/validate_integration_config';
+import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 import type { AnyPolicyCreateConfig } from './types';
-import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
-import { createEventFilters } from './handlers/create_event_filters';
-import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
-import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T

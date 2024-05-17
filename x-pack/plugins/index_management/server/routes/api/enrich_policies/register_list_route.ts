@@ -6,9 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
+import { RouteDependencies } from '../../../types';
 
 export function registerListRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(

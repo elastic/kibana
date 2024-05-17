@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs/promises';
 import { join } from 'path';
+import fs from 'fs/promises';
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { getDataPath } from '@kbn/utils';

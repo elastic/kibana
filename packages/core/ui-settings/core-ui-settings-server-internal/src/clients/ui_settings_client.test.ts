@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { UiSettingsClient } from './ui_settings_client';
+import Chance from 'chance';
 import {
   CannotOverrideError,
   ValidationBadValueError,
   ValidationSettingNotFoundError,
 } from '../ui_settings_errors';
+import { UiSettingsClient } from './ui_settings_client';
+import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 
 const logger = loggingSystemMock.create().get();
 

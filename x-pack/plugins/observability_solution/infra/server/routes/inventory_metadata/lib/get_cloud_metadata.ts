@@ -10,11 +10,11 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
-  InfraMetadataAggregationResponse,
   InfraMetadataAggregationBucket,
+  InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
-import { InfraSourceConfiguration } from '../../../lib/sources';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { InfraSourceConfiguration } from '../../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 export interface CloudMetaData {

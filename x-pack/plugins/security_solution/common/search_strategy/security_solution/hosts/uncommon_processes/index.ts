@@ -9,15 +9,15 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { HostEcs, ProcessEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import type {
+  CommonFields,
   CursorType,
+  Hit,
+  Hits,
   Inspect,
   Maybe,
   PageInfoPaginated,
-  Hit,
-  TotalHit,
   StringOrNumber,
-  Hits,
-  CommonFields,
+  TotalHit,
 } from '../../..';
 
 export interface HostsUncommonProcessesStrategyResponse extends IEsSearchResponse {

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
 import {
-  EuiPanel,
-  EuiTitle,
-  EuiLink,
-  EuiTextArea,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiPanel,
   EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { MarkdownVisParams } from './types';

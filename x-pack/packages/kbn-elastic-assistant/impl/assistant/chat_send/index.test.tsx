@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { ChatSend, Props } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 

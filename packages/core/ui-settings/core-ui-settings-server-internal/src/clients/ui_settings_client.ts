@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UiSettingsClientCommon } from './ui_settings_client_common';
 import { UiSettingsServiceOptions } from '../types';
+import { UiSettingsClientCommon } from './ui_settings_client_common';
 
 export class UiSettingsClient extends UiSettingsClientCommon {
   constructor(options: UiSettingsServiceOptions) {

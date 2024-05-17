@@ -67,9 +67,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -102,9 +100,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-search-errors/src/es_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -117,9 +113,7 @@
                 "tags": [],
                 "label": "openInInspector",
                 "description": [],
-                "signature": [
-                  "() => void"
-                ],
+                "signature": ["() => void"],
                 "path": "packages/kbn-search-errors/src/es_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -135,9 +129,7 @@
             "tags": [],
             "label": "getErrorMessage",
             "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
+            "signature": ["() => JSX.Element"],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -151,9 +143,7 @@
             "tags": [],
             "label": "getActions",
             "description": [],
-            "signature": [
-              "() => JSX.Element[]"
-            ],
+            "signature": ["() => JSX.Element[]"],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -232,9 +222,7 @@
             "tags": [],
             "label": "openInInspector",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/kbn-search-errors/src/create_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -247,9 +235,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Services"
-            ],
+            "signature": ["Services"],
             "path": "packages/kbn-search-errors/src/create_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -290,9 +276,7 @@
         "description": [
           "\nChecks if a given errors originated from Elasticsearch.\nThose params are assigned to the attributes property of an error.\n"
         ],
-        "signature": [
-          "(e: any) => boolean"
-        ],
+        "signature": ["(e: any) => boolean"],
         "path": "packages/kbn-search-errors/src/es_error.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -304,9 +288,7 @@
             "tags": [],
             "label": "e",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -337,9 +319,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "Error"
-            ],
+            "signature": ["Error"],
             "path": "packages/kbn-search-errors/src/render_search_error.ts",
             "deprecated": false,
             "trackAdoption": false,

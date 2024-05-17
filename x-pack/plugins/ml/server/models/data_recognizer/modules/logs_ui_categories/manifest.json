@@ -17,9 +17,5 @@
       "job_id": "log-entry-categories-count"
     }
   ],
-  "tags": [
-    "logs",
-    "observability",
-    "security"
-  ]
+  "tags": ["logs", "observability", "security"]
 }

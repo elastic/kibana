@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Recognizer, RecognitionException } from 'antlr4';
+import type { RecognitionException, Recognizer } from 'antlr4';
 import { ErrorListener } from 'antlr4';
-import type { EditorError } from './types';
 import { getPosition } from './ast_position_utils';
+import type { EditorError } from './types';
 
 export class ESQLErrorListener extends ErrorListener<any> {
   protected errors: EditorError[] = [];

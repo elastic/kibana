@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
-import React from 'react';
-import { toExpression } from '@kbn/interpreter';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { toExpression } from '@kbn/interpreter';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { RendererStrings } from '../../../../i18n';
-import { TimeFilter } from './components';
-import { StartInitializer } from '../../../plugin';
+import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererHandlers } from '../../../../types';
-import { Arguments } from '../../../functions/common/timefilterControl';
 import { RendererFactory } from '../../../../types';
+import { Arguments } from '../../../functions/common/timefilterControl';
+import { StartInitializer } from '../../../plugin';
+import { TimeFilter } from './components';
 
 const { timeFilter: strings } = RendererStrings;
 

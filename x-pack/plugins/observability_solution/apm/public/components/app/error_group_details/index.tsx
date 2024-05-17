@@ -7,11 +7,14 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { omit } from 'lodash';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { maybe } from '../../../../common/utils/maybe';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -20,13 +23,10 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { ErrorSampler } from './error_sampler';
-import { ErrorDistribution } from './distribution';
-import { TopErroneousTransactions } from './top_erroneous_transactions';
-import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { ErrorDistribution } from './distribution';
+import { ErrorSampler } from './error_sampler';
+import { TopErroneousTransactions } from './top_erroneous_transactions';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;

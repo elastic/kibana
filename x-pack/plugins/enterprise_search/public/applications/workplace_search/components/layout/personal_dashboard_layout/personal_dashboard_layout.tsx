@@ -10,7 +10,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '..';
 import { FlashMessages } from '../../../../shared/flash_messages';
@@ -19,7 +19,7 @@ import { SetWorkplaceSearchChrome } from '../../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../../../../shared/loading';
 
-import { PRIVATE_SOURCES_PATH, PERSONAL_SETTINGS_PATH } from '../../../routes';
+import { PERSONAL_SETTINGS_PATH, PRIVATE_SOURCES_PATH } from '../../../routes';
 import { PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING } from '../../../views/content_sources/constants';
 
 import './personal_dashboard_layout.scss';

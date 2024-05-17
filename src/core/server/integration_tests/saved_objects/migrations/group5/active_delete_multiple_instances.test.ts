@@ -7,24 +7,24 @@
  */
 
 import Path from 'path';
-import fs from 'fs/promises';
-import { SemVer } from 'semver';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { REPO_ROOT } from '@kbn/repo-info';
+import fs from 'fs/promises';
+import { SemVer } from 'semver';
+import { createBaselineArchive } from '../kibana_migrator_archive_utils';
 import {
   defaultLogFilePath,
   getEsClient,
   getKibanaMigratorTestKit,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { baselineTypes } from './active_delete.fixtures';
 import { delay } from '../test_utils';
-import { createBaselineArchive } from '../kibana_migrator_archive_utils';
+import { baselineTypes } from './active_delete.fixtures';
 
 const PARALLEL_MIGRATORS = 6;
 const DOCUMENTS_PER_TYPE = 250000;

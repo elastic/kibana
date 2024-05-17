@@ -6,49 +6,49 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import type {
-  ColumnHeaderOptions,
-  CellValueElementProps,
-  RowRenderer,
-} from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import type { OnRowSelected } from '../../events';
-import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
-import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
-import { getEventType, isEvenEqlSequence } from '../helpers';
-import { NoteCards } from '../../../notes/note_cards';
-import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
-import { EventColumnView } from './event_column_view';
-import type { inputsModel } from '../../../../../common/store';
-import { appSelectors } from '../../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../../store';
-import type { TimelineResultNote } from '../../../open_timeline/types';
-import { getRowRenderer } from '../renderers/get_row_renderer';
-import { StatefulRowRenderer } from './stateful_row_renderer';
-import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
-import { timelineDefaults } from '../../../../store/defaults';
-import { useGetMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ControlColumnProps,
   ExpandedDetailType,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../../common/types';
+import type {
+  CellValueElementProps,
+  ColumnHeaderOptions,
+  RowRenderer,
+} from '../../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import type { inputsModel } from '../../../../../common/store';
+import { appSelectors } from '../../../../../common/store';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineDefaults } from '../../../../store/defaults';
+import { NoteCards } from '../../../notes/note_cards';
+import type { TimelineResultNote } from '../../../open_timeline/types';
+import type { OnRowSelected } from '../../events';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
+import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
+import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
+import { useGetMappedNonEcsValue } from '../data_driven_columns';
+import { getEventType, isEvenEqlSequence } from '../helpers';
+import { getRowRenderer } from '../renderers/get_row_renderer';
+import { EventColumnView } from './event_column_view';
+import { StatefulRowRenderer } from './stateful_row_renderer';
 
 interface Props {
   actionsColumnWidth: number;

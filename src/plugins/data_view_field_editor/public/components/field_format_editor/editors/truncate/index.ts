@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { formatId } from './constants';
 import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
 import { TruncateFormatEditorFormatParams } from './truncate';
 
 export type { TruncateFormatEditor } from './truncate';

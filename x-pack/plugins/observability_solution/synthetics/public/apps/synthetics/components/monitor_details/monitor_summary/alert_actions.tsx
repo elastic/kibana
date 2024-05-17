@@ -1,3 +1,14 @@
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiSkeletonText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import rison from '@kbn/rison';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +16,16 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiSkeletonText,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import rison from '@kbn/rison';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
-import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
 import { ConfigKey } from '../../../../../../common/runtime_types';
-import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
 import {
   DISABLE_STATUS_ALERT,
   ENABLE_STATUS_ALERT,
 } from '../../monitors_page/management/monitor_list_table/labels';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const AlertActions = ({ from, to }: { from: string; to: string }) => {
   const [isPopoverOpen, setPopover] = useState(false);

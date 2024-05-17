@@ -10,8 +10,8 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  obsOnlySpacesAll,
   logsOnlySpacesAll,
+  obsOnlySpacesAll,
   secOnlySpacesAllEsReadAll,
 } from '../../../common/lib/authentication/users';
 

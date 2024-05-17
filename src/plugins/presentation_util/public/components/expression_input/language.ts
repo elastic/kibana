@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '@kbn/monaco';
 import { ExpressionFunction } from '@kbn/expressions-plugin/common';
+import { monaco } from '@kbn/monaco';
 import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
 
 /**

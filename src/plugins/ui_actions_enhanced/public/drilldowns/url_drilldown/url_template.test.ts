@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { compile } from './url_template';
 import moment from 'moment-timezone';
+import { compile } from './url_template';
 
 test('should compile url without variables', async () => {
   const url = 'https://elastic.co';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import MarkdownIt from 'markdown-it';
 import type { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import type { MapConfig, TileMapConfig } from '@kbn/maps-ems-plugin/public';
+import _ from 'lodash';
+import MarkdownIt from 'markdown-it';
 import type { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN_LEGACY, TMS_IN_YML_ID } from './service_settings_types';
 /**

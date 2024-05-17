@@ -24,7 +24,7 @@ import {
   ANOMALY_SCORE_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  removeExternalLinkText,
+  INTERVAL_ABBR_VALUE,
   MACHINE_LEARNING_JOB_ID,
   // MACHINE_LEARNING_JOB_STATUS,
   MITRE_ATTACK_DETAILS,
@@ -37,10 +37,9 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-  INTERVAL_ABBR_VALUE,
+  removeExternalLinkText,
 } from '../../../../screens/rule_details';
 
-import { getDetails } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
@@ -51,6 +50,7 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
+import { getDetails } from '../../../../tasks/rule_details';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 

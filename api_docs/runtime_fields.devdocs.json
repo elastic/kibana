@@ -117,9 +117,7 @@
             "tags": [],
             "label": "isValid",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -194,9 +192,7 @@
             "type": "Function",
             "tags": [],
             "label": "onSave",
-            "description": [
-              "\nHandler for the \"save\" footer button"
-            ],
+            "description": ["\nHandler for the \"save\" footer button"],
             "signature": [
               "(field: ",
               {
@@ -242,12 +238,8 @@
             "type": "Function",
             "tags": [],
             "label": "onCancel",
-            "description": [
-              "\nHandler for the \"cancel\" footer button"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nHandler for the \"cancel\" footer button"],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -260,9 +252,7 @@
             "type": "Object",
             "tags": [],
             "label": "docLinks",
-            "description": [
-              "\nThe docLinks start service from core"
-            ],
+            "description": ["\nThe docLinks start service from core"],
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-browser",
@@ -282,9 +272,7 @@
             "type": "Object",
             "tags": [],
             "label": "defaultValue",
-            "description": [
-              "\nAn optional runtime field to edit"
-            ],
+            "description": ["\nAn optional runtime field to edit"],
             "signature": [
               {
                 "pluginId": "runtimeFields",
@@ -305,9 +293,7 @@
             "type": "Object",
             "tags": [],
             "label": "ctx",
-            "description": [
-              "\nOptional context object"
-            ],
+            "description": ["\nOptional context object"],
             "signature": [
               "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
             ],
@@ -347,9 +333,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\""
-            ],
+            "signature": ["\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\""],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -361,9 +345,7 @@
             "tags": [],
             "label": "script",
             "description": [],
-            "signature": [
-              "{ source: string; }"
-            ],
+            "signature": ["{ source: string; }"],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -397,9 +379,7 @@
         "tags": [],
         "label": "RuntimeType",
         "description": [],
-        "signature": [
-          "\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\""
-        ],
+        "signature": ["\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\""],
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -425,11 +405,7 @@
           "tags": [],
           "label": "loadEditor",
           "description": [],
-          "signature": [
-            "() => Promise<",
-            "LoadEditorResponse",
-            ">"
-          ],
+          "signature": ["() => Promise<", "LoadEditorResponse", ">"],
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { createMemoryHistory } from 'history';
 import React from 'react';
+import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
 import { render } from '../../lib/helper/rtl_helpers';
+import { fetchJourneySteps } from '../../state/api/journey';
 import {
   SyntheticsCheckSteps,
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './synthetics_checks';
-import { fetchJourneySteps } from '../../state/api/journey';
-import { createMemoryHistory } from 'history';
-import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
 
 jest.mock('../../state/api/journey', () => ({
   fetchJourneySteps: jest.fn(),

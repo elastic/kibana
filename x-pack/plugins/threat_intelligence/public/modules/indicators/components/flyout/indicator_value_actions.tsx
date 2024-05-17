@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -13,7 +12,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import React, { useState, VFC } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
 import { FilterInButtonIcon } from '../../../query_bar/components/filter_in';
 import { FilterOutButtonIcon } from '../../../query_bar/components/filter_out';
@@ -21,6 +20,7 @@ import {
   AddToTimelineButtonIcon,
   AddToTimelineContextMenu,
 } from '../../../timeline/components/add_to_timeline';
+import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../utils/field_value';
 import { CopyToClipboardButtonIcon, CopyToClipboardContextMenu } from '../common/copy_to_clipboard';
 import {

@@ -6,7 +6,7 @@
  */
 
 import { IToasts } from '@kbn/core-notifications-browser';
-import { createMachine, InterpreterFrom } from 'xstate';
+import { InterpreterFrom, createMachine } from 'xstate';
 import { ObservabilityLogsExplorerHistory } from '../../../types';
 import { FEEDBACK_DELAY_MS } from './constants';
 import { DEFAULT_CONTEXT } from './defaults';

@@ -7,12 +7,12 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
 import {
-  systemIndicesSuperuser,
   createEsClientForFtrConfig,
   createRemoteEsClientForFtrConfig,
+  systemIndicesSuperuser,
 } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';

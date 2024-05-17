@@ -7,32 +7,31 @@
 
 import { encode } from '@kbn/rison';
 
+import { getNewRule } from '../../../../objects/rule';
+import {
+  expectFilterByCustomRules,
+  expectFilterByDisabledRules,
+  expectFilterByEnabledRules,
+  expectFilterByPrebuiltRules,
+  expectFilterByTags,
+  expectFilterSearchTerm,
+  expectManagementTableRules,
+  expectNoFilterByElasticOrCustomRules,
+  expectNoFilterByEnabledOrDisabledRules,
+  expectNoFilterByTags,
+  expectRulesManagementTab,
+  expectRulesMonitoringTab,
+  filterByCustomRules,
+  filterByDisabledRules,
+  filterBySearchTerm,
+  filterByTags,
+  goToRuleDetailsOf,
+} from '../../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { DASHBOARDS_URL, KIBANA_HOME } from '../../../../urls/navigation';
-import { RULES_MANAGEMENT_URL, RULES_MONITORING_URL } from '../../../../urls/rules_management';
-import { getNewRule } from '../../../../objects/rule';
-import {
-  filterByCustomRules,
-  filterBySearchTerm,
-  filterByTags,
-  expectFilterSearchTerm,
-  expectFilterByTags,
-  expectFilterByCustomRules,
-  expectRulesManagementTab,
-  expectRulesMonitoringTab,
-  expectNoFilterByTags,
-  expectNoFilterByElasticOrCustomRules,
-  expectFilterByDisabledRules,
-  expectNoFilterByEnabledOrDisabledRules,
-  filterByDisabledRules,
-  expectFilterByPrebuiltRules,
-  expectFilterByEnabledRules,
-  expectManagementTableRules,
-  goToRuleDetailsOf,
-} from '../../../../tasks/alerts_detection_rules';
-import { createRule } from '../../../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
   expectTablePage,
@@ -41,7 +40,8 @@ import {
   setRowsPerPageTo,
   sortByTableColumn,
 } from '../../../../tasks/table_pagination';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { DASHBOARDS_URL, KIBANA_HOME } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL, RULES_MONITORING_URL } from '../../../../urls/rules_management';
 
 function createTestRules(): void {
   createRule(getNewRule({ rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false }));

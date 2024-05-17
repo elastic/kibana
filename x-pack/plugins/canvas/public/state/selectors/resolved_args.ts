@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash';
-import * as argHelper from '../../lib/resolved_arg';
-import { prepend } from '../../lib/modify_path';
 import { State } from '../../../types';
+import { prepend } from '../../lib/modify_path';
+import * as argHelper from '../../lib/resolved_arg';
 
 export function getArgs(state: State) {
   return get(state, ['transient', 'resolvedArgs']);

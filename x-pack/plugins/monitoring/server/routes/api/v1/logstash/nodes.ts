@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
-import { getNodes } from '../../../../lib/logstash/get_nodes';
-import { handleError } from '../../../../lib/errors';
-import { MonitoringCore } from '../../../../types';
 import {
   postLogstashNodesRequestParamsRT,
   postLogstashNodesRequestPayloadRT,
 } from '../../../../../common/http_api/logstash/post_logstash_nodes';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../lib/errors';
+import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
+import { getNodes } from '../../../../lib/logstash/get_nodes';
+import { MonitoringCore } from '../../../../types';
 
 export function logstashNodesRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postLogstashNodesRequestParamsRT);

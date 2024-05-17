@@ -7,15 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
+  CoreSetup,
   IKibanaResponse,
   IRouter,
-  CoreSetup,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
 } from '@kbn/core/server';
-import { range, chunk } from 'lodash';
-import { TaskManagerStartContract, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { chunk, range } from 'lodash';
 import { PerfApi, PerfResult } from './types';
 
 const scope = 'perf-testing';
@@ -76,9 +76,12 @@ export function initRoutes(
 
       return res.ok({
         body: await new Promise<PerfResult>((resolve, reject) => {
-          setTimeout(() => {
-            performanceApi.endCapture().then((perf) => resolve(perf), reject);
-          }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);
+          setTimeout(
+            () => {
+              performanceApi.endCapture().then((perf) => resolve(perf), reject);
+            },
+            durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */
+          );
         }),
       });
     }

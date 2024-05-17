@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { isJsonString } from '../../../../../../common/validators';
 import type {
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
 import { isPivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
-import { FILTERS } from './constants';
+import { isJsonString } from '../../../../../../common/validators';
 import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
+import { FILTERS } from './constants';
 import type {
   FilterAggConfigBool,
   FilterAggConfigExists,

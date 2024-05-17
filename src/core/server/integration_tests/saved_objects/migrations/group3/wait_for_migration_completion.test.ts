@@ -7,16 +7,16 @@
  */
 
 import Path from 'path';
-import fs from 'fs/promises';
-import JSON5 from 'json5';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import { Root } from '@kbn/core-root-server-internal';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import {
+  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
-  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import fs from 'fs/promises';
+import JSON5 from 'json5';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
 

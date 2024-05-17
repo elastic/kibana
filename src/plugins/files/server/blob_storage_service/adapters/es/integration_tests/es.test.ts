@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
-  createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
+  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
-import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
+import { BLOB_STORAGE_SYSTEM_INDEX_NAME, ElasticsearchBlobStorageClient } from '../es';
 
 describe('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;

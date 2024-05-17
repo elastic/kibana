@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment, { Moment } from 'moment';
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import moment, { Moment } from 'moment';
 
 export interface Usage {
   locale: string;

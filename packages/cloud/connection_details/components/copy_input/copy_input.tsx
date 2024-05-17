@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import { EuiCopy, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 
 export interface CopyInputProps {
   value: string;

@@ -6,9 +6,9 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { LensPluginStartDependencies } from '../../plugin';
-import { createMockStartDependencies } from '../../editor_frame_service/mocks';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { createMockStartDependencies } from '../../editor_frame_service/mocks';
+import type { LensPluginStartDependencies } from '../../plugin';
 import { CreateESQLPanelAction } from './create_action';
 
 describe('create Lens panel action', () => {

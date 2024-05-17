@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import _ from 'lodash';
+import moment from 'moment';
 
 import type { DateHistogramParams } from '@kbn/visualizations-plugin/public';
 

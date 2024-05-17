@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useCallback, useState } from 'react';
 
 import type { inputsModel } from '../../../../common/store';
 

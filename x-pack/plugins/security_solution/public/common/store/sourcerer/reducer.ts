@@ -8,16 +8,16 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  setSourcererDataViews,
-  setSourcererScopeLoading,
-  setSelectedDataView,
-  setSignalIndexName,
   setDataView,
   setDataViewLoading,
+  setSelectedDataView,
+  setSignalIndexName,
+  setSourcererDataViews,
+  setSourcererScopeLoading,
 } from './actions';
-import type { SourcererModel } from './model';
-import { initDataView, initialSourcererState, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
+import type { SourcererModel } from './model';
+import { SourcererScopeName, initDataView, initialSourcererState } from './model';
 
 export type SourcererState = SourcererModel;
 

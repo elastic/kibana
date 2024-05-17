@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import expect from '@kbn/expect';
+import { testGuideId } from '@kbn/guided-onboarding';
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import {
-  testGuideStep1ActiveState,
   testGuideNotActiveState,
+  testGuideParams,
+  testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2ActiveState,
-  testGuideParams,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
-  pluginStateSavedObjectsType,
-  pluginStateSavedObjectsId,
   guideStateSavedObjectsType,
+  pluginStateSavedObjectsId,
+  pluginStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import { testGuideId } from '@kbn/guided-onboarding';
-import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
-import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 

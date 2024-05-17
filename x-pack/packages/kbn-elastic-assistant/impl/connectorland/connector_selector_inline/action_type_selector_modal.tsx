@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,9 +15,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { ActionType } from '@kbn/actions-plugin/common';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { css } from '@emotion/css';
+import React, { useMemo } from 'react';
 import * as i18n from '../translations';
 
 interface Props {

@@ -7,18 +7,18 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IUnsecuredActionsClient, ActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { Logger } from '@kbn/logging';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { once } from 'lodash';
 import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib';
+import type { Logger } from '@kbn/logging';
+import { once } from 'lodash';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 
 export interface NormalizedExternalConnectorClientExecuteOptions<
   TParams extends Record<string, any> = Record<string, any>,
-  TSubAction = unknown
+  TSubAction = unknown,
 > {
   params: {
     subAction: TSubAction;
@@ -107,7 +107,7 @@ export class NormalizedExternalConnectorClient {
 
   public async execute<
     TResponse = unknown,
-    TParams extends Record<string, any> = Record<string, any>
+    TParams extends Record<string, any> = Record<string, any>,
   >({
     spaceId = 'default',
     params,

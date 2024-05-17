@@ -6,11 +6,11 @@
  */
 
 import {
-  getAllowedListForPrefix,
+  DOCKER_ALLOWED_LIST,
   ECS_ALLOWED_LIST,
   K8S_ALLOWED_LIST,
   PROMETHEUS_ALLOWED_LIST,
-  DOCKER_ALLOWED_LIST,
+  getAllowedListForPrefix,
 } from './ecs_allowed_list';
 describe('getAllowedListForPrefix()', () => {
   test('kubernetes', () => {

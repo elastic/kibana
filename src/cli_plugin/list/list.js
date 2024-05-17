@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { statSync, readdirSync, readFileSync } from 'fs';
+import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 export function list(pluginDir, logger) {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SnapshotType, Snapshot } from '../../../../common/runtime_types';
-import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
+import { Snapshot, SnapshotType } from '../../../../common/runtime_types';
+import { apiService } from './utils';
 
 export interface SnapShotQueryParams {
   dateRangeStart: string;

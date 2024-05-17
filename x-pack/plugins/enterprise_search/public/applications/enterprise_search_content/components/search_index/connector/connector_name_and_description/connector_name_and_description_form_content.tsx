@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 
-import { NAME_LABEL, DESCRIPTION_LABEL, OPTIONAL_LABEL } from '../../../../../shared/constants';
+import { DESCRIPTION_LABEL, NAME_LABEL, OPTIONAL_LABEL } from '../../../../../shared/constants';
 
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 

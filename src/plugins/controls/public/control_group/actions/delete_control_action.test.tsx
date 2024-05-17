@@ -8,17 +8,17 @@
 
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { OPTIONS_LIST_CONTROL } from '../../../common';
-import { ControlOutput } from '../../types';
-import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
-import { DeleteControlAction } from './delete_control_action';
-import { OptionsListEmbeddableInput } from '../../options_list';
-import { controlGroupInputBuilder } from '../external_api/control_group_input_builder';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { OptionsListEmbeddableFactory } from '../../options_list/embeddable/options_list_embeddable_factory';
-import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
+import { OPTIONS_LIST_CONTROL } from '../../../common';
+import { OptionsListEmbeddableInput } from '../../options_list';
+import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
+import { OptionsListEmbeddableFactory } from '../../options_list/embeddable/options_list_embeddable_factory';
+import { pluginServices } from '../../services';
+import { ControlOutput } from '../../types';
+import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { controlGroupInputBuilder } from '../external_api/control_group_input_builder';
+import { ControlGroupInput } from '../types';
+import { DeleteControlAction } from './delete_control_action';
 
 let container: ControlGroupContainer;
 let embeddable: OptionsListEmbeddable;

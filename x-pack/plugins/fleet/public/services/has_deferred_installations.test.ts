@@ -51,7 +51,7 @@ describe('isPackageUnverified', () => {
       // @ts-ignore don't want to define all experimental features here
       mockGet.mockReturnValue({
         packageVerification: false,
-      } as ReturnType<typeof ExperimentalFeaturesService['get']>);
+      } as ReturnType<(typeof ExperimentalFeaturesService)['get']>);
     });
 
     it('Should return false for a package with no installationInfo', () => {

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import rison from '@kbn/rison';
 import {
   CaseSeverity,
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { UserProfile } from '@kbn/user-profile-components';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { users, roles, casesAllUser, casesAllUser2 } from '../common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { casesAllUser, casesAllUser2, roles, users } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -770,9 +770,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.common.selectFirstRowInAssigneesPopover();
           await cases.casesTable.validateCasesTableHasNthRows(2);
 
-          const firstCaseTitle = await (
-            await cases.casesTable.getCaseByIndex(0)
-          ).findByTestSubject('case-details-link');
+          const firstCaseTitle = await (await cases.casesTable.getCaseByIndex(0)).findByTestSubject(
+            'case-details-link'
+          );
 
           const secondCaseTitle = await (
             await cases.casesTable.getCaseByIndex(1)

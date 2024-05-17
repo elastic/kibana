@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -16,10 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutDelimited,
-  EuiFormLabel,
   EuiFormFieldset,
+  EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 const StyledFieldset = styled(EuiFormFieldset)`
   &&& {
@@ -43,7 +43,7 @@ const StyledField = styled(EuiFieldText)`
 
 export type Pair = [
   string, // key
-  string // value
+  string, // value
 ];
 
 export interface KeyValuePairsFieldProps {

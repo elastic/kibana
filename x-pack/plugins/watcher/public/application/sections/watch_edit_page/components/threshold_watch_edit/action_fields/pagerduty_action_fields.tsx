@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../../../components/form_errors';
+import React, { Fragment } from 'react';
 import { PagerDutyAction } from '../../../../../../../common/types/action_types';
+import { ErrableFormRow } from '../../../../../components/form_errors';
 
 interface Props {
   action: PagerDutyAction;

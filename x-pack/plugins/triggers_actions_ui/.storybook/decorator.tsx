@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
+import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaServices, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
-import { EMPTY, of } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
-import { KibanaContextProvider } from '../public/common/lib/kibana';
+import React, { FC, PropsWithChildren } from 'react';
+import { EMPTY, of } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
-import { getHttp } from './context/http';
-import { getRuleTypeRegistry } from './context/rule_type_registry';
+import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { getActionTypeRegistry } from './context/action_type_registry';
 import { getDefaultServicesApplication } from './context/application';
+import { getHttp } from './context/http';
+import { getRuleTypeRegistry } from './context/rule_type_registry';
 
 interface StorybookContextDecoratorProps {
   context: Parameters<DecoratorFn>[1];

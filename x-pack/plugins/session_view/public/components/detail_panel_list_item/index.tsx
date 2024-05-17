@@ -1,3 +1,5 @@
+import { EuiText, EuiTextProps } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React, { useState, ReactNode } from 'react';
-import { EuiText, EuiTextProps } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
 import { useStyles } from './styles';
 
 interface DetailPanelListItemDeps {

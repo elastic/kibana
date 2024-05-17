@@ -6,14 +6,14 @@
  */
 
 import { cpu } from './snapshot/cpu';
-import { rx } from './snapshot/rx';
-import { tx } from './snapshot/tx';
 import { diskIOReadBytes } from './snapshot/disk_io_read_bytes';
 import { diskIOWriteBytes } from './snapshot/disk_io_write_bytes';
+import { rx } from './snapshot/rx';
+import { tx } from './snapshot/tx';
 
 import { awsEC2CpuUtilization } from './tsvb/aws_ec2_cpu_utilization';
-import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
+import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 
 import { InventoryMetrics } from '../../types';
 

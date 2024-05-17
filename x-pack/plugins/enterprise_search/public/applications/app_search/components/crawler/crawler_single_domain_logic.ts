@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
@@ -16,7 +16,7 @@ import { EngineLogic, generateEnginePath } from '../engine';
 
 import { CrawlerLogic } from './crawler_logic';
 
-import { CrawlerDomain, EntryPoint, Sitemap, CrawlRule, CrawlerDomainFromServer } from './types';
+import { CrawlRule, CrawlerDomain, CrawlerDomainFromServer, EntryPoint, Sitemap } from './types';
 import { crawlerDomainServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
 export interface CrawlerSingleDomainValues {
@@ -62,11 +62,11 @@ export const CrawlerSingleDomainLogic = kea<
       {
         onReceiveDomainData: (_, { domain }) => domain,
         updateCrawlRules: (currentDomain, { crawlRules }) =>
-          ({ ...currentDomain, crawlRules } as CrawlerDomain),
+          ({ ...currentDomain, crawlRules }) as CrawlerDomain,
         updateEntryPoints: (currentDomain, { entryPoints }) =>
-          ({ ...currentDomain, entryPoints } as CrawlerDomain),
+          ({ ...currentDomain, entryPoints }) as CrawlerDomain,
         updateSitemaps: (currentDomain, { sitemaps }) =>
-          ({ ...currentDomain, sitemaps } as CrawlerDomain),
+          ({ ...currentDomain, sitemaps }) as CrawlerDomain,
       },
     ],
   },

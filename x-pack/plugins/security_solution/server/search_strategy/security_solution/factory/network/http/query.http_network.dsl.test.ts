@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { expectedDsl, mockOptions } from './__mocks__';
 import { buildHttpQuery } from './query.http_network.dsl';
-import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildHttpQuery', () => {
   test('build query from options correctly', () => {

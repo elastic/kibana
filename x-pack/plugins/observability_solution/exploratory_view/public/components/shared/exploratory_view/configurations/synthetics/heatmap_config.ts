@@ -7,8 +7,8 @@
 
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
-import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
 import { SYNTHETICS_STEP_NAME } from '../constants/field_names/synthetics';
+import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
 import { buildExistsFilter } from '../utils';
 
 const SUMMARY_UP = 'summary.up';

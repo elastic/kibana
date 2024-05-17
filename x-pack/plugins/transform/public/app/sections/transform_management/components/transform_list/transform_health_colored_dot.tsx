@@ -10,10 +10,10 @@ import React, { type FC } from 'react';
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
 
 import {
-  type TransformHealthStatus,
   TRANSFORM_HEALTH_COLOR,
   TRANSFORM_HEALTH_DESCRIPTION,
   TRANSFORM_HEALTH_LABEL,
+  type TransformHealthStatus,
 } from '../../../../../../common/constants';
 
 interface TransformHealthProps {

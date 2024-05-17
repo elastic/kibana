@@ -7,17 +7,17 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
-  getRuleMock,
-  getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getFindResultWithSingleHit,
+  getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import {
   getExistingPrepackagedRules,
   getNonPackagedRules,
+  getNonPackagedRulesCount,
   getRules,
   getRulesCount,
-  getNonPackagedRulesCount,
 } from './get_existing_prepackaged_rules';
 
 describe('get_existing_prepackaged_rules', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Statement } from './statement';
-import { PluginStatement } from '../models/pipeline/plugin_statement';
-import { PluginStatement as PluginStatementComponent } from './plugin_statement';
-import { IfElement } from '../models/list/if_element';
-import { CollapsibleStatement } from './collapsible_statement';
-import { shallow } from 'enzyme';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { shallow } from 'enzyme';
+import React from 'react';
+import { IfElement } from '../models/list/if_element';
+import { PluginStatement } from '../models/pipeline/plugin_statement';
+import { CollapsibleStatement } from './collapsible_statement';
+import { PluginStatement as PluginStatementComponent } from './plugin_statement';
+import { Statement } from './statement';
 
 describe('Statement component', () => {
   let props;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsType } from '@kbn/core/server';
 import { APM_TELEMETRY_SAVED_OBJECT_ID } from '../../common/apm_saved_object_constants';
 
 export const apmTelemetry: SavedObjectsType = {

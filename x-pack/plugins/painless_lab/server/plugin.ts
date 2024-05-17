@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import { PLUGIN } from '../common/constants';
+import { registerExecuteRoute } from './routes/api';
 import { License } from './services';
 import { Dependencies } from './types';
-import { registerExecuteRoute } from './routes/api';
 
 export class PainlessLabServerPlugin implements Plugin {
   private readonly license: License;

@@ -16,9 +16,9 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 import type { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';
-import * as i18n from './translations';
 import type { JobsFilters, SecurityJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';
+import * as i18n from './translations';
 
 interface JobsTableFiltersProps {
   securityJobs: SecurityJob[];

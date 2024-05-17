@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { parse } from './parse_owners';
-import { flush } from './flush';
-import { enumeratePatterns } from './enumerate_patterns';
-import { pipe } from '../utils';
 import { reduce } from 'rxjs';
+import { pipe } from '../utils';
+import { enumeratePatterns } from './enumerate_patterns';
+import { flush } from './flush';
+import { parse } from './parse_owners';
 
 const flags = {
   string: ['src', 'dest'],

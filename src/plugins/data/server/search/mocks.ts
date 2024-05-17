@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSetup, ISearchStart } from './types';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
+import type { ISearchSetup, ISearchStart } from './types';
 
 export { createSearchSessionsClientMock } from './session/mocks';
 

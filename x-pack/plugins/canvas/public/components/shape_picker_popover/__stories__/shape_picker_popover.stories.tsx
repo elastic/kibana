@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Shape, getAvailableShapes } from '@kbn/expression-shape-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { getAvailableShapes, Shape } from '@kbn/expression-shape-plugin/common';
 import { ShapePickerPopover } from '../shape_picker_popover';
 
 class Interactive extends React.Component<{}, { value: string }> {

@@ -8,8 +8,8 @@
 
 import React from 'react';
 
+import { EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiRange, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 

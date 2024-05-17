@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import {
-  EuiFieldNumber,
-  EuiColorPicker,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiColorPickerSwatch,
   EuiButtonIcon,
+  EuiColorPicker,
+  EuiColorPickerSwatch,
+  EuiFieldNumber,
   EuiFieldNumberProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { isValidColor } from '../../../color_manipulation';
 import {
+  CustomPaletteParams,
   PaletteContinuity,
   checkIsMaxContinuity,
   checkIsMinContinuity,
-  CustomPaletteParams,
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';
-import { getAutoBoundInformation, isLastItem } from './utils';
 import {
-  ColorRangeDeleteButton,
   ColorRangeAutoDetectButton,
+  ColorRangeDeleteButton,
   ColorRangeEditButton,
 } from './color_ranges_item_buttons';
+import { getAutoBoundInformation, isLastItem } from './utils';
 
-import type { ColorRange, ColorRangeAccessor, ColorRangesActions } from './types';
 import { ColorRangesContext } from './color_ranges_context';
 import type { ColorRangeValidation } from './color_ranges_validation';
+import type { ColorRange, ColorRangeAccessor, ColorRangesActions } from './types';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;

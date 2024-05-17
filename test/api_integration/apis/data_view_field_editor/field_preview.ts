@@ -9,11 +9,11 @@
 import expect from '@kbn/expect';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
 import {
   FIELD_PREVIEW_PATH,
   INITIAL_REST_VERSION,
 } from '@kbn/data-view-field-editor-plugin/common/constants';
+import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const INDEX_NAME = 'api-integration-test-field-preview';

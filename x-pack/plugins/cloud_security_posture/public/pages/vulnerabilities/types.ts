@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VectorScoreBase, CspVulnerabilityFinding } from '../../../common/schemas';
+import { CspVulnerabilityFinding, VectorScoreBase } from '../../../common/schemas';
 
 export type Vendor = 'NVD' | 'Red Hat' | 'GHSA';
 

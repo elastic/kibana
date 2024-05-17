@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo } from 'react';
 import { ManagementEmptyStateWrapper } from './management_empty_state_wrapper';
 
 export const ManagementPageLoader = memo<{ 'data-test-subj'?: string }>(

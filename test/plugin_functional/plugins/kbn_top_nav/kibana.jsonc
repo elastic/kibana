@@ -6,11 +6,7 @@
     "id": "kbnTopNav",
     "server": false,
     "browser": true,
-    "configPath": [
-      "kbn_top_nav"
-    ],
-    "requiredPlugins": [
-      "navigation"
-    ]
+    "configPath": ["kbn_top_nav"],
+    "requiredPlugins": ["navigation"]
   }
 }

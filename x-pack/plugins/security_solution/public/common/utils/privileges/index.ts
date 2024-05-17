@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { isMlRule } from '../../../../common/machine_learning/helpers';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import * as i18nActions from '../../../detections/pages/detection_engine/rules/translations';
-import { isMlRule } from '../../../../common/machine_learning/helpers';
 import * as detectionI18n from '../../../detections/pages/detection_engine/translations';
 
 export const isBoolean = (obj: unknown): obj is boolean => typeof obj === 'boolean';

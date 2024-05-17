@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { ThreatSummaryView } from './threat_summary_view';
-import { TestProviders } from '../../../mock';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { render } from '@testing-library/react';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
-import { mockAlertDetailsData } from '../__mocks__';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../../containers/source/mock';
+import { TestProviders } from '../../../mock';
 import { mockTimelines } from '../../../mock/mock_timelines_plugin';
+import { mockAlertDetailsData } from '../__mocks__';
+import { ThreatSummaryView } from './threat_summary_view';
 
 jest.mock('../../../lib/kibana', () => ({
   useKibana: () => ({

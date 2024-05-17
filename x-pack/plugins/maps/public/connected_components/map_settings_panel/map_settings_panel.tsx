@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,12 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NavigationPanel } from './navigation_panel';
-import { SpatialFiltersPanel } from './spatial_filters_panel';
-import { DisplayPanel } from './display_panel';
-import { CustomIconsPanel } from './custom_icons_panel';
+import React from 'react';
 import { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
 import { panelStrings } from '../panel_strings';
+import { CustomIconsPanel } from './custom_icons_panel';
+import { DisplayPanel } from './display_panel';
+import { NavigationPanel } from './navigation_panel';
+import { SpatialFiltersPanel } from './spatial_filters_panel';
 
 export interface Props {
   cancelChanges: () => void;

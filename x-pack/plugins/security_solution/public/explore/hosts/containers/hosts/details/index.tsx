@@ -7,13 +7,13 @@
 
 import { useEffect, useMemo } from 'react';
 
-import type { inputsModel } from '../../../../../common/store';
 import type { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { HostsQueries } from '../../../../../../common/search_strategy/security_solution/hosts';
+import type { inputsModel } from '../../../../../common/store';
 
-import * as i18n from './translations';
-import type { InspectResponse } from '../../../../../types';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import type { InspectResponse } from '../../../../../types';
+import * as i18n from './translations';
 
 export const ID = 'hostsDetailsQuery';
 

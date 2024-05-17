@@ -8,11 +8,11 @@
 
 /* eslint-disable no-console */
 
+import { resolve } from 'path';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import chalk from 'chalk';
 import fs from 'fs/promises';
 import globby from 'globby';
-import { resolve } from 'path';
 import { fixEslint } from './lib/fix_eslint';
 import { formatOutput } from './lib/format_output';
 import { getGeneratedFilePath } from './lib/get_generated_file_path';
@@ -20,7 +20,7 @@ import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
 import type { OpenApiDocument } from './parser/openapi_types';
-import { initTemplateService, TemplateName } from './template_service/template_service';
+import { TemplateName, initTemplateService } from './template_service/template_service';
 
 export interface GeneratorConfig {
   title?: string;

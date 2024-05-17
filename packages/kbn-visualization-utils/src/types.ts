@@ -1,3 +1,4 @@
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import type { Ast } from '@kbn/interpreter';
-import type { IconType } from '@elastic/eui/src/components/icon/icon';
 
 /**
  * Indicates what was changed in this table compared to the currently active table of this layer.

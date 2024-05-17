@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './types';
 import { consoleDefinition } from './languages/console';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './types';
 
 export const getLanguageDefinitionCodeSnippet = (
   language: Partial<LanguageDefinition>,

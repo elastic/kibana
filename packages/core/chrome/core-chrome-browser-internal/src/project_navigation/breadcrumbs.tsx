@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import type {
   AppDeepLinkId,
+  ChromeBreadcrumb,
   ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
-  ChromeBreadcrumb,
-  SolutionNavigationDefinitions,
   CloudLinks,
+  SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { getSolutionNavSwitcherBreadCrumb } from '../ui/solution_nav_switcher_breadcrumbs';
 

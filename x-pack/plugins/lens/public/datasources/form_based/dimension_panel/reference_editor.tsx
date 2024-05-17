@@ -6,32 +6,32 @@
  */
 
 import './dimension_editor.scss';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRowProps, EuiSpacer } from '@elastic/eui';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import React, { useMemo } from 'react';
 import type { DateRange } from '../../../../common/types';
-import type { OperationSupportMatrix } from './operation_support';
+import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { GenericIndexPatternColumn, OperationType } from '../form_based';
 import {
+  FieldBasedIndexPatternColumn,
+  GenericOperationDefinition,
+  IncompleteColumn,
+  RequiredReference,
   getOperationDisplay,
   isOperationAllowedAsReference,
-  FieldBasedIndexPatternColumn,
-  RequiredReference,
-  IncompleteColumn,
-  GenericOperationDefinition,
 } from '../operations';
-import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
+import { FormRow } from '../operations/definitions/shared_components';
 import { hasField } from '../pure_utils';
 import type { FormBasedLayer } from '../types';
-import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
-import { FormRow } from '../operations/definitions/shared_components';
+import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
+import type { OperationSupportMatrix } from './operation_support';
 
 const operationDisplay = getOperationDisplay();
 
@@ -191,8 +191,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   const selectedOption = incompleteOperation
     ? [functionOptions?.find(({ value }) => value === incompleteOperation)!]
     : column
-    ? [functionOptions?.find(({ value }) => value === column.operationType)!]
-    : [];
+      ? [functionOptions?.find(({ value }) => value === column.operationType)!]
+      : [];
 
   // what about a field changing type and becoming invalid?
   // Let's say this change makes the indexpattern without any number field but the operation was set to a numeric operation.
@@ -275,8 +275,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
                     ? currentIndexPattern.getFieldByName(column.sourceField)
                     : possibleFieldNames?.size === 1
-                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
-                    : undefined;
+                      ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
+                      : undefined;
 
                 onChooseFunction(operationType, field);
                 return;

@@ -11,10 +11,10 @@ import type { Percentile } from '../../../../common/types';
 import { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
 import {
-  PercentileColumnWithExtendedMeta,
-  PercentileColumn,
   Column,
   CommonColumnConverterArgs,
+  PercentileColumn,
+  PercentileColumnWithExtendedMeta,
 } from './types';
 
 export const isPercentileColumnWithMeta = (

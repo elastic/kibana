@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
+import React from 'react';
 import type { JsonCodeEditorProps } from './components';
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 

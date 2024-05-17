@@ -18,7 +18,7 @@ import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
-import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
+import { CalculateDiffProps, calculateDiff, formatDiffValue } from './calculate_diff';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,

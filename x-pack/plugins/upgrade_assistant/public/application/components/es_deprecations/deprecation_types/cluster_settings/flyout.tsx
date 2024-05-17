@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiSpacer,
-  EuiCallOut,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 
 import {
-  EnrichedDeprecationInfo,
   ClusterSettingAction,
+  EnrichedDeprecationInfo,
   ResponseError,
 } from '../../../../../../common/types';
-import { uiMetricService, UIM_CLUSTER_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
+import { UIM_CLUSTER_SETTINGS_DELETE_CLICK, uiMetricService } from '../../../../lib/ui_metric';
+import { DeprecationBadge, DeprecationFlyoutLearnMoreLink } from '../../../shared';
 import type { Status } from '../../../types';
-import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface RemoveClusterSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;

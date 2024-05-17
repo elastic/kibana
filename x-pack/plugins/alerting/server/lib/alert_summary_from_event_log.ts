@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mean } from 'lodash';
 import { IEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
+import { mean } from 'lodash';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
+import { AlertStatus, AlertSummary, SanitizedRule } from '../types';
 
 export interface AlertSummaryFromEventLogParams {
   rule: SanitizedRule<{ bar: boolean }>;

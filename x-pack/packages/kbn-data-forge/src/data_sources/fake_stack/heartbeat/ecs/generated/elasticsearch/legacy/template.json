@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "kbn-data-forge-fake_stack.heartbeat-*"
-  ],
+  "index_patterns": ["kbn-data-forge-fake_stack.heartbeat-*"],
   "mappings": {
     "_meta": {
       "version": "1.6.0"

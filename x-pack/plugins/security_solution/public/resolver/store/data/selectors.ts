@@ -7,37 +7,37 @@
 
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
-import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 import type {
-  DataState,
-  Vector2,
-  IndexedEntity,
-  IndexedEdgeLineSegment,
-  IndexedTreeNode,
+  EventStats,
+  NewResolverTree,
+  ResolverNode,
+  ResolverSchema,
+  SafeResolverEvent,
+} from '../../../../common/endpoint/types';
+import * as aabbModel from '../../models/aabb';
+import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
+import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as resolverTreeModel from '../../models/resolver_tree';
+import * as timeRangeModel from '../../models/time_range';
+import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
+import * as vector2 from '../../models/vector2';
+import type {
   AABB,
-  VisibleEntites,
-  TreeFetcherParameters,
+  DataState,
+  IndexedEdgeLineSegment,
+  IndexedEntity,
+  IndexedTreeNode,
   IsometricTaxiLayout,
   NodeData,
   NodeDataStatus,
   TimeRange,
+  TreeFetcherParameters,
+  Vector2,
+  VisibleEntites,
 } from '../../types';
-import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
-import * as nodeModel from '../../../../common/endpoint/models/node';
+import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
-import type {
-  SafeResolverEvent,
-  NewResolverTree,
-  ResolverNode,
-  EventStats,
-  ResolverSchema,
-} from '../../../../common/endpoint/types';
-import * as resolverTreeModel from '../../models/resolver_tree';
-import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
-import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
-import * as timeRangeModel from '../../models/time_range';
-import * as aabbModel from '../../models/aabb';
-import * as vector2 from '../../models/vector2';
 
 /**
  * Was a request made for graph data

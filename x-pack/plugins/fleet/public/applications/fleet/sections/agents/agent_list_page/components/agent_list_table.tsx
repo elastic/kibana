@@ -1,3 +1,15 @@
+import { type CriteriaWithPagination } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,30 +17,18 @@
  * 2.0.
  */
 import React from 'react';
-import { type CriteriaWithPagination } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
+import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../services';
 import type { Agent, AgentPolicy } from '../../../../types';
-import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
 import { useAgentVersion } from '../../../../hooks';
-import { useLink, useAuthz } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 
+import type { AgentMetrics } from '../../../../../../../common/types';
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
-import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';

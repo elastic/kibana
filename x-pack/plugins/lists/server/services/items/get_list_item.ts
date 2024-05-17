@@ -8,9 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { transformElasticToListItem } from '../utils';
 import { findSourceType } from '../utils/find_source_type';
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 interface GetListItemOptions {
   id: Id;

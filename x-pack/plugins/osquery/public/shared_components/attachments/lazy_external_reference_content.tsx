@@ -7,9 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 import { useKibana } from '../../common/lib/kibana';
+import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import ServicesWrapper from '../services_wrapper';
-import { EmptyPrompt } from '../../routes/components/empty_prompt';
 
 export interface IExternalReferenceMetaDataProps {
   externalReferenceMetadata: {

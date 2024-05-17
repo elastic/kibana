@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path, { join, resolve } from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +7,14 @@
  * 2.0.
  */
 import mustache from 'mustache';
-import path, { join, resolve } from 'path';
-import fs from 'fs';
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 
+import { readConsoleRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
-import { readConsoleRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getView } from '../utils';

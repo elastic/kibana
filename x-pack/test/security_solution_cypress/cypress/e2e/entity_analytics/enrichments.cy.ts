@@ -7,29 +7,29 @@
 
 import { getNewRule } from '../../objects/rule';
 import {
-  HOST_RISK_HEADER_COLUMN,
-  USER_RISK_HEADER_COLUMN,
-  HOST_RISK_COLUMN,
-  USER_RISK_COLUMN,
   ACTION_COLUMN,
+  HOST_RISK_COLUMN,
+  HOST_RISK_HEADER_COLUMN,
+  USER_RISK_COLUMN,
+  USER_RISK_HEADER_COLUMN,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
-import { createRule } from '../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
+  closeAlertFlyout,
   expandFirstAlert,
   scrollAlertTableColumnIntoView,
-  closeAlertFlyout,
 } from '../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
+import { createRule } from '../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 
-import { ALERTS_URL } from '../../urls/navigation';
 import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
+import { ALERTS_URL } from '../../urls/navigation';
 
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';

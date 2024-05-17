@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import styled from 'styled-components';
-import { useExpandedPingList } from './use_ping_expanded';
-import { formatDuration } from '../../../../utils/formatting';
 import { Ping } from '../../../../../../../common/runtime_types';
-import * as I18LABELS from './translations';
-import { PingStatusColumn } from './columns/ping_status';
-import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL } from './translations';
-import { PingErrorCol } from './columns/ping_error';
-import { ResponseCodeColumn } from './columns/response_code';
+import { formatDuration } from '../../../../utils/formatting';
 import { ExpandRowColumn } from './columns/expand_row';
+import { PingErrorCol } from './columns/ping_error';
+import { PingStatusColumn } from './columns/ping_status';
+import { ResponseCodeColumn } from './columns/response_code';
+import * as I18LABELS from './translations';
+import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL } from './translations';
+import { useExpandedPingList } from './use_ping_expanded';
 
 interface Props {
   loading?: boolean;

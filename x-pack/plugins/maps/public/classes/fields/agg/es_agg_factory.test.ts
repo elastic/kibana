@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { esAggFieldsFactory } from './es_agg_factory';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggSource } from '../../sources/es_agg_source';
+import { esAggFieldsFactory } from './es_agg_factory';
 
 const mockEsAggSource = {
   getAggKey() {

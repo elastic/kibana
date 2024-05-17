@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import { SummaryStatus } from '../../summary_status';
-import { ApmStatusIcon } from '../status_icon';
-import { formatMetric } from '../../../lib/format_number';
+import React, { Fragment } from 'react';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { formatMetric } from '../../../lib/format_number';
+import { SummaryStatus } from '../../summary_status';
+import { ApmStatusIcon } from '../status_icon';
 
 export function Status({ alerts, stats }) {
   const {

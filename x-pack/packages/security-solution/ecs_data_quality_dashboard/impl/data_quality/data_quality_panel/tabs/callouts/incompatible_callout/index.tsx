@@ -10,9 +10,9 @@ import { EcsVersion } from '@elastic/ecs';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import type { EnrichedFieldMetadata } from '../../../../types';
 import * as i18n from '../../../index_properties/translations';
 import { CalloutItem } from '../../styles';
-import type { EnrichedFieldMetadata } from '../../../../types';
 
 interface Props {
   children?: React.ReactNode;

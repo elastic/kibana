@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { useUrlParams } from './use_url_params';
 import { PAGE_SIZE_OPTIONS, usePagination } from './use_pagination';
 import type { Pagination } from './use_pagination';
+import { useUrlParams } from './use_url_params';
 
 type SetUrlPagination = (pagination: Pagination) => void;
 interface UrlPagination {

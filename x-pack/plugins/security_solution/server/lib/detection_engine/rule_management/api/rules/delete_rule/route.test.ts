@@ -6,17 +6,17 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import {
-  getEmptyFindResult,
-  resolveRuleMock,
   getDeleteRequest,
-  getFindResultWithSingleHit,
   getDeleteRequestById,
+  getEmptyFindResult,
   getEmptySavedObjectsResponse,
+  getFindResultWithSingleHit,
+  resolveRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { deleteRuleRoute } from './route';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
+import { deleteRuleRoute } from './route';
 
 describe('Delete rule route', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import { EuiCode, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, EuiLink, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
 
 import { useMlKibana } from '../../contexts/kibana';
 

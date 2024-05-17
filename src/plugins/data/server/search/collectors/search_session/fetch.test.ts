@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
-import { fetchProvider } from './fetch';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { fetchProvider } from './fetch';
 
 describe('fetchProvider', () => {
   let fetchFn: any;

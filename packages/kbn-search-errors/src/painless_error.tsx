@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
+import { EuiButtonEmpty, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { IEsError } from './types';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EsError } from './es_error';
+import type { IEsError } from './types';
 
 export class PainlessError extends EsError {
   private readonly applicationStart: ApplicationStart;

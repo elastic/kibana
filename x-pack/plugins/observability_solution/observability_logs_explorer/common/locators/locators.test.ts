@@ -8,12 +8,12 @@
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorParams,
-  SingleDatasetLocatorParams,
   ObsLogsExplorerDataViewLocatorParams,
+  SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
 import { AllDatasetsLocatorDefinition } from './all_datasets_locator';
 import { DataViewLocatorDefinition } from './data_view_locator';
+import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset_locator';
 import { ObsLogsExplorerLocatorDependencies } from './types';
 

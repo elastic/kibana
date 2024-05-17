@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
+import React, { FunctionComponent } from 'react';
 
 import {
   EuiBadge,
@@ -21,9 +21,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Phase } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
+import { UseField, useFormErrorsContext, usePhaseTimings } from '../../../form';
 import { i18nTexts } from '../../../i18n_texts';
 import { FormInternal } from '../../../types';
-import { UseField, useFormErrorsContext, usePhaseTimings } from '../../../form';
 import { MinAgeField } from '../shared_fields';
 
 import './phase_title.scss';

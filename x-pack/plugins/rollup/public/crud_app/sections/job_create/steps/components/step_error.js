@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 

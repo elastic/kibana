@@ -6,8 +6,8 @@
  */
 
 import { isEqual } from 'lodash';
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { SparklineFlotChart } from './sparkline_flot_chart';
 import './sparkline.scss';
 

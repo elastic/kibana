@@ -7,14 +7,14 @@
 
 import { keys } from 'lodash';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
+import { AlertInstanceContext, AlertInstanceState, RawAlertInstance } from '../types';
 
 // determines which alerts to return in the state
 export function determineAlertsToReturn<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}

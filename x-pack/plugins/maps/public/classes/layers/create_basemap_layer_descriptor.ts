@@ -6,14 +6,14 @@
  */
 
 import _ from 'lodash';
-import { LayerDescriptor } from '../../../common/descriptor_types';
-import { getKibanaTileMap } from '../../util';
-import { getEMSSettings } from '../../kibana_services';
-import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
-import { RasterTileLayer } from './raster_tile_layer/raster_tile_layer';
-import { EmsVectorTileLayer } from './ems_vector_tile_layer/ems_vector_tile_layer';
-import { EMSTMSSource } from '../sources/ems_tms_source';
 import { AUTOSELECT_EMS_LOCALE } from '../../../common/constants';
+import { LayerDescriptor } from '../../../common/descriptor_types';
+import { getEMSSettings } from '../../kibana_services';
+import { getKibanaTileMap } from '../../util';
+import { EMSTMSSource } from '../sources/ems_tms_source';
+import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
+import { EmsVectorTileLayer } from './ems_vector_tile_layer/ems_vector_tile_layer';
+import { RasterTileLayer } from './raster_tile_layer/raster_tile_layer';
 
 export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const tilemapSourceFromKibana = getKibanaTileMap();

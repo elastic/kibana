@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { useDispatch } from 'react-redux';
 import type { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useGetUrlParams, useGenerateUpdatedKueryString, useUrlParams } from '../../../hooks';
-import { setEsKueryString } from '../../../state/actions';
+import React, { useCallback, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import useDebounce from 'react-use/lib/useDebounce';
 import { UptimePluginServices } from '../../../../plugin';
+import { useGenerateUpdatedKueryString, useGetUrlParams, useUrlParams } from '../../../hooks';
+import { setEsKueryString } from '../../../state/actions';
 
 export enum SyntaxType {
   text = 'text',
@@ -58,11 +58,11 @@ export const useQueryBar = (): UseQueryBarUtils => {
           language: SyntaxType.text,
         }
       : search
-      ? { query: search, language: SyntaxType.kuery }
-      : {
-          query: '',
-          language: storage.get(SYNTAX_STORAGE) ?? SyntaxType.text,
-        }
+        ? { query: search, language: SyntaxType.kuery }
+        : {
+            query: '',
+            language: storage.get(SYNTAX_STORAGE) ?? SyntaxType.text,
+          }
   );
 
   const [, updateUrlParams] = useUrlParams();

@@ -19,19 +19,19 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   HOST_NAME,
-  SERVICE_VERSION,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
   SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
-  KUBERNETES_POD_NAME,
-  KUBERNETES_POD_UID,
+  SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
 
 import {
   KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
   KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
-  KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../../../common/es_fields/infra_metrics';
 
 import { isPending } from '../../../../hooks/use_fetcher';

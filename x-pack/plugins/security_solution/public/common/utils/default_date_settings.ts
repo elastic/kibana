@@ -6,20 +6,20 @@
  */
 
 import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
+import moment from 'moment';
 
-import { getPreviousTimeRange } from './get_time_range';
 import {
-  DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
   DEFAULT_FROM,
-  DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_TO,
 } from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
 import type { Policy } from '../store/inputs/model';
+import { getPreviousTimeRange } from './get_time_range';
 
 interface DefaultTimeRange {
   from?: string | null;

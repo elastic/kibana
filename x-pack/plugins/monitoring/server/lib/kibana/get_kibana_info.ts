@@ -10,11 +10,11 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
 import { MissingRequiredError } from '../error_missing_required';
+import { KibanaMetric } from '../metrics';
 import { buildKibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
-import { createQuery } from '../create_query';
-import { KibanaMetric } from '../metrics';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const hit = resp.hits?.hits[0];

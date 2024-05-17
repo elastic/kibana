@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import React from 'react';
 
 export function SizeLabel() {
   return (

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
 import { SOContentStorage } from '@kbn/content-management-utils';
+import type { Logger } from '@kbn/logging';
 import { CONTENT_ID } from '../../common';
 import type { LinksCrudTypes } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';

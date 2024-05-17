@@ -8,8 +8,6 @@
 
 import React, { useCallback, useState } from 'react';
 import './document_explorer_callout.scss';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,9 +16,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTourContext } from '../../../../components/discover_tour';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 

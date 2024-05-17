@@ -7,8 +7,8 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { OverviewStatusState } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
+import { OverviewStatusState } from '../../../../../common/runtime_types';
 import { clearOverviewStatusErrorAction, fetchOverviewStatusAction } from './actions';
 
 export interface OverviewStatusStateReducer {

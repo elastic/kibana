@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import React from 'react';
+import sinon from 'sinon';
 
-import { Frequency } from './types';
 import { CronEditor } from './cron_editor';
+import { Frequency } from './types';
 
 describe('CronEditor', () => {
   ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {

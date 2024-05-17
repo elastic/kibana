@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { handleActions, type Action } from 'redux-actions';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
+import { type Action, handleActions } from 'redux-actions';
 import type { MonitorSummariesResult } from '../../../../common/runtime_types';
+import { getMonitorList, getMonitorListFailure, getMonitorListSuccess } from '../actions';
 
 export interface MonitorList {
   loading: boolean;

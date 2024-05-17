@@ -7,17 +7,17 @@
 import { omit } from 'lodash';
 import { FormattedValue } from './common';
 import {
-  formatMonitorConfigFields,
   formatHeartbeatRequest,
+  formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './format_configs';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  ConfigKey,
-  MonitorTypeEnum,
   CodeEditorMode,
+  ConfigKey,
   MonitorFields,
+  MonitorTypeEnum,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
   SyntheticsMonitor,

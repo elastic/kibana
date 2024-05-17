@@ -7,14 +7,14 @@
 
 import { connect } from 'react-redux';
 
-import { RevertToBasic as PresentationComponent } from './revert_to_basic';
+import { cancelStartBasicLicense, startBasicLicense } from '../../../store/actions/start_basic';
 import {
-  startBasicLicenseNeedsAcknowledgement,
   getLicenseType,
-  shouldShowRevertToBasicLicense,
   getStartBasicMessages,
+  shouldShowRevertToBasicLicense,
+  startBasicLicenseNeedsAcknowledgement,
 } from '../../../store/reducers/license_management';
-import { startBasicLicense, cancelStartBasicLicense } from '../../../store/actions/start_basic';
+import { RevertToBasic as PresentationComponent } from './revert_to_basic';
 
 const mapStateToProps = (state) => {
   return {

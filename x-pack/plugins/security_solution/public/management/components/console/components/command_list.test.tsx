@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
+import React from 'react';
 import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../mocks';
 import {
   getCommandListMock,
   getConsoleTestSetup,
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
-import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];

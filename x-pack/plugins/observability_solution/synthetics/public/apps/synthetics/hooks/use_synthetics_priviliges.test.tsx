@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { render, WrappedHelper } from '../utils/testing';
+import { WrappedHelper, render } from '../utils/testing';
 import { useSyntheticsPrivileges } from './use_synthetics_priviliges';
 
 jest.mock('../../../hooks/use_capabilities', () => ({

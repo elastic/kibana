@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { renderHook } from '@testing-library/react-hooks';
 import { usePanelSideNavItems } from './use_panel_side_nav_items';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 

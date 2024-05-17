@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import React from 'react';
 
 export interface ICoreStartContext {
   appName: string;

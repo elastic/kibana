@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiCheckbox,
   EuiButtonIcon,
-  EuiPopover,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 import type { ControlColumnProps } from '../../../common/types';
 
 const SelectionHeaderCell = () => {

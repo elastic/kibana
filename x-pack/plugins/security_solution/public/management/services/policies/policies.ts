@@ -7,7 +7,7 @@
 
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type { GetPackagePoliciesRequest } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { INGEST_API_PACKAGE_POLICIES } from './ingest';
 

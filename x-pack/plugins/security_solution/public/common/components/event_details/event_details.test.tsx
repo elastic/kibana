@@ -12,22 +12,22 @@ import React from 'react';
 
 import '../../mock/react_beautiful_dnd';
 import {
+  TestProviders,
   mockDetailItemData,
   mockDetailItemDataId,
   mockEcsDataWithAlert,
   rawEventData,
-  TestProviders,
 } from '../../mock';
 
-import { EventDetails, EVENT_DETAILS_CONTEXT_ID, EventsViewType } from './event_details';
-import { mockBrowserFields } from '../../containers/source/mock';
-import { mockAlertDetailsData } from './__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
-import { useKibana } from '../../lib/kibana';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useKibana } from '../../lib/kibana';
+import { mockAlertDetailsData } from './__mocks__';
+import { EVENT_DETAILS_CONTEXT_ID, EventDetails, EventsViewType } from './event_details';
 
 jest.mock('../../hooks/use_experimental_features');
 jest.mock('../../../timelines/components/timeline/body/renderers', () => {

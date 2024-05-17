@@ -8,6 +8,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { pick } from 'lodash';
 import {
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_FLAPPING,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
@@ -19,14 +21,12 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  ALERT_WORKFLOW_STATUS,
   ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
-  ALERT_FLAPPING,
   TAGS,
-  ALERT_CONSECUTIVE_MATCHES,
 } from '../../common/technical_rule_data_field_names';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';

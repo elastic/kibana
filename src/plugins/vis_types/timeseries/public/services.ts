@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { I18nStart, IUiSettingsClient, CoreStart } from '@kbn/core/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CoreStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

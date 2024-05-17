@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { summarizeCustomElements } from './custom_element_collector';
 import { TelemetryCustomElementDocument } from '../../types';
+import { summarizeCustomElements } from './custom_element_collector';
 
 function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElementDocument {
   return {

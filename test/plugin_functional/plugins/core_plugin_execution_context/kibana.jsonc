@@ -6,8 +6,6 @@
     "id": "corePluginExecutionContext",
     "server": true,
     "browser": false,
-    "configPath": [
-      "core_plugin_execution_context"
-    ]
+    "configPath": ["core_plugin_execution_context"]
   }
 }

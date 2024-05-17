@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getAlertsTableDefaultAlertActionsLazy } from '@kbn/triggers-actions-ui-plugin/public/common/get_alerts_table_default_row_actions';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { getAlertsTableDefaultAlertActionsLazy } from '@kbn/triggers-actions-ui-plugin/public/common/get_alerts_table_default_row_actions';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import React from 'react';
 
 const triggersActionsUiStartMock = {
   createStart() {

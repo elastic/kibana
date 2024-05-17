@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiCode, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBetaBadge, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { FIELD_TYPES, ToggleField, UseField, Field } from '../../../../../../shared_imports';
+import { FIELD_TYPES, Field, ToggleField, UseField } from '../../../../../../shared_imports';
 
-import { FieldsConfig, from, to } from './shared';
-import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
-import { TargetField } from './common_fields/target_field';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { PropertiesField } from './common_fields/properties_field';
+import { TargetField } from './common_fields/target_field';
+import { FieldsConfig, from, to } from './shared';
 
 const propertyOptions: Array<EuiComboBoxOptionOption<string>> = [
   { label: 'name' },

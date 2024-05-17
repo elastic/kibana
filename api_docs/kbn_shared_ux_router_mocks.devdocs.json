@@ -26,9 +26,7 @@
         "tags": [],
         "label": "foo",
         "description": [],
-        "signature": [
-          "() => string"
-        ],
+        "signature": ["() => string"],
         "path": "packages/shared-ux/router/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,

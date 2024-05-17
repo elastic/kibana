@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject } from 'rxjs';
-import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointComponentApi, ChangePointEmbeddableState } from './types';
 
 type ChangePointEmbeddableCustomState = Omit<

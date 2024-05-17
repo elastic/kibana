@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { CurrentRouteContextProvider } from './use_current_route';
 import { RouteMatch } from './types';
+import { CurrentRouteContextProvider } from './use_current_route';
 import { useMatchRoutes } from './use_match_routes';
 
 export function RouteRenderer() {
@@ -16,12 +16,15 @@ export function RouteRenderer() {
   return matches
     .concat()
     .reverse()
-    .reduce((prev, match) => {
-      const { element } = match.route;
-      return (
-        <CurrentRouteContextProvider match={match} element={prev}>
-          {element}
-        </CurrentRouteContextProvider>
-      );
-    }, <></>);
+    .reduce(
+      (prev, match) => {
+        const { element } = match.route;
+        return (
+          <CurrentRouteContextProvider match={match} element={prev}>
+            {element}
+          </CurrentRouteContextProvider>
+        );
+      },
+      <></>
+    );
 }

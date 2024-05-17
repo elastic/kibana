@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
+import type { Observable } from 'rxjs';
 
 /** @internal */
 export interface UiPlugins {

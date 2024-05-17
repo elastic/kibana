@@ -6,35 +6,35 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
+  DataPublicPluginStart,
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
-  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import _ from 'lodash';
+import { VisualizationSavedObjectAttributes } from '../../common';
 import { VisualizationSavedObject } from '../../common/content_management';
-import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
-import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
-import type {
-  VisSavedObject,
-  SerializedVis,
-  ISavedVis,
-  SaveVisOptions,
-  GetVisOptions,
-  StartServices,
-} from '../types';
-import type { TypesStart, BaseVisType } from '../vis_types';
+import { visualizationsClient } from '../content_management';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
-import { injectReferences, extractReferences } from './saved_visualization_references';
+import type {
+  GetVisOptions,
+  ISavedVis,
+  SaveVisOptions,
+  SerializedVis,
+  StartServices,
+  VisSavedObject,
+} from '../types';
+import type { BaseVisType, TypesStart } from '../vis_types';
+import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
+import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
-import { visualizationsClient } from '../content_management';
-import { VisualizationSavedObjectAttributes } from '../../common';
+import { extractReferences, injectReferences } from './saved_visualization_references';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -167,12 +167,15 @@ export async function findListItems(
   const extensions = visAliases
     .map((v) => v.appExtensions?.visualizations)
     .filter(Boolean) as VisualizationsAppExtension[];
-  const extensionByType = extensions.reduce((acc, m) => {
-    return m!.docTypes.reduce((_acc, type) => {
-      acc[type] = m;
-      return acc;
-    }, acc);
-  }, {} as { [visType: string]: VisualizationsAppExtension });
+  const extensionByType = extensions.reduce(
+    (acc, m) => {
+      return m!.docTypes.reduce((_acc, type) => {
+        acc[type] = m;
+        return acc;
+      }, acc);
+    },
+    {} as { [visType: string]: VisualizationsAppExtension }
+  );
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
@@ -390,25 +393,25 @@ export async function saveVisualization(
     const resp = confirmOverwrite
       ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
       : savedObject.id
-      ? await visualizationsClient.update({
-          id: savedObject.id,
-          data: {
-            ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
-          },
-          options: {
-            overwrite: true,
-            references: extractedRefs.references,
-          },
-        })
-      : await visualizationsClient.create({
-          data: {
-            ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
-          },
-          options: {
-            overwrite: true,
-            references: extractedRefs.references,
-          },
-        });
+        ? await visualizationsClient.update({
+            id: savedObject.id,
+            data: {
+              ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
+            },
+            options: {
+              overwrite: true,
+              references: extractedRefs.references,
+            },
+          })
+        : await visualizationsClient.create({
+            data: {
+              ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
+            },
+            options: {
+              overwrite: true,
+              references: extractedRefs.references,
+            },
+          });
 
     savedObject.id = resp.item.id;
     savedObject.lastSavedTitle = savedObject.title;

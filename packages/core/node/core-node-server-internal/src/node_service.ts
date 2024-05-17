@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
-import { camelCase } from 'lodash';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
+import { camelCase } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import {
-  type NodeConfigType,
-  type NodeRolesConfig,
   NODE_ALL_ROLES,
   NODE_CONFIG_PATH,
-  NODE_WILDCARD_CHAR,
   NODE_DEFAULT_ROLES,
+  NODE_WILDCARD_CHAR,
+  type NodeConfigType,
+  type NodeRolesConfig,
 } from './node_config';
 
 const DEFAULT_ROLES = [...NODE_DEFAULT_ROLES];

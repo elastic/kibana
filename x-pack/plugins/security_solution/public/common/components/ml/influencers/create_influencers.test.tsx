@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { mount, shallow } from 'enzyme';
+import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { mockAnomalies } from '../mock';
-import { cloneDeep } from 'lodash/fp';
-import { shallow, mount } from 'enzyme';
 import { createInfluencers, createKeyAndValue } from './create_influencers';
 
 describe('create_influencers', () => {

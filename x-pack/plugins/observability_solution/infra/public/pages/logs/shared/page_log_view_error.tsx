@@ -7,16 +7,16 @@
 
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, FC, PropsWithChildren } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { useSelector } from '@xstate/react';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
-  FetchLogViewStatusError,
   FetchLogViewError,
+  FetchLogViewStatusError,
   ResolveLogViewError,
 } from '@kbn/logs-shared-plugin/common';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useSelector } from '@xstate/react';
+import React, { useCallback, FC, PropsWithChildren } from 'react';
 import { LogsPageTemplate } from './page_template';
 
 export const LogViewErrorPage: React.FC<{

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { apm, ApmFields, httpExitSpan, Serializable } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
+import { ApmFields, Serializable, apm, httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';

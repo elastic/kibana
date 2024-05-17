@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { FormHook, FieldConfig } from '../types';
-import { getFieldValidityAndErrorMessage } from '../helpers';
 import { useFormContext } from '../form_context';
-import { useField, InternalFieldConfig } from '../hooks';
+import { getFieldValidityAndErrorMessage } from '../helpers';
+import { InternalFieldConfig, useField } from '../hooks';
+import { FieldConfig, FormHook } from '../types';
 
 export interface Props {
   path: string;
@@ -126,7 +126,7 @@ export const UseArray = ({
           ({
             ...row,
             path: `${path}[${index}]`,
-          } as ArrayItem)
+          }) as ArrayItem
       );
     },
     [path]

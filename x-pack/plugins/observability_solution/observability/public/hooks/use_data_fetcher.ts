@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../utils/kibana_react';

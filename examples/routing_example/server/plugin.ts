@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 
 export class RoutingExamplePlugin implements Plugin<{}, {}> {

@@ -6,20 +6,20 @@
  */
 
 import {
+  EuiButton,
   EuiComboBoxOptionOption,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
-import { isEmpty, findIndex, orderBy } from 'lodash';
+import { findIndex, isEmpty, orderBy } from 'lodash';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 

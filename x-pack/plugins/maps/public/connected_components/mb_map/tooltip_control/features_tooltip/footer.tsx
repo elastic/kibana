@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiPagination,
   EuiSelect,
   EuiSelectOption,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTextColor,
-  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import { TooltipFeature } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 

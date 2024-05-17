@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AbstractStyleProperty } from './style_property';
 import { SYMBOLIZE_AS_TYPES } from '../../../../../common/constants';
 import { SymbolizeAsOptions } from '../../../../../common/descriptor_types';
+import { AbstractStyleProperty } from './style_property';
 
 export class SymbolizeAsProperty extends AbstractStyleProperty<SymbolizeAsOptions> {
   isSymbolizedAsIcon = () => {

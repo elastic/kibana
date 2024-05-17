@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { basicCase } from './mock';
-import * as api from './api';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import { useToasts } from '../common/lib/kibana';
+import * as api from './api';
 import { casesQueriesKeys } from './constants';
+import { basicCase } from './mock';
 import { useReplaceCustomField } from './use_replace_custom_field';
 
 jest.mock('./api');

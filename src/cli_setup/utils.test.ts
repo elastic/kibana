@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { decodeEnrollmentToken, getCommand } from './utils';
 import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
+import { decodeEnrollmentToken, getCommand } from './utils';
 
 describe('kibana setup cli', () => {
   describe('getCommand', () => {

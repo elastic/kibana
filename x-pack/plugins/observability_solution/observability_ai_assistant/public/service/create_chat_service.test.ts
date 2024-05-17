@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core/public';
-import { filter, lastValueFrom, Observable } from 'rxjs';
-import { ReadableStream } from 'stream/web';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { Observable, filter, lastValueFrom } from 'rxjs';
+import { ReadableStream } from 'stream/web';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionError,

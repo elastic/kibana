@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import { basename } from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { basename } from 'path';
-import * as cborx from 'cbor-x';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
+import * as cborx from 'cbor-x';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  FILE_STORAGE_DATA_INDEX,
+  FILE_STORAGE_METADATA_INDEX,
+} from '../../../common/endpoint/constants';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
+import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
+import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import type {
   ActionDetails,
   EndpointAction,
   EndpointActionData,
   EndpointActionResponse,
+  EndpointActionResponseDataOutput,
   FileUploadMetadata,
   GetProcessesActionOutputContent,
   LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  EndpointActionResponseDataOutput,
 } from '../../../common/endpoint/types';
-import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
-import {
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-  FILE_STORAGE_DATA_INDEX,
-  FILE_STORAGE_METADATA_INDEX,
-} from '../../../common/endpoint/constants';
+import { generateFileMetadataDocumentMock } from '../../../server/endpoint/services/actions/mocks';
 import { sendEndpointMetadataUpdate } from './endpoint_metadata_services';
 import { checkInFleetAgent } from './fleet_services';
-import { generateFileMetadataDocumentMock } from '../../../server/endpoint/services/actions/mocks';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 export const fleetActionGenerator = new FleetActionGenerator();
@@ -251,7 +251,7 @@ export const sendEndpointActionResponse = async (
   return endpointResponse as unknown as LogsEndpointActionResponse;
 };
 type ResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();

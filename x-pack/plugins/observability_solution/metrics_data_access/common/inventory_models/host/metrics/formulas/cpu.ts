@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import {
   CPU_USAGE_LABEL,
-  LOAD_15M_LABEL,
   LOAD_1M_LABEL,
   LOAD_5M_LABEL,
+  LOAD_15M_LABEL,
   NORMALIZED_LOAD_LABEL,
 } from '../../../shared/charts/constants';
 

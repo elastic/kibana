@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JobStat } from '@kbn/ml-plugin/public';
-import { MachineLearningFlyout } from './ml_flyout_container';
+import React, { useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getMLJobId } from '../../../../../common/lib';
+import { UptimeRefreshContext } from '../../../contexts';
+import { useMonitorId } from '../../../hooks';
+import { deleteMLJobAction, getExistingMLJobAction, resetMLState } from '../../../state/actions';
 import {
   hasMLFeatureSelector,
   hasMLJobSelector,
   isMLJobDeletedSelector,
   isMLJobDeletingSelector,
 } from '../../../state/selectors';
-import { deleteMLJobAction, getExistingMLJobAction, resetMLState } from '../../../state/actions';
 import { ConfirmJobDeletion } from './confirm_delete';
-import { UptimeRefreshContext } from '../../../contexts';
-import * as labels from './translations';
 import { ManageMLJobComponent } from './manage_ml_job';
-import { useMonitorId } from '../../../hooks';
-import { getMLJobId } from '../../../../../common/lib';
+import { MachineLearningFlyout } from './ml_flyout_container';
+import * as labels from './translations';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);

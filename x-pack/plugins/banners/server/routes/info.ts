@@ -7,8 +7,8 @@
 
 import { IUiSettingsClient } from '@kbn/core/server';
 import { ILicense } from '@kbn/licensing-plugin/server';
+import { BannerConfiguration, BannerInfoResponse, BannerPlacement } from '../../common';
 import { BannersConfigType } from '../config';
-import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
 import { BannersRouter } from '../types';
 
 export const registerInfoRoute = (router: BannersRouter, config: BannersConfigType) => {

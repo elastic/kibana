@@ -7,17 +7,17 @@
  */
 
 import Fs from 'fs';
-import { join } from 'path';
 import http from 'http';
+import { join } from 'path';
 
-import sinon from 'sinon';
-import nock from 'nock';
-import globby from 'globby';
 import del from 'del';
+import globby from 'globby';
+import nock from 'nock';
+import sinon from 'sinon';
 
 import { Logger } from '../../cli/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
-import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
+import { _checkFilePathDeprecation, _downloadSingle, _getFilePath, download } from './download';
 
 describe('kibana cli', function () {
   describe('plugin downloader', function () {

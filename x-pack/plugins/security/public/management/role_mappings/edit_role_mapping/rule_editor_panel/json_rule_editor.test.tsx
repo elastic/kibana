@@ -20,8 +20,8 @@ import { CodeEditorField } from '@kbn/code-editor';
 import type { monaco } from '@kbn/monaco';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { JSONRuleEditor } from './json_rule_editor';
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
+import { JSONRuleEditor } from './json_rule_editor';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),

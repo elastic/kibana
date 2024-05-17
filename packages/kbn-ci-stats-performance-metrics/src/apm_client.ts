@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { getYearAgoIso } from './utils';
 
 type Environment = 'ENVIRONMENT_ALL' | 'ci' | 'development';

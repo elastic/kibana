@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { TestProviders } from '../../../../common/mock';
 import { RuleStatusIcon } from '.';
+import { TestProviders } from '../../../../common/mock';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleStatusIcon', () => {

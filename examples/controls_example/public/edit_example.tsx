@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pickBy } from 'lodash';
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,21 +13,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSkeletonRectangle,
 } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
 import {
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
+  AwaitingControlGroupAPI,
   type ControlGroupInput,
   ControlGroupRenderer,
-  AwaitingControlGroupAPI,
-  ACTION_EDIT_CONTROL,
-  ACTION_DELETE_CONTROL,
 } from '@kbn/controls-plugin/public';
-import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { pickBy } from 'lodash';
+import React, { useState } from 'react';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 

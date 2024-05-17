@@ -9,11 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from '@langchain/core/tools';
 
-import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
-import { MAX_SIZE } from './helpers';
-import type { RetrievalQAChain } from 'langchain/chains';
-import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
+import type { RetrievalQAChain } from 'langchain/chains';
+import { MAX_SIZE } from './helpers';
+import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
   const alertsIndexPattern = 'alerts-index';

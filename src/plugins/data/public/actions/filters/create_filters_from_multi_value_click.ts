@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import {
-  buildCombinedFilter,
-  toggleFilterNegated,
-  Filter,
-  compareFilters,
   COMPARE_ALL_OPTIONS,
+  Filter,
+  buildCombinedFilter,
+  compareFilters,
+  toggleFilterNegated,
 } from '@kbn/es-query';
 import { Truthy, uniqWith } from 'lodash';
-import { createFilter } from './create_filters_from_value_click';
-import type { MultiValueClickContext } from '../multi_value_click_action';
 import { mapAndFlattenFilters } from '../../query';
+import type { MultiValueClickContext } from '../multi_value_click_action';
+import { createFilter } from './create_filters_from_value_click';
 
 type MultiValueClickDataContext = MultiValueClickContext['data'];
 

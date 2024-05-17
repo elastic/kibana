@@ -6,8 +6,8 @@
  */
 
 import type {
-  InventoryColorPalette,
   InfraWaffleMapSteppedGradientLegend,
+  InventoryColorPalette,
 } from '../../../../lib/lib';
 import { getColorPalette } from './get_color_palette';
 

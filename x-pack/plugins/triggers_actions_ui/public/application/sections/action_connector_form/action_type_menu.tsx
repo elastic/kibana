@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import React, { useEffect, useState } from 'react';
+import { useKibana } from '../../../common/lib/kibana';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
+import { SectionLoading } from '../../components/section_loading';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { useKibana } from '../../../common/lib/kibana';
-import { SectionLoading } from '../../components/section_loading';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;

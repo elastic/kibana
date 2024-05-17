@@ -17,7 +17,7 @@ import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import type { MlRoute, PageProps } from '../router';
-import { createPath, PageLoader } from '../router';
+import { PageLoader, createPath } from '../router';
 import { useRouteResolver } from '../use_resolver';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));

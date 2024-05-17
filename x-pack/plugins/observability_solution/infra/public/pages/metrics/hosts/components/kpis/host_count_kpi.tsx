@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { KPI_CHART_HEIGHT, METRICS_TOOLTIP } from '../../../../../common/visualizations';
+import { TooltipContent } from '../../../../../components/lens';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
-import { TooltipContent } from '../../../../../components/lens';
+import { MetricChartWrapper, type Props } from '../chart/metric_chart_wrapper';
 
 export const HostCountKpi = () => {
   const inventoryModel = findInventoryModel('host');

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import _ from 'lodash';
 import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
-import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 export default function buildRequest(config, tlConfig, scriptFields, runtimeFields, timeout) {
   const bool = { must: [] };

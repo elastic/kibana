@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 

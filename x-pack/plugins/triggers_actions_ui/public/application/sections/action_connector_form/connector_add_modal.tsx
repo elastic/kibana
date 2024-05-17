@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiModal,
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiButtonGroup,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiFlexGroup,
-  EuiBetaBadge,
-  EuiButtonGroup,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import './connector_add_modal.scss';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import {
-  ActionType,
-  ActionConnector,
-  ActionTypeRegistryContract,
-  ActionTypeModel,
-  ActionTypeIndex,
-} from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
+import {
+  ActionConnector,
+  ActionType,
+  ActionTypeIndex,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+} from '../../../types';
+import { SectionLoading } from '../../components';
 import { useCreateConnector } from '../../hooks/use_create_connector';
+import { loadActionTypes } from '../../lib/action_connector_api';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { ConnectorForm, ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorFormSchema } from './types';
-import { loadActionTypes } from '../../lib/action_connector_api';
-import { SectionLoading } from '../../components';
 
 export interface ConnectorAddModalProps {
   actionType: ActionType;

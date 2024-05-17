@@ -11,13 +11,13 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
 import {
-  setSuccessMessage,
-  setErrorMessage,
-  setQueuedSuccessMessage,
-  setQueuedErrorMessage,
   clearFlashMessages,
-  flashSuccessToast,
   flashErrorToast,
+  flashSuccessToast,
+  setErrorMessage,
+  setQueuedErrorMessage,
+  setQueuedSuccessMessage,
+  setSuccessMessage,
 } from './set_message_helpers';
 
 describe('Flash Message Helpers', () => {

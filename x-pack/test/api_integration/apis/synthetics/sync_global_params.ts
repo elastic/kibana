@@ -1,3 +1,6 @@
+import expect from '@kbn/expect';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,16 +15,13 @@ import {
   ServiceLocation,
   SyntheticsParams,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
-import { PrivateLocationTestService } from './services/private_location_test_service';
-import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 import { LOCAL_LOCATION } from './get_filters';
+import { getFixtureJson } from './helper/get_fixture_json';
+import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyncGlobalParams', function () {

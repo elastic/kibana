@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { FormulaValueConfig } from '../types';
 
 export function getFormulaColumn(

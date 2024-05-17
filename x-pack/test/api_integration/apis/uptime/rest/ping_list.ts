@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import { PingsResponseType } from '@kbn/uptime-plugin/common/runtime_types';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { PingsResponseType } from '@kbn/uptime-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 function decodePingsResponseData(response: any) {

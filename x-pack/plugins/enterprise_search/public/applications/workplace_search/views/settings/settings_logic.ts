@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   clearFlashMessages,
-  flashSuccessToast,
   flashAPIErrors,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
+import { OAUTH_APP_UPDATED_MESSAGE, ORG_UPDATED_MESSAGE } from '../../constants';
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
 import { Connector } from '../../types';
 import { sortByName } from '../../utils';

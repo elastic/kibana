@@ -8,9 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import { PROGRESS_TRACKER_LABEL } from './translations';
-import { useProgressBarStyles } from './styles/progress_bar.style';
 import type { ProductTier } from './configs';
+import { useProgressBarStyles } from './styles/progress_bar.style';
+import { PROGRESS_TRACKER_LABEL } from './translations';
 
 const ProgressComponent: React.FC<{
   productTier: ProductTier | undefined;

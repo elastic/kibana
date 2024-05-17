@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import sinon from 'sinon';
+import { processAlerts } from '../lib';
 import { Alert } from './alert';
 import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
-import { processAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
   processAlerts: jest.fn(),

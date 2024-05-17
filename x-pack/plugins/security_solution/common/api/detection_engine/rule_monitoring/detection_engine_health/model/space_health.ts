@@ -6,7 +6,7 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { HealthOverviewStats, HealthOverviewState, HealthHistory } from './health_stats';
+import type { HealthHistory, HealthOverviewState, HealthOverviewStats } from './health_stats';
 
 /**
  * Health calculation parameters for the current Kibana space.

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { isGroupByFieldsEnabled } from '../../../../common/check_ui_restrictions';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 

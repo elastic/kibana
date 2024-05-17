@@ -7,14 +7,14 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
 import $ from 'jquery';
+import _ from 'lodash';
 
 import { Tooltip } from '../components/tooltip';
-import { Chart } from './_chart';
-import { TimeMarker } from './time_marker';
 import { touchdownTemplate } from '../partials/touchdown_template';
+import { Chart } from './_chart';
 import { HeatmapChart } from './point_series/heatmap_chart';
+import { TimeMarker } from './time_marker';
 
 /**
  * Line Chart Visualization

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import {
   Comparators,
+  Criteria,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiText,
-  Criteria,
 } from '@elastic/eui';
-import { ClusterView } from './cluster_view';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState, ReactNode } from 'react';
 import { ClusterHealth } from '../clusters_health';
 import { LOCAL_CLUSTER_KEY } from '../local_cluster';
+import { ClusterView } from './cluster_view';
 
 function getInitialExpandedRow(clusters: Record<string, estypes.ClusterDetails>) {
   const clusterNames = Object.keys(clusters);

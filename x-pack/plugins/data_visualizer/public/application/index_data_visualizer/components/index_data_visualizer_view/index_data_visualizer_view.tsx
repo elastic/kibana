@@ -6,14 +6,12 @@
  */
 
 import { css } from '@emotion/react';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import {
-  useEuiBreakpoint,
-  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
@@ -21,59 +19,61 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTitle,
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
-import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
+import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
 import {
   DatePickerWrapper,
-  FullTimeRangeSelector,
   FROZEN_TIER_PREFERENCE,
+  FullTimeRangeSelector,
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import {
-  DV_FROZEN_TIER_PREFERENCE,
-  DV_RANDOM_SAMPLER_PREFERENCE,
-  DV_RANDOM_SAMPLER_P_VALUE,
-  type DVKey,
-  type DVStorageMapped,
-} from '../../types/storage';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { OMIT_FIELDS } from '../../../../../common/constants';
+import { DocumentCountContent } from '../../../common/components/document_count_content';
+import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
+import { FieldCountPanel } from '../../../common/components/field_count_panel';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
-import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
-import type { OverallStats } from '../../types/overall_stats';
-import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
+import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 import {
   DATA_VISUALIZER_INDEX_VIEWER,
   DATA_VISUALIZER_INDEX_VIEWER_ID,
 } from '../../constants/index_data_visualizer_viewer';
-import type {
-  DataVisualizerIndexBasedAppState,
-  DataVisualizerIndexBasedPageUrlState,
-} from '../../types/index_data_visualizer_state';
-import { useDataVisualizerKibana } from '../../../kibana_context';
-import { FieldCountPanel } from '../../../common/components/field_count_panel';
-import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { OMIT_FIELDS } from '../../../../../common/constants';
-import { SearchPanel } from '../search_panel';
-import { ActionsPanel } from '../actions_panel';
-import { DataVisualizerDataViewManagement } from '../data_view_management';
-import type { GetAdditionalLinks } from '../../../common/components/results_links';
-import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
   type RandomSamplerOption,
 } from '../../constants/random_sampler';
 import type { FieldStatisticsTableEmbeddableState } from '../../embeddables/grid_embeddable/types';
+import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
+import type {
+  DataVisualizerIndexBasedAppState,
+  DataVisualizerIndexBasedPageUrlState,
+} from '../../types/index_data_visualizer_state';
+import type { OverallStats } from '../../types/overall_stats';
+import {
+  type DVKey,
+  type DVStorageMapped,
+  DV_FROZEN_TIER_PREFERENCE,
+  DV_RANDOM_SAMPLER_PREFERENCE,
+  DV_RANDOM_SAMPLER_P_VALUE,
+} from '../../types/storage';
+import { ActionsPanel } from '../actions_panel';
+import { DataVisualizerDataViewManagement } from '../data_view_management';
+import { SearchPanel } from '../search_panel';
 
 const defaultSearchQuery = {
   match_all: {},

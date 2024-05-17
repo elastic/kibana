@@ -1,3 +1,13 @@
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +15,6 @@
  * 2.0.
  */
 import React, { useCallback, useState } from 'react';
-import {
-  EuiText,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiHorizontalRule,
-} from '@elastic/eui';
 import * as i18n from '../../translations';
 import { styles } from './field_table_header.styles';
 

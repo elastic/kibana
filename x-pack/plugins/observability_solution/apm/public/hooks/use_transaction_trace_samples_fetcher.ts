@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from './use_fetcher';
-import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from './use_apm_params';
+import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
 
 export type TraceSamplesFetchResult = ReturnType<typeof useTransactionTraceSamplesFetcher>;

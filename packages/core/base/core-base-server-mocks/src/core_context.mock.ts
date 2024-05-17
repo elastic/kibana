@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { Env, IConfigService } from '@kbn/config';
-import type { LoggerFactory } from '@kbn/logging';
-import { loggerMock } from '@kbn/logging-mocks';
 import { configServiceMock, createTestEnv } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { LoggerFactory } from '@kbn/logging';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 function create({
   env = createTestEnv(),

@@ -141,9 +141,7 @@
             "tags": [],
             "label": "requestVersion",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -225,21 +223,15 @@
             "type": "number",
             "tags": [],
             "label": "requestVersion",
-            "description": [
-              "The starting version before up/down transforming"
-            ],
-            "signature": [
-              "number"
-            ],
+            "description": ["The starting version before up/down transforming"],
+            "signature": ["number"],
             "path": "packages/kbn-object-versioning/lib/object_transform.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "A handler to pass an object migration definition"
-        ],
+        "returnComment": ["A handler to pass an object migration definition"],
         "initialIsOpen": false
       }
     ],
@@ -330,9 +322,7 @@
                 "tags": [],
                 "label": "obj",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -345,9 +335,7 @@
                 "tags": [],
                 "label": "version",
                 "description": [],
-                "signature": [
-                  "number | \"latest\" | undefined"
-                ],
+                "signature": ["number | \"latest\" | undefined"],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -370,12 +358,8 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "validate",
-                    "description": [
-                      "Validate the object _before_ up transform"
-                    ],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "description": ["Validate the object _before_ up transform"],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-object-versioning/lib/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -414,9 +398,7 @@
                 "tags": [],
                 "label": "obj",
                 "description": [],
-                "signature": [
-                  "DownIn"
-                ],
+                "signature": ["DownIn"],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -429,9 +411,7 @@
                 "tags": [],
                 "label": "version",
                 "description": [],
-                "signature": [
-                  "number | \"latest\" | undefined"
-                ],
+                "signature": ["number | \"latest\" | undefined"],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -454,12 +434,8 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "validate",
-                    "description": [
-                      "Validate the object _before_ down transform"
-                    ],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "description": ["Validate the object _before_ down transform"],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-object-versioning/lib/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -498,9 +474,7 @@
                 "tags": [],
                 "label": "obj",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -513,9 +487,7 @@
                 "tags": [],
                 "label": "version",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1217,9 +1189,7 @@
         "tags": [],
         "label": "ObjectTransform",
         "description": [],
-        "signature": [
-          "(input: I) => O"
-        ],
+        "signature": ["(input: I) => O"],
         "path": "packages/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1232,9 +1202,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "I"
-            ],
+            "signature": ["I"],
             "path": "packages/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1272,9 +1240,7 @@
         "tags": [],
         "label": "Version",
         "description": [],
-        "signature": [
-          "number"
-        ],
+        "signature": ["number"],
         "path": "packages/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,

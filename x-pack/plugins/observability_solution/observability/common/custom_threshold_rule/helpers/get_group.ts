@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { Filter } from '@kbn/es-query';
 import { Group } from '../types';
 
 /*

@@ -9,10 +9,10 @@
 import type { ExtractRouteParams } from 'react-router';
 import { generatePath } from 'react-router-dom';
 import {
-  CASES_CREATE_PATH,
   CASES_CONFIGURE_PATH,
-  CASE_VIEW_PATH,
+  CASES_CREATE_PATH,
   CASE_VIEW_COMMENT_PATH,
+  CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';

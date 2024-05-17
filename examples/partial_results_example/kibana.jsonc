@@ -7,9 +7,6 @@
     "id": "paertialResultsExample",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "developerExamples",
-      "expressions"
-    ]
+    "requiredPlugins": ["developerExamples", "expressions"]
   }
 }

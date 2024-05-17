@@ -11,9 +11,9 @@ import { CanDuplicatePanels, CanExpandPanels, TracksOverlays } from '@kbn/presen
 import {
   HasType,
   HasTypeDisplayName,
-  PublishesUnifiedSearch,
   PublishesPanelTitle,
   PublishesSavedObjectId,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../common';
 import { DashboardContainer } from '../embeddable/dashboard_container';

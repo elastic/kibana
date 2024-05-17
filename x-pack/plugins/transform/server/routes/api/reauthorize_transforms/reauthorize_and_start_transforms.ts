@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 import type {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
 } from '../../../../common/api_schemas/reauthorize_transforms';
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { fillResultsWithTimeouts, isRequestTimeout } from '../../utils/error_utils';
 
 export async function reauthorizeAndStartTransforms(
   transformsInfo: ReauthorizeTransformsRequestSchema,

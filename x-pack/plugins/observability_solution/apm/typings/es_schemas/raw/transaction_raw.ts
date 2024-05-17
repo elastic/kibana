@@ -9,18 +9,18 @@ import { APMBaseDoc } from './apm_base_doc';
 import { Cloud } from './fields/cloud';
 import { Container } from './fields/container';
 import { EventOutcome } from './fields/event_outcome';
+import { Faas } from './fields/faas';
 import { Host } from './fields/host';
 import { Http } from './fields/http';
 import { Kubernetes } from './fields/kubernetes';
 import { Page } from './fields/page';
 import { Process } from './fields/process';
 import { Service } from './fields/service';
+import { SpanLink } from './fields/span_links';
 import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
 import { UserAgent } from './fields/user_agent';
-import { Faas } from './fields/faas';
-import { SpanLink } from './fields/span_links';
 
 interface Processor {
   name: 'transaction';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { JsonValue } from '@kbn/utility-types';
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
-import { JsonValue } from '@kbn/utility-types';
-import { jsonValueRT } from '../../common/typed_json';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
+import { jsonValueRT } from '../../common/typed_json';
 import { ShardFailure } from './elasticsearch_runtime_types';
 
 export const jsonFromBase64StringRT = new rt.Type<JsonValue, string, string>(

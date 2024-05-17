@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
+import React from 'react';
 
 export const InfinityIcon = (props: Omit<EuiIconProps, 'type'>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" {...props}>

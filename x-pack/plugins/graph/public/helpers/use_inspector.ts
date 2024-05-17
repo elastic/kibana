@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
 import {
   Start as InspectorPublicPluginStart,
   InspectorSession,
   RequestAdapter,
 } from '@kbn/inspector-plugin/public';
+import { useCallback, useEffect, useState } from 'react';
 
 export const useInspector = ({
   inspect,

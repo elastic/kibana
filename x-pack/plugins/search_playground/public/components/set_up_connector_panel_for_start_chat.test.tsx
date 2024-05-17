@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render as testingLibraryRender, waitFor } from '@testing-library/react';
-import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
+import React from 'react';
 import { useKibana } from '../hooks/use_kibana';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);

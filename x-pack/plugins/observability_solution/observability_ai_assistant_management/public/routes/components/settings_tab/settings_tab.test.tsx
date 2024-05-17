@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../../../helpers/test_helper';
-import { useAppContext } from '../../../hooks/use_app_context';
-import { SettingsTab } from './settings_tab';
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import { coreMock } from '@kbn/core/public/mocks';
-import { uiSettings } from '../../../../common/ui_settings';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { merge } from 'lodash';
+import React from 'react';
+import { uiSettings } from '../../../../common/ui_settings';
+import { render } from '../../../helpers/test_helper';
+import { useAppContext } from '../../../hooks/use_app_context';
+import { SettingsTab } from './settings_tab';
 
 jest.mock('../../../hooks/use_app_context');
 

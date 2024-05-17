@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
 import { ActionTypeExecutorResult, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import { HttpSetup } from '@kbn/core/public';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../lib/rewrite_response_body';
 import { Fields, Issue, IssueTypes } from './types';
 

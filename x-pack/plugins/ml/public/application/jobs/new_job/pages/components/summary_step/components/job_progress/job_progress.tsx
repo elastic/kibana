@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiProgress } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiProgress } from '@elastic/eui';
 
 interface Props {
   progress: number;

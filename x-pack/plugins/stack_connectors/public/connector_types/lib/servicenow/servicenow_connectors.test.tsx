@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, within, render, screen, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
 
-import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
-import ServiceNowConnectorFields from './servicenow_connectors';
-import { getAppInfo } from './api';
-import { ConnectorFormTestProvider } from '../test_utils';
-import { mount } from 'enzyme';
+import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import userEvent from '@testing-library/user-event';
+import { mount } from 'enzyme';
+import { ConnectorFormTestProvider } from '../test_utils';
+import { getAppInfo } from './api';
+import ServiceNowConnectorFields from './servicenow_connectors';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api');

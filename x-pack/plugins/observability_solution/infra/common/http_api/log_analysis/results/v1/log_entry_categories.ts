@@ -8,15 +8,15 @@
 import * as rt from 'io-ts';
 
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
-import { idFormatRT } from '../../id_formats/v1/id_formats';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
-  timeRangeRT,
   routeTimingMetadataRT,
+  timeRangeRT,
 } from '../../../shared';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 
-import { logEntryCategoryRT, categoriesSortRT } from '../../../../log_analysis';
+import { categoriesSortRT, logEntryCategoryRT } from '../../../../log_analysis';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH =
   '/api/infra/log_analysis/results/log_entry_categories';

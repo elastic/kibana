@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { Refresh } from '@kbn/ml-date-picker';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export interface DataVisualizerDataViewManagementProps {

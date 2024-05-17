@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { IAggConfig } from '@kbn/data-plugin/public';
 

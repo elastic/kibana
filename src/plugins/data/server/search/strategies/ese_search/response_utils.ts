@@ -8,9 +8,9 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { AsyncSearchResponse } from './types';
-import { getTotalLoaded } from '../es_search';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
+import { getTotalLoaded } from '../es_search';
+import type { AsyncSearchResponse } from './types';
 import { AsyncSearchStatusResponse } from './types';
 
 /**

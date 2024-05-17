@@ -6,17 +6,17 @@
  */
 
 import { isObject } from 'lodash';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import {
   FieldBasedIndexPatternColumn,
-  GenericOperationDefinition,
   GenericIndexPatternColumn,
+  GenericOperationDefinition,
 } from '..';
-import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { FormBasedLayer } from '../../../types';
-import { unquotedStringRegex } from './util';
+import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { isColumnOfType } from '../helpers';
 import { StaticValueIndexPatternColumn } from '../static_value';
+import { unquotedStringRegex } from './util';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;

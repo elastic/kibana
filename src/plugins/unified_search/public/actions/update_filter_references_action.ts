@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ActionExecutionMeta, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { ActionExecutionMeta, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 
 export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
 

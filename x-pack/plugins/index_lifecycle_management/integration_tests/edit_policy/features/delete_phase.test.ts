@@ -10,9 +10,9 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import {
   DELETE_PHASE_POLICY,
-  getDefaultHotPhasePolicy,
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
+  getDefaultHotPhasePolicy,
 } from '../constants';
 import { DeleteTestBed, setupDeleteTestBed } from './delete_phase.helpers';
 

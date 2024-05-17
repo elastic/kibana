@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import type { EffectedPolicySelection } from './effected_policy_select';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 
 /**
  * Given a list of artifact tags, returns the tags that are not policy tags

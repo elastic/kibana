@@ -8,8 +8,8 @@
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
+import { MockContextConstructor } from './context_service.test.mocks';
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 

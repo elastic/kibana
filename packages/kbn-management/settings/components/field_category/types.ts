@@ -7,8 +7,8 @@
  */
 
 import type {
-  FieldRowServices,
   FieldRowKibanaDependencies,
+  FieldRowServices,
 } from '@kbn/management-settings-components-field-row';
 
 /**

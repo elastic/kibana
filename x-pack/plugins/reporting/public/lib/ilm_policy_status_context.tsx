@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { createContext, useContext } from 'react';
 import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
 import { useCheckIlmPolicyStatus } from '@kbn/reporting-public';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useContext } from 'react';
 
 type UseCheckIlmPolicyStatus = ReturnType<typeof useCheckIlmPolicyStatus>;
 

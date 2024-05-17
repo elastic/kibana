@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../services/ml_api_service';
+import { getToastNotifications } from '../../../../util/dependency_cache';
 
 export async function deleteFilterLists(filterListsToDelete) {
   if (filterListsToDelete === undefined || filterListsToDelete.length === 0) {

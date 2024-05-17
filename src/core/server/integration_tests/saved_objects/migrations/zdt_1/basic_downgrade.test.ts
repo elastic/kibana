@@ -7,14 +7,14 @@
  */
 
 import Path from 'path';
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import fs from 'fs/promises';
 import { range } from 'lodash';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile, createType } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { createType, delay, parseLogFile } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'basic_downgrade.test.log');
 

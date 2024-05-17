@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { readDataStream } from './stream';
 import { Annotation, Message, MessageRole } from '../types';
+import { readDataStream } from './stream';
 
 export async function fetchApi({
   api,

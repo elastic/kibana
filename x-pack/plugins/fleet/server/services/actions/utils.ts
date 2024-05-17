@@ -6,8 +6,8 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { get } from 'lodash';
 import { deepFreeze } from '@kbn/std';
+import { get } from 'lodash';
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 

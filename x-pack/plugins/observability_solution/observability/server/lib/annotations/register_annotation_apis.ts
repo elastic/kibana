@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { CoreSetup, Logger, RequestHandler } from '@kbn/core/server';
 import { isLeft } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
-  getAnnotationByIdRt,
   createAnnotationRt,
   deleteAnnotationRt,
+  getAnnotationByIdRt,
 } from '../../../common/annotations';
+import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ScopedAnnotationsClient } from './bootstrap_annotations';
 import { createAnnotationsClient } from './create_annotations_client';
-import type { ObservabilityRequestHandlerContext } from '../../types';
 
 const unknowns = schema.object({}, { unknowns: 'allow' });
 

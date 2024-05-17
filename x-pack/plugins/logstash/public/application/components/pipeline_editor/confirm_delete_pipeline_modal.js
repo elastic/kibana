@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { EUI_MODAL_CANCEL_BUTTON, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { PIPELINE_EDITOR } from './constants';
 
 export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDeletePipeline }) {

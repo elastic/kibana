@@ -8,17 +8,17 @@
 import React from 'react';
 
 import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiCopy,
-  EuiButtonIcon,
-  EuiFieldText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { COPY_TOOLTIP, COPIED_TOOLTIP } from '../../../constants';
+import { COPIED_TOOLTIP, COPY_TOOLTIP } from '../../../constants';
 
 import { ID_LABEL } from '../constants';
 

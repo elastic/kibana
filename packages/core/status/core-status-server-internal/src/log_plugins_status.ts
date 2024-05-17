@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
-import { merge, type Observable, Subject, type Subscription } from 'rxjs';
-import { pairwise, takeUntil, map, startWith, bufferTime, filter, concatAll } from 'rxjs';
-import { Logger } from '@kbn/logging';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
+import { Logger } from '@kbn/logging';
+import { uniq } from 'lodash';
+import { type Observable, Subject, type Subscription, merge } from 'rxjs';
+import { bufferTime, concatAll, filter, map, pairwise, startWith, takeUntil } from 'rxjs';
 import type { LoggablePluginStatus, PluginStatus } from './types';
 
 // let plugins log up to 3 status changes every 30s (extra messages will be throttled / aggregated)

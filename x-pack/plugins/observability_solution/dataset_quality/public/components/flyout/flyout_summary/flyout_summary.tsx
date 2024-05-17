@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  OnRefreshProps,
-  OnTimeChangeProps,
-  EuiSpacer,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiLink,
-  EuiCode,
+  EuiSpacer,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DegradedDocs } from '../degraded_docs_trend/degraded_docs';
 import { DataStreamDetails } from '../../../../common/api_types';
-import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
-import { useDatasetQualityContext } from '../../dataset_quality/context';
+import { DEFAULT_DATEPICKER_REFRESH, DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { useDatasetQualityContext } from '../../dataset_quality/context';
+import { DegradedDocs } from '../degraded_docs_trend/degraded_docs';
 import { FlyoutSummaryHeader } from './flyout_summary_header';
 import { FlyoutSummaryKpis, FlyoutSummaryKpisLoading } from './flyout_summary_kpis';
 

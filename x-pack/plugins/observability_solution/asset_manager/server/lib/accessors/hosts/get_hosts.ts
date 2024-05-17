@@ -7,12 +7,12 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Asset } from '../../../../common/types_api';
-import { collectHosts } from '../../collectors/hosts';
 import { GetHostsOptionsPublic } from '../../../../common/types_client';
 import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
+import { collectHosts } from '../../collectors/hosts';
 import { parseEan } from '../../parse_ean';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 

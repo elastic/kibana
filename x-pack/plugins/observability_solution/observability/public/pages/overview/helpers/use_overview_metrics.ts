@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useTrackPageview, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
-import { useUiTracker, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 
 const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SyntaxType, useQueryBar } from './use_query_bar';
-import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
-import { useGetUrlParams, useUptimeDataView } from '../../../hooks';
+import React, { useState } from 'react';
 import { ClientPluginsStart } from '../../../../plugin';
+import { useGetUrlParams, useUptimeDataView } from '../../../hooks';
+import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
+import { SyntaxType, useQueryBar } from './use_query_bar';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 

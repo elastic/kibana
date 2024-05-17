@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
+  ThreatMapping,
+  ThreatMappingEntries,
   concurrent_searches,
   items_per_search,
-  ThreatMapping,
   threatMappingEntries,
-  ThreatMappingEntries,
   threat_mapping,
 } from '.';
-import { foldLeftRight, getPaths, exactCheck } from '@kbn/securitysolution-io-ts-utils';
 
 describe('threat_mapping', () => {
   describe('threatMappingEntries', () => {

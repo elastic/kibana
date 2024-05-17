@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { COMPARE_ALL_OPTIONS, Filter, compareFilters, toggleFilterNegated } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
-import { getIndexPatterns, getSearchService } from '../../services';
+import _ from 'lodash';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
+import { getIndexPatterns, getSearchService } from '../../services';
 
 interface ValueClickDataContext {
   data: Array<{

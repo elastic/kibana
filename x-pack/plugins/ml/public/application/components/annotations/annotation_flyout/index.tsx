@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import type { FC, ReactNode } from 'react';
 import React, { Component, useCallback, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type * as Rx from 'rxjs';
-import { cloneDeep } from 'lodash';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -24,31 +25,30 @@ import {
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
-  EuiCheckbox,
 } from '@elastic/eui';
 
 import type { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { ML_PARTITION_FIELDS, type MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
 import {
-  ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
+  ANNOTATION_MAX_LENGTH_CHARS,
 } from '../../../../../common/constants/annotations';
-import type {
-  AnnotationState,
-  AnnotationUpdatesService,
-} from '../../../services/annotations_service';
-import { annotationsRefreshed } from '../../../services/annotations_service';
-import { AnnotationDescriptionList } from '../annotation_description_list';
-import { DeleteAnnotationModal } from '../delete_annotation_modal';
-import { ml } from '../../../services/ml_api_service';
-import { getToastNotifications } from '../../../util/dependency_cache';
 import {
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import type {
+  AnnotationState,
+  AnnotationUpdatesService,
+} from '../../../services/annotations_service';
+import { annotationsRefreshed } from '../../../services/annotations_service';
+import { ml } from '../../../services/ml_api_service';
+import { getToastNotifications } from '../../../util/dependency_cache';
+import { AnnotationDescriptionList } from '../annotation_description_list';
+import { DeleteAnnotationModal } from '../delete_annotation_modal';
 
 interface ViewableDetector {
   index: number;

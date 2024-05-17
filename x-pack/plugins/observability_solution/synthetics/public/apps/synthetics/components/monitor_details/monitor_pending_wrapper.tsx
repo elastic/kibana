@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useRef, FC, PropsWithChildren } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { EuiLoadingChart, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner, EuiLoadingChart } from '@elastic/eui';
-import { PageLoader } from '../common/components/page_loader';
-import { resetMonitorLastRunAction } from '../../state';
-import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
+import React, { useEffect, useState, useMemo, useRef, FC, PropsWithChildren } from 'react';
+import { useDispatch } from 'react-redux';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useSyntheticsRefreshContext } from '../../contexts';
+import { resetMonitorLastRunAction } from '../../state';
+import { PageLoader } from '../common/components/page_loader';
+import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
 export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const dispatch = useDispatch();

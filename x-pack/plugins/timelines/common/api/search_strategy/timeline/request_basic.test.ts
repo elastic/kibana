@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { timelineRequestBasicOptionsSchema } from './request_basic';
 import { mockBaseTimelineRequest } from './mocks/base_timeline_request';
+import { timelineRequestBasicOptionsSchema } from './request_basic';
 
 describe('timelineRequestBasicOptionsSchema', () => {
   it('should correctly parse the base timeline request object', () => {

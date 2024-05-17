@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import { FIELD_BROWSER_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { useKibana } from '../../../common/lib/kibana';
 import { sourcererSelectors } from '../../../common/store';
 import type { State } from '../../../common/store';
@@ -23,8 +25,6 @@ import { defaultColumnHeaderType } from '../timeline/body/column_headers/default
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { useCreateFieldButton } from './create_field_button';
 import { useFieldTableColumns } from './field_table_columns';
-import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
-import { FIELD_BROWSER_ACTIONS } from '../../../common/lib/apm/user_actions';
 
 export type FieldEditorActions = { closeEditor: () => void } | null;
 export type FieldEditorActionsRef = MutableRefObject<FieldEditorActions>;

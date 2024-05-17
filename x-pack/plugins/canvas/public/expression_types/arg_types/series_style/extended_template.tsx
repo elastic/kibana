@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { ResolvedArgProps, ResolvedLabels } from '../../arg';
-import { ExpressionAstExpression } from '../../../../types';
+import immutable from 'object-path-immutable';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
 import { ArgTypesStrings } from '../../../../i18n';
+import { ExpressionAstExpression } from '../../../../types';
+import { ResolvedArgProps, ResolvedLabels } from '../../arg';
 
 const { set, del } = immutable;
 const { SeriesStyle: strings } = ArgTypesStrings;

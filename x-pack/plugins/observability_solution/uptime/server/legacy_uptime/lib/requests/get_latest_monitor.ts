@@ -10,8 +10,8 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../../common/runtime_types';
+import { UMElasticsearchQueryFn } from '../adapters';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */

@@ -7,17 +7,17 @@
 
 import type { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
-import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time';
 import {
-  LogEntry,
   LogColumn,
-  LogTimestampColumn,
+  LogEntry,
   LogFieldColumn,
   LogMessageColumn,
-  LogMessagePart,
-  LogMessageFieldPart,
   LogMessageConstantPart,
+  LogMessageFieldPart,
+  LogMessagePart,
+  LogTimestampColumn,
 } from '../../../common/log_entry';
+import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time';
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;
 

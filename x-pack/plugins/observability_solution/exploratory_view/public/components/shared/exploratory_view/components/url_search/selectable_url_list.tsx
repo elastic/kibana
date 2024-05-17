@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSelectableMessage,
+  EuiSelectableOption,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import React, {
   SetStateAction,
   useRef,
@@ -13,22 +28,7 @@ import React, {
   ReactNode,
   FormEventHandler,
 } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableMessage,
-  EuiPopoverFooter,
-  EuiButton,
-  EuiButtonIcon,
-  EuiSelectableOption,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import useEvent from 'react-use/lib/useEvent';
-import classNames from 'classnames';
 import { I18LABELS } from './translations';
 
 export type UrlOption<T = { [key: string]: any }> = {

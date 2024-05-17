@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 
 /** @internal */
 export class DocLinksService {

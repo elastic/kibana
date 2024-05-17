@@ -7,8 +7,8 @@
 
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
-  TrustedAppConditionEntry,
   MacosLinuxConditionEntry,
+  TrustedAppConditionEntry,
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
 

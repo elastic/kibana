@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from '../action_types';
 import { parseAutoFollowErrors } from '../../services/auto_follow_errors';
+import * as t from '../action_types';
 
 const initialState = {
   autoFollow: null,

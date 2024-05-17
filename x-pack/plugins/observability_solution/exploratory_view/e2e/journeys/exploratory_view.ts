@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { journey, step, before } from '@elastic/synthetics';
-import { recordVideo } from '../record_video';
+import { before, journey, step } from '@elastic/synthetics';
 import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
-import { loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
+import { recordVideo } from '../record_video';
+import { TIMEOUT_60_SEC, loginToKibana, waitForLoadingToFinish } from '../utils';
 
 journey('Exploratory view', async ({ page, params }) => {
   recordVideo(page);

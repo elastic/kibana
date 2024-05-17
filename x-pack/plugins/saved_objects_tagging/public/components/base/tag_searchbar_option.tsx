@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
+import React, { FC } from 'react';
 import { Tag } from '../../../common';
 import { testSubjFriendly } from '../../utils';
 

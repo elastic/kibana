@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
-import { legacyMigrateRuleAlertId, legacyMigrateAlertId } from './legacy_migrations';
+import { legacyMigrateAlertId, legacyMigrateRuleAlertId } from './legacy_migrations';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 

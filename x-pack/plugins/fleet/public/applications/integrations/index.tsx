@@ -1,3 +1,4 @@
+import { Route } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,14 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
 
 import type { RouteProps } from 'react-router-dom';
 
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
-import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from '../../hooks';
+import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import type { UIExtensionsStorage } from '../../types';
 
 import { AppRoutes, IntegrationsAppContext } from './app';

@@ -36,10 +36,7 @@
             "tags": [],
             "label": "parseOptions",
             "description": [],
-            "signature": [
-              "(options: Options) => ",
-              "ParsedOptions"
-            ],
+            "signature": ["(options: Options) => ", "ParsedOptions"],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -51,9 +48,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -90,9 +85,7 @@
                 "tags": [],
                 "label": "inputOptions",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -108,9 +101,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -122,10 +113,7 @@
                 "tags": [],
                 "label": "bundles",
                 "description": [],
-                "signature": [
-                  "Bundle",
-                  "[]"
-                ],
+                "signature": ["Bundle", "[]"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -138,10 +126,7 @@
                 "tags": [],
                 "label": "filteredBundles",
                 "description": [],
-                "signature": [
-                  "Bundle",
-                  "[]"
-                ],
+                "signature": ["Bundle", "[]"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -154,9 +139,7 @@
                 "tags": [],
                 "label": "cache",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -169,9 +152,7 @@
                 "tags": [],
                 "label": "watch",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -184,9 +165,7 @@
                 "tags": [],
                 "label": "inspectWorkers",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -199,10 +178,7 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": [
-                  "KibanaPlatformPlugin",
-                  "[]"
-                ],
+                "signature": ["KibanaPlatformPlugin", "[]"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -215,9 +191,7 @@
                 "tags": [],
                 "label": "repoRoot",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -230,9 +204,7 @@
                 "tags": [],
                 "label": "maxWorkerCount",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -245,9 +217,7 @@
                 "tags": [],
                 "label": "dist",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -260,9 +230,7 @@
                 "tags": [],
                 "label": "profileWebpack",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -275,9 +243,7 @@
                 "tags": [],
                 "label": "themeTags",
                 "description": [],
-                "signature": [
-                  "ThemeTags"
-                ],
+                "signature": ["ThemeTags"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -293,10 +259,7 @@
             "tags": [],
             "label": "getWorkerConfig",
             "description": [],
-            "signature": [
-              "(optimizerCacheKey: unknown) => ",
-              "WorkerConfig"
-            ],
+            "signature": ["(optimizerCacheKey: unknown) => ", "WorkerConfig"],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -308,9 +271,7 @@
                 "tags": [],
                 "label": "optimizerCacheKey",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -326,10 +287,7 @@
             "tags": [],
             "label": "getCacheableWorkerConfig",
             "description": [],
-            "signature": [
-              "() => ",
-              "CacheableWorkerConfig"
-            ],
+            "signature": ["() => ", "CacheableWorkerConfig"],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -497,10 +455,7 @@
         "tags": [],
         "label": "readLimits",
         "description": [],
-        "signature": [
-          "(path: string) => ",
-          "Limits"
-        ],
+        "signature": ["(path: string) => ", "Limits"],
         "path": "packages/kbn-optimizer/src/limits.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -512,9 +467,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -623,9 +576,7 @@
         "tags": [],
         "label": "runFindBabelHelpersInEntryBundlesCli",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_babel_runtime_helpers_in_entry_bundles.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -640,9 +591,7 @@
         "tags": [],
         "label": "runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_node_libs_browser_polyfills_in_entry_bundles.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -657,9 +606,7 @@
         "tags": [],
         "label": "runKbnOptimizerCli",
         "description": [],
-        "signature": [
-          "(options: { defaultLimitsPath: string; }) => void"
-        ],
+        "signature": ["(options: { defaultLimitsPath: string; }) => void"],
         "path": "packages/kbn-optimizer/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -770,9 +717,7 @@
             "tags": [],
             "label": "{\n  log,\n  config,\n  dropMissing,\n  limitsPath,\n}",
             "description": [],
-            "signature": [
-              "UpdateBundleLimitsOptions"
-            ],
+            "signature": ["UpdateBundleLimitsOptions"],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -861,9 +806,7 @@
             "tags": [],
             "label": "limitsPath",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -884,14 +827,7 @@
         "tags": [],
         "label": "OptimizerUpdate",
         "description": [],
-        "signature": [
-          "Update",
-          "<",
-          "OptimizerEvent",
-          ", ",
-          "OptimizerState",
-          ">"
-        ],
+        "signature": ["Update", "<", "OptimizerEvent", ", ", "OptimizerState", ">"],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
         "deprecated": false,
         "trackAdoption": false,

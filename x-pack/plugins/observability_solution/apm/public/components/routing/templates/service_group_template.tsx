@@ -6,20 +6,20 @@
  */
 
 import {
-  EuiPageHeaderProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonTitle,
   EuiIcon,
+  EuiPageHeaderProps,
+  EuiSkeletonTitle,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ApmMainTemplate } from './apm_main_template';
+import React from 'react';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { ApmMainTemplate } from './apm_main_template';
 
 export function ServiceGroupTemplate({
   pageTitle,

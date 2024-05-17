@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
 import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';

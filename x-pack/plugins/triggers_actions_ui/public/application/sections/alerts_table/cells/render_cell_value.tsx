@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import React from 'react';
-import {
-  ALERT_DURATION,
-  AlertConsumers,
-  ALERT_RULE_NAME,
-  ALERT_RULE_UUID,
-  ALERT_START,
-  TIMESTAMP,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils';
+import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
 import {
   FIELD_FORMAT_IDS,
   FieldFormatParams,
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
-import { alertProducersData, observabilityFeatureIds } from '../constants';
+import {
+  ALERT_DURATION,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  AlertConsumers,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
+import { isEmpty } from 'lodash';
+import React from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { alertProducersData, observabilityFeatureIds } from '../constants';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -139,8 +139,8 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
           ? 'observability'
           : producer && (value === 'alerts' || value === 'stackAlerts')
-          ? producer
-          : value;
+            ? producer
+            : value;
         const consumerData = alertProducersData[consumer];
         if (!consumerData) {
           return <>{value}</>;

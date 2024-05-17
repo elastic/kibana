@@ -7,11 +7,11 @@
 
 import type { SearchHit } from '@kbn/es-types';
 
-import type { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
 import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';
+import type { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
 
 export const esSearchHitToArtifact = <
-  T extends Pick<SearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>
+  T extends Pick<SearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>,
 >({
   _id: id,
   _source: {
@@ -62,7 +62,7 @@ export const newArtifactToElasticsearchProperties = ({
 };
 
 export const relativeDownloadUrlFromArtifact = <
-  T extends Pick<Artifact, 'identifier' | 'decodedSha256'>
+  T extends Pick<Artifact, 'identifier' | 'decodedSha256'>,
 >({
   identifier,
   decodedSha256,
@@ -74,7 +74,7 @@ export const relativeDownloadUrlFromArtifact = <
 };
 
 export const uniqueIdFromArtifact = <
-  T extends Pick<Artifact, 'identifier' | 'decodedSha256' | 'packageName'>
+  T extends Pick<Artifact, 'identifier' | 'decodedSha256' | 'packageName'>,
 >({
   identifier,
   decodedSha256,

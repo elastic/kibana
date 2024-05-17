@@ -6,10 +6,10 @@
  */
 
 import { mockBrowserFields } from '../../shared/mocks/mock_browser_fields';
-import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import type { LeftPanelContext } from '../context';
 
 /**

@@ -9,17 +9,17 @@
 import { SavedObjectAttributes } from '@kbn/core/public';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { IContainer } from '..';
-import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableStateWithType } from '../../../common/types';
+import { runEmbeddableFactoryMigrations } from '../factory_migrations/run_factory_migrations';
+import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { runEmbeddableFactoryMigrations } from '../factory_migrations/run_factory_migrations';
 
 export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends FinderAttributes = SavedObjectAttributes
+  T extends FinderAttributes = SavedObjectAttributes,
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ): EmbeddableFactory<I, O, E, T> => {

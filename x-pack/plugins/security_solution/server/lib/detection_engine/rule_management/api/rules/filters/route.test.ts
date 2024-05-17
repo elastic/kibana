@@ -7,12 +7,12 @@
 
 import { getRuleManagementFilters } from './route';
 
+import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getRuleManagementFiltersRequest,
 } from '../../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
 
 const emptyTagAggregationResult = {
   tags: {

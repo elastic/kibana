@@ -5,24 +5,18 @@
  * 2.0.
  */
 
+import { render, screen } from '@testing-library/react';
 import { get } from 'lodash/fp';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
 
+import { ID_FIELD_NAME } from '../../../../common/components/event_details/event_id';
 import { asArrayIfExists } from '../../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { ID_FIELD_NAME } from '../../../../common/components/event_details/event_id';
+import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
-import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 
-import {
-  getPorts,
-  hasPorts,
-  isIpFieldPopulated,
-  SourceDestinationIp,
-} from './source_destination_ip';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -35,6 +29,12 @@ import {
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
+import {
+  SourceDestinationIp,
+  getPorts,
+  hasPorts,
+  isIpFieldPopulated,
+} from './source_destination_ip';
 
 jest.mock('../../../../common/lib/kibana');
 

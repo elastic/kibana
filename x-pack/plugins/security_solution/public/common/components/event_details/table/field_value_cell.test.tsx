@@ -9,9 +9,9 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import type { BrowserField } from '../../../containers/source';
-import { FieldValueCell } from './field_value_cell';
 import { TestProviders } from '../../../mock';
 import type { EventFieldsData } from '../types';
+import { FieldValueCell } from './field_value_cell';
 
 const contextId = 'test';
 

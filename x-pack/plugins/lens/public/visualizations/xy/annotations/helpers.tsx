@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import {
-  isQueryAnnotationConfig,
-  getAnnotationAccessor,
-  createCopiedAnnotation,
-} from '@kbn/event-annotation-components';
+import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getDefaultQueryAnnotation } from '@kbn/event-annotation-common';
-import { IconChartBarAnnotations } from '@kbn/chart-icons';
+import {
+  createCopiedAnnotation,
+  getAnnotationAccessor,
+  isQueryAnnotationConfig,
+} from '@kbn/event-annotation-components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { generateId } from '../../../id_generator';
 import type { FramePublicAPI, Visualization } from '../../../types';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
 import { isHorizontalChart } from '../state_helpers';
-import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
+import type { XYAnnotationLayerConfig, XYDataLayerConfig, XYLayerConfig, XYState } from '../types';
 import {
   getAnnotationsLayers,
   getAxisName,
@@ -27,7 +28,6 @@ import {
   isAnnotationsLayer,
   isTimeChart,
 } from '../visualization_helpers';
-import { generateId } from '../../../id_generator';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;

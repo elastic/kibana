@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { Breakdowns } from './breakdowns';
-import { mockDataView, mockUxSeries, render } from '../../rtl_helpers';
-import { getDefaultConfigs } from '../../configurations/default_configs';
+import React from 'react';
 import { RECORDS_FIELD } from '../../configurations/constants';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
+import { getDefaultConfigs } from '../../configurations/default_configs';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
+import { mockDataView, mockUxSeries, render } from '../../rtl_helpers';
+import { Breakdowns } from './breakdowns';
 
 describe('Breakdowns', function () {
   const dataViewSeries = getDefaultConfigs({

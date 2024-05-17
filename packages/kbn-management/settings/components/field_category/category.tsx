@@ -10,9 +10,9 @@ import React, { ReactElement, Children } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSplitPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 
-import { getCategoryName } from '@kbn/management-settings-utilities';
-import type { FieldRowProps } from '@kbn/management-settings-components-field-row';
 import { css } from '@emotion/react';
+import type { FieldRowProps } from '@kbn/management-settings-components-field-row';
+import { getCategoryName } from '@kbn/management-settings-utilities';
 import { ClearQueryLink, ClearQueryLinkProps } from './clear_query_link';
 
 export const DATA_TEST_SUBJ_SETTINGS_CATEGORY = 'settingsCategory';

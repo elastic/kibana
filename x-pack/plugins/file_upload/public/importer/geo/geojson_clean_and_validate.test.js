@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cleanGeometry, geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import * as jsts from 'jsts';
+import { cleanGeometry, geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 
 describe('geo_json_clean_and_validate', () => {
   const reader = new jsts.io.GeoJSONReader();

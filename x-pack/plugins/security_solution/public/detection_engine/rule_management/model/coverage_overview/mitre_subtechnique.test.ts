@@ -6,12 +6,12 @@
  */
 
 import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
-import { getNumOfCoveredSubtechniques } from './mitre_subtechnique';
-import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 import {
   getMockCoverageOverviewMitreSubTechnique,
   getMockCoverageOverviewMitreTechnique,
 } from './__mocks__';
+import { getNumOfCoveredSubtechniques } from './mitre_subtechnique';
+import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 
 describe('mitre_subtechniques', () => {
   describe('getNumOfCoveredSubtechniques', () => {

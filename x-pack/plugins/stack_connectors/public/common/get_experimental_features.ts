@@ -7,8 +7,8 @@
 
 import {
   ExperimentalFeatures,
-  isValidExperimentalValue,
   getExperimentalAllowedValues,
+  isValidExperimentalValue,
 } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from './experimental_features_service';
 

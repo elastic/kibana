@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-import { set } from '@kbn/safer-lodash-set';
-import { has, unset, find, some, mapKeys } from 'lodash';
-import { produce } from 'immer';
+import type { IRouter } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
-import type { CreatePackRequestBodySchema } from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { set } from '@kbn/safer-lodash-set';
+import { produce } from 'immer';
+import { find, has, mapKeys, some, unset } from 'lodash';
+import moment from 'moment-timezone';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
+import type { CreatePackRequestBodySchema } from '../../../common/api';
+import { createPackRequestBodySchema } from '../../../common/api';
+import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
+import type { PackSavedObject } from '../../common/types';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
+import type { PackResponseData } from './types';
 import {
-  convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  convertSOQueriesToPackConfig,
   findMatchingShards,
   getInitialPolicies,
 } from './utils';
-import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObject } from '../../common/types';
-import type { PackResponseData } from './types';
-import { createPackRequestBodySchema } from '../../../common/api';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 

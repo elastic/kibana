@@ -1,3 +1,4 @@
+import type { IHttpFetchError } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +7,17 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core/public';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import type { BulkActionErrorResponse, BulkActionResponse, PerformBulkActionProps } from '../api';
 import { performBulkAction } from '../api';
-import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
-import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
-import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
-import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
-import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
+import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
+import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 

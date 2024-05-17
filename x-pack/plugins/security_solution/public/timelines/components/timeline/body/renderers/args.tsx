@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
-import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
+import { TokensFlexItem, isNillEmptyOrNotFinite } from './helpers';
 
 interface Props {
   args: string[] | null | undefined;

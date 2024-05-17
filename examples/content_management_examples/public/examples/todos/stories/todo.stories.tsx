@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import { ContentClientProvider, ContentClient } from '@kbn/content-management-plugin/public';
+import { ContentClient, ContentClientProvider } from '@kbn/content-management-plugin/public';
 import { ContentTypeRegistry } from '@kbn/content-management-plugin/public/registry';
+import * as React from 'react';
 
 import { Todos } from '../todos';
 import { TodosClient } from './todos_client';

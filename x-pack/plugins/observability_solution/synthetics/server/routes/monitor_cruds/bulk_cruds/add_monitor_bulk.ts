@@ -1,22 +1,15 @@
+import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
-import pMap from 'p-map';
-import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
-import { v4 as uuidV4 } from 'uuid';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
-import { SyntheticsServerSetup } from '../../../types';
-import { RouteContext } from '../../types';
-import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import { deleteMonitor } from '../delete_monitor';
-import { formatSecrets } from '../../../synthetics_service/utils';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import pMap from 'p-map';
+import { v4 as uuidV4 } from 'uuid';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
@@ -24,6 +17,13 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { formatSecrets } from '../../../synthetics_service/utils';
+import { SyntheticsServerSetup } from '../../../types';
+import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
+import { RouteContext } from '../../types';
+import { deleteMonitor } from '../delete_monitor';
 
 export const createNewSavedObjectMonitorBulk = async ({
   soClient,

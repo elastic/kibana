@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LogstashVersionMismatchRule } from './logstash_version_mismatch_rule';
-import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
-import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
+import { LogstashVersionMismatchRule } from './logstash_version_mismatch_rule';
 
 const RealDate = Date;
 

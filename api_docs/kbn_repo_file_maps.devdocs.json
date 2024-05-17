@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,10 +48,7 @@
                 "tags": [],
                 "label": "packages",
                 "description": [],
-                "signature": [
-                  "Package",
-                  "[]"
-                ],
+                "signature": ["Package", "[]"],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -140,9 +135,7 @@
                 "tags": [],
                 "label": "pkg",
                 "description": [],
-                "signature": [
-                  "Package"
-                ],
+                "signature": ["Package"],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -158,11 +151,7 @@
             "tags": [],
             "label": "getPackage",
             "description": [],
-            "signature": [
-              "(repoRel: string) => ",
-              "Package",
-              " | undefined"
-            ],
+            "signature": ["(repoRel: string) => ", "Package", " | undefined"],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -174,9 +163,7 @@
                 "tags": [],
                 "label": "repoRel",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -284,9 +271,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
             "deprecated": false,
             "trackAdoption": false,

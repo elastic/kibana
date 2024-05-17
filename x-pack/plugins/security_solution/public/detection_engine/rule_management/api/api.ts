@@ -5,38 +5,37 @@
  * 2.0.
  */
 
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
+import type { ActionResult } from '@kbn/actions-plugin/server';
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
+import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
-import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
-import type { ActionResult } from '@kbn/actions-plugin/server';
-import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
-import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
-  UpgradeSpecificRulesRequest,
-  PerformRuleUpgradeResponseBody,
+  GetPrebuiltRulesStatusResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
-  GetPrebuiltRulesStatusResponseBody,
-  ReviewRuleUpgradeResponseBody,
+  PerformRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
+  ReviewRuleUpgradeResponseBody,
+  UpgradeSpecificRulesRequest,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import type {
-  BulkDuplicateRules,
   BulkActionEditPayload,
   BulkActionType,
+  BulkDuplicateRules,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
-  RULE_MANAGEMENT_FILTERS_URL,
-  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   BulkActionTypeEnum,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+  RULE_MANAGEMENT_FILTERS_URL,
 } from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
@@ -45,6 +44,7 @@ import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../common/constants';
+import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 
 import {
   GET_PREBUILT_RULES_STATUS_URL,

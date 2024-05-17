@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { RecursivePartial } from '@elastic/charts';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { sloEditLocatorID } from '@kbn/observability-plugin/common';
-import type { CreateSLOForm } from '../pages/slo_edit/types';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { SLO_CREATE_PATH } from '../../common/locators/paths';
+import type { CreateSLOForm } from '../pages/slo_edit/types';
 
 export type SloEditParams = RecursivePartial<CreateSLOForm>;
 

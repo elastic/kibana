@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import { PropTypes } from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { PropTypes } from 'prop-types';
+import React from 'react';
 
-import { isEmpty } from 'lodash';
-import { TOOLTIPS } from '../../../../common/constants/tooltips';
-import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
   EuiFieldNumber,
-  EuiFlexItem,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiPageHeader,
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
-  EuiPageHeader,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
+import { isEmpty } from 'lodash';
+import { TOOLTIPS } from '../../../../common/constants/tooltips';
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
+import { PIPELINE_EDITOR } from './constants';
 import { FlexItemSetting } from './flex_item_setting';
 import { FormLabelWithIconTip } from './form_label_with_icon_tip';
-import { PIPELINE_EDITOR } from './constants';
 
 class PipelineEditorUi extends React.Component {
   constructor(props) {

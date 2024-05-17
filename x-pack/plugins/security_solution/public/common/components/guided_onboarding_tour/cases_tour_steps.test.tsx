@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { TestProviders } from '../../mock';
 import { CasesTourSteps } from './cases_tour_steps';
 import { AlertsCasesTourSteps } from './tour_config';
-import { TestProviders } from '../../mock';
 
 jest.mock('./tour_step', () => ({
   GuidedOnboardingTourStep: jest

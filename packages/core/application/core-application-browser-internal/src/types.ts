@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { History } from 'history';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type {
   App,
   AppMount,
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { History } from 'history';
+import type { Observable } from 'rxjs';
 
 /** @internal */
 export interface Mounter {

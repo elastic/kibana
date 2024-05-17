@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery } from '@kbn/es-query';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { getBoundsRoundedToInterval, useTimeBuckets } from '@kbn/ml-time-buckets';
 import React, {
   type FC,
   type PropsWithChildren,
@@ -14,11 +19,6 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { type AggregateQuery } from '@kbn/es-query';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { getBoundsRoundedToInterval, useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import { useReload } from './use_reload';
 

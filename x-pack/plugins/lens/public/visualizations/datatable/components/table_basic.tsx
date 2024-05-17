@@ -6,7 +6,20 @@
  */
 
 import './table_basic.scss';
+import {
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiDataGridStyle,
+} from '@elastic/eui';
+import { IconChartDatatable } from '@kbn/chart-icons';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { i18n } from '@kbn/i18n';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -16,36 +29,18 @@ import React, {
   useContext,
   useEffect,
 } from 'react';
-import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import {
-  EuiButtonIcon,
-  EuiDataGrid,
-  EuiDataGridRefProps,
-  EuiDataGridControlColumn,
-  EuiDataGridColumn,
-  EuiDataGridSorting,
-  EuiDataGridStyle,
-} from '@elastic/eui';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { IconChartDatatable } from '@kbn/chart-icons';
-import type { LensTableRowContextMenuEvent } from '../../../types';
+import type { LensGridDirection } from '../../../../common/expressions';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import type { LensGridDirection } from '../../../../common/expressions';
-import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
-import type {
-  DataContextType,
-  DatatableRenderProps,
-  LensSortAction,
-  LensResizeAction,
-  LensToggleAction,
-  LensPagesizeAction,
-} from './types';
-import { createGridColumns } from './columns';
+import type { LensTableRowContextMenuEvent } from '../../../types';
+import { VisualizationContainer } from '../../../visualization_container';
 import { createGridCell } from './cell_value';
+import { createGridColumns } from './columns';
+import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
   buildSchemaDetectors,
   createGridFilterHandler,
@@ -54,9 +49,14 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
-import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
+import type {
+  DataContextType,
+  DatatableRenderProps,
+  LensPagesizeAction,
+  LensResizeAction,
+  LensSortAction,
+  LensToggleAction,
+} from './types';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -482,10 +482,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
             defaultHeight: props.args.fitRowToContent
               ? RowHeightMode.auto
               : props.args.rowHeightLines && props.args.rowHeightLines !== 1
-              ? {
-                  lineCount: props.args.rowHeightLines,
-                }
-              : undefined,
+                ? {
+                    lineCount: props.args.rowHeightLines,
+                  }
+                : undefined,
           }}
           inMemory={{ level: 'sorting' }}
           columns={columns}

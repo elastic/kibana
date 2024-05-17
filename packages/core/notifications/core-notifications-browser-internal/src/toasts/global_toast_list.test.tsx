@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Toast } from '@kbn/core-notifications-browser/src/types';
-import React, { type ComponentProps } from 'react';
-import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
-import { screen, render, fireEvent, act } from '@testing-library/react';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EuiToast } from '@elastic/eui';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { Toast } from '@kbn/core-notifications-browser/src/types';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import React, { type ComponentProps } from 'react';
+import { BehaviorSubject, EMPTY, Observable, from } from 'rxjs';
 import { EventReporter } from './telemetry';
 
 import { GlobalToastList } from './global_toast_list';

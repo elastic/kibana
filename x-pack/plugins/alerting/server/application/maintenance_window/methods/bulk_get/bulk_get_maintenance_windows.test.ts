@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { bulkGetMaintenanceWindows } from './bulk_get_maintenance_windows';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObject } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
-  MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  MaintenanceWindowClientContext,
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
+import { bulkGetMaintenanceWindows } from './bulk_get_maintenance_windows';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

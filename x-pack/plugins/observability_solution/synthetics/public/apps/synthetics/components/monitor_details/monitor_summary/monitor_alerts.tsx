@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
   EuiPanel,
+  EuiSkeletonText,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelectedLocation } from '../hooks/use_selected_location';
-import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
-import { AlertActions } from './alert_actions';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { AlertActions } from './alert_actions';
 
 const MONITOR_STATUS_RULE = {
   'kibana.alert.rule.category': ['Synthetics monitor status'],

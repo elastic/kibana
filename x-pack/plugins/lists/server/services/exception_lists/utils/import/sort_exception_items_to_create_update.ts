@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   BulkErrorSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   ImportExceptionListItemSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { v4 as uuidv4 } from 'uuid';
 
-import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '..';
+import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 
 export const sortExceptionItemsToUpdateOrCreate = ({
   items,

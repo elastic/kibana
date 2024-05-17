@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ElasticsearchClient, Logger, StartServicesAccessor } from '@kbn/core/server';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
-import type { ElasticsearchClient, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { get } from 'lodash';
 import {
   setSignalStatusValidateTypeDependents,
   setSignalsStatusSchema,
 } from '../../../../../common/api/detection_engine/signals';
 import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/api/detection_engine/signals';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import type { StartPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
-  getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
+  getSessionIDfromKibanaRequest,
 } from '../../../telemetry/insights';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { buildSiemResponse } from '../utils';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -187,8 +187,8 @@ const getUpdateSignalStatusScript = (
   source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
       ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
       ctx._source['${ALERT_WORKFLOW_USER}'] = ${
-    user?.profile_uid ? `'${user.profile_uid}'` : 'null'
-  };
+        user?.profile_uid ? `'${user.profile_uid}'` : 'null'
+      };
       ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {

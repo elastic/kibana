@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { ElementGrid } from '../element_grid';
 import { getTestCustomElements } from './fixtures/test_elements';
 

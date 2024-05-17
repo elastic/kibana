@@ -6,17 +6,10 @@
     "id": "banners",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "banners"
-    ],
+    "configPath": ["xpack", "banners"],
     "enabledOnAnonymousPages": true,
-    "requiredPlugins": [
-      "licensing"
-    ],
-    "optionalPlugins": [
-      "screenshotMode"
-    ],
+    "requiredPlugins": ["licensing"],
+    "optionalPlugins": ["screenshotMode"],
     "requiredBundles": []
   }
 }

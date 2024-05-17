@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import {
-  mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
+  mergeMigrationFunctionMaps,
 } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DOC_TYPE } from '../../common/constants';
+import { extract, inject } from '../../common/embeddable_factory';
 import {
   commonEnhanceTableRowHeight,
-  commonPreserveOldLegendSizeDefault,
+  commonEnrichAnnotationLayer,
   commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
   commonMakeReversePaletteAsCustom,
+  commonMigrateIndexPatternDatasource,
+  commonMigrateMetricFormatter,
+  commonMigrateMetricIds,
+  commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
+  commonPreserveOldLegendSizeDefault,
   commonRemoveTimezoneDateHistogramParam,
   commonRenameFilterReferences,
   commonRenameOperationsForFormula,
@@ -27,14 +34,8 @@ import {
   commonSetLastValueShowArrayValues,
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
-  getLensFilterMigrations,
-  commonEnrichAnnotationLayer,
   getLensDataViewMigrations,
-  commonMigrateMetricIds,
-  commonMigratePartitionChartGroups,
-  commonMigratePartitionMetrics,
-  commonMigrateIndexPatternDatasource,
-  commonMigrateMetricFormatter,
+  getLensFilterMigrations,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -42,8 +43,8 @@ import {
   LensDocShape715,
   LensDocShape810,
   LensDocShape850,
-  LensDocShapePre712,
   LensDocShape860,
+  LensDocShapePre712,
   VisState716,
   VisState810,
   VisState850,
@@ -51,7 +52,6 @@ import {
   VisStatePre830,
   XYVisState850,
 } from '../migrations/types';
-import { extract, inject } from '../../common/embeddable_factory';
 
 export const makeLensEmbeddableFactory =
   (

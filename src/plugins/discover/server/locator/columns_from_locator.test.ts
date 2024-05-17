@@ -13,10 +13,10 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { columnsFromLocatorFactory } from './columns_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';

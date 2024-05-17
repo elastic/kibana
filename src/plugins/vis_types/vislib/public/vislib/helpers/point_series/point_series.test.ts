@@ -10,10 +10,10 @@ import _ from 'lodash';
 
 import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
 
-import { buildPointSeriesData } from './point_series';
-import { Table, Column } from '../../types';
 import { setFormatService } from '../../../services';
+import { Column, Table } from '../../types';
 import { Serie } from './_add_to_siri';
+import { buildPointSeriesData } from './point_series';
 
 describe('pointSeriesChartDataFromTable', function () {
   beforeAll(() => {

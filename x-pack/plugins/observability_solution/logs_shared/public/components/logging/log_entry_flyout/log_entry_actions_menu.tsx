@@ -7,10 +7,10 @@
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
-import { useLinkProps, LinkDescriptor } from '@kbn/observability-shared-plugin/public';
-import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
+import { useVisibilityState } from '../../../utils/use_visibility_state';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 

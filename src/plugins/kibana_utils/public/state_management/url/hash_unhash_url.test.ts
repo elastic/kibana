@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { HashedItemStore } from '../../storage/hashed_item_store';
+import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { hashUrl, unhashUrl } from './hash_unhash_url';
 
 describe('hash unhash url', () => {

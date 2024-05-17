@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { omit, pick } from 'lodash';
 import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import { omit, pick } from 'lodash';
 import { RawRule } from '../types';
 
 import {
-  RuleAttributesToEncrypt,
+  RULE_SAVED_OBJECT_TYPE,
   RuleAttributesIncludedInAAD,
   RuleAttributesNotPartiallyUpdatable,
-  RULE_SAVED_OBJECT_TYPE,
+  RuleAttributesToEncrypt,
 } from '.';
 import { RuleAttributes } from '../data/rule/types';
 

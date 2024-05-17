@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiDraggable } from '@elastic/eui';
+import React from 'react';
 import type { Panel } from '../common/types';
 
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;

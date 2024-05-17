@@ -13,13 +13,13 @@ import type {
 } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
-  savedObjectsClientMock,
   httpServerMock,
+  savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
-import { NewAgentActionSchema } from '../../types/models';
-import type { ActionsService } from '../../services/agents';
 import type { AgentAction } from '../../../common/types/models';
+import type { ActionsService } from '../../services/agents';
+import { NewAgentActionSchema } from '../../types/models';
 
 import type {
   PostNewAgentActionRequest,

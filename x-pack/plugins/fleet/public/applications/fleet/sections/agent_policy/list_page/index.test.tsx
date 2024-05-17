@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 
-import { createFleetTestRendererMock } from '../../../../../mock';
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
+import { createFleetTestRendererMock } from '../../../../../mock';
 
 import { AgentPolicyListPage } from '.';
 

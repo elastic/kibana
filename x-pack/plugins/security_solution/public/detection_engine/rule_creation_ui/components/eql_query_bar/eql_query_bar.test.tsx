@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { shallow } from 'enzyme';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import React from 'react';
 
-import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
+import { TestProviders, mockIndexPattern, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import type { EqlQueryBarProps } from './eql_query_bar';
 import { EqlQueryBar } from './eql_query_bar';

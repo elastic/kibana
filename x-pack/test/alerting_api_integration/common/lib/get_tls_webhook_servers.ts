@@ -7,8 +7,8 @@
 
 import fs from 'fs';
 import https from 'https';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import getPort from 'get-port';
-import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
 interface TlsWebhookURLs {
   noCustom: string;

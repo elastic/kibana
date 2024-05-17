@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { GroupSettings } from '../group_settings';
 
 storiesOf('components/Sidebar/GroupSettings', module).add('default', () => <GroupSettings />);

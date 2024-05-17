@@ -7,14 +7,14 @@
 
 import { connect } from 'react-redux';
 
-import { isLoading, jobLoadError, getJobsList } from '../../store/selectors';
+import { getJobsList, isLoading, jobLoadError } from '../../store/selectors';
 
 import {
-  loadJobs,
-  refreshJobs,
-  openDetailPanel,
-  closeDetailPanel,
   cloneJob,
+  closeDetailPanel,
+  loadJobs,
+  openDetailPanel,
+  refreshJobs,
 } from '../../store/actions';
 
 import { JobList as JobListView } from './job_list';

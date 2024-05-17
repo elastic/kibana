@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { schema } from '@kbn/config-schema';
 
 export interface SetupDeps {
   features: FeaturesPluginSetup;

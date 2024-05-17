@@ -7,7 +7,7 @@
 
 import { handleActions } from 'redux-actions';
 import { State } from '../../../types';
-import { SetGroupFiltersByOptionType, SetGroupFiltersByOptionPayload } from '../actions/sidebar';
+import { SetGroupFiltersByOptionPayload, SetGroupFiltersByOptionType } from '../actions/sidebar';
 
 export const sidebarReducer = handleActions<State['transient'], SetGroupFiltersByOptionPayload>(
   {

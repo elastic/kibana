@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { sum, round } from 'lodash';
-import { euiLightVars as theme } from '@kbn/ui-theme';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { euiLightVars as theme } from '@kbn/ui-theme';
+import { round, sum } from 'lodash';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
 import { ChartBase } from '../../../types';
 
+import { APMConfig } from '../../../../..';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 import {
   AGENT_NAME,
+  LABEL_GC,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
-  LABEL_GC,
-  METRIC_OTEL_JVM_GC_DURATION,
   METRIC_JAVA_GC_TIME,
+  METRIC_OTEL_JVM_GC_DURATION,
   SERVICE_NAME,
 } from '../../../../../../common/es_fields/apm';
-import { getBucketSize } from '../../../../../../common/utils/get_bucket_size';
-import { getVizColorForIndex } from '../../../../../../common/viz_colors';
-import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../../../../common/utils/environment_query';
-import { APMConfig } from '../../../../..';
+import { getBucketSize } from '../../../../../../common/utils/get_bucket_size';
+import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const RATE = 'rate';
@@ -69,8 +69,8 @@ export async function fetchAndTransformGcMetrics({
   const targetField = isOpenTelemetry
     ? METRIC_OTEL_JVM_GC_DURATION
     : rateOrTime === RATE
-    ? METRIC_JAVA_GC_COUNT
-    : METRIC_JAVA_GC_TIME;
+      ? METRIC_JAVA_GC_COUNT
+      : METRIC_JAVA_GC_TIME;
 
   const fieldAggregation = isOpenTelemetry
     ? rateOrTime === RATE

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,15 +16,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import * as i18n from '../translations';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Conversation } from '../../..';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
-import { useConversation } from '../use_conversation';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
+import * as i18n from '../translations';
+import { useConversation } from '../use_conversation';
 
 /**
  * Renders a header title, a tooltip button, and a popover with

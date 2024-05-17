@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
 import type { DescriptionList } from '../../../../../common/utility_types';
-import type { Anomaly, NarrowDateRange } from '../types';
-import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { createInfluencers } from '../influencers/create_influencers';
-import * as i18n from './translations';
 import { ExplorerLink } from '../links/create_explorer_link';
+import type { Anomaly, NarrowDateRange } from '../types';
+import { getScoreString } from './score_health';
+import * as i18n from './translations';
 
 const LargeScore = styled(EuiText)`
   font-size: 45px;

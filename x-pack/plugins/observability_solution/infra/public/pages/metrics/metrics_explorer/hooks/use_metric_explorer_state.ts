@@ -6,8 +6,12 @@
  */
 
 import DateMath from '@kbn/datemath';
-import { useCallback, useEffect } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { useCallback, useEffect } from 'react';
+import {
+  MetricsExplorerAggregation,
+  MetricsExplorerMetric,
+} from '../../../../../common/http_api/metrics_explorer';
 import type {
   MetricsExplorerChartOptions,
   MetricsExplorerOptions,
@@ -16,10 +20,6 @@ import type {
   MetricsExplorerViewState,
 } from '../../../../../common/metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import {
-  MetricsExplorerMetric,
-  MetricsExplorerAggregation,
-} from '../../../../../common/http_api/metrics_explorer';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 import { useMetricsExplorerOptionsContainerContext } from './use_metrics_explorer_options';
 

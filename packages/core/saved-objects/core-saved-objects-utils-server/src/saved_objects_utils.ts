@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { isFunction } from 'lodash';
-import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectMigration, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
+import { isFunction } from 'lodash';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';

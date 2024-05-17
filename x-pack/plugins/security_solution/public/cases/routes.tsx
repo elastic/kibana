@@ -8,10 +8,10 @@
 import React from 'react';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { SecuritySubPluginRoutes } from '../app/types';
 import { CASES_PATH } from '../../common/constants';
-import { Cases } from './pages';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { Cases } from './pages';
 
 export const CasesRoutes = () => {
   return (

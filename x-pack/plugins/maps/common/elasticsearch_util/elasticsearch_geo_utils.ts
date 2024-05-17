@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';
+import { Feature, FeatureCollection, Geometry, Point, Polygon, Position } from 'geojson';
+import _ from 'lodash';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
   GEO_JSON_TYPE,
-  POLYGON_COORDINATES_EXTERIOR_INDEX,
-  LON_INDEX,
   LAT_INDEX,
+  LON_INDEX,
+  POLYGON_COORDINATES_EXTERIOR_INDEX,
 } from '../constants';
 import { MapExtent } from '../descriptor_types';
 

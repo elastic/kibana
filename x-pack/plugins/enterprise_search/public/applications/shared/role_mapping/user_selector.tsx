@@ -9,9 +9,9 @@ import React from 'react';
 
 import {
   EuiFieldText,
+  EuiFormRow,
   EuiLink,
   EuiRadio,
-  EuiFormRow,
   EuiSelect,
   EuiSelectOption,
   EuiSpacer,
@@ -20,20 +20,20 @@ import {
 import { RoleTypes as ASRole } from '../../app_search/types';
 import { Role as WSRole } from '../../workplace_search/types';
 
-import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
+import { EMAIL_LABEL, USERNAME_LABEL } from '../constants';
 import { docLinks } from '../doc_links';
 import { ElasticsearchUser } from '../types';
 
 const SMTP_URL = `${docLinks.enterpriseSearchMailService}`;
 
 import {
-  NEW_USER_LABEL,
   EXISTING_USER_LABEL,
-  USERNAME_NO_USERS_TEXT,
+  NEW_USER_LABEL,
   REQUIRED_LABEL,
   ROLE_LABEL,
   SMTP_CALLOUT_LABEL,
   SMTP_LINK_LABEL,
+  USERNAME_NO_USERS_TEXT,
 } from './constants';
 
 type SharedRole = WSRole | ASRole;

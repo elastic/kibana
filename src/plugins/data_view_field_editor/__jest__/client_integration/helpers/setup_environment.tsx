@@ -9,21 +9,21 @@
 // eslint-disable-next-line max-classes-per-file
 import './jest.mocks';
 
-import React, { FunctionComponent } from 'react';
 import { merge } from 'lodash';
+import React, { FunctionComponent } from 'react';
 
-import { defer, BehaviorSubject } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { PreviewController } from '../../../public/components/preview/preview_controller';
-import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
+import { BehaviorSubject, defer } from 'rxjs';
+import { Context, FieldEditorProvider } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
-import { initApi, ApiService } from '../../../public/lib';
-import { init as initHttpRequests } from './http_requests';
+import { PreviewController } from '../../../public/components/preview/preview_controller';
+import { ApiService, initApi } from '../../../public/lib';
 import { RuntimeFieldSubFields } from '../../../public/shared_imports';
+import { init as initHttpRequests } from './http_requests';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
@@ -94,15 +94,15 @@ export const WithFieldEditorDependencies =
   (props: T) => {
     // Setup mocks
     (
-      fieldFormats.getByFieldType as jest.MockedFunction<typeof fieldFormats['getByFieldType']>
+      fieldFormats.getByFieldType as jest.MockedFunction<(typeof fieldFormats)['getByFieldType']>
     ).mockReturnValue(fieldFormatsOptions);
 
     (
-      fieldFormats.getDefaultType as jest.MockedFunction<typeof fieldFormats['getDefaultType']>
+      fieldFormats.getDefaultType as jest.MockedFunction<(typeof fieldFormats)['getDefaultType']>
     ).mockReturnValue(MockDefaultFieldFormat);
 
     (
-      fieldFormats.getInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+      fieldFormats.getInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
     ).mockImplementation((id: string) => {
       if (id === MockCustomFieldFormat.id) {
         return new MockCustomFieldFormat();
@@ -112,7 +112,7 @@ export const WithFieldEditorDependencies =
     });
 
     (
-      fieldFormats.getDefaultInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+      fieldFormats.getDefaultInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
     ).mockImplementation(() => {
       return new MockDefaultFieldFormat();
     });

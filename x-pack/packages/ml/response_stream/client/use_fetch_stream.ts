@@ -6,19 +6,19 @@
  */
 
 import {
+  type Reducer,
+  type ReducerAction,
+  type ReducerState,
   useEffect,
   useRef,
   useState,
-  type Reducer,
-  type ReducerState,
-  type ReducerAction,
 } from 'react';
 
-import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
+import type { HttpFetchOptions, HttpSetup } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { fetchStream } from './fetch_stream';
-import { stringReducer, type StringReducer } from './string_reducer';
+import { type StringReducer, stringReducer } from './string_reducer';
 
 const DATA_THROTTLE_MS = 100;
 
@@ -31,8 +31,8 @@ const DATA_THROTTLE_MS = 100;
 type CustomReducer<T> = T extends StringReducer
   ? StringReducer
   : T extends Reducer<any, any>
-  ? T
-  : never;
+    ? T
+    : never;
 
 // Wrapped reducer options in the format they need to be passed in as arguments.
 interface FetchStreamCustomReducer<T> {

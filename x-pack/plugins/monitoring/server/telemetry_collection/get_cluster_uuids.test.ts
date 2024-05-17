@@ -8,8 +8,8 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
 import {
-  getClusterUuids,
   fetchClusterUuids,
+  getClusterUuids,
   handleClusterUuidsResponse,
 } from './get_cluster_uuids';
 

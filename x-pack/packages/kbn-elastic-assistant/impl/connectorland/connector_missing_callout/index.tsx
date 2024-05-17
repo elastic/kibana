@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
+import React, { useCallback } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import * as i18n from '../translations';
-import { useAssistantContext } from '../../assistant_context';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CONVERSATIONS_TAB } from '../../assistant/settings/assistant_settings';
+import { useAssistantContext } from '../../assistant_context';
 import { ConnectorButton } from '../connector_button';
+import * as i18n from '../translations';
 
 interface Props {
   isConnectorConfigured: boolean;

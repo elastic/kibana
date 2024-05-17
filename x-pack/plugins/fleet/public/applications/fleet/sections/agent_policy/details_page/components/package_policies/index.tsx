@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 
-import type { AgentPolicy } from '../../../../../types';
 import { useBreadcrumbs } from '../../../../../hooks';
+import type { AgentPolicy } from '../../../../../types';
 
 import { NoPackagePolicies } from './no_package_policies';
 import { PackagePoliciesTable } from './package_policies_table';

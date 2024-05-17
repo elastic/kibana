@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
-import { render } from '../rtl_helpers';
-import { AddSeriesButton } from './add_series_button';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 import * as hooks from '../hooks/use_series_storage';
+import { render } from '../rtl_helpers';
+import { AddSeriesButton } from './add_series_button';
 
 const setSeries = jest.fn();
 

@@ -8,15 +8,15 @@
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
-import { indexStatusAction } from '../../../state/actions';
-import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
-import { UptimeRefreshContext } from '../../../contexts';
-import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import {
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
   MONITOR_ROUTE,
 } from '../../../../../common/constants';
+import { UptimeRefreshContext } from '../../../contexts';
+import { indexStatusAction } from '../../../state/actions';
+import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
+import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
 
 export const useHasData = () => {
   const { loading, error, data } = useSelector(indexStatusSelector);

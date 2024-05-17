@@ -74,9 +74,7 @@
             "tags": [],
             "label": "loggingSystem",
             "description": [],
-            "signature": [
-              "ILoggingSystem"
-            ],
+            "signature": ["ILoggingSystem"],
             "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
             "deprecated": false,
             "trackAdoption": false

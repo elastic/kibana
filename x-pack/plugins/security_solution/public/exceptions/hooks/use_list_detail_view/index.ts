@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   BackOptions,
   ListDetails,
@@ -14,20 +7,27 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { useUserData } from '../../../detections/components/user_info';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import {
-  updateList,
-  getListRules,
-  getListById,
-  unlinkListFromRules,
-  linkListToRules,
-} from '../../api';
-import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
-import * as i18n from '../../translations';
 import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { useUserData } from '../../../detections/components/user_info';
+import {
+  getListById,
+  getListRules,
+  linkListToRules,
+  unlinkListFromRules,
+  updateList,
+} from '../../api';
+import * as i18n from '../../translations';
+import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 
 interface ReferenceModalState {
   contentText: string;

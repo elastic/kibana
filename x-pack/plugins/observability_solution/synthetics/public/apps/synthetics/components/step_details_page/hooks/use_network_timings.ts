@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   NETWORK_TIMINGS_FIELDS,
@@ -18,6 +17,7 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-shared-plugin/common';
+import { useParams } from 'react-router-dom';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 

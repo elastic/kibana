@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCreateListIndex, useReadListIndex } from '@kbn/securitysolution-list-hooks';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
+import { useCallback, useMemo } from 'react';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsPrivileges } from './use_lists_privileges';
 
 /**

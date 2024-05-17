@@ -1,3 +1,5 @@
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +7,15 @@
  * 2.0.
  */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QueryDslQueryContainerBool } from '../../../types';
 import {
-  QUERY_KEY_PROCESS_EVENTS,
   AGGREGATE_ROUTE,
+  CURRENT_API_VERSION,
   MULTI_TERMS_AGGREGATE_ROUTE,
   ORCHESTRATOR_CLUSTER_NAME,
-  CURRENT_API_VERSION,
+  QUERY_KEY_PROCESS_EVENTS,
 } from '../../../../common/constants';
 import { AggregateBucketPaginationResult, MultiTermsBucket } from '../../../../common/types';
+import { QueryDslQueryContainerBool } from '../../../types';
 import { KUBERNETES_COLLECTION_FIELDS } from '../helpers';
 
 export const useFetchDynamicTreeView = (

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { ExpandableSection } from './expandable_section';
-import { ABOUT_SECTION_TEST_ID } from './test_ids';
-import { AlertDescription } from './alert_description';
-import { Reason } from './reason';
-import { MitreAttack } from './mitre_attack';
-import { getField } from '../../shared/utils';
+import React, { memo } from 'react';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { getField } from '../../shared/utils';
 import { useRightPanelContext } from '../context';
+import { useExpandSection } from '../hooks/use_expand_section';
 import { isEcsAllowedValue } from '../utils/event_utils';
+import { AlertDescription } from './alert_description';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
+import { ExpandableSection } from './expandable_section';
+import { MitreAttack } from './mitre_attack';
+import { Reason } from './reason';
+import { ABOUT_SECTION_TEST_ID } from './test_ids';
 
 const KEY = 'about';
 

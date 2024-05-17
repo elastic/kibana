@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+import { connect } from 'react-redux';
 
 import { transitionsRegistry } from '../../lib/transitions_registry';
-import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
-import { stylePage, setPageTransition } from '../../state/actions/pages';
+import { setPageTransition, stylePage } from '../../state/actions/pages';
+import { getPages, getSelectedPageIndex } from '../../state/selectors/workpad';
 import { PageConfig as Component } from './page_config';
 
 const strings = {

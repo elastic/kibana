@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import React from 'react';
 
 export { FilterContent, FilterContentLazy } from './filter_content';
 

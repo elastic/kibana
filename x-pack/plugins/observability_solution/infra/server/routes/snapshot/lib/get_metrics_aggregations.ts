@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JsonObject } from '@kbn/utility-types';
 import {
   InventoryItemType,
   MetricsUIAggregation,
@@ -14,9 +13,10 @@ import {
 } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
+import { JsonObject } from '@kbn/utility-types';
 import {
-  SnapshotMetricInput,
   SnapshotCustomMetricInputRT,
+  SnapshotMetricInput,
   SnapshotRequest,
 } from '../../../../common/http_api';
 import { InfraSourceConfiguration } from '../../../lib/sources';

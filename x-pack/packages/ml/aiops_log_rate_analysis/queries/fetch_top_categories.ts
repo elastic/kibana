@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
+import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 

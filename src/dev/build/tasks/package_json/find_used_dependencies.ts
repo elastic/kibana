@@ -7,11 +7,11 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
-import { ImportResolver } from '@kbn/import-resolver';
-import { ImportLocator } from '@kbn/import-locator';
-import { readPackageMap, Package, PluginPackage } from '@kbn/repo-packages';
 import { findUsedNodeModules } from '@kbn/find-used-node-modules';
+import { ImportLocator } from '@kbn/import-locator';
+import { ImportResolver } from '@kbn/import-resolver';
+import { Package, PluginPackage, readPackageMap } from '@kbn/repo-packages';
+import globby from 'globby';
 
 export async function findUsedDependencies(
   listedPkgDependencies: any,

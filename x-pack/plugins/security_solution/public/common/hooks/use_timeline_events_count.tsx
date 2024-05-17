@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
+import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 
 /**
  * A singleton portal for rendering content in the global header

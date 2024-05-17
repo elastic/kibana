@@ -6,16 +6,16 @@
  */
 
 import {
-  usageCollectionPluginMock,
   createCollectorFetchContextMock,
+  usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import type { Collector } from '@kbn/usage-collection-plugin/server/mocks';
+import { launchDarklyClientMocks } from '../launch_darkly_client/mocks';
 import {
-  registerUsageCollector,
   type LaunchDarklyEntitiesGetter,
   type Usage,
+  registerUsageCollector,
 } from './register_usage_collector';
-import { launchDarklyClientMocks } from '../launch_darkly_client/mocks';
 
 describe('cloudExperiments usage collector', () => {
   let collector: Collector<Usage>;

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { getComplianceDashboardSchema } from '../../../common/schemas/stats';
-import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
-import type {
-  PosturePolicyTemplate,
-  ComplianceDashboardData,
-  GetComplianceDashboardRequest,
-  ComplianceDashboardDataV2,
-} from '../../../common/types_old';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
-import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
-import { ClusterWithoutTrend, getClusters } from './get_clusters';
-import { getStats } from './get_stats';
-import { CspRouter } from '../../types';
-import { getTrends, Trends } from './get_trends';
-import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
+import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { getComplianceDashboardSchema } from '../../../common/schemas/stats';
+import type {
+  ComplianceDashboardData,
+  ComplianceDashboardDataV2,
+  GetComplianceDashboardRequest,
+  PosturePolicyTemplate,
+} from '../../../common/types_old';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
+import { CspRouter } from '../../types';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
+import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
+import { ClusterWithoutTrend, getClusters } from './get_clusters';
+import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
+import { getStats } from './get_stats';
+import { Trends, getTrends } from './get_trends';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;

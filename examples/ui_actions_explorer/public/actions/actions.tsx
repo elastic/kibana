@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiButton, EuiFieldText, EuiModalBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
-import { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   ActionExecutionContext,
-  createAction,
   UiActionsStart,
+  createAction,
 } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
+import { useState } from 'react';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';

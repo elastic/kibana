@@ -7,10 +7,10 @@
 
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
+import { State } from '../../../types';
 import { createThunk } from '../../lib/create_thunk';
 // @ts-expect-error untyped local
 import { fetchRenderable } from './elements';
-import { State } from '../../../types';
 
 export const UpdateEmbeddableExpressionActionType = 'updateEmbeddableExpression';
 export interface UpdateEmbeddableExpressionPayload {

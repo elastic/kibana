@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiLoadingSpinner, EuiSkeletonText, EuiText } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { useQueryClient } from '@tanstack/react-query';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
-import { RuleResponse } from '../common/types';
-import { useKibana } from '../common/hooks/use_kibana';
-import { showCreateDetectionRuleSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
+import { useKibana } from '../common/hooks/use_kibana';
+import { RuleResponse } from '../common/types';
+import { showCreateDetectionRuleSuccessToast } from './take_action';
 
 const RULES_PAGE_PATH = '/rules/management';
 const ALERTS_PAGE_PATH = '/alerts';

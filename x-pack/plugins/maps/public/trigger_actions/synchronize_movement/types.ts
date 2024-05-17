@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HasType } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
+import type { HasType } from '@kbn/presentation-publishing';
 import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
 export type SynchronizeMovementActionApi =

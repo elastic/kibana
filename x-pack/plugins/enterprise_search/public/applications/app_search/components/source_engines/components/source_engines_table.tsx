@@ -17,10 +17,10 @@ import { ENGINE_PATH } from '../../../routes';
 import { generateEncodedPath } from '../../../utils/encode_path_params';
 import { EngineDetails } from '../../engine/types';
 import {
-  NAME_COLUMN,
+  ACTIONS_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
-  ACTIONS_COLUMN,
+  NAME_COLUMN,
 } from '../../engines/components/tables/shared_columns';
 
 import { REMOVE_SOURCE_ENGINE_BUTTON_LABEL, REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE } from '../i18n';

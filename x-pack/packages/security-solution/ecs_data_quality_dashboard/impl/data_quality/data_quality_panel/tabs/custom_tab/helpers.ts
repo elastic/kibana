@@ -9,17 +9,17 @@ import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { FIELD, INDEX_MAPPING_TYPE } from '../../../compare_fields_table/translations';
+import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import {
-  getSummaryMarkdownComment,
   getCustomMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
-  getTabCountsMarkdownComment,
+  getSummaryMarkdownComment,
   getSummaryTableMarkdownComment,
+  getTabCountsMarkdownComment,
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
 import { getFillColor } from '../summary_tab/helpers';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 export const getCustomMarkdownComment = ({
   enrichedFieldMetadata,

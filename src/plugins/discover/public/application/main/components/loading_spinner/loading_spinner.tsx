@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiLoadingSpinner,
-  EuiTitle,
   EuiSpacer,
-  useEuiPaddingSize,
+  EuiTitle,
   useEuiBackgroundColor,
+  useEuiPaddingSize,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export function LoadingSpinner() {
   const loadingSpinnerCss = css`

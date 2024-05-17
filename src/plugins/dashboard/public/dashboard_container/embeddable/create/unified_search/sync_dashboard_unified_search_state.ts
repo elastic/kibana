@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import { Subject } from 'rxjs';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs';
 
+import {
+  GlobalQueryStateFromUrl,
+  connectToQueryState,
+  waitUntilNextSessionCompletes$,
+} from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import {
-  connectToQueryState,
-  GlobalQueryStateFromUrl,
-  waitUntilNextSessionCompletes$,
-} from '@kbn/data-plugin/public';
 
-import { DashboardContainer } from '../../dashboard_container';
-import { pluginServices } from '../../../../services/plugin_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../../dashboard_constants';
+import { pluginServices } from '../../../../services/plugin_services';
 import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
+import { DashboardContainer } from '../../dashboard_container';
 
 /**
  * Sets up syncing and subscriptions between the filter state from the Data plugin

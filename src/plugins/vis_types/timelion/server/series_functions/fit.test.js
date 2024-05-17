@@ -7,11 +7,11 @@
  */
 
 const fn = require('./fit');
-import moment from 'moment';
 import expect from '@kbn/expect';
-import invoke from './test_helpers/invoke_series_fn';
-import getSeriesList from './test_helpers/get_single_series_list';
 import _ from 'lodash';
+import moment from 'moment';
+import getSeriesList from './test_helpers/get_single_series_list';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('fit.js', function () {
   describe('should not filter out zeros', function () {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import yaml from 'js-yaml';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;

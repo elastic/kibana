@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockSearchResult } from './test_helpers';
-import { getMonitorAlerts, getMonitorDetails } from './get_monitor_details';
-import * as statusCheck from '../alerts/status_check';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
+import * as statusCheck from '../alerts/status_check';
+import { getMonitorAlerts, getMonitorDetails } from './get_monitor_details';
+import { mockSearchResult } from './test_helpers';
 
 describe('getMonitorDetails', () => {
   it('getMonitorDetails will provide expected calls', async () => {

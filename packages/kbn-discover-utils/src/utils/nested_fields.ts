@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { escapeRegExp } from 'lodash/fp';
-import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
+import { escapeRegExp } from 'lodash/fp';
 
 /**
  * This function checks if the given field in a given data view is a nested field's parent.

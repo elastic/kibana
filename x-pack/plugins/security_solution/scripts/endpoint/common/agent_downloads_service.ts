@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mkdir, readdir, stat, unlink } from 'fs/promises';
-import { join } from 'path';
 import fs from 'fs';
+import { join } from 'path';
+import { mkdir, readdir, stat, unlink } from 'fs/promises';
 import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
-import { handleProcessInterruptions } from './nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import { handleProcessInterruptions } from './nodejs_utils';
 import { SettingsStorage } from './settings_storage';
 
 export interface DownloadedAgentInfo {

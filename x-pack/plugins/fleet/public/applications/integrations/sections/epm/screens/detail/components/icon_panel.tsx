@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
 
+import { Loading } from '../../../../../components';
 import type { UsePackageIconType } from '../../../../../hooks';
 import { usePackageIconType } from '../../../../../hooks';
-import { Loading } from '../../../../../components';
 
 const Panel = styled(EuiPanel)`
   padding: ${(props) => props.theme.eui.euiSizeXL};

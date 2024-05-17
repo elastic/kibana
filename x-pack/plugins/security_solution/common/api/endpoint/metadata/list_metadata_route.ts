@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
-import { HostStatus, EndpointSortableField } from '../../../endpoint/types';
+import { EndpointSortableField, HostStatus } from '../../../endpoint/types';
 
 export const GetMetadataListRequestSchema = {
   query: schema.object(

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
 
 import { removeLifecycleForIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';

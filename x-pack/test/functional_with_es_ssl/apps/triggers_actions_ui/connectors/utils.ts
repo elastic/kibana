@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
-import { findIndex } from 'lodash';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { ObjectRemover } from '../../../lib/object_remover';
+import { findIndex } from 'lodash';
+import type SuperTest from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getTestActionData, getTestAlertData } from '../../../lib/get_test_data';
+import { ObjectRemover } from '../../../lib/object_remover';
 
 export const createSlackConnectorAndObjectRemover = async ({
   getService,

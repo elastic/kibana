@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
-import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { Filter, buildEsQuery } from '@kbn/es-query';
+import { v4 } from 'uuid';
 import {
   NormalizedAlertAction,
   NormalizedAlertDefaultActionWithGeneratedValues,

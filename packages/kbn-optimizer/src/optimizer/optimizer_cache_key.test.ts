@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getOptimizerCacheKey } from './optimizer_cache_key';
 import { OptimizerConfig } from './optimizer_config';

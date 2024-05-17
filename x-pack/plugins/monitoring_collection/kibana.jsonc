@@ -6,8 +6,6 @@
     "id": "monitoringCollection",
     "server": true,
     "browser": false,
-    "configPath": [
-      "monitoring_collection"
-    ]
+    "configPath": ["monitoring_collection"]
   }
 }

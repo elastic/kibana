@@ -9,8 +9,8 @@
 
 import { API_ROUTE_TEMPLATES } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
-import { pluginServices } from '../services';
 import { CanvasTemplate } from '../../types';
+import { pluginServices } from '../services';
 
 const getApiPath = function () {
   const platformService = pluginServices.getServices().platform;

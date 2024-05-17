@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { write, Task } from '../lib';
+import { Task, write } from '../lib';
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';

@@ -6,12 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "PUT"
-    ],
-    "patterns": [
-      "_ml/trained_models/{model_id}/definition/{part}"
-    ],
+    "methods": ["PUT"],
+    "patterns": ["_ml/trained_models/{model_id}/definition/{part}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-model-definition-part.html",
     "availability": {
       "stack": true,

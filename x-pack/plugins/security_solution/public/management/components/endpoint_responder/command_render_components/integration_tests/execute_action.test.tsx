@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { waitFor } from '@testing-library/react';
+import React from 'react';
+import { EXECUTE_ROUTE } from '../../../../../../common/endpoint/constants';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../../../../common/translations';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
-import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
-import React from 'react';
 import { enterConsoleCommand } from '../../../console/mocks';
-import { waitFor } from '@testing-library/react';
-import { EXECUTE_ROUTE } from '../../../../../../common/endpoint/constants';
-import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
-import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
-import {
-  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
-  UPGRADE_AGENT_FOR_RESPONDER,
-} from '../../../../../common/translations';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
-import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/experimental_features_service');

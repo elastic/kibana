@@ -13,23 +13,23 @@ import { patchCaseRoute } from './cases/patch_cases';
 import { postCaseRoute } from './cases/post_case';
 import { pushCaseRoute } from './cases/push_case';
 import { getReportersRoute } from './cases/reporters/get_reporters';
-import { getStatusRoute } from './stats/get_status';
-import { getUserActionsRoute } from './user_actions/get_all_user_actions';
-import type { CaseRoute } from './types';
 import { getTagsRoute } from './cases/tags/get_tags';
 import { deleteAllCommentsRoute } from './comments/delete_all_comments';
 import { deleteCommentRoute } from './comments/delete_comment';
 import { findCommentsRoute } from './comments/find_comments';
-import { getCommentRoute } from './comments/get_comment';
+import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { getAllCommentsRoute } from './comments/get_all_comment';
+import { getCommentRoute } from './comments/get_comment';
 import { patchCommentRoute } from './comments/patch_comment';
 import { postCommentRoute } from './comments/post_comment';
 import { getCaseConfigureRoute } from './configure/get_configure';
 import { getConnectorsRoute } from './configure/get_connectors';
 import { patchCaseConfigureRoute } from './configure/patch_configure';
 import { postCaseConfigureRoute } from './configure/post_configure';
-import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
+import { getStatusRoute } from './stats/get_status';
+import type { CaseRoute } from './types';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
+import { getUserActionsRoute } from './user_actions/get_all_user_actions';
 
 export const getExternalRoutes = () =>
   [

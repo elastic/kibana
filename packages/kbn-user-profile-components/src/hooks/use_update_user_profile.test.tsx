@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { type WrapperComponent, act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
-import { useUpdateUserProfile } from './use_update_user_profile';
 import { UserProfilesKibanaProvider } from '../services';
+import { useUpdateUserProfile } from './use_update_user_profile';
 
 const core = coreMock.createStart();
 const security = {

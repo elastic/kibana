@@ -9,8 +9,8 @@
 import { memoize } from 'lodash';
 import moment from 'moment-timezone';
 import {
-  analysePatternForFract,
   DateNanosFormat,
+  analysePatternForFract,
   formatWithNanos,
 } from '../../../common/converters/date_nanos_shared';
 import { TextContextTypeConvert } from '../../../common/types';

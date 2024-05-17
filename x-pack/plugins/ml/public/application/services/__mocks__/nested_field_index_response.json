@@ -44,9 +44,7 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "high_mean",
@@ -58,9 +56,7 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "low_mean",
@@ -72,9 +68,7 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "sum",
@@ -86,9 +80,7 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "high_sum",
@@ -100,9 +92,7 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "low_sum",
@@ -114,9 +104,7 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "median",
@@ -128,9 +116,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "high_median",
@@ -142,9 +128,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "low_median",
@@ -156,9 +140,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "min",
@@ -170,9 +152,7 @@
           "max": "min",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "max",
@@ -184,9 +164,7 @@
           "max": "max",
           "min": "max"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "distinct_count",
@@ -198,12 +176,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "group.keyword",
-          "user.first.keyword",
-          "user.last.keyword",
-          "time_spent"
-        ]
+        "fieldIds": ["group.keyword", "user.first.keyword", "user.last.keyword", "time_spent"]
       },
       {
         "id": "non_zero_count",
@@ -248,12 +221,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "group.keyword",
-          "user.first.keyword",
-          "user.last.keyword",
-          "time_spent"
-        ]
+        "fieldIds": ["group.keyword", "user.first.keyword", "user.last.keyword", "time_spent"]
       },
       {
         "id": "low_distinct_count",
@@ -265,12 +233,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "group.keyword",
-          "user.first.keyword",
-          "user.last.keyword",
-          "time_spent"
-        ]
+        "fieldIds": ["group.keyword", "user.first.keyword", "user.last.keyword", "time_spent"]
       },
       {
         "id": "metric",
@@ -282,9 +245,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "varp",
@@ -296,9 +257,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "high_varp",
@@ -310,9 +269,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "low_varp",
@@ -324,9 +281,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "non_null_sum",
@@ -338,9 +293,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "high_non_null_sum",
@@ -352,9 +305,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "low_non_null_sum",
@@ -366,9 +317,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "time_spent"
-        ]
+        "fieldIds": ["time_spent"]
       },
       {
         "id": "rare",
@@ -494,11 +443,7 @@
         "type": "text",
         "aggregatable": false,
         "counter": false,
-        "aggIds": [
-          "info_content",
-          "high_info_content",
-          "low_info_content"
-        ]
+        "aggIds": ["info_content", "high_info_content", "low_info_content"]
       },
       {
         "id": "group.keyword",
@@ -562,11 +507,7 @@
         "type": "text",
         "aggregatable": false,
         "counter": false,
-        "aggIds": [
-          "info_content",
-          "high_info_content",
-          "low_info_content"
-        ]
+        "aggIds": ["info_content", "high_info_content", "low_info_content"]
       },
       {
         "id": "user.first.keyword",
@@ -589,11 +530,7 @@
         "type": "text",
         "aggregatable": false,
         "counter": false,
-        "aggIds": [
-          "info_content",
-          "high_info_content",
-          "low_info_content"
-        ]
+        "aggIds": ["info_content", "high_info_content", "low_info_content"]
       },
       {
         "id": "user.last.keyword",

@@ -6,27 +6,27 @@
  */
 
 import {
-  EuiPopover,
   EuiButtonEmpty,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiHorizontalRule,
+  EuiPopover,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { AggregateQuery, Query, isOfQueryType } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { useActor } from '@xstate/react';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
-import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
-import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
-import useAsync from 'react-use/lib/useAsync';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
-import { useKibanaContextForPlugin } from '../utils/use_kibana';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { useActor } from '@xstate/react';
+import React, { useMemo } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
+import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
 

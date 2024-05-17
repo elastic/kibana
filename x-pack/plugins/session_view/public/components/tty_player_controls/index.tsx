@@ -1,3 +1,14 @@
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiRangeProps,
+  EuiToolTip,
+} from '@elastic/eui';
+import { findIndex } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,18 +16,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiButtonIconProps,
-  EuiRangeProps,
-} from '@elastic/eui';
-import { findIndex } from 'lodash';
-import type { ProcessStartMarker, ProcessEvent } from '../../../common';
+import type { ProcessEvent, ProcessStartMarker } from '../../../common';
 import { useStyles } from './styles';
 import {
   TTY_END,

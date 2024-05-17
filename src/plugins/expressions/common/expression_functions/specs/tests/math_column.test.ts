@@ -7,7 +7,7 @@
  */
 
 import { mathColumn } from '../math_column';
-import { functionWrapper, testTable, tableWithNulls } from './utils';
+import { functionWrapper, tableWithNulls, testTable } from './utils';
 
 describe('mathColumn', () => {
   const fn = functionWrapper(mathColumn);

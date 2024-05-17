@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { DefaultBooleanFalse } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { DefaultBooleanFalse } from '.';
 
 describe('default_boolean_false', () => {
   test('it should validate a boolean false', () => {

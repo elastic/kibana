@@ -6,18 +6,8 @@
     "id": "searchprofiler",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "searchprofiler"
-    ],
-    "requiredPlugins": [
-      "devTools",
-      "home",
-      "licensing",
-      "share"
-    ],
-    "requiredBundles": [
-      "esUiShared"
-    ]
+    "configPath": ["xpack", "searchprofiler"],
+    "requiredPlugins": ["devTools", "home", "licensing", "share"],
+    "requiredBundles": ["esUiShared"]
   }
 }

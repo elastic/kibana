@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import {
+  ISOLATE_HOST_ROUTE_V2,
+  UNISOLATE_HOST_ROUTE_V2,
+} from '../../../../common/endpoint/constants';
 import type {
   HostIsolationRequestBody,
   HostIsolationResponse,
 } from '../../../../common/endpoint/types';
 import type { ResponseProvidersInterface } from '../../mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../mock/endpoint/http_handler_mock_factory';
-import {
-  ISOLATE_HOST_ROUTE_V2,
-  UNISOLATE_HOST_ROUTE_V2,
-} from '../../../../common/endpoint/constants';
 
 export const hostIsolationRequestBodyMock = (): HostIsolationRequestBody => {
   return {

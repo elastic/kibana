@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RouteDependencies } from './types';
 import { BASE_API_ROUTE } from '../common';
+import { RouteDependencies } from './types';
 
 export const registerRoutes = ({ router, log, screenshotMode }: RouteDependencies) => {
   router.get(

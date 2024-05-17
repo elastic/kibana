@@ -1,3 +1,4 @@
+import { PathsOf, TypeOf, useParams } from '@kbn/typed-react-router-config';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { ValuesType } from 'utility-types';
-import { TypeOf, PathsOf, useParams } from '@kbn/typed-react-router-config';
 import { ApmRoutes } from '../components/routing/apm_route_config';
 
 // these three different functions exist purely to speed up completions from

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -21,14 +21,14 @@ import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
-  type AiOpsKey,
-  type AiOpsStorageMapped,
   AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE,
   AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
 } from '../../types/storage';
 
 import { RandomSampler } from './sampling_menu';
-import { RANDOM_SAMPLER_OPTION, DEFAULT_PROBABILITY } from './sampling_menu/random_sampler';
+import { DEFAULT_PROBABILITY, RANDOM_SAMPLER_OPTION } from './sampling_menu/random_sampler';
 
 export type EventRate = Array<{
   key: number;

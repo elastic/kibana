@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { QueryStringContract } from '.';
 import { Observable } from 'rxjs';
+import type { QueryStringContract } from '.';
 
 const createSetupContractMock = () => {
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {

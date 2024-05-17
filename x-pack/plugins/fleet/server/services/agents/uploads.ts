@@ -6,20 +6,20 @@
  */
 import type { Readable } from 'stream';
 
-import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import moment from 'moment';
 
 import { createEsFileClient } from '@kbn/files-plugin/server';
 
 import type { ResponseHeaders } from '@kbn/core-http-server';
 
-import type { AgentDiagnostics } from '../../../common/types/models';
-import { appContextService } from '../app_context';
 import {
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
   agentRouteService,
 } from '../../../common';
+import type { AgentDiagnostics } from '../../../common/types/models';
+import { appContextService } from '../app_context';
 
 import {
   FILE_STORAGE_DATA_AGENT_INDEX,

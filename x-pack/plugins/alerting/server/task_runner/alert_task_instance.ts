@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ruleParamsSchema } from '@kbn/alerting-state-types';
-import { SanitizedRule, RuleTaskState, RuleTaskParams, RuleTypeParams } from '../../common';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { RuleTaskParams, RuleTaskState, RuleTypeParams, SanitizedRule } from '../../common';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;

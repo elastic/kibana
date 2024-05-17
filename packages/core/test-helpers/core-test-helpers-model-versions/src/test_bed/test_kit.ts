@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs/promises';
-import { defaultsDeep } from 'lodash';
-import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { ConfigService, Env, BuildFlavor } from '@kbn/config';
+import { BuildFlavor, ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import {
-  SavedObjectConfig,
-  type SavedObjectsConfigType,
-  type SavedObjectsMigrationConfigType,
-  type IndexTypesMap,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
-import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import type { LoggerFactory } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
-import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
+import { registerServiceConfig } from '@kbn/core-root-server-internal';
+import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  type IndexTypesMap,
+  SavedObjectConfig,
+  type SavedObjectsConfigType,
+  type SavedObjectsMigrationConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
+import type { LoggerFactory } from '@kbn/logging';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
+import fs from 'fs/promises';
+import { defaultsDeep } from 'lodash';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { getTypeRegistries } from './type_registry';
-import type { ModelVersionTestkitOptions, ModelVersionTestKit } from './types';
+import type { ModelVersionTestKit, ModelVersionTestkitOptions } from './types';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const currentVersion = env.packageInfo.version;

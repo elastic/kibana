@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { findObjectByTitle } from './find_object_by_title';
-import { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/public';
 import { simpleSavedObjectMock } from '@kbn/core/public/mocks';
+import { findObjectByTitle } from './find_object_by_title';
 
 describe('findObjectByTitle', () => {
   const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;

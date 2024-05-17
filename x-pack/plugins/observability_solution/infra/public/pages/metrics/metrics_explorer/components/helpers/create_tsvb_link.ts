@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { v4 as uuidv4 } from 'uuid';
-import { set } from '@kbn/safer-lodash-set';
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
+import { encode } from '@kbn/rison';
+import { set } from '@kbn/safer-lodash-set';
+import { v4 as uuidv4 } from 'uuid';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
-import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
-import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
+import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
+import { InfraFormatterType } from '../../../../../lib/lib';
 import {
+  MetricsExplorerChartOptions,
+  MetricsExplorerChartType,
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartOptions,
   MetricsExplorerYAxisMode,
-  MetricsExplorerChartType,
 } from '../../hooks/use_metrics_explorer_options';
-import { metricToFormat } from './metric_to_format';
-import { InfraFormatterType } from '../../../../../lib/lib';
 import { createMetricLabel } from './create_metric_label';
+import { metricToFormat } from './metric_to_format';
 
 /*
  We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to

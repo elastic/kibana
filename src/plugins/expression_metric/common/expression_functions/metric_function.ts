@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { openSans } from '@kbn/expressions-plugin/common/fonts';
-import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
+import { i18n } from '@kbn/i18n';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, NUMERALJS } from '../constants';
 import { ExpressionMetricFunction } from '../types';
 
 export const strings = {

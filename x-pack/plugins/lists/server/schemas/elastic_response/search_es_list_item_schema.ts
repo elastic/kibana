@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import {
   created_at,
   created_by,
@@ -18,6 +17,7 @@ import {
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
+import * as t from 'io-ts';
 
 import {
   binaryOrUndefined,

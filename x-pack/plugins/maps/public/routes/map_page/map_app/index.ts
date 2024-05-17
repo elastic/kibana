@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { MapApp } from './map_app';
-import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
+import { connect } from 'react-redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import { enableFullScreen, openMapSettings, setExecutionContext, setQuery } from '../../../actions';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../../reducers/store';
+import { FLYOUT_STATE } from '../../../reducers/ui';
 import {
   getFilters,
   getQuery,
@@ -20,10 +22,8 @@ import {
   getTimeFilters,
   hasDirtyState,
 } from '../../../selectors/map_selectors';
-import { setQuery, setExecutionContext, enableFullScreen, openMapSettings } from '../../../actions';
-import { FLYOUT_STATE } from '../../../reducers/ui';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../../reducers/store';
+import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
+import { MapApp } from './map_app';
 
 function mapStateToProps(state: MapStoreState) {
   return {

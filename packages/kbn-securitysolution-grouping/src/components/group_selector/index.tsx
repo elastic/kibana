@@ -11,11 +11,11 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { CustomFieldPanel } from './custom_field_panel';
-import * as i18n from '../translations';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
+import * as i18n from '../translations';
+import { CustomFieldPanel } from './custom_field_panel';
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;

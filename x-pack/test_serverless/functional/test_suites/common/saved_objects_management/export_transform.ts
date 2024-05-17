@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import type { SavedObject } from '@kbn/core/types';
 import type { SavedObjectsExportResultDetails } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/types';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {

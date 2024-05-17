@@ -8,9 +8,9 @@
 
 import { Subject } from 'rxjs';
 
-import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
-import type { SettingsStart, SettingsSetup } from '@kbn/core-ui-settings-browser';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { SettingsSetup, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';

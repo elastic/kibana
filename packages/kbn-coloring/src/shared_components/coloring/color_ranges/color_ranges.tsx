@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, Dispatch } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { camelCase } from 'lodash';
-import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
+import React, { useState, useEffect, Dispatch } from 'react';
 import { CustomPaletteParams, DEFAULT_CONTINUITY, DEFAULT_RANGE_TYPE } from '../../../palettes';
 
 import { ColorRangesExtraActions } from './color_ranges_extra_actions';
 import { ColorRangeItem } from './color_ranges_item';
 import {
-  validateColorRanges,
-  getErrorMessages,
   ColorRangeValidation,
+  getErrorMessages,
+  validateColorRanges,
 } from './color_ranges_validation';
 
-import type { ColorRange } from './types';
 import type { PaletteConfigurationActions } from '../types';
+import type { ColorRange } from './types';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];

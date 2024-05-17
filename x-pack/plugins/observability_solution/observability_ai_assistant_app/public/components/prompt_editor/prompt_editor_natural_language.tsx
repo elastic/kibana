@@ -1,3 +1,8 @@
+import { EuiInputPopover, EuiSelectable, EuiTextArea } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +10,6 @@
  * 2.0.
  */
 import React, { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { css } from '@emotion/css';
-import { EuiInputPopover, EuiSelectable, EuiTextArea } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 
 interface Props {
   disabled: boolean;

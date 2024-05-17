@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getQueryParams } from './get_query_params';
 import { Location } from 'history';
+import { getQueryParams } from './get_query_params';
 
 describe('getQueryParams', () => {
   it('should getQueryParams', () => {

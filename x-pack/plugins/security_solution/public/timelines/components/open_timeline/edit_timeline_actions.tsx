@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { OpenTimelineResult } from './types';
 
 export const useEditTimelineActions = () => {

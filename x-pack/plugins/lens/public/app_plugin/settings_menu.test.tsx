@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { renderWithReduxStore } from '../mocks';
 import { SettingsMenu } from './settings_menu';
-import { screen, waitFor } from '@testing-library/react';
 
 describe('settings menu', () => {
   const onCloseMock = jest.fn();

@@ -1,3 +1,5 @@
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { render, screen } from '@testing-library/react';
 import { withDataView } from '.';
 import { useGetScopedSourcererDataView } from '../sourcerer/use_get_sourcerer_data_view';
 

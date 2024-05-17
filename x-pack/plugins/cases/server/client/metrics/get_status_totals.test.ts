@@ -57,8 +57,9 @@ describe('getStatusTotalsByType', () => {
         clientArgs
       );
 
-      expect(mockServices.services.caseService.getCaseStatusStats.mock.calls[0][0])
-        .toMatchInlineSnapshot(`
+      expect(
+        mockServices.services.caseService.getCaseStatusStats.mock.calls[0][0]
+      ).toMatchInlineSnapshot(`
         Object {
           "searchOptions": Object {
             "filter": Object {

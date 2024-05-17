@@ -1,3 +1,17 @@
+import {
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
+  EuiLink,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +20,6 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopoverTitle,
-  EuiText,
-  EuiListGroupItem,
-  EuiListGroup,
-  EuiTitle,
-  EuiFieldSearch,
-  EuiHighlight,
-  EuiSpacer,
-  EuiLink,
-} from '@elastic/eui';
 import { elementToString } from '../utils/element_to_string';
 
 import './documentation.scss';

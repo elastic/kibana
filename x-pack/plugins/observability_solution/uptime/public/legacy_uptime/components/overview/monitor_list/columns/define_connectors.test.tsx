@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { DefineAlertConnectors } from './define_connectors';
-import { screen, fireEvent } from '@testing-library/react';
-import { ENABLE_STATUS_ALERT } from './translations';
 import { render } from '../../../../lib/helper/rtl_helpers';
+import { DefineAlertConnectors } from './define_connectors';
+import { ENABLE_STATUS_ALERT } from './translations';
 
 describe('EnableAlertComponent', () => {
   it('does not showHelpText or render popover when showHelpText and renderPopOver are false', () => {

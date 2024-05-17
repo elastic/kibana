@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { LatestActive } from './latest_active';
-import { LatestVersions } from './latest_versions';
-import { LatestTypes } from './latest_types';
-import { Stats } from '..';
-import { MonitoringTimeseriesContainer } from '../../chart';
 import {
   EuiCallOut,
-  EuiTitle,
-  EuiSpacer,
-  EuiPage,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
   EuiPageBody,
   EuiPanel,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { Stats } from '..';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { LatestActive } from './latest_active';
+import { LatestTypes } from './latest_types';
+import { LatestVersions } from './latest_versions';
 
 function renderLatestActive(latestActive, latestTypes, latestVersions) {
   if (latestTypes && latestTypes.length > 0) {

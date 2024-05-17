@@ -1,3 +1,7 @@
+import { EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
+import { css, cx } from '@emotion/css';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +9,16 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css, cx } from '@emotion/css';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { useKubernetesCharts } from '../hooks/use_host_metrics_charts';
+import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
+import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Section } from '../components/section';
 import { SectionTitle, TitleWithTooltip } from '../components/section_title';
-import { CONTAINER_METRIC_GROUP_TITLES, HOST_METRIC_GROUP_TITLES } from '../translations';
 import { INTEGRATIONS } from '../constants';
-import { ChartsGrid } from '../charts_grid/charts_grid';
-import { Chart } from './chart';
-import { useIntegrationCheck } from '../hooks/use_integration_check';
 import { useK8sContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
-import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
+import { useKubernetesCharts } from '../hooks/use_host_metrics_charts';
+import { useIntegrationCheck } from '../hooks/use_integration_check';
+import { CONTAINER_METRIC_GROUP_TITLES, HOST_METRIC_GROUP_TITLES } from '../translations';
+import { Chart } from './chart';
 import { ContainerMetricTypes, MetricsChartsFields } from './types';
 
 const FRAGMENT_BASE = 'key-metrics';

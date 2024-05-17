@@ -19,9 +19,9 @@ import {
   NormalizedField,
   NormalizedFields,
   NormalizedRuntimeFields,
-  State,
   ParameterName,
   RuntimeFields,
+  State,
   SubType,
 } from '../types';
 

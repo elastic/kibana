@@ -7,8 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useGetTags } from '../../containers/use_get_tags';
 import * as i18n from './translations';
 

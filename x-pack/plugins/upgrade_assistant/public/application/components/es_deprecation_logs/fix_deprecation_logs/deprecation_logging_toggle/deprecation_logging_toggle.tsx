@@ -8,15 +8,15 @@
 import React, { useState, FunctionComponent } from 'react';
 
 import {
-  EuiSwitch,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiPopover,
-  EuiLink,
-  EuiTextColor,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiSwitch,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

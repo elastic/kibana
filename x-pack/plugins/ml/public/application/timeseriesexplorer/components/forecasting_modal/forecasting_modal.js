@@ -9,8 +9,8 @@
  * React modal dialog which allows the user to run and view time series forecasts.
  */
 
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
 
@@ -21,15 +21,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import { MESSAGE_LEVEL } from '../../../../../common/constants/message_levels';
+import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import { isJobVersionGte } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
+import { forecastServiceFactory } from '../../../services/forecast_service';
+import { mlJobService } from '../../../services/job_service';
+import { ml } from '../../../services/ml_api_service';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
-import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
-import { forecastServiceFactory } from '../../../services/forecast_service';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 

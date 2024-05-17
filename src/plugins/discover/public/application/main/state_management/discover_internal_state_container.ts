@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { Filter } from '@kbn/es-query';
 import {
+  ReduxLikeStateContainer,
   createStateContainer,
   createStateContainerReactHelpers,
-  ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 
 export interface InternalState {

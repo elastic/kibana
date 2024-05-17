@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
-import { EuiPopover, EuiButton, EuiContextMenu } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 
 interface Props {
   anchorPosition?: 'upCenter' | 'downCenter';

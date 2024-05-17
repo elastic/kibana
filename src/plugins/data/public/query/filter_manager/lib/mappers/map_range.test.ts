@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Filter, FilterMeta, RangeFilter } from '@kbn/es-query';
 import { getRangeDisplayValue, mapRange } from './map_range';
-import { FilterMeta, RangeFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {

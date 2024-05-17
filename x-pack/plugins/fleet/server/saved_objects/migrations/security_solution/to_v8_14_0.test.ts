@@ -6,17 +6,17 @@
  */
 
 import {
-  createModelVersionTestMigrator,
   type ModelVersionTestMigrator,
+  createModelVersionTestMigrator,
 } from '@kbn/core-test-helpers-model-versions';
 
 import { cloneDeep } from 'lodash';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
+import { getSavedObjectTypes } from '../..';
 import type { PackagePolicy } from '../../../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import { getSavedObjectTypes } from '../..';
 
 const policyDoc: SavedObject<PackagePolicy> = {
   id: 'mock-saved-object-id',

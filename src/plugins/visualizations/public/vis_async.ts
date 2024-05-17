@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SerializedVis } from './vis';
 import type { VisParams } from '../common';
+import type { SerializedVis } from './vis';
 
 export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   visType: string,

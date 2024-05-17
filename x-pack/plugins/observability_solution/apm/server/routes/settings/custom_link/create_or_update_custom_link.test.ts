@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockNow } from '../../../utils/test_helpers';
 import { CustomLink } from '../../../../common/custom_link/custom_link_types';
-import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { mockNow } from '../../../utils/test_helpers';
+import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 
 describe('Create or Update Custom link', () => {
   const internalClientIndexMock = jest.fn();

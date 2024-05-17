@@ -40,8 +40,7 @@ import type {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-// TODO: Create and import 8.0.0 versioned ListArray schema
-import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 // TODO: Create and import 8.0.0 versioned alerting-types schemas
 import type {
   RiskScoreMapping,
@@ -49,16 +48,19 @@ import type {
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
+// TODO: Create and import 8.0.0 versioned ListArray schema
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+// TODO: Create and import 8.0.0 versioned RuleAlertAction type
+import type { SearchTypes } from '../../../../../detection_engine/types';
 import type {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
+  ALERT_GROUP_ID,
+  ALERT_GROUP_INDEX,
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_ACTIONS,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_FALSE_POSITIVES,
-  ALERT_GROUP_ID,
-  ALERT_GROUP_INDEX,
   ALERT_RULE_IMMUTABLE,
   ALERT_RULE_MAX_SIGNALS,
   ALERT_RULE_RISK_SCORE_MAPPING,
@@ -69,8 +71,6 @@ import type {
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
 } from '../../../../../field_maps/field_names';
-// TODO: Create and import 8.0.0 versioned RuleAlertAction type
-import type { SearchTypes } from '../../../../../detection_engine/types';
 import type { RuleAction } from '../../rule_schema';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.

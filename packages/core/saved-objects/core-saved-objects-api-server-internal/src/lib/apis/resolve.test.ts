@@ -7,27 +7,27 @@
  */
 
 import {
-  pointInTimeFinderMock,
-  mockInternalBulkResolve,
   mockGetCurrentTime,
   mockGetSearchDsl,
+  mockInternalBulkResolve,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { type BulkResolveError } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  mockTimestamp,
-  mappings,
-  createRegistry,
   createDocumentMigrator,
+  createRegistry,
   createSpySerializer,
+  mappings,
+  mockTimestamp,
 } from '../../test_helpers/repository.test.common';
 
 describe('SavedObjectsRepository', () => {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { rangeControlFactory } from './range_control_factory';
+import { CONTROL_TYPES, ControlParams } from '../editor_utils';
 import { listControlFactory } from './list_control_factory';
-import { ControlParams, CONTROL_TYPES } from '../editor_utils';
+import { rangeControlFactory } from './range_control_factory';
 
 export function getControlFactory(controlParams: ControlParams) {
   let factory = null;

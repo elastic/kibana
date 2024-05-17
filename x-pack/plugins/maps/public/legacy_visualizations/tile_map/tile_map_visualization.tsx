@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import type { TileMapVisConfig } from './types';
-import { MapComponent } from '../../embeddable/map_component';
+import React, { useMemo } from 'react';
 import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
+import { MapComponent } from '../../embeddable/map_component';
+import type { TileMapVisConfig } from './types';
 
 interface Props {
   filters?: Filter[];

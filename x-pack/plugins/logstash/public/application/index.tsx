@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs';
 
@@ -23,10 +23,10 @@ import {
   // @ts-ignore
 } from '../services';
 // @ts-ignore
+import * as Breadcrumbs from './breadcrumbs';
+// @ts-ignore
 import { PipelineList } from './components/pipeline_list';
 import { PipelineEditView } from './pipeline_edit_view';
-// @ts-ignore
-import * as Breadcrumbs from './breadcrumbs';
 
 export const renderApp = async (
   core: CoreStart,

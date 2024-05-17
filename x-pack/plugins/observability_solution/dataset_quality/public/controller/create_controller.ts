@@ -10,11 +10,11 @@ import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
-import { IDataStreamsStatsClient } from '../services/data_streams_stats';
 import { IDataStreamDetailsClient } from '../services/data_stream_details';
+import { IDataStreamsStatsClient } from '../services/data_streams_stats';
 import {
-  createDatasetQualityControllerStateMachine,
   DEFAULT_CONTEXT,
+  createDatasetQualityControllerStateMachine,
 } from '../state_machines/dataset_quality_controller';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import { DatasetQualityController, DatasetQualityPublicStateUpdate } from './types';

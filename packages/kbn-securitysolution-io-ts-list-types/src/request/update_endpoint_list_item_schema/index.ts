@@ -9,18 +9,18 @@
 import * as t from 'io-ts';
 
 import { DefaultUpdateCommentsArray } from '../../common/default_update_comments_array';
-import { exceptionListItemType } from '../../common/exception_list_item_type';
-import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
 import { description } from '../../common/description';
-import { name } from '../../common/name';
-import { _version } from '../../common/underscore_version';
+import { EntriesArray } from '../../common/entries';
+import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { id } from '../../common/id';
 import { meta } from '../../common/meta';
-import { Tags, tags } from '../../common/tags';
+import { name } from '../../common/name';
+import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
+import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { Tags, tags } from '../../common/tags';
+import { _version } from '../../common/underscore_version';
 import { UpdateCommentsArray } from '../../common/update_comment';
-import { EntriesArray } from '../../common/entries';
 
 export const updateEndpointListItemSchema = t.intersection([
   t.exact(

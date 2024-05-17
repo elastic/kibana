@@ -8,7 +8,7 @@
 import type { ProductLine } from './configs';
 import { setupActiveSections, updateActiveSections } from './helpers';
 import type { ExpandedCardSteps, ReducerActions } from './types';
-import { type CardId, type StepId, type TogglePanelReducer, OnboardingActions } from './types';
+import { type CardId, OnboardingActions, type StepId, type TogglePanelReducer } from './types';
 
 export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
   if (action.type === OnboardingActions.ToggleProduct) {
@@ -143,12 +143,15 @@ export const getFinishedStepsInitialStates = ({
 }: {
   finishedSteps: Record<CardId, StepId[]>;
 }): Record<CardId, Set<StepId>> => {
-  const initialStates = Object.entries(finishedSteps).reduce((acc, [cardId, stepIdsByCard]) => {
-    if (stepIdsByCard) {
-      acc[cardId] = new Set(stepIdsByCard);
-    }
-    return acc;
-  }, {} as Record<string, Set<StepId>>);
+  const initialStates = Object.entries(finishedSteps).reduce(
+    (acc, [cardId, stepIdsByCard]) => {
+      if (stepIdsByCard) {
+        acc[cardId] = new Set(stepIdsByCard);
+      }
+      return acc;
+    },
+    {} as Record<string, Set<StepId>>
+  );
 
   return initialStates;
 };

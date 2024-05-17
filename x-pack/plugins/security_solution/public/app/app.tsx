@@ -8,29 +8,29 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import type { Action, Store } from 'redux';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AppMountParameters } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { UpsellingProvider } from '../common/components/upselling_provider';
-import { ManageUserInfo } from '../detections/components/user_info';
 import { APP_NAME } from '../../common/constants';
+import { AssistantProvider } from '../assistant/provider';
+import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
-import type { State } from '../common/store';
-import type { StartServices } from '../types';
-import { PageRouter } from './routes';
+import { UpsellingProvider } from '../common/components/upselling_provider';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
-import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
-import { AssistantProvider } from '../assistant/provider';
+import { KibanaContextProvider, useDarkMode, useKibana } from '../common/lib/kibana';
+import type { State } from '../common/store';
+import { ManageUserInfo } from '../detections/components/user_info';
+import type { StartServices } from '../types';
+import { PageRouter } from './routes';
 
 interface StartAppComponent {
   children: React.ReactNode;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Subject, take, toArray } from 'rxjs';
 import type { Event, TelemetryCounter } from '@kbn/analytics-client';
+import { Subject, firstValueFrom, take, toArray } from 'rxjs';
 import { createTelemetryCounterHelper } from './report_telemetry_counters';
 
 describe('reportTelemetryCounters', () => {

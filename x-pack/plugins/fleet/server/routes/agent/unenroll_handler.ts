@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
 
 import type { PostAgentUnenrollResponse } from '../../../common/types';
+import { defaultFleetErrorHandler } from '../../errors';
+import * as AgentService from '../../services/agents';
 import type {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
 } from '../../types';
-import * as AgentService from '../../services/agents';
-import { defaultFleetErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,

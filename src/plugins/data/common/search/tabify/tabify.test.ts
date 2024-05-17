@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { tabifyAggResponse } from './tabify';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { AggConfigs, BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { isSamplingEnabled } from '../aggs/utils/sampler';
+import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { timeOffsetFiltersWithZeroDocCountResponse } from './fixtures/fake_timeoffset_data';
+import { tabifyAggResponse } from './tabify';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
@@ -151,7 +151,7 @@ describe('tabifyAggResponse Integration', () => {
 
       function getTopAggregations(
         rawResp: typeof threeTermBuckets
-      ): typeof threeTermBuckets['aggregations'] {
+      ): (typeof threeTermBuckets)['aggregations'] {
         return !isSamplingEnabled(probability)
           ? rawResp.aggregations!
           : // @ts-ignore

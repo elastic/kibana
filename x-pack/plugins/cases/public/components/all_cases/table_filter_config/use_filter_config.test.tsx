@@ -1,3 +1,4 @@
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +6,13 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { CustomFieldTypes } from '../../../../common/types/domain';
+import type { FilterOptions } from '../../../../common/ui';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
 import { useFilterConfig } from './use_filter_config';
-import type { FilterOptions } from '../../../../common/ui';
-import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
-import { CustomFieldTypes } from '../../../../common/types/domain';
 
 const emptyFilterOptions: FilterOptions = {
   search: '',

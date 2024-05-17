@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -25,15 +25,15 @@ import {
 
 import type { v1 } from '../common';
 
-import { SavedObjectManagementTypeInfo } from './types';
 import {
   getAllowedTypes,
+  getDefaultTitle,
   getRelationships,
   getSavedObjectLabel,
-  getDefaultTitle,
-  parseQuery,
   getTagFindReferences,
+  parseQuery,
 } from './lib';
+import { SavedObjectManagementTypeInfo } from './types';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export const getErrorMessagesFromEsShardFailures = (arg?: unknown): string[] => {
   if (isPopulatedObject<string, { failures: object[] }>(arg, ['_shards'])) {

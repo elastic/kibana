@@ -10,8 +10,8 @@ import { useEffect } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 
-import { pluginServices } from '../../services/plugin_services';
 import { DashboardAPI } from '../..';
+import { pluginServices } from '../../services/plugin_services';
 import { getDashboardTitle } from '../_dashboard_app_strings';
 
 export const DashboardTabTitleSetter = ({

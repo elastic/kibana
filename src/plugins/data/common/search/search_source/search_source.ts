@@ -58,43 +58,46 @@
  *    `appSearchSource`.
  */
 
-import { setWith } from '@kbn/safer-lodash-set';
-import {
-  difference,
-  isEqual,
-  isFunction,
-  isObject,
-  keyBy,
-  pick,
-  uniqueId,
-  concat,
-  omitBy,
-  isNil,
-} from 'lodash';
-import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
-import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  buildEsQuery,
   Filter,
+  buildEsQuery,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
 } from '@kbn/es-query';
-import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
-import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
-import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
+import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
+import { setWith } from '@kbn/safer-lodash-set';
+import type { IEsSearchResponse, IKibanaSearchResponse, ISearchGeneric } from '@kbn/search-types';
+import {
+  concat,
+  difference,
+  isEqual,
+  isFunction,
+  isNil,
+  isObject,
+  keyBy,
+  omitBy,
+  pick,
+  uniqueId,
+} from 'lodash';
+import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, defer, from, lastValueFrom } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 
 import { AggConfigs, EsQuerySortValue } from '../..';
+import { RequestFailure, getSearchParamsFromRequest } from './fetch';
+import type { FetchHandlers, SearchRequest } from './fetch';
+import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -102,19 +105,16 @@ import type {
   SearchSourceOptions,
   SearchSourceSearchOptions,
 } from './types';
-import { getSearchParamsFromRequest, RequestFailure } from './fetch';
-import type { FetchHandlers, SearchRequest } from './fetch';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
+import { UI_SETTINGS, getEsQueryConfig, isRunningResponse } from '../..';
 import { AggsStart } from '../aggs';
-import { extractReferences } from './extract_references';
 import {
   EsdslExpressionFunctionDefinition,
   ExpressionFunctionKibanaContext,
   filtersToAst,
   queryToAst,
 } from '../expressions';
+import { extractReferences } from './extract_references';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -261,8 +261,8 @@ export class SearchSource {
     const queryString = Array.isArray(query)
       ? query.map((q) => q.query)
       : isOfQueryType(query)
-      ? query?.query
-      : undefined;
+        ? query?.query
+        : undefined;
 
     const indexPatternFromQuery =
       typeof queryString === 'string'

@@ -6,25 +6,25 @@
  */
 
 import { mount } from 'enzyme';
+import { merge } from 'lodash';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { merge } from 'lodash';
 
-import { TestProviders } from '../../common/mock';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { Overview } from '.';
+import type { EndpointPrivileges } from '../../../common/endpoint/types';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
-import { Overview } from '.';
-import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
-import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { TestProviders } from '../../common/mock';
+import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
-import type { EndpointPrivileges } from '../../../common/endpoint/types';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
+import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/components/empty_prompt');

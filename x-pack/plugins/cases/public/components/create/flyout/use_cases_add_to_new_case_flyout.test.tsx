@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { allCasesPermissions } from '../../../common/mock';
+import { alertComment } from '../../../containers/mock';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
-import { allCasesPermissions } from '../../../common/mock';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
 jest.mock('../../../common/use_cases_toast');
 

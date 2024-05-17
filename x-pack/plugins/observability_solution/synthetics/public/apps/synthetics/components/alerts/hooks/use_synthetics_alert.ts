@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import {
-  selectSyntheticsAlerts,
-  selectSyntheticsAlertsLoading,
-} from '../../../state/alert_rules/selectors';
+import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../../state';
 import {
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
 } from '../../../state/alert_rules';
-import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
-import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../../state';
-import { ClientPluginsStart } from '../../../../../plugin';
+import {
+  selectSyntheticsAlerts,
+  selectSyntheticsAlertsLoading,
+} from '../../../state/alert_rules/selectors';
 
 export const useSyntheticsAlert = (isOpen: boolean) => {
   const dispatch = useDispatch();

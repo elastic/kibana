@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { monaco, ParsedRequest } from '@kbn/monaco';
+import { ParsedRequest, monaco } from '@kbn/monaco';
 import { constructUrl } from '../../../../../lib/es';
 import { MetricsTracker } from '../../../../../types';
 import type { DevToolsVariable } from '../../../../components';
 import type { EditorRequest } from '../types';
+import { AdjustedParsedRequest } from '../types';
 import { variableTemplateRegex } from './constants';
 import { removeTrailingWhitespaces } from './tokens_utils';
-import { AdjustedParsedRequest } from '../types';
 
 /*
  * This function stringifies and normalizes the parsed request:

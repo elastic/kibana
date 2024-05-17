@@ -192,9 +192,7 @@
             "tags": [],
             "label": "isRespectRanges",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -315,9 +313,7 @@
             "tags": [],
             "label": "isRespectRanges",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -356,9 +352,7 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -451,9 +445,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -465,9 +457,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -479,9 +469,7 @@
             "tags": [],
             "label": "metric",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -493,9 +481,7 @@
             "tags": [],
             "label": "goal",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -693,9 +679,7 @@
             "tags": [],
             "label": "ticksPosition",
             "description": [],
-            "signature": [
-              "\"hidden\" | \"auto\" | \"bands\""
-            ],
+            "signature": ["\"hidden\" | \"auto\" | \"bands\""],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -707,9 +691,7 @@
             "tags": [],
             "label": "labelMajorMode",
             "description": [],
-            "signature": [
-              "\"none\" | \"custom\" | \"auto\""
-            ],
+            "signature": ["\"none\" | \"custom\" | \"auto\""],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -721,9 +703,7 @@
             "tags": [],
             "label": "labelMajor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -735,9 +715,7 @@
             "tags": [],
             "label": "labelMinor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -749,10 +727,7 @@
             "tags": [],
             "label": "colorMode",
             "description": [],
-            "signature": [
-              "GaugeColorMode",
-              " | undefined"
-            ],
+            "signature": ["GaugeColorMode", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -807,9 +782,7 @@
             "tags": [],
             "label": "respectRanges",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -821,9 +794,7 @@
             "tags": [],
             "label": "commonLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -832,15 +803,10 @@
             "parentPluginId": "expressionGauge",
             "id": "def-common.GaugeState.centralMajorMode",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "centralMajorMode",
             "description": [],
-            "signature": [
-              "GaugeCentralMajorMode",
-              " | undefined"
-            ],
+            "signature": ["GaugeCentralMajorMode", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -850,14 +816,10 @@
             "parentPluginId": "expressionGauge",
             "id": "def-common.GaugeState.centralMajor",
             "type": "string",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "centralMajor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -867,16 +829,10 @@
             "parentPluginId": "expressionGauge",
             "id": "def-common.GaugeState.percentageMode",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "percentageMode",
-            "description": [
-              "\nThis field is deprecated and will be removed in a future release"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nThis field is deprecated and will be removed in a future release"],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -947,9 +903,7 @@
         "tags": [],
         "label": "EXPRESSION_GAUGE_NAME",
         "description": [],
-        "signature": [
-          "\"gauge\""
-        ],
+        "signature": ["\"gauge\""],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1142,9 +1096,7 @@
         "tags": [],
         "label": "GaugeLabelMajorMode",
         "description": [],
-        "signature": [
-          "\"none\" | \"custom\" | \"auto\""
-        ],
+        "signature": ["\"none\" | \"custom\" | \"auto\""],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1290,9 +1242,7 @@
         "tags": [],
         "label": "GaugeTicksPosition",
         "description": [],
-        "signature": [
-          "\"hidden\" | \"auto\" | \"bands\""
-        ],
+        "signature": ["\"hidden\" | \"auto\" | \"bands\""],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1305,9 +1255,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"expressionGauge\""
-        ],
+        "signature": ["\"expressionGauge\""],
         "path": "src/plugins/chart_expressions/expression_gauge/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1320,9 +1268,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"expressionGauge\""
-        ],
+        "signature": ["\"expressionGauge\""],
         "path": "src/plugins/chart_expressions/expression_gauge/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1337,9 +1283,7 @@
         "tags": [],
         "label": "GaugeColorModes",
         "description": [],
-        "signature": [
-          "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
-        ],
+        "signature": ["{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

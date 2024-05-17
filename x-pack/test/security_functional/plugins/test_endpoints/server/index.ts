@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializer } from '@kbn/core/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { initRoutes } from './init_routes';
 
 export interface PluginSetupDependencies {

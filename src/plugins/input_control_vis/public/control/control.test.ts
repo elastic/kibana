@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Control } from './control';
 import { ControlParams } from '../editor_utils';
+import { Control } from './control';
 import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
 
 function createControlParams(id: string, label: string): ControlParams {

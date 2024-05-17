@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getQueryFromSavedSearchObject, getEsQueryFromSavedSearch } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common/types';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import type { Query, Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
-import type { FilterManager } from '@kbn/data-plugin/public';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchSavedObject } from '../../../../common/types';
+import { getEsQueryFromSavedSearch, getQueryFromSavedSearchObject } from './saved_search_utils';
 
 function createMockFilterManager() {
   const filters: Filter[] = [];

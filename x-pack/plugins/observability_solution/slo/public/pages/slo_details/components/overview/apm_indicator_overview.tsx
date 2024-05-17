@@ -9,9 +9,9 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ALL_VALUE,
+  SLOWithSummaryResponse,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';

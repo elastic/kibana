@@ -9,8 +9,8 @@
 import { join } from 'path';
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
-import { Logger } from '../utils/create_logger';
 import { kibanaHeaders } from '../shared/client_headers';
+import { Logger } from '../utils/create_logger';
 
 export class InfraSynthtraceKibanaClient {
   private readonly logger: Logger;

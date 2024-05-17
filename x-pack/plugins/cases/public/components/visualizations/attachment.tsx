@@ -16,9 +16,9 @@ import type {
   PersistableStateAttachmentViewProps,
 } from '../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import type { LensProps } from './types';
-import { OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
+import { OpenLensButton } from './open_lens_button';
+import type { LensProps } from './types';
 
 function getOpenLensButton(attachmentId: string, props: LensProps) {
   return (

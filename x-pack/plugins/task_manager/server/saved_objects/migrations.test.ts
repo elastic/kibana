@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { getMigrations } from './migrations';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { v4 as uuidv4 } from 'uuid';
 import { TaskInstanceWithDeprecatedFields } from '../task';
+import { getMigrations } from './migrations';
 
 const migrationContext = migrationMocks.createContext();
 

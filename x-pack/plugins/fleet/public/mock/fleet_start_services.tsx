@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MockedKeys } from '@kbn/utility-types-jest';
+import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
@@ -19,7 +19,7 @@ import { setHttpClient } from '../hooks/use_request';
 
 import type { FleetAuthz } from '../../common';
 
-import { createStartDepsMock, createSetupDepsMock } from './plugin_dependencies';
+import { createSetupDepsMock, createStartDepsMock } from './plugin_dependencies';
 import type { MockedFleetStartServices } from './types';
 
 // Taken from core. See: src/plugins/kibana_utils/public/storage/storage.test.ts

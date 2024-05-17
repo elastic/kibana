@@ -8,9 +8,9 @@
 import { CoreSetup } from '@kbn/core/server';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
-import { telemetryMappingsType } from './mappings';
 import { getInternalRepository, setInternalRepository } from './internal_repository';
+import { telemetryMappingsType } from './mappings';
+import { Telemetry, getTelemetry, initTelemetry } from './telemetry';
 
 export function initFileUploadTelemetry(
   coreSetup: CoreSetup,

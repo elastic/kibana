@@ -7,8 +7,8 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { withProcRunner } from './with_proc_runner';
 import { ProcRunner } from './proc_runner';
+import { withProcRunner } from './with_proc_runner';
 
 it('passes proc runner to a function', async () => {
   await withProcRunner(new ToolingLog(), async (proc) => {

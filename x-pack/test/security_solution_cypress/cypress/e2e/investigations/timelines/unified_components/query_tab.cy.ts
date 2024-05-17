@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { OPEN_ANALYZER_BTN } from '../../../../screens/alerts';
+import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import {
-  closeTimelineFlyout,
-  openEventDetailsFlyout,
-  openHostDetailsFlyout,
-  openUserDetailsFlyout,
-} from '../../../../tasks/unified_timeline';
+  ADD_NOTE_CONTAINER,
+  RESOLVER_GRAPH_CONTAINER,
+  ROW_ADD_NOTES_BUTTON,
+} from '../../../../screens/timeline';
 import {
   GET_UNIFIED_DATA_GRID_CELL_HEADER,
   HOST_DETAILS_FLYOUT,
   TIMELINE_DETAILS_FLYOUT,
   USER_DETAILS_FLYOUT,
 } from '../../../../screens/unified_timeline';
-import {
-  ROW_ADD_NOTES_BUTTON,
-  ADD_NOTE_CONTAINER,
-  RESOLVER_GRAPH_CONTAINER,
-} from '../../../../screens/timeline';
-import { OPEN_ANALYZER_BTN } from '../../../../screens/alerts';
-import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import { addFieldToTable, removeFieldFromTable } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { createNewTimeline, executeTimelineSearch } from '../../../../tasks/timeline';
+import {
+  closeTimelineFlyout,
+  openEventDetailsFlyout,
+  openHostDetailsFlyout,
+  openUserDetailsFlyout,
+} from '../../../../tasks/unified_timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/181882

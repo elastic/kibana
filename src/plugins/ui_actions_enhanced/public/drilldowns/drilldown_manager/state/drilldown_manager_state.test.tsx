@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
+import { AdvancedUiActionsStart } from '../../..';
 import { ActionFactory, MemoryActionStorage } from '../../../dynamic_actions';
-import { DrilldownManagerState, DrilldownManagerStateDeps } from './drilldown_manager_state';
 import { DynamicActionManager } from '../../../dynamic_actions/dynamic_action_manager';
 import { uiActionsEnhancedPluginMock } from '../../../mocks';
-import { AdvancedUiActionsStart } from '../../..';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { DrilldownManagerState, DrilldownManagerStateDeps } from './drilldown_manager_state';
 import { DrilldownState } from './drilldown_state';
 
 class StorageWrapperMock implements IStorageWrapper {

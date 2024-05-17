@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { buildExpression } from '@kbn/expressions-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { sampleHeatmapVis } from './sample_vis.test.mocks';
-import { buildExpression } from '@kbn/expressions-plugin/public';
 
 import { toExpressionAst } from './to_ast';
 import { HeatmapVisParams } from './types';

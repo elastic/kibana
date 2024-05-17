@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { EuiButtonTo } from '../../react_router_helpers';
 
-import { SCHEMA_ERRORS_TITLE, SCHEMA_ERRORS_DESCRIPTION, SCHEMA_ERRORS_BUTTON } from './constants';
+import { SCHEMA_ERRORS_BUTTON, SCHEMA_ERRORS_DESCRIPTION, SCHEMA_ERRORS_TITLE } from './constants';
 
 interface Props {
   viewErrorsPath: string;

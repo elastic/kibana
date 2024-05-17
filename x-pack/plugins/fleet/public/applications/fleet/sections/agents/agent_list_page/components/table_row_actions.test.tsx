@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent } from '@testing-library/react';
+import React from 'react';
 
-import { createFleetTestRendererMock } from '../../../../../../mock';
-import type { Agent, AgentPolicy } from '../../../../types';
-import { ExperimentalFeaturesService } from '../../../../services';
-import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useAgentVersion } from '../../../../../../hooks/use_agent_version';
+import { useAuthz } from '../../../../../../hooks/use_authz';
+import { createFleetTestRendererMock } from '../../../../../../mock';
+import { ExperimentalFeaturesService } from '../../../../services';
+import type { Agent, AgentPolicy } from '../../../../types';
 
 import { TableRowActions } from './table_row_actions';
 

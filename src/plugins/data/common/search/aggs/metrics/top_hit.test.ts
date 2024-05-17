@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import * as tabifyModule from '@kbn/data-service/src/search/tabify/tabify_docs';
 import { dropRight, last } from 'lodash';
-import { getTopHitMetricAgg } from './top_hit';
+import { KBN_FIELD_TYPES } from '../../..';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
-import { KBN_FIELD_TYPES } from '../../..';
-import * as tabifyModule from '@kbn/data-service/src/search/tabify/tabify_docs';
+import { getTopHitMetricAgg } from './top_hit';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;

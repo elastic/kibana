@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UNKNOWN_TEXT } from './translations';
+import React from 'react';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { UNKNOWN_TEXT } from './translations';
 
 interface CreatedByProps {
   createdBy?: string;

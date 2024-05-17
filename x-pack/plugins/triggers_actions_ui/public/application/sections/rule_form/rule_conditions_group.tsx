@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import { EuiButtonIcon, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonIcon, EuiTitle } from '@elastic/eui';
-import { RuleConditionsProps, ActionGroupWithCondition } from './rule_conditions';
+import React, { PropsWithChildren } from 'react';
+import { ActionGroupWithCondition, RuleConditionsProps } from './rule_conditions';
 
 export type RuleConditionsGroupProps<ConditionProps> = {
   actionGroup?: ActionGroupWithCondition<ConditionProps, string>;

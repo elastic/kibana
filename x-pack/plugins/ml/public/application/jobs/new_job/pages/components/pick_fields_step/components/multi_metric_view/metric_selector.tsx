@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { AggFieldPair, Field } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
 import { AggSelect } from '../agg_select';
 

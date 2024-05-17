@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import supertest from 'supertest';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { SavedObjectsType } from '../../..';
 import {
-  registerDeleteUnknownTypesRoute,
   type InternalSavedObjectsRequestHandlerContext,
+  registerDeleteUnknownTypesRoute,
 } from '@kbn/core-saved-objects-server-internal';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import supertest from 'supertest';
+import { SavedObjectsType } from '../../..';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

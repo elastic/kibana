@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { workoutColorForValue } from './helpers';
 import { CustomPaletteState } from '../..';
+import { workoutColorForValue } from './helpers';
 
 describe('workoutColorForValue', () => {
   it('should return no color for empty value', () => {

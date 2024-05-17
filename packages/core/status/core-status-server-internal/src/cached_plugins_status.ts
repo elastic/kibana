@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
 import type { PluginName } from '@kbn/core-base-common';
-import { type Deps, PluginsStatusService as BasePluginsStatusService } from './plugins_status';
+import type { Observable } from 'rxjs';
+import { PluginsStatusService as BasePluginsStatusService, type Deps } from './plugins_status';
 import type { PluginStatus } from './types';
 
 export class PluginsStatusService extends BasePluginsStatusService {

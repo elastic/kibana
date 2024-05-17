@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { HitsCounter, HitsCounterMode } from './hits_counter';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
+import { HitsCounter, HitsCounterMode } from './hits_counter';
 
 describe('hits counter', function () {
   it('expect to render the number of hits', function () {

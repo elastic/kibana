@@ -6,12 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createTelemetryTimelineTaskConfig } from './timelines';
 import {
+  createMockTaskMetrics,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
-  createMockTaskMetrics,
 } from '../__mocks__';
+import { createTelemetryTimelineTaskConfig } from './timelines';
 
 describe('timeline telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

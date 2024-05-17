@@ -8,8 +8,8 @@
 /* eslint-disable max-classes-per-file */
 
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import { stringify } from '../../../utils/stringify';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
+import { stringify } from '../../../utils/stringify';
 
 /**
  * Errors associated with Response Actions clients

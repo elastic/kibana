@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
-import { collectionActions } from '../lib/collection_actions';
-import { AddDeleteButtons } from '../add_delete_buttons';
-import { v4 as uuidv4 } from 'uuid';
 import {
-  htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiComboBox,
   EuiFieldNumber,
-  EuiFormRow,
   EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiPanel,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { ColorPicker } from '../color_picker';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { ColorPicker } from '../color_picker';
+import { collectionActions } from '../lib/collection_actions';
 
 export const newPercentile = (opts) => {
   return _.assign({ id: uuidv4(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);

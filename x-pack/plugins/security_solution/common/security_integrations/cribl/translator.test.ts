@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import type { RouteEntry } from './types';
 import {
-  getRouteEntriesFromPolicyConfig,
   getPolicyConfigValueFromRouteEntries,
+  getRouteEntriesFromPolicyConfig,
 } from './translator';
+import type { RouteEntry } from './types';
 
 describe('translater', () => {
   const routeEntries = [

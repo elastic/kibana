@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { getConnectorsAction } from '../../state/alerts/alerts';
 
 interface Props {

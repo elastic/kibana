@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SLODefinition } from '../../../../domain/models';
 import { Rule } from '@kbn/alerting-plugin/common';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { SLODefinition } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
 import { shouldSuppressInstanceId } from './should_suppress_instance_id';
-import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('shouldSuppressInstanceId', () => {
   it('should suppress when supressAll is encountered', () => {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormFieldset, EuiRadio } from '@elastic/eui';
 

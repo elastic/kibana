@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect } from 'react';
-import { once } from 'lodash';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { SearchSessionIndicatorRef } from '../search_session_indicator';
-import { SearchSessionState } from '../../search_session_state';
+import { once } from 'lodash';
+import { useCallback, useEffect } from 'react';
 import { SearchUsageCollector } from '../../../collectors';
+import { SearchSessionState } from '../../search_session_state';
+import { SearchSessionIndicatorRef } from '../search_session_indicator';
 
 const TOUR_TAKING_TOO_LONG_TIMEOUT = 10000;
 export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;

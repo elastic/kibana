@@ -8,25 +8,25 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import type { Sort } from '../sort';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import type { Sort } from '../sort';
+import { defaultHeaders } from './default_headers';
 
+import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeadersComponentProps } from '.';
 import { ColumnHeadersComponent } from '.';
-import { cloneDeep } from 'lodash/fp';
-import { timelineActions } from '../../../../store';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
-import { getDefaultControlColumn } from '../control_columns';
-import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
-import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
-import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
+import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
+import { timelineActions } from '../../../../store';
+import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
+import { getDefaultControlColumn } from '../control_columns';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({

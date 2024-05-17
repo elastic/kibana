@@ -7,11 +7,12 @@
 
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { FilterStateStore } from '@kbn/es-query';
 import { maintenanceWindowCategoryIdTypes } from '../application/maintenance_window/constants';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { MaintenanceWindowStatus } from '../types';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
 import {
   filterMaintenanceWindows,
@@ -20,7 +21,6 @@ import {
 } from './get_maintenance_windows';
 import { getFakeKibanaRequest } from './rule_loader';
 import { TaskRunnerContext } from './types';
-import { FilterStateStore } from '@kbn/es-query';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };

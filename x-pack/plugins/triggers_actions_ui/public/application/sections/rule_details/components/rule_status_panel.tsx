@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiHealth,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
+  EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
   EuiStat,
   EuiText,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { RuleStatusDropdown } from '../..';
+import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
-import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import { RefreshToken } from './types';
 
 export interface RuleStatusPanelProps {

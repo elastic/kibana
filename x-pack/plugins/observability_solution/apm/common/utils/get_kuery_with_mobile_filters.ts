@@ -6,12 +6,12 @@
  */
 
 import {
-  HOST_OS_VERSION,
   DEVICE_MODEL_IDENTIFIER,
+  ERROR_GROUP_ID,
+  ERROR_TYPE,
+  HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-  ERROR_TYPE,
-  ERROR_GROUP_ID,
 } from '../es_fields/apm';
 import { fieldValuePairToKql } from './field_value_pair_to_kql';
 

@@ -10,23 +10,23 @@ import {
   RISK_SCORE_INDEX_STATUS_API_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
+import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
 import {
-  ANOMALIES_TABLE_ROWS,
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
+  ANOMALIES_TABLE_ROWS,
   OPEN_RISK_INFORMATION_FLYOUT_BUTTON,
 } from '../screens/entity_analytics';
 import { RISK_SCORE_STATUS } from '../screens/entity_analytics_management';
-import { ENTITY_ANALYTICS_URL, ENTITY_ANALYTICS_MANAGEMENT_URL } from '../urls/navigation';
 import {
-  RISK_SCORE_UPDATE_CONFIRM,
-  RISK_SCORE_UPDATE_BUTTON,
-  RISK_SCORE_SWITCH,
   RISK_PREVIEW_ERROR_BUTTON,
+  RISK_SCORE_SWITCH,
+  RISK_SCORE_UPDATE_BUTTON,
+  RISK_SCORE_UPDATE_CONFIRM,
 } from '../screens/entity_analytics_management';
-import { visitWithTimeRange } from './navigation';
-import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
 import { LOADING_SPINNER } from '../screens/loading';
+import { ENTITY_ANALYTICS_MANAGEMENT_URL, ENTITY_ANALYTICS_URL } from '../urls/navigation';
+import { visitWithTimeRange } from './navigation';
 
 export const updateDashboardTimeRange = () => {
   // eslint-disable-next-line cypress/no-force

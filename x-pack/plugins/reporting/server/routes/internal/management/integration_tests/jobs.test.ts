@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
+import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 jest.mock('../../../../lib/content_stream', () => ({

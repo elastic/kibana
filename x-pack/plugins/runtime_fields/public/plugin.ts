@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getRuntimeFieldEditorLoader } from './load_editor';
+import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 
 export class RuntimeFieldsPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>

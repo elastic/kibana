@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getExternalReferenceAttachmentRegular } from './attachments/external_reference';
 import { getPersistableStateAttachmentRegular } from './attachments/persistable_state';

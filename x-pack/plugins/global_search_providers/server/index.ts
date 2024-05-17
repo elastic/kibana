@@ -8,12 +8,8 @@
 import { PluginInitializer } from '@kbn/core/server';
 import type { GlobalSearchProvidersPluginSetupDeps } from './plugin';
 
-export const plugin: PluginInitializer<
-  {},
-  {},
-  GlobalSearchProvidersPluginSetupDeps,
-  {}
-> = async () => {
-  const { GlobalSearchProvidersPlugin } = await import('./plugin');
-  return new GlobalSearchProvidersPlugin();
-};
+export const plugin: PluginInitializer<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> =
+  async () => {
+    const { GlobalSearchProvidersPlugin } = await import('./plugin');
+    return new GlobalSearchProvidersPlugin();
+  };

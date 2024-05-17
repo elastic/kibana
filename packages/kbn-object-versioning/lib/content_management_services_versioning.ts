@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { get } from 'lodash';
 
-import { ObjectMigrationDefinition, Version, VersionableObject } from './types';
+import { serviceDefinitionSchema } from './content_management_services_schemas';
 import type {
   ServiceDefinitionVersioned,
-  ServicesDefinition,
   ServiceTransforms,
+  ServicesDefinition,
 } from './content_management_types';
-import { serviceDefinitionSchema } from './content_management_services_schemas';
-import { validateObj, validateVersion } from './utils';
 import { initTransform } from './object_transform';
+import { ObjectMigrationDefinition, Version, VersionableObject } from './types';
+import { validateObj, validateVersion } from './utils';
 
 const serviceObjectPaths = [
   'get.in.options',

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CONTROL_TYPES } from '../../editor_utils';
+import React, { Component } from 'react';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
+import { CONTROL_TYPES } from '../../editor_utils';
 import { ListControl as ListControlComponent } from './list_control';
 import { RangeControl as RangeControlComponent } from './range_control';
 

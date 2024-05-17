@@ -1,3 +1,15 @@
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTextArea,
+} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,23 +17,11 @@
  * 2.0.
  */
 import React, { useCallback, FormEvent, useState } from 'react';
-import {
-  EuiTextArea,
-  EuiSwitch,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiHorizontalRule,
-} from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
-import * as i18n from './translations';
+import { OnChangeDeps, SettingsDeps } from '../../types';
 import { ControlSettings } from '../control_settings';
-import { SettingsDeps, OnChangeDeps } from '../../types';
+import * as i18n from './translations';
 
 export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const [policyHasErrors, setPolicyHasErrors] = useState(false);

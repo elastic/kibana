@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import type { ESQLLocation, ESQLMessage } from '@kbn/esql-ast';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {

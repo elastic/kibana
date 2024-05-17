@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
-import type { estypes } from '@elastic/elasticsearch';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import type { INPUT_TYPE } from '../inference_base';
 import { InferenceBase } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
-import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
+import type { RawTextClassificationResponse, TextClassificationResponse } from './common';
 
-import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
+import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;

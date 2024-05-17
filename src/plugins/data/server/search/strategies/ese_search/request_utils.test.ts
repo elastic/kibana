@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from '@kbn/core/server';
+import moment from 'moment';
+import { UI_SETTINGS } from '../../../../common';
+import { getMockSearchConfig } from '../../../../config.mock';
 import {
-  getDefaultAsyncSubmitParams,
   getDefaultAsyncGetParams,
+  getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { IUiSettingsClient } from '@kbn/core/server';
-import { UI_SETTINGS } from '../../../../common';
-import moment from 'moment';
-import { getMockSearchConfig } from '../../../../config.mock';
 
 const getMockUiSettingsClient = (config: Record<string, unknown>) => {
   return { get: async (key: string) => config[key] } as IUiSettingsClient;

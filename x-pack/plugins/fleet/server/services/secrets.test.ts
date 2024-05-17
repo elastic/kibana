@@ -22,12 +22,12 @@ import type { NewPackagePolicy, PackageInfo, PackagePolicy, UpdatePackagePolicy 
 
 import { appContextService } from './app_context';
 import {
-  getPolicySecretPaths,
-  diffSecretPaths,
   diffOutputSecretPaths,
-  extractAndWriteSecrets,
-  extractAndUpdateSecrets,
+  diffSecretPaths,
   extractAndUpdateOutputSecrets,
+  extractAndUpdateSecrets,
+  extractAndWriteSecrets,
+  getPolicySecretPaths,
 } from './secrets';
 
 describe('secrets', () => {

@@ -6,8 +6,8 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleTypeModal } from '@kbn/alerts-ui-shared';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -17,12 +17,12 @@ import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
+import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
-import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
 const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
 

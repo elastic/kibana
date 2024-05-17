@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { mapKeys, snakeCase } from 'lodash/fp';
 import type { Alert } from '@kbn/alerting-plugin/server';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
-import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
-import type { RuleParams } from '../../../rule_schema';
-import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
-import { isDetectionAlert } from '../../../rule_types/utils/utils';
+import { mapKeys, snakeCase } from 'lodash/fp';
 import type { DetectionAlert } from '../../../../../../common/api/detection_engine/model/alerts';
+import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
+import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
+import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
+import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
+import type { RuleParams } from '../../../rule_schema';
+import { isDetectionAlert } from '../../../rule_types/utils/utils';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;
@@ -23,13 +23,16 @@ export type NotificationRuleTypeParams = RuleParams & {
 };
 
 const convertToLegacyAlert = (alert: DetectionAlert) =>
-  Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
-    const val = alert[aadField];
-    if (val != null) {
-      acc[legacyField] = val;
-    }
-    return acc;
-  }, {} as Record<string, unknown>);
+  Object.entries(aadFieldConversion).reduce(
+    (acc, [legacyField, aadField]) => {
+      const val = alert[aadField];
+      if (val != null) {
+        acc[legacyField] = val;
+      }
+      return acc;
+    },
+    {} as Record<string, unknown>
+  );
 
 export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
   if (isThresholdRule(alert[ALERT_RULE_TYPE])) {

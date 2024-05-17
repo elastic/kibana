@@ -18,10 +18,10 @@ import { shallow } from 'enzyme';
 import { EuiSideNav } from '@elastic/eui';
 
 import {
-  PRIVATE_CAN_CREATE_PAGE_TITLE,
-  PRIVATE_VIEW_ONLY_PAGE_TITLE,
-  PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
+  PRIVATE_CAN_CREATE_PAGE_TITLE,
+  PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
+  PRIVATE_VIEW_ONLY_PAGE_TITLE,
 } from '../../../constants';
 
 import { ViewContentHeader } from '../../shared/view_content_header';

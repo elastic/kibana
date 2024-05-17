@@ -9,15 +9,15 @@
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
-import { take, mergeMap } from 'rxjs';
+import { mergeMap, take } from 'rxjs';
 
 import {
+  BundleRemotes,
+  WorkerMsg,
+  WorkerMsgs,
+  isWorkerMsg,
   parseBundles,
   parseWorkerConfig,
-  WorkerMsg,
-  isWorkerMsg,
-  WorkerMsgs,
-  BundleRemotes,
 } from '../common';
 
 import { runCompilers } from './run_compilers';

@@ -7,10 +7,10 @@
  */
 
 import {
-  FILES_API_BASE_PATH,
-  FILES_SHARE_API_BASE_PATH,
-  FILES_PUBLIC_API_BASE_PATH,
   API_BASE_PATH,
+  FILES_API_BASE_PATH,
+  FILES_PUBLIC_API_BASE_PATH,
+  FILES_SHARE_API_BASE_PATH,
 } from '../../common/api_routes';
 
 export * from '../../common/api_routes';

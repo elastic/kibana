@@ -14,8 +14,8 @@ import type {
   DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import type { ResultsSearchQuery } from '../../../../common/analytics';
 

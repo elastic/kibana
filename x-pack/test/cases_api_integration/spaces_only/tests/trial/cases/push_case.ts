@@ -8,17 +8,17 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import http from 'http';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { nullUser } from '../../../../common/lib/mock';
 import {
-  pushCase,
+  createCaseWithConnector,
   deleteAllCaseItems,
   getAuthWithSuperUser,
-  createCaseWithConnector,
   getServiceNowSimulationServer,
+  pushCase,
 } from '../../../../common/lib/api';
+import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { MetricsDataClient, DEFAULT_METRIC_INDICES } from './client';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { metricsDataSourceSavedObjectName } from '../saved_objects/metrics_data_source';
+import { DEFAULT_METRIC_INDICES, MetricsDataClient } from './client';
 
 describe('MetricsDataClient', () => {
   describe('metric indices', () => {

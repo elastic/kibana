@@ -29,9 +29,7 @@
         "tags": [],
         "label": "PidConfigType",
         "description": [],
-        "signature": [
-          "{ readonly file?: string | undefined; readonly exclusive: boolean; }"
-        ],
+        "signature": ["{ readonly file?: string | undefined; readonly exclusive: boolean; }"],
         "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
         "deprecated": false,
         "trackAdoption": false,

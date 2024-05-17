@@ -23,15 +23,11 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
-import type { ToastsStart } from '@kbn/core/public';
 import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AliasTable } from './alias_table';
-import { RelativesFooter } from './relatives_footer';
-import { ShareToSpaceForm } from './share_to_space_form';
-import type { InternalLegacyUrlAliasTarget } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DEFAULT_OBJECT_NOUN } from '../../constants';
 import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
@@ -43,6 +39,10 @@ import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from '../types';
+import { AliasTable } from './alias_table';
+import { RelativesFooter } from './relatives_footer';
+import { ShareToSpaceForm } from './share_to_space_form';
+import type { InternalLegacyUrlAliasTarget } from './types';
 
 interface SpacesState {
   isLoading: boolean;
@@ -315,8 +315,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     const spacesToAdd = isSharedToAllSpaces
       ? [ALL_SPACES_ID]
       : isUnsharedFromAllSpaces
-      ? [...activeSpaceArray, ...selectedSpacesToAdd]
-      : selectedSpacesToAdd;
+        ? [...activeSpaceArray, ...selectedSpacesToAdd]
+        : selectedSpacesToAdd;
     const spacesToAddSet = new Set(spacesToAdd);
     const spacesToRemove =
       isUnsharedFromAllSpaces || !isSharedToAllSpaces

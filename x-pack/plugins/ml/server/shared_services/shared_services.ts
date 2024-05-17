@@ -5,60 +5,60 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   IClusterClient,
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
   UiSettingsServiceStart,
-  KibanaRequest,
 } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CompatibleModule } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
 import type {
-  MlSystemProvider,
+  AnomalyDetectorsProvider,
   JobServiceProvider,
+  MlSystemProvider,
+  ModulesProvider,
   ResultsServiceProvider,
   TrainedModelsProvider,
-  AnomalyDetectorsProvider,
-  ModulesProvider,
 } from './providers';
 
 import {
-  getMlSystemProvider,
+  getAnomalyDetectorsProvider,
   getJobServiceProvider,
+  getMlSystemProvider,
   getModulesProvider,
   getResultsServiceProvider,
   getTrainedModelsProvider,
-  getAnomalyDetectorsProvider,
 } from './providers';
 
-import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
+import type { MlCapabilitiesKey, ResolveMlCapabilities } from '../../common/types/capabilities';
+import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
+import type { JobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
+import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
 import type { HasMlCapabilities } from '../lib/capabilities';
 import { hasMlCapabilitiesProvider } from '../lib/capabilities';
+import type { GetDataViewsService } from '../lib/data_views_utils';
+import { getDataViewsServiceFactory } from '../lib/data_views_utils';
+import type { MlClient } from '../lib/ml_client';
+import { getMlClient } from '../lib/ml_client';
+import type { MLSavedObjectService } from '../saved_objects';
+import { mlSavedObjectServiceFactory } from '../saved_objects';
 import {
   MLClusterClientUninitialized,
   MLFieldFormatRegistryUninitialized,
   MLUISettingsClientUninitialized,
 } from './errors';
-import type { MlClient } from '../lib/ml_client';
-import { getMlClient } from '../lib/ml_client';
-import type { MLSavedObjectService } from '../saved_objects';
-import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlAlertingServiceProvider } from './providers/alerting_service';
 import { getAlertingServiceProvider } from './providers/alerting_service';
-import type { JobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
-import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
-import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
-import type { GetDataViewsService } from '../lib/data_views_utils';
-import { getDataViewsServiceFactory } from '../lib/data_views_utils';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &

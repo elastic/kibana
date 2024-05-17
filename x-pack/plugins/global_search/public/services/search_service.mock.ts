@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SearchServiceSetup, SearchServiceStart } from './search_service';
 import { of } from 'rxjs';
+import { SearchServiceSetup, SearchServiceStart } from './search_service';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SearchServiceSetup> = {

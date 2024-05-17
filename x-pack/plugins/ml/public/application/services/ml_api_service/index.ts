@@ -14,45 +14,45 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
-  MlServerDefaults,
-  MlServerLimits,
-  MlNodeCount,
-} from '../../../../common/types/ml_server_info';
-import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
-import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
-import type {
+  AnalysisConfig,
+  CombinedJob,
+  Datafeed,
+  Detector,
+  IndicesOptions,
   Job,
   JobStats,
-  Datafeed,
-  CombinedJob,
-  Detector,
-  AnalysisConfig,
   ModelSnapshot,
-  IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
+import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
+import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
+import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+import type {
+  MlNodeCount,
+  MlServerDefaults,
+  MlServerLimits,
+} from '../../../../common/types/ml_server_info';
 import type {
   DataRecognizerConfigResponse,
   Module,
   RecognizeResult,
 } from '../../../../common/types/modules';
-import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
 
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 import { getHttp } from '../../util/dependency_cache';
 
 import { HttpService } from '../http_service';
 
-import { jsonSchemaProvider } from './json_schema';
 import { annotationsApiProvider } from './annotations';
 import { dataFrameAnalyticsApiProvider } from './data_frame_analytics';
 import { filtersApiProvider } from './filters';
-import { resultsApiProvider } from './results';
+import { inferenceModelsApiProvider } from './inference_models';
 import { jobsApiProvider } from './jobs';
+import { jsonSchemaProvider } from './json_schema';
+import { notificationsProvider } from './notifications';
+import { resultsApiProvider } from './results';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
-import { notificationsProvider } from './notifications';
-import { inferenceModelsApiProvider } from './inference_models';
 
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;

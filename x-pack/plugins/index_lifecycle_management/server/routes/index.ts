@@ -10,9 +10,9 @@ import { RouteDependencies } from '../types';
 import { registerIndexRoutes } from './api/index/index';
 import { registerNodesRoutes } from './api/nodes';
 import { registerPoliciesRoutes } from './api/policies';
-import { registerTemplatesRoutes } from './api/templates';
 import { registerSnapshotPoliciesRoutes } from './api/snapshot_policies';
 import { registerSnapshotRepositoriesRoutes } from './api/snapshot_repositories';
+import { registerTemplatesRoutes } from './api/templates';
 
 export function registerApiRoutes(dependencies: RouteDependencies) {
   registerIndexRoutes(dependencies);

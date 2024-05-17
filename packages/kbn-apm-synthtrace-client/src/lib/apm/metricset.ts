@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
 import { Fields } from '../entity';
+import { Serializable } from '../serializable';
 
 export class Metricset<TFields extends Fields> extends Serializable<TFields> {
   constructor(fields: TFields) {

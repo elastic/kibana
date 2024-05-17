@@ -7,14 +7,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPlainObject } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   Datatable,
   DatatableColumn,
-  DatatableRow,
   DatatableColumnType,
+  DatatableRow,
 } from '@kbn/expressions-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { isPlainObject } from 'lodash';
 
 // meta fields we won't merge with our result hit
 const EXCLUDED_META_FIELDS: string[] = ['_type', '_source'];

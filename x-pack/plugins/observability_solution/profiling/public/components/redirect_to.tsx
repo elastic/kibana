@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useHistory, Redirect } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 
 export function RedirectTo({ pathname }: { pathname: string }) {
   const { location } = useHistory();

@@ -7,36 +7,36 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import type {
+  BulkGetAgentPoliciesResponse,
+  BulkGetPackagePoliciesResponse,
   CheckPermissionsResponse,
   GetAgentPoliciesResponse,
   GetAgentStatusResponse,
+  GetInfoResponse,
   GetPackagePoliciesResponse,
   GetPackagesResponse,
-  GetInfoResponse,
-  BulkGetPackagePoliciesResponse,
-  BulkGetAgentPoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  appRoutesService,
   EPM_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  appRoutesService,
 } from '@kbn/fleet-plugin/common';
+import { FleetAgentPolicyGenerator } from '../../../common/endpoint/data_generators/fleet_agent_policy_generator';
+import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
 } from '../../common/mock/endpoint/http_handler_mock_factory';
-import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 import type {
   GetPolicyListResponse,
   GetPolicyResponse,
   UpdatePolicyResponse,
 } from '../pages/policy/types';
-import { FleetAgentPolicyGenerator } from '../../../common/endpoint/data_generators/fleet_agent_policy_generator';
-import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
 interface KqlArgumentType {
   type: string;

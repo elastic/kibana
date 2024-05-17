@@ -1,3 +1,4 @@
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { isLensEmbeddable } from '../utils';
 import type { StartServices } from '../../types';
+import { isLensEmbeddable } from '../utils';
 
 const ACTION_CONFIGURE_IN_LENS = 'ACTION_CONFIGURE_IN_LENS';
 

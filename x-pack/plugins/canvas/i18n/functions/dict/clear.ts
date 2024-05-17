@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { clear } from '../../../canvas_plugin_src/functions/common/clear';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT, TYPE_NULL } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof clear>> = {
   help: i18n.translate('xpack.canvas.functions.clearHelpText', {

@@ -150,9 +150,7 @@
                 "tags": [],
                 "label": "collectReturnValue",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

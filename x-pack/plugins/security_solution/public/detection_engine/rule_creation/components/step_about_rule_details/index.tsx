@@ -7,30 +7,30 @@
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiProgress,
-  EuiButtonGroup,
-  EuiSpacer,
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
   EuiResizeObserver,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
-import { RuleAboutSection } from '../../../rule_management/components/rule_details/rule_about_section';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import * as i18n from './translations';
+import { RuleAboutSection } from '../../../rule_management/components/rule_details/rule_about_section';
 import { fullHeight } from './styles';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import * as i18n from './translations';
 
 const detailsOption: EuiButtonGroupOptionProps = {
   id: 'details',

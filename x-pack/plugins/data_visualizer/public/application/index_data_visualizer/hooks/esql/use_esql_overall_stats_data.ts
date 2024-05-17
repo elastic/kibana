@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
+import { ESQL_LATEST_VERSION, appendToESQLQuery, getESQLWithSafeLimit } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
-import type { estypes } from '@elastic/elasticsearch';
-import type { ISearchOptions } from '@kbn/search-types';
-import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { getESQLWithSafeLimit, ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import type { ISearchOptions } from '@kbn/search-types';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type {
   DataStatsFetchProgress,
@@ -24,14 +24,14 @@ import type {
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-import { getSafeESQLName, isESQLQuery } from '../../search_strategy/requests/esql_utils';
-import type { NonAggregatableField } from '../../types/overall_stats';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
-import type { AggregatableField } from '../../types/esql_data_visualizer';
 import {
-  handleError,
   type HandleErrorCallback,
+  handleError,
 } from '../../search_strategy/esql_requests/handle_error';
+import { getSafeESQLName, isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { AggregatableField } from '../../types/esql_data_visualizer';
+import type { NonAggregatableField } from '../../types/overall_stats';
 
 interface ESQLColumn {
   type: string;
@@ -432,12 +432,15 @@ export const useESQLOverallStatsData = (
             error: undefined,
           });
 
-          const columnsWithExamples = columnInfo.reduce((hashmap, curr, idx) => {
-            if (curr.type === 'text' || curr.type === 'geo_point' || curr.type === 'geo_shape') {
-              hashmap[curr.name] = idx;
-            }
-            return hashmap;
-          }, {} as Record<string, number>);
+          const columnsWithExamples = columnInfo.reduce(
+            (hashmap, curr, idx) => {
+              if (curr.type === 'text' || curr.type === 'geo_point' || curr.type === 'geo_shape') {
+                hashmap[curr.name] = idx;
+              }
+              return hashmap;
+            },
+            {} as Record<string, number>
+          );
 
           const exampleDocs = Object.entries(columnsWithExamples).map(([fieldName, idx]) => {
             const examples = [...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx]))]

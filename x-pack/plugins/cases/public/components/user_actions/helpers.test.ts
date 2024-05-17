@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { AttachmentType } from '../../../common/types/domain';
 import type { AttachmentUI } from '../../containers/types';
-import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
+import { getManualAlertIdsWithNoRuleId, isUserActionTypeSupported } from './helpers';
 
 const comments: AttachmentUI[] = [
   {

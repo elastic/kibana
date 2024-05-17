@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedDashboardPanel } from '../../common/content_management';
-import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import { SavedDashboardPanel } from '../../common/content_management';
+import { collectPanelsByType, getEmptyDashboardData } from './dashboard_telemetry';
 
 const visualizationType1ByValue = {
   embeddableConfig: {

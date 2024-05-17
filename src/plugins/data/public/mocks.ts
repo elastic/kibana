@@ -7,12 +7,12 @@
  */
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin } from '.';
-import { searchServiceMock } from './search/mocks';
-import { queryServiceMock } from './query/mocks';
-import { createNowProviderMock } from './now_provider/mocks';
+import { createDatatableUtilitiesMock } from '../common/mocks';
 import { dataViewPluginMocks } from './data_views/mocks';
+import { createNowProviderMock } from './now_provider/mocks';
+import { queryServiceMock } from './query/mocks';
+import { searchServiceMock } from './search/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;

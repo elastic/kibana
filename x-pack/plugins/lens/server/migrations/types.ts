@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import type { Query, Filter } from '@kbn/es-query';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { Filter, Query } from '@kbn/es-query';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type {
   LayerType,

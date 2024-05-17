@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import useThrottle from 'react-use/lib/useThrottle';
-import { useEffect, useState, MutableRefObject } from 'react';
-import useIntersection from 'react-use/lib/useIntersection';
+import { MutableRefObject, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import useIntersection from 'react-use/lib/useIntersection';
+import useThrottle from 'react-use/lib/useThrottle';
+import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectOverviewState } from '../../../../state';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 
 export const useInfiniteScroll = ({
   intersectionRef,

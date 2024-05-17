@@ -23,18 +23,18 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import rison from '@kbn/rison';
-import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common/query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { stringHash } from '@kbn/ml-string-hash';
+import { i18n } from '@kbn/i18n';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
+  type RuntimeMappings,
   getCombinedRuntimeMappings,
   isRuntimeMappings,
-  type RuntimeMappings,
 } from '@kbn/ml-runtime-field-utils';
-import { getProcessedFields } from '@kbn/ml-data-grid';
+import { stringHash } from '@kbn/ml-string-hash';
+import rison from '@kbn/rison';
 
 import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
@@ -44,8 +44,8 @@ import type { LegendType } from '../vega_chart/common';
 import { VegaChartLoading } from '../vega_chart/vega_chart_loading';
 
 import {
-  getScatterplotMatrixVegaLiteSpec,
   OUTLIER_SCORE_FIELD,
+  getScatterplotMatrixVegaLiteSpec,
 } from './scatterplot_matrix_vega_lite_spec';
 
 import './scatterplot_matrix.scss';
@@ -328,9 +328,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           );
         }
 
-        const [foregroundResp, backgroundResp] = await Promise.all<estypes.SearchResponse>(
-          promises
-        );
+        const [foregroundResp, backgroundResp] =
+          await Promise.all<estypes.SearchResponse>(promises);
 
         if (!options.didCancel) {
           const items = filterChartableItems(foregroundResp.hits.hits, resultsField);

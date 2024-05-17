@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import {
-  SettingsApplication,
-  DATA_TEST_SUBJ_SETTINGS_TITLE,
-  SPACE_SETTINGS_TAB_ID,
-  GLOBAL_SETTINGS_TAB_ID,
-} from './application';
-import { DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR } from './query_input';
-import {
-  DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE,
-  DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK,
-} from './empty_state';
-import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
-import { wrap, createSettingsApplicationServicesMock } from './mocks';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+import {
+  DATA_TEST_SUBJ_SETTINGS_TITLE,
+  GLOBAL_SETTINGS_TAB_ID,
+  SPACE_SETTINGS_TAB_ID,
+  SettingsApplication,
+} from './application';
+import {
+  DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK,
+  DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE,
+} from './empty_state';
+import { createSettingsApplicationServicesMock, wrap } from './mocks';
+import { DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR } from './query_input';
 import { SettingsApplicationServices } from './services';
+import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 
 const spaceCategories = ['general', 'dashboard', 'notifications'];
 const globalCategories = ['custom branding'];

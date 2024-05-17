@@ -7,9 +7,9 @@
 
 import React from 'react';
 
+import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request/epm';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request/epm';
 
 import { AgentDashboardLink } from './agent_dashboard_link';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
-import { derivative, DerivativeArgs } from '../derivative';
 import { ExecutionContext } from '../../../execution/types';
 import { Datatable } from '../../../expression_types/specs/datatable';
+import { DerivativeArgs, derivative } from '../derivative';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#derivative', () => {
   const fn = functionWrapper(derivative);

@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LogRecord, Appender, DisposableAppender } from '@kbn/logging';
 import type { RewriteAppenderConfig } from '@kbn/core-logging-server';
-import { createRewritePolicy, rewritePolicyConfigSchema, RewritePolicy } from './policies';
+import { Appender, DisposableAppender, LogRecord } from '@kbn/logging';
+import { RewritePolicy, createRewritePolicy, rewritePolicyConfigSchema } from './policies';
 
 /**
  * Appender that can modify the `LogRecord` instances it receives before passing

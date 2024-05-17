@@ -6,8 +6,8 @@
  */
 
 import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
-import { recursiveUnboxingFields } from './recursive_unboxing_fields';
 import type { FieldsType } from '../types';
+import { recursiveUnboxingFields } from './recursive_unboxing_fields';
 
 describe('recursive_unboxing_fields', () => {
   beforeAll(() => {

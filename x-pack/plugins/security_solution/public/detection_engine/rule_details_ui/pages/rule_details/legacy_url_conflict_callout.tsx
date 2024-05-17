@@ -1,3 +1,6 @@
+import { EuiSpacer } from '@elastic/eui';
+import { i18n as i18nTranslate } from '@kbn/i18n';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { i18n as i18nTranslate } from '@kbn/i18n';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { Rule } from '../../../rule_management/logic';
 
 interface LegacyUrlConflictCallOutProps {

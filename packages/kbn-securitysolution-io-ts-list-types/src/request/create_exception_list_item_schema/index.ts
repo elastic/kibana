@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
-import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
+import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
 import { CreateCommentsArray } from '../../common/create_comment';
-import { Tags } from '../../common/tags';
-import { ItemId } from '../../common/item_id';
-import { EntriesArray } from '../../common/entries';
+import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
 import { NamespaceType } from '../../common/default_namespace';
+import { description } from '../../common/description';
+import { EntriesArray } from '../../common/entries';
+import { exceptionListItemType } from '../../common/exception_list_item_type';
+import { ItemId } from '../../common/item_id';
+import { list_id } from '../../common/list_id';
+import { meta } from '../../common/meta';
+import { name } from '../../common/name';
+import { namespace_type } from '../../common/namespace_type';
+import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { description } from '../../common/description';
-import { list_id } from '../../common/list_id';
-import { name } from '../../common/name';
-import { exceptionListItemType } from '../../common/exception_list_item_type';
-import { meta } from '../../common/meta';
-import { namespace_type } from '../../common/namespace_type';
+import { Tags } from '../../common/tags';
 import { tags } from '../../common/tags';
-import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
-import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
 
 export const createExceptionListItemSchema = t.intersection([
   t.exact(

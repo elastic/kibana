@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getBreakdownColumn } from './breakdown';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { getBreakdownColumn } from './breakdown';
 
 const dataView = {
   fields: {

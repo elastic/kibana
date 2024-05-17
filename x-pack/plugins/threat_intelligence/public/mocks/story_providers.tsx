@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, VFC } from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
-import { SecuritySolutionContext } from '../containers/security_solution_context';
-import { getSecuritySolutionContextMock } from './mock_security_context';
-import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { FC, ReactNode, VFC } from 'react';
 import { FieldTypesContext } from '../containers/field_types_provider';
+import { InspectorContext } from '../containers/inspector';
+import { SecuritySolutionContext } from '../containers/security_solution_context';
+import { BlockListProvider } from '../modules/indicators/containers/block_list_provider';
+import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
 import { generateFieldTypeMap } from './mock_field_type_map';
-import { mockUiSettingsService } from './mock_kibana_ui_settings_service';
+import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { mockKibanaTimelinesService } from './mock_kibana_timelines_service';
 import { mockTriggersActionsUiService } from './mock_kibana_triggers_actions_ui_service';
-import { InspectorContext } from '../containers/inspector';
-import { BlockListProvider } from '../modules/indicators/containers/block_list_provider';
+import { mockUiSettingsService } from './mock_kibana_ui_settings_service';
+import { getSecuritySolutionContextMock } from './mock_security_context';
 
 export interface KibanaContextMock {
   /**

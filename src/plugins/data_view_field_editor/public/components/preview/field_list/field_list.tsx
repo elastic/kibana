@@ -1,3 +1,6 @@
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { get, isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,16 +10,13 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
-import { i18n } from '@kbn/i18n';
-import { get, isEqual } from 'lodash';
-import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
 
+import { useStateSelector } from '../../../state_utils';
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
 import type { FieldPreview, PreviewState } from '../types';
 import { PreviewListItem } from './field_list_item';
 import type { PreviewListItemProps } from './field_list_item';
-import { useStateSelector } from '../../../state_utils';
 
 import './field_list.scss';
 

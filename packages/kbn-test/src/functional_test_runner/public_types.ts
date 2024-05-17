@@ -8,14 +8,14 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import type { Suite, Test } from './fake_mocha_types';
 import type {
   Config,
-  Lifecycle,
+  DedicatedTaskRunner,
   DockerServersService,
   EsVersion,
-  DedicatedTaskRunner,
+  Lifecycle,
 } from './lib';
-import type { Test, Suite } from './fake_mocha_types';
 
 export { Lifecycle, Config };
 
@@ -45,18 +45,20 @@ export type ProvidedType<T extends (...args: any[]) => any> = MaybeAsyncInstance
  * promise types into the async instances that other providers will receive.
  */
 type ProvidedTypeMap<T extends {}> = {
-  [K in keyof T]: T[K] extends new (...args: any[]) => infer X
+  [K in keyof T]: T[K] extends new (
+    ...args: any[]
+  ) => infer X
     ? X
     : T[K] extends (...args: any[]) => any
-    ? ProvidedType<T[K]>
-    : unknown;
+      ? ProvidedType<T[K]>
+      : unknown;
 };
 
 export interface GenericFtrProviderContext<
   ServiceProviders extends {},
   PageObjectProviders extends {},
   ServiceMap = ProvidedTypeMap<ServiceProviders>,
-  PageObjectMap = ProvidedTypeMap<PageObjectProviders>
+  PageObjectMap = ProvidedTypeMap<PageObjectProviders>,
 > {
   /**
    * Determine if a service is avaliable

@@ -8,7 +8,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, createRunner, Task, GlobalTask } from './lib';
+import { Config, GlobalTask, Task, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {

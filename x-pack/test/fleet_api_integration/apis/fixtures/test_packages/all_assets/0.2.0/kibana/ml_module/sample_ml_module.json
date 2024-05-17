@@ -38,9 +38,7 @@
       {
         "id": "visitor_rate_ecs",
         "config": {
-          "groups": [
-            "nginx"
-          ],
+          "groups": ["nginx"],
           "description": "HTTP Access Logs: Detect unusual visitor rates (ECS)",
           "analysis_config": {
             "bucket_span": "15m",
@@ -77,9 +75,7 @@
       {
         "id": "status_code_rate_ecs",
         "config": {
-          "groups": [
-            "nginx"
-          ],
+          "groups": ["nginx"],
           "description": "HTTP Access Logs: Detect unusual status code rates (ECS)",
           "analysis_config": {
             "bucket_span": "15m",
@@ -90,10 +86,7 @@
                 "partition_field_name": "http.response.status_code"
               }
             ],
-            "influencers": [
-              "http.response.status_code",
-              "source.address"
-            ]
+            "influencers": ["http.response.status_code", "source.address"]
           },
           "analysis_limits": {
             "model_memory_limit": "100mb"
@@ -123,9 +116,7 @@
       {
         "id": "source_ip_url_count_ecs",
         "config": {
-          "groups": [
-            "nginx"
-          ],
+          "groups": ["nginx"],
           "description": "HTTP Access Logs: Detect unusual source IPs - high distinct count of URLs (ECS)",
           "analysis_config": {
             "bucket_span": "1h",
@@ -137,9 +128,7 @@
                 "over_field_name": "source.address"
               }
             ],
-            "influencers": [
-              "source.address"
-            ]
+            "influencers": ["source.address"]
           },
           "data_description": {
             "time_field": "@timestamp",
@@ -163,9 +152,7 @@
       {
         "id": "source_ip_request_rate_ecs",
         "config": {
-          "groups": [
-            "nginx"
-          ],
+          "groups": ["nginx"],
           "description": "HTTP Access Logs: Detect unusual source IPs - high request rates (ECS)",
           "analysis_config": {
             "bucket_span": "1h",
@@ -176,9 +163,7 @@
                 "over_field_name": "source.address"
               }
             ],
-            "influencers": [
-              "source.address"
-            ]
+            "influencers": ["source.address"]
           },
           "data_description": {
             "time_field": "@timestamp",
@@ -202,9 +187,7 @@
       {
         "id": "low_request_rate_ecs",
         "config": {
-          "groups": [
-            "nginx"
-          ],
+          "groups": ["nginx"],
           "description": "HTTP Access Logs: Detect low request rates (ECS)",
           "analysis_config": {
             "bucket_span": "15m",
@@ -245,9 +228,7 @@
         "job_id": "visitor_rate_ecs",
         "config": {
           "job_id": "visitor_rate_ecs",
-          "indices": [
-            "INDEX_PATTERN_NAME"
-          ],
+          "indices": ["INDEX_PATTERN_NAME"],
           "query": {
             "bool": {
               "filter": [
@@ -292,9 +273,7 @@
         "job_id": "status_code_rate_ecs",
         "config": {
           "job_id": "status_code_rate_ecs",
-          "indices": [
-            "INDEX_PATTERN_NAME"
-          ],
+          "indices": ["INDEX_PATTERN_NAME"],
           "query": {
             "bool": {
               "filter": [
@@ -313,9 +292,7 @@
         "job_id": "source_ip_url_count_ecs",
         "config": {
           "job_id": "source_ip_url_count_ecs",
-          "indices": [
-            "INDEX_PATTERN_NAME"
-          ],
+          "indices": ["INDEX_PATTERN_NAME"],
           "query": {
             "bool": {
               "filter": [
@@ -334,9 +311,7 @@
         "job_id": "source_ip_request_rate_ecs",
         "config": {
           "job_id": "source_ip_request_rate_ecs",
-          "indices": [
-            "INDEX_PATTERN_NAME"
-          ],
+          "indices": ["INDEX_PATTERN_NAME"],
           "query": {
             "bool": {
               "filter": [
@@ -355,9 +330,7 @@
         "job_id": "low_request_rate_ecs",
         "config": {
           "job_id": "low_request_rate_ecs",
-          "indices": [
-            "INDEX_PATTERN_NAME"
-          ],
+          "indices": ["INDEX_PATTERN_NAME"],
           "query": {
             "bool": {
               "filter": [

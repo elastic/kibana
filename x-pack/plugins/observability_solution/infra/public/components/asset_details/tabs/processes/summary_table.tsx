@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiLoadingSpinner,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
-import { STATE_NAMES } from './states';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
+import { STATE_NAMES } from './states';
 
 interface Props {
   processSummary: ProcessListAPIResponse['summary'];

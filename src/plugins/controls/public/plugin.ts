@@ -10,23 +10,23 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableFactory, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import {
-  ControlGroupContainerFactory,
   CONTROL_GROUP_TYPE,
+  ControlGroupContainerFactory,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '.';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
-import { TimeSliderEmbeddableFactory, TimeSliderControlEmbeddableInput } from './time_slider';
 import { controlsService } from './services/controls/controls_service';
+import { TimeSliderControlEmbeddableInput, TimeSliderEmbeddableFactory } from './time_slider';
 import {
+  ControlInput,
   ControlsPluginSetup,
-  ControlsPluginStart,
   ControlsPluginSetupDeps,
+  ControlsPluginStart,
   ControlsPluginStartDeps,
   IEditableControlFactory,
-  ControlInput,
 } from './types';
 export class ControlsPlugin
   implements

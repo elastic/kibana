@@ -1,3 +1,9 @@
+import { EuiThemeProvider } from '@elastic/eui';
+import type {
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser';
+import { type RenderResult, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,19 +12,13 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render, type RenderResult } from '@testing-library/react';
 import { BehaviorSubject, of } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type {
-  NavigationTreeDefinitionUI,
-  ChromeProjectNavigationNode,
-} from '@kbn/core-chrome-browser';
-import { EuiThemeProvider } from '@elastic/eui';
 
 import { NavigationProvider } from '../src/services';
-import { Navigation } from '../src/ui/navigation';
-import type { PanelContentProvider } from '../src/ui';
 import { NavigationServices } from '../src/types';
+import type { PanelContentProvider } from '../src/ui';
+import { Navigation } from '../src/ui/navigation';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];
 

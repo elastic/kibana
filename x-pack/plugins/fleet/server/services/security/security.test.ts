@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { CheckPrivilegesDynamically, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { deepFreeze } from '@kbn/std';
-import type { SecurityPluginStart, CheckPrivilegesDynamically } from '@kbn/security-plugin/server';
 
-import { appContextService } from '../app_context';
 import type { FleetAuthz } from '../../../common';
+import { appContextService } from '../app_context';
 
 import { calculateRouteAuthz, getAuthzFromRequest } from './security';
 

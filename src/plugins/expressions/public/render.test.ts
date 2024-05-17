@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionRenderHandler, render } from './render';
-import { Observable } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
-import { ExpressionRenderError } from './types';
-import { getRenderersRegistry } from './services';
+import { Observable } from 'rxjs';
 import { first, take, toArray } from 'rxjs';
 import { IInterpreterRenderHandlers } from '../common';
+import { ExpressionRenderHandler, render } from './render';
+import { getRenderersRegistry } from './services';
+import { ExpressionRenderError } from './types';
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {

@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiProgress,
+  EuiResizeObserver,
   EuiSwitch,
   EuiTitle,
-  EuiResizeObserver,
-  EuiProgress,
 } from '@elastic/eui';
-import { NewSelectionIdBadges } from './new_selection_id_badges';
-// @ts-ignore
-import { JobSelectorTable } from './job_selector_table';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../../contexts/kibana';
 import {
   getGroupsFromJobs,
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
+// @ts-ignore
+import { JobSelectorTable } from './job_selector_table';
+import { NewSelectionIdBadges } from './new_selection_id_badges';
 
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels

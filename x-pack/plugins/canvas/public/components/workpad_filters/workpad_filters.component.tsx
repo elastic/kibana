@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { FiltersGroup as FiltersGroupType } from './types';
-import { FiltersGroup } from './filters_group.component';
+import React, { FC, Fragment } from 'react';
 import { FilterField } from '../../../types';
+import { FiltersGroup } from './filters_group.component';
+import { FiltersGroup as FiltersGroupType } from './types';
 import { formatByKey } from './utils';
 
 interface Props {

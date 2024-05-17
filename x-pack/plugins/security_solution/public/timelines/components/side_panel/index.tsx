@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
-import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import type { BrowserFields } from '../../../common/containers/source';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
-import type { BrowserFields } from '../../../common/containers/source';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';

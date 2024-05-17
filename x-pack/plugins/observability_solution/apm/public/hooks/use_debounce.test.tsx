@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useStateDebounced } from './use_debounce'; // Replace 'your-module' with the actual module path
 
 describe('useStateDebounced', () => {

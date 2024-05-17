@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,13 +17,14 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerAction, StartServices } from '../../../../types';
-import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
+import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import React, { useCallback, useState } from 'react';
 import type { LayerType } from '../../../../../common/types';
+import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
+import type { LayerAction, StartServices } from '../../../../types';
 import { LAST_ACTION_ORDER } from './order_bounds';
 
 interface RemoveLayerAction {

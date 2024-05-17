@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { extractReferences, injectReferences } from './saved_visualization_references';
-import { VisSavedObject } from '../../types';
 import { SavedVisState } from '../../../common';
+import { VisSavedObject } from '../../types';
+import { extractReferences, injectReferences } from './saved_visualization_references';
 
 describe('extractReferences', () => {
   test('extracts nothing if savedSearchId is empty', () => {

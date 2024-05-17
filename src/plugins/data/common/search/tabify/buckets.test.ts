@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { TabifyBuckets } from './buckets';
-import { AggGroupNames, IAggConfig } from '../aggs';
 import moment from 'moment';
+import { AggGroupNames, IAggConfig } from '../aggs';
+import { TabifyBuckets } from './buckets';
 
 interface Bucket {
   key: number | string;

@@ -1,3 +1,14 @@
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiThemeProvider,
+} from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { throttle } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,33 +16,22 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiButton,
-  EuiThemeProvider,
-} from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
-import { throttle } from 'lodash';
 import type { ProcessEvent } from '../../../common';
-import { TTYSearchBar } from '../tty_search_bar';
-import { TTYTextSizer } from '../tty_text_sizer';
-import { useStyles } from './styles';
 import {
-  DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_ROWS,
   POLICIES_PAGE_PATH,
   SECURITY_APP_ID,
 } from '../../../common/constants';
 import { SessionViewTelemetryKey } from '../../types';
-import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
+import { DETAIL_PANEL, TOGGLE_TTY_PLAYER } from '../session_view/translations';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { TTYSearchBar } from '../tty_search_bar';
+import { TTYTextSizer } from '../tty_text_sizer';
+import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
+import { useStyles } from './styles';
 
 export interface TTYPlayerDeps {
   index: string;

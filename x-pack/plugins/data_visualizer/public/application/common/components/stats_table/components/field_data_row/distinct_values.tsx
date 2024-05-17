@@ -7,9 +7,9 @@
 
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../../common/constants';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import type { FieldDataRowProps } from '../../types';

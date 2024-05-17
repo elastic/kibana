@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import React, { useMemo } from 'react';
+import styled, { css } from 'styled-components';
 
-import * as i18n from './translations';
 import type { Rule } from '../../../../rule_management/logic/types';
-import { ExceptionsAddToRulesOptions } from '../add_to_rules_options';
 import { ExceptionsAddToListsOptions } from '../add_to_lists_options';
+import { ExceptionsAddToRulesOptions } from '../add_to_rules_options';
+import * as i18n from './translations';
 
 interface ExceptionsAddToRulesOrListsComponentProps {
   /* Rules that exception item will be added to, or whose shared lists will be used to populate add to lists option. If none passed in, user is prompted to select what rules to add exception to. */

@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-import React, {
-  ChangeEvent,
-  MouseEvent,
-  KeyboardEvent,
-  FunctionComponent,
-  useCallback,
-  useEffect,
-} from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFormRow,
   EuiRange,
@@ -26,10 +17,19 @@ import {
 } from '@elastic/eui';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
+import PropTypes from 'prop-types';
+import React, {
+  ChangeEvent,
+  MouseEvent,
+  KeyboardEvent,
+  FunctionComponent,
+  useCallback,
+  useEffect,
+} from 'react';
+import { ArgumentStrings } from '../../../../i18n';
 import { defaultExpression } from './default_expression';
 import { Fields } from './types';
 import { getFieldPath, getFieldValue } from './utils';
-import { ArgumentStrings } from '../../../../i18n';
 
 const { PartitionLabels: strings } = ArgumentStrings;
 

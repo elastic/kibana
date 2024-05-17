@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { Spaces } from '../../../scenarios';
+import moment from 'moment';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  getUrlPrefix,
-  getTestRuleData,
   ObjectRemover,
   getEventLog,
+  getTestRuleData,
+  getUrlPrefix,
   resetRulesSettings,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { Spaces } from '../../../scenarios';
 
 const InstanceActions = new Set<string | undefined>([
   'new-instance',

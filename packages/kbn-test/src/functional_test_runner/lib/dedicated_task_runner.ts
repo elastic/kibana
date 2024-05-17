@@ -11,9 +11,9 @@ import Url from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
 import Supertest from 'supertest';
 
+import { getKibanaCliArg } from '../../functional_tests/lib/kibana_cli_args';
 import { KbnClient } from '../../kbn_client';
 import { Config } from './config';
-import { getKibanaCliArg } from '../../functional_tests/lib/kibana_cli_args';
 
 export class DedicatedTaskRunner {
   static getPort(uiPort: number) {

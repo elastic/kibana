@@ -6,12 +6,12 @@
  */
 
 import type {
+  AlertTypeCount,
   Process,
   ProcessEvent,
   ProcessEventsPage,
   ProcessFields,
   ProcessMap,
-  AlertTypeCount,
 } from '../..';
 
 export const TEST_PROCESS_INDEX = 'logs-endpoint.events.process*';
@@ -1738,7 +1738,7 @@ export const childProcessMock: Process = {
         entry_leader: {} as ProcessFields,
         group_leader: {} as ProcessFields,
       },
-    } as ProcessEvent),
+    }) as ProcessEvent,
   isUserEntered: () => false,
   getEndTime: () => '',
   isDescendantOf: () => false,
@@ -1923,7 +1923,7 @@ export const processMock: Process = {
           },
         },
       },
-    } as ProcessEvent),
+    }) as ProcessEvent,
   isUserEntered: () => false,
   getEndTime: () => '',
   isDescendantOf: () => false,

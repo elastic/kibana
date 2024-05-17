@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,14 +14,16 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
-import { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
-import { RepositoryValidation } from '../../services/validation';
-import { TypeSettings } from './type_settings';
-import { textService } from '../../services/text';
+import { Repository } from '../../../../common/types';
 import { useCore } from '../../app_context';
 import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
+import { textService } from '../../services/text';
+import { RepositoryValidation } from '../../services/validation';
+import { TypeSettings } from './type_settings';
 
 interface Props {
   repository: Repository;

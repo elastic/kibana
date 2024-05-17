@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import Chance from 'chance';
 
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 

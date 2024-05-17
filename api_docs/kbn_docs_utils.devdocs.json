@@ -26,11 +26,7 @@
         "tags": [],
         "label": "findPlugins",
         "description": [],
-        "signature": [
-          "(pluginOrPackageFilter: string[] | undefined) => ",
-          "PluginOrPackage",
-          "[]"
-        ],
+        "signature": ["(pluginOrPackageFilter: string[] | undefined) => ", "PluginOrPackage", "[]"],
         "path": "packages/kbn-docs-utils/src/find_plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +38,7 @@
             "tags": [],
             "label": "pluginOrPackageFilter",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-docs-utils/src/find_plugins.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -61,11 +55,7 @@
         "tags": [],
         "label": "findTeamPlugins",
         "description": [],
-        "signature": [
-          "(team: string) => ",
-          "PluginOrPackage",
-          "[]"
-        ],
+        "signature": ["(team: string) => ", "PluginOrPackage", "[]"],
         "path": "packages/kbn-docs-utils/src/find_plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -77,9 +67,7 @@
             "tags": [],
             "label": "team",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-docs-utils/src/find_plugins.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -96,9 +84,7 @@
         "tags": [],
         "label": "runBuildApiDocsCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-docs-utils/src/build_api_docs_cli.ts",
         "deprecated": false,
         "trackAdoption": false,

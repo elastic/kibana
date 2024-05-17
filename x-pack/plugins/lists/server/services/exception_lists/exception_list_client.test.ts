@@ -9,12 +9,13 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
+import type { ExtensionPointCallbackDataArgument } from '../extension_points';
 import {
   ExtensionPointStorageContextMock,
   createExtensionPointStorageMock,
 } from '../extension_points/extension_point_storage.mock';
-import type { ExtensionPointCallbackDataArgument } from '../extension_points';
 
+import { ExceptionListClient } from './exception_list_client';
 import {
   getCreateExceptionListItemOptionsMock,
   getExceptionListClientMock,
@@ -22,7 +23,6 @@ import {
   getUpdateExceptionListItemOptionsMock,
   toReadable,
 } from './exception_list_client.mock';
-import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
 
 describe('exception_list_client', () => {

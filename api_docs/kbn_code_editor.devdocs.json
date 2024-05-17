@@ -23,13 +23,9 @@
         "parentPluginId": "@kbn/code-editor",
         "id": "def-common.CodeEditor",
         "type": "Function",
-        "tags": [
-          "see"
-        ],
+        "tags": ["see"],
         "label": "CodeEditor",
-        "description": [
-          "\nRenders a Monaco code editor with EUI color theme.\n"
-        ],
+        "description": ["\nRenders a Monaco code editor with EUI color theme.\n"],
         "signature": [
           "(props: React.PropsWithChildren<",
           {
@@ -142,12 +138,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "width",
-            "description": [
-              "Width of editor. Defaults to 100%."
-            ],
-            "signature": [
-              "string | number | undefined"
-            ],
+            "description": ["Width of editor. Defaults to 100%."],
+            "signature": ["string | number | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -158,12 +150,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "height",
-            "description": [
-              "Height of editor. Defaults to 100px."
-            ],
-            "signature": [
-              "string | number | undefined"
-            ],
+            "description": ["Height of editor. Defaults to 100px."],
+            "signature": ["string | number | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -174,9 +162,7 @@
             "type": "string",
             "tags": [],
             "label": "languageId",
-            "description": [
-              "ID of the editor language"
-            ],
+            "description": ["ID of the editor language"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -187,9 +173,7 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [
-              "Value of the editor"
-            ],
+            "description": ["Value of the editor"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -200,9 +184,7 @@
             "type": "Function",
             "tags": [],
             "label": "onChange",
-            "description": [
-              "Function invoked when text in editor is changed"
-            ],
+            "description": ["Function invoked when text in editor is changed"],
             "signature": [
               "((value: string, event: ",
               "editor",
@@ -219,9 +201,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -234,10 +214,7 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": [
-                  "editor",
-                  ".IModelContentChangedEvent"
-                ],
+                "signature": ["editor", ".IModelContentChangedEvent"],
                 "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -255,10 +232,7 @@
             "description": [
               "\nOptions for the Monaco Code Editor\nDocumentation of options can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html"
             ],
-            "signature": [
-              "editor",
-              ".IStandaloneEditorConstructionOptions | undefined"
-            ],
+            "signature": ["editor", ".IStandaloneEditorConstructionOptions | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -272,10 +246,7 @@
             "description": [
               "\nSuggestion provider for autocompletion\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html"
             ],
-            "signature": [
-              "languages",
-              ".CompletionItemProvider | undefined"
-            ],
+            "signature": ["languages", ".CompletionItemProvider | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -289,10 +260,7 @@
             "description": [
               "\nSignature provider for function parameter info\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html"
             ],
-            "signature": [
-              "languages",
-              ".SignatureHelpProvider | undefined"
-            ],
+            "signature": ["languages", ".SignatureHelpProvider | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -306,10 +274,7 @@
             "description": [
               "\nHover provider for hover documentation\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html"
             ],
-            "signature": [
-              "languages",
-              ".HoverProvider | undefined"
-            ],
+            "signature": ["languages", ".HoverProvider | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -323,10 +288,7 @@
             "description": [
               "\nLanguage config provider for bracket\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html"
             ],
-            "signature": [
-              "languages",
-              ".LanguageConfiguration | undefined"
-            ],
+            "signature": ["languages", ".LanguageConfiguration | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -340,10 +302,7 @@
             "description": [
               "\nCodeAction provider for code actions on markers feedback\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html"
             ],
-            "signature": [
-              "languages",
-              ".CodeActionProvider | undefined"
-            ],
+            "signature": ["languages", ".CodeActionProvider | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -354,12 +313,8 @@
             "type": "Function",
             "tags": [],
             "label": "editorWillMount",
-            "description": [
-              "\nFunction called before the editor is mounted in the view"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "description": ["\nFunction called before the editor is mounted in the view"],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -375,9 +330,7 @@
             "description": [
               "\nFunction called before the editor is mounted in the view\nand completely replaces the setup behavior called by the component"
             ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -390,14 +343,8 @@
             "type": "Function",
             "tags": [],
             "label": "editorDidMount",
-            "description": [
-              "\nFunction called after the editor is mounted in the view"
-            ],
-            "signature": [
-              "((editor: ",
-              "editor",
-              ".IStandaloneCodeEditor) => void) | undefined"
-            ],
+            "description": ["\nFunction called after the editor is mounted in the view"],
+            "signature": ["((editor: ", "editor", ".IStandaloneCodeEditor) => void) | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -409,10 +356,7 @@
                 "tags": [],
                 "label": "editor",
                 "description": [],
-                "signature": [
-                  "editor",
-                  ".IStandaloneCodeEditor"
-                ],
+                "signature": ["editor", ".IStandaloneCodeEditor"],
                 "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -428,9 +372,7 @@
             "tags": [],
             "label": "editorWillUnmount",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -443,12 +385,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "useDarkTheme",
-            "description": [
-              "\nShould the editor use the dark theme"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nShould the editor use the dark theme"],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -459,12 +397,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "transparentBackground",
-            "description": [
-              "\nShould the editor use a transparent background"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nShould the editor use a transparent background"],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -475,12 +409,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fullWidth",
-            "description": [
-              "\nShould the editor be rendered using the fullWidth EUI attribute"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nShould the editor be rendered using the fullWidth EUI attribute"],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -492,9 +422,7 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -505,12 +433,8 @@
             "type": "string",
             "tags": [],
             "label": "'aria-label'",
-            "description": [
-              "\nAccessible name for the editor. (Defaults to \"Code editor\")"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nAccessible name for the editor. (Defaults to \"Code editor\")"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -522,9 +446,7 @@
             "tags": [],
             "label": "isCopyable",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -536,9 +458,7 @@
             "tags": [],
             "label": "allowFullScreen",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -552,9 +472,7 @@
             "description": [
               "\nAlternate text to display, when an attempt is made to edit read only content. (Defaults to \"Cannot edit in read-only editor\")"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -584,9 +502,7 @@
             "description": [
               "\nEnables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -604,9 +520,7 @@
         "tags": [],
         "label": "LANG",
         "description": [],
-        "signature": [
-          "\"css\""
-        ],
+        "signature": ["\"css\""],
         "path": "packages/shared-ux/code_editor/impl/languages/css/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -619,9 +533,7 @@
         "tags": [],
         "label": "LANG",
         "description": [],
-        "signature": [
-          "\"markdown\""
-        ],
+        "signature": ["\"markdown\""],
         "path": "packages/shared-ux/code_editor/impl/languages/markdown/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -634,9 +546,7 @@
         "tags": [],
         "label": "LANG",
         "description": [],
-        "signature": [
-          "\"yaml\""
-        ],
+        "signature": ["\"yaml\""],
         "path": "packages/shared-ux/code_editor/impl/languages/yaml/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -649,9 +559,7 @@
         "tags": [],
         "label": "LANG",
         "description": [],
-        "signature": [
-          "\"handlebars\""
-        ],
+        "signature": ["\"handlebars\""],
         "path": "packages/shared-ux/code_editor/impl/languages/handlebars/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -664,9 +572,7 @@
         "tags": [],
         "label": "LANG",
         "description": [],
-        "signature": [
-          "\"hjson\""
-        ],
+        "signature": ["\"hjson\""],
         "path": "packages/shared-ux/code_editor/impl/languages/hjson/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -679,9 +585,7 @@
         "tags": [],
         "label": "LANG",
         "description": [],
-        "signature": [
-          "\"grok\""
-        ],
+        "signature": ["\"grok\""],
         "path": "packages/shared-ux/code_editor/impl/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

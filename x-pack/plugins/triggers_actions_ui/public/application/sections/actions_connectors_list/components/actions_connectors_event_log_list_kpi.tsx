@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import datemath from '@kbn/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import { IExecutionKPIResult } from '@kbn/actions-plugin/common';
+import datemath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
 import {
   ComponentOpts as ConnectorApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
-import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {

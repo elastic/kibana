@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { useAllHost } from '../../containers/hosts';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { HostsQueryTabBody } from './hosts_query_tab_body';
 import { HostsType } from '../../store/model';
+import { HostsQueryTabBody } from './hosts_query_tab_body';
 
 jest.mock('../../containers/hosts');
 jest.mock('../../../../common/containers/query_toggle');

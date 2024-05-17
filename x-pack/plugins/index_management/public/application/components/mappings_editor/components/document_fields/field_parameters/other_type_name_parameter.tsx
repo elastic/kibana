@@ -8,8 +8,8 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { UseField, TextField, FieldConfig, FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
+import { FieldConfig, FieldHook, TextField, UseField } from '../../../shared_imports';
 
 /**
  * This is a special component that does not have an explicit entry in {@link PARAMETERS_DEFINITION}.

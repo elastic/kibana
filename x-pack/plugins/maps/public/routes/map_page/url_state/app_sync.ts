@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { map } from 'rxjs';
-import { FilterStateStore } from '@kbn/es-query';
 import { connectToQueryState } from '@kbn/data-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import {
+  BaseStateContainer,
   IKbnUrlStateStorage,
   syncState,
-  BaseStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
+import { map } from 'rxjs';
 import { getData } from '../../../kibana_services';
 import { AppStateManager } from './app_state_manager';
 

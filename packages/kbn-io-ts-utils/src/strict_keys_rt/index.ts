@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { either, isRight } from 'fp-ts/lib/Either';
-import { difference, isPlainObject, forEach } from 'lodash';
+import * as t from 'io-ts';
+import { difference, forEach, isPlainObject } from 'lodash';
 import { MergeType } from '../merge_rt';
 
 /*

@@ -8,14 +8,14 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   TinesConfigSchema,
-  TinesSecretsSchema,
   TinesRunActionParamsSchema,
   TinesRunActionResponseSchema,
+  TinesSecretsSchema,
   TinesStoriesActionResponseSchema,
-  TinesWebhooksActionResponseSchema,
-  TinesWebhooksActionParamsSchema,
-  TinesWebhookObjectSchema,
   TinesStoryObjectSchema,
+  TinesWebhookObjectSchema,
+  TinesWebhooksActionParamsSchema,
+  TinesWebhooksActionResponseSchema,
 } from './schema';
 
 export type TinesConfig = TypeOf<typeof TinesConfigSchema>;

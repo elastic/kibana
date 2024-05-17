@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiIconTip,
-  EuiSpacer,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
+import React from 'react';
 
-import { pluginServices } from '../../services';
 import { EnvironmentName } from '../../../common/labs';
 import { LabsStrings } from '../../i18n';
+import { pluginServices } from '../../services';
 
 const { Switch: strings } = LabsStrings.Components;
 

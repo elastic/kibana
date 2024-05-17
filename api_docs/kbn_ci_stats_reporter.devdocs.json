@@ -24,9 +24,7 @@
         "type": "Class",
         "tags": [],
         "label": "CiStatsReporter",
-        "description": [
-          "Object that helps report data to the ci-stats service"
-        ],
+        "description": ["Object that helps report data to the ci-stats service"],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -93,9 +91,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -155,9 +151,7 @@
             "description": [
               "\nDetermine if CI_STATS is explicitly disabled by the environment. To determine\nif the CiStatsReporter has enough information in the environment to send metrics\nfor builds use #hasBuildConfig()."
             ],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,9 +167,7 @@
             "description": [
               "\nDetermines if the CiStatsReporter is disabled by the environment, or properly\nconfigured and able to send stats"
             ],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -315,9 +307,7 @@
             "type": "Function",
             "tags": [],
             "label": "reportTests",
-            "description": [
-              "\nSend test reports to ci-stats"
-            ],
+            "description": ["\nSend test reports to ci-stats"],
             "signature": [
               "({ group, testRuns }: ",
               {
@@ -364,11 +354,7 @@
             "tags": [],
             "label": "reportPerformanceMetrics",
             "description": [],
-            "signature": [
-              "(metrics: ",
-              "PerformanceMetrics",
-              ") => Promise<boolean | undefined>"
-            ],
+            "signature": ["(metrics: ", "PerformanceMetrics", ") => Promise<boolean | undefined>"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -380,9 +366,7 @@
                 "tags": [],
                 "label": "metrics",
                 "description": [],
-                "signature": [
-                  "PerformanceMetrics"
-                ],
+                "signature": ["PerformanceMetrics"],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -446,9 +430,7 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -466,9 +448,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CiStatsMetric",
-        "description": [
-          "A ci-stats metric record"
-        ],
+        "description": ["A ci-stats metric record"],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -492,9 +472,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Specific sub-set of the \"group\", e.g. \"dashboard\""
-            ],
+            "description": ["Specific sub-set of the \"group\", e.g. \"dashboard\""],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -505,9 +483,7 @@
             "type": "number",
             "tags": [],
             "label": "value",
-            "description": [
-              "integer value recorded as the value of this metric"
-            ],
+            "description": ["integer value recorded as the value of this metric"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -521,9 +497,7 @@
             "description": [
               "optional limit which will generate an error on PRs when the metric exceeds the limit"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -537,9 +511,7 @@
             "description": [
               "\npath, relative to the repo, where the config file containing limits\nis kept. Linked from PR comments instructing contributors how to fix\ntheir PRs."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -576,9 +548,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CiStatsReportTestsOptions",
-        "description": [
-          "Options for reporting tests to ci-stats"
-        ],
+        "description": ["Options for reporting tests to ci-stats"],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -589,9 +559,7 @@
             "type": "Object",
             "tags": [],
             "label": "group",
-            "description": [
-              "\nInformation about the group of tests that were run"
-            ],
+            "description": ["\nInformation about the group of tests that were run"],
             "signature": [
               {
                 "pluginId": "@kbn/ci-stats-reporter",
@@ -661,9 +629,7 @@
             "type": "number",
             "tags": [],
             "label": "durationMs",
-            "description": [
-              "\nThe number of miliseconds that the tests ran for"
-            ],
+            "description": ["\nThe number of miliseconds that the tests ran for"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -687,9 +653,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nThe name of this specific group (within the \"type\")"
-            ],
+            "description": ["\nThe name of this specific group (within the \"type\")"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -700,12 +664,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "result",
-            "description": [
-              "\nOverall result of this test group"
-            ],
-            "signature": [
-              "\"skip\" | \"fail\" | \"pass\""
-            ],
+            "description": ["\nOverall result of this test group"],
+            "signature": ["\"skip\" | \"fail\" | \"pass\""],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -765,9 +725,7 @@
             "type": "number",
             "tags": [],
             "label": "durationMs",
-            "description": [
-              "\nDuration of the tests in milliseconds"
-            ],
+            "description": ["\nDuration of the tests in milliseconds"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -807,12 +765,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "result",
-            "description": [
-              "\n\"fail\", \"pass\" or \"skip\", the result of the tests"
-            ],
-            "signature": [
-              "\"skip\" | \"fail\" | \"pass\""
-            ],
+            "description": ["\n\"fail\", \"pass\" or \"skip\", the result of the tests"],
+            "signature": ["\"skip\" | \"fail\" | \"pass\""],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -826,9 +780,7 @@
             "description": [
               "\nThe list of suite names containing this test, the first being the outermost suite"
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -839,9 +791,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nThe name of this specific test run"
-            ],
+            "description": ["\nThe name of this specific test run"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -852,9 +802,7 @@
             "type": "string",
             "tags": [],
             "label": "file",
-            "description": [
-              "\nRelative path from the root of the repo contianing this test"
-            ],
+            "description": ["\nRelative path from the root of the repo contianing this test"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -865,12 +813,8 @@
             "type": "string",
             "tags": [],
             "label": "error",
-            "description": [
-              "\nError message if the test failed"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nError message if the test failed"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -881,12 +825,8 @@
             "type": "string",
             "tags": [],
             "label": "stdout",
-            "description": [
-              "\nDebug output/stdout produced by the test"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nDebug output/stdout produced by the test"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -897,12 +837,8 @@
             "type": "Array",
             "tags": [],
             "label": "screenshots",
-            "description": [
-              "\nScreenshots captured during the test run"
-            ],
-            "signature": [
-              "{ name: string; base64Png: string; }[] | undefined"
-            ],
+            "description": ["\nScreenshots captured during the test run"],
+            "signature": ["{ name: string; base64Png: string; }[] | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -916,9 +852,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CiStatsTiming",
-        "description": [
-          "A ci-stats timing event"
-        ],
+        "description": ["A ci-stats timing event"],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -942,9 +876,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Specific timing (witin the \"group\" being tracked) e.g. \"total\""
-            ],
+            "description": ["Specific timing (witin the \"group\" being tracked) e.g. \"total\""],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -955,9 +887,7 @@
             "type": "number",
             "tags": [],
             "label": "ms",
-            "description": [
-              "time in milliseconds which should be recorded"
-            ],
+            "description": ["time in milliseconds which should be recorded"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -994,9 +924,7 @@
         "type": "Interface",
         "tags": [],
         "label": "MetricsOptions",
-        "description": [
-          "Options for reporting metrics to ci-stats"
-        ],
+        "description": ["Options for reporting metrics to ci-stats"],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1007,9 +935,7 @@
             "type": "Object",
             "tags": [],
             "label": "defaultMeta",
-            "description": [
-              "Default metadata to add to each metric"
-            ],
+            "description": ["Default metadata to add to each metric"],
             "signature": [
               {
                 "pluginId": "@kbn/ci-stats-core",
@@ -1033,9 +959,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TimingsOptions",
-        "description": [
-          "Options for reporting timings to ci-stats"
-        ],
+        "description": ["Options for reporting timings to ci-stats"],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1046,9 +970,7 @@
             "type": "Array",
             "tags": [],
             "label": "timings",
-            "description": [
-              "list of timings to record"
-            ],
+            "description": ["list of timings to record"],
             "signature": [
               {
                 "pluginId": "@kbn/ci-stats-reporter",
@@ -1072,9 +994,7 @@
             "description": [
               "master, 7.x, etc, automatically detected from package.json if not specified"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1085,12 +1005,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "kibanaUuid",
-            "description": [
-              "value of data/uuid, automatically loaded if not specified"
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
+            "description": ["value of data/uuid, automatically loaded if not specified"],
+            "signature": ["string | null | undefined"],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1108,9 +1024,7 @@
         "tags": [],
         "label": "CiStatsTestResult",
         "description": [],
-        "signature": [
-          "\"skip\" | \"fail\" | \"pass\""
-        ],
+        "signature": ["\"skip\" | \"fail\" | \"pass\""],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -7,36 +7,15 @@
       "pretty": "__flag__",
       "if_primary_term": "",
       "if_seq_no": "",
-      "refresh": [
-        "true",
-        "false",
-        "wait_for"
-      ],
+      "refresh": ["true", "false", "wait_for"],
       "routing": "",
-      "timeout": [
-        "1m",
-        "-1",
-        "0"
-      ],
+      "timeout": ["1m", "-1", "0"],
       "version": "",
-      "version_type": [
-        "internal",
-        "external",
-        "external_gte",
-        "force"
-      ],
-      "wait_for_active_shards": [
-        "1",
-        "all",
-        "index-setting"
-      ]
+      "version_type": ["internal", "external", "external_gte", "force"],
+      "wait_for_active_shards": ["1", "all", "index-setting"]
     },
-    "methods": [
-      "DELETE"
-    ],
-    "patterns": [
-      "{index}/_doc/{id}"
-    ],
+    "methods": ["DELETE"],
+    "patterns": ["{index}/_doc/{id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete.html",
     "availability": {
       "stack": true,

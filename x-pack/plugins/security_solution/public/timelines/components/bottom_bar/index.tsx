@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as i18n from './translations';
-import type { State } from '../../../common/store';
-import { selectTitleByTimelineById } from '../../store/selectors';
-import { AddTimelineButton } from './add_timeline_button';
-import { timelineActions } from '../../store';
-import { TimelineSaveStatus } from '../save_status';
-import { AddToFavoritesButton } from '../add_to_favorites';
 import { TimelineEventsCountBadge } from '../../../common/hooks/use_timeline_events_count';
+import type { State } from '../../../common/store';
+import { timelineActions } from '../../store';
+import { selectTitleByTimelineById } from '../../store/selectors';
+import { AddToFavoritesButton } from '../add_to_favorites';
+import { TimelineSaveStatus } from '../save_status';
+import { AddTimelineButton } from './add_timeline_button';
+import * as i18n from './translations';
 
 interface TimelineBottomBarProps {
   /**

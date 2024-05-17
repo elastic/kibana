@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PluginSetupContract, PluginStartContract } from './plugin';
 import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
 } from './feature_privilege_iterator';
+import { PluginSetupContract, PluginStartContract } from './plugin';
 
 const createSetup = (): jest.Mocked<PluginSetupContract> => {
   return {

@@ -8,20 +8,20 @@
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import React from 'react';
+import useMount from 'react-use/lib/useMount';
 import {
-  isCategoryAnomaly,
   LogEntryAnomaly,
+  isCategoryAnomaly,
   logEntryRateJobType,
 } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
-import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
 
 const EXAMPLE_COUNT = 5;
 

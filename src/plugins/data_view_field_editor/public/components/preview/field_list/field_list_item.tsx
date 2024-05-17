@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import classnames from 'classnames';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiBadge,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import classnames from 'classnames';
+import React, { useState } from 'react';
 
-import { useFieldPreviewContext } from '../field_preview_context';
-import { IsUpdatingIndicator } from '../is_updating_indicator';
-import { ImagePreviewModal } from '../image_preview_modal';
-import type { DocumentField } from './field_list';
-import { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
+import { useFieldPreviewContext } from '../field_preview_context';
+import { ImagePreviewModal } from '../image_preview_modal';
+import { IsUpdatingIndicator } from '../is_updating_indicator';
+import { PreviewState } from '../types';
+import type { DocumentField } from './field_list';
 
 export interface PreviewListItemProps {
   field: DocumentField;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-import { LocationAvailability } from './location_availability/location_availability';
 import { MonitorLocations } from '../../../../../common/runtime_types';
+import { LocationAvailability } from './location_availability/location_availability';
 import { MonitorStatusBar } from './status_bar';
 
 interface MonitorStatusDetailsProps {

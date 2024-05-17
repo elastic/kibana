@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
 
+import { notificationService } from '../../../public/application/services/notification';
 import { setupEnvironment } from '../helpers';
 import { createTestEnrichPolicy } from '../helpers/fixtures';
 import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
-import { notificationService } from '../../../public/application/services/notification';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

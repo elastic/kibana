@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { Feature, Point } from 'geojson';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { Feature, Point } from 'geojson';
-import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
-import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
-import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
-import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
-import { ExamplesList } from '../../examples_list';
-import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
+import { ExamplesList } from '../../examples_list';
+import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
+import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
+import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
+import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
+import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 

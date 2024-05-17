@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { fromEventPattern, fromEvent, map, mergeMap, takeUntil, bufferCount } from 'rxjs';
-import jsonStream from './json_stream';
-import { pipe, noop } from './utils';
-import { ingestList } from './ingest';
-import {
-  staticSite,
-  statsAndstaticSiteUrl,
-  addJsonSummaryPath,
-  testRunner,
-  addTimeStamp,
-  buildId,
-  coveredFilePath,
-  ciRunUrl,
-  itemizeVcs,
-  teamAssignment,
-} from './transforms';
-import { resolve } from 'path';
 import { createReadStream } from 'fs';
+import { resolve } from 'path';
 import readline from 'readline';
 import * as moment from 'moment';
+import { bufferCount, fromEvent, fromEventPattern, map, mergeMap, takeUntil } from 'rxjs';
+import { ingestList } from './ingest';
+import jsonStream from './json_stream';
+import {
+  addJsonSummaryPath,
+  addTimeStamp,
+  buildId,
+  ciRunUrl,
+  coveredFilePath,
+  itemizeVcs,
+  staticSite,
+  statsAndstaticSiteUrl,
+  teamAssignment,
+  testRunner,
+} from './transforms';
+import { noop, pipe } from './utils';
 
 const ROOT = '../../../..';
 const COVERAGE_INGESTION_KIBANA_ROOT =

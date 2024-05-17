@@ -6,12 +6,7 @@
     "id": "taskManager",
     "server": true,
     "browser": false,
-    "configPath": [
-      "xpack",
-      "task_manager"
-    ],
-    "optionalPlugins": [
-      "usageCollection"
-    ]
+    "configPath": ["xpack", "task_manager"],
+    "optionalPlugins": ["usageCollection"]
   }
 }

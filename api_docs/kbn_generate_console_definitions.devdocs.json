@@ -26,9 +26,7 @@
         "tags": [],
         "label": "runGenerateConsoleDefinitionsCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-generate-console-definitions/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,

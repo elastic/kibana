@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiText, EuiTextColor, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 const UNSUPPORTED_LABEL = i18n.translate(
   'xpack.securitySolution.console.unsupportedMessageCallout.title',

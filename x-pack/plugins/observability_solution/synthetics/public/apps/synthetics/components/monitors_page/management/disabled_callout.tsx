@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import * as labels from './labels';
+import React from 'react';
 import { useEnablement } from '../../../hooks';
+import * as labels from './labels';
 
 export const DisabledCallout = ({ total }: { total: number }) => {
   const { enablement, invalidApiKeyError, loading } = useEnablement();

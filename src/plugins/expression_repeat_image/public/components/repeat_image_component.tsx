@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
-import { times } from 'lodash';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { times } from 'lodash';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { RepeatImageRendererConfig } from '../../common';
 
 interface RepeatImageComponentProps extends RepeatImageRendererConfig {

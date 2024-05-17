@@ -20,9 +20,7 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": [
-              "() => React.ReactNode"
-            ],
+            "signature": ["() => React.ReactNode"],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,9 +91,7 @@
             "tags": [],
             "label": "refreshOnFinish",
             "description": [],
-            "signature": [
-              "(() => { type: string; id: string; }[]) | undefined"
-            ],
+            "signature": ["(() => { type: string; id: string; }[]) | undefined"],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -107,9 +103,7 @@
             "tags": [],
             "label": "actionContext",
             "description": [],
-            "signature": [
-              "ActionContext | null"
-            ],
+            "signature": ["ActionContext | null"],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -142,9 +136,7 @@
             "tags": [],
             "label": "setActionContext",
             "description": [],
-            "signature": [
-              "(actionContext: ActionContext) => void"
-            ],
+            "signature": ["(actionContext: ActionContext) => void"],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -156,9 +148,7 @@
                 "tags": [],
                 "label": "actionContext",
                 "description": [],
-                "signature": [
-                  "ActionContext"
-                ],
+                "signature": ["ActionContext"],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -174,9 +164,7 @@
             "tags": [],
             "label": "registerOnFinishCallback",
             "description": [],
-            "signature": [
-              "(callback: Function) => void"
-            ],
+            "signature": ["(callback: Function) => void"],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -188,9 +176,7 @@
                 "tags": [],
                 "label": "callback",
                 "description": [],
-                "signature": [
-                  "Function"
-                ],
+                "signature": ["Function"],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -252,9 +238,7 @@
             "tags": [],
             "label": "finish",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -351,9 +335,7 @@
             "tags": [],
             "label": "refreshOnFinish",
             "description": [],
-            "signature": [
-              "(() => { type: string; id: string; }[]) | undefined"
-            ],
+            "signature": ["(() => { type: string; id: string; }[]) | undefined"],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -365,9 +347,7 @@
             "tags": [],
             "label": "columnContext",
             "description": [],
-            "signature": [
-              "ColumnContext | null"
-            ],
+            "signature": ["ColumnContext | null"],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -379,9 +359,7 @@
             "tags": [],
             "label": "setColumnContext",
             "description": [],
-            "signature": [
-              "(columnContext: ColumnContext) => void"
-            ],
+            "signature": ["(columnContext: ColumnContext) => void"],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -393,9 +371,7 @@
                 "tags": [],
                 "label": "columnContext",
                 "description": [],
-                "signature": [
-                  "ColumnContext"
-                ],
+                "signature": ["ColumnContext"],
                 "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -411,9 +387,7 @@
             "tags": [],
             "label": "registerOnFinishCallback",
             "description": [],
-            "signature": [
-              "(callback: Function) => void"
-            ],
+            "signature": ["(callback: Function) => void"],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -425,9 +399,7 @@
                 "tags": [],
                 "label": "callback",
                 "description": [],
-                "signature": [
-                  "Function"
-                ],
+                "signature": ["Function"],
                 "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -443,9 +415,7 @@
             "tags": [],
             "label": "finish",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -505,9 +475,7 @@
                 "tags": [],
                 "label": "selectedTags",
                 "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
+                "signature": ["string[] | undefined"],
                 "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -570,9 +538,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "Query"
-            ],
+            "signature": ["Query"],
             "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -800,9 +766,7 @@
             "tags": [],
             "label": "unmatchedReferences",
             "description": [],
-            "signature": [
-              "UnmatchedReference[]"
-            ],
+            "signature": ["UnmatchedReference[]"],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -814,9 +778,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": [
-              "\"success\" | \"idle\""
-            ],
+            "signature": ["\"success\" | \"idle\""],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -885,9 +847,7 @@
             "tags": [],
             "label": "namespaceType",
             "description": [],
-            "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
-            ],
+            "signature": ["\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -937,9 +897,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -951,9 +909,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -965,9 +921,7 @@
             "tags": [],
             "label": "editUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -979,9 +933,7 @@
             "tags": [],
             "label": "inAppUrl",
             "description": [],
-            "signature": [
-              "{ path: string; uiCapabilitiesPath: string; } | undefined"
-            ],
+            "signature": ["{ path: string; uiCapabilitiesPath: string; } | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1014,9 +966,7 @@
             "tags": [],
             "label": "hiddenType",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1066,9 +1016,7 @@
             "tags": [],
             "label": "relationship",
             "description": [],
-            "signature": [
-              "\"child\" | \"parent\""
-            ],
+            "signature": ["\"child\" | \"parent\""],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1113,9 +1061,7 @@
             "type": "Function",
             "tags": [],
             "label": "register",
-            "description": [
-              "\nregister given action in the registry."
-            ],
+            "description": ["\nregister given action in the registry."],
             "signature": [
               "(action: ",
               {
@@ -1178,9 +1124,7 @@
             "description": [
               "\nreturn true if the registry contains given action, false otherwise."
             ],
-            "signature": [
-              "(actionId: string) => boolean"
-            ],
+            "signature": ["(actionId: string) => boolean"],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1192,9 +1136,7 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1249,9 +1191,7 @@
             "type": "Function",
             "tags": [],
             "label": "register",
-            "description": [
-              "\nregister given column in the registry."
-            ],
+            "description": ["\nregister given column in the registry."],
             "signature": [
               "(column: ",
               {
@@ -1417,9 +1357,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1431,13 +1369,9 @@
         "parentPluginId": "savedObjectsManagement",
         "id": "def-public.SavedObjectWithMetadata",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA saved object.\n"
-        ],
+        "description": ["\nA saved object.\n"],
         "signature": [
           {
             "pluginId": "savedObjectsManagement",
@@ -1522,9 +1456,7 @@
             "tags": [],
             "label": "created_at",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1536,9 +1468,7 @@
             "tags": [],
             "label": "updated_at",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1550,9 +1480,7 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1564,9 +1492,7 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1578,9 +1504,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1592,10 +1516,7 @@
             "tags": [],
             "label": "references",
             "description": [],
-            "signature": [
-              "SavedObjectReference",
-              "[]"
-            ],
+            "signature": ["SavedObjectReference", "[]"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1760,9 +1681,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1775,9 +1694,7 @@
               "tags": [],
               "label": "id",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1790,9 +1707,7 @@
               "tags": [],
               "label": "savedObjectTypes",
               "description": [],
-              "signature": [
-                "string[]"
-              ],
+              "signature": ["string[]"],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1865,9 +1780,7 @@
           "tags": [],
           "label": "getDefaultTitle",
           "description": [],
-          "signature": [
-            "(object: { id: string; type: string; }) => string"
-          ],
+          "signature": ["(object: { id: string; type: string; }) => string"],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1880,9 +1793,7 @@
               "tags": [],
               "label": "object",
               "description": [],
-              "signature": [
-                "{ id: string; type: string; }"
-              ],
+              "signature": ["{ id: string; type: string; }"],
               "path": "src/plugins/saved_objects_management/public/lib/get_default_title.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -1921,9 +1832,7 @@
               "tags": [],
               "label": "query",
               "description": [],
-              "signature": [
-                "Query"
-              ],
+              "signature": ["Query"],
               "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -2035,9 +1944,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2049,9 +1956,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2063,9 +1968,7 @@
             "tags": [],
             "label": "editUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2077,9 +1980,7 @@
             "tags": [],
             "label": "inAppUrl",
             "description": [],
-            "signature": [
-              "{ path: string; uiCapabilitiesPath: string; } | undefined"
-            ],
+            "signature": ["{ path: string; uiCapabilitiesPath: string; } | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2112,9 +2013,7 @@
             "tags": [],
             "label": "hiddenType",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2126,13 +2025,9 @@
         "parentPluginId": "savedObjectsManagement",
         "id": "def-server.SavedObjectWithMetadata",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA saved object.\n"
-        ],
+        "description": ["\nA saved object.\n"],
         "signature": [
           {
             "pluginId": "savedObjectsManagement",
@@ -2217,9 +2112,7 @@
             "tags": [],
             "label": "created_at",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2231,9 +2124,7 @@
             "tags": [],
             "label": "updated_at",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2245,9 +2136,7 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2259,9 +2148,7 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2273,9 +2160,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2287,10 +2172,7 @@
             "tags": [],
             "label": "references",
             "description": [],
-            "signature": [
-              "SavedObjectReference",
-              "[]"
-            ],
+            "signature": ["SavedObjectReference", "[]"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2377,9 +2259,7 @@
             "tags": [],
             "label": "relationship",
             "description": [],
-            "signature": [
-              "\"child\" | \"parent\""
-            ],
+            "signature": ["\"child\" | \"parent\""],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2427,9 +2307,7 @@
             "tags": [],
             "label": "namespaceType",
             "description": [],
-            "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
-            ],
+            "signature": ["\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2479,9 +2357,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2493,9 +2369,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2507,9 +2381,7 @@
             "tags": [],
             "label": "editUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2521,9 +2393,7 @@
             "tags": [],
             "label": "inAppUrl",
             "description": [],
-            "signature": [
-              "{ path: string; uiCapabilitiesPath: string; } | undefined"
-            ],
+            "signature": ["{ path: string; uiCapabilitiesPath: string; } | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2556,9 +2426,7 @@
             "tags": [],
             "label": "hiddenType",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2608,9 +2476,7 @@
             "tags": [],
             "label": "relationship",
             "description": [],
-            "signature": [
-              "\"child\" | \"parent\""
-            ],
+            "signature": ["\"child\" | \"parent\""],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2642,13 +2508,9 @@
         "parentPluginId": "savedObjectsManagement",
         "id": "def-common.SavedObjectWithMetadata",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA saved object.\n"
-        ],
+        "description": ["\nA saved object.\n"],
         "signature": [
           {
             "pluginId": "savedObjectsManagement",
@@ -2733,9 +2595,7 @@
             "tags": [],
             "label": "created_at",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2747,9 +2607,7 @@
             "tags": [],
             "label": "updated_at",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2761,9 +2619,7 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2775,9 +2631,7 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2789,9 +2643,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2803,10 +2655,7 @@
             "tags": [],
             "label": "references",
             "description": [],
-            "signature": [
-              "SavedObjectReference",
-              "[]"
-            ],
+            "signature": ["SavedObjectReference", "[]"],
             "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2824,9 +2673,7 @@
         "tags": [],
         "label": "SavedObjectRelationKind",
         "description": [],
-        "signature": [
-          "\"child\" | \"parent\""
-        ],
+        "signature": ["\"child\" | \"parent\""],
         "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,

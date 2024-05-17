@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
-import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { Ping } from '../../../../../../common/runtime_types';
-import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const FailedTestsList = ({

@@ -11,14 +11,14 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { SETTINGS_API_ROUTES } from '../../constants';
+import { defaultFleetErrorHandler } from '../../errors';
+import { agentPolicyService, appContextService, settingsService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import {
-  PutSettingsRequestSchema,
-  GetSettingsRequestSchema,
   GetEnrollmentSettingsRequestSchema,
+  GetSettingsRequestSchema,
+  PutSettingsRequestSchema,
 } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
-import { settingsService, agentPolicyService, appContextService } from '../../services';
 
 import { getEnrollmentSettingsHandler } from './enrollment_settings_handler';
 

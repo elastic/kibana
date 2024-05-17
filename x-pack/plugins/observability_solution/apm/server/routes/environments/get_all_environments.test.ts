@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getAllEnvironments } from './get_all_environments';
 import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
+import { getAllEnvironments } from './get_all_environments';
 
 describe('getAllEnvironments', () => {
   let mock: SearchParamsMock;

@@ -10,8 +10,8 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-import { isAst } from '@kbn/interpreter';
 import { ExpressionAstNode } from '@kbn/expressions-plugin/common';
+import { isAst } from '@kbn/interpreter';
 
 export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) => void) {
   if (!isAst(ast)) {

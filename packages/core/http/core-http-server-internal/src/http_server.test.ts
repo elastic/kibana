@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { setTlsConfigMock } from './http_server.test.mocks';
 import { Server } from 'http';
-import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
-import supertest from 'supertest';
-import { omit } from 'lodash';
 import { join } from 'path';
+import { Readable } from 'stream';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
-  RouteValidationResultFactory,
-  RouteValidationFunction,
   RequestHandlerContextBase,
+  RouteValidationFunction,
+  RouteValidationResultFactory,
 } from '@kbn/core-http-server';
-import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createServer } from '@kbn/server-http-tools';
+import { mkdtemp, readFile, rm, writeFile } from 'fs/promises';
+import { omit } from 'lodash';
+import moment from 'moment';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import supertest from 'supertest';
 import { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
-import { Readable } from 'stream';
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import moment from 'moment';
-import { of, Observable, BehaviorSubject } from 'rxjs';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { setTlsConfigMock } from './http_server.test.mocks';
 
 const routerOptions: RouterOptions = {
   isDev: false,

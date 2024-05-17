@@ -18,8 +18,8 @@ jest.mock('../../capabilities/check_capabilities', () => ({
 
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ScopeSection } from './scope_section';
 

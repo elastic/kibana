@@ -10,9 +10,7 @@
         "tags": [],
         "label": "canImportVisContext",
         "description": [],
-        "signature": [
-          "(visContext: unknown) => boolean"
-        ],
+        "signature": ["(visContext: unknown) => boolean"],
         "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -24,9 +22,7 @@
             "tags": [],
             "label": "visContext",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -89,9 +85,7 @@
         "type": "Function",
         "tags": [],
         "label": "getBreakdownField",
-        "description": [
-          "\nGet the breakdown field from local storage"
-        ],
+        "description": ["\nGet the breakdown field from local storage"],
         "signature": [
           "(storage: ",
           {
@@ -135,9 +129,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -153,9 +145,7 @@
         "type": "Function",
         "tags": [],
         "label": "getChartHidden",
-        "description": [
-          "\nGet the chart hidden state from local storage"
-        ],
+        "description": ["\nGet the chart hidden state from local storage"],
         "signature": [
           "(storage: ",
           {
@@ -199,9 +189,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -217,9 +205,7 @@
         "type": "Function",
         "tags": [],
         "label": "getTopPanelHeight",
-        "description": [
-          "\nGet the top panel height from local storage"
-        ],
+        "description": ["\nGet the top panel height from local storage"],
         "signature": [
           "(storage: ",
           {
@@ -263,9 +249,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -281,9 +265,7 @@
         "type": "Function",
         "tags": [],
         "label": "setBreakdownField",
-        "description": [
-          "\nSet the breakdown field in local storage"
-        ],
+        "description": ["\nSet the breakdown field in local storage"],
         "signature": [
           "(storage: ",
           {
@@ -327,9 +309,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -342,9 +322,7 @@
             "tags": [],
             "label": "breakdownField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -360,9 +338,7 @@
         "type": "Function",
         "tags": [],
         "label": "setChartHidden",
-        "description": [
-          "\nSet the chart hidden state in local storage"
-        ],
+        "description": ["\nSet the chart hidden state in local storage"],
         "signature": [
           "(storage: ",
           {
@@ -406,9 +382,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -421,9 +395,7 @@
             "tags": [],
             "label": "chartHidden",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -439,9 +411,7 @@
         "type": "Function",
         "tags": [],
         "label": "setTopPanelHeight",
-        "description": [
-          "\nSet the top panel height in local storage"
-        ],
+        "description": ["\nSet the top panel height in local storage"],
         "signature": [
           "(storage: ",
           {
@@ -485,9 +455,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -500,9 +468,7 @@
             "tags": [],
             "label": "topPanelHeight",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -552,9 +518,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -644,9 +608,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -694,9 +656,7 @@
             "tags": [],
             "label": "breakdown",
             "description": [],
-            "signature": [
-              "UnifiedHistogramBreakdownContext"
-            ],
+            "signature": ["UnifiedHistogramBreakdownContext"],
             "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -757,9 +717,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UnifiedHistogramChartLoadEvent",
-        "description": [
-          "\nEmitted when the histogram loading status changes"
-        ],
+        "description": ["\nEmitted when the histogram loading status changes"],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -770,9 +728,7 @@
             "type": "Object",
             "tags": [],
             "label": "adapters",
-            "description": [
-              "\nInspector adapters for the request"
-            ],
+            "description": ["\nInspector adapters for the request"],
             "signature": [
               "{ requests?: ",
               {
@@ -810,9 +766,7 @@
             "type": "Object",
             "tags": [],
             "label": "embeddableOutput$",
-            "description": [
-              "\nObservable of the lens embeddable output"
-            ],
+            "description": ["\nObservable of the lens embeddable output"],
             "signature": [
               "Observable",
               "<",
@@ -838,9 +792,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UnifiedHistogramServices",
-        "description": [
-          "\nThe services required by the Unified Histogram components"
-        ],
+        "description": ["\nThe services required by the Unified Histogram components"],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1092,9 +1044,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UnifiedHistogramState",
-        "description": [
-          "\nThe current state of the container"
-        ],
+        "description": ["\nThe current state of the container"],
         "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1105,12 +1055,8 @@
             "type": "string",
             "tags": [],
             "label": "breakdownField",
-            "description": [
-              "\nThe current field used for the breakdown"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe current field used for the breakdown"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1121,13 +1067,8 @@
             "type": "Object",
             "tags": [],
             "label": "currentSuggestionContext",
-            "description": [
-              "\nThe current Lens suggestion"
-            ],
-            "signature": [
-              "UnifiedHistogramSuggestionContext",
-              " | undefined"
-            ],
+            "description": ["\nThe current Lens suggestion"],
+            "signature": ["UnifiedHistogramSuggestionContext", " | undefined"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1138,9 +1079,7 @@
             "type": "boolean",
             "tags": [],
             "label": "chartHidden",
-            "description": [
-              "\nWhether or not the chart is hidden"
-            ],
+            "description": ["\nWhether or not the chart is hidden"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1151,9 +1090,7 @@
             "type": "Object",
             "tags": [],
             "label": "lensRequestAdapter",
-            "description": [
-              "\nThe current Lens request adapter"
-            ],
+            "description": ["\nThe current Lens request adapter"],
             "signature": [
               {
                 "pluginId": "inspector",
@@ -1174,9 +1111,7 @@
             "type": "Object",
             "tags": [],
             "label": "lensAdapters",
-            "description": [
-              "\nThe current Lens adapters"
-            ],
+            "description": ["\nThe current Lens adapters"],
             "signature": [
               "Partial<",
               {
@@ -1198,9 +1133,7 @@
             "type": "Object",
             "tags": [],
             "label": "lensEmbeddableOutput$",
-            "description": [
-              "\nLens embeddable output observable"
-            ],
+            "description": ["\nLens embeddable output observable"],
             "signature": [
               "Observable",
               "<",
@@ -1223,9 +1156,7 @@
             "type": "string",
             "tags": [],
             "label": "timeInterval",
-            "description": [
-              "\nThe current time interval of the chart"
-            ],
+            "description": ["\nThe current time interval of the chart"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1236,12 +1167,8 @@
             "type": "number",
             "tags": [],
             "label": "topPanelHeight",
-            "description": [
-              "\nThe current top panel height"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nThe current top panel height"],
+            "signature": ["number | undefined"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1252,9 +1179,7 @@
             "type": "Enum",
             "tags": [],
             "label": "totalHitsStatus",
-            "description": [
-              "\nThe current fetch status of the hits count request"
-            ],
+            "description": ["\nThe current fetch status of the hits count request"],
             "signature": [
               {
                 "pluginId": "unifiedHistogram",
@@ -1274,12 +1199,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "totalHitsResult",
-            "description": [
-              "\nThe current result of the hits count request"
-            ],
-            "signature": [
-              "number | Error | undefined"
-            ],
+            "description": ["\nThe current result of the hits count request"],
+            "signature": ["number | Error | undefined"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1293,9 +1214,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UnifiedHistogramStateOptions",
-        "description": [
-          "\nThe options used to initialize the comntainer state"
-        ],
+        "description": ["\nThe options used to initialize the comntainer state"],
         "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1306,9 +1225,7 @@
             "type": "Object",
             "tags": [],
             "label": "services",
-            "description": [
-              "\nThe services required by the Unified Histogram components"
-            ],
+            "description": ["\nThe services required by the Unified Histogram components"],
             "signature": [
               {
                 "pluginId": "unifiedHistogram",
@@ -1331,9 +1248,7 @@
             "description": [
               "\nThe prefix for the keys used in local storage -- leave undefined to avoid using local storage"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1344,9 +1259,7 @@
             "type": "Object",
             "tags": [],
             "label": "initialState",
-            "description": [
-              "\nThe initial state of the container"
-            ],
+            "description": ["\nThe initial state of the container"],
             "signature": [
               "Partial<",
               {
@@ -1371,9 +1284,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UnifiedHistogramVisContext",
-        "description": [
-          "\nUnified Histogram type for recreating a stored Lens vis"
-        ],
+        "description": ["\nUnified Histogram type for recreating a stored Lens vis"],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1449,9 +1360,7 @@
             "tags": [],
             "label": "requestData",
             "description": [],
-            "signature": [
-              "LensRequestData"
-            ],
+            "signature": ["LensRequestData"],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1463,9 +1372,7 @@
             "tags": [],
             "label": "suggestionType",
             "description": [],
-            "signature": [
-              "UnifiedHistogramSuggestionType"
-            ],
+            "signature": ["UnifiedHistogramSuggestionType"],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1493,9 +1400,7 @@
         "type": "Enum",
         "tags": [],
         "label": "UnifiedHistogramFetchStatus",
-        "description": [
-          "\nThe fetch status of a Unified Histogram request"
-        ],
+        "description": ["\nThe fetch status of a Unified Histogram request"],
         "path": "src/plugins/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1509,9 +1414,7 @@
         "type": "Type",
         "tags": [],
         "label": "UnifiedHistogramAdapters",
-        "description": [
-          "\nThe adapters passed up from Lens"
-        ],
+        "description": ["\nThe adapters passed up from Lens"],
         "signature": [
           "{ requests?: ",
           {
@@ -1550,9 +1453,7 @@
         "type": "Type",
         "tags": [],
         "label": "UnifiedHistogramApi",
-        "description": [
-          "\nThe API exposed by the container"
-        ],
+        "description": ["\nThe API exposed by the container"],
         "signature": [
           "{ refetch: () => void; } & Pick<",
           "UnifiedHistogramStateService",
@@ -1569,9 +1470,7 @@
         "type": "Type",
         "tags": [],
         "label": "UnifiedHistogramContainerProps",
-        "description": [
-          "\nThe props exposed by the container"
-        ],
+        "description": ["\nThe props exposed by the container"],
         "signature": [
           "{ getCreationOptions?: (() => ",
           {
@@ -1628,9 +1527,7 @@
         "type": "Type",
         "tags": [],
         "label": "UnifiedHistogramCreationOptions",
-        "description": [
-          "\nThe options used to initialize the container"
-        ],
+        "description": ["\nThe options used to initialize the container"],
         "signature": [
           "Omit<",
           {

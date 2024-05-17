@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { useResizeObserver } from '@elastic/eui';
+import { throttle } from 'lodash';
 import React, {
   useRef,
   useEffect,
@@ -15,8 +17,6 @@ import React, {
   useMemo,
   CSSProperties,
 } from 'react';
-import { throttle } from 'lodash';
-import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 
 interface AutoScaleParams {

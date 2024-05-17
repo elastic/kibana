@@ -11,7 +11,7 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
 import {
@@ -20,11 +20,11 @@ import {
 } from '../../constants';
 import {
   ADD_SOURCE_PATH,
-  SOURCE_DETAILS_PATH,
   PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
-  getSourcesPath,
+  SOURCE_DETAILS_PATH,
   getAddPath,
+  getSourcesPath,
 } from '../../routes';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';

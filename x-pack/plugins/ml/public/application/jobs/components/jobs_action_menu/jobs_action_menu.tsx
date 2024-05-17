@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 
 export const JobsActionMenu: FC = () => {
   const navigateToPath = useNavigateToPath();

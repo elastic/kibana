@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { ServerError } from '@kbn/cases-plugin/public/types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { UserProfile } from '@kbn/security-plugin/common';
-import type { ServerError } from '@kbn/cases-plugin/public/types';
-import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { ActionType } from '@kbn/actions-plugin/common';
+import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import * as i18n from '../translations';
 
 /**

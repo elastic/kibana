@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
-import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
-import { APMSection } from './apm_section';
-import { response } from './mock_data/apm.mock';
+import { AppMountParameters } from '@kbn/core/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React from 'react';
+import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../../hooks/use_plugin_context';
-import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
-import { AppMountParameters } from '@kbn/core/public';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { data as dataMock, render } from '../../../../../utils/test_helper';
+import { APMSection } from './apm_section';
+import { response } from './mock_data/apm.mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

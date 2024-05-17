@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { PackageInstallContext } from '../../../../common/types';
 import type { EsAssetReference, Installation, RegistryDataStream } from '../../../types';
@@ -20,8 +20,8 @@ import type { EsAssetReference, Installation, RegistryDataStream } from '../../.
 import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 
-import { withPackageSpan } from './utils';
 import { optimisticallyAddEsAssetReferences, updateEsAssetReferences } from './es_assets_reference';
+import { withPackageSpan } from './utils';
 
 export async function installIndexTemplatesAndPipelines({
   installedPkg,

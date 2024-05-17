@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ScopedHistory } from '@kbn/core/public';
-import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
+import { i18n } from '@kbn/i18n';
 import { APP_NAME } from '../../../../common/constants';
+import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 
 export const unsavedChangesWarning = i18n.translate(
   'xpack.maps.breadCrumbs.unsavedChangesWarning',

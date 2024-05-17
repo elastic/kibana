@@ -93,7 +93,7 @@ describe('dynamic', () => {
         ExpectTrue<MatchesProperty<LazyTestComponentProps, 'customProp'>>,
         ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'children'>>,
         ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'ref'>>,
-        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'customProp'>>
+        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'customProp'>>,
       ];
     });
   });

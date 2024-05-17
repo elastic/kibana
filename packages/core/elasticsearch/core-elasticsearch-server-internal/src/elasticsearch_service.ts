@@ -6,27 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { Observable, Subject, firstValueFrom } from 'rxjs';
 import { map, takeUntil } from 'rxjs';
 
-import type { Logger } from '@kbn/logging';
-import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 import type {
-  InternalExecutionContextSetup,
+  ElasticsearchCapabilities,
+  ElasticsearchClientConfig,
+  UnauthorizedErrorHandler,
+} from '@kbn/core-elasticsearch-server';
+import type {
   IExecutionContext,
+  InternalExecutionContextSetup,
 } from '@kbn/core-execution-context-server-internal';
 import type { IAuthHeadersStorage } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type {
-  UnauthorizedErrorHandler,
-  ElasticsearchClientConfig,
-  ElasticsearchCapabilities,
-} from '@kbn/core-elasticsearch-server';
-import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import type { Logger } from '@kbn/logging';
 
-import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
+import { getElasticsearchCapabilities } from './get_capabilities';
+import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
+import { isInlineScriptingEnabled } from './is_scripting_enabled';
+import { isValidConnection } from './is_valid_connection';
+import { mergeConfig } from './merge_config';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
+import { calculateStatus$ } from './status';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
@@ -34,12 +40,6 @@ import {
 } from './types';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
-import { calculateStatus$ } from './status';
-import { isValidConnection } from './is_valid_connection';
-import { isInlineScriptingEnabled } from './is_scripting_enabled';
-import { mergeConfig } from './merge_config';
-import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
-import { getElasticsearchCapabilities } from './get_capabilities';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;

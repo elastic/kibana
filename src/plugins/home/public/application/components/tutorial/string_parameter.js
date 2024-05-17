@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import React from 'react';
 
 export function StringParameter({ id, label, value, setParameter }) {
   const handleChange = (evt) => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Rule } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';

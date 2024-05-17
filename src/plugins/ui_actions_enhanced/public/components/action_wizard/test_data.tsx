@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
-  Trigger,
   UiActionsActionDefinition as ActionDefinition,
+  Trigger,
 } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import React, { useState } from 'react';
 import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { ActionWizard } from './action_wizard';
 
@@ -169,7 +169,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   isCompatible(context?: object): Promise<boolean> {
     return Promise.resolve(true);
   },
-  create: () => ({} as ActionDefinition),
+  create: () => ({}) as ActionDefinition,
   supportedTriggers(): string[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   },

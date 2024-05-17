@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
-import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import type { FC } from 'react';
+import React from 'react';
 import { useServices } from '../services';
 import { NoUsersTip } from './user_missing_tip';
 
@@ -65,10 +65,13 @@ export const UserFilterPanel: FC<{}> = () => {
 
   const usersMap = React.useMemo(() => {
     if (!query.data) return {};
-    return query.data.reduce((acc, user) => {
-      acc[user.uid] = user;
-      return acc;
-    }, {} as Record<string, UserProfile>);
+    return query.data.reduce(
+      (acc, user) => {
+        acc[user.uid] = user;
+        return acc;
+      },
+      {} as Record<string, UserProfile>
+    );
   }, [query.data]);
 
   const visibleOptions = React.useMemo(() => {

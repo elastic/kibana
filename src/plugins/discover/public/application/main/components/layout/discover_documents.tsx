@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -14,60 +6,68 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
-import {
-  DataLoadingState,
-  useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
-  getRenderCustomToolbarWithElements,
-} from '@kbn/unified-data-table';
+import { DataView } from '@kbn/data-views-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   HIDE_ANNOUNCEMENTS,
-  isLegacyTableEnabled,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import useObservable from 'react-use/lib/useObservable';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
+import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
+import {
+  DataLoadingState,
+  type DataTableColumnsMeta,
+  getRenderCustomToolbarWithElements,
+  getTextBasedColumnsMeta,
+  useColumns,
+} from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DiscoverGrid } from '../../../../components/discover_grid';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import React, { memo, useCallback, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { FetchStatus } from '../../../types';
-import { RecordRawType } from '../../state_management/discover_data_state_container';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { useDataState } from '../../hooks/use_data_state';
-import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { DocumentExplorerCallout } from '../document_explorer_callout';
-import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
+import { DiscoverGrid } from '../../../../components/discover_grid';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import {
   DISCOVER_TOUR_STEP_ANCHOR_IDS,
   DiscoverTourProvider,
 } from '../../../../components/discover_tour';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
-import {
-  getMaxAllowedSampleSize,
-  getAllowedSampleSize,
-} from '../../../../utils/get_allowed_sample_size';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
-import { useFetchMoreRecords } from './use_fetch_more_records';
-import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
+import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import {
+  getAllowedSampleSize,
+  getMaxAllowedSampleSize,
+} from '../../../../utils/get_allowed_sample_size';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { FetchStatus } from '../../../types';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
+import { useDataState } from '../../hooks/use_data_state';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { RecordRawType } from '../../state_management/discover_data_state_container';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { DocumentExplorerCallout } from '../document_explorer_callout';
+import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
+import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 
 const containerStyles = css`
   position: relative;
@@ -394,8 +394,8 @@ function DiscoverDocumentsComponent({
                     isDataLoading
                       ? DataLoadingState.loading
                       : isMoreDataLoading
-                      ? DataLoadingState.loadingMore
-                      : DataLoadingState.loaded
+                        ? DataLoadingState.loadingMore
+                        : DataLoadingState.loaded
                   }
                   rows={rows}
                   sort={(sort as SortOrder[]) || []}

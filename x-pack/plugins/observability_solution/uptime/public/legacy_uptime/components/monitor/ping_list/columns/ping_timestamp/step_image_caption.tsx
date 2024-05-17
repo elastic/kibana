@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -14,6 +13,7 @@ import {
   useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
+import React, { MouseEvent, useEffect } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';

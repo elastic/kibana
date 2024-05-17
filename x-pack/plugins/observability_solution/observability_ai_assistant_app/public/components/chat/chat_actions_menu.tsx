@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -15,11 +13,13 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
+import React, { useState } from 'react';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { getSettingsHref } from '../../utils/get_settings_href';
 import { getSettingsKnowledgeBaseHref } from '../../utils/get_settings_kb_href';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 export function ChatActionsMenu({
   connectors,

@@ -112,9 +112,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
             "deprecated": false,
             "trackAdoption": false,

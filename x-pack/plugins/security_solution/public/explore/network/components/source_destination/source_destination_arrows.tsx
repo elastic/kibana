@@ -10,6 +10,8 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 import styled from 'styled-components';
 
+import { DefaultDraggable } from '../../../../common/components/draggables';
+import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 import { ArrowBody, ArrowHead } from '../arrows';
 import {
   DEFAULT_ARROW_HEIGHT,
@@ -17,8 +19,6 @@ import {
   getPercent,
   hasOneValue,
 } from '../arrows/helpers';
-import { DefaultDraggable } from '../../../../common/components/draggables';
-import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 import * as i18n from './translations';
 

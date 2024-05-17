@@ -8,25 +8,25 @@
 
 import * as t from 'io-ts';
 
-import { namespace_type } from '../../common/namespace_type';
-import { metaOrUndefined } from '../../common/meta';
-import { name } from '../../common/name';
+import { commentsArray } from '../../common/comment';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
-import { id } from '../../common/id';
-import { tie_breaker_id } from '../../common/tie_breaker_id';
-import { updated_at } from '../../common/updated_at';
-import { updated_by } from '../../common/updated_by';
-import { list_id } from '../../common/list_id';
 import { description } from '../../common/description';
-import { osTypeArray } from '../../common/os_type';
-import { tags } from '../../common/tags';
-import { _versionOrUndefined } from '../../common/underscore_version';
-import { commentsArray } from '../../common/comment';
 import { entriesArray } from '../../common/entries';
-import { item_id } from '../../common/item_id';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { expireTimeOrUndefined } from '../../common/expire_time';
+import { id } from '../../common/id';
+import { item_id } from '../../common/item_id';
+import { list_id } from '../../common/list_id';
+import { metaOrUndefined } from '../../common/meta';
+import { name } from '../../common/name';
+import { namespace_type } from '../../common/namespace_type';
+import { osTypeArray } from '../../common/os_type';
+import { tags } from '../../common/tags';
+import { tie_breaker_id } from '../../common/tie_breaker_id';
+import { _versionOrUndefined } from '../../common/underscore_version';
+import { updated_at } from '../../common/updated_at';
+import { updated_by } from '../../common/updated_by';
 
 export const exceptionListItemSchema = t.exact(
   t.type({

@@ -7,9 +7,9 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { createEsoMigration, pipeMigrations } from '../utils';
-import { RawRule, RuleLastRunOutcomeValues } from '../../../types';
 import { getDefaultMonitoring } from '../../../lib/monitoring';
+import { RawRule, RuleLastRunOutcomeValues } from '../../../types';
+import { createEsoMigration, pipeMigrations } from '../utils';
 
 const succeededStatus = ['ok', 'active', 'succeeded'];
 const warningStatus = ['warning'];

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { safeLoad } from 'js-yaml';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { safeLoad } from 'js-yaml';
 import { uniqBy } from 'lodash';
 
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
@@ -22,31 +22,31 @@ import {
   USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../../../common/constants';
 import {
-  buildComponentTemplates,
-  installComponentAndIndexTemplateForDataStream,
-} from '../template/install';
-import { isFields } from '../../fields/field';
-import { getESAssetMetadata } from '../meta';
-import { updateEsAssetReferences } from '../../packages/es_assets_reference';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import {
   ElasticsearchAssetType,
   type PackageInstallContext,
 } from '../../../../../common/types/models';
 import type {
-  EsAssetReference,
-  InstallablePackage,
   ESAssetMetadata,
+  EsAssetReference,
   IndexTemplate,
+  InstallablePackage,
   RegistryElasticsearch,
 } from '../../../../../common/types/models';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import { isFields } from '../../fields/field';
 import { getInstallation } from '../../packages';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import {
+  buildComponentTemplates,
+  installComponentAndIndexTemplateForDataStream,
+} from '../template/install';
 import { isUserSettingsTemplate } from '../template/utils';
 
+import { loadMappingForTransform } from './mappings';
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
-import { loadMappingForTransform } from './mappings';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {

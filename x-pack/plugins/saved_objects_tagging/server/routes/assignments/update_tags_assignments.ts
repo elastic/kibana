@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { TagsPluginRouter } from '../../types';
 import { AssignmentError } from '../../services';
+import type { TagsPluginRouter } from '../../types';
 
 export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => {
   const objectReferenceSchema = schema.object({

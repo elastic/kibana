@@ -96,12 +96,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "kind",
-            "description": [
-              "\nThe file kind that was passed to the registry."
-            ],
-            "signature": [
-              "Kind"
-            ],
+            "description": ["\nThe file kind that was passed to the registry."],
+            "signature": ["Kind"],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -161,12 +157,8 @@
             "type": "Function",
             "tags": [],
             "label": "onClose",
-            "description": [
-              "\nWill be called when the modal is closed"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nWill be called when the modal is closed"],
+            "signature": ["() => void"],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -179,9 +171,7 @@
             "type": "Function",
             "tags": [],
             "label": "onDone",
-            "description": [
-              "\nWill be called after a user has a selected a set of files"
-            ],
+            "description": ["\nWill be called after a user has a selected a set of files"],
             "signature": [
               "(files: ",
               {
@@ -277,12 +267,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "uploadMeta",
-            "description": [
-              "\n`meta` value to be used for file uploads"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["\n`meta` value to be used for file uploads"],
+            "signature": ["unknown"],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -293,12 +279,8 @@
             "type": "number",
             "tags": [],
             "label": "pageSize",
-            "description": [
-              "\nThe number of results to show per page."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nThe number of results to show per page."],
+            "signature": ["number | undefined"],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -307,16 +289,10 @@
             "parentPluginId": "@kbn/shared-ux-file-picker",
             "id": "def-common.Props.multiple",
             "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
+            "tags": ["default"],
             "label": "multiple",
-            "description": [
-              "\nWhether you can select one or more files\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nWhether you can select one or more files\n"],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false

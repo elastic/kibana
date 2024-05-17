@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { filter, isEmpty, map, omit, reduce } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiAccordion,
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSpacer,
-  EuiBottomBar,
   EuiHorizontalRule,
-  EuiAccordion,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
+import { filter, isEmpty, map, omit, reduce } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import { PackShardsField } from './shards/pack_shards_field';
-import { useRouterNavigate } from '../../common/lib/kibana';
-import { PolicyIdComboBoxField } from './policy_id_combobox_field';
-import { QueriesField } from './queries_field';
-import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
+import { useRouterNavigate } from '../../common/lib/kibana';
+import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import type { PackItem } from '../types';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
-import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
-import type { PackItem } from '../types';
-import { NameField } from './name_field';
-import { DescriptionField } from './description_field';
-import type { PackQueryFormData } from '../queries/use_pack_query_form';
-import { PackTypeSelectable } from './shards/pack_type_selectable';
 import { overflowCss } from '../utils';
+import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
+import { DescriptionField } from './description_field';
+import { NameField } from './name_field';
+import { PolicyIdComboBoxField } from './policy_id_combobox_field';
+import { QueriesField } from './queries_field';
+import { PackShardsField } from './shards/pack_shards_field';
+import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
@@ -68,7 +68,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const {
+    data: { agentPoliciesById } = {},
+  } = useAgentPolicies();
 
   const cancelButtonProps = useRouterNavigate(`packs/${editMode ? defaultValue?.id : ''}`);
 

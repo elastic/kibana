@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment';
+import React from 'react';
 
 import type { NetworkTlsNode } from '../../../../../common/search_strategy';
-import type { Columns } from '../../../components/paginated_table';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
-import { LocalizedDateTooltip } from '../../../../common/components/localized_date_tooltip';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { LocalizedDateTooltip } from '../../../../common/components/localized_date_tooltip';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import type { Columns } from '../../../components/paginated_table';
 
 import * as i18n from './translations';
 
@@ -21,7 +21,7 @@ export type TlsColumns = [
   Columns<NetworkTlsNode>,
   Columns<NetworkTlsNode['_id']>,
   Columns<NetworkTlsNode>,
-  Columns<NetworkTlsNode>
+  Columns<NetworkTlsNode>,
 ];
 
 export const getTlsColumns = (tableId: string): TlsColumns => [

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEffect, useRef, useState } from 'react';
 import { isDataView } from '../../../../common/types/data_view';
 import { useAppDependencies } from '../../app_dependencies';
 import type { SearchItems } from './common';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Route, Routes, Router } from '@kbn/shared-ux-router';
 
 import { UIM_APP_LOAD } from './constants';
-import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
-import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
+import { RemoteClusterAdd, RemoteClusterEdit, RemoteClusterList } from './sections';
+import { METRIC_TYPE, registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
 
 class AppComponent extends Component {
   static propTypes = {

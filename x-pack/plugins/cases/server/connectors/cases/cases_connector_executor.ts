@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
-import pMap from 'p-map';
-import { get, partition, pick } from 'lodash';
-import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
+import dateMath from '@kbn/datemath';
 import { getFlattenedObject } from '@kbn/std';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import stringify from 'json-stable-stringify';
+import { get, partition, pick } from 'lodash';
+import pMap from 'p-map';
+import type { Case } from '../../../common';
+import { AttachmentType, ConnectorTypes } from '../../../common';
 import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
@@ -21,31 +22,30 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
-import type { Case } from '../../../common';
-import { ConnectorTypes, AttachmentType } from '../../../common';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CasesClient } from '../../client';
+import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
+import { CasesConnectorError } from './cases_connector_error';
+import type { CasesOracleService } from './cases_oracle_service';
+import type { CasesService } from './cases_service';
 import {
   INITIAL_ORACLE_RECORD_COUNTER,
   MAX_CONCURRENT_ES_REQUEST,
   MAX_OPEN_CASES,
 } from './constants';
-import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
-import type { CasesOracleService } from './cases_oracle_service';
-import {
-  convertValueToString,
-  partitionByNonFoundErrors,
-  partitionRecordsByError,
-  buildRequiredCustomFieldsForRequest,
-} from './utils';
-import type { CasesService } from './cases_service';
-import type { CasesClient } from '../../client';
-import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
-import { CasesConnectorError } from './cases_connector_error';
 import {
   AUTO_CREATED_TITLE,
   CASE_CREATED_BY_RULE_DESC,
   GROUPED_BY_DESC,
   GROUPED_BY_TITLE,
 } from './translations';
+import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
+import {
+  buildRequiredCustomFieldsForRequest,
+  convertValueToString,
+  partitionByNonFoundErrors,
+  partitionRecordsByError,
+} from './utils';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -224,11 +224,14 @@ export class CasesConnectorExecutor {
   }
 
   private generateNoGroupAlertGrouping = (groupingBy: string[]) => {
-    const noGroupedGrouping = groupingBy.reduce((acc, field) => {
-      acc[field] = 'unknown';
+    const noGroupedGrouping = groupingBy.reduce(
+      (acc, field) => {
+        acc[field] = 'unknown';
 
-      return acc;
-    }, {} as Record<string, string>);
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
     return noGroupedGrouping;
   };

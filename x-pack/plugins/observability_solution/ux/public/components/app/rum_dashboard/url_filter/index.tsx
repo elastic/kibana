@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import { omit } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { omit } from 'lodash';
-import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
-import { URLSearch } from './url_search';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
+import { URLSearch } from './url_search';
 
 export function URLFilter() {
   const history = useHistory();

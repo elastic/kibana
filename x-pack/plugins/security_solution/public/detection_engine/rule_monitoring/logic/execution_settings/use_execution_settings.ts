@@ -10,12 +10,12 @@ import { useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 
+import type { RuleExecutionSettings } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { LogLevelSetting } from '../../../../../common/api/detection_engine/rule_monitoring';
 import {
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
 } from '../../../../../common/constants';
-import type { RuleExecutionSettings } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { LogLevelSetting } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const useRuleExecutionSettings = (): RuleExecutionSettings => {
   const featureFlagEnabled = useIsExperimentalFeatureEnabled('extendedRuleExecutionLoggingEnabled');

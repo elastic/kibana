@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { estypes } from '@elastic/elasticsearch';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { memoize, once } from 'lodash';
 import {
   BehaviorSubject,
   EMPTY,
+  Observable,
+  Subscription,
   from,
   fromEvent,
-  Observable,
   of,
-  Subscription,
   throwError,
 } from 'rxjs';
 import {
@@ -30,11 +34,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
 
 import type {
   AnalyticsServiceStart,
@@ -48,34 +48,34 @@ import type {
   ToastsSetup,
 } from '@kbn/core/public';
 
-import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
+import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
+import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type {
-  SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
   ISearchOptionsSerializable,
+  SanitizedConnectionRequestParams,
 } from '@kbn/search-types';
-import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
+  UI_SETTINGS,
   isRunningResponse,
   pollSearch,
-  UI_SETTINGS,
 } from '../../../common';
-import { SearchUsageCollector } from '../collectors';
-import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
-import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
-import { toPartialResponseAfterTimeout } from './to_partial_response';
-import { ISessionService, SearchSessionState } from '../session';
-import { SearchResponseCache } from './search_response_cache';
-import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
+import { SearchUsageCollector } from '../collectors';
 import type { SearchServiceStartDependencies } from '../search_service';
+import { ISessionService, SearchSessionState } from '../session';
 import { createRequestHash } from './create_request_hash';
+import { SearchAbortController } from './search_abort_controller';
+import { SearchResponseCache } from './search_response_cache';
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
+import { toPartialResponseAfterTimeout } from './to_partial_response';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;

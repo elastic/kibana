@@ -8,9 +8,9 @@
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import type {
-  ResultsStrategyResponse,
-  ResultsRequestOptions,
   OsqueryQueries,
+  ResultsRequestOptions,
+  ResultsStrategyResponse,
 } from '../../../../../common/search_strategy/osquery';
 import { inspectStringifyObject } from '../../../../../common/utils/build_query';
 import type { OsqueryFactory } from '../types';

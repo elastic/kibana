@@ -9,9 +9,9 @@ import { shallow } from 'enzyme';
 
 import React from 'react';
 
-import { ModalAllErrors } from './modal_all_errors';
-import type { AppToast } from '.';
 import { cloneDeep } from 'lodash/fp';
+import type { AppToast } from '.';
+import { ModalAllErrors } from './modal_all_errors';
 
 const mockToast: AppToast = {
   color: 'danger',

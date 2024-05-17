@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
+import { CellActionsMode, SecurityCellActions, SecurityCellActionsTrigger } from '../cell_actions';
 
 interface Props {
   entityName: string;

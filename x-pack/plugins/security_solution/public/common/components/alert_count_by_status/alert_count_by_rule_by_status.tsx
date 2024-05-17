@@ -11,9 +11,9 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import {

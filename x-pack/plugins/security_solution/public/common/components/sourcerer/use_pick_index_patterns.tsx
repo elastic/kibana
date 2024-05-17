@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
-import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import { useKibana } from '../../lib/kibana';
 import { getSourcererDataView } from '../../containers/sourcerer/get_sourcerer_data_view';
+import { useKibana } from '../../lib/kibana';
+import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 
 interface UsePickIndexPatternsProps {
   dataViewId: string | null;

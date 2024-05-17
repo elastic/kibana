@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { ClientPluginsStart } from '../../../../../../plugin';
+import { useGetUrlParams, useRefreshedRange } from '../../../../hooks';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
-import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
-import { ClientPluginsStart } from '../../../../../../plugin';
 
 export const useMonitorQueryIds = () => {
   const { status } = useSelector(selectOverviewStatus);

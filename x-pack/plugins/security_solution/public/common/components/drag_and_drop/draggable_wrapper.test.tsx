@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { DraggableStateSnapshot, DraggingStyle } from '@hello-pangea/dnd';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import type { DraggableStateSnapshot, DraggingStyle } from '@hello-pangea/dnd';
 
+import { TableId } from '@kbn/securitysolution-data-table';
+import { TimelineId } from '../../../../common/types';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
+import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
-import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import {
   ConditionalPortal,
-  disableHoverActions,
   DraggableWrapper,
+  disableHoverActions,
   getStyle,
 } from './draggable_wrapper';
-import { useMountAppended } from '../../utils/use_mount_appended';
-import { TimelineId } from '../../../../common/types';
-import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../lib/kibana');
 

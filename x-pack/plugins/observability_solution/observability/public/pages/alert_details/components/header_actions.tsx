@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,17 +15,22 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
+import { i18n } from '@kbn/i18n';
 import {
-  AlertStatus,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  AlertStatus,
 } from '@kbn/rule-data-utils';
+import { noop } from 'lodash';
+import React, { useCallback, useState } from 'react';
 
-import { useKibana } from '../../../utils/kibana_react';
+import { paths } from '../../../../common/locators/paths';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
-import { paths } from '../../../../common/locators/paths';
+import { useKibana } from '../../../utils/kibana_react';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 export interface HeaderActionsProps {

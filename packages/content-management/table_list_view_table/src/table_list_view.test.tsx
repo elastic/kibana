@@ -7,20 +7,20 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import React, { useEffect } from 'react';
-import queryString from 'query-string';
-import moment, { Moment } from 'moment';
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
-import type { LocationDescriptor, History } from 'history';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
+import type { ReactWrapper } from 'enzyme';
+import type { History, LocationDescriptor } from 'history';
+import moment, { Moment } from 'moment';
+import queryString from 'query-string';
+import React, { useEffect } from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
-import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
+import { getActions } from './table_list_view.test.helpers';
+import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 
 const mockUseEffect = useEffect;
 

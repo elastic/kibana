@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest } from 'rxjs';
-import { startWith, map } from 'rxjs';
-import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
-import type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';
 import type { KibanaMigratorStatus } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { Observable, combineLatest } from 'rxjs';
+import { map, startWith } from 'rxjs';
 
 export const calculateStatus$ = (
   rawMigratorStatus$: Observable<KibanaMigratorStatus>,

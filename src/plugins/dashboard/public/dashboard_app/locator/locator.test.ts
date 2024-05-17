@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DashboardAppLocatorDefinition } from './locator';
-import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
-import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
+import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { mockControlGroupInput } from '@kbn/controls-plugin/common/mocks';
 import { FilterStateStore } from '@kbn/es-query';
-import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
+import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
+import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
+import { DashboardAppLocatorDefinition } from './locator';
 
 describe('dashboard locator', () => {
   beforeEach(() => {
@@ -280,8 +280,8 @@ describe('dashboard locator', () => {
           return dashboardId === 'dashboard1'
             ? [savedFilter1]
             : dashboardId === 'dashboard2'
-            ? [savedFilter2]
-            : [];
+              ? [savedFilter2]
+              : [];
         },
       });
 

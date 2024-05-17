@@ -9,11 +9,11 @@
 import * as t from 'io-ts';
 
 import { NamespaceType } from '../../common/default_namespace';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { Filter, filter } from '../../common/filter';
 import { id } from '../../common/id';
-import { filter, Filter } from '../../common/filter';
 import { list_id } from '../../common/list_id';
 import { namespace_type } from '../../common/namespace_type';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const summaryExceptionListSchema = t.exact(
   t.partial({

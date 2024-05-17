@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getThemeStylesheetPaths, getCommonStylesheetPaths, getScriptPaths } from './render_utils';
+import { getCommonStylesheetPaths, getScriptPaths, getThemeStylesheetPaths } from './render_utils';
 
 describe('getScriptPaths', () => {
   it('returns the correct list when darkMode is `system`', () => {

@@ -6,11 +6,11 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../../common/mock';
-import { useNetworkUsers, ID } from '.';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { networkModel } from '../../store';
+import { ID, useNetworkUsers } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { TestProviders } from '../../../../common/mock';
+import { networkModel } from '../../store';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),

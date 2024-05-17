@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfile } from '@kbn/security-plugin/common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useKibana } from '../../lib/kibana';
 import { USER_PROFILES_FAILURE } from './translations';
 
 export interface BulkGetUserProfilesArgs {

@@ -7,13 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { DeepPartial } from 'utility-types';
 import { merge, set } from 'lodash';
 import { gte } from 'semver';
+import type { DeepPartial } from 'utility-types';
 import type { EndpointCapabilities } from '../service/response_actions/constants';
-import { BaseDataGenerator } from './base_data_generator';
-import type { HostMetadataInterface, OSFields, HostInfoInterface } from '../types';
+import type { HostInfoInterface, HostMetadataInterface, OSFields } from '../types';
 import { EndpointStatus, HostPolicyResponseActionStatus, HostStatus } from '../types';
+import { BaseDataGenerator } from './base_data_generator';
 
 export interface GetCustomEndpointMetadataGeneratorOptions {
   /** Version for agent/endpoint. Defaults to the stack version */

@@ -1,3 +1,7 @@
+import { browser } from './browser';
+import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
+import { mobileApp } from './mobile_app';
+import { serverlessFunction } from './serverless_function';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +10,6 @@
  * Side Public License, v 1.
  */
 import { service } from './service';
-import { mobileApp } from './mobile_app';
-import { browser } from './browser';
-import { serverlessFunction } from './serverless_function';
-import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
 
 import type { ApmException } from './apm_fields';
 

@@ -11,8 +11,8 @@ import { Provider } from 'react-redux';
 
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
 import { App } from './app';
-import { remoteClustersStore } from './store';
 import { AppContextProvider } from './app_context';
+import { remoteClustersStore } from './store';
 
 import './_hacks.scss';
 

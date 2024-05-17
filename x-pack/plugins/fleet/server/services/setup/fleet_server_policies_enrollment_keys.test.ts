@@ -8,9 +8,9 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
+import { appContextService } from '../app_context';
 
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './fleet_server_policies_enrollment_keys';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { registerNavigation } from './alert_types';
 import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
-import { registerNavigation } from './alert_types';
 
 export type Setup = void;
 export type Start = void;

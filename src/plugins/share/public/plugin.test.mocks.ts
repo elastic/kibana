@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shareMenuRegistryMock } from './services/share_menu_registry.mock';
 import { shareMenuManagerMock } from './services/share_menu_manager.mock';
+import { shareMenuRegistryMock } from './services/share_menu_registry.mock';
 
 export const registryMock = shareMenuRegistryMock.create();
 export const managerMock = shareMenuManagerMock.create();

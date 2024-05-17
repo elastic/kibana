@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
-import React, { FC, PropsWithChildren } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import moment from 'moment/moment';
+import React, { FC, PropsWithChildren } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { KibanaContext } from '../hooks/use_kibana';
-import { SecuritySolutionPluginContext } from '../types';
-import { getSecuritySolutionContextMock } from './mock_security_context';
-import { mockUiSetting } from './mock_kibana_ui_settings_service';
-import { SecuritySolutionContext } from '../containers/security_solution_context';
-import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
-import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
+import { BehaviorSubject } from 'rxjs';
 import { FieldTypesContext } from '../containers/field_types_provider';
-import { generateFieldTypeMap } from './mock_field_type_map';
 import { InspectorContext } from '../containers/inspector';
+import { SecuritySolutionContext } from '../containers/security_solution_context';
+import { KibanaContext } from '../hooks/use_kibana';
+import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
+import { SecuritySolutionPluginContext } from '../types';
+import { generateFieldTypeMap } from './mock_field_type_map';
+import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
+import { mockUiSetting } from './mock_kibana_ui_settings_service';
+import { getSecuritySolutionContextMock } from './mock_security_context';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import styled from 'styled-components';
 import type { EuiIconProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
+import React from 'react';
+import styled from 'styled-components';
 
 import type { UsePackageIconType } from '../hooks';
 import { usePackageIconType } from '../hooks';
@@ -22,13 +22,12 @@ const Icon = styled(EuiIcon)`
   margin-block-end: unset !important;
 `;
 
-export const PackageIcon: React.FunctionComponent<
-  UsePackageIconType & Omit<EuiIconProps, 'type'>
-> = ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
-  const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
-  // @ts-expect-error loading="lazy" is not supported by EuiIcon
-  return <Icon size="s" type={iconType} {...euiIconProps} loading="lazy" />;
-};
+export const PackageIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> =
+  ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
+    const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
+    // @ts-expect-error loading="lazy" is not supported by EuiIcon
+    return <Icon size="s" type={iconType} {...euiIconProps} loading="lazy" />;
+  };
 
 export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
   props

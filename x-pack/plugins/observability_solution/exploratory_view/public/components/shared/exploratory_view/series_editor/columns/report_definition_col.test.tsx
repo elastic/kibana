@@ -8,6 +8,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import {
   mockAppDataView,
   mockDataView,
@@ -16,7 +17,6 @@ import {
   render,
 } from '../../rtl_helpers';
 import { ReportDefinitionCol } from './report_definition_col';
-import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('Series Builder ReportDefinitionCol', function () {
   mockAppDataView();

@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type {
+  HttpResources,
+  HttpResourcesRenderOptions,
+  HttpResourcesRequestHandler,
+  HttpResourcesResponseOptions,
+  HttpResourcesServiceToolkit,
+} from '@kbn/core-http-resources-server';
 import type {
   IRouter,
-  RouteConfig,
   KibanaRequest,
   KibanaResponseFactory,
+  RouteConfig,
 } from '@kbn/core-http-server';
 import type {
-  InternalHttpServiceSetup,
   InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
 } from '@kbn/core-rendering-server-internal';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type {
-  HttpResources,
-  HttpResourcesResponseOptions,
-  HttpResourcesRenderOptions,
-  HttpResourcesRequestHandler,
-  HttpResourcesServiceToolkit,
-} from '@kbn/core-http-resources-server';
+import type { Logger } from '@kbn/logging';
 
 import type { InternalHttpResourcesSetup } from './types';
 

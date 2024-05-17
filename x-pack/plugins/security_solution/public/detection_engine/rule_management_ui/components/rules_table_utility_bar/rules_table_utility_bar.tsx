@@ -16,13 +16,13 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
-import type { PaginationOptions } from '../../../rule_management/logic/types';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import type { PaginationOptions } from '../../../rule_management/logic/types';
 import { AutoRefreshButton } from '../auto_refresh_button/auto_refresh_button';
+import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 
 export const getShowingRulesParams = ({ page, perPage, total: totalRules }: PaginationOptions) => {
   const firstInPage = totalRules === 0 ? 0 : (page - 1) * perPage + 1;

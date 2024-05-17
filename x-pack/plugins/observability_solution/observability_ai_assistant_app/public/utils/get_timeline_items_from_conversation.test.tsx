@@ -1,3 +1,8 @@
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ChatState, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { render } from '@testing-library/react';
+import { last, pick } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +10,8 @@
  * 2.0.
  */
 import React from 'react';
-import { last, pick } from 'lodash';
-import { render } from '@testing-library/react';
-import { getTimelineItemsfromConversation } from './get_timeline_items_from_conversation';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ChatState, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from './create_mock_chat_service';
-import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { getTimelineItemsfromConversation } from './get_timeline_items_from_conversation';
 
 const mockChatService = createMockChatService();
 

@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 import {
-  NetworkQueries,
-  NetworkTopNFlowEdges,
   Direction,
   FlowTargetSourceDest,
-  NetworkTopTablesFields,
+  NetworkQueries,
+  NetworkTopNFlowEdges,
   NetworkTopNFlowStrategyResponse,
+  NetworkTopTablesFields,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const EDGE_LENGTH = 10;
 

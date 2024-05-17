@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { Observable, Subject, of } from 'rxjs';
 import sinon from 'sinon';
-import { Observable, of, Subject } from 'rxjs';
 
-import { TaskPollingLifecycle, claimAvailableTasks, TaskLifecycleEvent } from './polling_lifecycle';
-import { createInitialMiddleware } from './lib/middleware';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { taskStoreMock } from './task_store.mock';
-import { mockLogger } from './test_utils';
-import { taskClaimingMock } from './queries/task_claiming.mock';
-import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
-import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming';
-import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { createInitialMiddleware } from './lib/middleware';
+import { Err, Result, asOk, isErr, isOk } from './lib/result_type';
+import { TaskLifecycleEvent, TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
+import { ClaimOwnershipResult, TaskClaiming } from './queries/task_claiming';
+import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming';
+import { taskClaimingMock } from './queries/task_claiming.mock';
+import { taskStoreMock } from './task_store.mock';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import { mockLogger } from './test_utils';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});

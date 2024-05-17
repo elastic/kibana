@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { FC, PropsWithChildren } from 'react';
 import { useSyntheticsServiceAllowed } from '../../../hooks/use_service_allowed';
 
 export const ServiceAllowedWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {

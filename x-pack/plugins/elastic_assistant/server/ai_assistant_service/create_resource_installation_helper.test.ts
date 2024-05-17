@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { range } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { range } from 'lodash';
 import {
-  createResourceInstallationHelper,
-  errorResult,
   InitializationPromise,
   ResourceInstallationHelper,
-  successResult,
   calculateDelay,
+  createResourceInstallationHelper,
+  errorResult,
   getShouldRetry,
+  successResult,
 } from './create_resource_installation_helper';
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
@@ -47,7 +47,7 @@ export const retryUntil = async (
 
 const delay = async (millis: number) => new Promise((resolve) => setTimeout(resolve, millis));
 
-const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
+const logger: ReturnType<(typeof loggingSystemMock)['createLogger']> =
   loggingSystemMock.createLogger();
 
 const getCommonInitPromise = async (

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { mockGetAppUrl, mockNavigateTo } from '../../mocks/navigation';
 import { SecurityPageName } from '../constants';
-import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
-import { LandingLinksIcons } from './landing_links_icons';
 import { BETA } from './beta_badge';
+import { LandingLinksIcons } from './landing_links_icons';
 
 jest.mock('../navigation');
 

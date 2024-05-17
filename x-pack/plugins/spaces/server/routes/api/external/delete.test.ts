@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidatorConfig } from '@kbn/core/server';
-import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
@@ -17,7 +17,6 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
-import { initDeleteSpacesApi } from './delete';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -28,6 +27,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
+import { initDeleteSpacesApi } from './delete';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();

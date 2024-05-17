@@ -9,13 +9,13 @@ import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
 import { ACTION_TYPES } from '../../../../common/constants';
 import { EmailAction } from './email_action';
-import { LoggingAction } from './logging_action';
-import { SlackAction } from './slack_action';
-import { WebhookAction } from './webhook_action';
 import { IndexAction } from './index_action';
-import { PagerDutyAction } from './pagerduty_action';
 import { JiraAction } from './jira_action';
+import { LoggingAction } from './logging_action';
+import { PagerDutyAction } from './pagerduty_action';
+import { SlackAction } from './slack_action';
 import { UnknownAction } from './unknown_action';
+import { WebhookAction } from './webhook_action';
 
 const ActionTypes = {};
 set(ActionTypes, ACTION_TYPES.EMAIL, EmailAction);

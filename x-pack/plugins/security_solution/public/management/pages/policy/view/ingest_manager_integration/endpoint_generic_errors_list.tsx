@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { PackageGenericErrorsListProps } from '@kbn/fleet-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import type { PackageGenericErrorsListProps } from '@kbn/fleet-plugin/public';
+import React, { memo, useMemo } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { PackageActionFormatter } from '../../../../components/package_action_item/package_action_formatter';

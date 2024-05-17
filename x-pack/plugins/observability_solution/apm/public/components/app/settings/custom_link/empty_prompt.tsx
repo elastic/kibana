@@ -7,10 +7,10 @@
 
 import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateCustomLinkButton } from './create_custom_link_button';
+import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { CreateCustomLinkButton } from './create_custom_link_button';
 
 export function EmptyPrompt({ onCreateCustomLinkClick }: { onCreateCustomLinkClick: () => void }) {
   const { docLinks } = useApmPluginContext().core;

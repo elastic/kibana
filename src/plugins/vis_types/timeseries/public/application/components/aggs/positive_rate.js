@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import { AggSelect } from './agg_select';
-import { FieldSelect } from './field_select';
-import { AggRow } from './agg_row';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
 import {
-  htmlIdGenerator,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiComboBox,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
 
 const UNIT_OPTIONS = [
   {

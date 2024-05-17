@@ -7,13 +7,13 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { LogRateAnalysisPageProvider } from './log_rate_analysis_page';
-import { LogRateAnalysisResultsTableProvider } from './log_rate_analysis_results_table';
-import { LogRateAnalysisResultsGroupsTableProvider } from './log_rate_analysis_results_groups_table';
-import { LogRateAnalysisDataGeneratorProvider } from './log_rate_analysis_data_generator';
-import { LogPatternAnalysisPageProvider } from './log_pattern_analysis_page';
-import { ChangePointDetectionPageProvider } from './change_point_detection_page';
 import { MlTableServiceProvider } from '../ml/common_table_service';
+import { ChangePointDetectionPageProvider } from './change_point_detection_page';
+import { LogPatternAnalysisPageProvider } from './log_pattern_analysis_page';
+import { LogRateAnalysisDataGeneratorProvider } from './log_rate_analysis_data_generator';
+import { LogRateAnalysisPageProvider } from './log_rate_analysis_page';
+import { LogRateAnalysisResultsGroupsTableProvider } from './log_rate_analysis_results_groups_table';
+import { LogRateAnalysisResultsTableProvider } from './log_rate_analysis_results_table';
 
 export function AiopsProvider(context: FtrProviderContext) {
   const logRateAnalysisPage = LogRateAnalysisPageProvider(context);

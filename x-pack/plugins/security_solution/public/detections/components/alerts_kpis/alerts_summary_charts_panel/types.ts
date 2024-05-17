@@ -7,20 +7,20 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import type { AlertsBySeverityAgg } from '../severity_level_panel/types';
 import type {
+  ChartCollapseAgg,
+  ChartCollapseData,
+} from '../../../pages/detection_engine/chart_panels/chart_collapse/types';
+import type {
+  AlertsByRuleAgg,
   AlertsByTypeAgg,
   AlertsTypeData,
-  AlertsByRuleAgg,
 } from '../alerts_by_type_panel/types';
 import type {
   AlertsByGroupingAgg,
   AlertsProgressBarData,
 } from '../alerts_progress_bar_panel/types';
-import type {
-  ChartCollapseAgg,
-  ChartCollapseData,
-} from '../../../pages/detection_engine/chart_panels/chart_collapse/types';
+import type { AlertsBySeverityAgg } from '../severity_level_panel/types';
 
 export type SummaryChartsAgg = Partial<
   AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg | ChartCollapseAgg | AlertsByRuleAgg

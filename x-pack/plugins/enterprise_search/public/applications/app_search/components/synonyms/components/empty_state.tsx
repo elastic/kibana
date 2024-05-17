@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SYNONYMS_DOCS_URL } from '../../../routes';
 
-import { SynonymModal, SynonymIcon } from '.';
+import { SynonymIcon, SynonymModal } from '.';
 
 export const EmptyState: React.FC = () => {
   return (

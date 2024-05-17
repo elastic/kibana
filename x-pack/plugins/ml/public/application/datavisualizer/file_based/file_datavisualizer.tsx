@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment, useState, useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
 import type {
   FileDataVisualizerSpec,
-  GetAdditionalLinksParams,
   GetAdditionalLinks,
+  GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
+import type { FC } from 'react';
+import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { isFullLicense } from '../../license';
-import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
+import { isFullLicense } from '../../license';
+import { getMlNodeCount, mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });

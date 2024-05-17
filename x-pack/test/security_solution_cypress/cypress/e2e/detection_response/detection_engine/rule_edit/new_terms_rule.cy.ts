@@ -8,10 +8,10 @@
 import { getNewTermsRule } from '../../../../objects/rule';
 
 import {
-  SUPPRESS_FOR_DETAILS,
   DEFINITION_DETAILS,
-  SUPPRESS_MISSING_FIELD,
   SUPPRESS_BY_DETAILS,
+  SUPPRESS_FOR_DETAILS,
+  SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 
 import {
@@ -22,19 +22,19 @@ import {
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { getDetails } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
+import { getDetails } from '../../../../tasks/rule_details';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 
-import { saveEditedRule } from '../../../../tasks/edit_rule';
 import {
+  fillAlertSuppressionFields,
   selectAlertSuppressionPerRuleExecution,
   selectDoNotSuppressForMissingFields,
-  fillAlertSuppressionFields,
 } from '../../../../tasks/create_new_rule';
+import { saveEditedRule } from '../../../../tasks/edit_rule';
 import { visit } from '../../../../tasks/navigation';
 
 const SUPPRESS_BY_FIELDS = ['agent.hostname', 'agent.type'];

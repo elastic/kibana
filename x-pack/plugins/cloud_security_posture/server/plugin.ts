@@ -6,51 +6,51 @@
  */
 
 import type {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { DeepReadonly } from 'utility-types';
 import type {
-  PostDeletePackagePoliciesResponse,
-  PackagePolicy,
   NewPackagePolicy,
+  PackagePolicy,
+  PostDeletePackagePoliciesResponse,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { DeepReadonly } from 'utility-types';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
 import { isCspPackage } from '../common/utils/helpers';
-import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
-import type {
-  CspServerPluginSetup,
-  CspServerPluginStart,
-  CspServerPluginSetupDeps,
-  CspServerPluginStartDeps,
-  CspServerPluginStartServices,
-} from './types';
-import { setupRoutes } from './routes/setup_routes';
-import { cspBenchmarkRule, cspSettings } from './saved_objects';
+import { isSubscriptionAllowed } from '../common/utils/subscription';
+import { CloudSecurityPostureConfig } from './config';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
   isCspPackagePolicyInstalled,
   onPackagePolicyPostCreateCallback,
 } from './fleet_integration/fleet_integration';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
+import { setupRoutes } from './routes/setup_routes';
+import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import {
   removeFindingsStatsTask,
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
-import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
-import { CloudSecurityPostureConfig } from './config';
-import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
+import type {
+  CspServerPluginSetup,
+  CspServerPluginSetupDeps,
+  CspServerPluginStart,
+  CspServerPluginStartDeps,
+  CspServerPluginStartServices,
+} from './types';
 
 export class CspPlugin
   implements

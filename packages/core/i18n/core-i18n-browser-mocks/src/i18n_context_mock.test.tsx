@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { I18nProviderMock } from './i18n_context_mock';
 import { shallow } from 'enzyme';
+import React from 'react';
+import { I18nProviderMock } from './i18n_context_mock';
 
 describe('I18nProviderMock', () => {
   it('interpolates to default message if present', () => {

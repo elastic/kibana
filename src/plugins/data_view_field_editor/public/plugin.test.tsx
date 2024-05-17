@@ -1,3 +1,4 @@
+import { registerTestBed } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { registerTestBed } from '@kbn/test-jest-helpers';
 
 jest.mock('@kbn/react-kibana-mount', () => {
   const original = jest.requireActual('@kbn/react-kibana-mount');
@@ -23,9 +23,9 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
+import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
-import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { DataView } from './shared_imports';
 
 const noop = () => {};

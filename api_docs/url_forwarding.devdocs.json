@@ -176,9 +176,7 @@
             "tags": [],
             "label": "rewritePath",
             "description": [],
-            "signature": [
-              "(legacyPath: string) => string"
-            ],
+            "signature": ["(legacyPath: string) => string"],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -190,9 +188,7 @@
                 "tags": [],
                 "label": "legacyPath",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,

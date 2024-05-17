@@ -6,8 +6,8 @@
  */
 import { Action } from 'redux-actions';
 
-import { monitorStatusReducer, MonitorStatusState, MonitorStatusPayload } from './monitor_status';
 import { getMonitorStatusAction } from '../actions/monitor_status';
+import { MonitorStatusPayload, MonitorStatusState, monitorStatusReducer } from './monitor_status';
 
 describe('selectedFiltersReducer', () => {
   let state: MonitorStatusState;

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
+import { CSSObject, css } from '@emotion/react';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { css, CSSObject } from '@emotion/react';
 import { isValidUrl } from '@kbn/presentation-util-plugin/common';
-import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { NodeDimensions, OriginString, RevealImageRendererConfig } from '../../common/types';
 
 const revealImageParentStyle = css`
   height: 100%;

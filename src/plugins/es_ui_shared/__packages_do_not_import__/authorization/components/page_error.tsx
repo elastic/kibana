@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
-import React from 'react';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import React from 'react';
 import { Error } from '../types';
 
 interface Props {

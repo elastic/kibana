@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ASSETS_ENDPOINT } from './constants';
 import { FtrProviderContext } from '../types';
+import { ASSETS_ENDPOINT } from './constants';
 import { generateHostsData, generateServicesData } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { ConnectorSyncJob, TriggerMethod, SyncStatus, SyncJobType } from '@kbn/search-connectors';
+import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 
 import { SyncJobView } from '../components/search_index/sync_jobs/sync_jobs_view_logic';
 

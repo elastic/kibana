@@ -1,3 +1,5 @@
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DetectionRuleCounter } from './detection_rule_counter';
-import { TestProvider } from '../test/test_provider';
-import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
+import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
+import { TestProvider } from '../test/test_provider';
+import { DetectionRuleCounter } from './detection_rule_counter';
 
 jest.mock('../common/api/use_fetch_detection_rules_by_tags', () => ({
   useFetchDetectionRulesByTags: jest.fn(),

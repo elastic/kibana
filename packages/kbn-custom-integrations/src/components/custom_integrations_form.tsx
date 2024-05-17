@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { useSelector } from '@xstate/react';
+import React from 'react';
 import { useCustomIntegrations } from '../hooks/use_custom_integrations';
 import { createIsInitializedSelector } from '../state_machines/custom_integrations/selectors';
 import { ConnectedCreateCustomIntegrationForm, CreateTestSubjects } from './create/form';

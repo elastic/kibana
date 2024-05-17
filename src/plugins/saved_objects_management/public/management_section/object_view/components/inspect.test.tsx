@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { Inspect, InspectProps } from './inspect';
+import { ShallowWrapper } from 'enzyme';
+import React from 'react';
 import { SavedObjectWithMetadata } from '../../../../common';
+import { Inspect, InspectProps } from './inspect';
 
 describe('Inspect component', () => {
   let defaultProps: { object: SavedObjectWithMetadata };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import React, { FC } from 'react';
-import { EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { useCanvasShareableState, setToolbarAutohideAction } from '../../../context';
+import { setToolbarAutohideAction, useCanvasShareableState } from '../../../context';
 
 export type OnSetAutohideFn = (isAutohide: boolean) => void;
 

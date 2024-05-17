@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiContextMenuItem, EuiLink } from '@elastic/eui';
 // @ts-ignore file exists, but ts def doesn't
 import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
-import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { GeoJsonProperties } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { FeatureProperties } from './feature_properties';
+import { i18n } from '@kbn/i18n';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { GeoJsonProperties } from 'geojson';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { RawValue } from '../../../../../common/constants';
+import { TooltipFeature } from '../../../../../common/descriptor_types';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
+import { FeatureProperties } from './feature_properties';
 import { Footer } from './footer';
 import { Header } from './header';
-import { TooltipFeature } from '../../../../../common/descriptor_types';
-import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const PROPERTIES_VIEW = 'PROPERTIES_VIEW';
 const FILTER_ACTIONS_VIEW = 'FILTER_ACTIONS_VIEW';

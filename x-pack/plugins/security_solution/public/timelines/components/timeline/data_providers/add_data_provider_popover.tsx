@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-import { pick } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiText,
-  EuiPopover,
   EuiIcon,
+  EuiPopover,
+  EuiText,
 } from '@elastic/eui';
-import { v4 as uuidv4 } from 'uuid';
+import { pick } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/api/timeline';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { StatefulEditDataProvider } from '../../edit_data_provider';
-import { addContentToTimeline, getDisplayValue } from './helpers';
-import { DataProviderType } from './data_provider';
 import { timelineSelectors } from '../../../store';
+import { StatefulEditDataProvider } from '../../edit_data_provider';
+import { DataProviderType } from './data_provider';
+import { addContentToTimeline, getDisplayValue } from './helpers';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
 
 interface AddDataProviderPopoverProps {

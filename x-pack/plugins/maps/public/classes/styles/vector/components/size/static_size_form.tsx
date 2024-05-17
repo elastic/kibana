@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ValidatedRange } from '../../../../../components/validated_range';
-import { SizeStaticOptions } from '../../../../../../common/descriptor_types';
+import { i18n } from '@kbn/i18n';
+import React, { ReactNode } from 'react';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { SizeStaticOptions } from '../../../../../../common/descriptor_types';
+import { ValidatedRange } from '../../../../../components/validated_range';
 import { StaticSizeProperty } from '../../properties/static_size_property';
 
 interface Props {

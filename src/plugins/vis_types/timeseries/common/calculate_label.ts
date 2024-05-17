@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { includes, startsWith } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { includes, startsWith } from 'lodash';
 import { getMetricLabel } from './agg_utils';
-import { extractFieldLabel } from './fields_utils';
 import { TSVB_METRIC_TYPES } from './enums';
+import { extractFieldLabel } from './fields_utils';
 import type { Metric, SanitizedFieldType } from './types';
 
 const paths = [

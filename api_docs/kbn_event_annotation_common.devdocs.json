@@ -55,9 +55,7 @@
             "tags": [],
             "label": "newId",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -70,9 +68,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -132,9 +128,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -147,9 +141,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -187,9 +179,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -202,9 +192,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -217,9 +205,7 @@
             "tags": [],
             "label": "timeField",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -479,9 +465,7 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -559,9 +543,7 @@
         "tags": [],
         "label": "defaultAnnotationRangeColor",
         "description": [],
-        "signature": [
-          "\"#F04E981A\""
-        ],
+        "signature": ["\"#F04E981A\""],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -574,9 +556,7 @@
         "tags": [],
         "label": "EVENT_ANNOTATION_GROUP_TYPE",
         "description": [],
-        "signature": [
-          "\"event-annotation-group\""
-        ],
+        "signature": ["\"event-annotation-group\""],
         "path": "packages/kbn-event-annotation-common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -656,9 +636,7 @@
         "tags": [],
         "label": "ManualAnnotationType",
         "description": [],
-        "signature": [
-          "\"manual\""
-        ],
+        "signature": ["\"manual\""],
         "path": "packages/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -787,9 +765,7 @@
         "tags": [],
         "label": "RangeStyleProps",
         "description": [],
-        "signature": [
-          "StyleSharedProps & { outside?: boolean | undefined; }"
-        ],
+        "signature": ["StyleSharedProps & { outside?: boolean | undefined; }"],
         "path": "packages/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

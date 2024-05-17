@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { AddRoleAlert } from './add_role_alert';
 import { AlertCallOut } from './alert_call_out';
 import { EnableMonitoringAlert } from './enable_monitoring_alert';

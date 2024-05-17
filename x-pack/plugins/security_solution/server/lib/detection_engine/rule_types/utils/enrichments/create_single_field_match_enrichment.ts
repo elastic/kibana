@@ -7,9 +7,9 @@
 
 import { chunk } from 'lodash';
 import { searchEnrichments } from './search_enrichments';
-import { makeSingleFieldMatchQuery } from './utils/requests';
+import type { CreateFieldsMatchEnrichment, EnrichmentType, EventsMapByEnrichments } from './types';
 import { getEventValue, getFieldValue } from './utils/events';
-import type { CreateFieldsMatchEnrichment, EventsMapByEnrichments, EnrichmentType } from './types';
+import { makeSingleFieldMatchQuery } from './utils/requests';
 
 const MAX_CLAUSES = 1000;
 
@@ -29,16 +29,19 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
 
     const eventsToEnrich = events.filter((event) => getEventValue(event, mappingField.eventField));
 
-    const eventsMapByFieldValue = eventsToEnrich.reduce((acc, event) => {
-      const eventFieldValue = getEventValue(event, mappingField.eventField);
+    const eventsMapByFieldValue = eventsToEnrich.reduce(
+      (acc, event) => {
+        const eventFieldValue = getEventValue(event, mappingField.eventField);
 
-      if (!eventFieldValue) return {};
+        if (!eventFieldValue) return {};
 
-      acc[eventFieldValue] ??= [];
-      acc[eventFieldValue].push(event);
+        acc[eventFieldValue] ??= [];
+        acc[eventFieldValue].push(event);
 
-      return acc;
-    }, {} as { [key: string]: typeof events });
+        return acc;
+      },
+      {} as { [key: string]: typeof events }
+    );
 
     const uniqueEventsValuesToSearchBy = Object.keys(eventsMapByFieldValue);
 

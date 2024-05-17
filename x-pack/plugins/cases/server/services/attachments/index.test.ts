@@ -10,21 +10,21 @@ import { unset } from 'lodash';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AttachmentService } from '.';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common';
+import { AttachmentType } from '../../../common/types/domain';
 import {
+  createPersistableStateAttachmentTypeRegistryMock,
   externalReferenceAttachmentES,
   externalReferenceAttachmentESAttributes,
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
-import { createAlertAttachment, createUserAttachment } from './test_utils';
-import { AttachmentType } from '../../../common/types/domain';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common';
+import { createAlertAttachment, createUserAttachment } from './test_utils';
 
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

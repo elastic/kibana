@@ -6,16 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { updateMeta } from '../../../../rules_client/lib';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { Rule } from '../../../../types';
 import { muteAlertParamsSchema } from './schemas';
 import type { MuteAlertParams } from './types';
-import { Rule } from '../../../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
-import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,

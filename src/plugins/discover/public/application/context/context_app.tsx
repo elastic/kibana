@@ -8,32 +8,32 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import './context_app.scss';
-import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { cloneDeep } from 'lodash';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   DOC_TABLE_LEGACY,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { ContextErrorMessage } from './components/context_error_message';
-import { LoadingStatus } from './services/context_query_state';
-import { AppState, GlobalState, isEqualFilters } from './services/context_state';
-import { useContextAppState } from './hooks/use_context_app_state';
-import { useContextAppFetch } from './hooks/use_context_app_fetch';
-import { ContextAppContent } from './context_app_content';
-import { SurrDocType } from './services/context';
+import classNames from 'classnames';
+import { cloneDeep } from 'lodash';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { ContextErrorMessage } from './components/context_error_message';
+import { ContextAppContent } from './context_app_content';
+import { useContextAppFetch } from './hooks/use_context_app_fetch';
+import { useContextAppState } from './hooks/use_context_app_state';
+import { SurrDocType } from './services/context';
+import { LoadingStatus } from './services/context_query_state';
+import { AppState, GlobalState, isEqualFilters } from './services/context_state';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 

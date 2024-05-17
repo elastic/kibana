@@ -6,9 +6,9 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { StaticStyleProperty } from './static_style_property';
 import { HALF_MAKI_ICON_SIZE, VECTOR_STYLES } from '../../../../../common/constants';
 import { SizeStaticOptions } from '../../../../../common/descriptor_types';
+import { StaticStyleProperty } from './static_style_property';
 
 export class StaticSizeProperty extends StaticStyleProperty<SizeStaticOptions> {
   constructor(options: SizeStaticOptions, styleName: VECTOR_STYLES) {

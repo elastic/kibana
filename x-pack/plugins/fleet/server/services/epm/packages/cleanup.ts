@@ -9,14 +9,14 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { removeArchiveEntries } from '../archive/storage';
 
+import { appContextService } from '../..';
 import {
   ASSETS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../common';
 import type { PackageAssetReference } from '../../../../common/types';
 import { packagePolicyService } from '../../package_policy';
-import { appContextService } from '../..';
 
 export async function removeOldAssets(options: {
   soClient: SavedObjectsClientContract;
@@ -86,7 +86,7 @@ async function removeAssetsFromVersion(
 
   for await (const assets of finder.find()) {
     const refs = assets.saved_objects.map(
-      (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE } as PackageAssetReference)
+      (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE }) as PackageAssetReference
     );
     // only delete epm-packages-assets that are not referenced by epm-packages
     const unusedRefs = refs.filter((ref) => !packageAssetRefs.includes(ref.id));

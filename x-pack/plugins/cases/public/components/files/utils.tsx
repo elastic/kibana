@@ -12,10 +12,10 @@ import type {
 import { FileAttachmentMetadataRt } from '../../../common/types/domain';
 
 import {
-  compressionMimeTypes,
   IMAGE_MIME_TYPES,
-  textMimeTypes,
+  compressionMimeTypes,
   pdfMimeTypes,
+  textMimeTypes,
 } from '../../../common/constants/mime_types';
 import * as i18n from './translations';
 

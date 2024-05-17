@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, MouseEvent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Dispatch, SetStateAction, MouseEvent } from 'react';
 import { Ping } from '../../../../../../../../common/runtime_types';
 import { PingListExpandedRowComponent } from '../expanded_row';
 type PingExpandedRowMap = Record<string, JSX.Element>;

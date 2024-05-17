@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
-import { pluck } from 'rxjs';
 import {
-  EuiProvider,
   EuiBasicTable,
   EuiCallOut,
   EuiCodeBlock,
   EuiPageTemplate,
+  EuiProvider,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import React, { useContext, useEffect, useState } from 'react';
+import { pluck } from 'rxjs';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   TextBasedLanguagesEditor,
   TextBasedLanguagesEditorProps,
 } from './text_based_languages_editor';
-import { ReactWrapper } from 'enzyme';
 
 jest.mock('./helpers', () => {
   const module = jest.requireActual('./helpers');

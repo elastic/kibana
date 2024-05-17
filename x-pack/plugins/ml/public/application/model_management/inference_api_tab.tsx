@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import {
   EuiAccordion,
   EuiCodeBlock,
@@ -17,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { FC } from 'react';
+import React from 'react';
 
 export interface InferenceAPITabProps {
   inferenceApis: InferenceAPIConfigResponse[];

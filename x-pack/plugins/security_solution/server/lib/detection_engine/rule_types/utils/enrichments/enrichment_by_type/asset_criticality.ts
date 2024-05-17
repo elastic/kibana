@@ -6,6 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { getAssetCriticalityIndex } from '../../../../../../../common/entity_analytics/asset_criticality';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
@@ -13,7 +14,6 @@ import {
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
 import type { CreateCriticalityEnrichment, CreateEnrichmentFunction } from '../types';
 import { getFieldValue } from '../utils/events';
-import { getAssetCriticalityIndex } from '../../../../../../../common/entity_analytics/asset_criticality';
 
 const enrichmentResponseFields = ['id_value', 'criticality_level'];
 

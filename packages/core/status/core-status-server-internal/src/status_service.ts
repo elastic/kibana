@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
+import { isDeepStrictEqual } from 'util';
 import {
+  BehaviorSubject,
   type Observable,
-  combineLatest,
-  type Subscription,
   Subject,
+  type Subscription,
+  combineLatest,
   firstValueFrom,
   tap,
-  BehaviorSubject,
 } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs';
-import { isDeepStrictEqual } from 'util';
+import { debounceTime, distinctUntilChanged, map, shareReplay, takeUntil } from 'rxjs';
 
 import type { RootSchema } from '@kbn/analytics-client';
-import type { Logger, LogMeta } from '@kbn/logging';
-import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { PluginName } from '@kbn/core-base-common';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
 import type {
-  InternalHttpServiceSetup,
   InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import { type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
-import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
+import type { LogMeta, Logger } from '@kbn/logging';
+import { registerPrebootStatusRoute, registerStatusRoute } from './routes';
 
-import { statusConfig as config, type StatusConfigType } from './status_config';
-import type { InternalStatusServiceSetup } from './types';
-import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './cached_plugins_status';
+import { getSummaryStatus } from './get_summary_status';
 import { logCoreStatusChanges } from './log_core_services_status';
-import { logPluginsStatusChanges } from './log_plugins_status';
 import { logOverallStatusChanges } from './log_overall_status';
+import { logPluginsStatusChanges } from './log_plugins_status';
+import { type StatusConfigType, statusConfig as config } from './status_config';
+import type { InternalStatusServiceSetup } from './types';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };

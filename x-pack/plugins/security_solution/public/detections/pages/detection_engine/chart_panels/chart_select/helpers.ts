@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor, EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import * as i18n from './translations';
 

@@ -7,32 +7,32 @@
 
 import './advanced_editor.scss';
 
-import React, { useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiFieldNumber,
   EuiLink,
-  EuiText,
   EuiPopover,
+  EuiText,
   EuiToolTip,
   htmlIdGenerator,
   keys,
 } from '@elastic/eui';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
   DragDropBuckets,
   DraggableBucketContainer,
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
+import React, { useState, useCallback } from 'react';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import { RangeTypeLens, isValidRange } from './ranges';
-import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
-import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
+import { LabelInput } from '../shared_components';
+import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
+import { RangeTypeLens, isValidRange } from './ranges';
 
 const generateId = htmlIdGenerator();
 

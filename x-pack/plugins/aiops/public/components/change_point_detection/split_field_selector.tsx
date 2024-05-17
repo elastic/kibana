@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 

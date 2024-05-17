@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnalysisConfig, ClassificationAnalysis, RegressionAnalysis } from './types';
 import { isClassificationAnalysis, isRegressionAnalysis } from './analytics_utils';
+import type { AnalysisConfig, ClassificationAnalysis, RegressionAnalysis } from './types';
 
 /**
  * Get the `num_top_feature_importance_values` attribute of DFA regression and classification configurations

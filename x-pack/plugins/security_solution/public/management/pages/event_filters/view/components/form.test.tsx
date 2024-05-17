@@ -1,3 +1,7 @@
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { act, cleanup, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +9,23 @@
  * 2.0.
  */
 import React from 'react';
-import { act, cleanup, fireEvent } from '@testing-library/react';
-import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
-import { NAME_ERROR } from '../event_filters_list';
-import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import userEvent from '@testing-library/user-event';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { NAME_ERROR } from '../event_filters_list';
 
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
+import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');

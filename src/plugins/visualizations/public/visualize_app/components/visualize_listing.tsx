@@ -8,6 +8,9 @@
 
 import './visualize_listing.scss';
 
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, {
   useCallback,
   useRef,
@@ -16,37 +19,34 @@ import React, {
   MouseEvent,
   MutableRefObject,
 } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
+import useUnmount from 'react-use/lib/useUnmount';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import type { SavedObjectReference } from '@kbn/core/public';
-import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import {
   TabbedTableListView,
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
-import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { TableListViewProps } from '@kbn/content-management-table-list-view';
-import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
+import type { SavedObjectReference } from '@kbn/core/public';
+import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { findListItems } from '../../utils/saved_visualize_utils';
-import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
-import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
-import { showNewVisModal } from '../../wizard';
-import { getTypes } from '../../services';
 import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
 import type { VisualizationListItem } from '../..';
-import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
-import { getNoItemsMessage, getCustomColumn } from '../utils';
-import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
+import { getTypes } from '../../services';
+import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
+import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import { findListItems } from '../../utils/saved_visualize_utils';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+import { showNewVisModal } from '../../wizard';
+import type { VisualizeServices } from '../types';
+import { getCustomColumn, getNoItemsMessage } from '../utils';
+import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
 
 type VisualizeUserContent = VisualizationListItem &
   UserContentCommonSchema & {

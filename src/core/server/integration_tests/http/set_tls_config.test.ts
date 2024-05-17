@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import supertest from 'supertest';
-import { KBN_CERT_PATH, KBN_KEY_PATH, ES_KEY_PATH, ES_CERT_PATH } from '@kbn/dev-utils';
+import {
+  HttpConfig,
+  cspConfig,
+  externalUrlConfig,
+  config as httpConfig,
+} from '@kbn/core-http-server-internal';
+import { ES_CERT_PATH, ES_KEY_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import {
   createServer,
   getListenerOptions,
   getServerOptions,
   setTlsConfig,
 } from '@kbn/server-http-tools';
-import {
-  HttpConfig,
-  config as httpConfig,
-  cspConfig,
-  externalUrlConfig,
-} from '@kbn/core-http-server-internal';
-import { flattenCertificateChain, fetchPeerCertificate, isServerTLS } from './tls_utils';
+import supertest from 'supertest';
+import { fetchPeerCertificate, flattenCertificateChain, isServerTLS } from './tls_utils';
 
 describe('setTlsConfig', () => {
   const CSP_CONFIG = cspConfig.schema.validate({});

@@ -8,13 +8,13 @@
 import { mapValues } from 'lodash';
 import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
-import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
+import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { UxUIFilters } from '../../../typings/ui_filters';
+import { useDeepObjectIdentity } from '../../hooks/use_deep_object_identity';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { UrlParams } from './types';
-import { useDeepObjectIdentity } from '../../hooks/use_deep_object_identity';
 
 export interface TimeRange {
   rangeFrom: string;

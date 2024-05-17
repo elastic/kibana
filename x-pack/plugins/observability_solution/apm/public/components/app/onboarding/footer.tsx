@@ -6,9 +6,9 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
 export function Footer() {

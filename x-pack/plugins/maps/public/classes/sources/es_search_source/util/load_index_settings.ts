@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  DEFAULT_MAX_RESULT_WINDOW,
   DEFAULT_MAX_INNER_RESULT_WINDOW,
+  DEFAULT_MAX_RESULT_WINDOW,
   INDEX_SETTINGS_API_PATH,
 } from '../../../../../common/constants';
 import { getHttp, getToasts } from '../../../../kibana_services';

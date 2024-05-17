@@ -10,8 +10,8 @@ import React from 'react';
 
 import {
   CategorizedFields,
-  UnsavedFieldChanges,
   CategoryCounts,
+  UnsavedFieldChanges,
 } from '@kbn/management-settings-types';
 
 import { FieldRow, FieldRowProps } from '@kbn/management-settings-components-field-row';

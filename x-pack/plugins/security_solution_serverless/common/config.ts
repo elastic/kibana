@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 import { ProductLine, ProductTier } from './product';
 
 export const productLine = schema.oneOf([

@@ -11,13 +11,13 @@ import type {
   UseDataGridColumnsCellActions,
   UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
-import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
+import React, { useMemo } from 'react';
+import { SecurityCellActionType, SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
-import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 import { useDataViewId } from '../../hooks/use_data_view_id';
+import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';

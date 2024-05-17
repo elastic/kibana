@@ -5,57 +5,57 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiAccordion,
+  EuiButtonGroup,
   EuiFormRow,
+  EuiIconTip,
   EuiSelect,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiSpacer,
-  EuiAccordion,
-  EuiIconTip,
-  htmlIdGenerator,
-  EuiButtonGroup,
   EuiText,
-  useEuiTheme,
-  EuiTitle,
   EuiTextColor,
+  EuiTitle,
+  htmlIdGenerator,
+  useEuiTheme,
 } from '@elastic/eui';
-import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
-import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
-import type { DataType, OperationMetadata } from '../../../../../types';
+import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
+import React, { useCallback, useState } from 'react';
 import { OperationDefinition } from '..';
-import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
-import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage, isColumn } from '../helpers';
-import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
+import type { DataType, OperationMetadata } from '../../../../../types';
+import type { IndexPatternField } from '../../../../../types';
 import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
-import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../../../types';
-import {
-  getDisallowedTermsMessage,
-  getMultiTermsScriptedFieldErrorMessage,
-  getFieldsByValidationState,
-  isSortableByColumn,
-  isPercentileRankSortable,
-  isPercentileSortable,
-  getOtherBucketSwitchDefault,
-} from './helpers';
+import { shouldShowTimeSeriesOption } from '../../../pure_utils';
+import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
+import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
+import { getInvalidFieldMessage, isColumn } from '../helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
   DEFAULT_SIZE,
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
+import { FieldInputs, MAX_MULTI_FIELDS_SIZE, getInputFieldErrorMessage } from './field_inputs';
+import {
+  getDisallowedTermsMessage,
+  getFieldsByValidationState,
+  getMultiTermsScriptedFieldErrorMessage,
+  getOtherBucketSwitchDefault,
+  isPercentileRankSortable,
+  isPercentileSortable,
+  isSortableByColumn,
+} from './helpers';
 import { IncludeExcludeRow } from './include_exclude_options';
-import { shouldShowTimeSeriesOption } from '../../../pure_utils';
+import type { TermsIndexPatternColumn } from './types';
+import { ValuesInput } from './values_input';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity

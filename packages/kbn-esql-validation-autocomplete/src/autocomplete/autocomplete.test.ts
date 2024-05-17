@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { suggest } from './autocomplete';
-import { evalFunctionsDefinitions } from '../definitions/functions';
-import { builtinFunctions } from '../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { commandDefinitions } from '../definitions/commands';
-import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { camelCase, partition } from 'lodash';
+import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { builtinFunctions } from '../definitions/builtin';
+import { commandDefinitions } from '../definitions/commands';
+import { evalFunctionsDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { FunctionArgSignature } from '../definitions/types';
+import { suggest } from './autocomplete';
+import { TRIGGER_SUGGESTION_COMMAND, getUnitDuration } from './factories';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -238,7 +238,7 @@ describe('autocomplete', () => {
     string,
     string[],
     (string | number)?,
-    Parameters<typeof createCustomCallbackMocks>?
+    Parameters<typeof createCustomCallbackMocks>?,
   ];
 
   const testSuggestionsFn = (

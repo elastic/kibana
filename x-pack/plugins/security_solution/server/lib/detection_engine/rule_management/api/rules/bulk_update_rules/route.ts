@@ -9,29 +9,29 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  BulkCrudRulesResponse,
   BulkUpdateRulesRequestBody,
   validateUpdateRuleProps,
-  BulkCrudRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
 import {
-  transformBulkError,
   buildSiemResponse,
   createBulkErrorObject,
+  transformBulkError,
 } from '../../../../routes/utils';
-import { updateRules } from '../../../logic/crud/update_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { updateRules } from '../../../logic/crud/update_rules';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
+import { getIdBulkError } from '../../../utils/utils';
+import { transformValidateBulkError } from '../../../utils/validate';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 /**

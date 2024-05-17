@@ -9,13 +9,13 @@ import { getAdvancedButton } from '../screens/integrations';
 import { RESULTS_TABLE_BUTTON, RESULTS_TABLE_COLUMNS_BUTTON } from '../screens/live_query';
 import { closeToastIfVisible, generateRandomStringName } from './integrations';
 import {
-  checkResults,
   BIG_QUERY,
+  checkResults,
   deleteAndConfirm,
+  fillInQueryTimeout,
   inputQuery,
   selectAllAgents,
   submitQuery,
-  fillInQueryTimeout,
   verifyQueryTimeout,
 } from './live_query';
 import { navigateTo } from './navigation';

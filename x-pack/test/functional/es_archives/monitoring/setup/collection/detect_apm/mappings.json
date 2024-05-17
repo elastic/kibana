@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "apm-8.0.0-metric-2019.04.16",
     "mappings": {
       "_meta": {

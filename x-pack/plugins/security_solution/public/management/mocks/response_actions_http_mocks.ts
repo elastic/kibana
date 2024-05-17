@@ -6,7 +6,6 @@
  */
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_AGENT_FILE_INFO_ROUTE,
   ACTION_DETAILS_ROUTE,
@@ -21,8 +20,7 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../common/endpoint/constants';
-import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
-import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
+import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
   ActionDetails,
   ActionDetailsApiResponse,
@@ -34,10 +32,12 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionsExecuteParameters,
 } from '../../../common/endpoint/types';
+import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
+import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   isolateHost: () => ResponseActionApiResponse;

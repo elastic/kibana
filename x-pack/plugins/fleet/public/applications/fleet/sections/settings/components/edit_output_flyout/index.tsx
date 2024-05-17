@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
+import React, { useMemo, useState } from 'react';
 
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutFooter,
+  EuiAccordion,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCode,
+  EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
-  EuiSelect,
-  EuiSwitch,
-  EuiCallOut,
-  EuiSpacer,
   EuiLink,
-  EuiComboBox,
-  EuiBetaBadge,
+  EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
   EuiText,
-  EuiAccordion,
-  EuiCode,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -44,22 +44,22 @@ import {
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
-import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
+import { RESERVED_CONFIG_YML_KEYS, outputType } from '../../../../../../../common/constants';
 
-import type { Output, FleetProxy } from '../../../../types';
+import type { FleetProxy, Output } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 
 import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
 
 import { OutputFormKafkaSection } from './output_form_kafka';
 
-import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
-import { useOutputForm } from './use_output_form';
 import { AdvancedOptionsSection } from './advanced_options_section';
+import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
+import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormRemoteEsSection } from './output_form_remote_es';
 import { OutputHealth } from './output_health';
-import { OutputFormLogstashSection } from './output_form_logstash';
-import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
+import { useOutputForm } from './use_output_form';
+import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 
 export interface EditOutputFlyoutProps {
   defaultOuput?: Output;

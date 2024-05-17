@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import {
-  INVESTIGATION_SECTION_CONTENT_TEST_ID,
-  INVESTIGATION_SECTION_HEADER_TEST_ID,
-  INVESTIGATION_GUIDE_TEST_ID,
-  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
-} from './test_ids';
-import { RightPanelContext } from '../context';
-import { InvestigationSection } from './investigation_section';
+import React from 'react';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { mockContextValue } from '../mocks/mock_context';
+import { RightPanelContext } from '../context';
 import { useExpandSection } from '../hooks/use_expand_section';
+import { mockContextValue } from '../mocks/mock_context';
+import { InvestigationSection } from './investigation_section';
+import {
+  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
+  INVESTIGATION_GUIDE_TEST_ID,
+  INVESTIGATION_SECTION_CONTENT_TEST_ID,
+  INVESTIGATION_SECTION_HEADER_TEST_ID,
+} from './test_ids';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../hooks/use_expand_section');

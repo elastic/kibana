@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorGetUrlParams, LocatorPublic } from '..';
 
 export const useLocatorUrl = <P extends SerializableRecord>(

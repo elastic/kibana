@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React, { useEffect, useState, useCallback } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiButton, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { SO_SEARCH_LIMIT } from '../../applications/fleet/constants';
+import {
+  sendCreateEnrollmentAPIKey,
+  sendGetEnrollmentAPIKeys,
+  useStartServices,
+} from '../../applications/fleet/hooks';
 import type {
   EnrollmentAPIKey,
   GetEnrollmentAPIKeysResponse,
 } from '../../applications/fleet/types';
-import {
-  sendGetEnrollmentAPIKeys,
-  useStartServices,
-  sendCreateEnrollmentAPIKey,
-} from '../../applications/fleet/hooks';
 import { Loading } from '../loading';
 
 const NoEnrollmentKeysCallout: React.FunctionComponent<{

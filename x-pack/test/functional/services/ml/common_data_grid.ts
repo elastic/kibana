@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { chunk } from 'lodash';
-import type { ProvidedType } from '@kbn/test';
 import { asyncForEachWithLimit } from '@kbn/std';
+import type { ProvidedType } from '@kbn/test';
+import { chunk } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface SetValueOptions {

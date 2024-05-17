@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
-import { SelectOption } from '@kbn/vis-default-editor-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
+import { SelectOption } from '@kbn/vis-default-editor-plugin/public';
 import { GaugeOptionsInternalProps } from '.';
 import { getGaugeCollections } from '../../collections';
 

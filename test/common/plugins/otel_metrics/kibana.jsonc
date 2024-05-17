@@ -6,8 +6,6 @@
     "id": "openTelemetryInstrumentedPlugin",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "monitoringCollection"
-    ]
+    "requiredPlugins": ["monitoringCollection"]
   }
 }

@@ -6,12 +6,12 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
-import { PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
+import { Integration } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { DataStreamType } from '../../../common/types';
-import { Integration } from '../../../common/api_types';
 
 export async function getIntegrations(options: {
   packageClient: PackageClient;

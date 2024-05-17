@@ -1,3 +1,4 @@
+import datemath, { Unit } from '@kbn/datemath';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +6,16 @@
  * 2.0.
  */
 import { intersection } from 'lodash';
-import datemath, { Unit } from '@kbn/datemath';
 import moment from 'moment';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ConfigKey } from '../../../common/runtime_types';
+import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getMonitorFilters, OverviewStatusSchema, OverviewStatusQuery } from '../common';
+import { OverviewStatusQuery, OverviewStatusSchema, getMonitorFilters } from '../common';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate

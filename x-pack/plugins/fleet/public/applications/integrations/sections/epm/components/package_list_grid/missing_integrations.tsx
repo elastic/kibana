@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 
 import type { ExtendedIntegrationCategory } from '../../screens/home/category_facets';
 import type { IntegrationsURLParameters } from '../../screens/home/hooks/use_available_packages';

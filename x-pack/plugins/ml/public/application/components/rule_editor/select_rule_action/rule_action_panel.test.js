@@ -31,8 +31,8 @@ jest.mock('../../../services/ml_api_service', () => ({
 
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { RuleActionPanel } from './rule_action_panel';
 

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { hasTemplateSnippet } from '../../../utils';
 import {
-  FIELD_TYPES,
-  fieldValidators,
-  UseField,
   ComboBoxField,
-  ToggleField,
+  FIELD_TYPES,
   SelectField,
+  ToggleField,
+  UseField,
+  fieldValidators,
   useFormData,
 } from '../../../../../../shared_imports';
+import { hasTemplateSnippet } from '../../../utils';
 
-import { FieldsConfig, from, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
+import { FieldsConfig, from, to } from './shared';
 
 const { emptyField } = fieldValidators;
 

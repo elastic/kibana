@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import {
   LayoutDirection,
   Metric,
@@ -19,14 +15,18 @@ import {
   MetricWTrend,
   Settings,
 } from '@elastic/charts';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { DimensionsVisParam } from '../../common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { SerializableRecord } from '@kbn/utility-types';
+import { shallow } from 'enzyme';
 import faker from 'faker';
+import React from 'react';
+import { DimensionsVisParam } from '../../common';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;

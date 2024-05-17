@@ -7,11 +7,11 @@
  */
 
 import { writeFile } from 'fs';
-import getopts from 'getopts';
-import { join } from 'path';
 import { Session } from 'node:inspector';
 import { threadId } from 'node:worker_threads';
+import { join } from 'path';
 import { promisify } from 'util';
+import getopts from 'getopts';
 
 class Profiler {
   #counter = 0;

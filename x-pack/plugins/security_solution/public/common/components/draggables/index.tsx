@@ -10,12 +10,12 @@ import type { IconType, ToolTipPositions } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { getEmptyStringTag } from '../empty_value';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { getEmptyStringTag } from '../empty_value';
 
 export interface DefaultDraggableType {
   hideTopN?: boolean;

@@ -7,9 +7,9 @@
 
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { ConcreteTaskInstance } from '../task';
-import { TaskStore, BulkUpdateResult, BulkGetResult } from '../task_store';
-import { isErr, isOk, asErr } from './result_type';
 import { BulkUpdateTaskResult } from '../task_scheduling';
+import { BulkGetResult, BulkUpdateResult, TaskStore } from '../task_store';
+import { asErr, isErr, isOk } from './result_type';
 
 export const MAX_RETRIES = 2;
 

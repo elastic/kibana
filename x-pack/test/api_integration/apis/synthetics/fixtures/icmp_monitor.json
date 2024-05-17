@@ -14,10 +14,7 @@
   },
   "config_id": "",
   "service.name": "example-service-name",
-  "tags": [
-    "tagT1",
-    "tagT2"
-  ],
+  "tags": ["tagT1", "tagT2"],
   "timeout": "16",
   "hosts": "192.33.22.111:3333",
   "wait": "1",

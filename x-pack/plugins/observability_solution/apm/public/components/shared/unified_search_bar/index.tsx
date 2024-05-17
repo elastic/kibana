@@ -1,3 +1,11 @@
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { Filter, Query, TimeRange, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import deepEqual from 'fast-deep-equal';
+import qs from 'query-string';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,30 +13,22 @@
  * 2.0.
  */
 import React, { useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { Filter, fromKueryExpression, Query, TimeRange, toElasticsearchQuery } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
-import deepEqual from 'fast-deep-equal';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import qs from 'query-string';
-import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { UIProcessorEvent } from '../../../../common/processor_event';
-import { TimePickerTimeDefaults } from '../date_picker/typings';
-import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
-import { useProcessorEvent } from '../../../hooks/use_processor_event';
-import { fromQuery, toQuery } from '../links/url_helpers';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { getBoolFilter } from '../get_bool_filter';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { clearCache } from '../../../services/rest/call_api';
 import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../../context/url_params_context/helpers';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useProcessorEvent } from '../../../hooks/use_processor_event';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { clearCache } from '../../../services/rest/call_api';
 import { SearchQueryActions } from '../../../services/telemetry';
+import { TimePickerTimeDefaults } from '../date_picker/typings';
+import { getBoolFilter } from '../get_bool_filter';
+import { fromQuery, toQuery } from '../links/url_helpers';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 

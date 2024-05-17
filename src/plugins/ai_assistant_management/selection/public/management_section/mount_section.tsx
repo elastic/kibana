@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { I18nProvider } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { StartDependencies, AIAssistantManagementSelectionPluginPublicStart } from '../plugin';
-import { aIAssistantManagementSelectionRouter } from '../routes/config';
-import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { AppContextProvider } from '../app_context';
+import type { AIAssistantManagementSelectionPluginPublicStart, StartDependencies } from '../plugin';
+import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
+import { aIAssistantManagementSelectionRouter } from '../routes/config';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>;

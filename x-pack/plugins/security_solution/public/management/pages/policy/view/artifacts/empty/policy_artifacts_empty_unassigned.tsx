@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
-import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
-import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
+import React, { memo, useCallback } from 'react';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import type { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
+import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
+import type { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
+import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 interface CommonProps {
   policyId: string;
   policyName: string;

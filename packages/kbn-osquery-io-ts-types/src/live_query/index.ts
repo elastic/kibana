@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { inRangeRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 
 export const id = t.string;
 export type Id = t.TypeOf<typeof id>;

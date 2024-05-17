@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import { LogRetentionLogic } from '../log_retention_logic';
 import { LogRetentionOptions } from '../types';
 
-import { NoLogging, CustomPolicy, DefaultPolicy } from './constants';
+import { CustomPolicy, DefaultPolicy, NoLogging } from './constants';
 
 interface Props {
   type: LogRetentionOptions;

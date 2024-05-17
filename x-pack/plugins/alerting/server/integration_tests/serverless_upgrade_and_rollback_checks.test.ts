@@ -11,8 +11,8 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
+import { setupTestServers } from './lib';
 
 jest.mock('../rule_type_registry', () => {
   const actual = jest.requireActual('../rule_type_registry');

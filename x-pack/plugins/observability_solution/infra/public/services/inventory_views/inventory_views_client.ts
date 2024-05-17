@@ -8,15 +8,15 @@
 import { HttpStart } from '@kbn/core/public';
 import {
   CreateInventoryViewAttributesRequestPayload,
-  createInventoryViewRequestPayloadRT,
   CreateInventoryViewResponsePayload,
   FindInventoryViewResponsePayload,
-  findInventoryViewResponsePayloadRT,
   GetInventoryViewResposePayload,
-  getInventoryViewUrl,
-  inventoryViewResponsePayloadRT,
   UpdateInventoryViewAttributesRequestPayload,
   UpdateInventoryViewResponsePayload,
+  createInventoryViewRequestPayloadRT,
+  findInventoryViewResponsePayloadRT,
+  getInventoryViewUrl,
+  inventoryViewResponsePayloadRT,
 } from '../../../common/http_api/latest';
 import {
   DeleteInventoryViewError,

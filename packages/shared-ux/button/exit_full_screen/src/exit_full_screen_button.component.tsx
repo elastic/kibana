@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
-  EuiScreenReaderOnly,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiImage,
-  useEuiTheme,
+  EuiScreenReaderOnly,
   makeHighContrastColor,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import cx from 'classnames';
+import React from 'react';
 
 import type { ExitFullScreenButtonComponentProps as Props } from '../types';
 

@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import type {
   ClientRequestParamsOf,
   ReturnOf,
@@ -13,10 +14,9 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { FetchOptions } from '../../../common/fetch_options';
+import type { APIEndpoint, APMServerRouteRepository } from '../../../server';
 import { CallApi, callApi } from './call_api';
-import type { APMServerRouteRepository, APIEndpoint } from '../../../server';
 
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'signal'> & {
   signal: AbortSignal | null;

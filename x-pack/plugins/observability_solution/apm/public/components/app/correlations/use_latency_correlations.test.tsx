@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { merge } from 'lodash';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { merge } from 'lodash';
+import React, { ReactNode } from 'react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
-  mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  mockApmPluginContextValue,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { delay } from '../../../utils/test_helpers';
 
 import { fromQuery } from '../../shared/links/url_helpers';
 
-import { useLatencyCorrelations } from './use_latency_correlations';
 import type { APIEndpoint } from '../../../../server';
+import { useLatencyCorrelations } from './use_latency_correlations';
 
 function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>

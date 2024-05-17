@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
+import moment from 'moment';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { exportDashboards } from './lib';
 

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiButtonEmpty,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo } from 'react';
+import styled from 'styled-components';
 
 import { useAgentlessPolicy } from '../hooks/setup_technology';
 
+import { PackageIcon } from '../../../../../components';
 import { WithHeaderLayout } from '../../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
-import { PackageIcon } from '../../../../../components';
 import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`

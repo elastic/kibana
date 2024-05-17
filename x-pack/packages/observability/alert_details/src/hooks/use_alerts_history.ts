@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type HttpSetup } from '@kbn/core/public';
 import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type HttpSetup } from '@kbn/core/public';
 import {
   ALERT_DURATION,
   ALERT_INSTANCE_ID,

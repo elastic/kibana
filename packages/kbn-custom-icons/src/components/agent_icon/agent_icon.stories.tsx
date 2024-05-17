@@ -7,12 +7,12 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
-import type { Story } from '@storybook/react';
-import React from 'react';
 import { AGENT_NAMES } from '@kbn/elastic-agent-utils';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { getAgentIcon } from './get_agent_icon';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { AgentIcon } from '.';
+import { getAgentIcon } from './get_agent_icon';
 
 export default {
   title: 'Custom Icons/AgentIcon',

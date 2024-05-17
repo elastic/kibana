@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiTextArea,
-  EuiFormRow,
-  EuiSwitch,
-  EuiConfirmModal,
   EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 
 import type {
-  ModelSnapshot,
   CombinedJobWithStats,
+  ModelSnapshot,
 } from '../../../../../common/types/anomaly_detection_jobs';
-import { ml } from '../../../services/ml_api_service';
 import { useNotifications } from '../../../contexts/kibana';
+import { ml } from '../../../services/ml_api_service';
 
 interface Props {
   snapshot: ModelSnapshot;

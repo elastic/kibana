@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import {
   DETECTION_ENGINE_RULES_BULK_UPDATE,
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../../../../common/constants';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
+import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
@@ -18,11 +21,8 @@ import {
   getRuleMock,
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
-import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
-import { bulkPatchRulesRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { bulkPatchRulesRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz');
 

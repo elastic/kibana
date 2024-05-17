@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { KILL_PROCESS_ROUTE, SUSPEND_PROCESS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   KillOrSuspendProcessRequestBody,
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
-import { KILL_PROCESS_ROUTE, SUSPEND_PROCESS_ROUTE } from '../../../../common/endpoint/constants';
 
 /** Kills a process specified by pid or entity id on a host running Endpoint Security */
 export const killProcess = (

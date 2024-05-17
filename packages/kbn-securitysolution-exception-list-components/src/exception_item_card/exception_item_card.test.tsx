@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
-import { ExceptionItemCard } from '.';
-import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
-import { getCommentsArrayMock, mockGetFormattedComments } from '../mocks/comments.mock';
-import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionItemCard } from '.';
+import { getCommentsArrayMock, mockGetFormattedComments } from '../mocks/comments.mock';
+import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { rules } from '../mocks/rule_references.mock';
+import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
 
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {

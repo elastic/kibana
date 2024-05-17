@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
+import React from 'react';
 
-import { TemplateDetailsContent, Props } from './template_details_content';
+import { Props, TemplateDetailsContent } from './template_details_content';
 
 export const TemplateDetails = (props: Props) => {
   return (

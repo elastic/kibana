@@ -10,28 +10,28 @@ import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SchemaConfig, SupportedAggregation } from '../../../types';
 import {
-  Operation,
-  BaseColumn as GenericBaseColumn,
+  AvgColumn as BaseAvgColumn,
+  CardinalityColumn as BaseCardinalityColumn,
   Column as BaseColumn,
-  GenericColumnWithMeta,
-  PercentileColumn as BasePercentileColumn,
-  PercentileRanksColumn as BasePercentileRanksColumn,
+  CountColumn as BaseCountColumn,
+  CumulativeSumColumn as BaseCumulativeSumColumn,
+  DateHistogramColumn as BaseDateHistogramColumn,
+  DerivativeColumn as BaseDerivativeColumn,
+  FiltersColumn as BaseFiltersColumn,
   FormulaColumn as BaseFormulaColumn,
   LastValueColumn as BaseLastValueColumn,
-  AvgColumn as BaseAvgColumn,
-  CountColumn as BaseCountColumn,
-  CardinalityColumn as BaseCardinalityColumn,
   MaxColumn as BaseMaxColumn,
   MedianColumn as BaseMedianColumn,
   MinColumn as BaseMinColumn,
-  SumColumn as BaseSumColumn,
-  CumulativeSumColumn as BaseCumulativeSumColumn,
   MovingAverageColumn as BaseMovingAverageColumn,
-  DerivativeColumn as BaseDerivativeColumn,
-  DateHistogramColumn as BaseDateHistogramColumn,
-  TermsColumn as BaseTermsColumn,
-  FiltersColumn as BaseFiltersColumn,
+  PercentileColumn as BasePercentileColumn,
+  PercentileRanksColumn as BasePercentileRanksColumn,
   RangeColumn as BaseRangeColumn,
+  SumColumn as BaseSumColumn,
+  TermsColumn as BaseTermsColumn,
+  BaseColumn as GenericBaseColumn,
+  GenericColumnWithMeta,
+  Operation,
 } from '../../types';
 
 export type MetricsWithField = Exclude<
@@ -60,7 +60,7 @@ export type SiblingPipelineMetric =
 
 export type BucketColumn = DateHistogramColumn | TermsColumn | FiltersColumn | RangeColumn;
 export interface CommonColumnConverterArgs<
-  Agg extends SupportedAggregation = SupportedAggregation
+  Agg extends SupportedAggregation = SupportedAggregation,
 > {
   agg: SchemaConfig<Agg>;
   dataView: DataView;
@@ -68,13 +68,13 @@ export interface CommonColumnConverterArgs<
 }
 
 export interface ExtendedColumnConverterArgs<
-  Agg extends SupportedAggregation = SupportedAggregation
+  Agg extends SupportedAggregation = SupportedAggregation,
 > extends CommonColumnConverterArgs<Agg> {
   aggs: Array<SchemaConfig<METRIC_TYPES>>;
 }
 
 export interface CommonBucketConverterArgs<
-  Agg extends SupportedAggregation = SupportedAggregation
+  Agg extends SupportedAggregation = SupportedAggregation,
 > {
   visType: string;
   agg: SchemaConfig<Agg>;

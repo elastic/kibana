@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { upperFirst, find, get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { find, get, includes, upperFirst } from 'lodash';
 
 export function decorateShards(shards, nodes) {
   function getTooltipMessage(shard) {

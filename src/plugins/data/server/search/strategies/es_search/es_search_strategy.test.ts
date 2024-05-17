@@ -9,13 +9,13 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
-import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
+import { esSearchStrategyProvider } from './es_search_strategy';
 
-import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
-import { KbnSearchError } from '../../report_search_error';
 import { firstValueFrom } from 'rxjs';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import { KbnSearchError } from '../../report_search_error';
 
 describe('ES search strategy', () => {
   const successBody = {

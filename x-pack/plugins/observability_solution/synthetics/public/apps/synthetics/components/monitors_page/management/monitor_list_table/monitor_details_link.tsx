@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { selectSelectedLocationId } from '../../../../state';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { selectSelectedLocationId } from '../../../../state';
 
 export const MonitorDetailsLink = ({ monitor }: { monitor: EncryptedSyntheticsSavedMonitor }) => {
   const lastSelectedLocationId = useSelector(selectSelectedLocationId);

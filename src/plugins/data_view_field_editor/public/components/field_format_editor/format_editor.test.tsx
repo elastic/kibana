@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
+import React, { PureComponent } from 'react';
 import { FormatEditor } from './format_editor';
 
 class TestEditor extends PureComponent {

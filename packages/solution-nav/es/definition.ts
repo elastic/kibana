@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
-  SolutionNavigationDefinition,
   NavigationTreeDefinition,
+  SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { of } from 'rxjs';
 
 const title = i18n.translate('navigation.searchNav.headerSolutionSwitcher.searchSolutionTitle', {

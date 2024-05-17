@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
-  savedObjectSchema,
-  objectTypeToGetResultSchema,
   createOptionsSchemas,
   createResultSchema,
+  objectTypeToGetResultSchema,
+  savedObjectSchema,
 } from '@kbn/content-management-utils';
+import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 
 export const controlGroupInputSchema = schema
   .object({

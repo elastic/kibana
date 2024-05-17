@@ -56,9 +56,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
+              "signature": ["P & { children?: React.ReactNode; }"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -70,9 +68,7 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": [
-                "any"
-              ],
+              "signature": ["any"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -86,9 +82,7 @@
           "tags": [],
           "label": "PlaygroundToolbar",
           "description": [],
-          "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
-          ],
+          "signature": ["React.FunctionComponent<{ children?: React.ReactNode; }>"],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -101,9 +95,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
+              "signature": ["P & { children?: React.ReactNode; }"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -115,9 +107,7 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": [
-                "any"
-              ],
+              "signature": ["any"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -131,9 +121,7 @@
           "tags": [],
           "label": "Playground",
           "description": [],
-          "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
-          ],
+          "signature": ["React.FunctionComponent<{ children?: React.ReactNode; }>"],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -146,9 +134,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
+              "signature": ["P & { children?: React.ReactNode; }"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -160,9 +146,7 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": [
-                "any"
-              ],
+              "signature": ["any"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -176,9 +160,7 @@
           "tags": [],
           "label": "PlaygroundHeaderDocs",
           "description": [],
-          "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
-          ],
+          "signature": ["React.FunctionComponent<{ children?: React.ReactNode; }>"],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -191,9 +173,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
+              "signature": ["P & { children?: React.ReactNode; }"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -205,9 +185,7 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": [
-                "any"
-              ],
+              "signature": ["any"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -268,9 +246,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"searchPlayground\""
-        ],
+        "signature": ["\"searchPlayground\""],
         "path": "x-pack/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -283,9 +259,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"Playground\""
-        ],
+        "signature": ["\"Playground\""],
         "path": "x-pack/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

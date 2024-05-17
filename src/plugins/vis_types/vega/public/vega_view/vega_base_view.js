@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
-import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { buildQueryFilter, compareFilters } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { Warn, expressionFunction, loader, logger, scheme, version as vegaVersion } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
 
-import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
-import { normalizeDate, normalizeString, normalizeObject } from './utils';
+import { getDataViews, getEnableExternalUrls } from '../services';
+import { normalizeDate, normalizeObject, normalizeString } from './utils';
 
 scheme('elastic', euiPaletteColorBlind());
 

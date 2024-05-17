@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { compact, shuffle } from 'lodash';
 import { Readable } from 'stream';
-import { apm, ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
+import { ApmFields, apm, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
+import { compact, shuffle } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';

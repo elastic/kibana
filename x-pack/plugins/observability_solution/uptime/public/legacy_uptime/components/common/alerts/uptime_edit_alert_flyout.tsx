@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   Rule,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useMemo } from 'react';
 import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {

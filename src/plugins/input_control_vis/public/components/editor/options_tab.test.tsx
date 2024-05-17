@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
 import OptionsTab, { OptionsTabProps } from './options_tab';

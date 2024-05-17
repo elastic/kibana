@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component, Fragment } from 'react';
 
 import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { serializeJob } from '../../../services';
 
 import {
-  JobDetails,
-  JOB_DETAILS_TAB_SUMMARY,
-  JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_REQUEST,
+  JOB_DETAILS_TAB_SUMMARY,
+  JOB_DETAILS_TAB_TERMS,
+  JobDetails,
   tabToHumanizedMap,
 } from '../../components';
 

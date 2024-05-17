@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { asPercent, asDecimalOrInteger, asBigNumber } from './formatters';
+import { asBigNumber, asDecimalOrInteger, asPercent } from './formatters';
 
 describe('formatters', () => {
   describe('asPercent', () => {

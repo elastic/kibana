@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { get, values, first } from 'lodash';
 import * as rt from 'io-ts';
+import { first, get, values } from 'lodash';
 import {
-  MetricsAPIRequest,
-  MetricsAPISeries,
   MetricsAPIColumn,
+  MetricsAPIRequest,
   MetricsAPIRow,
+  MetricsAPISeries,
 } from '../../../../common/http_api/metrics_api';
 import {
-  Bucket,
   BasicMetricValueRT,
-  NormalizedMetricValueRT,
-  PercentilesTypeRT,
-  PercentilesKeyedTypeRT,
-  TopMetricsTypeRT,
+  Bucket,
   MetricValueTypeRT,
+  NormalizedMetricValueRT,
+  PercentilesKeyedTypeRT,
+  PercentilesTypeRT,
+  TopMetricsTypeRT,
 } from '../types';
 
 const BASE_COLUMNS = [{ name: 'timestamp', type: 'date' }] as MetricsAPIColumn[];
@@ -74,11 +74,14 @@ export const convertBucketsToRows = (
 ): MetricsAPIRow[] => {
   return buckets.map((bucket) => {
     const ids = options.metrics.map((metric) => metric.id);
-    const metrics = ids.reduce((acc, id) => {
-      const valueObject = get(bucket, [id]);
-      acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
-      return acc;
-    }, {} as Record<string, number | null | object[]>);
+    const metrics = ids.reduce(
+      (acc, id) => {
+        const valueObject = get(bucket, [id]);
+        acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
+        return acc;
+      },
+      {} as Record<string, number | null | object[]>
+    );
 
     return { timestamp: bucket.key as number, ...metrics };
   });

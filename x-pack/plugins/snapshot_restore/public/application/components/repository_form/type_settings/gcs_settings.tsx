@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
-import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
+import { ChunkSizeField, MaxRestoreField, MaxSnapshotsField } from './common';
 
 interface Props {
   repository: GCSRepository;

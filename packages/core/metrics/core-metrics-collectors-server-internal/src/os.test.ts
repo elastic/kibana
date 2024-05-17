@@ -9,10 +9,10 @@
 let mockGetOsResult: object = {};
 jest.mock('getos', () => (cb: Function) => cb(null, mockGetOsResult));
 
-import { loggerMock } from '@kbn/logging-mocks';
 import os from 'os';
-import { cgroupCollectorMock } from './os.test.mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { OsMetricsCollector } from './os';
+import { cgroupCollectorMock } from './os.test.mocks';
 
 describe('OsMetricsCollector', () => {
   let collector: OsMetricsCollector;

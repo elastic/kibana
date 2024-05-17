@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import sinon from 'sinon';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, mockedDateString } from './lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RuleSnooze } from '../../types';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import moment from 'moment';
+import sinon from 'sinon';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RuleSnooze } from '../../types';
+import { ConstructorOptions, RulesClient } from '../rules_client';
+import { getBeforeSetup, mockedDateString } from './lib';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),

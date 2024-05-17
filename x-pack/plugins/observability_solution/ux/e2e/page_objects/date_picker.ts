@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { Page } from '@elastic/synthetics';
+import moment from 'moment';
 import { Locator, byTestId } from './utils';
 
 const DEFAULT_ABS_START_UTC_DATE = '2022-05-22T19:00:00.000Z';

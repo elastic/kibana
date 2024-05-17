@@ -12,33 +12,33 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENTRIES } from '../../../common/constants.mock';
-import {
-  getEntryMatchAnyExcludeMock,
-  getEntryMatchAnyMock,
-} from '../../../common/schemas/types/entry_match_any.mock';
+import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import {
   getEntryExistsExcludedMock,
   getEntryExistsMock,
 } from '../../../common/schemas/types/entry_exists.mock';
 import {
-  getEntryNestedExcludeMock,
-  getEntryNestedMixedEntries,
-  getEntryNestedMock,
-} from '../../../common/schemas/types/entry_nested.mock';
-import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
+  getEntryListExcludedMock,
+  getEntryListMock,
+} from '../../../common/schemas/types/entry_list.mock';
+import {
+  getEntryMatchExcludeMock,
+  getEntryMatchMock,
+} from '../../../common/schemas/types/entry_match.mock';
+import {
+  getEntryMatchAnyExcludeMock,
+  getEntryMatchAnyMock,
+} from '../../../common/schemas/types/entry_match_any.mock';
 import {
   getEntryMatchWildcardExcludeMock,
   getEntryMatchWildcardMock,
 } from '../../../common/schemas/types/entry_match_wildcard.mock';
 import {
-  getEntryMatchExcludeMock,
-  getEntryMatchMock,
-} from '../../../common/schemas/types/entry_match.mock';
+  getEntryNestedExcludeMock,
+  getEntryNestedMixedEntries,
+  getEntryNestedMock,
+} from '../../../common/schemas/types/entry_nested.mock';
 import { getListClientMock } from '../lists/list_client.mock';
-import {
-  getEntryListExcludedMock,
-  getEntryListMock,
-} from '../../../common/schemas/types/entry_list.mock';
 
 import {
   buildExceptionFilter,

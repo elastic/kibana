@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { Header } from './header';
+import React from 'react';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import { Header } from './header';
 
 const layerMock = {
   getDisplayName: async () => {

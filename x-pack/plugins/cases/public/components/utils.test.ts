@@ -10,17 +10,17 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { elasticUser, getCaseUsersMockResponse } from '../containers/mock';
 import {
   connectorDeprecationValidator,
+  convertCustomFieldValue,
   convertEmptyValuesToNull,
   getConnectorIcon,
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
   isDeprecatedConnector,
   isEmptyValue,
-  removeItemFromSessionStorage,
-  parseURL,
-  stringifyToURL,
   parseCaseUsers,
-  convertCustomFieldValue,
+  parseURL,
+  removeItemFromSessionStorage,
+  stringifyToURL,
 } from './utils';
 
 describe('Utils', () => {

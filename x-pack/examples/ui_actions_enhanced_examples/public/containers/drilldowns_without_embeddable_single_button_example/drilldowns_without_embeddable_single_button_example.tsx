@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiFlyout } from '@elastic/eui';
 import { useUiActions } from '../../context';
-import { sampleApp2ClickContext, SAMPLE_APP2_CLICK_TRIGGER } from '../../triggers';
+import { SAMPLE_APP2_CLICK_TRIGGER, sampleApp2ClickContext } from '../../triggers';
 
 export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
   const { plugins, managerWithoutEmbeddableSingleButton } = useUiActions();

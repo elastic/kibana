@@ -6,10 +6,8 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { NewLocation } from '../add_location_flyout';
-import { getServiceLocations } from '../../../../state/service_locations';
 import {
   getPrivateLocationsAction,
   selectPrivateLocations,
@@ -20,6 +18,8 @@ import {
   addSyntheticsPrivateLocations,
   deleteSyntheticsPrivateLocations,
 } from '../../../../state/private_locations/api';
+import { getServiceLocations } from '../../../../state/service_locations';
+import { NewLocation } from '../add_location_flyout';
 
 export const usePrivateLocationsAPI = () => {
   const [formData, setFormData] = useState<NewLocation>();

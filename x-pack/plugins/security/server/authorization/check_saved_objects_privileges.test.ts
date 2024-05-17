@@ -11,8 +11,8 @@ import type {
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
 
-import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import type { SpacesService } from '../plugin';
+import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 
 let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;

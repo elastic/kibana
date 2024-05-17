@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { SETTING_CATEGORY } from '@kbn/presentation-util-plugin/server';
 import { UiSettingsParams } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
+import { SETTING_CATEGORY } from '@kbn/presentation-util-plugin/server';
 import { UI_SETTINGS } from '../common';
 
 /**

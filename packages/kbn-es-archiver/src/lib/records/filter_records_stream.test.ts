@@ -8,7 +8,7 @@
 
 import Chance from 'chance';
 
-import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { createFilterRecordsStream } from './filter_records_stream';
 

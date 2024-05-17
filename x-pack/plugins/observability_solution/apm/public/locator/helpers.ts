@@ -1,3 +1,4 @@
+import { isRight } from 'fp-ts/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { Environment, environmentRt } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';

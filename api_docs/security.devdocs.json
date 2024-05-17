@@ -10,9 +10,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthenticatedUser",
-        "description": [
-          "\nRepresents the currently authenticated user."
-        ],
+        "description": ["\nRepresents the currently authenticated user."],
         "signature": [
           {
             "pluginId": "@kbn/core-security-common",
@@ -40,9 +38,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_realm",
-            "description": [
-              "\nThe name and type of the Realm that has authenticated the user."
-            ],
+            "description": ["\nThe name and type of the Realm that has authenticated the user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -84,9 +80,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_provider",
-            "description": [
-              "\nThe authentication provider that used to authenticate user."
-            ],
+            "description": ["\nThe authentication provider that used to authenticate user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -106,9 +100,7 @@
             "type": "string",
             "tags": [],
             "label": "authentication_type",
-            "description": [
-              "\nThe AuthenticationType used by ES to authenticate the user.\n"
-            ],
+            "description": ["\nThe AuthenticationType used by ES to authenticate the user.\n"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -132,12 +124,8 @@
             "type": "string",
             "tags": [],
             "label": "profile_uid",
-            "description": [
-              "\nUser profile ID of this user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nUser profile ID of this user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -188,12 +176,8 @@
             "type": "Function",
             "tags": [],
             "label": "areAPIKeysEnabled",
-            "description": [
-              "\nDetermines if API Keys are currently enabled."
-            ],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
+            "description": ["\nDetermines if API Keys are currently enabled."],
+            "signature": ["() => Promise<boolean>"],
             "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -220,12 +204,8 @@
             "type": "Function",
             "tags": [],
             "label": "isRoleManagementEnabled",
-            "description": [
-              "\nDetermines if role management is enabled."
-            ],
-            "signature": [
-              "() => boolean | undefined"
-            ],
+            "description": ["\nDetermines if role management is enabled."],
+            "signature": ["() => boolean | undefined"],
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -321,9 +301,7 @@
             "tags": [],
             "label": "isLicenseAvailable",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -337,9 +315,7 @@
             "tags": [],
             "label": "getUnavailableReason",
             "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -353,9 +329,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -449,9 +423,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SecurityLicenseFeatures",
-        "description": [
-          "\nDescribes Security plugin features that depend on license."
-        ],
+        "description": ["\nDescribes Security plugin features that depend on license."],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -462,9 +434,7 @@
             "type": "boolean",
             "tags": [],
             "label": "showLogin",
-            "description": [
-              "\nIndicates whether we show login page or skip it."
-            ],
+            "description": ["\nIndicates whether we show login page or skip it."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -475,9 +445,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowLogin",
-            "description": [
-              "\nIndicates whether we allow login or disable it on the login page."
-            ],
+            "description": ["\nIndicates whether we allow login or disable it on the login page."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -501,9 +469,7 @@
             "type": "boolean",
             "tags": [],
             "label": "showRoleMappingsManagement",
-            "description": [
-              "\nIndicates whether we show the Role Mappings UI."
-            ],
+            "description": ["\nIndicates whether we show the Role Mappings UI."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -527,9 +493,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowAuditLogging",
-            "description": [
-              "\nIndicates whether we allow logging of audit events."
-            ],
+            "description": ["\nIndicates whether we allow logging of audit events."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -592,9 +556,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowRbac",
-            "description": [
-              "\nIndicates whether we allow Role-based access control (RBAC)."
-            ],
+            "description": ["\nIndicates whether we allow Role-based access control (RBAC)."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -605,9 +567,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowSubFeaturePrivileges",
-            "description": [
-              "\nIndicates whether we allow sub-feature privileges."
-            ],
+            "description": ["\nIndicates whether we allow sub-feature privileges."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -631,9 +591,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "layout",
-            "description": [
-              "\nDescribes the layout of the login form if it's displayed."
-            ],
+            "description": ["\nDescribes the layout of the login form if it's displayed."],
             "signature": [
               {
                 "pluginId": "@kbn/security-plugin-types-common",
@@ -815,9 +773,7 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": [
-              "string | React.ComponentType<{}>"
-            ],
+            "signature": ["string | React.ComponentType<{}>"],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -840,9 +796,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -854,9 +808,7 @@
             "tags": [],
             "label": "setAsProfile",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -886,9 +838,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileBulkGetParams",
-        "description": [
-          "\nParameters for the bulk get API."
-        ],
+        "description": ["\nParameters for the bulk get API."],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -899,12 +849,8 @@
             "type": "Object",
             "tags": [],
             "label": "uids",
-            "description": [
-              "\nList of user profile identifiers."
-            ],
-            "signature": [
-              "Set<string>"
-            ],
+            "description": ["\nList of user profile identifiers."],
+            "signature": ["Set<string>"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -918,9 +864,7 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -934,9 +878,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileGetCurrentParams",
-        "description": [
-          "\nParameters for the get user profile for the current user API."
-        ],
+        "description": ["\nParameters for the get user profile for the current user API."],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -963,9 +905,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileSuggestParams",
-        "description": [
-          "\nParameters for the suggest API."
-        ],
+        "description": ["\nParameters for the suggest API."],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -989,12 +929,8 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": [
-              "\nDesired number of suggestions to return. The default value is 10."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nDesired number of suggestions to return. The default value is 10."],
+            "signature": ["number | undefined"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1008,9 +944,7 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1030,9 +964,7 @@
         "description": [
           "\nThe identifier in a saved object's `namespaces` array when it is shared globally to all spaces."
         ],
-        "signature": [
-          "\"*\""
-        ],
+        "signature": ["\"*\""],
         "path": "x-pack/plugins/security/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1044,9 +976,7 @@
         "type": "Type",
         "tags": [],
         "label": "AuthenticationServiceStart",
-        "description": [
-          "\nStart has the same contract as Setup for now."
-        ],
+        "description": ["\nStart has the same contract as Setup for now."],
         "signature": [
           {
             "pluginId": "@kbn/security-plugin-types-public",
@@ -1067,9 +997,7 @@
         "type": "Type",
         "tags": [],
         "label": "AuthorizationServiceStart",
-        "description": [
-          "\nStart has the same contract as Setup for now."
-        ],
+        "description": ["\nStart has the same contract as Setup for now."],
         "signature": [
           {
             "pluginId": "@kbn/security-plugin-types-public",
@@ -1157,13 +1085,9 @@
           "parentPluginId": "security",
           "id": "def-public.SecurityPluginStart.uiApi",
           "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "uiApi",
-          "description": [
-            "\nExposes UI components that will be loaded asynchronously."
-          ],
+          "description": ["\nExposes UI components that will be loaded asynchronously."],
           "signature": [
             {
               "pluginId": "security",
@@ -1238,9 +1162,7 @@
           "type": "Object",
           "tags": [],
           "label": "authz",
-          "description": [
-            "\nExposes authorization configuration."
-          ],
+          "description": ["\nExposes authorization configuration."],
           "signature": [
             {
               "pluginId": "@kbn/security-plugin-types-public",
@@ -1313,9 +1235,7 @@
             "type": "string",
             "tags": [],
             "label": "credentials",
-            "description": [
-              "\nThe authentication credentials for the scheme."
-            ],
+            "description": ["\nThe authentication credentials for the scheme."],
             "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1327,9 +1247,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1341,9 +1259,7 @@
                 "tags": [],
                 "label": "scheme",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1356,9 +1272,7 @@
                 "tags": [],
                 "label": "credentials",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1373,9 +1287,7 @@
             "type": "Function",
             "tags": [],
             "label": "parseFromRequest",
-            "description": [
-              "\nParses request's `Authorization` HTTP header if present."
-            ],
+            "description": ["\nParses request's `Authorization` HTTP header if present."],
             "signature": [
               "(request: ",
               {
@@ -1405,9 +1317,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": [
-                  "Request instance to extract the authorization header from."
-                ],
+                "description": ["Request instance to extract the authorization header from."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1432,9 +1342,7 @@
                 "description": [
                   "Optional name of the HTTP header to extract authentication information from. By default, the\nauthentication information is extracted from the `Authorization` HTTP header."
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1450,9 +1358,7 @@
             "tags": [],
             "label": "toString",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1664,9 +1570,7 @@
                 "tags": [],
                 "label": "ruleTypeId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1679,9 +1583,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1694,9 +1596,7 @@
                 "tags": [],
                 "label": "alertingEntity",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1709,9 +1609,7 @@
                 "tags": [],
                 "label": "operation",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1741,9 +1639,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "(operation: string) => string"
-            ],
+            "signature": ["(operation: string) => string"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1755,9 +1651,7 @@
                 "tags": [],
                 "label": "operation",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1786,12 +1680,8 @@
             "type": "Function",
             "tags": [],
             "label": "areAPIKeysEnabled",
-            "description": [
-              "\nDetermines if API Keys are enabled in Elasticsearch."
-            ],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
+            "description": ["\nDetermines if API Keys are enabled in Elasticsearch."],
+            "signature": ["() => Promise<boolean>"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1804,12 +1694,8 @@
             "type": "Function",
             "tags": [],
             "label": "areCrossClusterAPIKeysEnabled",
-            "description": [
-              "\nDetermines if Cross-Cluster API Keys are enabled in Elasticsearch."
-            ],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
+            "description": ["\nDetermines if Cross-Cluster API Keys are enabled in Elasticsearch."],
+            "signature": ["() => Promise<boolean>"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1856,9 +1742,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": [
-                  "Request instance."
-                ],
+                "description": ["Request instance."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1880,9 +1764,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "createParams",
-                "description": [
-                  "The params to create an API key"
-                ],
+                "description": ["The params to create an API key"],
                 "signature": [
                   {
                     "pluginId": "@kbn/security-plugin-types-server",
@@ -1906,9 +1788,7 @@
             "type": "Function",
             "tags": [],
             "label": "grantAsInternalUser",
-            "description": [
-              "\nTries to grant an API key for the current user."
-            ],
+            "description": ["\nTries to grant an API key for the current user."],
             "signature": [
               "(request: ",
               {
@@ -1938,9 +1818,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": [
-                  "Request instance."
-                ],
+                "description": ["Request instance."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -1962,9 +1840,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "createParams",
-                "description": [
-                  "Create operation parameters."
-                ],
+                "description": ["Create operation parameters."],
                 "signature": [
                   "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
                 ],
@@ -1982,9 +1858,7 @@
             "type": "Function",
             "tags": [],
             "label": "validate",
-            "description": [
-              "\nTries to validate an API key."
-            ],
+            "description": ["\nTries to validate an API key."],
             "signature": [
               "(apiKeyPrams: ",
               {
@@ -2006,9 +1880,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "apiKeyPrams",
-                "description": [
-                  "ValidateAPIKeyParams."
-                ],
+                "description": ["ValidateAPIKeyParams."],
                 "signature": [
                   {
                     "pluginId": "@kbn/security-plugin-types-server",
@@ -2032,9 +1904,7 @@
             "type": "Function",
             "tags": [],
             "label": "invalidate",
-            "description": [
-              "\nTries to invalidate an API keys."
-            ],
+            "description": ["\nTries to invalidate an API keys."],
             "signature": [
               "(request: ",
               {
@@ -2072,9 +1942,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": [
-                  "Request instance."
-                ],
+                "description": ["Request instance."],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -2096,9 +1964,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "The params to invalidate an API keys."
-                ],
+                "description": ["The params to invalidate an API keys."],
                 "signature": [
                   {
                     "pluginId": "@kbn/security-plugin-types-server",
@@ -2122,9 +1988,7 @@
             "type": "Function",
             "tags": [],
             "label": "invalidateAsInternalUser",
-            "description": [
-              "\nTries to invalidate the API keys by using the internal user."
-            ],
+            "description": ["\nTries to invalidate the API keys by using the internal user."],
             "signature": [
               "(params: ",
               {
@@ -2154,9 +2018,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "The params to invalidate the API keys."
-                ],
+                "description": ["The params to invalidate the API keys."],
                 "signature": [
                   {
                     "pluginId": "@kbn/security-plugin-types-server",
@@ -2195,9 +2057,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "(operation: string) => string"
-            ],
+            "signature": ["(operation: string) => string"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/app.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2209,9 +2069,7 @@
                 "tags": [],
                 "label": "operation",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/app.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2259,9 +2117,7 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [
-              "\nLog message"
-            ],
+            "description": ["\nLog message"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2272,9 +2128,7 @@
             "type": "Object",
             "tags": [],
             "label": "kibana",
-            "description": [
-              "\nKibana specific fields"
-            ],
+            "description": ["\nKibana specific fields"],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
@@ -2295,9 +2149,7 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": [
-              "\nFields describing an HTTP request"
-            ],
+            "description": ["\nFields describing an HTTP request"],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
@@ -2321,9 +2173,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuditHttp",
-        "description": [
-          "\nAudit http schema using ECS format"
-        ],
+        "description": ["\nAudit http schema using ECS format"],
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
@@ -2345,9 +2195,7 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": [
-              "\nHTTP request details"
-            ],
+            "description": ["\nHTTP request details"],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
@@ -2371,9 +2219,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuditKibana",
-        "description": [
-          "\nAudit kibana schema using ECS format"
-        ],
+        "description": ["\nAudit kibana schema using ECS format"],
         "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2384,12 +2230,8 @@
             "type": "string",
             "tags": [],
             "label": "space_id",
-            "description": [
-              "\nThe ID of the space associated with this event."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe ID of the space associated with this event."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2403,9 +2245,7 @@
             "description": [
               "\nThe ID of the user session associated with this event. Each login attempt\nresults in a unique session id."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2419,9 +2259,7 @@
             "description": [
               "\nSaved object that was created, changed, deleted or accessed as part of this event."
             ],
-            "signature": [
-              "{ type: string; id: string; name?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ type: string; id: string; name?: string | undefined; } | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2432,12 +2270,8 @@
             "type": "string",
             "tags": [],
             "label": "authentication_provider",
-            "description": [
-              "\nName of authentication provider associated with a login event."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nName of authentication provider associated with a login event."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2448,12 +2282,8 @@
             "type": "string",
             "tags": [],
             "label": "authentication_type",
-            "description": [
-              "\nType of authentication provider associated with a login event."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nType of authentication provider associated with a login event."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2464,12 +2294,8 @@
             "type": "string",
             "tags": [],
             "label": "authentication_realm",
-            "description": [
-              "\nName of Elasticsearch realm that has authenticated the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nName of Elasticsearch realm that has authenticated the user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2483,9 +2309,7 @@
             "description": [
               "\nName of Elasticsearch realm where the user details were retrieved from."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2496,12 +2320,8 @@
             "type": "Object",
             "tags": [],
             "label": "add_to_spaces",
-            "description": [
-              "\nSet of space IDs that a saved object was shared to."
-            ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "description": ["\nSet of space IDs that a saved object was shared to."],
+            "signature": ["readonly string[] | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2512,12 +2332,8 @@
             "type": "Object",
             "tags": [],
             "label": "delete_from_spaces",
-            "description": [
-              "\nSet of space IDs that a saved object was removed from."
-            ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "description": ["\nSet of space IDs that a saved object was removed from."],
+            "signature": ["readonly string[] | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2528,12 +2344,8 @@
             "type": "Object",
             "tags": [],
             "label": "unauthorized_spaces",
-            "description": [
-              "\nSet of space IDs that are not authorized for an action."
-            ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "description": ["\nSet of space IDs that are not authorized for an action."],
+            "signature": ["readonly string[] | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2544,12 +2356,8 @@
             "type": "Object",
             "tags": [],
             "label": "unauthorized_types",
-            "description": [
-              "\nSet of types that are not authorized for an action."
-            ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "description": ["\nSet of types that are not authorized for an action."],
+            "signature": ["readonly string[] | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2639,9 +2447,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuditRequest",
-        "description": [
-          "\nAudit request schema using ECS format"
-        ],
+        "description": ["\nAudit request schema using ECS format"],
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
@@ -2662,12 +2468,8 @@
             "type": "Object",
             "tags": [],
             "label": "headers",
-            "description": [
-              "\nHTTP request headers"
-            ],
-            "signature": [
-              "{ 'x-forwarded-for'?: string | undefined; } | undefined"
-            ],
+            "description": ["\nHTTP request headers"],
+            "signature": ["{ 'x-forwarded-for'?: string | undefined; } | undefined"],
             "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2773,9 +2575,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthenticatedUser",
-        "description": [
-          "\nRepresents the currently authenticated user."
-        ],
+        "description": ["\nRepresents the currently authenticated user."],
         "signature": [
           {
             "pluginId": "@kbn/core-security-common",
@@ -2803,9 +2603,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_realm",
-            "description": [
-              "\nThe name and type of the Realm that has authenticated the user."
-            ],
+            "description": ["\nThe name and type of the Realm that has authenticated the user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -2847,9 +2645,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_provider",
-            "description": [
-              "\nThe authentication provider that used to authenticate user."
-            ],
+            "description": ["\nThe authentication provider that used to authenticate user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -2869,9 +2665,7 @@
             "type": "string",
             "tags": [],
             "label": "authentication_type",
-            "description": [
-              "\nThe AuthenticationType used by ES to authenticate the user.\n"
-            ],
+            "description": ["\nThe AuthenticationType used by ES to authenticate the user.\n"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2895,12 +2689,8 @@
             "type": "string",
             "tags": [],
             "label": "profile_uid",
-            "description": [
-              "\nUser profile ID of this user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nUser profile ID of this user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3295,9 +3085,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "(owner: string, operation: string) => string"
-            ],
+            "signature": ["(owner: string, operation: string) => string"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3309,9 +3097,7 @@
                 "tags": [],
                 "label": "owner",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3324,9 +3110,7 @@
                 "tags": [],
                 "label": "operation",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3394,9 +3178,7 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3493,9 +3275,7 @@
                 "tags": [],
                 "label": "spaceIds",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3640,9 +3420,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CheckPrivilegesOptions",
-        "description": [
-          "\nOptions to influce the privilege checks."
-        ],
+        "description": ["\nOptions to influce the privilege checks."],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3656,9 +3434,7 @@
             "description": [
               "\nWhether or not the `login` action should be required (default: true).\nSetting this to false is not advised except for special circumstances, when you do not require\nthe request to belong to a user capable of logging into Kibana."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3672,9 +3448,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CheckPrivilegesPayload",
-        "description": [
-          "\nPrivileges that can be checked for the Kibana users."
-        ],
+        "description": ["\nPrivileges that can be checked for the Kibana users."],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3688,9 +3462,7 @@
             "description": [
               "\nA list of the Kibana specific privileges (usually generated with `security.authz.actions.*.get(...)`)."
             ],
-            "signature": [
-              "string | string[] | undefined"
-            ],
+            "signature": ["string | string[] | undefined"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3701,12 +3473,8 @@
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": [
-              "\nA set of the Elasticsearch cluster and index privileges."
-            ],
-            "signature": [
-              "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
-            ],
+            "description": ["\nA set of the Elasticsearch cluster and index privileges."],
+            "signature": ["{ cluster: string[]; index: Record<string, string[]>; } | undefined"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3814,9 +3582,7 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3871,9 +3637,7 @@
             "description": [
               "\nA list of the Kibana specific privileges (usually generated with `security.authz.actions.*.get(...)`)."
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3887,9 +3651,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CheckUserProfilesPrivilegesResponse",
-        "description": [
-          "\nResponse of the check privileges operation for the users profiles."
-        ],
+        "description": ["\nResponse of the check privileges operation for the users profiles."],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3903,9 +3665,7 @@
             "description": [
               "\nThe subset of the requested profile IDs of the users that have all the requested privileges."
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3946,9 +3706,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique id for this API key"
-            ],
+            "description": ["\nUnique id for this API key"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3959,9 +3717,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nName for this API key"
-            ],
+            "description": ["\nName for this API key"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3972,9 +3728,7 @@
             "type": "string",
             "tags": [],
             "label": "api_key",
-            "description": [
-              "\nGenerated API key"
-            ],
+            "description": ["\nGenerated API key"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3988,9 +3742,7 @@
         "type": "Interface",
         "tags": [],
         "label": "InvalidateAPIKeyResult",
-        "description": [
-          "\nThe return value when invalidating an API key in Elasticsearch."
-        ],
+        "description": ["\nThe return value when invalidating an API key in Elasticsearch."],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4004,9 +3756,7 @@
             "description": [
               "\nThe IDs of the API keys that were invalidated as part of the request."
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4017,12 +3767,8 @@
             "type": "Array",
             "tags": [],
             "label": "previously_invalidated_api_keys",
-            "description": [
-              "\nThe IDs of the API keys that were already invalidated."
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["\nThe IDs of the API keys that were already invalidated."],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4065,9 +3811,7 @@
         "type": "Interface",
         "tags": [],
         "label": "InvalidateAPIKeysParams",
-        "description": [
-          "\nRepresents the params for invalidating multiple API keys"
-        ],
+        "description": ["\nRepresents the params for invalidating multiple API keys"],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4079,9 +3823,7 @@
             "tags": [],
             "label": "ids",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4276,9 +4018,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "(type: string, operation: string) => string"
-            ],
+            "signature": ["(type: string, operation: string) => string"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4290,9 +4030,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4305,9 +4043,7 @@
                 "tags": [],
                 "label": "operation",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4406,9 +4142,7 @@
                 "tags": [],
                 "label": "uiCapabilityParts",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4426,9 +4160,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileBulkGetParams",
-        "description": [
-          "\nParameters for the bulk get API."
-        ],
+        "description": ["\nParameters for the bulk get API."],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4439,12 +4171,8 @@
             "type": "Object",
             "tags": [],
             "label": "uids",
-            "description": [
-              "\nList of user profile identifiers."
-            ],
-            "signature": [
-              "Set<string>"
-            ],
+            "description": ["\nList of user profile identifiers."],
+            "signature": ["Set<string>"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4458,9 +4186,7 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4474,9 +4200,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileGetCurrentParams",
-        "description": [
-          "\nParameters for the get user profile for the current user API."
-        ],
+        "description": ["\nParameters for the get user profile for the current user API."],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4487,9 +4211,7 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": [
-              "\nUser request instance to get user profile for."
-            ],
+            "description": ["\nUser request instance to get user profile for."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -4513,9 +4235,7 @@
             "description": [
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4542,9 +4262,7 @@
             "type": "string",
             "tags": [],
             "label": "spaceId",
-            "description": [
-              "\nThe id of the Kibana Space."
-            ],
+            "description": ["\nThe id of the Kibana Space."],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4555,12 +4273,8 @@
             "type": "Object",
             "tags": [],
             "label": "privileges",
-            "description": [
-              "\nThe set of the Kibana specific application privileges."
-            ],
-            "signature": [
-              "{ kibana: string[]; }"
-            ],
+            "description": ["\nThe set of the Kibana specific application privileges."],
+            "signature": ["{ kibana: string[]; }"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4574,9 +4288,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileSuggestParams",
-        "description": [
-          "\nParameters for the suggest API."
-        ],
+        "description": ["\nParameters for the suggest API."],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4590,9 +4302,7 @@
             "description": [
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4606,9 +4316,7 @@
             "description": [
               "\nExtra search criteria to improve relevance of the suggestion result. A profile matching the\nspecified hint is ranked higher in the response. But not-matching the hint does not exclude a\nprofile from the response as long as it matches the `name` field query."
             ],
-            "signature": [
-              "{ uids: string[]; } | undefined"
-            ],
+            "signature": ["{ uids: string[]; } | undefined"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4619,12 +4327,8 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": [
-              "\nDesired number of suggestion to return. The default value is 10."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nDesired number of suggestion to return. The default value is 10."],
+            "signature": ["number | undefined"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4638,9 +4342,7 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4677,9 +4379,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ValidateAPIKeyParams",
-        "description": [
-          "\nRepresents the parameters for validating API Key credentials."
-        ],
+        "description": ["\nRepresents the parameters for validating API Key credentials."],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4690,9 +4390,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique id for this API key"
-            ],
+            "description": ["\nUnique id for this API key"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4703,9 +4401,7 @@
             "type": "string",
             "tags": [],
             "label": "api_key",
-            "description": [
-              "\nGenerated API Key (secret)"
-            ],
+            "description": ["\nGenerated API Key (secret)"],
             "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4952,9 +4648,7 @@
             "tags": [],
             "label": "actions",
             "description": [],
-            "signature": [
-              "string | string[]"
-            ],
+            "signature": ["string | string[]"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4966,9 +4660,7 @@
             "tags": [],
             "label": "namespaceOrNamespaces",
             "description": [],
-            "signature": [
-              "string | (string | undefined)[] | undefined"
-            ],
+            "signature": ["string | (string | undefined)[] | undefined"],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5051,12 +4743,8 @@
         "type": "Type",
         "tags": [],
         "label": "CreateAPIKeyResult",
-        "description": [
-          "\nResponse of Kibana Create API key endpoint."
-        ],
-        "signature": [
-          "SecurityCreateApiKeyResponse"
-        ],
+        "description": ["\nResponse of Kibana Create API key endpoint."],
+        "signature": ["SecurityCreateApiKeyResponse"],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5146,9 +4834,7 @@
         "description": [
           "\nThe routes that are involved into authentication flows, especially if they are used by the 3rd\nparties, require special handling."
         ],
-        "signature": [
-          "\"security:authFlow\""
-        ],
+        "signature": ["\"security:authFlow\""],
         "path": "x-pack/plugins/security/server/routes/tags.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5163,9 +4849,7 @@
         "description": [
           "\nIf the route is marked with this tag Security can safely assume that the calling party that sends\nrequest to this route can handle redirect responses. It's particularly important if we want the\nspecific route to be able to initiate or participate in the authentication handshake that may\ninvolve redirects and will eventually redirect authenticated user to this route."
         ],
-        "signature": [
-          "\"security:canRedirect\""
-        ],
+        "signature": ["\"security:canRedirect\""],
         "path": "x-pack/plugins/security/server/routes/tags.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5177,9 +4861,7 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileServiceStart",
-        "description": [
-          "\nStart contract for Core's userProfile service.\n"
-        ],
+        "description": ["\nStart contract for Core's userProfile service.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server",
@@ -5202,9 +4884,7 @@
       "type": "Interface",
       "tags": [],
       "label": "SecurityPluginSetup",
-      "description": [
-        "\nDescribes public Security plugin contract returned at the `setup` stage."
-      ],
+      "description": ["\nDescribes public Security plugin contract returned at the `setup` stage."],
       "signature": [
         {
           "pluginId": "security",
@@ -5230,9 +4910,7 @@
           "parentPluginId": "security",
           "id": "def-server.SecurityPluginSetup.authc",
           "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "authc",
           "description": [],
           "signature": [
@@ -5316,9 +4994,7 @@
           "parentPluginId": "security",
           "id": "def-server.SecurityPluginSetup.authz",
           "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "authz",
           "description": [],
           "signature": [
@@ -5382,9 +5058,7 @@
       "type": "Interface",
       "tags": [],
       "label": "SecurityPluginStart",
-      "description": [
-        "\nDescribes public Security plugin contract returned at the `start` stage."
-      ],
+      "description": ["\nDescribes public Security plugin contract returned at the `start` stage."],
       "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -5439,9 +5113,7 @@
           "type": "Object",
           "tags": [],
           "label": "userProfiles",
-          "description": [
-            "\nUser profiles services to retrieve user profiles."
-          ],
+          "description": ["\nUser profiles services to retrieve user profiles."],
           "signature": [
             {
               "pluginId": "@kbn/core-user-profile-server",
@@ -5469,9 +5141,7 @@
         "type": "Function",
         "tags": [],
         "label": "getUserDisplayName",
-        "description": [
-          "\nDetermines the display name for the provided user information."
-        ],
+        "description": ["\nDetermines the display name for the provided user information."],
         "signature": [
           "(params: ",
           {
@@ -5493,9 +5163,7 @@
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": [
-              "Set of available user's name-related fields."
-            ],
+            "description": ["Set of available user's name-related fields."],
             "signature": [
               {
                 "pluginId": "security",
@@ -5520,9 +5188,7 @@
         "type": "Function",
         "tags": [],
         "label": "isRoleReserved",
-        "description": [
-          "\nReturns whether given role is reserved or not.\n"
-        ],
+        "description": ["\nReturns whether given role is reserved or not.\n"],
         "signature": [
           "(role: Partial<",
           {
@@ -5544,9 +5210,7 @@
             "type": "Object",
             "tags": [],
             "label": "role",
-            "description": [
-              "Role as returned by roles API"
-            ],
+            "description": ["Role as returned by roles API"],
             "signature": [
               "Partial<",
               {
@@ -5573,9 +5237,7 @@
         "type": "Function",
         "tags": [],
         "label": "isRoleWithWildcardBasePrivilege",
-        "description": [
-          "\nReturns whether given role is editable through the UI or not.\n"
-        ],
+        "description": ["\nReturns whether given role is editable through the UI or not.\n"],
         "signature": [
           "(role: Partial<",
           {
@@ -5597,9 +5259,7 @@
             "type": "Object",
             "tags": [],
             "label": "role",
-            "description": [
-              "the Role as returned by roles API"
-            ],
+            "description": ["the Role as returned by roles API"],
             "signature": [
               "Partial<",
               {
@@ -5628,9 +5288,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthenticatedUser",
-        "description": [
-          "\nRepresents the currently authenticated user."
-        ],
+        "description": ["\nRepresents the currently authenticated user."],
         "signature": [
           {
             "pluginId": "@kbn/core-security-common",
@@ -5658,9 +5316,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_realm",
-            "description": [
-              "\nThe name and type of the Realm that has authenticated the user."
-            ],
+            "description": ["\nThe name and type of the Realm that has authenticated the user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -5702,9 +5358,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_provider",
-            "description": [
-              "\nThe authentication provider that used to authenticate user."
-            ],
+            "description": ["\nThe authentication provider that used to authenticate user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -5724,9 +5378,7 @@
             "type": "string",
             "tags": [],
             "label": "authentication_type",
-            "description": [
-              "\nThe AuthenticationType used by ES to authenticate the user.\n"
-            ],
+            "description": ["\nThe AuthenticationType used by ES to authenticate the user.\n"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5750,12 +5402,8 @@
             "type": "string",
             "tags": [],
             "label": "profile_uid",
-            "description": [
-              "\nUser profile ID of this user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nUser profile ID of this user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5769,9 +5417,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthenticationProvider",
-        "description": [
-          "\nType and name tuple to identify provider used to authenticate user."
-        ],
+        "description": ["\nType and name tuple to identify provider used to authenticate user."],
         "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5782,9 +5428,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nType of the Kibana authentication provider."
-            ],
+            "description": ["\nType of the Kibana authentication provider."],
             "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5795,9 +5439,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nName of the Kibana authentication provider (arbitrary string)."
-            ],
+            "description": ["\nName of the Kibana authentication provider (arbitrary string)."],
             "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5823,9 +5465,7 @@
             "tags": [],
             "label": "cluster",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/security/common/model/builtin_es_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5837,9 +5477,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/security/common/model/builtin_es_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5851,9 +5489,7 @@
             "tags": [],
             "label": "remote_cluster",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/security/common/model/builtin_es_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5896,9 +5532,7 @@
             "tags": [],
             "label": "password",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5910,9 +5544,7 @@
             "tags": [],
             "label": "confirmPassword",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5938,9 +5570,7 @@
             "tags": [],
             "label": "[featureId: string]: string[]",
             "description": [],
-            "signature": [
-              "[featureId: string]:  string[]"
-            ],
+            "signature": ["[featureId: string]:  string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/features_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5954,9 +5584,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetUserDisplayNameParams",
-        "description": [
-          "\nSet of available name-related fields to pick as display name."
-        ],
+        "description": ["\nSet of available name-related fields to pick as display name."],
         "path": "x-pack/plugins/security/common/model/user.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5967,9 +5595,7 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [
-              "\nUsername of the user."
-            ],
+            "description": ["\nUsername of the user."],
             "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5980,12 +5606,8 @@
             "type": "string",
             "tags": [],
             "label": "email",
-            "description": [
-              "\nOptional email of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional email of the user."],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5996,12 +5618,8 @@
             "type": "string",
             "tags": [],
             "label": "full_name",
-            "description": [
-              "\nOptional full name of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional full name of the user."],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6015,9 +5633,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetUserProfileResponse",
-        "description": [
-          "\nUser profile enriched with session information."
-        ],
+        "description": ["\nUser profile enriched with session information."],
         "signature": [
           {
             "pluginId": "security",
@@ -6100,9 +5716,7 @@
             "tags": [],
             "label": "template",
             "description": [],
-            "signature": [
-              "{ source: string; }"
-            ],
+            "signature": ["{ source: string; }"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6114,9 +5728,7 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": [
-              "RoleTemplateFormat | undefined"
-            ],
+            "signature": ["RoleTemplateFormat | undefined"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6153,9 +5765,7 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": [
-              "RoleTemplateFormat | undefined"
-            ],
+            "signature": ["RoleTemplateFormat | undefined"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6181,9 +5791,7 @@
             "tags": [],
             "label": "global",
             "description": [],
-            "signature": [
-              "{ [x: string]: string[]; }"
-            ],
+            "signature": ["{ [x: string]: string[]; }"],
             "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6195,9 +5803,7 @@
             "tags": [],
             "label": "features",
             "description": [],
-            "signature": [
-              "RawKibanaFeaturePrivileges"
-            ],
+            "signature": ["RawKibanaFeaturePrivileges"],
             "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6209,9 +5815,7 @@
             "tags": [],
             "label": "space",
             "description": [],
-            "signature": [
-              "{ [x: string]: string[]; }"
-            ],
+            "signature": ["{ [x: string]: string[]; }"],
             "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6223,9 +5827,7 @@
             "tags": [],
             "label": "reserved",
             "description": [],
-            "signature": [
-              "{ [x: string]: string[]; }"
-            ],
+            "signature": ["{ [x: string]: string[]; }"],
             "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6263,9 +5865,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"rest\""
-            ],
+            "signature": ["\"rest\""],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6302,9 +5902,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6375,9 +5973,7 @@
             "tags": [],
             "label": "metadata",
             "description": [],
-            "signature": [
-              "{ [anyKey: string]: any; } | undefined"
-            ],
+            "signature": ["{ [anyKey: string]: any; } | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6389,9 +5985,7 @@
             "tags": [],
             "label": "transient_metadata",
             "description": [],
-            "signature": [
-              "{ [anyKey: string]: any; } | undefined"
-            ],
+            "signature": ["{ [anyKey: string]: any; } | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6403,9 +5997,7 @@
             "tags": [],
             "label": "_transform_error",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6417,9 +6009,7 @@
             "tags": [],
             "label": "_unrecognized_applications",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6445,9 +6035,7 @@
             "tags": [],
             "label": "names",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6459,9 +6047,7 @@
             "tags": [],
             "label": "privileges",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6487,9 +6073,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6515,9 +6099,7 @@
             "tags": [],
             "label": "spaces",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6529,9 +6111,7 @@
             "tags": [],
             "label": "base",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6563,9 +6143,7 @@
             "tags": [],
             "label": "_reserved",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6613,9 +6191,7 @@
             "tags": [],
             "label": "roles",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6648,9 +6224,7 @@
             "tags": [],
             "label": "rules",
             "description": [],
-            "signature": [
-              "{} | RoleMappingRule"
-            ],
+            "signature": ["{} | RoleMappingRule"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6662,9 +6236,7 @@
             "tags": [],
             "label": "metadata",
             "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
+            "signature": ["{ [x: string]: any; }"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6690,9 +6262,7 @@
             "tags": [],
             "label": "clusters",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6704,9 +6274,7 @@
             "tags": [],
             "label": "privileges",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6749,9 +6317,7 @@
             "tags": [],
             "label": "clusters",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6777,9 +6343,7 @@
             "tags": [],
             "label": "isLicenseAvailable",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6793,9 +6357,7 @@
             "tags": [],
             "label": "getUnavailableReason",
             "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6809,9 +6371,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6905,9 +6465,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SecurityLicenseFeatures",
-        "description": [
-          "\nDescribes Security plugin features that depend on license."
-        ],
+        "description": ["\nDescribes Security plugin features that depend on license."],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6918,9 +6476,7 @@
             "type": "boolean",
             "tags": [],
             "label": "showLogin",
-            "description": [
-              "\nIndicates whether we show login page or skip it."
-            ],
+            "description": ["\nIndicates whether we show login page or skip it."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6931,9 +6487,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowLogin",
-            "description": [
-              "\nIndicates whether we allow login or disable it on the login page."
-            ],
+            "description": ["\nIndicates whether we allow login or disable it on the login page."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6957,9 +6511,7 @@
             "type": "boolean",
             "tags": [],
             "label": "showRoleMappingsManagement",
-            "description": [
-              "\nIndicates whether we show the Role Mappings UI."
-            ],
+            "description": ["\nIndicates whether we show the Role Mappings UI."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6983,9 +6535,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowAuditLogging",
-            "description": [
-              "\nIndicates whether we allow logging of audit events."
-            ],
+            "description": ["\nIndicates whether we allow logging of audit events."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7048,9 +6598,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowRbac",
-            "description": [
-              "\nIndicates whether we allow Role-based access control (RBAC)."
-            ],
+            "description": ["\nIndicates whether we allow Role-based access control (RBAC)."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7061,9 +6609,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowSubFeaturePrivileges",
-            "description": [
-              "\nIndicates whether we allow sub-feature privileges."
-            ],
+            "description": ["\nIndicates whether we allow sub-feature privileges."],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7087,9 +6633,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "layout",
-            "description": [
-              "\nDescribes the layout of the login form if it's displayed."
-            ],
+            "description": ["\nDescribes the layout of the login form if it's displayed."],
             "signature": [
               {
                 "pluginId": "@kbn/security-plugin-types-common",
@@ -7125,9 +6669,7 @@
             "tags": [],
             "label": "template",
             "description": [],
-            "signature": [
-              "{ id: string; }"
-            ],
+            "signature": ["{ id: string; }"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7139,9 +6681,7 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": [
-              "RoleTemplateFormat | undefined"
-            ],
+            "signature": ["RoleTemplateFormat | undefined"],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7155,9 +6695,7 @@
         "type": "Interface",
         "tags": [],
         "label": "User",
-        "description": [
-          "\nA set of fields describing Kibana user."
-        ],
+        "description": ["\nA set of fields describing Kibana user."],
         "path": "packages/core/security/core-security-common/src/authentication/user.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7180,9 +6718,7 @@
             "tags": [],
             "label": "email",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7194,9 +6730,7 @@
             "tags": [],
             "label": "full_name",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7208,9 +6742,7 @@
             "tags": [],
             "label": "roles",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "packages/core/security/core-security-common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7272,9 +6804,7 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": [
-              "\nUnique ID for of the user profile."
-            ],
+            "description": ["\nUnique ID for of the user profile."],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7285,9 +6815,7 @@
             "type": "boolean",
             "tags": [],
             "label": "enabled",
-            "description": [
-              "\nIndicates whether user profile is enabled or not."
-            ],
+            "description": ["\nIndicates whether user profile is enabled or not."],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7298,9 +6826,7 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nInformation about the user that owns profile."
-            ],
+            "description": ["\nInformation about the user that owns profile."],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-common",
@@ -7320,12 +6846,8 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": [
-              "\nUser specific data associated with the profile."
-            ],
-            "signature": [
-              "{ [P in keyof D]?: D[P] | undefined; }"
-            ],
+            "description": ["\nUser specific data associated with the profile."],
+            "signature": ["{ [P in keyof D]?: D[P] | undefined; }"],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7339,9 +6861,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileUserInfo",
-        "description": [
-          "\nBasic user information returned in user profile."
-        ],
+        "description": ["\nBasic user information returned in user profile."],
         "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7352,9 +6872,7 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [
-              "\nUsername of the user."
-            ],
+            "description": ["\nUsername of the user."],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7365,12 +6883,8 @@
             "type": "string",
             "tags": [],
             "label": "email",
-            "description": [
-              "\nOptional email of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional email of the user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7381,12 +6895,8 @@
             "type": "string",
             "tags": [],
             "label": "full_name",
-            "description": [
-              "\nOptional full name of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional full name of the user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7430,12 +6940,8 @@
             "type": "Object",
             "tags": [],
             "label": "roles",
-            "description": [
-              "\nList of the user roles."
-            ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "description": ["\nList of the user roles."],
+            "signature": ["readonly string[]"],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7462,9 +6968,7 @@
             "description": [
               "\nOptional name of the security domain that Elasticsearch security realm that was\nused to authenticate user resides in (if any)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7509,9 +7013,7 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nInformation about the user that owns profile."
-            ],
+            "description": ["\nInformation about the user that owns profile."],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-common",
@@ -7534,9 +7036,7 @@
             "description": [
               "\nUser specific _searchable_ labels associated with the profile. Note that labels are considered\nsecurity related field since it's going to be used to store user's space ID."
             ],
-            "signature": [
-              "L"
-            ],
+            "signature": ["L"],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7563,9 +7063,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nArbitrary name of the security realm."
-            ],
+            "description": ["\nArbitrary name of the security realm."],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7576,9 +7074,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nType of the security realm (file, native, saml etc.)."
-            ],
+            "description": ["\nType of the security realm (file, native, saml etc.)."],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7620,12 +7116,8 @@
         "type": "Type",
         "tags": [],
         "label": "LoginLayout",
-        "description": [
-          "\nRepresents types of login form layouts."
-        ],
-        "signature": [
-          "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
-        ],
+        "description": ["\nRepresents types of login form layouts."],
+        "signature": ["\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7674,12 +7166,8 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileData",
-        "description": [
-          "\nPlaceholder for data stored in user profile."
-        ],
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
+        "description": ["\nPlaceholder for data stored in user profile."],
+        "signature": ["{ [x: string]: unknown; }"],
         "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7691,12 +7179,8 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileLabels",
-        "description": [
-          "\nType of the user profile labels structure (currently"
-        ],
-        "signature": [
-          "{ [x: string]: string; }"
-        ],
+        "description": ["\nType of the user profile labels structure (currently"],
+        "signature": ["{ [x: string]: string; }"],
         "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,

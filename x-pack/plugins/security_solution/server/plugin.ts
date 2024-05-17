@@ -5,32 +5,59 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { Dataset } from '@kbn/rule-registry-plugin/server';
-import type { ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
-import { registerAgentRoutes } from './endpoint/routes/agent';
-import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
-import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
-import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
-import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import {
-  siemGuideId,
-  getSiemGuideConfig,
+  APP_ID,
+  APP_UI_ID,
+  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+  DEFAULT_ALERTS_INDEX,
+  SERVER_APP_ID,
+} from '../common/constants';
+import {
   defaultGuideTranslations,
+  getSiemGuideConfig,
+  siemGuideId,
 } from '../common/guided_onboarding/siem_guide_config';
+import { AppClientFactory } from './client';
+import type { ConfigType } from './config';
+import { createConfig } from './config';
+import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import { ManifestTask } from './endpoint/lib/artifacts';
+import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
+import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
+import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
+import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
+import { registerActionRoutes } from './endpoint/routes/actions';
+import { registerAgentRoutes } from './endpoint/routes/agent';
+import { registerEndpointRoutes } from './endpoint/routes/metadata';
+import { registerPolicyRoutes } from './endpoint/routes/policy';
+import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
+import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import { EndpointMetadataService } from './endpoint/services/metadata';
+import type { EndpointAppContext } from './endpoint/types';
+import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
+// eslint-disable-next-line no-restricted-imports
+import {
+  isLegacyNotificationRuleExecutor,
+  legacyRulesNotificationRuleType,
+} from './lib/detection_engine/rule_actions_legacy';
+import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
+import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
+import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -40,64 +67,47 @@ import {
   createQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
-import { initRoutes } from './routes';
-import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
-import { ManifestTask } from './endpoint/lib/artifacts';
-import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
-import { initSavedObjects } from './saved_objects';
-import { AppClientFactory } from './client';
-import type { ConfigType } from './config';
-import { createConfig } from './config';
-import { initUiSettings } from './ui_settings';
-import {
-  APP_ID,
-  APP_UI_ID,
-  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-  DEFAULT_ALERTS_INDEX,
-  SERVER_APP_ID,
-} from '../common/constants';
-import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { registerActionRoutes } from './endpoint/routes/actions';
-import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
-import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
-import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
-import type { EndpointAppContext } from './endpoint/types';
-import { initUsageCollectors } from './usage';
-import type { SecuritySolutionRequestHandlerContext } from './types';
-import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import type { ITelemetryEventsSender } from './lib/telemetry/sender';
-import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
-import {
-  DEFAULT_QUEUE_CONFIG,
-  DEFAULT_RETRY_CONFIG,
-  AsyncTelemetryEventsSender,
-} from './lib/telemetry/async_sender';
-import type { ITelemetryReceiver } from './lib/telemetry/receiver';
-import { TelemetryReceiver } from './lib/telemetry/receiver';
-import { licenseService } from './lib/license';
-import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-import { EndpointMetadataService } from './endpoint/services/metadata';
-import type {
-  CreateQueryRuleAdditionalOptions,
-  CreateRuleOptions,
-} from './lib/detection_engine/rule_types/types';
-// eslint-disable-next-line no-restricted-imports
-import {
-  isLegacyNotificationRuleExecutor,
-  legacyRulesNotificationRuleType,
-} from './lib/detection_engine/rule_actions_legacy';
 import {
   createSecurityRuleTypeWrapper,
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import type {
+  CreateQueryRuleAdditionalOptions,
+  CreateRuleOptions,
+} from './lib/detection_engine/rule_types/types';
+import { licenseService } from './lib/license';
+import {
+  AsyncTelemetryEventsSender,
+  DEFAULT_QUEUE_CONFIG,
+  DEFAULT_RETRY_CONFIG,
+} from './lib/telemetry/async_sender';
+import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
+import type { ITelemetryReceiver } from './lib/telemetry/receiver';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
+import type { ITelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { initRoutes } from './routes';
+import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
+import { initSavedObjects } from './saved_objects';
+import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
+import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
+import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import type { SecuritySolutionRequestHandlerContext } from './types';
+import { initUiSettings } from './ui_settings';
+import { initUsageCollectors } from './usage';
 
 import { RequestContextFactory } from './request_context_factory';
 
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
+  ENDPOINT_SEARCH_STRATEGY,
+} from '../common/endpoint/constants';
+import { featureUsageService } from './endpoint/services/feature_usage';
+import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
+import { artifactService } from './lib/telemetry/artifact';
+import { events } from './lib/telemetry/event_based/events';
+import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import type {
   ISecuritySolutionPlugin,
   PluginInitializerContext,
@@ -108,28 +118,18 @@ import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from './plugin_contract';
-import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
-import { featureUsageService } from './endpoint/services/feature_usage';
-import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { artifactService } from './lib/telemetry/artifact';
-import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
-import {
-  ENDPOINT_FIELDS_SEARCH_STRATEGY,
-  ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
-  ENDPOINT_SEARCH_STRATEGY,
-} from '../common/endpoint/constants';
 
-import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
-import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
-import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
-import {
-  latestRiskScoreIndexPattern,
-  allRiskScoreIndexPattern,
-} from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
+import {
+  allRiskScoreIndexPattern,
+  latestRiskScoreIndexPattern,
+} from '../common/entity_analytics/risk_engine';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
+import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
+import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useLicense } from '../../../../../../hooks/use_license';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { MockedFleetStartServices } from '../../../../../../mock';
-import { useLicense } from '../../../../../../hooks/use_license';
 import type { LicenseService } from '../../../../services';
 import type { AgentPolicy } from '../../../../types';
 
-import { useOutputOptions, useFleetServerHostsOptions } from './hooks';
+import { useFleetServerHostsOptions, useOutputOptions } from './hooks';
 
 jest.mock('../../../../../../hooks/use_license');
 

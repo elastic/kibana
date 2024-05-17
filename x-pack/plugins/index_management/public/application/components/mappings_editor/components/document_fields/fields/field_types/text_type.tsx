@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiDualRange, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import { getFieldConfig } from '../../../../lib';
 import {
-  UseField,
-  UseMultiFields,
   FieldHook,
   FormDataProvider,
   RangeField,
+  UseField,
+  UseMultiFields,
 } from '../../../../shared_imports';
-import { getFieldConfig } from '../../../../lib';
+import { Field as FieldType, NormalizedField } from '../../../../types';
 import {
-  StoreParameter,
-  IndexParameter,
-  BoostParameter,
   AnalyzersParameter,
+  BoostParameter,
+  CopyToParameter,
   EagerGlobalOrdinalsParameter,
+  FieldDataParameter,
+  IndexParameter,
+  MetaParameter,
   NormsParameter,
   SimilarityParameter,
-  CopyToParameter,
+  StoreParameter,
   TermVectorParameter,
-  FieldDataParameter,
-  MetaParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import { AdvancedParametersSection, BasicParametersSection, EditFieldFormRow } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -203,25 +203,29 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                       },
                     }}
                   />
-                  {formData.index_options !== 'positions' && formData.index_options !== 'offsets' && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiCallOut
-                        title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorTitle', {
-                          defaultMessage: 'Positions not enabled.',
-                        })}
-                        color="danger"
-                        iconType="warning"
-                      >
-                        <p>
-                          {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
-                            defaultMessage:
-                              'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
-                          })}
-                        </p>
-                      </EuiCallOut>
-                    </>
-                  )}
+                  {formData.index_options !== 'positions' &&
+                    formData.index_options !== 'offsets' && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiCallOut
+                          title={i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
+                            {
+                              defaultMessage: 'Positions not enabled.',
+                            }
+                          )}
+                          color="danger"
+                          iconType="warning"
+                        >
+                          <p>
+                            {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
+                              defaultMessage:
+                                'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
+                            })}
+                          </p>
+                        </EuiCallOut>
+                      </>
+                    )}
                 </>
               );
             }}

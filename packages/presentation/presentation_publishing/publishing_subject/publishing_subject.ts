@@ -33,7 +33,7 @@ export const usePublishingSubject = <T extends unknown = unknown>(
  *   When 'subject' is expected to change, 'subject' must be part of component react state.
  */
 export const useStateFromPublishingSubject = <
-  SubjectType extends PublishingSubject<any> | undefined = PublishingSubject<any> | undefined
+  SubjectType extends PublishingSubject<any> | undefined = PublishingSubject<any> | undefined,
 >(
   subject: SubjectType
 ): ValueFromPublishingSubject<SubjectType> => {

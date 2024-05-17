@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { TimestampOption } from '../types';
 
 export const noTimeFieldLabel = i18n.translate(

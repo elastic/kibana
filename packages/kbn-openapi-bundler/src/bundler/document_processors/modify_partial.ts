@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor } from '../types';
 import { hasProp } from '../../utils/has_prop';
-import { inlineRef } from './utils/inline_ref';
 import { X_MODIFY } from '../known_custom_props';
+import { DocumentNodeProcessor } from '../types';
+import { inlineRef } from './utils/inline_ref';
 
 /**
  * Creates a node processor to modify a node by removing `required` property when

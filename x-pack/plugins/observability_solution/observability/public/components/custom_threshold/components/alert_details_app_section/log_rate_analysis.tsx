@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { pick, orderBy } from 'lodash';
-import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { CustomThresholdRuleTypeParams } from '../../types';
+import { orderBy, pick } from 'lodash';
+import moment from 'moment';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TopAlert } from '../../../..';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
-import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
+import { CustomThresholdRuleTypeParams } from '../../types';
 import { getInitialAnalysisStart, getTimeRangeEnd } from './helpers/get_initial_analysis_start';
+import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisProps {
   alert: TopAlert<Record<string, any>>;

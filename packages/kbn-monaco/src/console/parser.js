@@ -9,7 +9,6 @@
 /* eslint-disable prettier/prettier,prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
 
 export const createParser = () => {
-
   let at, // The index of the current character
     ch, // The current character
     escapee = {
@@ -30,26 +29,26 @@ export const createParser = () => {
     requests,
     requestStartOffset,
     requestEndOffset,
-    getLastRequest = function() {
+    getLastRequest = function () {
       return requests.length > 0 ? requests.pop() : {};
     },
-    addRequestStart = function() {
+    addRequestStart = function () {
       requestStartOffset = at - 1;
       requests.push({ startOffset: requestStartOffset });
     },
-    addRequestMethod = function(method) {
+    addRequestMethod = function (method) {
       const lastRequest = getLastRequest();
       lastRequest.method = method;
       requests.push(lastRequest);
       requestEndOffset = at - 1;
     },
-    addRequestUrl = function(url) {
+    addRequestUrl = function (url) {
       const lastRequest = getLastRequest();
       lastRequest.url = url;
       requests.push(lastRequest);
       requestEndOffset = at - 1;
     },
-    addRequestData = function(data) {
+    addRequestData = function (data) {
       const lastRequest = getLastRequest();
       const dataArray = lastRequest.data || [];
       dataArray.push(data);
@@ -57,7 +56,7 @@ export const createParser = () => {
       requests.push(lastRequest);
       requestEndOffset = at - 1;
     },
-    addRequestEnd = function() {
+    addRequestEnd = function () {
       const lastRequest = getLastRequest();
       lastRequest.endOffset = requestEndOffset;
       requests.push(lastRequest);
@@ -76,7 +75,7 @@ export const createParser = () => {
     },
     next = function (c) {
       if (c && c !== ch) {
-        error('Expected \'' + c + '\' instead of \'' + ch + '\'');
+        error("Expected '" + c + "' instead of '" + ch + "'");
       }
 
       ch = text.charAt(at);
@@ -84,10 +83,10 @@ export const createParser = () => {
       return ch;
     },
     nextUpTo = function (upTo, errorMessage) {
-      let currentAt = at,
+      const currentAt = at,
         i = text.indexOf(upTo, currentAt);
       if (i < 0) {
-        error(errorMessage || 'Expected \'' + upTo + '\'');
+        error(errorMessage || "Expected '" + upTo + "'");
       }
       reset(i + upTo.length);
       return text.substring(currentAt, i);
@@ -183,7 +182,7 @@ export const createParser = () => {
         }
         // if the current char in iteration is '#' or the char and the next char is equal to '//'
         // we are on the single line comment
-        if (ch === '#' || ch === '/' && peek(0) === '/') {
+        if (ch === '#' || (ch === '/' && peek(0) === '/')) {
           // Until we are on the new line, skip to the next char
           while (ch && ch !== '\n') {
             next();
@@ -233,7 +232,7 @@ export const createParser = () => {
           next('l');
           return null;
       }
-      error('Unexpected \'' + ch + '\'');
+      error("Unexpected '" + ch + "'");
     },
     // parses and returns the method
     method = function () {
@@ -295,7 +294,7 @@ export const createParser = () => {
               next('t');
               return 'post';
             default:
-              error('Unexpected \'' + ch + '\'');
+              error("Unexpected '" + ch + "'");
           }
           break;
         case 'P':
@@ -317,7 +316,7 @@ export const createParser = () => {
               next('T');
               return 'POST';
             default:
-              error('Unexpected \'' + ch + '\'');
+              error("Unexpected '" + ch + "'");
           }
           break;
         default:
@@ -395,7 +394,7 @@ export const createParser = () => {
     }
   };
 
-  let url = function () {
+  const url = function () {
       let url = '';
       while (ch && ch != '\n') {
         url += ch;
@@ -486,23 +485,23 @@ export const createParser = () => {
 
     return typeof reviver === 'function'
       ? (function walk(holder, key) {
-        let k,
-          v,
-          value = holder[key];
-        if (value && typeof value === 'object') {
-          for (k in value) {
-            if (Object.hasOwnProperty.call(value, k)) {
-              v = walk(value, k);
-              if (v !== undefined) {
-                value[k] = v;
-              } else {
-                delete value[k];
+          let k,
+            v,
+            value = holder[key];
+          if (value && typeof value === 'object') {
+            for (k in value) {
+              if (Object.hasOwnProperty.call(value, k)) {
+                v = walk(value, k);
+                if (v !== undefined) {
+                  value[k] = v;
+                } else {
+                  delete value[k];
+                }
               }
             }
           }
-        }
-        return reviver.call(holder, key, value);
-      }({ '': result }, ''))
+          return reviver.call(holder, key, value);
+        })({ '': result }, '')
       : result;
   };
-}
+};

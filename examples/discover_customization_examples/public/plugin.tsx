@@ -14,24 +14,24 @@ import {
   EuiWrappingPopover,
   IconType,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { ControlsPanels } from '@kbn/controls-plugin/common';
+import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
   CustomizationCallback,
   DiscoverSetup,
   DiscoverStart,
 } from '@kbn/discover-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { css } from '@emotion/react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { ControlsPanels } from '@kbn/controls-plugin/common';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {

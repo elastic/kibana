@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getDashboardsRequest } from '../../../../common/api/tags';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { getDashboardsRequest } from '../../../../common/api/tags';
-import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 export const getDashboardsByTagsRoute = (
   router: SecuritySolutionPluginRouter,

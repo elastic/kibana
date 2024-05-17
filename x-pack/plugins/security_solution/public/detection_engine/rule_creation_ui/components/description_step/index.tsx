@@ -6,65 +6,65 @@
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
-import React, { memo, useState } from 'react';
-import styled from 'styled-components';
-import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { chunk, get, isEmpty, isNumber, pick } from 'lodash/fp';
+import React, { memo, useState } from 'react';
+import styled from 'styled-components';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { buildRelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
+import {
+  isSuppressionRuleConfiguredWithDuration,
+  isSuppressionRuleConfiguredWithGroupBy,
+  isSuppressionRuleConfiguredWithMissingFields,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
+import type { LicenseService } from '../../../../../common/license';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
+import { buildRelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
   Duration,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { FieldValueTimeline } from '../../../rule_creation/components/pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
-import type { ListItems } from './types';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
+import type { FieldValueTimeline } from '../../../rule_creation/components/pick_timeline';
+import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
+import { buildActionsDescription } from './actions_description';
+import { buildMlJobsDescription } from './build_ml_jobs_description';
 import {
+  buildAlertSuppressionDescription,
+  buildAlertSuppressionMissingFieldsDescription,
+  buildAlertSuppressionWindowDescription,
+  buildEqlOptionsDescription,
+  buildHighlightedFieldsOverrideDescription,
+  buildIntervalDescription,
+  buildNoteDescription,
   buildQueryBarDescription,
+  buildRequiredFieldsDescription,
+  buildRiskScoreDescription,
+  buildRuleTypeDescription,
+  buildSetupDescription,
   buildSeverityDescription,
   buildStringArrayDescription,
   buildThreatDescription,
+  buildThreatMappingDescription,
+  buildThresholdDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
-  buildNoteDescription,
-  buildRiskScoreDescription,
-  buildRuleTypeDescription,
-  buildThresholdDescription,
-  buildThreatMappingDescription,
-  buildEqlOptionsDescription,
-  buildRequiredFieldsDescription,
-  buildAlertSuppressionDescription,
-  buildAlertSuppressionWindowDescription,
-  buildAlertSuppressionMissingFieldsDescription,
-  buildHighlightedFieldsOverrideDescription,
-  buildSetupDescription,
   getQueryLabel,
-  buildIntervalDescription,
 } from './helpers';
-import * as i18n from './translations';
-import { buildMlJobsDescription } from './build_ml_jobs_description';
-import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
+import * as i18n from './translations';
 import { THREAT_QUERY_LABEL } from './translations';
-import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
-import { useLicense } from '../../../../common/hooks/use_license';
-import type { LicenseService } from '../../../../../common/license';
-import {
-  isThresholdRule,
-  isSuppressionRuleConfiguredWithMissingFields,
-  isSuppressionRuleConfiguredWithGroupBy,
-  isSuppressionRuleConfiguredWithDuration,
-} from '../../../../../common/detection_engine/utils';
+import type { ListItems } from './types';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;

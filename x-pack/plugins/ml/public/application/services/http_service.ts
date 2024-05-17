@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit) {

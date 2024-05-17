@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
-import { SplitCards, useAnimateSplit } from '../split_cards';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
+import type { FC } from 'react';
+import React from 'react';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { DetectorTitle } from '../detector_title';
+import { SplitCards, useAnimateSplit } from '../split_cards';
 
 interface Props {
   dataViewId?: string;

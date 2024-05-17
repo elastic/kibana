@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export interface Content<T = any> {
   isValid: boolean | undefined;

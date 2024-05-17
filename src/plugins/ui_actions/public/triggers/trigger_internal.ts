@@ -7,8 +7,8 @@
  */
 
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
+import { TriggerContract } from './trigger_contract';
 
 /**
  * Internal representation of a trigger kept for consumption only internally
@@ -17,7 +17,10 @@ import { UiActionsService } from '../service';
 export class TriggerInternal<Context extends object = object> {
   public readonly contract: TriggerContract<Context>;
 
-  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger) {
+  constructor(
+    public readonly service: UiActionsService,
+    public readonly trigger: Trigger
+  ) {
     this.contract = new TriggerContract<Context>(this);
   }
 

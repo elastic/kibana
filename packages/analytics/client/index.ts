@@ -7,8 +7,8 @@
  */
 
 import type {
-  AnalyticsClientInitContext,
   IAnalyticsClient as AnalyticsClient,
+  AnalyticsClientInitContext,
 } from './src/analytics_client';
 import { AnalyticsClient as AnalyticsClientClass } from './src/analytics_client';
 

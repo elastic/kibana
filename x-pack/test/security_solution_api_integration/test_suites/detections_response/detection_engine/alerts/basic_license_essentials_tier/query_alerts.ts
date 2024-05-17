@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 
-import {
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  ALERTS_AS_DATA_FIND_URL,
-} from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { getAlertStatus } from '../../../utils';
+import {
+  ALERTS_AS_DATA_FIND_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   createAlertsIndex,
   deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getAlertStatus } from '../../../utils';
 
 const query = {
   ...getAlertStatus(),

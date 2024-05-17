@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
-import { TestProviders } from '../../../common/mock';
 import { getEmptyValue } from '../../../common/components/empty_value';
+import { TestProviders } from '../../../common/mock';
 
+import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
+import type { AutonomousSystem } from '../../../../common/search_strategy';
+import { FlowTarget } from '../../../../common/search_strategy';
+import { mockData } from '../../../explore/network/components/details/mock';
 import {
+  DEFAULT_MORE_MAX_HEIGHT,
+  DefaultFieldRenderer,
+  DefaultFieldRendererOverflow,
+  MoreContainer,
   autonomousSystemRenderer,
   dateRenderer,
   hostNameRenderer,
   locationRenderer,
-  whoisRenderer,
   reputationRenderer,
-  DefaultFieldRenderer,
-  DEFAULT_MORE_MAX_HEIGHT,
-  DefaultFieldRendererOverflow,
-  MoreContainer,
+  whoisRenderer,
 } from './field_renderers';
-import { mockData } from '../../../explore/network/components/details/mock';
-import type { AutonomousSystem } from '../../../../common/search_strategy';
-import { FlowTarget } from '../../../../common/search_strategy';
-import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');

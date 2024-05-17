@@ -13,16 +13,16 @@ import { FilesRouter } from '../types';
 import { enhanceRouter } from './enhance_router';
 
 import * as create from './create';
-import * as upload from './upload';
-import * as update from './update';
 import * as deleteEndpoint from './delete';
-import * as list from './list';
 import * as download from './download';
 import * as getById from './get_by_id';
+import * as list from './list';
+import * as getShare from './share/get';
+import * as listShare from './share/list';
 import * as share from './share/share';
 import * as unshare from './share/unshare';
-import * as listShare from './share/list';
-import * as getShare from './share/get';
+import * as update from './update';
+import * as upload from './upload';
 
 /**
  * Register a single file kind's routes

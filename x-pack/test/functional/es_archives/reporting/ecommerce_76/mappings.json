@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "kibana_sample_data_ecommerce",
     "mappings": {
       "properties": {

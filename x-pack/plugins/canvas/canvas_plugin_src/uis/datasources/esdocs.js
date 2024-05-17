@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import {
-  EuiFormRow,
   EuiAccordion,
-  EuiSelect,
-  EuiTextArea,
   EuiCallOut,
-  EuiSpacer,
+  EuiFormRow,
   EuiLink,
+  EuiSelect,
+  EuiSpacer,
   EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
-import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
-import { ESFieldsSelect } from '../../../public/components/es_fields_select';
-import { ESFieldSelect } from '../../../public/components/es_field_select';
-import { ESDataViewSelect } from '../../../public/components/es_data_view_select';
-import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import PropTypes from 'prop-types';
+import React, { useEffect, useCallback } from 'react';
 import { DataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
+import { ESDataViewSelect } from '../../../public/components/es_data_view_select';
+import { ESFieldSelect } from '../../../public/components/es_field_select';
+import { ESFieldsSelect } from '../../../public/components/es_fields_select';
+import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const { ESDocs: strings } = DataSourceStrings;
 
@@ -130,7 +130,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
             value={sortOrder.toLowerCase()}
             onChange={(e) => setArg('sort', [sortField, e.target.value].join(', '))}
             options={sortOptions}
-            compressed
+            compressed={true}
           />
         </EuiFormRow>
 
@@ -148,7 +148,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
           <EuiTextArea
             value={getQuery()}
             onChange={(e) => setArg(getArgName(), e.target.value)}
-            compressed
+            compressed={true}
           />
         </EuiFormRow>
       </EuiAccordion>

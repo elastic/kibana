@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '..';
-import { TEMPLATE_TYPE, API_ROUTE_TEMPLATES } from '../../../common/lib/constants';
-import { catchErrorHandler } from '../catch_error_handler';
+import { API_ROUTE_TEMPLATES, TEMPLATE_TYPE } from '../../../common/lib/constants';
 import { CanvasTemplate } from '../../../types';
+import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeListTemplates(deps: RouteInitializerDeps) {
   const { router } = deps;

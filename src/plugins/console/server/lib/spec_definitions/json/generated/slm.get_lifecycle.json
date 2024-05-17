@@ -6,13 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_slm/policy/{policy_id}",
-      "_slm/policy"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_slm/policy/{policy_id}", "_slm/policy"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/slm-api-get-policy.html",
     "availability": {
       "stack": true,

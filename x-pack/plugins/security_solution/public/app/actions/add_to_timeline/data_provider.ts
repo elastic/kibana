@@ -8,7 +8,7 @@
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import type { Serializable } from '@kbn/utility-types';
 
-import { isArray, isString, isEmpty } from 'lodash/fp';
+import { isArray, isEmpty, isString } from 'lodash/fp';
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
 import type { DataProvider, QueryOperator } from '../../../../common/types';
 import { EXISTS_OPERATOR, IS_OPERATOR } from '../../../../common/types';
@@ -17,14 +17,14 @@ import { PORT_NAMES } from '../../../explore/network/components/port/helpers';
 import { EVENT_DURATION_FIELD_NAME } from '../../../timelines/components/duration';
 import { BYTES_FORMAT } from '../../../timelines/components/timeline/body/renderers/bytes';
 import {
+  EVENT_MODULE_FIELD_NAME,
+  EVENT_URL_FIELD_NAME,
   GEO_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
-  EVENT_MODULE_FIELD_NAME,
-  SIGNAL_STATUS_FIELD_NAME,
-  RULE_REFERENCE_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
-  EVENT_URL_FIELD_NAME,
+  RULE_REFERENCE_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_STATUS_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { isCountField } from '../utils';
 

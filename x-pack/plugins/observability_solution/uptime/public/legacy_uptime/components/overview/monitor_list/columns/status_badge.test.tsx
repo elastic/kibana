@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
-import { StatusBadge } from './status_badge';
+import React from 'react';
 import { render } from '../../../../lib/helper/rtl_helpers';
+import { StatusBadge } from './status_badge';
 
 describe('<StatusBadge />', () => {
   it('render no error for up status', () => {

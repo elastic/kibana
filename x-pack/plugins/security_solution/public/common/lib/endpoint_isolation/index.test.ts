@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { isolateHost, unIsolateHost } from '.';
-import { hostIsolationRequestBodyMock } from './mocks';
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
 } from '../../../../common/endpoint/constants';
+import { KibanaServices } from '../kibana';
+import { hostIsolationRequestBodyMock } from './mocks';
 
 jest.mock('../kibana');
 

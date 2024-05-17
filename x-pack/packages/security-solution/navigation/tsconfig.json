@@ -12,10 +12,6 @@
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/core",
-    "@kbn/deeplinks-security"
-  ],
+  "kbn_references": ["@kbn/i18n", "@kbn/core", "@kbn/deeplinks-security"],
   "exclude": ["target/**/*"]
 }

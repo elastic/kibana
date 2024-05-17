@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import { createAction } from 'redux-actions';
+import { clearRowStatus } from '.';
 import { deleteIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';
-import { clearRowStatus } from '.';
 
 export const deleteIndicesSuccess = createAction('INDEX_MANAGEMENT_DELETE_INDICES_SUCCESS');
 export const deleteIndices =

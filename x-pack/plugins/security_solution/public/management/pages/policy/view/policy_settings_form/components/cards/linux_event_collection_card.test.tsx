@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
+import { set } from 'lodash';
+import React from 'react';
+import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
-import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import React from 'react';
+import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
-import { set } from 'lodash';
 
 describe('Policy Linux Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;

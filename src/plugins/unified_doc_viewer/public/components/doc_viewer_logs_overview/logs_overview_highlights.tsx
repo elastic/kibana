@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
-import { first } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import { first } from 'lodash';
+import React from 'react';
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 

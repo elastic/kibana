@@ -8,11 +8,11 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type {
   NewResolverTree,
+  ResolverSchema,
   SafeEndpointEvent,
   SafeResolverEvent,
-  ResolverSchema,
 } from '../../../../common/endpoint/types';
-import type { TreeFetcherParameters, PanelViewAndParameters, TimeFilters } from '../../types';
+import type { PanelViewAndParameters, TimeFilters, TreeFetcherParameters } from '../../types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/analyzer');
 

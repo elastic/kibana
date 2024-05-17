@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React from 'react';
 
 export const ChartLoadingProgress = ({ hasTopMargin = false }: { hasTopMargin?: boolean }) => {
   const { euiTheme } = useEuiTheme();

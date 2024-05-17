@@ -13,13 +13,14 @@ import { SavedObjectsClient } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 
 import { updateIndexSettings } from '../elasticsearch/index/update_settings';
 
+import { appContextService, packagePolicyService } from '../..';
 import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
@@ -27,20 +28,19 @@ import type {
   AssetReference,
   AssetType,
   EsAssetReference,
-  KibanaAssetReference,
   Installation,
+  KibanaAssetReference,
 } from '../../../types';
-import { deletePipeline } from '../elasticsearch/ingest_pipeline';
-import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
-import { deleteTransforms } from '../elasticsearch/transform/remove';
-import { deleteMlModel } from '../elasticsearch/ml_model';
-import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
-import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
+import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline';
+import { deleteMlModel } from '../elasticsearch/ml_model';
+import { deleteTransforms } from '../elasticsearch/transform/remove';
+import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 
-import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
+import { auditLoggingService } from '../../audit_logging';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 
@@ -282,7 +282,7 @@ export async function deleteKibanaSavedObjectsAssets({
   const logger = appContextService.getLogger();
   const assetsToDelete = installedRefs
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
-    .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
+    .map(({ id, type }) => ({ id, type }) as KibanaAssetReference);
 
   try {
     await deleteKibanaAssets(assetsToDelete, spaceId);

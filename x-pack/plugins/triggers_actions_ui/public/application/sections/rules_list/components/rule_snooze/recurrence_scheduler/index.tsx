@@ -20,9 +20,9 @@ import { Moment } from 'moment';
 import React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency, RecurrenceSchedule } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
+import { NumberField } from '../helpers/number_field';
 import {
   DEFAULT_REPEAT_OPTIONS,
   DEFAULT_RRULE_PRESETS,
@@ -175,10 +175,10 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             until: recurrenceEndDate,
           }
         : recurrenceEnds === 'afterx'
-        ? {
-            count: occurrences,
-          }
-        : {};
+          ? {
+              count: occurrences,
+            }
+          : {};
     if (frequency === 'CUSTOM') {
       return { ...rewriteCustomFrequency(customFrequency), ...recurrenceEndProps };
     }

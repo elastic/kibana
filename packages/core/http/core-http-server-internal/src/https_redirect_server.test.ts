@@ -10,8 +10,8 @@ jest.mock('fs', () => ({
   readFileSync: jest.fn(),
 }));
 
-import Chance from 'chance';
 import { Server } from 'http';
+import Chance from 'chance';
 import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';

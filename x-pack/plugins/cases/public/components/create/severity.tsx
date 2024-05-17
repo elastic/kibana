@@ -6,12 +6,12 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import React, { memo } from 'react';
 import {
-  getFieldValidityAndErrorMessage,
   UseField,
+  getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash';
+import React, { memo } from 'react';
 import { CaseSeverity } from '../../../common/types/domain';
 import { SeveritySelector } from '../severity/selector';
 import { SEVERITY_TITLE } from '../severity/translations';

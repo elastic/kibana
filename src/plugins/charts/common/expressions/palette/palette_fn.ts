@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { last } from 'lodash';
 import { checkIsMaxContinuity, checkIsMinContinuity } from '@kbn/coloring';
-import type { PaletteExpressionFunctionDefinition } from './types';
+import { last } from 'lodash';
 import { defaultCustomColors } from '../../constants';
+import type { PaletteExpressionFunctionDefinition } from './types';
 
 export const paletteExpressionFn: PaletteExpressionFunctionDefinition['fn'] = async (
   input,

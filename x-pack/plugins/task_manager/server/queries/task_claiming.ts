@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { groupBy, isPlainObject } from 'lodash';
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { Subject, Observable, of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { map } from 'rxjs';
-import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
-import { asOk, asErr, Result } from '../lib/result_type';
+import { Result, asErr, asOk } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
 import { TaskClaim } from '../task_events';
 
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStore, UpdateByQueryResult } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import {
-  TaskClaimerOpts,
-  TaskClaimerFn,
   ClaimOwnershipResult,
+  TaskClaimerFn,
+  TaskClaimerOpts,
   getTaskClaimer,
 } from '../task_claimers';
+import { TaskStore, UpdateByQueryResult } from '../task_store';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 
 export type { ClaimOwnershipResult } from '../task_claimers';
 export interface TaskClaimingOpts {
@@ -120,8 +120,8 @@ export class TaskClaiming {
         definition.maxConcurrency
           ? 'limitedConcurrency'
           : definition.maxConcurrency === 0
-          ? 'skippedTypes'
-          : 'unlimitedConcurrency'
+            ? 'skippedTypes'
+            : 'unlimitedConcurrency'
     );
 
     if (skippedTypes?.length) {

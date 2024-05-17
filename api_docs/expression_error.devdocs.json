@@ -261,9 +261,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -297,9 +295,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -319,9 +315,7 @@
       "tags": [],
       "label": "ExpressionErrorPluginStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "src/plugins/expression_error/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -350,9 +344,7 @@
         "tags": [],
         "label": "JSON",
         "description": [],
-        "signature": [
-          "\"JSON\""
-        ],
+        "signature": ["\"JSON\""],
         "path": "src/plugins/expression_error/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -365,9 +357,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"expressionError\""
-        ],
+        "signature": ["\"expressionError\""],
         "path": "src/plugins/expression_error/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -380,9 +370,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"expressionError\""
-        ],
+        "signature": ["\"expressionError\""],
         "path": "src/plugins/expression_error/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

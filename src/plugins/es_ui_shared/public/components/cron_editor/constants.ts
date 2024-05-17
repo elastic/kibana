@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { padStart } from 'lodash';
 import { EuiSelectOption } from '@elastic/eui';
+import { padStart } from 'lodash';
 
-import { DayOrdinal, MonthOrdinal, getOrdinalValue, getDayName, getMonthName } from './services';
-import { Frequency, Field, FieldToValueMap } from './types';
+import { DayOrdinal, MonthOrdinal, getDayName, getMonthName, getOrdinalValue } from './services';
+import { Field, FieldToValueMap, Frequency } from './types';
 
 type FieldFlags = {
   [key in Field]?: boolean;

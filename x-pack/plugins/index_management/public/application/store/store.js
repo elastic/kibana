@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 import { defaultTableState } from './reducers/table_state';
 

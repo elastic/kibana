@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as T from '@babel/types';
 import type { Visitor } from '@babel/core';
+import * as T from '@babel/types';
 
 /**
  * @notice

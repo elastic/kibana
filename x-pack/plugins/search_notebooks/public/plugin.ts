@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
 import { notebooksConsoleView } from './console_view';
 import {

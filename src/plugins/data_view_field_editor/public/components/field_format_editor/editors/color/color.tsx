@@ -10,9 +10,9 @@ import React, { Fragment } from 'react';
 
 import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
+import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 

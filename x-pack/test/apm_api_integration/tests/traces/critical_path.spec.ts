@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import { getAggregatedCriticalPathRootNodes } from '@kbn/apm-plugin/common';
-import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmFields, SynthtraceGenerator, apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { Assign } from '@kbn/utility-types';
 import { compact, invert, sortBy, uniq } from 'lodash';
-import { Readable } from 'stream';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

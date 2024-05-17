@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
+import type React from 'react';
 
-import { getFormattedComments } from './ui.helpers';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
+import { getFormattedComments } from './ui.helpers';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

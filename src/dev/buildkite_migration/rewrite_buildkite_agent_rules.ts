@@ -7,8 +7,8 @@
  */
 
 import fs from 'fs';
-import { readFile, writeFile } from 'fs/promises';
 import { resolve } from 'path';
+import { readFile, writeFile } from 'fs/promises';
 
 import globby from 'globby';
 import yaml from 'js-yaml';

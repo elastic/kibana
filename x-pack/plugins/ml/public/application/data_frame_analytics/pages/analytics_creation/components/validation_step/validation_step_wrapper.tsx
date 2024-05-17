@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { debounce } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
 
 import { EuiForm } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { ValidationStep } from './validation_step';
-import { ValidationStepDetails } from './validation_step_details';
-import { ANALYTICS_STEPS } from '../../page';
-import { useMlApiContext } from '../../../../../contexts/kibana';
-import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import type {
   CalloutMessage,
   ValidateAnalyticsJobResponse,
 } from '../../../../../../../common/constants/validation';
 import { VALIDATION_STATUS } from '../../../../../../../common/constants/validation';
+import { useMlApiContext } from '../../../../../contexts/kibana';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { ANALYTICS_STEPS } from '../../page';
+import { ValidationStep } from './validation_step';
+import { ValidationStepDetails } from './validation_step_details';
 
 export interface ValidationSummary {
   warning: number;
@@ -65,9 +65,8 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
       const analyticsJobConfig = isAdvancedEditorEnabled
         ? jobConfig
         : getJobConfigFromFormState(form);
-      const validationResults: ValidateAnalyticsJobResponse = await validateDataFrameAnalytics(
-        analyticsJobConfig
-      );
+      const validationResults: ValidateAnalyticsJobResponse =
+        await validateDataFrameAnalytics(analyticsJobConfig);
 
       setValidationMessages(validationResults);
       setErrorMessage(undefined);

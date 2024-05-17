@@ -8,20 +8,20 @@
 
 import {
   type CoreVersionedRouter,
-  versionHandlerResolvers,
   VersionedRouterRoute,
   unwrapVersionedResponseBodyValidation,
+  versionHandlerResolvers,
 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import type { OperationIdCounter } from './operation_id_counter';
 import {
-  prepareRoutes,
-  getPathParameters,
-  extractContentType,
   assignToPathsObject,
-  getVersionedHeaderParam,
+  extractContentType,
+  getPathParameters,
   getVersionedContentTypeString,
+  getVersionedHeaderParam,
+  prepareRoutes,
 } from './util';
 
 export const processVersionedRouter = (

@@ -16,11 +16,17 @@ export interface ConnectorsByConsumersBucket {
 export function groupConnectorsByConsumers(
   consumers: AggregationsBuckets<ConnectorsByConsumersBucket>
 ) {
-  return (consumers as ConnectorsByConsumersBucket[]).reduce((acc, consumer) => {
-    acc[consumer.key] = consumer.actions.connector_types.buckets.reduce((accBucket, bucket) => {
-      accBucket[replaceDotSymbols(bucket.key)] = bucket.doc_count;
-      return accBucket;
-    }, {} as Record<string, number>);
-    return acc;
-  }, {} as Record<string, Record<string, number>>);
+  return (consumers as ConnectorsByConsumersBucket[]).reduce(
+    (acc, consumer) => {
+      acc[consumer.key] = consumer.actions.connector_types.buckets.reduce(
+        (accBucket, bucket) => {
+          accBucket[replaceDotSymbols(bucket.key)] = bucket.doc_count;
+          return accBucket;
+        },
+        {} as Record<string, number>
+      );
+      return acc;
+    },
+    {} as Record<string, Record<string, number>>
+  );
 }

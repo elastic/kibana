@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { isEqual } from 'lodash';
+import React from 'react';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
+import { useAssetDetailsFlyoutState } from '../../hooks/use_asset_details_flyout_url_state';
 import { GroupName } from './group_name';
 import { Node } from './node';
-import { useAssetDetailsFlyoutState } from '../../hooks/use_asset_details_flyout_url_state';
 
 interface Props {
   onDrilldown: (filter: string) => void;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import url from 'url';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import { synthtrace } from '../../../synthtrace';
 import { checkA11y } from '../../support/commands';
 import { generateData } from './generate_data';

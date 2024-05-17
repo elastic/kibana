@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { useCheckStepCompleted } from './use_check_step_completed';
 import {
   EnablePrebuiltRulesSteps,
   GetStartedWithAlertsCardsId,
@@ -13,6 +12,7 @@ import {
   QuickStartSectionCardsId,
   SectionId,
 } from '../types';
+import { useCheckStepCompleted } from './use_check_step_completed';
 
 jest.mock('../../../../lib/kibana');
 

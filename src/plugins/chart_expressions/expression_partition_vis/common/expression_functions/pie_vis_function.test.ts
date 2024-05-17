@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plugin/common';
+import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
 import {
-  PieVisConfig,
   EmptySizeRatios,
   LabelPositions,
-  ValueFormats,
   LegendDisplay,
+  PieVisConfig,
+  ValueFormats,
 } from '../types/expression_renderers';
-import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
-import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#pieVis', () => {
   const fn = functionWrapper(pieVisFunction());

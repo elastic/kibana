@@ -9,12 +9,12 @@ import { Logger } from '@kbn/logging';
 import { RuleAction } from '../types';
 import {
   generateActionHash,
+  getSummaryActionTimeBounds,
   getSummaryActionsFromTaskState,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
-  getSummaryActionTimeBounds,
 } from './rule_action_helper';
 
 const now = '2021-05-13T12:33:37.000Z';

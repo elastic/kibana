@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';

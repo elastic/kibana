@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { LogsOverviewHeader } from './logs_overview_header';
-import { LogsOverviewHighlights } from './logs_overview_highlights';
+import { getLogDocumentOverview } from '@kbn/discover-utils';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React from 'react';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewAIAssistant } from './logs_overview_ai_assistant';
+import { LogsOverviewHeader } from './logs_overview_header';
+import { LogsOverviewHighlights } from './logs_overview_highlights';
 
 export function LogsOverview({
   columns,

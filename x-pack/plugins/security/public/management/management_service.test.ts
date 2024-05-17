@@ -15,15 +15,15 @@ import type {
 } from '@kbn/management-plugin/public';
 import { createManagementSectionMock } from '@kbn/management-plugin/public/mocks';
 
+import type { SecurityLicenseFeatures } from '../../common';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { ConfigType } from '../config';
+import { securityMock } from '../mocks';
 import { apiKeysManagementApp } from './api_keys';
 import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
-import type { SecurityLicenseFeatures } from '../../common';
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { ConfigType } from '../config';
-import { securityMock } from '../mocks';
 
 const mockSection = createManagementSectionMock();
 

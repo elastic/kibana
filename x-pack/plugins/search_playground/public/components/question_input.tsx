@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiTextArea, keys, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const MAX_HEIGHT = 200;
 

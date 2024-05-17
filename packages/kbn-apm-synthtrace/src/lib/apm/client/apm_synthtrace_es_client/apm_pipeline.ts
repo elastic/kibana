@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { PassThrough, Readable, pipeline } from 'stream';
 import semver from 'semver';
-import { PassThrough, pipeline, Readable } from 'stream';
 import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
 import { Logger } from '../../../utils/create_logger';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { takeUntil, bufferCount } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { Subject } from 'rxjs';
+import { bufferCount, takeUntil } from 'rxjs';
 import { RecentlyAccessedService } from './recently_accessed_service';
 
 // Maybe this should be moved to our global jest polyfills?

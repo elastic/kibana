@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewErrorComponent } from './data_view_error';
-import { useGetScopedSourcererDataView } from '../sourcerer/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useGetScopedSourcererDataView } from '../sourcerer/use_get_sourcerer_data_view';
+import { DataViewErrorComponent } from './data_view_error';
 
 type OmitDataView<T> = T extends { dataView: DataView } ? Omit<T, 'dataView'> : T;
 

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { join, parse } from 'path';
-import sharp from 'sharp';
-import pixelmatch from 'pixelmatch';
-import { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
+import { join, parse } from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
+import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
+import sharp from 'sharp';
 export interface PngDescriptor {
   path: string;
 

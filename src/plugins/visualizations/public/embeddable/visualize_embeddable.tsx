@@ -6,20 +6,14 @@
  * Side Public License, v 1.
  */
 
-import _, { get } from 'lodash';
-import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
-import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
-import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { Warnings } from '@kbn/charts-plugin/public';
-import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import {
   Adapters,
   AttributeService,
@@ -31,27 +25,33 @@ import {
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
+import { Filter, Query, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
-import type { RenderMode } from '@kbn/expressions-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { isFallbackDataView } from '../visualize_app/utils';
-import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
+import { i18n } from '@kbn/i18n';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import _, { get } from 'lodash';
+import React from 'react';
+import { render } from 'react-dom';
+import { ReplaySubject, Subscription, mergeMap } from 'rxjs';
 import VisualizationError from '../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { SerializedVis, Vis } from '../vis';
+import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../services';
-import { VIS_EVENT_TO_TRIGGER } from './events';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import { SerializedVis, Vis } from '../vis';
+import { isFallbackDataView } from '../visualize_app/utils';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 import { toExpressionAst } from './to_ast';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;

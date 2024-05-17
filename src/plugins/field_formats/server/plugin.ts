@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { has } from 'lodash';
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   IUiSettingsClient,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
-import { FieldFormatsStart, FieldFormatsSetup } from './types';
+import { has } from 'lodash';
+import { FieldFormatInstanceType, FieldFormatsRegistry, baseFormatters } from '../common';
 import { DateFormat, DateNanosFormat } from './lib/converters';
-import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import { FieldFormatsSetup, FieldFormatsStart } from './types';
 import { getUiSettings } from './ui_settings';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

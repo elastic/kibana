@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
+import React, { useState, useEffect, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useDataViewsService } from '../../services';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   FAAS_BILLED_DURATION,

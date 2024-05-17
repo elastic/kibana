@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
-import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { uniq } from 'lodash';
 
 import type {
-  GetAgentsResponse,
-  GetOneAgentResponse,
-  GetAgentStatusResponse,
-  PutAgentReassignResponse,
-  GetAgentTagsResponse,
-  GetAvailableVersionsResponse,
   GetActionStatusResponse,
+  GetAgentStatusResponse,
+  GetAgentTagsResponse,
   GetAgentUploadsResponse,
+  GetAgentsResponse,
+  GetAvailableVersionsResponse,
+  GetOneAgentResponse,
   PostAgentReassignResponse,
   PostRetrieveAgentsByActionsResponse,
+  PutAgentReassignResponse,
 } from '../../../common/types';
-import type {
-  GetAgentsRequestSchema,
-  GetTagsRequestSchema,
-  GetOneAgentRequestSchema,
-  UpdateAgentRequestSchema,
-  DeleteAgentRequestSchema,
-  GetAgentStatusRequestSchema,
-  GetAgentDataRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
-  PostAgentReassignRequestSchema,
-  PostBulkAgentReassignRequestSchema,
-  PostBulkUpdateAgentTagsRequestSchema,
-  GetActionStatusRequestSchema,
-  GetAgentUploadFileRequestSchema,
-  PostRetrieveAgentsByActionsRequestSchema,
-} from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import type {
+  DeleteAgentRequestSchema,
+  GetActionStatusRequestSchema,
+  GetAgentDataRequestSchema,
+  GetAgentStatusRequestSchema,
+  GetAgentUploadFileRequestSchema,
+  GetAgentsRequestSchema,
+  GetOneAgentRequestSchema,
+  GetTagsRequestSchema,
+  PostAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
+  PostBulkUpdateAgentTagsRequestSchema,
+  PostRetrieveAgentsByActionsRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
+  UpdateAgentRequestSchema,
+} from '../../types';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
@@ -73,31 +73,30 @@ export const getAgentHandler: RequestHandler<
   }
 };
 
-export const deleteAgentHandler: RequestHandler<
-  TypeOf<typeof DeleteAgentRequestSchema.params>
-> = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
+export const deleteAgentHandler: RequestHandler<TypeOf<typeof DeleteAgentRequestSchema.params>> =
+  async (context, request, response) => {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  try {
-    await AgentService.deleteAgent(esClient, request.params.agentId);
+    try {
+      await AgentService.deleteAgent(esClient, request.params.agentId);
 
-    const body = {
-      action: 'deleted',
-    };
+      const body = {
+        action: 'deleted',
+      };
 
-    return response.ok({ body });
-  } catch (error) {
-    if (error.isBoom) {
-      return response.customError({
-        statusCode: error.output.statusCode,
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
+      return response.ok({ body });
+    } catch (error) {
+      if (error.isBoom) {
+        return response.customError({
+          statusCode: error.output.statusCode,
+          body: { message: `Agent ${request.params.agentId} not found` },
+        });
+      }
+
+      return defaultFleetErrorHandler({ error, response });
     }
-
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
+  };
 
 export const updateAgentHandler: RequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.params>,

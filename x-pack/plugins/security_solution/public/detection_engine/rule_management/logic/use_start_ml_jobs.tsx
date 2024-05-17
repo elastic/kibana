@@ -7,10 +7,10 @@
 
 import { useCallback, useState } from 'react';
 
-import type { SecurityJob } from '../../../common/components/ml_popover/types';
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
-import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useEnableDataFeed } from '../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
+import type { SecurityJob } from '../../../common/components/ml_popover/types';
 
 export interface ReturnUseStartMlJobs {
   loading: boolean;

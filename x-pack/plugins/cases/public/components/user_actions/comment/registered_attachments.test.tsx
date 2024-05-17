@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
 
+import { AttachmentTypeRegistry } from '../../../../common/registry';
 import type {
   AttachmentType,
   CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
-import { AttachmentTypeRegistry } from '../../../../common/registry';
-import { getMockBuilderArgs } from '../mock';
-import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { getMockBuilderArgs } from '../mock';
+import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 const getLazyComponent = () =>
   React.lazy(() => {

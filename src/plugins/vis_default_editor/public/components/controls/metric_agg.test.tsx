@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
+import React from 'react';
 
 import { IAggConfig } from '@kbn/data-plugin/public';
-import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
+import { DEFAULT_OPTIONS, MetricAggParamEditor, aggFilter } from './metric_agg';
 
 jest.mock('./utils', () => ({
   useAvailableOptions: jest.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
@@ -24,8 +24,8 @@ jest.mock('./utils', () => ({
   useValidation: jest.fn(),
 }));
 
-import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
+import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 
 const agg = {
   id: '1',

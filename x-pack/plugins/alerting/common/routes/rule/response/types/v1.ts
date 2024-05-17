@@ -7,11 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import {
+  monitoringSchemaV1,
+  ruleLastRunSchemaV1,
   ruleParamsSchemaV1,
   ruleResponseSchemaV1,
   ruleSnoozeScheduleSchemaV1,
-  ruleLastRunSchemaV1,
-  monitoringSchemaV1,
 } from '..';
 
 export type RuleParams = TypeOf<typeof ruleParamsSchemaV1>;

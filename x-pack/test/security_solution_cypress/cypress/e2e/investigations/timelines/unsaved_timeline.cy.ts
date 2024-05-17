@@ -24,18 +24,18 @@ import {
   openTimelineUsingToggle,
 } from '../../../tasks/security_main';
 import {
-  navigateToHostsUsingBreadcrumb,
-  navigateToExploreUsingBreadcrumb,
   navigateToAlertsPageInServerless,
   navigateToDiscoverPageInServerless,
   navigateToExplorePageInServerless,
+  navigateToExploreUsingBreadcrumb,
+  navigateToHostsUsingBreadcrumb,
 } from '../../../tasks/serverless/navigation';
 import {
   addNameToTimelineAndSave,
   createNewTimeline,
   populateTimeline,
 } from '../../../tasks/timeline';
-import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
+import { EXPLORE_URL, MANAGE_URL, hostsUrl } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174068
 describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {

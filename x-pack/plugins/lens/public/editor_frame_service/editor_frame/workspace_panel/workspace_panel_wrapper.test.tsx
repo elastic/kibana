@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Visualization } from '../../../types';
-import {
-  createMockVisualization,
-  createMockFramePublicAPI,
-  FrameMock,
-  renderWithReduxStore,
-} from '../../../mocks';
-import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import { updateVisualizationState, LensAppState } from '../../../state_management';
-import { setChangesApplied } from '../../../state_management/lens_slice';
-import { LensInspector } from '../../../lens_inspector_service';
 import { screen } from '@testing-library/react';
 import faker from 'faker';
+import React from 'react';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
+import { LensInspector } from '../../../lens_inspector_service';
+import {
+  FrameMock,
+  createMockFramePublicAPI,
+  createMockVisualization,
+  renderWithReduxStore,
+} from '../../../mocks';
+import { LensAppState, updateVisualizationState } from '../../../state_management';
+import { setChangesApplied } from '../../../state_management/lens_slice';
+import { Visualization } from '../../../types';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;

@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { generateTransformConfig, generateDestIndex } from './common';
+import { generateDestIndex, generateTransformConfig } from './common';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

@@ -6,23 +6,23 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utility-types';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import {
+  RelatedEventCategory,
+  Tree,
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import {
   eventIDSafeVersion,
   parentEntityIDSafeVersion,
   timestampAsDateSafeVersion,
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
 import { ResolverPaginatedEvents } from '@kbn/security-solution-plugin/common/endpoint/types';
-import {
-  Tree,
-  RelatedEventCategory,
-} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { JsonObject } from '@kbn/utility-types';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { Options, GeneratedTrees } from '../../services/resolver';
-import { compareArrays } from './common';
 import { HEADERS } from '../../headers';
+import { GeneratedTrees, Options } from '../../services/resolver';
+import { compareArrays } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

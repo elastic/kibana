@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,9 +48,7 @@
                 "tags": [],
                 "label": "rootDir",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -65,9 +61,7 @@
                 "tags": [],
                 "label": "rawKibanaConfig",
                 "description": [],
-                "signature": [
-                  "KibanaRawConfig"
-                ],
+                "signature": ["KibanaRawConfig"],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -80,9 +74,7 @@
                 "tags": [],
                 "label": "isDistributable",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -98,10 +90,7 @@
             "tags": [],
             "label": "getConfig",
             "description": [],
-            "signature": [
-              "(serviceName: string) => ",
-              "AgentConfigOptions"
-            ],
+            "signature": ["(serviceName: string) => ", "AgentConfigOptions"],
             "path": "packages/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -113,9 +102,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -131,9 +118,7 @@
             "tags": [],
             "label": "isUsersRedactionEnabled",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -152,11 +137,7 @@
         "tags": [],
         "label": "getConfiguration",
         "description": [],
-        "signature": [
-          "(serviceName: string) => ",
-          "AgentConfigOptions",
-          " | undefined"
-        ],
+        "signature": ["(serviceName: string) => ", "AgentConfigOptions", " | undefined"],
         "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -168,9 +149,7 @@
             "tags": [],
             "label": "serviceName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -201,9 +180,7 @@
             "tags": [],
             "label": "argv",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -216,9 +193,7 @@
             "tags": [],
             "label": "rootDir",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -231,9 +206,7 @@
             "tags": [],
             "label": "isDistributable",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -246,9 +219,7 @@
             "tags": [],
             "label": "serviceName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -265,11 +236,7 @@
         "tags": [],
         "label": "shouldInstrumentClient",
         "description": [],
-        "signature": [
-          "(config: ",
-          "AgentConfigOptions",
-          " | undefined) => boolean"
-        ],
+        "signature": ["(config: ", "AgentConfigOptions", " | undefined) => boolean"],
         "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -281,10 +248,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "AgentConfigOptions",
-              " | undefined"
-            ],
+            "signature": ["AgentConfigOptions", " | undefined"],
             "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,

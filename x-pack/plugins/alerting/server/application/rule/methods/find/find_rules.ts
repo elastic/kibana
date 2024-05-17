@@ -6,32 +6,32 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEmpty, pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
+import { isEmpty, pick } from 'lodash';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { findRulesSo } from '../../../../data/rule';
 import {
-  mapSortField,
-  validateOperationOnAttributes,
   buildKueryNodeFilter,
   includeFieldsRequiredForAuthentication,
+  mapSortField,
+  validateOperationOnAttributes,
 } from '../../../../rules_client/common';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import {
   getModifiedField,
-  getModifiedSearchFields,
   getModifiedSearch,
+  getModifiedSearchFields,
   modifyFilterKueryNode,
 } from '../../../../rules_client/common/mapped_params_utils';
-import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
-import type { RulesClientContext } from '../../../../rules_client/types';
 import { formatLegacyActions, getAlertFromRaw } from '../../../../rules_client/lib';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { FindRulesParams } from './types';
-import { findRulesParamsSchema } from './schemas';
+import { Rule as DeprecatedRule, RawRule, SanitizedRule } from '../../../../types';
 import { Rule, RuleParams } from '../../types';
-import { findRulesSo } from '../../../../data/rule';
+import { findRulesParamsSchema } from './schemas';
+import type { FindRulesParams } from './types';
 
 export interface FindResult<Params extends RuleParams> {
   page: number;

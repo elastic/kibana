@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -19,30 +18,31 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
-import type { ClosureType } from '../../containers/configure/types';
-import { Connectors } from './connectors';
-import { ClosureOptions } from './closure_options';
-import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
-import * as i18n from './translations';
-import { getConnectorById } from '../utils';
-import { HeaderPage } from '../header_page';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { CustomFields } from '../custom_fields';
-import { CustomFieldFlyout } from '../custom_fields/flyout';
+import { useLicense } from '../../common/use_license';
+import type { ClosureType } from '../../containers/configure/types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { CustomFields } from '../custom_fields';
+import { CustomFieldFlyout } from '../custom_fields/flyout';
 import { addOrReplaceCustomField } from '../custom_fields/utils';
-import { useLicense } from '../../common/use_license';
+import { HeaderPage } from '../header_page';
+import { useCasesBreadcrumbs } from '../use_breadcrumbs';
+import { getConnectorById } from '../utils';
+import { ClosureOptions } from './closure_options';
+import { Connectors } from './connectors';
+import * as i18n from './translations';
+import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;

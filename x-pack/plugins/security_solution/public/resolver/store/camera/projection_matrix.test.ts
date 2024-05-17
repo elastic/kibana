@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Store, AnyAction, Reducer } from 'redux';
+import type { AnyAction, Reducer, Store } from 'redux';
 import { createStore } from 'redux';
-import type { AnalyzerById } from '../../types';
-import { cameraReducer } from './reducer';
-import { projectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../models/vector2';
-import { scaleToZoom } from './scale_to_zoom';
-import { userSetZoomLevel, userSetPositionOfCamera, userSetRasterSize } from './action';
+import type { AnalyzerById } from '../../types';
 import { EMPTY_RESOLVER } from '../helpers';
+import { userSetPositionOfCamera, userSetRasterSize, userSetZoomLevel } from './action';
+import { cameraReducer } from './reducer';
+import { scaleToZoom } from './scale_to_zoom';
+import { projectionMatrix } from './selectors';
 
 describe('projectionMatrix', () => {
   let store: Store<AnalyzerById, AnyAction>;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment, { type MomentInput } from 'moment';
-import { css } from '@emotion/react';
 import { EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import moment, { type MomentInput } from 'moment';
+import React from 'react';
 import { CSP_MOMENT_FORMAT } from '../common/constants';
 
 // Offset top-aligned tooltips so that cell actions are visible

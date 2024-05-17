@@ -9,12 +9,12 @@
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
 
-import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
+import { context } from './context';
 import { FileUpload as Component } from './file_upload.component';
 import { createUploadState } from './upload_state';
-import { context } from './context';
 
 /**
  * An object representing an uploaded file

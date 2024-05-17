@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { writeFileSync, unlinkSync } from 'fs';
-import { resolve } from 'path';
+import { unlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
+import { resolve } from 'path';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
+  MAX_FILE_SIZE,
   createTelemetryUsageCollector,
   isFileReadable,
   readTelemetryFile,
-  MAX_FILE_SIZE,
 } from './telemetry_usage_collector';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const mockUsageCollector = () => {
   return usageCollectionPluginMock.createSetupContract();

@@ -9,9 +9,9 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
-  TRANSACTION_NAME,
-  SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import { MobileSpanSubtype, MobileSpanType } from '../../../common/mobile/constants';
 import { environmentQuery } from '../../../common/utils/environment_query';

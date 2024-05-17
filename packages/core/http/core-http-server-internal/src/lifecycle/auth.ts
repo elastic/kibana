@@ -7,24 +7,24 @@
  */
 
 import type { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
+import {
+  CoreKibanaRequest,
+  HapiResponseAdapter,
+  lifecycleResponseFactory,
+} from '@kbn/core-http-router-server-internal';
 import type {
-  AuthenticationHandler,
-  ResponseHeaders,
-  AuthResultParams,
   AuthResult,
   AuthResultAuthenticated,
   AuthResultNotHandled,
+  AuthResultParams,
   AuthResultRedirected,
   AuthToolkit,
+  AuthenticationHandler,
+  ResponseHeaders,
 } from '@kbn/core-http-server';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { AuthResultType } from '@kbn/core-http-server';
-import {
-  HapiResponseAdapter,
-  CoreKibanaRequest,
-  lifecycleResponseFactory,
-} from '@kbn/core-http-router-server-internal';
+import type { Logger } from '@kbn/logging';
 
 const authResult = {
   authenticated(data: AuthResultParams = {}): AuthResult {

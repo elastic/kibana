@@ -7,8 +7,8 @@
  */
 
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
-import React from 'react';
 import { Meta, Story } from '@storybook/react';
+import React from 'react';
 import mdx from '../README.mdx';
 
 import { NotFoundPrompt } from './not_found_prompt';

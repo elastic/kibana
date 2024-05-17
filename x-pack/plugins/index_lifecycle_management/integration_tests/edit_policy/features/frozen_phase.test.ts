@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { setupEnvironment } from '../../helpers';

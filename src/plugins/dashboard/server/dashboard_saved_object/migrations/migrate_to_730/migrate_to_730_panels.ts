@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import semverSatisfies from 'semver/functions/satisfies';
+import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import { GridData } from '../../../../common/content_management';
 import {
-  SavedDashboardPanel620,
-  SavedDashboardPanel630,
-  SavedDashboardPanel610,
-  SavedDashboardPanelTo60,
-  RawSavedDashboardPanel630,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-  RawSavedDashboardPanelTo60,
+  RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
+  RawSavedDashboardPanelTo60,
+  SavedDashboardPanel610,
+  SavedDashboardPanel620,
+  SavedDashboardPanel630,
+  SavedDashboardPanelTo60,
 } from './types';
-import { GridData } from '../../../../common/content_management';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
-import { listBreadcrumb, addBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
+import { SectionLoading } from '../../../shared_imports';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,
   RemoteClustersProvider,
 } from '../../components';
-import { SectionLoading } from '../../../shared_imports';
+import { addBreadcrumb, listBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 
 export class AutoFollowPatternAdd extends PureComponent {
   static propTypes = {

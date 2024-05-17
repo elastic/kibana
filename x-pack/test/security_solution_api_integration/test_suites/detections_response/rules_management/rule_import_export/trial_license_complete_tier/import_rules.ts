@@ -7,26 +7,26 @@
 
 import expect from 'expect';
 
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
+  getImportExceptionsListItemNewerVersionSchemaMock,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
-  getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { createRule } from '../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import {
   combineToNdJson,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
 } from '../../../utils';
-import { createRule } from '../../../../../../common/utils/security_solution';
-import { deleteAllRules } from '../../../../../../common/utils/security_solution';
-import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
+import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 
 const getImportRuleBuffer = (connectorId: string) => {
   const rule1 = {

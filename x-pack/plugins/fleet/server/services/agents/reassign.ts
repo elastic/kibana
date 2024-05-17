@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent } from '../../types';
-import { agentPolicyService } from '../agent_policy';
 import {
+  AgentPolicyNotFoundError,
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
-  AgentPolicyNotFoundError,
 } from '../../errors';
+import type { Agent } from '../../types';
+import { agentPolicyService } from '../agent_policy';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import {
-  getAgentsById,
-  getAgentPolicyForAgent,
-  updateAgent,
-  getAgentsByKuery,
-  openPointInTime,
-} from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
+import {
+  getAgentPolicyForAgent,
+  getAgentsById,
+  getAgentsByKuery,
+  openPointInTime,
+  updateAgent,
+} from './crud';
 
 import { ReassignActionRunner, reassignBatch } from './reassign_action_runner';
 

@@ -6,11 +6,11 @@
  */
 
 import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
-import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
+import { cleanupAgentPolicies, deleteAgentDocs, deleteFleetServerDocs } from '../tasks/cleanup';
+import { request } from '../tasks/common';
 import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
-import { request } from '../tasks/common';
 
 import { API_VERSIONS } from '../../common/constants';
 import { login } from '../tasks/login';

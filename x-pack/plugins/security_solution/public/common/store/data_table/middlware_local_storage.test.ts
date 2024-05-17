@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { defaultHeaders, createSecuritySolutionStorageMock, createMockStore } from '../../mock';
-import { addTableInStorage } from '../../../timelines/containers/local_storage';
-import { Direction } from '../../../../common/search_strategy';
 import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import { Direction } from '../../../../common/search_strategy';
+import { addTableInStorage } from '../../../timelines/containers/local_storage';
+import { createMockStore, createSecuritySolutionStorageMock, defaultHeaders } from '../../mock';
 
 const {
   applyDeltaToColumnWidth,

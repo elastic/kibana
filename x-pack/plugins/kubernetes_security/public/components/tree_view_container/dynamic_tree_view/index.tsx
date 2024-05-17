@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef, KeyboardEvent, useMemo } from 'react';
 import {
-  EuiTreeView,
-  EuiText,
-  EuiI18n,
-  EuiScreenReaderOnly,
   EuiBadge,
-  keys,
+  EuiI18n,
   EuiLoadingSpinner,
+  EuiScreenReaderOnly,
+  EuiText,
   EuiToolTip,
+  EuiTreeView,
+  keys,
   useEuiTheme,
 } from '@elastic/eui';
 // @ts-expect-error style types not defined, but they exist
 import { euiTreeViewStyles } from '@elastic/eui/lib/components/tree_view/tree_view.styles';
+import React, { useEffect, useState, useRef, KeyboardEvent, useMemo } from 'react';
 
 import {
-  TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_EMPTY,
+  TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
 } from '../../../../common/translations';
+import { useTreeViewContext } from '../contexts';
+import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
+import { TreeViewIcon } from '../tree_view_icon';
+import { disableEventDefaults, focusNextElement } from './helpers';
 import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
-import { disableEventDefaults, focusNextElement } from './helpers';
-import { useTreeViewContext } from '../contexts';
-import { TreeViewIcon } from '../tree_view_icon';
-import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
-import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
+import type { DynamicTreeViewItemProps, DynamicTreeViewProps } from './types';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
 

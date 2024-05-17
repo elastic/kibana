@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, memo, useEffect, useState } from 'react';
-import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
+import { debounce } from 'lodash';
+import React, { useCallback, memo, useEffect, useState } from 'react';
 
-import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '..';
-import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
-import { getAutocompleteInfo, StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import { StorageKeys, getAutocompleteInfo } from '../../../services';
+import { EditorContentSpinner } from '../../components';
+import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
+import { EditorOutput, Editor as EditorUI } from './legacy/console_editor';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
 
 const INITIAL_PANEL_WIDTH = 50;

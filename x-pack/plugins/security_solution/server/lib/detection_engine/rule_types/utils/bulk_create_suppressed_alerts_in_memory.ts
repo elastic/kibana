@@ -7,21 +7,21 @@
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { ExperimentalFeatures } from '../../../../../common';
+import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
-  WrapSuppressedHits,
   SignalSourceHit,
+  WrapSuppressedHits,
 } from '../types';
-import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
-import { addToSearchAfterReturn } from './utils';
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
-import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { createEnrichEventsFunction } from './enrichments';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
-import type { ExperimentalFeatures } from '../../../../../common';
+import { createEnrichEventsFunction } from './enrichments';
+import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
+import { addToSearchAfterReturn } from './utils';
 
 import type {
   BaseFieldsLatest,
@@ -126,7 +126,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
  * creates alerts in ES, both suppressed and unsuppressed
  */
 export const executeBulkCreateAlerts = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & BaseFieldsLatest,
 >({
   unsuppressibleWrappedDocs,
   suppressibleWrappedDocs,

@@ -7,7 +7,7 @@
  */
 
 import { IContainer } from '../../containers';
-import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables';
+import { Embeddable, EmbeddableInput, EmbeddableOutput } from '../../embeddables';
 
 /** @internal */
 export interface MockFilter {

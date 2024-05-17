@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n-react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
-import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { RenderOptions, render } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { ReactWrapper } from 'enzyme';
+import React, { PropsWithChildren, ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
+import { Provider } from 'react-redux';
 import { LensAppServices } from '../app_plugin/types';
-import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
-import { getResolvedDateRange } from '../utils';
+import { LensAppState, LensState, LensStoreDeps, makeConfigureStore } from '../state_management';
 import { DatasourceMap, VisualizationMap } from '../types';
-import { mockVisualizationMap } from './visualization_mock';
+import { getResolvedDateRange } from '../utils';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
+import { mockVisualizationMap } from './visualization_mock';
 
 export const mockStoreDeps = (deps?: {
   lensServices?: LensAppServices;

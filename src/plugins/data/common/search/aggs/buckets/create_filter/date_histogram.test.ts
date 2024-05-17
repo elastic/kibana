@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { RangeFilter } from '@kbn/es-query';
 import moment from 'moment-timezone';
-import { createFilterDateHistogram } from './date_histogram';
-import { intervalOptions, autoInterval } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketDateHistogramAggConfig } from '../date_histogram';
+import { autoInterval, intervalOptions } from '../_interval_options';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { RangeFilter } from '@kbn/es-query';
+import { IBucketDateHistogramAggConfig } from '../date_histogram';
+import { createFilterDateHistogram } from './date_histogram';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {

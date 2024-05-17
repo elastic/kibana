@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,15 +15,16 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
-import { cloneDeep } from 'lodash';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { cloneDeep } from 'lodash';
+import React from 'react';
 import type { LayerAction, StateSetter } from '../../../../types';
-import type { XYState, XYByReferenceAnnotationLayerConfig } from '../../types';
 import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
+import type { XYByReferenceAnnotationLayerConfig, XYState } from '../../types';
 import { getAnnotationLayerTitle } from '../../visualization_helpers';
 
 export const getRevertChangesAction = ({

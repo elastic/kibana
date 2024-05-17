@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { chain, isEmpty, keys } from 'lodash';
-import { combineReducers, Reducer, Store, ReducersMapObject } from 'redux';
-import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit';
+import reduceReducers from 'reduce-reducers';
+import { Reducer, ReducersMapObject, Store, combineReducers } from 'redux';
 import {
+  Observable,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -18,9 +20,7 @@ import {
   pluck,
   share,
   takeUntil,
-  Observable,
 } from 'rxjs';
-import reduceReducers from 'reduce-reducers';
 import type { Optional } from 'utility-types';
 import type { IEmbeddable } from '../lib';
 import { input } from './input_slice';

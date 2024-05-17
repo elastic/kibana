@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable, from, EMPTY } from 'rxjs';
-import { map, takeUntil } from 'rxjs';
 import { HttpStart } from '@kbn/core/public';
-import { GlobalSearchResult, GlobalSearchProviderFindParams } from '../../common/types';
+import { EMPTY, Observable, from } from 'rxjs';
+import { map, takeUntil } from 'rxjs';
+import { GlobalSearchProviderFindParams, GlobalSearchResult } from '../../common/types';
 import { GlobalSearchFindOptions } from './types';
 
 interface ServerFetchResponse {

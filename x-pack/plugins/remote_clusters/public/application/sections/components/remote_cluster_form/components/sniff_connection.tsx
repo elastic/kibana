@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -15,6 +12,9 @@ import {
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useState } from 'react';
 
 import { transportPortUrl } from '../../../../services/documentation';
 import { validateSeed } from '../validators';

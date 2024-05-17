@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act, waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import type { AppMockRenderer } from '../../common/mock';
 import {
+  createAppMockRenderer,
   noCasesPermissions,
   onlyDeleteCasesPermission,
-  createAppMockRenderer,
   writeCasesPermissions,
 } from '../../common/mock';
 import { casesQueriesKeys } from '../../containers/constants';

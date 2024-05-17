@@ -162,9 +162,7 @@
             "tags": [],
             "label": "onChange",
             "description": [],
-            "signature": [
-              "(newParams?: Partial<{ type?: string | undefined; } & P>) => void"
-            ],
+            "signature": ["(newParams?: Partial<{ type?: string | undefined; } & P>) => void"],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,9 +174,7 @@
                 "tags": [],
                 "label": "newParams",
                 "description": [],
-                "signature": [
-                  "Partial<{ type?: string | undefined; } & P>"
-                ],
+                "signature": ["Partial<{ type?: string | undefined; } & P>"],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -194,9 +190,7 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
+            "signature": ["() => JSX.Element"],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -236,9 +230,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -250,9 +242,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -273,9 +263,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Field",
-        "description": [
-          "\nThe data model for the field editor"
-        ],
+        "description": ["\nThe data model for the field editor"],
         "signature": [
           {
             "pluginId": "dataViewFieldEditor",
@@ -303,9 +291,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nname / path used for the field"
-            ],
+            "description": ["\nname / path used for the field"],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -316,12 +302,8 @@
             "type": "string",
             "tags": [],
             "label": "parentName",
-            "description": [
-              "\nName of parent field. Used for composite subfields"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nName of parent field. Used for composite subfields"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -335,9 +317,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FormatEditorProps",
-        "description": [
-          "\nProps for received by {@link FieldFormatEditor}"
-        ],
+        "description": ["\nProps for received by {@link FieldFormatEditor}"],
         "signature": [
           {
             "pluginId": "dataViewFieldEditor",
@@ -390,9 +370,7 @@
             "tags": [],
             "label": "formatParams",
             "description": [],
-            "signature": [
-              "{ type?: string | undefined; } & P"
-            ],
+            "signature": ["{ type?: string | undefined; } & P"],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -450,9 +428,7 @@
             "tags": [],
             "label": "onError",
             "description": [],
-            "signature": [
-              "(error?: string | undefined) => void"
-            ],
+            "signature": ["(error?: string | undefined) => void"],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -465,9 +441,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -517,9 +491,7 @@
             "tags": [],
             "label": "fieldFormatId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -533,9 +505,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OpenFieldDeleteModalOptions",
-        "description": [
-          "\nOptions for opening the field editor"
-        ],
+        "description": ["\nOptions for opening the field editor"],
         "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -546,9 +516,7 @@
             "type": "Object",
             "tags": [],
             "label": "ctx",
-            "description": [
-              "\nConfig for the delete modal"
-            ],
+            "description": ["\nConfig for the delete modal"],
             "signature": [
               "{ dataView: ",
               {
@@ -570,12 +538,8 @@
             "type": "Function",
             "tags": [],
             "label": "onDelete",
-            "description": [
-              "\nCallback fired when fields are deleted"
-            ],
-            "signature": [
-              "((fieldNames: string[]) => void) | undefined"
-            ],
+            "description": ["\nCallback fired when fields are deleted"],
+            "signature": ["((fieldNames: string[]) => void) | undefined"],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -586,12 +550,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fieldNames",
-                "description": [
-                  "- the names of the deleted fields"
-                ],
-                "signature": [
-                  "string[]"
-                ],
+                "description": ["- the names of the deleted fields"],
+                "signature": ["string[]"],
                 "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -606,12 +566,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldName",
-            "description": [
-              "\nNames of the fields to be deleted"
-            ],
-            "signature": [
-              "string | string[]"
-            ],
+            "description": ["\nNames of the fields to be deleted"],
+            "signature": ["string | string[]"],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -625,9 +581,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OpenFieldEditorOptions",
-        "description": [
-          "\nOptions for opening the field editor"
-        ],
+        "description": ["\nOptions for opening the field editor"],
         "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -638,9 +592,7 @@
             "type": "Object",
             "tags": [],
             "label": "ctx",
-            "description": [
-              "\ncontext containing the data view the field belongs to"
-            ],
+            "description": ["\ncontext containing the data view the field belongs to"],
             "signature": [
               "{ dataView: ",
               {
@@ -662,9 +614,7 @@
             "type": "Function",
             "tags": [],
             "label": "onSave",
-            "description": [
-              "\naction to take after field is saved"
-            ],
+            "description": ["\naction to take after field is saved"],
             "signature": [
               "((field: ",
               {
@@ -686,9 +636,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  "- the fields that were saved"
-                ],
+                "description": ["- the fields that were saved"],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -713,12 +661,8 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [
-              "\nfield to edit, for existing field"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nfield to edit, for existing field"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -729,9 +673,7 @@
             "type": "Object",
             "tags": [],
             "label": "fieldToCreate",
-            "description": [
-              "\npre-selectable options for new field creation"
-            ],
+            "description": ["\npre-selectable options for new field creation"],
             "signature": [
               {
                 "pluginId": "dataViewFieldEditor",
@@ -767,9 +709,7 @@
             "tags": [],
             "label": "children",
             "description": [],
-            "signature": [
-              "(deleteFieldHandler: DeleteFieldFunc) => React.ReactNode"
-            ],
+            "signature": ["(deleteFieldHandler: DeleteFieldFunc) => React.ReactNode"],
             "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -781,9 +721,7 @@
                 "tags": [],
                 "label": "deleteFieldHandler",
                 "description": [],
-                "signature": [
-                  "DeleteFieldFunc"
-                ],
+                "signature": ["DeleteFieldFunc"],
                 "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -798,9 +736,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "\nData view of fields to be deleted"
-            ],
+            "description": ["\nData view of fields to be deleted"],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -820,12 +756,8 @@
             "type": "Function",
             "tags": [],
             "label": "onDelete",
-            "description": [
-              "\nCallback fired when fields are deleted"
-            ],
-            "signature": [
-              "((fieldNames: string[]) => void) | undefined"
-            ],
+            "description": ["\nCallback fired when fields are deleted"],
+            "signature": ["((fieldNames: string[]) => void) | undefined"],
             "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -836,12 +768,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fieldNames",
-                "description": [
-                  "- the names of the deleted fields"
-                ],
-                "signature": [
-                  "string[]"
-                ],
+                "description": ["- the names of the deleted fields"],
+                "signature": ["string[]"],
                 "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -901,9 +829,7 @@
         "type": "Type",
         "tags": [],
         "label": "FieldFormatEditor",
-        "description": [
-          "\nA React component for editing custom field format params"
-        ],
+        "description": ["\nA React component for editing custom field format params"],
         "signature": [
           "React.ComponentType<",
           {
@@ -955,9 +881,7 @@
       "type": "Interface",
       "tags": [],
       "label": "PluginSetup",
-      "description": [
-        "\nPublic setup contract of data view field editor"
-      ],
+      "description": ["\nPublic setup contract of data view field editor"],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -994,9 +918,7 @@
       "type": "Interface",
       "tags": [],
       "label": "PluginStart",
-      "description": [
-        "\nPublic start contract of data view field editor"
-      ],
+      "description": ["\nPublic start contract of data view field editor"],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1007,9 +929,7 @@
           "type": "Function",
           "tags": [],
           "label": "openEditor",
-          "description": [
-            "\nMethod to open the data view field editor fly-out"
-          ],
+          "description": ["\nMethod to open the data view field editor fly-out"],
           "signature": [
             "(options: ",
             {
@@ -1055,9 +975,7 @@
           "type": "Function",
           "tags": [],
           "label": "openDeleteModal",
-          "description": [
-            "\nMethod to open the data view field delete fly-out"
-          ],
+          "description": ["\nMethod to open the data view field delete fly-out"],
           "signature": [
             "(options: ",
             {
@@ -1079,9 +997,7 @@
               "type": "Object",
               "tags": [],
               "label": "options",
-              "description": [
-                "Configuration options for the fly-out"
-              ],
+              "description": ["Configuration options for the fly-out"],
               "signature": [
                 {
                   "pluginId": "dataViewFieldEditor",
@@ -1135,12 +1051,8 @@
           "type": "Object",
           "tags": [],
           "label": "userPermissions",
-          "description": [
-            "\nConvenience method for user permissions checks"
-          ],
-          "signature": [
-            "{ editIndexPattern: () => boolean; }"
-          ],
+          "description": ["\nConvenience method for user permissions checks"],
+          "signature": ["{ editIndexPattern: () => boolean; }"],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -1151,9 +1063,7 @@
           "type": "Function",
           "tags": [],
           "label": "DeleteRuntimeFieldProvider",
-          "description": [
-            "\nContext provider for delete runtime field modal"
-          ],
+          "description": ["\nContext provider for delete runtime field modal"],
           "signature": [
             "React.FunctionComponent<",
             {
@@ -1177,9 +1087,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
+              "signature": ["P & { children?: React.ReactNode; }"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -1191,9 +1099,7 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": [
-                "any"
-              ],
+              "signature": ["any"],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false

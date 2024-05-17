@@ -1,8 +1,8 @@
 {
   "ccr.follow": {
     "data_autocomplete_rules": {
-      "remote_cluster" : "",
-      "leader_index" : "",
+      "remote_cluster": "",
+      "leader_index": "",
       "max_read_request_operation_count": "",
       "max_outstanding_read_requests": "",
       "max_read_request_size": "",

@@ -1,3 +1,13 @@
+import { AppMountParameters, ChromeBreadcrumb, CoreStart, I18nStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Router } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,32 +16,22 @@
  */
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { Router } from '@kbn/shared-ux-router';
-import { i18n } from '@kbn/i18n';
-import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { UMUpdateBadge } from '../lib/lib';
+import { ActionMenu } from '../components/common/header/action_menu';
+import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
+import { UptimeAlertsFlyoutWrapper } from '../components/overview';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
-  UptimeThemeContextProvider,
   UptimeStartupPluginsContextProvider,
+  UptimeThemeContextProvider,
 } from '../contexts';
-import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
-import { setBasePath } from '../state/actions';
-import { PageRouter } from '../routes';
-import { UptimeAlertsFlyoutWrapper } from '../components/overview';
-import { store, storage } from '../state';
-import { kibanaService } from '../state/kibana_service';
-import { ActionMenu } from '../components/common/header/action_menu';
 import { UptimeDataViewContextProvider } from '../contexts/uptime_data_view_context';
+import { UMUpdateBadge } from '../lib/lib';
+import { PageRouter } from '../routes';
+import { storage, store } from '../state';
+import { setBasePath } from '../state/actions';
+import { kibanaService } from '../state/kibana_service';
 
 export interface UptimeAppColors {
   danger: string;

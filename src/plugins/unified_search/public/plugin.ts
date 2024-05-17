@@ -5,28 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { createQueryStringInput } from './query_string_input/get_query_string_input';
-import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
+import { IStorageWrapper, Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays, setAnalytics, setI18n } from './services';
+import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
+import { createFilterAction } from './actions/apply_filter_action';
+import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar } from './search_bar/create_search_bar';
+import { FiltersBuilderLazy } from './filters_builder';
 import { createIndexPatternSelect } from './index_pattern_select';
+import { createQueryStringInput } from './query_string_input/get_query_string_input';
+import { createSearchBar } from './search_bar/create_search_bar';
+import { setAnalytics, setI18n, setIndexPatterns, setOverlays, setTheme } from './services';
+import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import type {
-  UnifiedSearchStartDependencies,
-  UnifiedSearchSetupDependencies,
   UnifiedSearchPluginSetup,
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPublicPluginStartUi,
+  UnifiedSearchSetupDependencies,
+  UnifiedSearchStartDependencies,
 } from './types';
-import { createFilterAction } from './actions/apply_filter_action';
-import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
-import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
-import { FiltersBuilderLazy } from './filters_builder';
 
 import './index.scss';
 

@@ -8,15 +8,15 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 import {
-  openPanelsAction,
-  openLeftPanelAction,
-  openRightPanelAction,
-  closePanelsAction,
   closeLeftPanelAction,
+  closePanelsAction,
   closePreviewPanelAction,
   closeRightPanelAction,
-  previousPreviewPanelAction,
+  openLeftPanelAction,
+  openPanelsAction,
   openPreviewPanelAction,
+  openRightPanelAction,
+  previousPreviewPanelAction,
   urlChangedAction,
 } from './actions';
 import { initialState } from './state';

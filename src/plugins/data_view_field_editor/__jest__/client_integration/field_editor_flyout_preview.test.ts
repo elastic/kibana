@@ -8,20 +8,20 @@
 import { act } from 'react-dom/test-utils';
 
 import {
-  setupEnvironment,
+  FieldEditorFlyoutContentTestBed,
+  getSearchCallMeta,
+  setIndexPatternFields,
+  setSearchResponse,
+  setup,
+} from './field_editor_flyout_preview.helpers';
+import {
+  EsDoc,
   fieldFormatsOptions,
   indexPatternNameForTest,
-  EsDoc,
   setSearchResponseLatency,
+  setupEnvironment,
 } from './helpers';
-import {
-  setup,
-  setIndexPatternFields,
-  getSearchCallMeta,
-  setSearchResponse,
-  FieldEditorFlyoutContentTestBed,
-} from './field_editor_flyout_preview.helpers';
-import { mockDocuments, createPreviewError } from './helpers/mocks';
+import { createPreviewError, mockDocuments } from './helpers/mocks';
 
 describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();

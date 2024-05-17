@@ -1,3 +1,15 @@
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiPopover,
+  EuiToolTip,
+  useEuiShadow,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,35 +17,23 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenu,
-  useEuiShadow,
-  EuiPanel,
-  EuiLoadingSpinner,
-  EuiContextMenuPanelItemDescriptor,
-  EuiToolTip,
-} from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
-import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import { useLocationName, useMonitorEnableHandler } from '../../../../hooks';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
-import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
-import { useMonitorEnableHandler, useLocationName } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
-import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
-import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
+import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
+import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
 
 type PopoverPosition = 'relative' | 'default';
 

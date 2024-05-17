@@ -6,16 +6,16 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { HttpSetup } from '@kbn/core/public';
+import { Prompt } from '../../../..';
 import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
-import { useSettingsUpdater } from './use_settings_updater';
-import { Prompt } from '../../../..';
 import {
   defaultSystemPrompt,
   mockSuperheroSystemPrompt,
   mockSystemPrompt,
 } from '../../../mock/system_prompt';
-import { HttpSetup } from '@kbn/core/public';
+import { useSettingsUpdater } from './use_settings_updater';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,

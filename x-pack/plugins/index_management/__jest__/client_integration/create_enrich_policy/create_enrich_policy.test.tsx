@@ -8,10 +8,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment } from '../helpers';
-import { getMatchingIndices, getFieldsFromIndices } from '../helpers/fixtures';
-import { CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
 import { getESPolicyCreationApiCall } from '../../../common/lib';
+import { setupEnvironment } from '../helpers';
+import { getFieldsFromIndices, getMatchingIndices } from '../helpers/fixtures';
+import { CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

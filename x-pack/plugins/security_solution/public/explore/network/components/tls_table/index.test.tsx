@@ -10,10 +10,10 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import { TlsTable } from '.';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
-import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
 jest.mock('../../../../common/lib/kibana');

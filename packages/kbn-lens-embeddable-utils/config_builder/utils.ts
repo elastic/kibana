@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  DataViewSpec,
   DataView,
+  DataViewSpec,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
@@ -22,8 +23,7 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import type { AggregateQuery } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { v4 as uuidv4 } from 'uuid';
 import {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -186,7 +186,7 @@ function buildDatasourceStatesLayer(
             fieldName: column.name,
             columnId: column.id,
             meta: column.meta,
-          } as TextBasedLayerColumn)
+          }) as TextBasedLayerColumn
       ),
       index: '',
       query: undefined,

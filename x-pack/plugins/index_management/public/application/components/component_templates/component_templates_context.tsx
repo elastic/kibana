@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
+import React, { createContext, useContext } from 'react';
 
 import {
-  HttpSetup,
-  DocLinksStart,
-  NotificationsSetup,
   CoreStart,
+  DocLinksStart,
   ExecutionContextStart,
+  HttpSetup,
+  NotificationsSetup,
 } from '@kbn/core/public';
 import { IndexManagementStartServices } from '../../../types';
-import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
+import { getApi, getDocumentation, getSendRequest, getUseRequest } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 

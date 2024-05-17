@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  useEuiMaxBreakpoint,
+  useEuiMinBreakpoint,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+  useResizeObserver,
+} from '@elastic/eui';
+import { css, cx } from '@emotion/css';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,18 +24,6 @@
  * 2.0.
  */
 import React, { useRef, useCallback, useEffect } from 'react';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  useEuiTheme,
-  useEuiMaxBreakpoint,
-  useEuiMinBreakpoint,
-  useIsWithinBreakpoints,
-  useResizeObserver,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
-import { css, cx } from '@emotion/css';
 import { useKibanaHeader } from '../../../../hooks/use_kibana_header';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';

@@ -7,10 +7,10 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getKeyboardShortcutsDocVisibility } from '../../state/selectors/flyouts';
-import { KeyboardShortcutsDocPanel as Component } from './keyboard_shortcuts_doc_panel.component';
 import { State } from '../../../types';
 import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
+import { getKeyboardShortcutsDocVisibility } from '../../state/selectors/flyouts';
+import { KeyboardShortcutsDocPanel as Component } from './keyboard_shortcuts_doc_panel.component';
 
 export const KeyboardShortcutsDocPanel = () => {
   const dispatch = useDispatch();

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { UserProfile } from '@kbn/user-profile-components';
+import { act, screen, waitFor } from '@testing-library/react';
+import * as api from '../../containers/user_profiles/api';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { Assignees } from './assignees';
 import type { FormProps } from './schema';
-import { act, waitFor, screen } from '@testing-library/react';
-import * as api from '../../containers/user_profiles/api';
-import type { UserProfile } from '@kbn/user-profile-components';
 
 jest.mock('../../containers/user_profiles/api');
 

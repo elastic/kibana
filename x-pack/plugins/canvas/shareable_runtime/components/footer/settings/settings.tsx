@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useState, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useCanvasShareableState } from '../../../context';
 import { Refs } from '../../../types';
-import { ToolbarSettings } from './toolbar_settings';
 import { AutoplaySettings } from './autoplay_settings';
+import { ToolbarSettings } from './toolbar_settings';
 
 interface Props {
   /**

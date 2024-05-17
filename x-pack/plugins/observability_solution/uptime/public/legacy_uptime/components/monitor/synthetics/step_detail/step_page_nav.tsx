@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React from 'react';
 
 export const PREVIOUS_CHECK_BUTTON_TEXT = i18n.translate(
   'xpack.uptime.synthetics.stepDetail.previousCheckButtonText',

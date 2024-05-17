@@ -7,51 +7,51 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type {
+  ElasticsearchClient,
   RequestHandler,
   ResponseHeaders,
-  ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
+import pMap from 'p-map';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService } from '../../services';
-import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { agentPolicyService, appContextService } from '../../services';
+import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
 import type {
-  GetAgentPoliciesRequestSchema,
-  GetOneAgentPolicyRequestSchema,
-  CreateAgentPolicyRequestSchema,
-  UpdateAgentPolicyRequestSchema,
+  AgentPolicy,
+  BulkGetAgentPoliciesRequestSchema,
   CopyAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
+  FleetRequestHandler,
+  GetAgentPoliciesRequestSchema,
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
-  FleetRequestHandler,
-  BulkGetAgentPoliciesRequestSchema,
-  AgentPolicy,
+  GetOneAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
 } from '../../types';
 
 import type {
+  BulkGetAgentPoliciesResponse,
+  CopyAgentPolicyResponse,
+  CreateAgentPolicyResponse,
+  DeleteAgentPolicyResponse,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  GetOneAgentPolicyResponse,
-  CreateAgentPolicyResponse,
-  UpdateAgentPolicyResponse,
-  CopyAgentPolicyResponse,
-  DeleteAgentPolicyResponse,
-  GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
-  BulkGetAgentPoliciesResponse,
+  GetFullAgentPolicyResponse,
+  GetOneAgentPolicyResponse,
+  UpdateAgentPolicyResponse,
 } from '../../../common/types';
 import {
-  defaultFleetErrorHandler,
   AgentPolicyNotFoundError,
   FleetUnauthorizedError,
+  defaultFleetErrorHandler,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 

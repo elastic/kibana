@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { CaseSeverity, severities, SeverityFilter } from './severity_filter';
+import React from 'react';
+import { CaseSeverity, SeverityFilter, severities } from './severity_filter';
 const onSeverityChange = jest.fn();
 const defaultProps = {
   selectedSeverity: CaseSeverity.LOW,

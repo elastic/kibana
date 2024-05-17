@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { UrlObject, format } from 'url';
+import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
 import { Config, FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
-import { format, UrlObject } from 'url';
-import { LogsSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import supertest from 'supertest';
 import { bootstrapApmSynthtraceEsClient, getSynthtraceKibanaClient } from './bootstrap_synthtrace';
 import { FtrProviderContext } from './ftr_provider_context';

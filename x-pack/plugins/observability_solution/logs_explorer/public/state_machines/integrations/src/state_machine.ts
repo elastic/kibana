@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { assign, createMachine } from 'xstate';
 import { isEmpty, isError, omitBy } from 'lodash';
-import { createComparatorByField } from '../../../utils/comparator_by_field';
+import { assign, createMachine } from 'xstate';
 import { Dataset, Integration } from '../../../../common/datasets';
 import { IDatasetsClient } from '../../../services/datasets';
+import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';
 import {
   DefaultIntegrationsContext,
+  IntegrationTypestate,
   IntegrationsContext,
   IntegrationsEvent,
   IntegrationsSearchParams,
-  IntegrationTypestate,
 } from './types';
 
 export const createPureIntegrationsStateMachine = (

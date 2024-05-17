@@ -1,3 +1,6 @@
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { asyncForEach } from '@kbn/std';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +8,10 @@
  * 2.0.
  */
 import sinon from 'sinon';
-import { Logger } from '@kbn/core/server';
-import { asyncForEach } from '@kbn/std';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
-import { getOAuthJwtAccessToken } from './get_oauth_jwt_access_token';
 import { createJWTAssertion } from './create_jwt_assertion';
+import { getOAuthJwtAccessToken } from './get_oauth_jwt_access_token';
 import { requestOAuthJWTToken } from './request_oauth_jwt_token';
 
 jest.mock('./create_jwt_assertion', () => ({

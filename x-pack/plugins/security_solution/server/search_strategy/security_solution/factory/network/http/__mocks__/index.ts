@@ -11,8 +11,8 @@ import type { NetworkHttpRequestOptions } from '../../../../../../../common/api/
 import type { SortField } from '../../../../../../../common/search_strategy';
 import {
   Direction,
-  NetworkQueries,
   NetworkDnsFields,
+  NetworkQueries,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkHttpRequestOptions = {

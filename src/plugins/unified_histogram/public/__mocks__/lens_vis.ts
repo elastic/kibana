@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { TimeRange } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { LensVisService } from '../services/lens_vis_service';
+import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
-import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',

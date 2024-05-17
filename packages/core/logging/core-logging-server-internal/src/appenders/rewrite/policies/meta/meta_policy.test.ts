@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LogRecord, LogLevel, LogMeta } from '@kbn/logging';
 import type { MetaRewritePolicyConfig } from '@kbn/core-logging-server';
+import { LogLevel, LogMeta, LogRecord } from '@kbn/logging';
 import { MetaRewritePolicy } from './meta_policy';
 
 describe('MetaRewritePolicy', () => {
@@ -97,8 +97,9 @@ describe('MetaRewritePolicy', () => {
       expect(policy.rewrite({ message, meta: { a: 'foo' } } as unknown as LogRecord).message).toBe(
         message
       );
-      expect(policy.rewrite({ message, meta: { a: 'foo' } } as unknown as LogRecord))
-        .toMatchInlineSnapshot(`
+      expect(
+        policy.rewrite({ message, meta: { a: 'foo' } } as unknown as LogRecord)
+      ).toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),
           "meta": Object {
@@ -146,8 +147,9 @@ describe('MetaRewritePolicy', () => {
       expect(
         policy.rewrite({ message, meta: { message: 'foo' } } as unknown as LogRecord).message
       ).toBe(message);
-      expect(policy.rewrite({ message, meta: { message: 'foo' } } as unknown as LogRecord))
-        .toMatchInlineSnapshot(`
+      expect(
+        policy.rewrite({ message, meta: { message: 'foo' } } as unknown as LogRecord)
+      ).toMatchInlineSnapshot(`
         Object {
           "message": Symbol(),
           "meta": Object {},

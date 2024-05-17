@@ -7,8 +7,8 @@
  */
 
 import type { Stats } from 'fs';
-import { generateFileHash, getFileCacheKey } from './utils';
 import type { IFileHashCache } from './file_hash_cache';
+import { generateFileHash, getFileCacheKey } from './utils';
 
 /**
  *  Get the hash of a file via a file descriptor

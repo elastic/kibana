@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { getSort } from './get_sort';
 import {
-  getESQuerySortForTimeField,
-  getESQuerySortForTieBreaker,
   DEFAULT_TIE_BREAKER_NAME,
+  getESQuerySortForTieBreaker,
+  getESQuerySortForTimeField,
 } from './get_es_query_sort';
+import { getSort } from './get_sort';
 
 /**
  * Prepares sort for search source, that's sending the request to ES

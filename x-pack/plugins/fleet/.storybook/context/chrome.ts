@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
 import type { ChromeStart } from '@kbn/core/public';
+import { action } from '@storybook/addon-actions';
 
 export const getChrome = () => {
   const chrome: ChromeStart = {

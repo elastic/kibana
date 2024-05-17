@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createMemoryHistory, History } from 'history';
 import type { IBasePath } from '@kbn/core-http-browser';
+import { History, createMemoryHistory } from 'history';
 
 import { BasePath } from '@kbn/core-http-browser-internal';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-import { setupUrlOverflowDetection, URL_MAX_LENGTH, URL_WARNING_LENGTH } from './url_overflow';
+import { URL_MAX_LENGTH, URL_WARNING_LENGTH, setupUrlOverflowDetection } from './url_overflow';
 
 const longUrl = '/' + 'a'.repeat(URL_MAX_LENGTH);
 

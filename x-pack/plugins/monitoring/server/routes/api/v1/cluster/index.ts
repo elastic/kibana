@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { MonitoringCore } from '../../../../types';
 import { clusterRoute } from './cluster';
 import { clustersRoute } from './clusters';
-import { MonitoringCore } from '../../../../types';
 
 export function registerV1ClusterRoutes(server: MonitoringCore) {
   clusterRoute(server);

@@ -6,13 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useToasts, useKibana } from '../../common/lib/kibana';
+import { useKibana, useToasts } from '../../common/lib/kibana';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
-import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { userProfilesIds } from './api.mock';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');

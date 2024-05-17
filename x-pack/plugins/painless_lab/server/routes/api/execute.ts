@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { RouteDependencies } from '../../types';
 import { handleEsError } from '../../shared_imports';
+import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.string();
 

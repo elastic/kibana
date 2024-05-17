@@ -8,8 +8,8 @@
 import React, { type FC } from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface CreateDataViewTimeFieldProps {
   dataViewAvailableTimeFields: string[];

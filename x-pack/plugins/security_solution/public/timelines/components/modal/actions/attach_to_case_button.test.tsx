@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { useKibana } from '../../../../common/lib/kibana';
-import { mockTimelineModel, TestProviders } from '../../../../common/mock';
-import { AttachToCaseButton } from './attach_to_case_button';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { SecurityPageName } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { TestProviders, mockTimelineModel } from '../../../../common/mock';
+import { AttachToCaseButton } from './attach_to_case_button';
 
 jest.mock('../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../common/components/link_to');

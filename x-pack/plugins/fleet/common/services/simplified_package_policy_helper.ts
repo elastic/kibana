@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type {
-  NewPackagePolicyInput,
-  NewPackagePolicyInputStream,
-  PackagePolicyConfigRecord,
-  PackagePolicy,
-  NewPackagePolicy,
-  PackageInfo,
-  ExperimentalDataStreamFeature,
-} from '../types';
 import { DATASET_VAR_NAME } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
+import type {
+  ExperimentalDataStreamFeature,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
+  PackageInfo,
+  PackagePolicy,
+  PackagePolicyConfigRecord,
+} from '../types';
 
 import { packageToPackagePolicy } from '.';
 
@@ -67,19 +67,22 @@ export function generateInputId(input: NewPackagePolicyInput) {
 }
 
 export function formatInputs(inputs: NewPackagePolicy['inputs']) {
-  return inputs.reduce((acc, input) => {
-    const inputId = generateInputId(input);
-    if (!acc) {
-      acc = {};
-    }
-    acc[inputId] = {
-      enabled: input.enabled,
-      vars: formatVars(input.vars),
-      streams: formatStreams(input.streams),
-    };
+  return inputs.reduce(
+    (acc, input) => {
+      const inputId = generateInputId(input);
+      if (!acc) {
+        acc = {};
+      }
+      acc[inputId] = {
+        enabled: input.enabled,
+        vars: formatVars(input.vars),
+        streams: formatStreams(input.streams),
+      };
 
-    return acc;
-  }, {} as SimplifiedPackagePolicy['inputs']);
+      return acc;
+    },
+    {} as SimplifiedPackagePolicy['inputs']
+  );
 }
 
 export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import moment from 'moment-timezone';
 import { AggTypesDependencies } from '..';
 
 // TODO - investigate if this check is still needed

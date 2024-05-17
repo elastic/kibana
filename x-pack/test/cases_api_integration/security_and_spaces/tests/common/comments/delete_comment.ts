@@ -7,28 +7,27 @@
 
 import expect from '@kbn/expect';
 import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
   Alerts,
   createCaseAttachAlertAndDeleteAlert,
   createSecuritySolutionAlerts,
   getAlertById,
   getSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
+  createCase,
+  createComment,
   deleteAllCaseItems,
   deleteCasesByESQuery,
   deleteCasesUserActions,
-  deleteComments,
-  createCase,
-  createComment,
   deleteComment,
+  deleteComments,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
 import {
@@ -45,6 +44,7 @@ import {
   secSolutionOnlyReadNoIndexAlerts,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

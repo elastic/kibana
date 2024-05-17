@@ -1,12 +1,12 @@
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import createContainer from 'constate';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState, useContext, useEffect } from 'react';
-import createContainer from 'constate';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Legacy } from '../../legacy_shims';
 import { GlobalStateContext } from '../contexts/global_state_context';
 

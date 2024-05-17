@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END } from '@kbn/rule-data-utils';
-import { pick, orderBy } from 'lodash';
-import { Color, colorTransformer } from '../../../../../../common/color_palette';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { orderBy, pick } from 'lodash';
 import {
   CountRuleParams,
-  isRatioRuleParams,
   PartialRuleParams,
+  isRatioRuleParams,
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisSectionProps {

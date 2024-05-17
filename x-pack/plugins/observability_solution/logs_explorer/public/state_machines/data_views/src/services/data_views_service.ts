@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { InvokeCreator } from 'xstate';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { createComparatorByField } from '../../../../utils/comparator_by_field';
+import { InvokeCreator } from 'xstate';
 import { DataViewDescriptor } from '../../../../../common/data_views/models/data_view_descriptor';
+import { createComparatorByField } from '../../../../utils/comparator_by_field';
+import { getSearchCacheKey } from '../state_machine';
 import {
   DataViewsContext,
   DataViewsEvent,
   DataViewsFilterParams,
   DataViewsSearchParams,
 } from '../types';
-import { getSearchCacheKey } from '../state_machine';
 
 interface LoadDataViewsServiceDeps {
   dataViews: DataViewsPublicPluginStart;

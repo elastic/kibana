@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { InvestigationGuideView } from './investigation_guide_view';
+import React from 'react';
 import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { InvestigationGuideView } from './investigation_guide_view';
 
 const defaultProps = {
   basicData: {

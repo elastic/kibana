@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { storage } from '../../../lib/local_storage';
+import type { MockStorage } from '../../../lib/local_storage/__mocks__';
+import { ProductLine } from './configs';
+import { DEFAULT_FINISHED_STEPS } from './helpers';
 import {
   ACTIVE_PRODUCTS_STORAGE_KEY,
-  defaultExpandedCards,
   EXPANDED_CARDS_STORAGE_KEY,
   FINISHED_STEPS_STORAGE_KEY,
-  getStorageKeyBySpace,
   OnboardingStorage,
+  defaultExpandedCards,
+  getStorageKeyBySpace,
 } from './storage';
 import {
   AddIntegrationsSteps,
@@ -19,14 +23,10 @@ import {
   EnablePrebuiltRulesSteps,
   OverviewSteps,
   QuickStartSectionCardsId,
+  type StepId,
   ViewAlertsSteps,
   ViewDashboardSteps,
-  type StepId,
 } from './types';
-import { DEFAULT_FINISHED_STEPS } from './helpers';
-import type { MockStorage } from '../../../lib/local_storage/__mocks__';
-import { storage } from '../../../lib/local_storage';
-import { ProductLine } from './configs';
 
 jest.mock('../../../lib/local_storage');
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty, pick, isNumber } from 'lodash';
+import { isEmpty, isNumber, pick } from 'lodash';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
-import type { AllCasesURLQueryParams, AllCasesTableState } from '../types';
+import type { AllCasesTableState, AllCasesURLQueryParams } from '../types';
 
 export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesURLQueryParams => {
   const supportedFilterOptions = pick(state.filterOptions, [

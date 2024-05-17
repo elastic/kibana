@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { Table } from './table';
-import { getAllFields } from './utils';
-import { useMetadataStateContext } from '../../hooks/use_metadata_state';
+import React, { useCallback, useMemo } from 'react';
+import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 import { MetadataExplanationMessage } from '../../components/metadata_explanation';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
-import { MetadataErrorCallout } from '../../components/metadata_error_callout';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
+import { Table } from './table';
+import { getAllFields } from './utils';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;

@@ -7,32 +7,32 @@
  */
 
 import './index.scss';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
-import React, { useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
-import {
-  IconSelectSetting,
-  DimensionEditorSection,
-  NameInput,
-  ColorPicker,
-  LineStyleSettings,
-  TextDecorationSetting,
-  FieldPicker,
-  FieldOption,
-  type QueryInputServices,
-} from '@kbn/visualization-ui-components';
-import type { FieldOptionValue } from '@kbn/visualization-ui-components';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import moment from 'moment';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   AvailableAnnotationIcon,
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { i18n } from '@kbn/i18n';
+import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
+import {
+  ColorPicker,
+  DimensionEditorSection,
+  FieldOption,
+  FieldPicker,
+  IconSelectSetting,
+  LineStyleSettings,
+  NameInput,
+  type QueryInputServices,
+  TextDecorationSetting,
+} from '@kbn/visualization-ui-components';
+import type { FieldOptionValue } from '@kbn/visualization-ui-components';
+import moment from 'moment';
+import React, { useCallback, useEffect } from 'react';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   defaultAnnotationColor,
@@ -41,11 +41,11 @@ import {
   defaultRangeAnnotationLabel,
   toLineAnnotationColor,
 } from './helpers';
-import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
-import { TooltipSection } from './tooltip_annotation_panel';
+import { annotationsIconSet } from './icon_set';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
+import { TooltipSection } from './tooltip_annotation_panel';
 
 export interface Props {
   annotation: EventAnnotationConfig;
@@ -232,7 +232,7 @@ const AnnotationEditorControls = ({
                         exists: hasFieldData(dataView.id!, field.name),
                         compatible: true,
                         'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
-                      } as FieldOption<FieldOptionValue>)
+                      }) as FieldOption<FieldOptionValue>
                   );
                 const selectedField = (currentAnnotation as QueryPointEventAnnotationConfig)
                   .textField;

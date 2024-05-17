@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ApiKey } from '@kbn/security-plugin/common/model';
+import React, { useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 

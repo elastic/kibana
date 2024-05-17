@@ -23,10 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
-import { TimeBounds } from '../../../slo_details/types';
-import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { useKibana } from '../../../../utils/kibana_react';
+import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { openInDiscover } from '../../../../utils/slo/get_discover_link';
+import { TimeBounds } from '../../../slo_details/types';
 
 export interface Props {
   data: GetPreviewDataResponse;

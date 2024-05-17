@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { FieldIcon as KbnFieldIcon, FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
+import React from 'react';
 import { getFieldTypeName } from '../../utils/get_field_type_name';
 
 export type FieldIconProps = KbnFieldIconProps;

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { ContentClientProvider } from './content_client_context';
-import { ContentClient } from './content_client';
-import { createCrudClientMock } from '../crud_client/crud_client.mock';
-import { useGetContentQuery, useSearchContentQuery } from './content_client_query_hooks';
+import React, { FC, PropsWithChildren } from 'react';
 import type { GetIn, SearchIn } from '../../common';
+import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { ContentTypeRegistry } from '../registry';
+import { ContentClient } from './content_client';
+import { ContentClientProvider } from './content_client_context';
+import { useGetContentQuery, useSearchContentQuery } from './content_client_query_hooks';
 
 const setup = () => {
   const crudClient = createCrudClientMock();

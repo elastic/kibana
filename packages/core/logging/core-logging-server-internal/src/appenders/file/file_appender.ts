@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
-import { createWriteStream, WriteStream, mkdirSync } from 'fs';
+import { WriteStream, createWriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { schema } from '@kbn/config-schema';
+import { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
 
 import { Layouts } from '../../layouts/layouts';
 
@@ -34,7 +34,10 @@ export class FileAppender implements DisposableAppender {
    * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
    * @param path Path to the file where log records should be stored.
    */
-  constructor(private readonly layout: Layout, private readonly path: string) {}
+  constructor(
+    private readonly layout: Layout,
+    private readonly path: string
+  ) {}
 
   /**
    * Formats specified `record` and writes them to the specified file.

@@ -16,21 +16,21 @@ import {
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SearchSessionStatus } from '../../../../../common';
+import { SearchSessionsConfigSchema } from '../../../../../config';
+import { SearchUsageCollector } from '../../../collectors';
 import { OnActionComplete, PopoverActionsMenu, TableText } from '../components';
 import { StatusIndicator } from '../components/status';
-import { dateString } from './date_string';
-import { SearchSessionsMgmtAPI } from './api';
-import { getExpirationStatus } from './get_expiration_status';
 import { UISession } from '../types';
-import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import { SearchSessionsMgmtAPI } from './api';
+import { dateString } from './date_string';
+import { getExpirationStatus } from './get_expiration_status';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {

@@ -6,10 +6,10 @@
  */
 
 import {
-  serviceNameHint,
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
+  serviceNameHint,
 } from './shared_hints';
 
 export const javaVariables = {

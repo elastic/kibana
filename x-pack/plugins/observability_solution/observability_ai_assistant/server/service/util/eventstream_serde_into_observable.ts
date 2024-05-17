@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+import { inspect } from 'util';
+import { Logger } from '@kbn/logging';
 import { EventStreamMarshaller } from '@smithy/eventstream-serde-node';
+import { Message } from '@smithy/types';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { identity } from 'lodash';
 import { Observable } from 'rxjs';
-import { Readable } from 'stream';
-import { Message } from '@smithy/types';
-import { Logger } from '@kbn/logging';
-import { inspect } from 'util';
 import { createInternalServerError } from '../../../common/conversation_complete';
 
 interface ModelStreamErrorException {

@@ -40,44 +40,44 @@ import {
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { getServiceAnnotations, ServiceAnnotationResponse } from './annotations';
-import { getServicesItems, ServicesItemsResponse } from './get_services/get_services_items';
-import { getServicesAlerts, ServiceAlertsResponse } from './get_services/get_service_alerts';
+import { ServiceAnnotationResponse, getServiceAnnotations } from './annotations';
+import { ServiceAgentResponse, getServiceAgent } from './get_service_agent';
+import { ServiceDependenciesResponse, getServiceDependencies } from './get_service_dependencies';
 import {
-  getServiceTransactionDetailedStatsPeriods,
-  ServiceTransactionDetailedStatPeriodsResponse,
-} from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
-import { getServiceAgent, ServiceAgentResponse } from './get_service_agent';
-import { getServiceDependencies, ServiceDependenciesResponse } from './get_service_dependencies';
-import {
-  getServiceDependenciesBreakdown,
   ServiceDependenciesBreakdownResponse,
+  getServiceDependenciesBreakdown,
 } from './get_service_dependencies_breakdown';
 import {
-  getServiceInstancesDetailedStatisticsPeriods,
-  ServiceInstancesDetailedStatisticsResponse,
-} from './get_service_instances/detailed_statistics';
-import {
-  getServiceInstancesMainStatistics,
-  ServiceInstanceMainStatisticsResponse,
-} from './get_service_instances/main_statistics';
-import {
-  getServiceInstanceContainerMetadata,
   ServiceInstanceContainerMetadataDetails,
+  getServiceInstanceContainerMetadata,
 } from './get_service_instance_container_metadata';
 import {
-  getServiceInstanceMetadataDetails,
   ServiceInstanceMetadataDetailsResponse,
+  getServiceInstanceMetadataDetails,
 } from './get_service_instance_metadata_details';
-import { getServiceMetadataDetails, ServiceMetadataDetails } from './get_service_metadata_details';
-import { getServiceMetadataIcons, ServiceMetadataIcons } from './get_service_metadata_icons';
-import { getServiceNodeMetadata, ServiceNodeMetadataResponse } from './get_service_node_metadata';
+import {
+  ServiceInstancesDetailedStatisticsResponse,
+  getServiceInstancesDetailedStatisticsPeriods,
+} from './get_service_instances/detailed_statistics';
+import {
+  ServiceInstanceMainStatisticsResponse,
+  getServiceInstancesMainStatistics,
+} from './get_service_instances/main_statistics';
+import { ServiceMetadataDetails, getServiceMetadataDetails } from './get_service_metadata_details';
+import { ServiceMetadataIcons, getServiceMetadataIcons } from './get_service_metadata_icons';
+import { ServiceNodeMetadataResponse, getServiceNodeMetadata } from './get_service_node_metadata';
 import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
 import {
-  getServiceTransactionTypes,
   ServiceTransactionTypesResponse,
+  getServiceTransactionTypes,
 } from './get_service_transaction_types';
-import { getThroughput, ServiceThroughputResponse } from './get_throughput';
+import { ServiceAlertsResponse, getServicesAlerts } from './get_services/get_service_alerts';
+import { ServicesItemsResponse, getServicesItems } from './get_services/get_services_items';
+import {
+  ServiceTransactionDetailedStatPeriodsResponse,
+  getServiceTransactionDetailedStatsPeriods,
+} from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
+import { ServiceThroughputResponse, getThroughput } from './get_throughput';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',

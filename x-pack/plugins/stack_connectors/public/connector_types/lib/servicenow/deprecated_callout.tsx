@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
 
 interface Props {
   onMigrate?: () => void;

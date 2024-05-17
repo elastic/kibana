@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import {
-  exportTimeline,
-  selectTimeline,
-  selectAllTimelines,
-  exportSelectedTimelines,
-} from '../../../tasks/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
+import {
+  exportSelectedTimelines,
+  exportTimeline,
+  selectAllTimelines,
+  selectTimeline,
+} from '../../../tasks/timelines';
 
-import { TIMELINES_URL } from '../../../urls/navigation';
+import { expectedExportedTimeline } from '../../../objects/timeline';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
+import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

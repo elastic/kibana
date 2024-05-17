@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getTopMetricsMetricAgg } from './top_metrics';
+import { CombinedFilter } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '../../..';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
-import { KBN_FIELD_TYPES } from '../../..';
-import { CombinedFilter } from '@kbn/es-query';
+import { getTopMetricsMetricAgg } from './top_metrics';
 
 describe('Top metrics metric', () => {
   let aggConfig: IMetricAggConfig;

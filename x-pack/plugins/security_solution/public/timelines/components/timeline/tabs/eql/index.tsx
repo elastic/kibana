@@ -6,38 +6,39 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
+import type { Dispatch } from 'redux';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import type { ControlColumnProps } from '../../../../../../common/types';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { timelineActions, timelineSelectors } from '../../../../store';
-import { useTimelineEvents } from '../../../../containers';
-import { StatefulBody } from '../../body';
-import { Footer, footerHeight } from '../../footer';
-import { calculateTotalPages } from '../../helpers';
-import { TimelineRefetch } from '../../refetch_timeline';
 import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
-import type { inputsModel, State } from '../../../../../common/store';
-import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
-import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
+import type { State, inputsModel } from '../../../../../common/store';
+import { inputsSelectors } from '../../../../../common/store';
+import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { useTimelineEvents } from '../../../../containers';
+import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineDefaults } from '../../../../store/defaults';
+import type { TimelineModel } from '../../../../store/model';
 import { DetailsPanel } from '../../../side_panel';
+import { StatefulBody } from '../../body';
+import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
+import { Footer, footerHeight } from '../../footer';
+import { calculateTotalPages } from '../../helpers';
+import { TimelineRefetch } from '../../refetch_timeline';
 import {
   EventsCountBadge,
   FullWidthFlexGroup,
@@ -46,17 +47,16 @@ import {
   StyledEuiFlyoutFooter,
   VerticalRule,
 } from '../shared/layout';
-import {
-  TIMELINE_EMPTY_EVENTS,
-  isTimerangeSame,
-  timelineEmptyTrailingControlColumns,
-  TIMELINE_NO_SORTING,
-} from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
-import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
-import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import {
+  TIMELINE_EMPTY_EVENTS,
+  TIMELINE_NO_SORTING,
+  isTimerangeSame,
+  timelineEmptyTrailingControlColumns,
+} from '../shared/utils';
+import { EqlTabHeader } from './header';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 

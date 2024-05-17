@@ -26,10 +26,10 @@ import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prom
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
 import {
+  BLOCKED_TIME_WINDOWS_TITLE,
   LEARN_MORE_LINK,
   SOURCE_FREQUENCY_DESCRIPTION,
   SOURCE_SYNC_FREQUENCY_TITLE,
-  BLOCKED_TIME_WINDOWS_TITLE,
   SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';

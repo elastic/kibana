@@ -1,3 +1,5 @@
+import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { FIELD_PREVIEW_PATH } from '../../common/constants';
 import { Context } from '../../public/components/field_editor_context';
@@ -16,12 +16,12 @@ import {
   Props,
 } from '../../public/components/field_editor_flyout_content';
 import {
+  TestDoc,
   WithFieldEditorDependencies,
   getCommonActions,
   spyIndexPatternGetAllFields,
   spySearchQuery,
   spySearchQueryResponse,
-  TestDoc,
 } from './helpers';
 
 const defaultProps: Props = {

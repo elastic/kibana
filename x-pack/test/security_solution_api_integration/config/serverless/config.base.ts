@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { services } from './services';
 
 export interface CreateTestConfigOptions {
   testFiles: string[];

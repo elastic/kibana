@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import { Index } from '../../../../../../common';
 import {
@@ -20,8 +20,8 @@ import {
   refreshIndices as refreshIndicesRequest,
   unfreezeIndices as unfreezeIndicesRequest,
 } from '../../../../services';
-import { notificationService } from '../../../../services/notification';
 import { httpService } from '../../../../services/http';
+import { notificationService } from '../../../../services/notification';
 
 import {
   IndexActionsContextMenu,

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
+import React from 'react';
+import type { SavedObjectManagementTypeInfo, SavedObjectWithMetadata } from '../../../../common';
 import { DeleteConfirmModal } from './delete_confirm_modal';
 
 interface CreateObjectOptions {

@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ReactNode, PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
 import type { CasesContextProps } from '../../components/cases_context';
 

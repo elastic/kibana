@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -16,7 +13,10 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { UNSET_CONFIG_ITEM } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';

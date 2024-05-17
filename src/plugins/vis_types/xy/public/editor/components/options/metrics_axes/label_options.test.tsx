@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { LabelOptions, LabelOptionsProps } from './label_options';
 import { TruncateLabelsOption } from '../../common';
+import { LabelOptions, LabelOptionsProps } from './label_options';
 import { valueAxis } from './mocks';
 
 const FILTER = 'filter';

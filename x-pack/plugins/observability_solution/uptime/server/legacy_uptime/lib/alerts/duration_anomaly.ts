@@ -5,53 +5,53 @@
  * 2.0.
  */
 
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import moment from 'moment';
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
-  ALERT_EVALUATION_VALUE,
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_REASON,
-} from '@kbn/rule-data-utils';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+  DEFAULT_APP_CATEGORIES,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import {
-  alertsLocatorID,
   AlertsLocatorParams,
+  alertsLocatorID,
   getAlertUrl,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
+import moment from 'moment';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
+import { getMLJobId } from '../../../../common/lib';
+import { Ping } from '../../../../common/runtime_types/ping';
+import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeEsClient } from '../lib';
 import {
-  updateState,
+  UptimeRuleTypeAlertDefinition,
   generateAlertMessage,
   getViewInAppUrl,
   setRecoveredAlertsContext,
-  UptimeRuleTypeAlertDefinition,
+  updateState,
 } from './common';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
-import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
-import { Ping } from '../../../../common/runtime_types/ping';
-import { getMLJobId } from '../../../../common/lib';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
 import {
-  ALERT_REASON_MSG,
   ACTION_VARIABLES,
-  VIEW_IN_APP_URL,
   ALERT_DETAILS_URL,
+  ALERT_REASON_MSG,
+  VIEW_IN_APP_URL,
 } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
@@ -90,7 +90,9 @@ const getAnomalies = async (
     params.severity,
     // Lookback window will be 2x Bucket time span, for uptime job, for now bucket
     // timespan will always be 15minute
-    moment(lastCheckedAt).subtract(30, 'minute').valueOf(),
+    moment(lastCheckedAt)
+      .subtract(30, 'minute')
+      .valueOf(),
     moment().valueOf(),
     Intl.DateTimeFormat().resolvedOptions().timeZone,
     500,

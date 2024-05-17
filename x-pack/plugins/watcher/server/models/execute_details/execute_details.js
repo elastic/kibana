@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omitBy, isUndefined } from 'lodash';
+import { isUndefined, omitBy } from 'lodash';
 
 export class ExecuteDetails {
   constructor(props) {

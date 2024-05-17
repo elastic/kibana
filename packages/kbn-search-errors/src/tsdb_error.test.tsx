@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ReactElement } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { shallow } from 'enzyme';
+import type { ReactElement } from 'react';
 import { createEsError } from './create_es_error';
 import { renderSearchError } from './render_search_error';
-import { shallow } from 'enzyme';
-import { coreMock } from '@kbn/core/public/mocks';
 
 const servicesMock = {
   application: coreMock.createStart().application,

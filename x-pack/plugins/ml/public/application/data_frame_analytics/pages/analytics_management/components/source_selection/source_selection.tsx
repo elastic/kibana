@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState } from 'react';
 import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';

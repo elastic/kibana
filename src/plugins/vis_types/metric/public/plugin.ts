@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { createMetricVisTypeDefinition } from './metric_vis_type';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { MetricPublicConfig } from '../config';
+import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { setDataViewsStart } from './services';
 
 /** @internal */

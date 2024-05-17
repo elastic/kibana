@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Rule, Scope, AST } from 'eslint';
-import type { Comment } from 'estree';
 import * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { AST, Rule, Scope } from 'eslint';
+import type { Comment } from 'estree';
 
 import { RUNNING_IN_EDITOR } from '../helpers/running_in_editor';
 

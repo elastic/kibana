@@ -12,8 +12,8 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
-import { useInspect } from './use_inspect';
 import * as i18n from './translations';
+import { useInspect } from './use_inspect';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiDescriptionList } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo } from 'react';
 
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import * as i18n from './translations';
 import type { ErrorMessage } from './types';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
-import * as i18n from './translations';
-import { useCasesContext } from '../../cases_context/use_cases_context';
 
 export interface CallOutProps {
   handleButtonClick: (
@@ -51,8 +51,8 @@ const CallOutComponent = ({
         isCaseClosed
           ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE
           : hasLicenseError
-          ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
-          : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
+            ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
+            : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
       }
       color={type}
       iconType="gear"

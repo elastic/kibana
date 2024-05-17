@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import * as i18n from './translations';
+import React, { useCallback } from 'react';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
+import * as i18n from './translations';
 
 interface Props {
   connectorId: string;

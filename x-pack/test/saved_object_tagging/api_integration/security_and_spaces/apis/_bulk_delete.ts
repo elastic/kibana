@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { USERS, User, ExpectedResponse } from '../../../common/lib';
+import { ExpectedResponse, USERS, User } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
-import { createTestSpaces, deleteTestSpaces, createTags, deleteTags } from './test_utils';
+import { createTags, createTestSpaces, deleteTags, deleteTestSpaces } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (ftrContext: FtrProviderContext) {

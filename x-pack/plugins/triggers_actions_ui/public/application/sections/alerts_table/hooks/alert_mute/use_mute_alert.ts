@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
-import { muteAlertInstance } from '../../../../lib/rule_api/mute_alert';
+import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../../..';
+import { muteAlertInstance } from '../../../../lib/rule_api/mute_alert';
+import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 import { ServerError, ToggleAlertParams } from '../../types';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.muteAlert.error', {

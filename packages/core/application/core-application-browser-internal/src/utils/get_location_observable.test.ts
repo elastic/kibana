@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createBrowserHistory, type History } from 'history';
+import { type History, createBrowserHistory } from 'history';
 import { firstValueFrom } from 'rxjs';
 import { getLocationObservable } from './get_location_observable';
 

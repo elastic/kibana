@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { of, Subject } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { Subject, of } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { TaskManagerConfig, configSchema } from '../config';
 import { MonitoringStats } from '../monitoring';
-import { configSchema, TaskManagerConfig } from '../config';
+import { sleep } from '../test_utils';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 import { backgroundTaskUtilizationRoute } from './background_task_utilization';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');

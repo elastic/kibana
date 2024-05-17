@@ -8,8 +8,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { globalNode, HookWrapper } from '../../mock';
 import { useScrollToTop } from '.';
+import { HookWrapper, globalNode } from '../../mock';
 
 const spyScroll = jest.fn();
 const spyScrollTo = jest.fn();

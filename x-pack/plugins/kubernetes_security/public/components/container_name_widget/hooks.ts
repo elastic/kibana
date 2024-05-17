@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import {
-  QUERY_KEY_CONTAINER_NAME_WIDGET,
   AGGREGATE_ROUTE,
   CURRENT_API_VERSION,
+  QUERY_KEY_CONTAINER_NAME_WIDGET,
 } from '../../../common/constants';
 import { AggregateResult } from '../../../common/types';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { SNStoreButton, SNStoreLink } from './sn_store_button';
 
 const appId = 'test';

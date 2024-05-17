@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
 import { buildRangeFilter } from '@kbn/es-query';
+import moment from 'moment-timezone';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
 
 export const createFilterDateHistogram = (

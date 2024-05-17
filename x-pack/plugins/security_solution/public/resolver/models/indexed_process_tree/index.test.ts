@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ResolverNode } from '../../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { generateTree, genResolverNode } from '../../mocks/generator';
-import type { IndexedProcessTree } from '../../types';
 import { factory } from '.';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import type { ResolverNode } from '../../../../common/endpoint/types';
+import { genResolverNode, generateTree } from '../../mocks/generator';
+import type { IndexedProcessTree } from '../../types';
 
 describe('factory', () => {
   const originID = 'origin';

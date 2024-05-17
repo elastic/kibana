@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import {
   clearFlashMessages,
@@ -14,18 +14,18 @@ import {
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import {
-  RoleMappingsBaseServerDetails,
   RoleMappingsBaseActions,
+  RoleMappingsBaseServerDetails,
   RoleMappingsBaseValues,
 } from '../../../shared/role_mapping';
-import { AttributeName, SingleUserRoleMapping, ElasticsearchUser } from '../../../shared/types';
-import { RoleGroup, WSRoleMapping, Role } from '../../types';
+import { AttributeName, ElasticsearchUser, SingleUserRoleMapping } from '../../../shared/types';
+import { Role, RoleGroup, WSRoleMapping } from '../../types';
 
 import {
-  ROLE_MAPPING_DELETED_MESSAGE,
-  ROLE_MAPPING_CREATED_MESSAGE,
-  ROLE_MAPPING_UPDATED_MESSAGE,
   DEFAULT_GROUP_NAME,
+  ROLE_MAPPING_CREATED_MESSAGE,
+  ROLE_MAPPING_DELETED_MESSAGE,
+  ROLE_MAPPING_UPDATED_MESSAGE,
 } from './constants';
 
 type UserMapping = SingleUserRoleMapping<WSRoleMapping>;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent, within } from '@testing-library/react';
 import { ChatActions } from '.';
 
 const onChatCleared = jest.fn();

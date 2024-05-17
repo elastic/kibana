@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import { IconWithCount } from './icon_with_count';
 

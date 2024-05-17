@@ -7,27 +7,27 @@
 
 import {
   EuiBadge,
-  EuiInMemoryTable,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiText,
+  EuiInMemoryTable,
   EuiLink,
   EuiSearchBar,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import React, { useEffect, useState } from 'react';
 import { useDebounce } from 'react-use';
-import { TableTitle } from '../../common/components/table_title';
-import { ParamsText } from './params_text';
 import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import { TableTitle } from '../../common/components/table_title';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
+import { ParamsText } from './params_text';
 
 export interface ListParamItem extends SyntheticsParams {
   id: string;

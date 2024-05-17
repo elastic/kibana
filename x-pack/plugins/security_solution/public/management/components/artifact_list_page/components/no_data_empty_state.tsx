@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`

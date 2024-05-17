@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { AGG_TYPE, DEFAULT_PERCENTILE, FIELD_ORIGIN } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { IESAggSource } from '../../sources/es_agg_source';
-import { AGG_TYPE, DEFAULT_PERCENTILE, FIELD_ORIGIN } from '../../../../common/constants';
 import { ESDocField } from '../es_doc_field';
-import { TopTermPercentageField } from './top_term_percentage_field';
-import { CountAggField } from './count_agg_field';
-import { IESAggField } from './agg_field_types';
 import { AggField } from './agg_field';
+import { IESAggField } from './agg_field_types';
+import { CountAggField } from './count_agg_field';
 import { PercentileAggField } from './percentile_agg_field';
+import { TopTermPercentageField } from './top_term_percentage_field';
 
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,

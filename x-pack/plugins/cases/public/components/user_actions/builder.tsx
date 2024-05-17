@@ -6,8 +6,11 @@
  */
 
 import { createAssigneesUserActionBuilder } from './assignees';
+import { createCategoryUserActionBuilder } from './category';
 import { createCommentUserActionBuilder } from './comment/comment';
 import { createConnectorUserActionBuilder } from './connector';
+import { createCaseUserActionBuilder } from './create_case';
+import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 import { createDescriptionUserActionBuilder } from './description';
 import { createPushedUserActionBuilder } from './pushed';
 import { createSettingsUserActionBuilder } from './settings';
@@ -15,10 +18,7 @@ import { createSeverityUserActionBuilder } from './severity';
 import { createStatusUserActionBuilder } from './status';
 import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
-import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
-import { createCategoryUserActionBuilder } from './category';
-import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 
 export const builderMap: UserActionBuilderMap = {
   create_case: createCaseUserActionBuilder,

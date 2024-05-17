@@ -9,13 +9,13 @@ import {
   SecurityGetRoleMappingResponse,
   SecurityGetUserResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { i18n } from '@kbn/i18n';
 import type {
   DeprecationsDetails,
   DocLinksServiceSetup,
   ElasticsearchClient,
   GetDeprecationsContext,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '..';
 import { deprecations } from '../lib/deprecations';
 

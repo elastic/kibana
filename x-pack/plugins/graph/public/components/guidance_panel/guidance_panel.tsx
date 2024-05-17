@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect, useState } from 'react';
 import {
-  EuiPanel,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiText,
   EuiLink,
-  EuiCallOut,
+  EuiPanel,
   EuiScreenReaderOnly,
+  EuiText,
 } from '@elastic/eui';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { connect } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import classNames from 'classnames';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { openSourceModal } from '../../services/source_modal';
 import {
   GraphState,
+  fillWorkspace,
   hasDatasourceSelector,
   hasFieldsSelector,
   requestDatasource,
-  fillWorkspace,
 } from '../../state_management';
 import { IndexPatternSavedObject } from '../../types';
-import { openSourceModal } from '../../services/source_modal';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;

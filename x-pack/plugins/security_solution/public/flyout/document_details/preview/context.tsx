@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useEventDetails } from '../shared/hooks/use_event_details';
+import React, { createContext, memo, useContext, useMemo } from 'react';
+import type { PreviewPanelProps } from '.';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import type { PreviewPanelProps } from '.';
+import { useEventDetails } from '../shared/hooks/use_event_details';
 
 export interface PreviewPanelContext {
   /**

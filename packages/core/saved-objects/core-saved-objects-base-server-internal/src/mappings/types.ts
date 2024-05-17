@@ -7,8 +7,8 @@
  */
 
 import type {
-  SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
+  SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
 
 /**

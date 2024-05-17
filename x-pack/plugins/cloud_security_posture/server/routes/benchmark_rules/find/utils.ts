@@ -1,3 +1,6 @@
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import semverCompare from 'semver/functions/compare';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +8,8 @@
  * 2.0.
  */
 import semverValid from 'semver/functions/valid';
-import semverCompare from 'semver/functions/compare';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 
 import type { CspBenchmarkRule } from '../../../../common/types/latest';
 

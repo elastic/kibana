@@ -7,10 +7,10 @@
 
 import { useMemo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { useGetUrlParams } from './use_url_params';
-import { filterLabels } from '../components/overview/filter_group/translations';
 import { FILTER_FIELDS, MONITOR_ROUTE } from '../../../common/constants';
+import { filterLabels } from '../components/overview/filter_group/translations';
 import { parseFiltersMap } from './use_filter_update';
+import { useGetUrlParams } from './use_url_params';
 
 type FilterType = string[];
 interface Filters {

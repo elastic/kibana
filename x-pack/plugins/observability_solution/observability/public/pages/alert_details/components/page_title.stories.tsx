@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentStory } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
+import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
-import { PageTitle as Component, PageTitleProps } from './page_title';
 import { alert } from '../mock/alert';
+import { PageTitle as Component, PageTitleProps } from './page_title';
 
 export default {
   component: Component,

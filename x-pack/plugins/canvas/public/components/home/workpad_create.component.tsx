@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export interface Props
   extends Omit<EuiButtonPropsForButton, 'iconType' | 'fill' | 'data-test-subj' | 'children'> {

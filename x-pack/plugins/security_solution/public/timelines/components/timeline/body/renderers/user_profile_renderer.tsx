@@ -9,11 +9,11 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { UsersAvatarsPanel } from '../../../../../common/components/user_profiles/users_avatars_panel';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import type { ColumnRenderer } from './column_renderer';
+import { UsersAvatarsPanel } from '../../../../../common/components/user_profiles/users_avatars_panel';
 import { profileUidColumns } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
+import type { ColumnRenderer } from './column_renderer';
 
 export const userProfileColumnRenderer: ColumnRenderer = {
   isInstance: (columnName, _, context) => profileUidColumns.includes(columnName) && !!context,

@@ -7,12 +7,12 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
+import type { IndexStateUpdateDoneState } from '../../state';
 import {
+  type MockedMigratorContext,
   createContextMock,
   createPostDocInitState,
-  type MockedMigratorContext,
 } from '../../test_helpers';
-import type { IndexStateUpdateDoneState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { indexStateUpdateDone } from './index_state_update_done';
 

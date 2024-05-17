@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { ErrorInfo, FC, ReactElement } from 'react';
-import { withState, withHandlers, lifecycle, mapProps, compose } from 'react-recompose';
-import PropTypes from 'prop-types';
 import { omit } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { ErrorInfo, FC, ReactElement } from 'react';
+import { compose, lifecycle, mapProps, withHandlers, withState } from 'react-recompose';
 
 interface Props {
   error?: Error;

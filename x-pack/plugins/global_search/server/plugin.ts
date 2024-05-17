@@ -7,15 +7,15 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
-import { SearchService, SearchServiceStart } from './services';
+import { ILicenseChecker, LicenseChecker } from '../common/license_checker';
+import { GlobalSearchConfigType } from './config';
 import { registerRoutes } from './routes';
+import { SearchService, SearchServiceStart } from './services';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchRequestHandlerContext,
 } from './types';
-import { GlobalSearchConfigType } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchPluginSetupDeps {}

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
 import { EuiAutoRefreshButton, OnRefreshChangeProps } from '@elastic/eui';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
-import { SyntheticsUrlParams } from '../../../utils/url_params';
 import { useUrlParams } from '../../../hooks';
 import {
   selectRefreshInterval,
@@ -17,6 +16,7 @@ import {
   setRefreshIntervalAction,
   setRefreshPausedAction,
 } from '../../../state';
+import { SyntheticsUrlParams } from '../../../utils/url_params';
 const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;
 
 const replaceDefaults = ({ refreshPaused, refreshInterval }: Partial<SyntheticsUrlParams>) => {

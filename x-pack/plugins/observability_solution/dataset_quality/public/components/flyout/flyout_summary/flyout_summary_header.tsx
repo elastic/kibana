@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiIcon,
@@ -16,7 +14,9 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { flyoutSummaryText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';

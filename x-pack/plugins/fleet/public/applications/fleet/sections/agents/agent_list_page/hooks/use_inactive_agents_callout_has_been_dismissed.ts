@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { TOUR_STORAGE_CONFIG } from '../../../../../../constants';
 import { TOUR_STORAGE_KEYS } from '../../../../../../constants';

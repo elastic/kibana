@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
-// @ts-ignore
-import registerSearchEmbeddableSource from '!!raw-loader!../react_embeddables/search/register_search_embeddable';
-// @ts-ignore
-import registerAttachActionSource from '!!raw-loader!../react_embeddables/search/register_add_search_panel_action';
 // @ts-ignore
 import registerFieldListEmbeddableSource from '!!raw-loader!../react_embeddables/field_list/register_field_list_embeddable';
 // @ts-ignore
 import registerReactEmbeddableSavedObjectSource from '!!raw-loader!../react_embeddables/register_saved_object_example';
+// @ts-ignore
+import registerAttachActionSource from '!!raw-loader!../react_embeddables/search/register_add_search_panel_action';
+// @ts-ignore
+import registerSearchEmbeddableSource from '!!raw-loader!../react_embeddables/search/register_search_embeddable';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
 
 export const RegisterEmbeddable = () => {
   return (

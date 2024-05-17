@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
-import styled, { css } from 'styled-components';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
-  EuiTextArea,
+  EuiAccordion,
+  EuiAvatar,
+  EuiCommentList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiAvatar,
-  EuiAccordion,
-  EuiCommentList,
   EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
+import styled, { css } from 'styled-components';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
-import * as i18n from './translations';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { getFormattedComments } from '../../utils/helpers';
+import * as i18n from './translations';
 
 interface ExceptionItemCommentsProps {
   exceptionItemComments?: Comment[];

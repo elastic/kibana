@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type React from 'react';
 import { i18n } from '@kbn/i18n';
+import type React from 'react';
 
 export const POLICY_ARTIFACT_LAYOUT_LABELS = Object.freeze({
   layoutTitle: i18n.translate('xpack.securitySolution.endpoint.policy.artifacts.layout.title', {

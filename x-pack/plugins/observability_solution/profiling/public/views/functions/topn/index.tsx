@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
 import { TopNFunctionSortField } from '@kbn/profiling-utils';
+import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';

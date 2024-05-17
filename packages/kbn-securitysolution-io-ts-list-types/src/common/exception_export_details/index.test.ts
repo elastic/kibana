@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { getExceptionExportDetailsMock } from './index.mock';
-import { exportExceptionDetailsSchema, ExportExceptionDetails } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { ExportExceptionDetails, exportExceptionDetailsSchema } from '.';
+import { getExceptionExportDetailsMock } from './index.mock';
 
 describe('exportExceptionDetails', () => {
   test('it should validate export meta', () => {

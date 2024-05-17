@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import type { IntegrationDetails } from '../integration_details';
 import * as i18n from '../translations';
@@ -40,8 +40,8 @@ const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = (
   const statusText = isEnabled
     ? i18n.INTEGRATIONS_ENABLED
     : isInstalled
-    ? i18n.INTEGRATIONS_DISABLED
-    : i18n.INTEGRATIONS_UNINSTALLED;
+      ? i18n.INTEGRATIONS_DISABLED
+      : i18n.INTEGRATIONS_UNINSTALLED;
 
   return (
     <EuiToolTip content={tooltipText}>

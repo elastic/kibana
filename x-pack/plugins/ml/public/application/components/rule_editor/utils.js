@@ -15,9 +15,9 @@ import {
   ML_DETECTOR_RULE_OPERATOR,
 } from '@kbn/ml-anomaly-utils';
 
-import { ml } from '../../services/ml_api_service';
-import { mlJobService } from '../../services/job_service';
 import { processCreatedBy } from '../../../../common/util/job_utils';
+import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
 
 export function getNewConditionDefaults() {
   return {

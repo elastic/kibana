@@ -1,3 +1,6 @@
+import { nextTick } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import { mount } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +8,11 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { screen, render } from '@testing-library/react';
-import { RuleActions } from './rule_actions';
-import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionConnector, ActionTypeModel } from '../../../../types';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
+import { RuleActions } from './rule_actions';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const actionType = {

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
+import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
 
 import {
   FIELD_TYPES,
+  Field,
+  FieldConfig,
+  FieldHook,
+  SerializerFunc,
   UseField,
   useFormContext,
-  Field,
-  FieldHook,
-  FieldConfig,
-  SerializerFunc,
 } from '../../../../../../shared_imports';
-import { FieldsConfig, from, to } from './shared';
-import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { TargetField } from './common_fields/target_field';
+import { FieldsConfig, from, to } from './shared';
 
 interface InternalNetworkTypes {
   internal_networks: string[];

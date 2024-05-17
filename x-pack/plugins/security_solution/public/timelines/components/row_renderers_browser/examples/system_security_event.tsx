@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { createSecurityEventRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { demoEndgameUserLogon } from '../../../../common/demo_data/endgame_ecs/user_logon';
+import { createSecurityEventRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemSecurityEventExampleComponent: React.FC = () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import { APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
 
 export const apmServerSettings: SavedObjectsType = {

@@ -6,9 +6,9 @@
  */
 
 import { green } from 'chalk';
+import { DataFormatter } from './data_formatter';
 import { isChoice } from './type_gards';
 import type { Choice } from './types';
-import { DataFormatter } from './data_formatter';
 
 type ChoiceMenuFormatterItems = string[] | Choice[];
 

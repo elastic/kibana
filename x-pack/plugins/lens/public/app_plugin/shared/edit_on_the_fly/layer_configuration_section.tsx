@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
-import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
+import React, { useMemo } from 'react';
 import { createIndexPatternService } from '../../../data_views_service/service';
-import { useLensDispatch, updateIndexPatterns } from '../../../state_management';
+import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
+import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
+import { updateIndexPatterns, useLensDispatch } from '../../../state_management';
+import { useLensSelector } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
-import { useLensSelector } from '../../../state_management';
 
 export function LayerConfiguration({
   attributes,

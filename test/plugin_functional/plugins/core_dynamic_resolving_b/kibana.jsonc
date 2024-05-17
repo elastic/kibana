@@ -6,9 +6,7 @@
     "id": "coreDynamicResolvingB",
     "server": true,
     "browser": false,
-    "configPath": [
-      "core_plugin_b"
-    ],
-    "runtimePluginDependencies" : ["coreDynamicResolvingA"]
+    "configPath": ["core_plugin_b"],
+    "runtimePluginDependencies": ["coreDynamicResolvingA"]
   }
 }

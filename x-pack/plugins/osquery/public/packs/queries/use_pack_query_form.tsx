@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, xor } from 'lodash';
-import { useForm as useHookForm } from 'react-hook-form';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { Draft } from 'immer';
 import { produce } from 'immer';
+import { isArray, isEmpty, xor } from 'lodash';
 import { useMemo } from 'react';
-import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { useForm as useHookForm } from 'react-hook-form';
 import { QUERY_TIMEOUT } from '../../../common/constants';
 import type { Shard } from '../../../common/utils/converters';
 

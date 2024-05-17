@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import type { Group } from './anomaly_detection_panel';
 
 export function useGroupActions(): Array<Action<Group>> {

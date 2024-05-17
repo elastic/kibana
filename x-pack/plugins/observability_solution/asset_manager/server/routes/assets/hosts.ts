@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { GetHostAssetsQueryOptions, getHostAssetsQueryOptionsRT } from '../../../common/types_api';
-import { debug } from '../../../common/debug_log';
-import { SetupRouteOptions } from '../types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import * as routePaths from '../../../common/constants_routes';
-import { getClientsFromContext, validateStringAssetFilters } from '../utils';
+import { debug } from '../../../common/debug_log';
+import { GetHostAssetsQueryOptions, getHostAssetsQueryOptionsRT } from '../../../common/types_api';
 import { AssetsValidationError } from '../../lib/validators/validation_error';
+import { SetupRouteOptions } from '../types';
+import { getClientsFromContext, validateStringAssetFilters } from '../utils';
 
 export function hostsRoutes<T extends RequestHandlerContext>({
   router,

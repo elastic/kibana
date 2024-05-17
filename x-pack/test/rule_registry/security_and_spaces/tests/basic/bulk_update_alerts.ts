@@ -8,29 +8,29 @@ import expect from '@kbn/expect';
 
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
-  superUser,
   globalRead,
+  noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadSpace2,
+  obsOnlySpace2,
+  obsOnlySpacesAll,
   obsSec,
+  obsSecAllSpace2,
   obsSecRead,
+  obsSecReadSpace2,
+  obsSecSpacesAll,
   secOnly,
   secOnlyRead,
-  secOnlySpace2,
   secOnlyReadSpace2,
-  obsSecAllSpace2,
-  obsSecReadSpace2,
-  obsOnlySpace2,
-  obsOnlyReadSpace2,
-  obsOnlySpacesAll,
-  obsSecSpacesAll,
+  secOnlySpace2,
   secOnlySpacesAll,
-  noKibanaPrivileges,
+  superUser,
 } from '../../../common/lib/authentication/users';
 
-import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
+import type { User } from '../../../common/lib/authentication/types';
 
 interface TestCase {
   /** The space where the alert exists */

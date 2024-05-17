@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { DocLinksStart } from '@kbn/core/public';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { isEmpty } from 'lodash';
+import React from 'react';
 import * as i18n from './translations';
 
 const { emptyField, urlField } = fieldValidators;

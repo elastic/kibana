@@ -10,12 +10,12 @@ import React, { useMemo } from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiStatProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiStat,
   EuiSpacer,
+  EuiStat,
+  EuiStatProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

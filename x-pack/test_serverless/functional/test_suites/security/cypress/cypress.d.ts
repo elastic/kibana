@@ -7,32 +7,32 @@
 
 // / <reference types="cypress" />
 
-import { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
-import {
-  DeleteIndexedFleetEndpointPoliciesResponse,
-  IndexedFleetEndpointPolicyResponse,
-} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import {
   DeletedIndexedCase,
   IndexedCase,
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_case';
-import {
-  HostActionResponse,
-  IndexEndpointHostsCyTaskOptions,
-} from '@kbn/security-solution-plugin/public/management/cypress/types';
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { DeleteIndexedEndpointHostsResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_hosts';
+import { IndexedEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
   DeletedIndexedEndpointRuleAlerts,
   IndexedEndpointRuleAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import {
+  DeleteIndexedFleetEndpointPoliciesResponse,
+  IndexedFleetEndpointPolicyResponse,
+} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import {
   HostPolicyResponse,
   LogsEndpointActionResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { IndexedEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_policy_response';
+import {
+  HostActionResponse,
+  IndexEndpointHostsCyTaskOptions,
+} from '@kbn/security-solution-plugin/public/management/cypress/types';
 import { DeleteAllEndpointDataResponse } from '@kbn/security-solution-plugin/scripts/endpoint/common/delete_all_endpoint_data';
+import { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
 import { LoadedRoleAndUser, ServerlessRoleName } from '../../../../shared/lib';
 
 export interface LoadUserAndRoleCyTaskOptions {

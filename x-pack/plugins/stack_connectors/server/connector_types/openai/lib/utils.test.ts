@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { sanitizeRequest, getRequestWithStreamOption, getAxiosOptions } from './utils';
 import {
   DEFAULT_OPENAI_MODEL,
-  OpenAiProviderType,
   OPENAI_CHAT_URL,
+  OpenAiProviderType,
 } from '../../../../common/openai/constants';
 import {
-  sanitizeRequest as openAiSanitizeRequest,
-  getRequestWithStreamOption as openAiGetRequestWithStreamOption,
-} from './openai_utils';
-import {
-  sanitizeRequest as azureAiSanitizeRequest,
   getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
+  sanitizeRequest as azureAiSanitizeRequest,
 } from './azure_openai_utils';
+import {
+  getRequestWithStreamOption as openAiGetRequestWithStreamOption,
+  sanitizeRequest as openAiSanitizeRequest,
+} from './openai_utils';
+import { getAxiosOptions, getRequestWithStreamOption, sanitizeRequest } from './utils';
 jest.mock('./openai_utils');
 jest.mock('./azure_openai_utils');
 

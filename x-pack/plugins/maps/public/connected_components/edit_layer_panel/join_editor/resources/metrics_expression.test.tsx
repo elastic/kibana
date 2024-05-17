@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { MetricsExpression } from './metrics_expression';
+import React from 'react';
 import { AGG_TYPE } from '../../../../../common/constants';
+import { MetricsExpression } from './metrics_expression';
 
 const defaultProps = {
   onChange: () => {},

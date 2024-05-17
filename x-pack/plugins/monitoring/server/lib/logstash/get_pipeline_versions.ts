@@ -6,11 +6,11 @@
  */
 
 import { get, orderBy } from 'lodash';
-import { createQuery } from '../create_query';
-import { LogstashMetric } from '../metrics';
-import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 import { LegacyRequest, PipelineVersion } from '../../types';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { LogstashMetric } from '../metrics';
 import { mergePipelineVersions } from './merge_pipeline_versions';
 
 const createScopedAgg = (pipelineId: string, maxBucketSize: number) => {

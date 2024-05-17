@@ -6,16 +6,16 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import type {
   RuleCreateProps,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { createRule } from '../api';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
-import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 
 export const CREATE_RULE_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_URL];
 

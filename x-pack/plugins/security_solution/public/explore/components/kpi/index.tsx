@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
+import React from 'react';
 
 import type { StatItems } from '../stat_items';
 import { StatItemsComponent } from '../stat_items';

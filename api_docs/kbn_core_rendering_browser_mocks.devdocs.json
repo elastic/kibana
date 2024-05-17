@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<RenderingServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<RenderingServiceContract>"],
             "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

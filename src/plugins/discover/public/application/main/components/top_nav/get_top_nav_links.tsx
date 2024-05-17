@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { omit } from 'lodash';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
-import { showOpenSearchPanel } from './show_open_search_panel';
-import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
-import { onSaveSearch } from './on_save_search';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { openAlertsPopover } from './open_alerts_popover';
 import type { TopNavCustomization } from '../../../../customizations';
+import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { onSaveSearch } from './on_save_search';
+import { openAlertsPopover } from './open_alerts_popover';
+import { showOpenSearchPanel } from './show_open_search_panel';
 
 /**
  * Helper function to build the top nav links

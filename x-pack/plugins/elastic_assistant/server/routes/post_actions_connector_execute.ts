@@ -6,9 +6,9 @@
  */
 
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
 import {
@@ -20,27 +20,27 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { i18n } from '@kbn/i18n';
-import { getLlmType } from './utils';
+import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
+import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import { buildResponse } from '../lib/build_response';
+import { StaticResponse, executeAction } from '../lib/executor';
+import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import { StaticReturnType } from '../lib/langchain/executors/types';
+import { getLangChainMessages } from '../lib/langchain/helpers';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
-import { executeAction, StaticResponse } from '../lib/executor';
-import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
-import { getLangChainMessages } from '../lib/langchain/helpers';
-import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
-import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { getLangSmithTracer } from './evaluate/utils';
 import {
   DEFAULT_PLUGIN_NAME,
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
-import { getLangSmithTracer } from './evaluate/utils';
-import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
-import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { getLlmType } from './utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,

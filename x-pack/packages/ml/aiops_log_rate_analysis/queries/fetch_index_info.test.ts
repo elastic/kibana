@@ -9,10 +9,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { paramsSearchQueryMock } from './__mocks__/params_search_query';
-import { fieldCapsPgBenchMock } from './__mocks__/field_caps_pgbench';
 import { fieldCapsEcommerceMock } from './__mocks__/field_caps_ecommerce';
 import { fieldCapsLargeArraysMock } from './__mocks__/field_caps_large_arrays';
+import { fieldCapsPgBenchMock } from './__mocks__/field_caps_pgbench';
+import { paramsSearchQueryMock } from './__mocks__/params_search_query';
 
 import { fetchIndexInfo } from './fetch_index_info';
 

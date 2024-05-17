@@ -6,14 +6,14 @@
  */
 
 import { Client, errors } from '@elastic/elasticsearch';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '@kbn/rule-data-utils';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { ApmApiClient } from '../../../common/config';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';

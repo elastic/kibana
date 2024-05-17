@@ -9,8 +9,8 @@
  * will import from 6.8.x to 7.x.x
  */
 
-import expect from '@kbn/expect';
 import path from 'path';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

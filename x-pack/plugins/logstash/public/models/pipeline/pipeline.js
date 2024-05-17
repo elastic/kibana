@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, omit, isEqual, defaultsDeep } from 'lodash';
+import { defaultsDeep, get, isEqual, omit } from 'lodash';
 
 // This config template is presented to the user for the 'new pipeline' workflow
 const emptyPipeline = 'input {\n' + '}\n' + 'filter {\n' + '}\n' + 'output {\n' + '}';

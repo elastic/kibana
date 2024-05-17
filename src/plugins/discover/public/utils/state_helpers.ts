@@ -7,8 +7,8 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
+import { DEFAULT_COLUMNS_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
-import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
 
 /**
  * Makes sure the current state is not referencing the source column when using the fields api

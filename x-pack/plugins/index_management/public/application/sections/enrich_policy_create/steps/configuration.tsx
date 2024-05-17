@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { omit, isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiIcon,
-  EuiCode,
-  EuiButton,
-  EuiText,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty, omit } from 'lodash';
+import React, { useState } from 'react';
 import {
-  useForm,
-  Form,
-  fieldValidators,
-  FormSchema,
   FIELD_TYPES,
-  UseField,
-  TextField,
-  SelectField,
+  Form,
+  FormSchema,
   JsonEditorField,
+  SelectField,
+  TextField,
+  UseField,
+  fieldValidators,
+  useForm,
 } from '../../../../shared_imports';
 
 import { useAppContext } from '../../../app_context';
-import { IndicesSelector } from './fields/indices_selector';
 import { documentationService } from '../../../services/documentation';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import { DraftPolicy, useCreatePolicyContext } from '../create_policy_context';
+import { IndicesSelector } from './fields/indices_selector';
 
 interface Props {
   onNext: () => void;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiFieldSearch } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { useCallback } from 'react';
-import { EuiFieldSearch } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface EventMessageFilterProps {

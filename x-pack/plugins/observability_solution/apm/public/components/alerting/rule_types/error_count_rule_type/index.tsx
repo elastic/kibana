@@ -5,21 +5,36 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { defaults, omit } from 'lodash';
-import React, { useCallback, useEffect } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
-import { SearchConfigurationType } from '../../../../../common/rules/schema';
+import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { defaults, omit } from 'lodash';
+import React, { useCallback, useEffect } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import {
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+} from '../../../../../common/es_fields/apm';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
+import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { ChartPreview } from '../../ui_components/chart_preview';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 import {
   EnvironmentField,
   ErrorGroupingKeyField,
@@ -27,21 +42,6 @@ import {
   ServiceField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
-import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
-import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  ERROR_GROUP_ID,
-  ERROR_GROUP_NAME,
-} from '../../../../../common/es_fields/apm';
-import {
-  ErrorState,
-  LoadingState,
-  NoDataState,
-} from '../../ui_components/chart_preview/chart_preview_helper';
-import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
 export interface ErrorCountRuleParams {
   windowSize?: number;

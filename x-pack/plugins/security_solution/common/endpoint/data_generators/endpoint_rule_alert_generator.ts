@@ -8,10 +8,10 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { mergeWith } from 'lodash';
 import type { DeepPartial } from 'utility-types';
+import { ELASTIC_SECURITY_RULE_ID } from '../../detection_engine/constants';
+import type { HostMetadata } from '../types';
 import { BaseDataGenerator } from './base_data_generator';
 import { EndpointMetadataGenerator } from './endpoint_metadata_generator';
-import type { HostMetadata } from '../types';
-import { ELASTIC_SECURITY_RULE_ID } from '../../detection_engine/constants';
 
 const mergeAndReplaceArrays = <T, S>(destinationObj: T, srcObj: S): T => {
   const customizer = (objValue: T[keyof T], srcValue: S[keyof S]) => {

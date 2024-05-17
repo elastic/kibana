@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
+import { KibanaRequest, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { set } from '@kbn/safer-lodash-set';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
-import {
-  validateConfig,
-  validateConnector,
-  validateParams,
-  validateSecrets,
-} from './validate_with_schema';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { cloneDeep } from 'lodash';
+import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import {
   ActionType,
   ActionTypeConfig,
@@ -38,13 +33,18 @@ import {
   UnsecuredServices,
   ValidatorServices,
 } from '../types';
-import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionExecutionSource } from './action_execution_source';
-import { RelatedSavedObjects } from './related_saved_objects';
+import { isBidirectionalConnectorType } from './bidirectional_connectors';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
-import type { ActionsAuthorization } from '../authorization/actions_authorization';
-import { isBidirectionalConnectorType } from './bidirectional_connectors';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
+import { RelatedSavedObjects } from './related_saved_objects';
+import {
+  validateConfig,
+  validateConnector,
+  validateParams,
+  validateSecrets,
+} from './validate_with_schema';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;

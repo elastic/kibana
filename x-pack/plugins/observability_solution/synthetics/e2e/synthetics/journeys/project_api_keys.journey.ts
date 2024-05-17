@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, before } from '@elastic/synthetics';
+import { before, expect, journey, step } from '@elastic/synthetics';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { recordVideo } from '../../helpers/record_video';
 

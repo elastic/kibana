@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
-import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { removeRow, isColorInvalid } from './color_stops_utils';
-import { i18n } from '@kbn/i18n';
+import { isColorInvalid, removeRow } from './color_stops_utils';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
 
 export const ColorStops = ({

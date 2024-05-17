@@ -17,10 +17,6 @@
       "triggersActionsUi",
       "inspector"
     ],
-    "requiredBundles": [
-      "data",
-      "kibanaUtils",
-      "kibanaReact"
-    ]
+    "requiredBundles": ["data", "kibanaUtils", "kibanaReact"]
   }
 }

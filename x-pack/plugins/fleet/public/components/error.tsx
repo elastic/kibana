@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import React from 'react';
 
 export const Error: React.FunctionComponent<{
   title: JSX.Element;

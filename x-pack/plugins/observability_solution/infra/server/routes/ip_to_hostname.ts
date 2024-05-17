@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { first } from 'lodash';
 import { schema } from '@kbn/config-schema';
+import { first } from 'lodash';
 import { InfraBackendLibs } from '../lib/infra_types';
 
 interface HostDoc {

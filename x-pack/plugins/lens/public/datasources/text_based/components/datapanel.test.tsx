@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import type { Query } from '@kbn/es-query';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
-import type { Query } from '@kbn/es-query';
 
+import { EuiHighlight, EuiToken } from '@elastic/eui';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import {
-  dataViewPluginMocks,
   Start as DataViewPublicStart,
+  dataViewPluginMocks,
 } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { EuiHighlight, EuiToken } from '@elastic/eui';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
-import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
+import { TextBasedDataPanel, type TextBasedDataPanelProps } from './datapanel';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { TextBasedPrivateState } from '../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { TextBasedPrivateState } from '../types';
 
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../../mocks';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { DataViewsState } from '../../../state_management';
 import { addColumnsToCache } from '../fieldlist_cache';
 
@@ -151,7 +151,7 @@ async function mountAndWaitForLazyModules(component: React.ReactElement): Promis
 }
 
 describe('TextBased Query Languages Data Panel', () => {
-  let core: ReturnType<typeof coreMock['createStart']>;
+  let core: ReturnType<(typeof coreMock)['createStart']>;
   let dataViews: DataViewPublicStart;
   const defaultIndexPatterns = {
     '1': {

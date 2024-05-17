@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -15,8 +14,9 @@ import {
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState } from 'react';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 export interface AutoRefreshButtonProps {

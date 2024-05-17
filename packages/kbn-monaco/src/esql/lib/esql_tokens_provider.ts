@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ESQLErrorListener, getLexer } from '@kbn/esql-ast';
 import { CharStreams, type Token } from 'antlr4';
-import { getLexer, ESQLErrorListener } from '@kbn/esql-ast';
 import { monaco } from '../../monaco_imports';
 
-import { ESQLToken } from './esql_token';
 import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
+import { ESQLToken } from './esql_token';
 
 import { ESQL_TOKEN_POSTFIX } from './constants';
 import { enrichTokensWithFunctionsMetadata } from './esql_token_helpers';

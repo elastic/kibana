@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fsp from 'fs/promises';
 import Path from 'path';
+import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 

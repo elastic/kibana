@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { assertNever } from '@kbn/std';
 import { BrushEvent } from '@elastic/charts';
-import { Duration, DurationUnit } from '../../typings';
+import { assertNever } from '@kbn/std';
+import moment from 'moment';
 import { TimeBounds } from '../../pages/slo_details/types';
+import { Duration, DurationUnit } from '../../typings';
 
 export function toDuration(duration: string): Duration {
   const durationValue = duration.substring(0, duration.length - 1);

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.top_n_flow_network.dsl';
 import { networkTopNFlow, networkTopNFlowCount } from '.';
 import {
-  mockOptions,
-  mockCountOptions,
-  mockSearchStrategyResponse,
-  formattedSearchStrategyResponse,
-  mockCountStrategyResponse,
   formattedCountStrategyResponse,
+  formattedSearchStrategyResponse,
+  mockCountOptions,
+  mockCountStrategyResponse,
+  mockOptions,
+  mockSearchStrategyResponse,
 } from './__mocks__';
+import * as buildQuery from './query.top_n_flow_network.dsl';
 
 describe('Network TopNFlow search strategy', () => {
   describe('networkTopNFlow', () => {

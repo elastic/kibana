@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiComboBox } from '@elastic/eui';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { IndexSelectPopover } from './index_select_popover';
-import { EuiComboBox } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const module = jest.requireActual('lodash');

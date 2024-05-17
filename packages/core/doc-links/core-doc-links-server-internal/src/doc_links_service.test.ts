@@ -7,8 +7,8 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
 import { DocLinksService } from './doc_links_service';
+import { getDocLinksMetaMock, getDocLinksMock } from './doc_links_service.test.mocks';
 
 describe('DocLinksService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;

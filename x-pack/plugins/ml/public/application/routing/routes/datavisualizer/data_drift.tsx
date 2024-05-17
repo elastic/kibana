@@ -8,24 +8,24 @@
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
+import type { MlRoute } from '../..';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import {
   DataDriftIndexOrSearchRedirect,
   DataDriftIndexPatternsPicker,
 } from '../../../datavisualizer/data_drift/index_patterns_picker';
-import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute } from '../..';
-import type { PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import {
-  breadcrumbOnClickFactory,
   DATA_DRIFT_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
+  breadcrumbOnClickFactory,
   getBreadcrumbWithUrlForApp,
 } from '../../breadcrumbs';
-import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { DataSourceContextProvider } from '../../../contexts/ml';
+import type { PageProps } from '../../router';
+import { PageLoader, createPath } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 
 export const dataDriftRouteIndexOrSearchFactory = (
   navigateToPath: NavigateToPath,

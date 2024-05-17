@@ -7,7 +7,7 @@
 
 import '../../__mocks__/engine_logic.mock';
 
-import { getCurationsBreadcrumbs, convertToDate, addDocument, removeDocument } from './utils';
+import { addDocument, convertToDate, getCurationsBreadcrumbs, removeDocument } from './utils';
 
 describe('getCurationsBreadcrumbs', () => {
   it('generates curation-prefixed breadcrumbs', () => {

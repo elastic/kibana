@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
+import React from 'react';
 import type { DataLayerConfig } from '../../common';
+import { mockPaletteOutput } from '../../common/__mocks__';
 import { LayerTypes } from '../../common/constants';
+import { LayerFieldFormats } from '../helpers';
 import { getLegendAction } from './legend_action';
 import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
-import { mockPaletteOutput } from '../../common/__mocks__';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { LayerFieldFormats } from '../helpers';
 
 const legendCellValueActions: LegendCellValueActions = [
   { id: 'action_1', displayName: 'Action 1', iconType: 'testIcon1', execute: () => {} },

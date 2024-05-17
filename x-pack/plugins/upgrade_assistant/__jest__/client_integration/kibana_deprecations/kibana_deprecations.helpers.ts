@@ -1,3 +1,10 @@
+import { HttpSetup } from '@kbn/core/public';
+import {
+  AsyncTestBedConfig,
+  TestBed,
+  findTestSubject,
+  registerTestBed,
+} from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +12,6 @@
  * 2.0.
  */
 import { act } from 'react-dom/test-utils';
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 

@@ -47,8 +47,8 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
   };
 });
 
-import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { monaco } from '@kbn/monaco';
+import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;

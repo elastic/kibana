@@ -11,7 +11,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { MitreTactic, MitreTechnique, MitreSubTechnique } from './types';
+import type { MitreSubTechnique, MitreTactic, MitreTechnique } from './types';
 
 export const tactics: MitreTactic[] = [
   {

@@ -11,8 +11,8 @@ import {
   INTERNAL_BASE_ACTION_API_PATH,
   RewriteRequestCase,
 } from '@kbn/actions-plugin/common';
-import { BASE_ACTION_API_PATH } from '../../constants';
 import type { ActionType } from '../../../types';
+import { BASE_ACTION_API_PATH } from '../../constants';
 
 const rewriteResponseRes = (results: Array<AsApiContract<ActionType>>): ActionType[] => {
   return results.map((item) => rewriteBodyReq(item));

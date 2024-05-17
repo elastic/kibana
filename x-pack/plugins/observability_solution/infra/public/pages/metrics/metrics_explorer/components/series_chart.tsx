@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  ScaleType,
   AreaSeries,
-  BarSeries,
-  RecursivePartial,
   AreaSeriesStyle,
+  BarSeries,
   BarSeriesStyle,
+  RecursivePartial,
+  ScaleType,
 } from '@elastic/charts';
+import React from 'react';
+import { Color, colorTransformer } from '../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
-import { colorTransformer, Color } from '../../../../../common/color_palette';
-import { createMetricLabel } from './helpers/create_metric_label';
-import {
-  MetricsExplorerOptionsMetric,
-  MetricsExplorerChartType,
-} from '../hooks/use_metrics_explorer_options';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
+import {
+  MetricsExplorerChartType,
+  MetricsExplorerOptionsMetric,
+} from '../hooks/use_metrics_explorer_options';
+import { createMetricLabel } from './helpers/create_metric_label';
 import { getMetricId } from './helpers/get_metric_id';
 
 type NumberOrString = string | number;

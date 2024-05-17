@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 
+import { parseMappings } from '../../shared/parse_mappings';
 import {
+  ConfigurationForm,
   DocumentFields,
+  MultipleMappingsWarning,
   RuntimeFieldsList,
   TemplatesForm,
-  ConfigurationForm,
-  MultipleMappingsWarning,
 } from './components';
+import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
+import { SearchResult } from './components/document_fields/search_fields';
+import { useConfig } from './config_context';
+import { useDispatch, useMappingsState } from './mappings_state_context';
+import { DocLinksStart } from './shared_imports';
 import {
-  OnUpdateHandler,
-  IndexSettings,
   Field,
+  IndexSettings,
   Mappings,
   MappingsConfiguration,
   MappingsTemplates,
+  OnUpdateHandler,
   RuntimeFields,
 } from './types';
-import { useDispatch, useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
-import { useConfig } from './config_context';
-import { DocLinksStart } from './shared_imports';
-import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
-import { SearchResult } from './components/document_fields/search_fields';
-import { parseMappings } from '../../shared/parse_mappings';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ParsedCommandInput, ParsedCommandInterface } from './types';
 import type { CommandDefinition } from '..';
+import type { ParsedCommandInput, ParsedCommandInterface } from './types';
 
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
@@ -159,6 +159,6 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
         });
       })
     : requiredArgs || optionalArgs
-    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
-    : [];
+      ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+      : [];
 };

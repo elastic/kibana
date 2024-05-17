@@ -6,10 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -18,10 +14,14 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { useCurrentThemeVars } from '../../../../contexts/kibana';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
-import type { NerInference, NerResponse } from './ner_inference';
+import { useCurrentThemeVars } from '../../../../contexts/kibana';
 import { INPUT_TYPE } from '../inference_base';
+import type { NerInference, NerResponse } from './ner_inference';
 
 const ICON_PADDING = '2px';
 const PROBABILITY_SIG_FIGS = 3;

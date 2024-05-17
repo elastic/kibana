@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { PluginStart as DataPluginStart, ISearchStrategy } from '@kbn/data-plugin/server';
+import type {
+  IEsSearchRequest,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '@kbn/search-types';
 import { pick } from '@kbn/std';
 import * as rt from 'io-ts';
 import { combineLatest, concat, defer, forkJoin, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs';
-import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  IEsSearchRequest,
-} from '@kbn/search-types';
-import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
-  getLogEntryCursorFromHit,
   LogColumn,
   LogEntry,
   LogEntryAfterCursor,
-  logEntryAfterCursorRT,
   LogEntryBeforeCursor,
-  logEntryBeforeCursorRT,
   LogEntryContext,
+  getLogEntryCursorFromHit,
+  logEntryAfterCursorRT,
+  logEntryBeforeCursorRT,
 } from '../../../common/log_entry';
 import {
   LogViewColumnConfiguration,
@@ -32,8 +32,8 @@ import {
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntriesSearchRequestParams,
-  logEntriesSearchRequestParamsRT,
   LogEntriesSearchResponsePayload,
+  logEntriesSearchRequestParamsRT,
   logEntriesSearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entries';
 import {
@@ -48,10 +48,10 @@ import {
   getBuiltinRules,
 } from './message';
 import {
+  LogEntryHit,
   createGetLogEntriesQuery,
   getLogEntriesResponseRT,
   getSortDirection,
-  LogEntryHit,
 } from './queries/log_entries';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;

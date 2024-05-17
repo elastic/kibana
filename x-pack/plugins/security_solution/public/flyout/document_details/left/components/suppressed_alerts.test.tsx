@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 import { TestProviders } from '../../../../common/mock';
-import {
-  CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
-  SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
-} from './test_ids';
-import { SuppressedAlerts } from './suppressed_alerts';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -20,7 +16,11 @@ import {
 } from '../../../shared/components/test_ids';
 import { LeftPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
-import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+import { SuppressedAlerts } from './suppressed_alerts';
+import {
+  CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
+  SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
+} from './test_ids';
 
 jest.mock('../../../../../common/detection_engine/utils', () => ({
   isSuppressionRuleInGA: jest.fn().mockReturnValue(false),

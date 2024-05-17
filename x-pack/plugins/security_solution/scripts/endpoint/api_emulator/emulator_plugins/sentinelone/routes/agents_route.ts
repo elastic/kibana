@@ -11,9 +11,9 @@ import type {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type { DeepPartial, Mutable } from 'utility-types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
-import { buildSentinelOneRoutePath } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
+import { buildSentinelOneRoutePath } from './utils';
 
 const generator = new SentinelOneDataGenerator();
 

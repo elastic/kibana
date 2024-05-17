@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "buildDataTableRecord",
-        "description": [
-          "\nBuild a record for data table, explorer + classic one"
-        ],
+        "description": ["\nBuild a record for data table, explorer + classic one"],
         "signature": [
           "(doc: ",
           {
@@ -64,9 +62,7 @@
             "type": "Object",
             "tags": [],
             "label": "doc",
-            "description": [
-              "the document returned from Elasticsearch"
-            ],
+            "description": ["the document returned from Elasticsearch"],
             "signature": [
               {
                 "pluginId": "@kbn/discover-utils",
@@ -87,9 +83,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "this current data view"
-            ],
+            "description": ["this current data view"],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -114,9 +108,7 @@
             "description": [
               "determines if the given doc is the anchor doc when viewing surrounding documents"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -172,9 +164,7 @@
             "type": "Array",
             "tags": [],
             "label": "docs",
-            "description": [
-              "Array of documents returned from Elasticsearch"
-            ],
+            "description": ["Array of documents returned from Elasticsearch"],
             "signature": [
               {
                 "pluginId": "@kbn/discover-utils",
@@ -196,9 +186,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "this current data view"
-            ],
+            "description": ["this current data view"],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -290,12 +278,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "value",
-            "description": [
-              "The value to format"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The value to format"],
+            "signature": ["unknown"],
             "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -307,13 +291,8 @@
             "type": "Object",
             "tags": [],
             "label": "hit",
-            "description": [
-              "The actual search hit (required to get highlight information from)"
-            ],
-            "signature": [
-              "SearchHit",
-              "<unknown>"
-            ],
+            "description": ["The actual search hit (required to get highlight information from)"],
+            "signature": ["SearchHit", "<unknown>"],
             "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -325,9 +304,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldFormats",
-            "description": [
-              "Field formatters"
-            ],
+            "description": ["Field formatters"],
             "signature": [
               {
                 "pluginId": "fieldFormats",
@@ -348,9 +325,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "The data view if available"
-            ],
+            "description": ["The data view if available"],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -372,9 +347,7 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The field that value was from if available"
-            ],
+            "description": ["The field that value was from if available"],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -396,9 +369,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "contentType",
-            "description": [
-              "Type of a converter"
-            ],
+            "description": ["Type of a converter"],
             "signature": [
               {
                 "pluginId": "fieldFormats",
@@ -420,9 +391,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "options",
-            "description": [
-              "Options for the converter"
-            ],
+            "description": ["Options for the converter"],
             "signature": [
               {
                 "pluginId": "fieldFormats",
@@ -577,9 +546,7 @@
             "tags": [],
             "label": "maxEntries",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -698,9 +665,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "field",
-            "description": [
-              "Either the data view field or the string name of it."
-            ],
+            "description": ["Either the data view field or the string name of it."],
             "signature": [
               "string | ",
               {
@@ -722,12 +687,8 @@
             "type": "Array",
             "tags": [],
             "label": "ignoredFields",
-            "description": [
-              "The hit._ignored value of the hit to validate."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["The hit._ignored value of the hit to validate."],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -955,9 +916,7 @@
             "tags": [],
             "label": "fields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -991,9 +950,7 @@
             "tags": [],
             "label": "showMultiFields",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1104,9 +1061,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1198,9 +1153,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DataTableRecord",
-        "description": [
-          "\nThis is the record/row of data provided to our Data Table"
-        ],
+        "description": ["\nThis is the record/row of data provided to our Data Table"],
         "path": "packages/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1211,9 +1164,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nA unique id generated by index, id and routing of a record"
-            ],
+            "description": ["\nA unique id generated by index, id and routing of a record"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1224,9 +1175,7 @@
             "type": "Object",
             "tags": [],
             "label": "raw",
-            "description": [
-              "\nThe document returned by Elasticsearch for search queries"
-            ],
+            "description": ["\nThe document returned by Elasticsearch for search queries"],
             "signature": [
               {
                 "pluginId": "@kbn/discover-utils",
@@ -1249,9 +1198,7 @@
             "description": [
               "\nA flattened version of the ES doc or data provided by SQL, aggregations ..."
             ],
-            "signature": [
-              "{ [x: string]: unknown; }"
-            ],
+            "signature": ["{ [x: string]: unknown; }"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1265,9 +1212,7 @@
             "description": [
               "\nDetermines that the given doc is the anchor doc when rendering view surrounding docs"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1305,9 +1250,7 @@
             "tags": [],
             "label": "_source",
             "description": [],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1333,9 +1276,7 @@
             "tags": [],
             "label": "'cloud.provider'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1347,9 +1288,7 @@
             "tags": [],
             "label": "'cloud.region'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1361,9 +1300,7 @@
             "tags": [],
             "label": "'cloud.availability_zone'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1375,9 +1312,7 @@
             "tags": [],
             "label": "'cloud.project.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1389,9 +1324,7 @@
             "tags": [],
             "label": "'cloud.instance.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1461,9 +1394,7 @@
             "tags": [],
             "label": "'log.level'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1475,9 +1406,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1489,9 +1418,7 @@
             "tags": [],
             "label": "'error.message'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1503,9 +1430,7 @@
             "tags": [],
             "label": "'event.original'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1517,9 +1442,7 @@
             "tags": [],
             "label": "'trace.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1531,9 +1454,7 @@
             "tags": [],
             "label": "'log.file.path'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1581,9 +1502,7 @@
             "tags": [],
             "label": "'host.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1595,9 +1514,7 @@
             "tags": [],
             "label": "'service.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1609,9 +1526,7 @@
             "tags": [],
             "label": "'agent.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1623,9 +1538,7 @@
             "tags": [],
             "label": "'orchestrator.cluster.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1637,9 +1550,7 @@
             "tags": [],
             "label": "'orchestrator.cluster.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1651,9 +1562,7 @@
             "tags": [],
             "label": "'orchestrator.resource.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1665,9 +1574,7 @@
             "tags": [],
             "label": "'orchestrator.namespace'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1679,9 +1586,7 @@
             "tags": [],
             "label": "'container.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1693,9 +1598,7 @@
             "tags": [],
             "label": "'container.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1721,9 +1624,7 @@
             "tags": [],
             "label": "'error.stack_trace'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1735,9 +1636,7 @@
             "tags": [],
             "label": "'error.exception.stacktrace'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1749,9 +1648,7 @@
             "tags": [],
             "label": "'error.log.stacktrace'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1782,9 +1679,7 @@
         "tags": [],
         "label": "CONTEXT_DEFAULT_SIZE_SETTING",
         "description": [],
-        "signature": [
-          "\"context:defaultSize\""
-        ],
+        "signature": ["\"context:defaultSize\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1797,9 +1692,7 @@
         "tags": [],
         "label": "CONTEXT_STEP_SETTING",
         "description": [],
-        "signature": [
-          "\"context:step\""
-        ],
+        "signature": ["\"context:step\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1812,9 +1705,7 @@
         "tags": [],
         "label": "CONTEXT_TIE_BREAKER_FIELDS_SETTING",
         "description": [],
-        "signature": [
-          "\"context:tieBreakerFields\""
-        ],
+        "signature": ["\"context:tieBreakerFields\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1827,9 +1718,7 @@
         "tags": [],
         "label": "DEFAULT_COLUMNS_SETTING",
         "description": [],
-        "signature": [
-          "\"defaultColumns\""
-        ],
+        "signature": ["\"defaultColumns\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1842,9 +1731,7 @@
         "tags": [],
         "label": "DOC_HIDE_TIME_COLUMN_SETTING",
         "description": [],
-        "signature": [
-          "\"doc_table:hideTimeColumn\""
-        ],
+        "signature": ["\"doc_table:hideTimeColumn\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1857,9 +1744,7 @@
         "tags": [],
         "label": "DOC_TABLE_LEGACY",
         "description": [],
-        "signature": [
-          "\"doc_table:legacy\""
-        ],
+        "signature": ["\"doc_table:legacy\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1872,9 +1757,7 @@
         "tags": [],
         "label": "FIELDS_LIMIT_SETTING",
         "description": [],
-        "signature": [
-          "\"fields:popularLimit\""
-        ],
+        "signature": ["\"fields:popularLimit\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1886,12 +1769,8 @@
         "type": "Type",
         "tags": [],
         "label": "FormattedHit",
-        "description": [
-          "\nPairs array for each field in the hit"
-        ],
-        "signature": [
-          "FormattedHitPair[]"
-        ],
+        "description": ["\nPairs array for each field in the hit"],
+        "signature": ["FormattedHitPair[]"],
         "path": "packages/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1904,9 +1783,7 @@
         "tags": [],
         "label": "HIDE_ANNOUNCEMENTS",
         "description": [],
-        "signature": [
-          "\"hideAnnouncements\""
-        ],
+        "signature": ["\"hideAnnouncements\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1919,9 +1796,7 @@
         "tags": [],
         "label": "MAX_DOC_FIELDS_DISPLAYED",
         "description": [],
-        "signature": [
-          "\"discover:maxDocFieldsDisplayed\""
-        ],
+        "signature": ["\"discover:maxDocFieldsDisplayed\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1934,9 +1809,7 @@
         "tags": [],
         "label": "MODIFY_COLUMNS_ON_SWITCH",
         "description": [],
-        "signature": [
-          "\"discover:modifyColumnsOnSwitch\""
-        ],
+        "signature": ["\"discover:modifyColumnsOnSwitch\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1949,9 +1822,7 @@
         "tags": [],
         "label": "ROW_HEIGHT_OPTION",
         "description": [],
-        "signature": [
-          "\"discover:rowHeightOption\""
-        ],
+        "signature": ["\"discover:rowHeightOption\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1964,9 +1835,7 @@
         "tags": [],
         "label": "SAMPLE_ROWS_PER_PAGE_SETTING",
         "description": [],
-        "signature": [
-          "\"discover:sampleRowsPerPage\""
-        ],
+        "signature": ["\"discover:sampleRowsPerPage\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1979,9 +1848,7 @@
         "tags": [],
         "label": "SAMPLE_SIZE_SETTING",
         "description": [],
-        "signature": [
-          "\"discover:sampleSize\""
-        ],
+        "signature": ["\"discover:sampleSize\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1994,9 +1861,7 @@
         "tags": [],
         "label": "SEARCH_EMBEDDABLE_TYPE",
         "description": [],
-        "signature": [
-          "\"search\""
-        ],
+        "signature": ["\"search\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2009,9 +1874,7 @@
         "tags": [],
         "label": "SEARCH_FIELDS_FROM_SOURCE",
         "description": [],
-        "signature": [
-          "\"discover:searchFieldsFromSource\""
-        ],
+        "signature": ["\"discover:searchFieldsFromSource\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2024,9 +1887,7 @@
         "tags": [],
         "label": "SEARCH_ON_PAGE_LOAD_SETTING",
         "description": [],
-        "signature": [
-          "\"discover:searchOnPageLoad\""
-        ],
+        "signature": ["\"discover:searchOnPageLoad\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2039,9 +1900,7 @@
         "tags": [],
         "label": "ShouldShowFieldInTableHandler",
         "description": [],
-        "signature": [
-          "(fieldName: string) => boolean"
-        ],
+        "signature": ["(fieldName: string) => boolean"],
         "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2068,9 +1927,7 @@
         "tags": [],
         "label": "SHOW_FIELD_STATISTICS",
         "description": [],
-        "signature": [
-          "\"discover:showFieldStatistics\""
-        ],
+        "signature": ["\"discover:showFieldStatistics\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2083,9 +1940,7 @@
         "tags": [],
         "label": "SHOW_MULTIFIELDS",
         "description": [],
-        "signature": [
-          "\"discover:showMultiFields\""
-        ],
+        "signature": ["\"discover:showMultiFields\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2098,9 +1953,7 @@
         "tags": [],
         "label": "SORT_DEFAULT_ORDER_SETTING",
         "description": [],
-        "signature": [
-          "\"discover:sort:defaultOrder\""
-        ],
+        "signature": ["\"discover:sort:defaultOrder\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2113,9 +1966,7 @@
         "tags": [],
         "label": "TRUNCATE_MAX_HEIGHT",
         "description": [],
-        "signature": [
-          "\"truncate:maxHeight\""
-        ],
+        "signature": ["\"truncate:maxHeight\""],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

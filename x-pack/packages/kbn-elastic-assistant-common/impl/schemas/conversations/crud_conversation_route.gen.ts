@@ -18,10 +18,10 @@ import { z } from 'zod';
 
 import {
   ConversationCreateProps,
-  ConversationResponse,
-  UUID,
-  ConversationUpdateProps,
   ConversationMessageCreateProps,
+  ConversationResponse,
+  ConversationUpdateProps,
+  UUID,
 } from './common_attributes.gen';
 
 export type AppendConversationMessageRequestParams = z.infer<

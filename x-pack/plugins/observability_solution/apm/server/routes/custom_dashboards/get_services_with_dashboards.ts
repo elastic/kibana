@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { estypes } from '@elastic/elasticsearch';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 
 function getSearchRequest(filters: estypes.QueryDslQueryContainer[]): APMEventESSearchRequest {
   return {

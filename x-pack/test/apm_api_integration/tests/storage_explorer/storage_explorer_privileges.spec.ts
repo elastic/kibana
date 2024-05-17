@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiSupertest } from '../../common/apm_api_supertest';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

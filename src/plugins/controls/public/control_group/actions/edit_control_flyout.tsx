@@ -11,16 +11,16 @@ import React from 'react';
 
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 
-import {
-  DataControlInput,
-  ControlEmbeddable,
-  IEditableControlFactory,
-  DataControlEditorChanges,
-} from '../../types';
 import { pluginServices } from '../../services';
+import {
+  ControlEmbeddable,
+  DataControlEditorChanges,
+  DataControlInput,
+  IEditableControlFactory,
+} from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlEditor } from '../editor/control_editor';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 
 export const EditControlFlyout = ({
   embeddable,

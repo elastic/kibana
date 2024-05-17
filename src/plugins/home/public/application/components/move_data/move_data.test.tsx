@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { MoveData } from './move_data';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 

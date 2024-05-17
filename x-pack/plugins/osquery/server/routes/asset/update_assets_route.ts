@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-import { filter, omit, some } from 'lodash';
 import { asyncForEach } from '@kbn/std';
 import deepmerge from 'deepmerge';
+import { filter, omit, some } from 'lodash';
+import moment from 'moment-timezone';
 
 import type { IRouter } from '@kbn/core/server';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import type { UpdateAssetsStatusRequestParamsSchema } from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { updateAssetsStatusRequestParamsSchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
-import { combineMerge } from './utils';
-import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { convertSOQueriesToPack, convertPackQueriesToSO } from '../pack/utils';
 import type { PackSavedObject } from '../../common/types';
-import { updateAssetsStatusRequestParamsSchema } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from '../pack/utils';
+import { combineMerge } from './utils';
 
 export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

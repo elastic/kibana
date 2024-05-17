@@ -7,14 +7,14 @@
 
 import { EcsFlat } from '@elastic/ecs';
 
+import { mockIndicesGetMappingIndexMappingRecords } from '../../mock/indices_get_mapping_index_mapping_record/mock_indices_get_mapping_index_mapping_record';
+import { mockMappingsProperties } from '../../mock/mappings_properties/mock_mappings_properties';
+import { EcsMetadata } from '../../types';
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
   hasAllDataFetchingCompleted,
 } from './helpers';
-import { mockIndicesGetMappingIndexMappingRecords } from '../../mock/indices_get_mapping_index_mapping_record/mock_indices_get_mapping_index_mapping_record';
-import { mockMappingsProperties } from '../../mock/mappings_properties/mock_mappings_properties';
-import { EcsMetadata } from '../../types';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 

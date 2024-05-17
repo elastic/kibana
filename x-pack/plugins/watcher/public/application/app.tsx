@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import {
+  ApplicationStart,
+  DocLinksStart,
+  ExecutionContextStart,
+  HttpSetup,
+  I18nStart,
+  IUiSettingsClient,
+  ThemeServiceStart,
+  ToastsSetup,
+} from '@kbn/core/public';
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import {
-  DocLinksStart,
-  HttpSetup,
-  ToastsSetup,
-  IUiSettingsClient,
-  ApplicationStart,
-  ExecutionContextStart,
-  ThemeServiceStart,
-  I18nStart,
-} from '@kbn/core/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { ManagementAppMountParams, RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
 import { LicenseStatus } from '../../common/types/license_status';
-import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
-import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
+import { registerRouter } from './lib/navigation';
 import { LicensePrompt } from './license_prompt';
+import { WatchEditPage, WatchListPage, WatchStatusPage } from './sections';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });

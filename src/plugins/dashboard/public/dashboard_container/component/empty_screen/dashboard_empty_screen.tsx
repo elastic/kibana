@@ -23,8 +23,8 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export function DashboardEmptyScreen() {
   const {
@@ -96,8 +96,8 @@ export function DashboardEmptyScreen() {
     const titleString = showEditPrompt
       ? emptyScreenStrings.getEditModeTitle()
       : showWriteControls
-      ? emptyScreenStrings.getViewModeWithPermissionsTitle()
-      : emptyScreenStrings.getViewModeWithoutPermissionsTitle();
+        ? emptyScreenStrings.getViewModeWithPermissionsTitle()
+        : emptyScreenStrings.getViewModeWithoutPermissionsTitle();
     return <h2>{titleString}</h2>;
   })();
 
@@ -105,8 +105,8 @@ export function DashboardEmptyScreen() {
     const bodyString = showEditPrompt
       ? emptyScreenStrings.getEditModeSubtitle()
       : showWriteControls
-      ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
-      : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle();
+        ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
+        : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle();
     return (
       <EuiText size="s" color="subdued">
         <span>{bodyString}</span>

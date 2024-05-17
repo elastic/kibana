@@ -9,8 +9,8 @@
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { ISearchOptions } from '@kbn/search-types';
 import type { ISearchSource } from '../../../../public';
-import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
+import { IAggConfigs } from '../agg_configs';
 
 export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   name: string;

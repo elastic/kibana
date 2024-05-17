@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
 import {
   existsSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
   rmdirSync,
   unlinkSync,
   writeFileSync,
 } from 'fs';
+import { join } from 'path';
 import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import { bundle } from '../openapi_bundler';

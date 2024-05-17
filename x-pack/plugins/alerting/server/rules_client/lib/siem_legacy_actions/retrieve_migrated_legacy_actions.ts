@@ -6,13 +6,13 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RulesClientContext } from '../..';
-import { RawRuleAction } from '../../../types';
-import { findRules } from '../../../application/rule/methods/find/find_rules';
 import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
-import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
+import { findRules } from '../../../application/rule/methods/find/find_rules';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { RawRuleAction } from '../../../types';
 import { transformFromLegacyActions } from './transform_legacy_actions';
+import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
 
 type RetrieveMigratedLegacyActions = (
   context: RulesClientContext,

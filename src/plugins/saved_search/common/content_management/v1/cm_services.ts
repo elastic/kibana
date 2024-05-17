@@ -7,15 +7,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
-  savedObjectSchema,
-  objectTypeToGetResultSchema,
   createOptionsSchemas,
-  updateOptionsSchema,
   createResultSchema,
+  objectTypeToGetResultSchema,
+  savedObjectSchema,
+  updateOptionsSchema,
 } from '@kbn/content-management-utils';
-import { MIN_SAVED_SEARCH_SAMPLE_SIZE, MAX_SAVED_SEARCH_SAMPLE_SIZE } from '../../constants';
+import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { MAX_SAVED_SEARCH_SAMPLE_SIZE, MIN_SAVED_SEARCH_SAMPLE_SIZE } from '../../constants';
 
 const sortSchema = schema.arrayOf(schema.string(), { maxSize: 2 });
 

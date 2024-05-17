@@ -8,22 +8,22 @@
 
 import type {
   CoreStart,
-  SavedObjectsMigrationVersion,
   ResolvedSimpleSavedObject,
+  SavedObjectsMigrationVersion,
 } from '@kbn/core/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import {
+  AggConfigSerialized,
   IAggConfigs,
   SerializedSearchSourceFields,
   TimefilterContract,
-  AggConfigSerialized,
 } from '@kbn/data-plugin/public';
-import type { ISearchSource } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
-import type { Vis } from './vis';
+import type { SerializedVis, VisParams } from '../common';
 import type { PersistedState } from './persisted_state';
-import type { VisParams, SerializedVis } from '../common';
+import type { Vis } from './vis';
 
 export type StartServices = Pick<
   CoreStart,

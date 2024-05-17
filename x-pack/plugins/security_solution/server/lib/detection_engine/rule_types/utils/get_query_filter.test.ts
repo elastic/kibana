@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getQueryFilter, getAllFilters } from './get_query_filter';
 import type { Filter } from '@kbn/es-query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
+import { getAllFilters, getQueryFilter } from './get_query_filter';
 
 describe('get_filter', () => {
   describe('getQueryFilter', () => {

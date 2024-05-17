@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type {
+  PrebootCoreRequestHandlerContext,
+  PrebootUiSettingsRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 // eslint-disable-next-line max-classes-per-file
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type {
-  PrebootUiSettingsRequestHandlerContext,
-  PrebootCoreRequestHandlerContext,
-} from '@kbn/core-http-request-handler-context-server';
 import type { InternalUiSettingsServicePreboot } from '@kbn/core-ui-settings-server-internal';
 
 /**

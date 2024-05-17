@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { LogsResponse } from '../../../common/types/logs';
+import { LegacyRequest } from '../../types';
+import { TimerangeFilter, createTimeFilter } from '../create_query';
 import { checkParam } from '../error_missing_required';
-import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 import { detectReasonFromException } from './detect_reason_from_exception';
-import { LegacyRequest } from '../../types';
-import { LogsResponse } from '../../../common/types/logs';
 import { elasticsearchLogsFilter } from './logs_filter';
 
 interface LogType {

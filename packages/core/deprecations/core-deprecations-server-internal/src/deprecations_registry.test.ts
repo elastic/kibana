@@ -8,8 +8,8 @@
 
 /* eslint-disable dot-notation */
 import type {
-  RegisterDeprecationsConfig,
   GetDeprecationsContext,
+  RegisterDeprecationsConfig,
 } from '@kbn/core-deprecations-server';
 import { DeprecationsRegistry } from './deprecations_registry';
 

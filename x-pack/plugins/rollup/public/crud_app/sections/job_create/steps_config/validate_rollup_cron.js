@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import cronstrue from 'cronstrue';
 import { FormattedMessage } from '@kbn/i18n-react';
+import cronstrue from 'cronstrue';
+import React from 'react';
 
 export function validateRollupCron(rollupCron) {
   if (!rollupCron || !rollupCron.trim()) {

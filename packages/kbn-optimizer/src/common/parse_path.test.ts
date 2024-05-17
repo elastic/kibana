@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseFilePath, parseDirPath } from './parse_path';
+import { parseDirPath, parseFilePath } from './parse_path';
 
 const DIRS = ['/', '/foo/bar/baz/', 'c:\\', 'c:\\foo\\bar\\baz\\'];
 const AMBIGUOUS = ['/foo', '/foo/bar/baz', 'c:\\foo', 'c:\\foo\\bar\\baz'];

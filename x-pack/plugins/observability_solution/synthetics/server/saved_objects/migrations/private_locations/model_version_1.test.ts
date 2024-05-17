@@ -1,3 +1,4 @@
+import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { transformGeoProperty } from './model_version_1';
-import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
 
 describe('model version 1 migration', () => {
   const testLocation = {

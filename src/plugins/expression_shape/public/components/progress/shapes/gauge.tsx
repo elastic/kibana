@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createShape } from '../../reusable/shape_factory';
 import { SvgElementTypes } from '../../reusable';
+import { createShape } from '../../reusable/shape_factory';
 
 export const Gauge = createShape({
   viewBox: {

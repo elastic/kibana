@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
 

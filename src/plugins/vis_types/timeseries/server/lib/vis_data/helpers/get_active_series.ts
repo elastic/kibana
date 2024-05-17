@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Panel } from '../../../../common/types';
 import { PANEL_TYPES } from '../../../../common/enums';
+import type { Panel } from '../../../../common/types';
 import { limitOfSeries } from '../../../../common/ui_restrictions';
 
 export const getActiveSeries = (panel: Panel) => {

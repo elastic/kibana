@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import {
-  NetworkQueries,
-  NetworkTopNFlowEdges,
   Direction,
   FlowTargetSourceDest,
-  NetworkTopTablesFields,
+  NetworkQueries,
+  NetworkTopNFlowEdges,
   NetworkTopNFlowStrategyResponse,
+  NetworkTopTablesFields,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';

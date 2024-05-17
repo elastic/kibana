@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { shallow, mount } from 'enzyme';
 
 import { ErrorsPopover } from './errors_popover';
 

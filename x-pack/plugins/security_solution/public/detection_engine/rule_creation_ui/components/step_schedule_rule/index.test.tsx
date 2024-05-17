@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { shallow, mount } from 'enzyme';
 
-import { TestProviders } from '../../../../common/mock';
 import { StepScheduleRule, StepScheduleRuleReadOnly } from '.';
+import { TestProviders } from '../../../../common/mock';
+import type { ScheduleStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import {
-  getStepScheduleDefaultValue,
   defaultSchedule,
+  getStepScheduleDefaultValue,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
-import { useRuleForms } from '../../pages/form';
-import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import type { FormHook } from '../../../../shared_imports';
-import type { ScheduleStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
+import { useRuleForms } from '../../pages/form';
 
 describe('StepScheduleRule', () => {
   const TestComp = ({

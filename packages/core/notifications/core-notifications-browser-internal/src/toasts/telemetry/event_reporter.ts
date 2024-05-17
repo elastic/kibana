@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ComponentProps } from 'react';
 import { EuiToast } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { ComponentProps } from 'react';
 import { EventMetric, FieldType } from './event_types';
 
 type ToastMessageType = Exclude<ComponentProps<typeof EuiToast>['color'], 'success'>;

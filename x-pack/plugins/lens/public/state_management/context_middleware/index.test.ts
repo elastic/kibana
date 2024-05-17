@@ -8,11 +8,11 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 
-import { contextMiddleware } from '.';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { contextMiddleware } from '.';
+import { mockDataPlugin, mockStoreDeps } from '../../mocks';
 import { applyChanges, initialState } from '../lens_slice';
 import { LensAppState } from '../types';
-import { mockDataPlugin, mockStoreDeps } from '../../mocks';
 
 const storeDeps = mockStoreDeps();
 const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppState>) => {

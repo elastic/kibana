@@ -1,3 +1,4 @@
+import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { ILicenseState } from '../lib';
+import { GetRuleExecutionKPIParams } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { GetRuleExecutionKPIParams } from '../rules_client';
-import { ILicenseState } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),

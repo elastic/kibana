@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getValue, setValue, hasTemplateSnippet } from './utils';
+import { getValue, hasTemplateSnippet, setValue } from './utils';
 
 describe('get and set values', () => {
   const testObject = Object.freeze([{ onFailure: [{ onFailure: 1 }] }]);

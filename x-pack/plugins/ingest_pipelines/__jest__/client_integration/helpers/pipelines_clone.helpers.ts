@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { PipelinesClone } from '../../../public/application/sections/pipelines_clone';
-import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
+import { ROUTES, getClonePath } from '../../../public/application/services/navigation';
+import { PipelineFormTestSubjects, getFormActions } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
-import { getClonePath, ROUTES } from '../../../public/application/services/navigation';
 
 export type PipelinesCloneTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;

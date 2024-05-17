@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { FlyoutContainer } from '../../shared_components/flyout_container';
 import type { ExtraAppendLayerArg } from './visualization';
 

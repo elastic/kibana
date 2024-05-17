@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import React, { FC, PropsWithChildren } from 'react';
 import type { ContentClient } from './content_client';
 
 const ContentClientContext = React.createContext<ContentClient>(null as unknown as ContentClient);

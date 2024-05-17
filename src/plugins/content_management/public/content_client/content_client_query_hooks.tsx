@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useQuery, QueryObserverOptions } from '@tanstack/react-query';
-import { useContentClient } from './content_client_context';
+import { QueryObserverOptions, useQuery } from '@tanstack/react-query';
 import type { GetIn, SearchIn } from '../../common';
+import { useContentClient } from './content_client_context';
 
 /**
  * Exposed `useQuery` options

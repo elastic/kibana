@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { FormulaValueConfig, ChartColumn } from '../../../types';
+import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { ChartColumn, FormulaValueConfig } from '../../../types';
 
 export class FormulaColumn implements ChartColumn {
   constructor(private valueConfig: FormulaValueConfig) {}

@@ -10,18 +10,18 @@ import { cloneDeep } from 'lodash';
 
 import type { NavigationGroupPreset } from '@kbn/core-chrome-browser';
 import {
-  defaultNavigation as analytics,
   type AnalyticsNodeDefinition,
+  defaultNavigation as analytics,
 } from '@kbn/default-nav-analytics';
-import { defaultNavigation as ml, type MlNodeDefinition } from '@kbn/default-nav-ml';
 import {
-  defaultNavigation as devtools,
   type DevToolsNodeDefinition,
+  defaultNavigation as devtools,
 } from '@kbn/default-nav-devtools';
 import {
-  defaultNavigation as management,
   type ManagementNodeDefinition,
+  defaultNavigation as management,
 } from '@kbn/default-nav-management';
+import { type MlNodeDefinition, defaultNavigation as ml } from '@kbn/default-nav-ml';
 
 export function getPresets(preset: 'devtools'): DevToolsNodeDefinition;
 export function getPresets(preset: 'management'): ManagementNodeDefinition;

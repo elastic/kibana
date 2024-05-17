@@ -10,8 +10,8 @@ import React from 'react';
 
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { useAgentDetails } from './use_agent_details';
 import { useKibana } from '../common/lib/kibana';
+import { useAgentDetails } from './use_agent_details';
 
 interface AgentIdToNameProps {
   agentId: string;

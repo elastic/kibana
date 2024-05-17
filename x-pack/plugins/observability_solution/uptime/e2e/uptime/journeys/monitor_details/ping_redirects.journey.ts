@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
-import { byTestId, delay } from '../../../helpers/utils';
-import { recordVideo } from '../../../helpers/record_video';
+import { Page, before, expect, journey, step } from '@elastic/synthetics';
 import { makeChecksWithStatus } from '../../../helpers/make_checks';
+import { recordVideo } from '../../../helpers/record_video';
+import { byTestId, delay } from '../../../helpers/utils';
 import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
 
 journey('MonitorPingRedirects', async ({ page, params }: { page: Page; params: any }) => {

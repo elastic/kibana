@@ -6,10 +6,10 @@
  */
 import { ColumnarViewModel } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { FrameType, describeFrameType } from '@kbn/profiling-utils';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import d3 from 'd3';
 import { compact, range, sum, uniqueId } from 'lodash';
-import { describeFrameType, FrameType } from '@kbn/profiling-utils';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
 import { ComparisonMode } from '../../components/normalization_menu';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
+import { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
+import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { fromExpression } from '@kbn/interpreter';
 import { AwaitedProperties } from '@kbn/utility-types';
-import { createWorkpadRouteContext } from './workpad_route_context';
-import { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
-import { savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
-import { CanvasWorkpad } from '../types';
+import sinon from 'sinon';
 import { CANVAS_TYPE } from '../common/lib/constants';
+import { CanvasWorkpad } from '../types';
+import { createWorkpadRouteContext } from './workpad_route_context';
 
 const mockedExpressionService = {
   inject: jest.fn(),

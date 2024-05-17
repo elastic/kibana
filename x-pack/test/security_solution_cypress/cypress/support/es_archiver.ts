@@ -7,10 +7,10 @@
 
 import Fs from 'fs';
 import * as Url from 'url';
-import { EsArchiver } from '@kbn/es-archiver';
-import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { EsArchiver } from '@kbn/es-archiver';
+import { KbnClient, createEsClientForTesting, systemIndicesSuperuser } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export const esArchiver = (
   on: Cypress.PluginEvents,

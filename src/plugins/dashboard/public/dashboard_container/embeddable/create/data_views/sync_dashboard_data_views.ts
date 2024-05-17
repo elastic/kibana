@@ -7,9 +7,9 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
+import { PublishesDataViews, apiPublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
-import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
+import { Observable, combineLatest, map, of, switchMap } from 'rxjs';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainer } from '../../dashboard_container';
 

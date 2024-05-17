@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { namespaceType } from '../default_namespace';
 
 export const namespaceTypeArray = t.array(namespaceType);

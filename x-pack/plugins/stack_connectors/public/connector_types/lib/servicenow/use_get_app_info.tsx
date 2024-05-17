@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { useState, useEffect, useRef, useCallback } from 'react';
 import { HttpStart } from '@kbn/core/public';
+import { isEmpty } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getAppInfo } from './api';
-import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 import { FETCH_ERROR } from './translations';
+import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 
 export interface UseGetAppInfoProps {
   actionTypeId?: string;

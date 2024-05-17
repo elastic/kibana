@@ -6,21 +6,21 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
+import {
+  ArchiveMaintenanceWindowRequestBodyV1,
+  ArchiveMaintenanceWindowRequestParamsV1,
+  ArchiveMaintenanceWindowResponseV1,
+  archiveBodySchemaV1,
+  archiveParamsSchemaV1,
+} from '../../../../../common/routes/maintenance_window/apis/archive';
+import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
 import { ILicenseState } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import {
-  archiveBodySchemaV1,
-  archiveParamsSchemaV1,
-  ArchiveMaintenanceWindowRequestBodyV1,
-  ArchiveMaintenanceWindowRequestParamsV1,
-  ArchiveMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/archive';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const archiveMaintenanceWindowRoute = (

@@ -7,12 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import dedent from 'dedent';
+import React, { useCallback } from 'react';
 import { type AlertDetailsContextualInsight } from '../../../server/services';
-import { useKibana } from '../../utils/kibana_react';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
+import { useKibana } from '../../utils/kibana_react';
 
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {

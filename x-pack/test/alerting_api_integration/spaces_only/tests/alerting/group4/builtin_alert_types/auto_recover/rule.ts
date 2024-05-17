@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import expect from '@kbn/expect';
 
-import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover, TaskManagerUtils } from '../../../../../../common/lib';
+import { ObjectRemover, TaskManagerUtils, getUrlPrefix } from '../../../../../../common/lib';
+import { Spaces } from '../../../../../scenarios';
 import { createEsDocuments } from '../../../create_test_data';
 
 const RULE_INTERVAL_SECONDS = 6;

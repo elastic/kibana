@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import deepEqual from 'react-fast-compare';
+import useDebounce from 'react-use/lib/useDebounce';
 import { ArgTemplateFormProps } from '../arg_form/arg_template_form';
 
 type Props = ArgTemplateFormProps['argumentProps'];

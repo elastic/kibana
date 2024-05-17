@@ -8,12 +8,20 @@
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   ADD_QUERY_BUTTON,
-  customActionEditSavedQuerySelector,
-  customActionRunSavedQuerySelector,
   EDIT_PACK_HEADER_BUTTON,
   SAVED_QUERY_DROPDOWN_SELECT,
+  customActionEditSavedQuerySelector,
+  customActionRunSavedQuerySelector,
 } from '../../screens/packs';
-import { preparePack } from '../../tasks/packs';
+import { ServerlessRoleName } from '../../support/roles';
+import {
+  cleanupCase,
+  cleanupPack,
+  cleanupSavedQuery,
+  loadCase,
+  loadPack,
+  loadSavedQuery,
+} from '../../tasks/api_fixtures';
 import {
   addToCase,
   checkResults,
@@ -24,16 +32,8 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
+import { preparePack } from '../../tasks/packs';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
-import {
-  loadCase,
-  cleanupCase,
-  loadPack,
-  cleanupPack,
-  loadSavedQuery,
-  cleanupSavedQuery,
-} from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;

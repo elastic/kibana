@@ -10,10 +10,10 @@ import ChildProcess from 'child_process';
 import { Readable } from 'stream';
 import * as Rx from 'rxjs';
 
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { SomeDevLog } from '@kbn/some-dev-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
 import type { Result } from './extract_mappings_from_plugins_worker';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 
 export const ServicesTooltipContent = () => {
   const linkProps = useLinkProps({

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { TransformRawDocs } from '../types';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { DocumentsTransformFailed, DocumentsTransformSuccess } from '../core/migrate_raw_docs';
+import type { TransformRawDocs } from '../types';
 
 /** @internal */
 export interface TransformDocsParams {

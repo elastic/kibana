@@ -7,8 +7,8 @@
 
 import type {
   EuiBasicTableProps,
-  EuiGlobalToastListToast as Toast,
   EuiTableRowCellProps,
+  EuiGlobalToastListToast as Toast,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -17,43 +17,43 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
   EuiPagination,
   EuiPopover,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import type { FC, ComponentType } from 'react';
+import type { ComponentType, FC } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
-import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
+import type { Direction } from '../../../../common/search_strategy';
+import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
+import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table';
 import type { NetworkDnsColumns } from '../../network/components/network_dns_table/columns';
 import type { NetworkHttpColumns } from '../../network/components/network_http_table/columns';
-import type {
-  NetworkTopNFlowColumns,
-  NetworkTopNFlowColumnsNetworkDetails,
-} from '../../network/components/network_top_n_flow_table/columns';
 import type {
   NetworkTopCountriesColumns,
   NetworkTopCountriesColumnsNetworkDetails,
 } from '../../network/components/network_top_countries_table/columns';
+import type {
+  NetworkTopNFlowColumns,
+  NetworkTopNFlowColumnsNetworkDetails,
+} from '../../network/components/network_top_n_flow_table/columns';
 import type { TlsColumns } from '../../network/components/tls_table/columns';
-import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table';
-import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
 
-import type { UsersColumns } from '../../network/components/users_table/columns';
 import { HeaderSection } from '../../../common/components/header_section';
 import { Loader } from '../../../common/components/loader';
 import { useStateToaster } from '../../../common/components/toasters';
+import type { UsersColumns } from '../../network/components/users_table/columns';
 
-import * as i18n from './translations';
-import { Panel } from '../../../common/components/panel';
 import { InspectButtonContainer } from '../../../common/components/inspect';
+import { Panel } from '../../../common/components/panel';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import type { UsersTableColumns } from '../../users/components/all_users';
 import type { AuthTableColumns } from '../authentication/types';
+import * as i18n from './translations';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -77,7 +77,7 @@ declare type HostsTableColumnsTest = [
   Columns<string>,
   Columns<string>,
   Columns<string>,
-  Columns<string>
+  Columns<string>,
 ];
 
 declare type BasicTableColumns =

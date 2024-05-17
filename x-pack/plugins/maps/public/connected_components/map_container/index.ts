@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { MapContainer } from './map_container';
+import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
+import { MapStoreState } from '../../reducers/store';
+import {
+  getLayerList,
+  getMapInitError,
+  getMapSettings,
+  getQueryableUniqueIndexPatternIds,
+  isMapLoading,
+} from '../../selectors/map_selectors';
 import {
   getFlyoutDisplay,
   getIsFullScreen,
   getIsTimesliderOpen,
 } from '../../selectors/ui_selectors';
-import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
-import {
-  isMapLoading,
-  getLayerList,
-  getMapInitError,
-  getMapSettings,
-  getQueryableUniqueIndexPatternIds,
-} from '../../selectors/map_selectors';
-import { MapStoreState } from '../../reducers/store';
+import { MapContainer } from './map_container';
 
 function mapStateToProps(state: MapStoreState) {
   return {

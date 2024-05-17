@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import { TimeRange } from '@kbn/es-query';
+import fastIsEqual from 'fast-deep-equal';
+import { BehaviorSubject } from 'rxjs';
 import { StateComparators } from '../../comparators';
 import { PublishesWritableTimeRange } from './publishes_unified_search';
 

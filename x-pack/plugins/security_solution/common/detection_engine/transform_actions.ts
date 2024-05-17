@@ -7,13 +7,13 @@
 
 import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
-import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
+import type { RuleAction } from '../api/detection_engine/model';
 import type {
   ResponseAction,
   RuleResponseAction,
 } from '../api/detection_engine/model/rule_response_actions';
 import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
-import type { RuleAction } from '../api/detection_engine/model';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
 
 export const transformRuleToAlertAction = ({
   group,

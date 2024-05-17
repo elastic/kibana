@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiLink } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiLink } from '@elastic/eui';
 
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';

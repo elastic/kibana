@@ -6,10 +6,10 @@
  */
 
 import { WATCH_TYPES } from '../../../common/constants';
-import { Watch } from './watch';
 import { JsonWatch } from './json_watch';
 import { MonitoringWatch } from './monitoring_watch';
 import { ThresholdWatch } from './threshold_watch';
+import { Watch } from './watch';
 
 describe('Watch', () => {
   describe('getWatchTypes factory method', () => {

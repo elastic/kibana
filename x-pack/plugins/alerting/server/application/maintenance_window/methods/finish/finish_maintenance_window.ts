@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import Boom from '@hapi/boom';
+import moment from 'moment';
+import {
+  DateRange,
+  MaintenanceWindowClientContext,
+  MaintenanceWindowStatus,
+} from '../../../../../common';
+import {
+  getMaintenanceWindowSo,
+  updateMaintenanceWindowSo,
+} from '../../../../data/maintenance_window';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import {
   generateMaintenanceWindowEvents,
   mergeEvents,
 } from '../../lib/generate_maintenance_window_events';
 import { getMaintenanceWindowDateAndStatus } from '../../lib/get_maintenance_window_date_and_status';
 import {
-  DateRange,
-  MaintenanceWindowClientContext,
-  MaintenanceWindowStatus,
-} from '../../../../../common';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import {
-  getMaintenanceWindowSo,
-  updateMaintenanceWindowSo,
-} from '../../../../data/maintenance_window';
-import type { MaintenanceWindow } from '../../types';
-import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../../transforms';
-import type { FinishMaintenanceWindowParams } from './types';
+import type { MaintenanceWindow } from '../../types';
 import { finishMaintenanceWindowParamsSchema } from './schemas';
+import type { FinishMaintenanceWindowParams } from './types';
 
 export async function finishMaintenanceWindow(
   context: MaintenanceWindowClientContext,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import numeral from '@elastic/numeral';
+import React from 'react';
 
 import { DEFAULT_BYTES_FORMAT } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';

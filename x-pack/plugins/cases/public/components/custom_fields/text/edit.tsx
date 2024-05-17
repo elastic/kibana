@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,27 +15,29 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  useForm,
-  UseField,
   Form,
+  UseField,
+  useForm,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUICustomField } from '../../../../common/ui';
-import type { CustomFieldType } from '../types';
-import { View } from './view';
 import {
   CANCEL,
   EDIT_CUSTOM_FIELDS_ARIA_LABEL,
   NO_CUSTOM_FIELD_SET,
-  SAVE,
   POPULATED_WITH_DEFAULT,
+  SAVE,
 } from '../translations';
+import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
+import { View } from './view';
 
 interface FormState {
   value: string;

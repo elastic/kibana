@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
-import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { licenseService } from '../../hooks/use_license';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { TestProviders, mockTimelineData, mockTimelineModel } from '../../mock';
 import { useTourContext } from '../guided_onboarding_tour';
-import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
 import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { Actions } from './actions';
-import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
+import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
 import { useUserPrivileges } from '../user_privileges';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
+import { Actions } from './actions';
 
 jest.mock('../guided_onboarding_tour');
 jest.mock('../user_privileges');

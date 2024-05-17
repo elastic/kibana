@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
 import { SolutionNavProps } from './solution_nav';
 import { withSolutionNav } from './with_solution_nav';

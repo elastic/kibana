@@ -89,12 +89,13 @@ function mergeWithSubFeatures(
     const managementEntries = Object.entries(mergedConfig.management ?? {});
     const subFeatureManagementEntries = Object.entries(subFeaturePrivilege.management ?? {});
 
-    mergedConfig.management = [managementEntries, subFeatureManagementEntries]
-      .flat()
-      .reduce((acc, [sectionId, managementApps]) => {
+    mergedConfig.management = [managementEntries, subFeatureManagementEntries].flat().reduce(
+      (acc, [sectionId, managementApps]) => {
         acc[sectionId] = mergeArrays(acc[sectionId], managementApps);
         return acc;
-      }, {} as Record<string, string[]>);
+      },
+      {} as Record<string, string[]>
+    );
 
     mergedConfig.ui = mergeArrays(mergedConfig.ui, subFeaturePrivilege.ui);
 

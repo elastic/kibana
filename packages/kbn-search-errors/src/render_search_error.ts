@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { BfetchRequestError } from '@kbn/bfetch-error';
 import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
-import { BfetchRequestError } from '@kbn/bfetch-error';
 import { EsError } from './es_error';
 
 export function renderSearchError(

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiListGroup,
-  EuiListGroupItem,
   EuiButton,
-  EuiSpacer,
-  EuiText,
   EuiCallOut,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
+import { IconRenderer } from '../icon_renderer';
 import { SettingsWorkspaceProps } from './settings';
 import { useListKeys } from './use_list_keys';
-import { IconRenderer } from '../icon_renderer';
 
 export function BlocklistForm({
   blocklistedNodes,

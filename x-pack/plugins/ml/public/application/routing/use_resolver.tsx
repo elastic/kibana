@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { AccessDeniedCallout } from '../access_denied';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
-import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
-import type { ResolverResults, Resolvers } from './resolvers';
 import { ML_PAGES } from '../../../common/constants/locator';
+import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
+import { AccessDeniedCallout } from '../access_denied';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
+import type { ResolverResults, Resolvers } from './resolvers';
 
 export interface RouteResolverContext {
   initialized: boolean;
@@ -115,10 +115,13 @@ export const useRouteResolver = (
 
     const funcNames = Object.keys(customResolversRef.current); // Object.entries gets this wrong?!
     const funcs = Object.values(customResolversRef.current); // Object.entries gets this wrong?!
-    const tempResults = funcNames.reduce((p, c) => {
-      p[c] = {};
-      return p;
-    }, {} as Exclude<ResolverResults, undefined>);
+    const tempResults = funcNames.reduce(
+      (p, c) => {
+        p[c] = {};
+        return p;
+      },
+      {} as Exclude<ResolverResults, undefined>
+    );
     const res = await Promise.all(funcs.map((r) => r()));
     res.forEach((r, i) => (tempResults[funcNames[i]] = r));
 

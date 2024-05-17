@@ -1,3 +1,6 @@
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { Filter, buildQueryFromFilters } from '@kbn/es-query';
+import { APMTransactionDurationIndicator, GetSLOResponse } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +9,6 @@
  */
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GetSLOResponse, APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 
 type EmbeddableId =

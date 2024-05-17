@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIcon, EuiIconProps } from '@elastic/eui';
+import React from 'react';
 import { CloudProvider, getCloudProviderIcon } from './get_cloud_provider_icon';
 
 export interface CloudProviderIconProps extends Omit<EuiIconProps, 'type'> {

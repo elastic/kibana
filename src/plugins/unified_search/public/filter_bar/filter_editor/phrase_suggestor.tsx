@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { KibanaReactContextValue, withKibana } from '@kbn/kibana-react-plugin/public';
 import { debounce } from 'lodash';
+import React from 'react';
 
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { Filter, buildQueryFromFilters } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 import { IUnifiedSearchPluginServices } from '../../types';
 

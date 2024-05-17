@@ -11,10 +11,10 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
-import { ResolveAllConflicts } from './resolve_all_conflicts';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
+import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
+import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 describe('ResolveAllConflicts', () => {
   const summarizedCopyResult = {

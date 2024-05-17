@@ -6,14 +6,7 @@
  */
 
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
-import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import {
-  openResponseConsoleFromEndpointList,
-  performCommandInputChecks,
-  submitCommand,
-  waitForEndpointListPageToBeLoaded,
-} from '../../../tasks/response_console';
 import {
   checkEndpointIsIsolated,
   checkEndpointIsNotIsolated,
@@ -21,6 +14,13 @@ import {
   sendActionResponse,
 } from '../../../tasks/isolate';
 import { login } from '../../../tasks/login';
+import {
+  openResponseConsoleFromEndpointList,
+  performCommandInputChecks,
+  submitCommand,
+  waitForEndpointListPageToBeLoaded,
+} from '../../../tasks/response_console';
+import type { ReturnTypeFromChainable } from '../../../types';
 
 describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {

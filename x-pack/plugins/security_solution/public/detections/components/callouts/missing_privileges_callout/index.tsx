@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import hash from 'object-hash';
+import React, { memo, useMemo } from 'react';
 import type { CallOutMessage } from '../../../../common/components/callouts';
 import { CallOutSwitcher } from '../../../../common/components/callouts';
 import * as i18n from './translations';

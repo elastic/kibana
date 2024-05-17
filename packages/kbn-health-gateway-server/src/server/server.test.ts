@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { IConfigServiceMock, configServiceMock } from '@kbn/config-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { Server } from './server';
 import {
   createServerMock,
-  getServerOptionsMock,
   getListenerOptionsMock,
+  getServerOptionsMock,
+  hapiRouteMock,
   hapiStartMock,
   hapiStopMock,
-  hapiRouteMock,
 } from './server.test.mocks';
-import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import { Server } from './server';
 
 const mockConfig = {
   port: 3000,

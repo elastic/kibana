@@ -8,15 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  onPremInstructions,
+  TutorialContext,
+  TutorialSchema,
+  TutorialsCategory,
+} from '../../services/tutorials/lib/tutorials_registry_types';
+import {
   cloudInstructions,
   onPremCloudInstructions,
+  onPremInstructions,
 } from '../instructions/metricbeat_instructions';
-import {
-  TutorialContext,
-  TutorialsCategory,
-  TutorialSchema,
-} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function aerospikeMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'aerospike';

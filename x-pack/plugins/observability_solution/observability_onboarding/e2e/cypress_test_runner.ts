@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
-import { FtrProviderContext } from './ftr_provider_context';
+import cypress from 'cypress';
 import { createObservabilityOnboardingUsers } from '../server/test_helpers/create_observability_onboarding_users';
+import { FtrProviderContext } from './ftr_provider_context';
 
 export async function cypressTestRunner({
   ftrProviderContext: { getService },

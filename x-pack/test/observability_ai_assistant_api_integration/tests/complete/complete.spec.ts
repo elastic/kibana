@@ -1,14 +1,6 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { Response } from 'supertest';
-import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { omit, pick } from 'lodash';
 import { PassThrough, Readable } from 'stream';
 import expect from '@kbn/expect';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
@@ -17,9 +9,17 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import type OpenAI from 'openai';
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
+import { omit, pick } from 'lodash';
+import type OpenAI from 'openai';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { Response } from 'supertest';
+import { LlmProxy, LlmResponseSimulator, createLlmProxy } from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

@@ -8,7 +8,7 @@
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/constants';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import { getMockUserProfiles } from '../__mocks__/request_responses';
 import { suggestUserProfilesRoute } from './suggest_user_profiles_route';
 

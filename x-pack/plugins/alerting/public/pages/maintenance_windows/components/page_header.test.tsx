@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { PageHeader } from './page_header';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { PageHeader } from './page_header';
 
 describe('PageHeader', () => {
   let appMockRenderer: AppMockRenderer;

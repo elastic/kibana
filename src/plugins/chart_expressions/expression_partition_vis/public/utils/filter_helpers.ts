@@ -7,12 +7,12 @@
  */
 
 import { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
-import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
+import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { BucketColumns, Dimensions, PartitionVisParams } from '../../common/types';
 import { FilterEvent } from '../types';
 
 export const canFilter = async (

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { ifFn } from './if';
 
 describe('if', () => {

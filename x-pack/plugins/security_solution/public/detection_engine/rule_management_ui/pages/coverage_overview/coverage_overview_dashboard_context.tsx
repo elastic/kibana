@@ -13,22 +13,22 @@ import React, {
   useMemo,
   useReducer,
 } from 'react';
-import { invariant } from '../../../../../common/utils/invariant';
 import {
   BulkActionTypeEnum,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
-import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
-import {
-  SET_SHOW_EXPANDED_CELLS,
-  SET_RULE_ACTIVITY_FILTER,
-  SET_RULE_SOURCE_FILTER,
-  SET_RULE_SEARCH_FILTER,
-  createCoverageOverviewDashboardReducer,
-} from './coverage_overview_dashboard_reducer';
+import { invariant } from '../../../../../common/utils/invariant';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
+import {
+  SET_RULE_ACTIVITY_FILTER,
+  SET_RULE_SEARCH_FILTER,
+  SET_RULE_SOURCE_FILTER,
+  SET_SHOW_EXPANDED_CELLS,
+  createCoverageOverviewDashboardReducer,
+} from './coverage_overview_dashboard_reducer';
 
 export interface CoverageOverviewDashboardActions {
   refetch: () => void;

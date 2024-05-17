@@ -28,12 +28,8 @@
         "type": "string",
         "tags": [],
         "label": "ESQL_TYPE",
-        "description": [
-          "\nESQL type constant"
-        ],
-        "signature": [
-          "\"esql\""
-        ],
+        "description": ["\nESQL type constant"],
+        "signature": ["\"esql\""],
         "path": "packages/kbn-data-view-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

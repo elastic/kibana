@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ScopedHistory } from '@kbn/core/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { ScopedHistory } from '@kbn/core/public';
-import { MapsListView } from './maps_list_view';
 import { APP_ID } from '../../../common/constants';
 import { getMapClient } from '../../content_management';
+import { MapsListView } from './maps_list_view';
 
 interface Props {
   history: ScopedHistory;

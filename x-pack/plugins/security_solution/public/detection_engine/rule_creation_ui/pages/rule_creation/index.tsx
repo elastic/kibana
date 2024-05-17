@@ -6,62 +6,57 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
   EuiResizableContainer,
-  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
+  isEsqlRule,
   isMlRule,
   isThreatMatchRule,
-  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
-import { useCreateRule } from '../../../rule_management/logic';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import { useCreateRule } from '../../../rule_management/logic';
 
+import { CustomHeaderPageMemo } from '..';
+import {
+  APP_UI_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_THREAT_INDEX_KEY,
+} from '../../../../../common/constants';
+import { SecurityPageName } from '../../../../app/types';
 import {
   getDetectionEngineUrl,
   getRuleDetailsUrl,
   getRulesUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { AccordionTitle } from '../../components/accordion_title';
-import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
-import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
-import { StepAboutRule, StepAboutRuleReadOnly } from '../../components/step_about_rule';
-import { StepScheduleRule, StepScheduleRuleReadOnly } from '../../components/step_schedule_rule';
 import {
-  stepActionsDefaultValue,
-  StepRuleActions,
-  StepRuleActionsReadOnly,
-} from '../../../rule_creation/components/step_rule_actions';
-import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import {
-  redirectToDetections,
-  getActionMessageParams,
   MaxWidthEuiFlexItem,
+  getActionMessageParams,
+  redirectToDetections,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
+import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
-import { formatRule } from './helpers';
-import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
-import * as i18n from './translations';
-import { SecurityPageName } from '../../../../app/types';
 import {
   defaultSchedule,
   defaultThreatMatchSchedule,
@@ -70,18 +65,23 @@ import {
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
 import {
-  APP_UI_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_INDICATOR_SOURCE_PATH,
-  DEFAULT_THREAT_INDEX_KEY,
-} from '../../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+  StepRuleActions,
+  StepRuleActionsReadOnly,
+  stepActionsDefaultValue,
+} from '../../../rule_creation/components/step_rule_actions';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { AccordionTitle } from '../../components/accordion_title';
+import { NextStep } from '../../components/next_step';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
-import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { NextStep } from '../../components/next_step';
+import { StepAboutRule, StepAboutRuleReadOnly } from '../../components/step_about_rule';
+import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
+import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
+import { StepScheduleRule, StepScheduleRuleReadOnly } from '../../components/step_schedule_rule';
+import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { useRuleForms, useRuleIndexPattern } from '../form';
-import { CustomHeaderPageMemo } from '..';
+import { formatRule } from './helpers';
+import * as i18n from './translations';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -446,8 +446,8 @@ const CreateRulePageComponent: React.FC = () => {
     activeStep === RuleStep.scheduleRule
       ? 'active'
       : scheduleStepForm.isValid
-      ? 'valid'
-      : 'passive';
+        ? 'valid'
+        : 'passive';
   const scheduleRuleButton = useMemo(
     () => <AccordionTitle name="3" title={RuleI18n.SCHEDULE_RULE} type={scheduleRuleButtonType} />,
     [scheduleRuleButtonType]

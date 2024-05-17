@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { transformRawUsageCounterObject, fetchUiCounters } from './register_ui_counters_collector';
-import { rawUsageCounters } from './__fixtures__/usage_counter_saved_objects';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
+import { rawUsageCounters } from './__fixtures__/usage_counter_saved_objects';
+import { fetchUiCounters, transformRawUsageCounterObject } from './register_ui_counters_collector';
 
 describe('transformRawUsageCounterObject', () => {
   it('transforms usage counters savedObject raw entries', () => {

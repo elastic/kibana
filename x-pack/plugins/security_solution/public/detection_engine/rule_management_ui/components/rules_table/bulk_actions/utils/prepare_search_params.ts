@@ -7,8 +7,8 @@
 
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { QueryOrIds } from '../../../../../rule_management/logic';
-import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
+import type { DryRunResult } from '../types';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 

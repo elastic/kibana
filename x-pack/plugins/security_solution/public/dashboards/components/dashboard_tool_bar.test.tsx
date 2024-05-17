@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { DashboardToolBar } from './dashboard_tool_bar';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { APP_NAME } from '../../../common/constants';
 import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-navigation';
-import { TestProviders } from '../../common/mock';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { APP_NAME } from '../../../common/constants';
 import { useNavigation } from '../../common/lib/kibana';
+import { TestProviders } from '../../common/mock';
+import { DashboardToolBar } from './dashboard_tool_bar';
 
 const mockDashboardTopNav = DashboardTopNav as jest.Mock;
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingSetup,
   RuleType,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 // this plugin's dependendencies

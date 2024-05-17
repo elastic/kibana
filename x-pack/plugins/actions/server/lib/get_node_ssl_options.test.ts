@@ -1,3 +1,5 @@
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

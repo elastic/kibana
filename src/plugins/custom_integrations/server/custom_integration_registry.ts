@@ -7,7 +7,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { IntegrationCategory, INTEGRATION_CATEGORY_DISPLAY, CustomIntegration } from '../common';
+import { CustomIntegration, INTEGRATION_CATEGORY_DISPLAY, IntegrationCategory } from '../common';
 
 function isAddable(integration: CustomIntegration): boolean {
   return !!integration.categories.length && !integration.eprOverlap;

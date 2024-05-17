@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { FC, useState, useContext, useEffect } from 'react';
 
-import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
+import { PageManager } from '../page_manager';
 import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';

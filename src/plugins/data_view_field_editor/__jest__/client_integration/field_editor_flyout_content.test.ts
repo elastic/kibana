@@ -7,12 +7,12 @@
  */
 import { act } from 'react-dom/test-utils';
 
+import type { Props } from '../../public/components/field_editor_flyout_content';
+import { setup } from './field_editor_flyout_content.helpers';
+import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment } from './helpers';
-import type { Props } from '../../public/components/field_editor_flyout_content';
-import { setSearchResponse } from './field_editor_flyout_preview.helpers';
-import { setup } from './field_editor_flyout_content.helpers';
-import { mockDocuments, createPreviewError } from './helpers/mocks';
+import { createPreviewError, mockDocuments } from './helpers/mocks';
 
 describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();

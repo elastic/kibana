@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mockAppDataView, mockDataView } from '../../rtl_helpers';
-import { LensAttributes } from '../lens_attributes';
-import { METRIC_SYSTEM_MEMORY_USAGE, SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
-import { obsvReportConfigMap } from '../../obsv_exploratory_view';
-import { testMobileKPIAttr } from '../test_data/mobile_test_attribute';
-import { getLayerConfigs } from '../../hooks/use_lens_attributes';
-import { DataViewState } from '../../hooks/use_app_data_view';
 import { ReportTypes } from '../../../../..';
+import { DataViewState } from '../../hooks/use_app_data_view';
+import { getLayerConfigs } from '../../hooks/use_lens_attributes';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
+import { mockAppDataView, mockDataView } from '../../rtl_helpers';
+import { METRIC_SYSTEM_MEMORY_USAGE, SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
+import { LensAttributes } from '../lens_attributes';
+import { testMobileKPIAttr } from '../test_data/mobile_test_attribute';
 
 describe('Mobile kpi config test', function () {
   mockAppDataView();

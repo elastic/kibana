@@ -7,7 +7,7 @@
  */
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';

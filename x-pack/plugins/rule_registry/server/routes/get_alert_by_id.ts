@@ -6,12 +6,12 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import * as t from 'io-ts';
-import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
+import * as t from 'io-ts';
 
-import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { RacRequestHandlerContext } from '../types';
 import { buildRouteValidation } from './utils/route_validation';
 
 export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => {

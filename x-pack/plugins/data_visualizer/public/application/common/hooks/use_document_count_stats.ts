@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { stringHash } from '@kbn/ml-string-hash';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
-import type { Query } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Query } from '@kbn/es-query';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import type { RandomSampler, RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { stringHash } from '@kbn/ml-string-hash';
 import { each, get } from 'lodash';
-import { lastValueFrom } from 'rxjs';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { lastValueFrom } from 'rxjs';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { displayError } from '../util/display_error';
 

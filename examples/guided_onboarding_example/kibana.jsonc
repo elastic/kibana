@@ -7,11 +7,7 @@
     "id": "guidedOnboardingExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "navigation"
-    ],
-    "optionalPlugins": [
-      "guidedOnboarding"
-    ]
+    "requiredPlugins": ["navigation"],
+    "optionalPlugins": ["guidedOnboarding"]
   }
 }

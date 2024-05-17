@@ -8,8 +8,8 @@
 
 import expect from '@kbn/expect';
 
-import { PIE_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { PIE_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');

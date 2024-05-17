@@ -7,8 +7,8 @@
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
   const cases = getService('cases');

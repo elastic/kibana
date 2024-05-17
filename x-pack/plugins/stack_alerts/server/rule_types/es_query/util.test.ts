@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OnlyEsQueryRuleParams } from './types';
 import { Comparator } from '../../../common/comparator_types';
+import { OnlyEsQueryRuleParams } from './types';
 import { getParsedQuery } from './util';
 
 describe('es_query utils', () => {

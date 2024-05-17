@@ -7,11 +7,11 @@
 
 /* eslint-disable complexity */
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
-import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import type { RuleUpdateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
-import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
+import type { InternalRuleUpdate, RuleAlertType, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
 

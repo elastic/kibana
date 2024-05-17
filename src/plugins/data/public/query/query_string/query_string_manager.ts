@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { isEqual } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreStart } from '@kbn/core/public';
-import type { Query, AggregateQuery } from '@kbn/es-query';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { isEqual } from 'lodash';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 
 export class QueryStringManager {

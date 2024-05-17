@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { Component, ComponentProps, Fragment } from 'react';
-import classNames from 'classnames';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiSpacer,
   EuiText,
   EuiTextAlign,
   EuiTextColor,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
+import { FormattedMessage } from '@kbn/i18n-react';
+import classNames from 'classnames';
+import React, { Component, ComponentProps, Fragment } from 'react';
 import { IField } from '../../classes/fields/field';
+import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
 
 // TODO import reorder from EUI once its exposed as service
 // https://github.com/elastic/eui/issues/2372

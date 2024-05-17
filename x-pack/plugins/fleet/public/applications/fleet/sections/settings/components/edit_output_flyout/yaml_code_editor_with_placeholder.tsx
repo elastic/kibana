@@ -8,8 +8,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 

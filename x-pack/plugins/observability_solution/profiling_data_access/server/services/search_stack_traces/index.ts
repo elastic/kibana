@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import { ProfilingESClient } from '../../../common/profiling_es_client';
 
 interface Params {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardAnalyticsService } from './analytics/types';
@@ -17,9 +17,9 @@ import { DashboardApplicationService } from './application/types';
 import { DashboardChromeService } from './chrome/types';
 import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCustomBrandingService } from './custom_branding/types';
+import { DashboardBackupServiceType } from './dashboard_backup/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
-import { DashboardBackupServiceType } from './dashboard_backup/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardDocumentationLinksService } from './documentation_links/types';
@@ -28,20 +28,20 @@ import { DashboardHTTPService } from './http/types';
 import { DashboardI18nService } from './i18n/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
+import { NoDataPageService } from './no_data_page/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
 import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
+import { DashboardServerlessService } from './serverless/types';
 import { DashboardSettingsService } from './settings/types';
 import { DashboardShareService } from './share/types';
 import { DashboardSpacesService } from './spaces/types';
+import { DashboardUiActionsService } from './ui_actions/types';
 import { DashboardUrlForwardingService } from './url_forwarding/types';
 import { DashboardUsageCollectionService } from './usage_collection/types';
-import { DashboardVisualizationsService } from './visualizations/types';
-import { DashboardServerlessService } from './serverless/types';
-import { NoDataPageService } from './no_data_page/types';
-import { DashboardUiActionsService } from './ui_actions/types';
 import { DashboardUserProfileService } from './user_profile/types';
+import { DashboardVisualizationsService } from './visualizations/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext

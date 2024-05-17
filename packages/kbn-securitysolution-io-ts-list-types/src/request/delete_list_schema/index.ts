@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const deleteListSchema = t.intersection([
   t.exact(

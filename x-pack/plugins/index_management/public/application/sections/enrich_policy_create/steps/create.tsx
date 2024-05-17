@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiCodeBlock,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiText,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTabbedContent,
   EuiSpacer,
-  EuiCodeBlock,
+  EuiTabbedContent,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import { getESPolicyCreationApiCall, serializeAsESPolicy } from '../../../../../common/lib';
 import { useCreatePolicyContext } from '../create_policy_context';
-import { serializeAsESPolicy, getESPolicyCreationApiCall } from '../../../../../common/lib';
 
 // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
 // levels. This way we prevent that happening for very large requests.

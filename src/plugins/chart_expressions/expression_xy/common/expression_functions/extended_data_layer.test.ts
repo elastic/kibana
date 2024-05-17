@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ExtendedDataLayerArgs } from '../types';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { mockPaletteOutput, sampleArgs } from '../__mocks__';
 import { LayerTypes } from '../constants';
+import { ExtendedDataLayerArgs } from '../types';
 import { extendedDataLayerFunction } from './extended_data_layer';
 
 describe('extendedDataLayerConfig', () => {

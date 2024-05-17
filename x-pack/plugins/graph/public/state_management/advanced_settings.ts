@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { takeLatest } from 'redux-saga/effects';
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest } from 'redux-saga/effects';
-import { GraphState, GraphStoreDependencies } from './store';
 import { AdvancedSettings } from '../types';
+import { requestDatasource, setDatasource } from './datasource';
 import { reset } from './global';
-import { setDatasource, requestDatasource } from './datasource';
+import { GraphState, GraphStoreDependencies } from './store';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/advancedSettings');
 

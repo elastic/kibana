@@ -8,9 +8,9 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
-import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
+import { getQueryFilter } from '../../../../utils/build_query';
 
 export const buildResultsQuery = ({
   actionId,

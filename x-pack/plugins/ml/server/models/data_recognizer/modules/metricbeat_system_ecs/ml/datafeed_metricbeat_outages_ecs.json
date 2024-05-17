@@ -1,8 +1,6 @@
 {
   "job_id": "JOB_ID",
-  "indices": [
-    "INDEX_PATTERN_NAME"
-  ],
+  "indices": ["INDEX_PATTERN_NAME"],
   "query": {
     "bool": {
       "must": {

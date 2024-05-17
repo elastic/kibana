@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import type { PackagePolicyResponseExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import React, { memo } from 'react';
 
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 

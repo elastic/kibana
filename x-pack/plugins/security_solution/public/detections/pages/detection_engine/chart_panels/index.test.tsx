@@ -8,18 +8,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { useAlertsLocalStorage } from './alerts_local_storage';
+import { ChartPanels } from '.';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { TestProviders } from '../../../../common/mock';
-import { ChartPanels } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { TestProviders } from '../../../../common/mock';
 import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
+import { useAlertsLocalStorage } from './alerts_local_storage';
 
 jest.mock('./alerts_local_storage');
 jest.mock('../../../../common/containers/sourcerer');

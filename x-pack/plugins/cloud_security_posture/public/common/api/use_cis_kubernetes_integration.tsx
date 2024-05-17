@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import {
-  epmRouteService,
-  type GetInfoResponse,
-  type DefaultPackagesInstallationError,
   API_VERSIONS,
+  type DefaultPackagesInstallationError,
+  type GetInfoResponse,
+  epmRouteService,
 } from '@kbn/fleet-plugin/common';
+import { useQuery } from '@tanstack/react-query';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 

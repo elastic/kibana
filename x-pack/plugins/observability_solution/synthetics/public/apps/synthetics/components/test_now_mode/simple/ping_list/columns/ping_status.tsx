@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
 import { STATUS } from '../../../../../../../../common/constants';
 import { Ping } from '../../../../../../../../common/runtime_types';
 import {

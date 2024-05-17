@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { act, createEvent, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../../../mocks';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleProps } from '../../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../../console_state/state_update_handlers/handle_input_area_state';
-import { act, waitFor, createEvent, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { NO_HISTORY_EMPTY_MESSAGE } from '../components/command_input_history';
 import { UP_ARROW_ACCESS_HISTORY_HINT } from '../hooks/use_input_hints';
 

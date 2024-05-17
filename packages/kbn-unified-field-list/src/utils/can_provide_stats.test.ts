@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  canProvideStatsForField,
-  canProvideExamplesForField,
-  canProvideStatsForFieldTextBased,
-} from './can_provide_stats';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import {
+  canProvideExamplesForField,
+  canProvideStatsForField,
+  canProvideStatsForFieldTextBased,
+} from './can_provide_stats';
 
 describe('can_provide_stats', function () {
   describe('canProvideStatsForField', function () {

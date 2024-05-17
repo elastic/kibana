@@ -8,12 +8,12 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '@kbn/visualizations-plugin/common';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   convertToLensModule,
-  getVisSchemas,
   getDataViewByIndexPatternId,
+  getVisSchemas,
 } from '@kbn/visualizations-plugin/public';
-import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';

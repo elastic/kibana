@@ -8,9 +8,9 @@
 
 import * as React from 'react';
 import { useConnectionDetailsService } from './context';
-import { EndpointsTab } from './tabs/endpoints_tab';
-import { ApiKeysTab } from './tabs/api_keys_tab';
 import { useBehaviorSubject } from './hooks/use_behavior_subject';
+import { ApiKeysTab } from './tabs/api_keys_tab';
+import { EndpointsTab } from './tabs/endpoints_tab';
 
 export const ConnectionDetails: React.FC = () => {
   const service = useConnectionDetailsService();

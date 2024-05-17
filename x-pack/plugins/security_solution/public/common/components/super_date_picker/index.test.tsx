@@ -11,11 +11,11 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
-import { mockGlobalState, createMockStore } from '../../mock';
 import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
+import { createMockStore, mockGlobalState } from '../../mock';
 
-import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
+import { SuperDatePicker, makeMapStateToProps } from '.';
 import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('../../lib/kibana');

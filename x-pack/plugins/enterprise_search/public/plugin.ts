@@ -11,14 +11,14 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
+  AppDeepLink,
   AppMountParameters,
-  CoreStart,
   CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-  DEFAULT_APP_CATEGORIES,
-  AppDeepLink,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -36,11 +36,11 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/p
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import {
+  AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
-  AI_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -55,11 +55,11 @@ import {
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
+import { PLAYGROUND_PATH, SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
-  SEARCH_INDICES_PATH,
   CRAWLERS_PATH,
+  SEARCH_INDICES_PATH,
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';

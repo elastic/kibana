@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import $ from 'jquery';
-import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import $ from 'jquery';
+import _ from 'lodash';
 
 import { Vis } from '../vis';
 

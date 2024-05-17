@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/shallow_useeffect.mock';
 import '../../../__mocks__/engine_logic.mock';
 
@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { MetaEnginesSchemaTable, MetaEnginesConflictsTable } from '../components';
+import { MetaEnginesConflictsTable, MetaEnginesSchemaTable } from '../components';
 
 import { MetaEngineSchema } from '.';
 

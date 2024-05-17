@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { getValueOrEmpty } from '../../../common/empty_label';
 import { PALETTES } from '../../../common/enums';
 import type { PanelData } from '../../../common/types';
 import { computeGradientFinalColor } from './compute_gradient_final_color';
 import { rainbowColors } from './rainbow_colors';
-import { getValueOrEmpty } from '../../../common/empty_label';
 
 interface PaletteParams {
   colors: string[];
@@ -53,11 +53,11 @@ export const getSplitByTermsColor = ({
           gradient: true,
         }
       : seriesPalette.name === PALETTES.RAINBOW
-      ? {
-          ...seriesPalette.params,
-          colors: rainbowColors,
-        }
-      : seriesPalette.params;
+        ? {
+            ...seriesPalette.params,
+            colors: rainbowColors,
+          }
+        : seriesPalette.params;
 
   const outputColor = palettesRegistry?.get(paletteName || 'default').getCategoricalColor(
     [

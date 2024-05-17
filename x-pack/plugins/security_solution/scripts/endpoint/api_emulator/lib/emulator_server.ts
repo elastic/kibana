@@ -10,14 +10,14 @@
 import type { ServerRoute } from '@hapi/hapi';
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
+import type { DeferredPromiseInterface } from '../../common/utils';
+import { getDeferredPromise, prefixedOutputLogger } from '../../common/utils';
 import type {
   EmulatorServerPlugin,
   EmulatorServerPluginRegisterOptions,
   EmulatorServerRouteDefinition,
 } from './emulator_server.types';
-import type { DeferredPromiseInterface } from '../../common/utils';
-import { getDeferredPromise, prefixedOutputLogger } from '../../common/utils';
-import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 
 interface EmulatorServerOptions<TServices extends {} = {}> {
   /**

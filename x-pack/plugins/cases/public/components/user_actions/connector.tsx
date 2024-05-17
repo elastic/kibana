@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ConnectorUserAction } from '../../../common/types/domain';
-import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
+import type { UserActionBuilder } from './types';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<ConnectorUserAction>) => {
   const connector = userAction.payload.connector;

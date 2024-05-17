@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { Component, ChangeEvent } from 'react';
 import {
+  EuiButton,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
-  EuiButton,
   EuiSpacer,
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import React, { Component, ChangeEvent } from 'react';
 import { ActionSelect } from '../action_select';
 
 interface Props {

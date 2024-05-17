@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
+import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import * as i18n from './translations';
-import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
-import { Loader } from '../../loader';
-import type { AnomaliesNetworkTableProps } from '../types';
-import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
-import { useMlCapabilities } from '../hooks/use_ml_capabilities';
-import { BasicTable } from './basic_table';
-import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
-import { Panel } from '../../panel';
+import { networkActions, networkSelectors } from '../../../../explore/network/store';
 import { useQueryToggle } from '../../../containers/query_toggle';
-import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
+import { Loader } from '../../loader';
+import { Panel } from '../../panel';
+import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
+import type { AnomaliesNetworkTableProps } from '../types';
+import { BasicTable } from './basic_table';
+import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
+import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { JobIdFilter } from './job_id_filter';
-import { networkActions, networkSelectors } from '../../../../explore/network/store';
 import { SelectInterval } from './select_interval';
+import * as i18n from './translations';
 
 const sorting = {
   sort: {

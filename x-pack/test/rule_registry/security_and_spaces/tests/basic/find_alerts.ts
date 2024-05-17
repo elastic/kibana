@@ -10,29 +10,29 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import {
-  superUser,
-  globalRead,
-  obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
-  secOnlySpace2,
-  secOnlyReadSpace2,
-  obsSecAllSpace2,
-  obsSecReadSpace2,
-  obsOnlySpace2,
-  obsOnlyReadSpace2,
-  obsOnlySpacesAll,
-  obsSecSpacesAll,
-  secOnlySpacesAll,
-  noKibanaPrivileges,
-} from '../../../common/lib/authentication/users';
-import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
+import type { User } from '../../../common/lib/authentication/types';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsOnlyReadSpace2,
+  obsOnlySpace2,
+  obsOnlySpacesAll,
+  obsSec,
+  obsSecAllSpace2,
+  obsSecRead,
+  obsSecReadSpace2,
+  obsSecSpacesAll,
+  secOnly,
+  secOnlyRead,
+  secOnlyReadSpace2,
+  secOnlySpace2,
+  secOnlySpacesAll,
+  superUser,
+} from '../../../common/lib/authentication/users';
 
 interface TestCase {
   /** The space where the alert exists */

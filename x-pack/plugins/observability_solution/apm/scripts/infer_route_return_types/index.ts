@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { execSync } from 'child_process';
+import Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  Project,
-  Node,
+  ArrowFunction,
   FunctionDeclaration,
   FunctionExpression,
-  ArrowFunction,
   MethodDeclaration,
+  Node,
+  Project,
+  PropertyAssignment,
   SourceFile,
   SyntaxKind,
-  PropertyAssignment,
-  ts,
   TypeFormatFlags,
+  ts,
 } from 'ts-morph';
-import Path from 'path';
-import { execSync } from 'child_process';
 import { argv } from 'yargs';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 // This script adds explicit return types to route handlers,
 // for performance reasons. See https://github.com/elastic/kibana/pull/123266

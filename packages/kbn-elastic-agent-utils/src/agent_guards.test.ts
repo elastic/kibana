@@ -7,12 +7,12 @@
  */
 
 import {
-  isAndroidAgentName,
   isAWSLambdaAgentName,
+  isAndroidAgentName,
   isAzureFunctionsAgentName,
   isIosAgentName,
-  isJavaAgentName,
   isJRubyAgentName,
+  isJavaAgentName,
   isMobileAgentName,
   isOpenTelemetryAgentName,
   isRumAgentName,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import * as esKuery from '@kbn/es-query';
 
 const MAX_OBJECTS_TO_FIND = 10000; // we only expect up to a few dozen, search for 10k to be safe; anything over this is ignored
 

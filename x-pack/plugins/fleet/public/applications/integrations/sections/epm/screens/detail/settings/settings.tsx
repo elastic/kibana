@@ -5,54 +5,54 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import semverLt from 'semver/functions/lt';
+import styled from 'styled-components';
 
 import {
   EuiCallOut,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSpacer,
   EuiLink,
   EuiPortal,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  getNumTransformAssets,
   TransformInstallWithCurrentUserPermissionCallout,
+  getNumTransformAssets,
 } from '../../../../../../../components/transform_install_as_current_user_callout';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
 import {
-  useGetPackagePoliciesQuery,
-  useGetPackageInstallStatus,
-  useLink,
-  useStartServices,
-  useUpgradePackagePolicyDryRunQuery,
-  useUpdatePackageMutation,
-} from '../../../../../hooks';
-import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
   AUTO_UPGRADE_POLICIES_PACKAGES,
+  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
+import {
+  useGetPackageInstallStatus,
+  useGetPackagePoliciesQuery,
+  useLink,
+  useStartServices,
+  useUpdatePackageMutation,
+  useUpgradePackagePolicyDryRunQuery,
+} from '../../../../../hooks';
+import type { PackageInfo } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
+import { ChangelogModal } from './changelog_modal';
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
-import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
-import { ChangelogModal } from './changelog_modal';
+import { UpdateButton } from './update_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};

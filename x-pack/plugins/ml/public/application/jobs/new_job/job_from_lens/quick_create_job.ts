@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type {
   ChartInfo,
   LensPublicStart,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import type { JobCreatorType } from '../common/job_creator';
-import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
-import { stashJobForCloning } from '../common/job_creator/util/general';
-import type { MlApiServices } from '../../../services/ml_api_service';
 import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   JOB_TYPE,
 } from '../../../../../common/constants/new_job';
+import type { MlApiServices } from '../../../services/ml_api_service';
+import type { JobCreatorType } from '../common/job_creator';
+import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/default_configs';
+import { stashJobForCloning } from '../common/job_creator/util/general';
+import { type CreateState, QuickJobCreatorBase } from '../job_from_dashboard';
 import {
-  isCompatibleLayer,
   createDetectors,
-  getJobsItemsFromEmbeddable,
   getChartInfoFromVisualization,
+  getJobsItemsFromEmbeddable,
+  isCompatibleLayer,
 } from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
-import { QuickJobCreatorBase, type CreateState } from '../job_from_dashboard';
 
 export class QuickLensJobCreator extends QuickJobCreatorBase {
   constructor(
@@ -204,9 +204,8 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
       layerIndex !== undefined ? chartInfo.layers[layerIndex] : compatibleLayers[0];
 
     const visExtractor = new VisualizationExtractor();
-    const { fields, timeField, splitField, dataView } = await visExtractor.extractFields(
-      selectedLayer
-    );
+    const { fields, timeField, splitField, dataView } =
+      await visExtractor.extractFields(selectedLayer);
 
     const jobConfig = createEmptyJob();
     const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());

@@ -8,18 +8,18 @@
 import expect from '@kbn/expect';
 
 import { APP_ID } from '@kbn/security-solution-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../cases_api_integration/common/lib/authentication';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createCase,
   deleteAllCaseItems,
   getCase,
 } from '../../../cases_api_integration/common/lib/api';
+import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
 const secAll: Role = {

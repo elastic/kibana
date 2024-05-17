@@ -6,13 +6,13 @@
  */
 
 import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
-import type { CoverageOverviewMitreTactic } from './mitre_tactic';
-import type { CoverageOverviewMitreTechnique } from './mitre_technique';
-import { getNumOfCoveredTechniques, getTotalRuleCount } from './mitre_technique';
 import {
   getMockCoverageOverviewMitreTactic,
   getMockCoverageOverviewMitreTechnique,
 } from './__mocks__';
+import type { CoverageOverviewMitreTactic } from './mitre_tactic';
+import type { CoverageOverviewMitreTechnique } from './mitre_technique';
+import { getNumOfCoveredTechniques, getTotalRuleCount } from './mitre_technique';
 
 describe('mitre_technique', () => {
   describe('getTotalRuleCount', () => {

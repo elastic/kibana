@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createStateContainer, PureTransition } from '../../common/state_containers';
+import { PureTransition, createStateContainer } from '../../common/state_containers';
 
 export interface TodoItem {
   text: string;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../../common/constants/states';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { StatsBar } from '../../../../components/stats_bar';
 
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 function createJobStats(jobsSummaryList, showNodeInfo) {
   const jobStats = {

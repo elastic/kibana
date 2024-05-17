@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@tanstack/react-query';
 import { isNumber } from 'lodash';
+import { useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { type AlertsQueryParams, createFindAlerts } from '../services/find_alerts';
 

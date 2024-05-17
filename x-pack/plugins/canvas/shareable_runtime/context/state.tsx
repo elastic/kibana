@@ -7,8 +7,8 @@
 
 import React, { createContext, useContext, Dispatch, useReducer, ReactChild } from 'react';
 import { CanvasShareableState } from '../types';
-import { reducer } from './reducer';
 import { CanvasShareableAction } from './actions';
+import { reducer } from './reducer';
 
 type StateType = [CanvasShareableState, Dispatch<CanvasShareableAction>];
 

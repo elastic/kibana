@@ -1,3 +1,4 @@
+import { Either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,7 +10,6 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -68,8 +68,7 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const ObservabilityLogsAlertRequired = rt.type({
-});
+const ObservabilityLogsAlertRequired = rt.type({});
 // prettier-ignore
 const ObservabilityLogsAlertOptional = rt.partial({
   'kibana.alert.context': schemaUnknown,
@@ -85,6 +84,12 @@ const ObservabilityLogsAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const ObservabilityLogsAlertSchema = rt.intersection([ObservabilityLogsAlertRequired, ObservabilityLogsAlertOptional, AlertSchema, EcsSchema, LegacyAlertSchema]);
+export const ObservabilityLogsAlertSchema = rt.intersection([
+  ObservabilityLogsAlertRequired,
+  ObservabilityLogsAlertOptional,
+  AlertSchema,
+  EcsSchema,
+  LegacyAlertSchema,
+]);
 // prettier-ignore
 export type ObservabilityLogsAlert = rt.TypeOf<typeof ObservabilityLogsAlertSchema>;

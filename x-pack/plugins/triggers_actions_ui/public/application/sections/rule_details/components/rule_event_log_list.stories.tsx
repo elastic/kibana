@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
 import { Meta } from '@storybook/react';
+import React, { ComponentProps } from 'react';
 import { RuleEventLogList, RuleEventLogListProps } from './rule_event_log_list';
 import { mockRule, mockRuleType } from './test_helpers';
 

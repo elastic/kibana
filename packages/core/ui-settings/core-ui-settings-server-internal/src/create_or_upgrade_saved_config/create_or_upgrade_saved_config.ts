@@ -8,13 +8,13 @@
 
 import { defaults } from 'lodash';
 
-import type { Logger, LogMeta } from '@kbn/logging';
-import { asyncForEach } from '@kbn/std';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { LogMeta, Logger } from '@kbn/logging';
+import { asyncForEach } from '@kbn/std';
 
-import { getUpgradeableConfig } from './get_upgradeable_config';
 import { transforms } from '../saved_objects';
+import { getUpgradeableConfig } from './get_upgradeable_config';
 
 interface ConfigLogMeta extends LogMeta {
   kibana: {

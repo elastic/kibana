@@ -7,21 +7,21 @@
 
 import { useCallback, useMemo } from 'react';
 
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import {
-  getLicenseError,
-  getKibanaConfigError,
-  getConnectorMissingInfo,
-  getDeletedConnectorError,
-  getCaseClosedInfo,
-} from './helpers';
 import type { CaseConnector } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
-import type { ErrorMessage } from './callout/types';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CaseConnectors } from '../../containers/types';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import type { ErrorMessage } from './callout/types';
+import {
+  getCaseClosedInfo,
+  getConnectorMissingInfo,
+  getDeletedConnectorError,
+  getKibanaConfigError,
+  getLicenseError,
+} from './helpers';
 
 export interface UsePushToService {
   caseConnectors: CaseConnectors;

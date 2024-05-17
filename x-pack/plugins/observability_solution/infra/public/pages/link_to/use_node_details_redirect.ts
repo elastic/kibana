@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/public';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { getRouterLinkProps } from '@kbn/router-utils';
-import {
-  type AssetDetailsLocatorParams,
-  ASSET_DETAILS_LOCATOR_ID,
-} from '@kbn/observability-shared-plugin/public';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import type { AssetDetailsUrlState, RouteState } from '../../components/asset_details/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import {

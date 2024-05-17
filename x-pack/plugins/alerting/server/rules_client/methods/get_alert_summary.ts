@@ -6,14 +6,14 @@
  */
 
 import { IEvent } from '@kbn/event-log-plugin/server';
-import { AlertSummary, SanitizedRuleWithLegacyId } from '../../types';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { alertSummaryFromEventLog } from '../../lib/alert_summary_from_event_log';
 import { parseDuration } from '../../../common/parse_duration';
+import { getRule } from '../../application/rule/methods/get/get_rule';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
+import { alertSummaryFromEventLog } from '../../lib/alert_summary_from_event_log';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { AlertSummary, SanitizedRuleWithLegacyId } from '../../types';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
-import { getRule } from '../../application/rule/methods/get/get_rule';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetAlertSummaryParams {
   id: string;

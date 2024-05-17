@@ -8,51 +8,51 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import memoizeOne from 'memoize-one';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { AggregateQuery, getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
+import memoizeOne from 'memoize-one';
+import { generateId } from '../../id_generator';
+import {
+  DataSourceInfo,
+  DataType,
+  DatasourceDataPanelProps,
+  DatasourceDimensionEditorProps,
+  DatasourceDimensionTriggerProps,
+  DatasourceLayerPanelProps,
+  PublicAPIProps,
+  TableChangeType,
+  UserMessage,
+} from '../../types';
+import type { Datasource, DatasourceSuggestion } from '../../types';
+import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
-import { toExpression } from './to_expression';
+import { getDropProps, onDrop } from './dnd';
 import {
-  DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
-  DatasourceLayerPanelProps,
-  PublicAPIProps,
-  DataType,
-  TableChangeType,
-  DatasourceDimensionTriggerProps,
-  DataSourceInfo,
-  UserMessage,
-} from '../../types';
-import { generateId } from '../../id_generator';
-import type {
-  TextBasedPrivateState,
-  TextBasedPersistedState,
-  TextBasedLayerColumn,
-  TextBasedField,
-} from './types';
-import type { Datasource, DatasourceSuggestion } from '../../types';
-import { getUniqueLabelGenerator, nonNullable } from '../../utils';
-import { onDrop, getDropProps } from './dnd';
+  addColumnsToCache,
+  getColumnsFromCache,
+  retrieveLayerColumnsFromCache,
+} from './fieldlist_cache';
 import { removeColumn } from './remove_column';
+import { toExpression } from './to_expression';
+import type {
+  TextBasedField,
+  TextBasedLayerColumn,
+  TextBasedPersistedState,
+  TextBasedPrivateState,
+} from './types';
 import {
+  MAX_NUM_OF_COLUMNS,
   canColumnBeUsedBeInMetricDimension,
   isNotNumeric,
   isNumeric,
-  MAX_NUM_OF_COLUMNS,
 } from './utils';
-import {
-  getColumnsFromCache,
-  addColumnsToCache,
-  retrieveLayerColumnsFromCache,
-} from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;

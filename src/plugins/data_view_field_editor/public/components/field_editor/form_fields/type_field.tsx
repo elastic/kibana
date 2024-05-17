@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
 import { UseField } from '../../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS, RUNTIME_FIELD_OPTIONS_PRIMITIVE } from '../constants';

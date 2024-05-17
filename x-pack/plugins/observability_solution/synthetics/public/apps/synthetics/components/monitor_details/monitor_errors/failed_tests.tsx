@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { useUrlParams } from '../../../hooks';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
-import { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorFailedTests = ({
   time,

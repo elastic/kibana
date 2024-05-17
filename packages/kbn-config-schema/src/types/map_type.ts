@@ -10,7 +10,7 @@ import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
+import { ExtendsDeepOptions, Type, TypeOptions } from './type';
 
 export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
 

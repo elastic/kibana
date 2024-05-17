@@ -5,33 +5,17 @@
  * 2.0.
  */
 
+import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
-import { PassThrough } from 'stream';
-import { IncomingMessage } from 'http';
 import {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
-import { removeEndpointFromUrl } from './lib/openai_utils';
-import {
-  RunActionParamsSchema,
-  RunActionResponseSchema,
-  DashboardActionParamsSchema,
-  StreamActionParamsSchema,
-  StreamingResponseSchema,
-  InvokeAIActionParamsSchema,
-} from '../../../common/openai/schema';
-import type {
-  Config,
-  Secrets,
-  RunActionParams,
-  RunActionResponse,
-  StreamActionParams,
-} from '../../../common/openai/types';
 import {
   DEFAULT_OPENAI_MODEL,
   DEFAULT_TIMEOUT_MS,
@@ -39,12 +23,28 @@ import {
   SUB_ACTION,
 } from '../../../common/openai/constants';
 import {
+  DashboardActionParamsSchema,
+  InvokeAIActionParamsSchema,
+  RunActionParamsSchema,
+  RunActionResponseSchema,
+  StreamActionParamsSchema,
+  StreamingResponseSchema,
+} from '../../../common/openai/schema';
+import type {
+  Config,
+  RunActionParams,
+  RunActionResponse,
+  Secrets,
+  StreamActionParams,
+} from '../../../common/openai/types';
+import {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/openai/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   getAxiosOptions,
   getAzureApiVersionParameter,

@@ -9,23 +9,23 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { startsWith, get, cloneDeep, map } from 'lodash';
-import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
+import { htmlIdGenerator } from '@elastic/eui';
+import { cloneDeep, get, map, startsWith } from 'lodash';
 
-import { getMetricsField } from '../../lib/get_metrics_field';
-import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
-import { TimeSeries } from '../../../visualizations/views/timeseries';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
-import { replaceVars } from '../../lib/replace_vars';
-import { getInterval } from '../../lib/get_interval';
-import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
-import { STACKED_OPTIONS } from '../../../visualizations/constants';
-import { getCoreStart } from '../../../../services';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { getCoreStart } from '../../../../services';
+import { STACKED_OPTIONS } from '../../../visualizations/constants';
+import { TimeSeries } from '../../../visualizations/views/timeseries';
+import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
+import { getInterval } from '../../lib/get_interval';
+import { getMetricsField } from '../../lib/get_metrics_field';
+import { replaceVars } from '../../lib/replace_vars';
+import { createTickFormatter } from '../../lib/tick_formatter';
 
 class TimeseriesVisualization extends Component {
   static propTypes = {

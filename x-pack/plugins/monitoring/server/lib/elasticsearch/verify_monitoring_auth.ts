@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import Boom from '@hapi/boom';
+import { get } from 'lodash';
 import { INDEX_PATTERN } from '../../../common/constants';
 import { LegacyRequest } from '../../types';
 

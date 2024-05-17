@@ -1,3 +1,4 @@
+import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,25 +7,24 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
-import { schema } from '@kbn/config-schema';
-import Papa from 'papaparse';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import Papa from 'papaparse';
 import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
+import {
+  APP_ID,
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '../../../../../common/constants';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream } from '../../../../types';
-import {
-  ASSET_CRITICALITY_CSV_UPLOAD_URL,
-  APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
-} from '../../../../../common/constants';
+import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { AssetCriticalityAuditActions } from '../audit';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
-import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { AssetCriticalityAuditActions } from '../audit';
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const assetCriticalityCSVUploadRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

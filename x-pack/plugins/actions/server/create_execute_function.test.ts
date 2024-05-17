@@ -6,16 +6,16 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { v4 as uuidv4 } from 'uuid';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
+import { actionsConfigMock } from './actions_config.mock';
+import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
-import { actionsConfigMock } from './actions_config.mock';
 
 const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();

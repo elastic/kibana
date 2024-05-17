@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import type { AggName } from '../../../../../../common/types/aggregations';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 import type { PivotAggsConfig } from '../../../../common';
 import { PopoverForm } from './popover_form';
-import { I18nProvider } from '@kbn/i18n-react';
 
 describe('Transform: Aggregation <PopoverForm />', () => {
   afterEach(() => {

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { inspect } from 'util';
-import Os from 'os';
-import Fs from 'fs';
-import Path from 'path';
 import crypto from 'crypto';
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
+import { inspect } from 'util';
 
-import execa from 'execa';
-import Axios, { AxiosRequestConfig } from 'axios';
+import { CiStatsMetadata, Config, parseConfig } from '@kbn/ci-stats-core';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
-import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { SomeDevLog } from '@kbn/some-dev-log';
+import Axios, { AxiosRequestConfig } from 'axios';
+import execa from 'execa';
 
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
 
@@ -122,7 +122,10 @@ export class CiStatsReporter {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
-  constructor(private readonly config: Config | undefined, private readonly log: SomeDevLog) {}
+  constructor(
+    private readonly config: Config | undefined,
+    private readonly log: SomeDevLog
+  ) {}
 
   /**
    * Determine if CI_STATS is explicitly disabled by the environment. To determine

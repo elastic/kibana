@@ -27,26 +27,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS, useFetcher, useTheme } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
+import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
-import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
-import { ActionsPopover } from './actions_popover';
 import {
   selectMonitorUpsertStatus,
   selectOverviewState,
   selectServiceLocationsState,
   setFlyoutConfig,
 } from '../../../../state';
-import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
-import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { MonitorStatus } from '../../../common/components/monitor_status';
-import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
 import { fetchSyntheticsMonitor } from '../../../../state/monitor_details/api';
+import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
+import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { MonitorStatus } from '../../../common/components/monitor_status';
+import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
+import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
+import { ActionsPopover } from './actions_popover';
 
 interface Props {
   configId: string;

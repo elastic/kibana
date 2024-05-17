@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { CommonProps } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import type { CommonProps } from '@elastic/eui';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import type { TextValueDisplayProps } from './text_value_display';
 import { TextValueDisplay } from './text_value_display';

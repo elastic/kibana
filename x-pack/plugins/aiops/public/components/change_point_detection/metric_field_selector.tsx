@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useChangePointDetectionControlsContext } from './change_point_detection_context';
+import { i18n } from '@kbn/i18n';
+import React, { type FC, useCallback, useMemo } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
 interface MetricFieldSelectorProps {
   value: string;

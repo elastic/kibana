@@ -7,9 +7,9 @@
 
 import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import {
-  createLifecycleExecutor,
   IRuleDataClient,
   RuleRegistryPluginSetupContract,
+  createLifecycleExecutor,
 } from '@kbn/rule-registry-plugin/server';
 
 type LifecycleRuleExecutorCreator = ReturnType<typeof createLifecycleExecutor>;

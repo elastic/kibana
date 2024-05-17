@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { accessSync, constants } from 'fs';
-import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from '.';
+import { constants, accessSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getConfigDirectory, getConfigPath, getDataPath, getLogsPath } from '.';
 
 expect.addSnapshotSerializer(
   ((rootPath: string = REPO_ROOT, replacement = '<absolute path>') => {

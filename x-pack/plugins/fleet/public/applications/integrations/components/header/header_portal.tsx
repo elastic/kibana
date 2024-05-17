@@ -8,7 +8,7 @@
 import type { AppMountParameters } from '@kbn/core/public';
 import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 

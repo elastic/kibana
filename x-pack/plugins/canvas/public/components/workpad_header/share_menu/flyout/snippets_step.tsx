@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
 import {
-  EuiText,
-  EuiSpacer,
   EuiCode,
   EuiCodeBlock,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC } from 'react';
 
-import { CANVAS, URL, JSON } from '../../../../../i18n/constants';
+import { CANVAS, JSON, URL } from '../../../../../i18n/constants';
 
 import { Clipboard } from '../../../clipboard';
 import { OnCopyFn } from './flyout';

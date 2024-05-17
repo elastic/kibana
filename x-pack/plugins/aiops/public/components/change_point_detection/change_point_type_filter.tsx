@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
 import {
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -18,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import { type ChangePointType, CHANGE_POINT_TYPES } from './constants';
+import React, { type FC, useCallback, useMemo } from 'react';
+import { CHANGE_POINT_TYPES, type ChangePointType } from './constants';
 
 export type ChangePointUIValue = ChangePointType | undefined;
 

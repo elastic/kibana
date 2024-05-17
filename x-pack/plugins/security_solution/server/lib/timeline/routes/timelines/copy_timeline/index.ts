@@ -6,14 +6,14 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { copyTimelineSchema } from '../../../../../../common/api/timeline';
-import { copyTimeline } from '../../../saved_object/timelines';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
+import type { SetupPlugins } from '../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
+import { copyTimeline } from '../../../saved_object/timelines';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 

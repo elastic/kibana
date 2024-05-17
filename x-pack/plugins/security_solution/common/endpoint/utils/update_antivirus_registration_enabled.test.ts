@@ -6,7 +6,7 @@
  */
 
 import { policyFactory } from '../models/policy_config';
-import { AntivirusRegistrationModes, ProtectionModes, type PolicyConfig } from '../types';
+import { AntivirusRegistrationModes, type PolicyConfig, ProtectionModes } from '../types';
 import { updateAntivirusRegistrationEnabled } from './update_antivirus_registration_enabled';
 
 describe('Update antivirus registration enabled', () => {

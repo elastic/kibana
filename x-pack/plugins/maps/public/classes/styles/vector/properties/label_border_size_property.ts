@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { AbstractStyleProperty } from './style_property';
-import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
+import _ from 'lodash';
 import { LABEL_BORDER_SIZES } from '../../../../../common/constants';
-import { LabelBorderSizeOptions } from '../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../common/constants';
-import { StaticSizeProperty } from './static_size_property';
+import { LabelBorderSizeOptions } from '../../../../../common/descriptor_types';
+import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
 import { DynamicSizeProperty } from './dynamic_size_property';
+import { StaticSizeProperty } from './static_size_property';
+import { AbstractStyleProperty } from './style_property';
 
 const SMALL_SIZE = 1 / 16;
 const MEDIUM_SIZE = 1 / 8;

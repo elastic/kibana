@@ -7,14 +7,8 @@
     "id": "cloudLinks",
     "server": false,
     "browser": true,
-    "optionalPlugins": [
-      "cloud",
-      "security",
-      "guidedOnboarding"
-    ],
+    "optionalPlugins": ["cloud", "security", "guidedOnboarding"],
     "requiredBundles": [],
-    "requiredPlugins": [
-      "share"
-    ]
+    "requiredPlugins": ["share"]
   }
 }

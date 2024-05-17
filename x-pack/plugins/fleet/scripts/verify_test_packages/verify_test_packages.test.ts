@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { Logger } from '@kbn/core/server';
 

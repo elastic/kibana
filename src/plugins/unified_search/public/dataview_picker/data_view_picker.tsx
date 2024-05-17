@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import React from 'react';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {

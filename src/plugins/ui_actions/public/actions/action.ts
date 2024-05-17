@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import { Subscription } from 'rxjs';
 
 /**

@@ -12,9 +12,9 @@ import type {
   Ast,
   AstArgument,
   AstArgumentWithMeta,
-  AstWithMeta,
   AstFunction,
   AstFunctionWithMeta,
+  AstWithMeta,
 } from './ast';
 import { isAst, isAstWithMeta } from './ast';
 

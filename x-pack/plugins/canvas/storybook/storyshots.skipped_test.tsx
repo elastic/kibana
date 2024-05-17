@@ -9,20 +9,20 @@
 // @storybook/addon-storyshots is not supported in Jest 27+ https://github.com/storybookjs/storybook/issues/15916
 
 import fs from 'fs';
-import { ReactChildren, createElement } from 'react';
 import path from 'path';
 import moment from 'moment';
+import { ReactChildren, createElement } from 'react';
 import 'moment-timezone';
-import ReactDOM from 'react-dom';
 import { shallow } from 'enzyme';
-import { create, act } from 'react-test-renderer';
+import ReactDOM from 'react-dom';
+import { act, create } from 'react-test-renderer';
 
+import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
+import { createSerializer } from '@emotion/jest';
 import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storyshots';
+import { addSerializer } from 'jest-specific-snapshot';
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
-import { addSerializer } from 'jest-specific-snapshot';
-import { createSerializer } from '@emotion/jest';
-import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
 
 // Several of the renderers, used by the runtime, use jQuery.
 import jquery from 'jquery';

@@ -14,8 +14,8 @@ import type {
 } from '@kbn/core/server';
 import { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
-import { createProfilingEsClient } from './utils/create_profiling_es_client';
 import { ProfilingPluginStartDeps } from './types';
+import { createProfilingEsClient } from './utils/create_profiling_es_client';
 
 export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
 export type ProfilingDataAccessPluginStart = ReturnType<ProfilingDataAccessPlugin['start']>;

@@ -8,13 +8,13 @@
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
-import sinon from 'sinon';
-import moment from 'moment';
 import { TimeRange } from '@kbn/es-query';
-import { AutoRefreshDoneFn, Timefilter } from './timefilter';
+import moment from 'moment';
 import { Subscription } from 'rxjs';
+import sinon from 'sinon';
 import { RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
+import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();

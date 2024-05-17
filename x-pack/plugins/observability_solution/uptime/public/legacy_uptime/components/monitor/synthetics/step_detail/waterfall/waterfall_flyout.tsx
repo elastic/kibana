@@ -10,19 +10,19 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiSpacer,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { Table } from '../../waterfall/components/waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
-import { WaterfallMetadataEntry } from '../../waterfall/types';
 import { OnFlyoutClose } from '../../waterfall/components/use_flyout';
+import { Table } from '../../waterfall/components/waterfall_flyout_table';
+import { WaterfallMetadataEntry } from '../../waterfall/types';
 
 export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',

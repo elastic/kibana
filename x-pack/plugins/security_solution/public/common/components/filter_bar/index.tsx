@@ -7,9 +7,9 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 

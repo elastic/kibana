@@ -6,16 +6,16 @@
  */
 
 import type {
-  PackageInfo,
-  RegistryVarsEntry,
-  RegistryInput,
-  RegistryStream,
-  PackagePolicyConfigRecord,
+  NewPackagePolicy,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
-  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
+  RegistryInput,
+  RegistryStream,
   RegistryStreamWithDataStream,
+  RegistryVarsEntry,
 } from '../types';
 
 import { doesPackageHaveIntegrations } from '.';

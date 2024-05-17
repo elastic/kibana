@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyncJobType, DayOfWeek } from '../../../../../types';
+import { DayOfWeek, SyncJobType } from '../../../../../types';
 
 export const blockedWindow = {
   jobType: 'incremental' as SyncJobType,

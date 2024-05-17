@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiRadioGroup } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
-import { EuiRadioGroup } from '@elastic/eui';
 
 import type { ClosureType } from '../../containers/configure/types';
 import * as i18n from './translations';

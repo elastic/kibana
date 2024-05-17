@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
 import { act, waitFor } from '@testing-library/react';
+import { ReactWrapper, mount } from 'enzyme';
+import React from 'react';
 
 import { AutocompleteFieldMatchAnyComponent } from '.';
-import { getField, fields } from '../fields/index.mock';
-import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
+import { fields, getField } from '../fields/index.mock';
+import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 
 jest.mock('../hooks/use_field_value_autocomplete', () => {
   const actual = jest.requireActual('../hooks/use_field_value_autocomplete');

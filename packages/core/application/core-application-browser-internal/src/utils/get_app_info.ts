@@ -8,10 +8,10 @@
 
 import {
   type App,
-  AppStatus,
   type AppDeepLink,
-  type PublicAppInfo,
+  AppStatus,
   type PublicAppDeepLinkInfo,
+  type PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { DEFAULT_APP_VISIBILITY, DEFAULT_LINK_VISIBILITY } from './constants';
 

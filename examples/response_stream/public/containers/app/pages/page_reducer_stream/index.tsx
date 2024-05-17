@@ -9,13 +9,13 @@
 import React, { useEffect, useState, FC } from 'react';
 
 import {
-  Chart,
-  Settings,
   Axis,
   BarSeries,
+  Chart,
+  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
-  LEGACY_LIGHT_THEME,
+  Settings,
 } from '@elastic/charts';
 
 import {
@@ -31,12 +31,12 @@ import {
 
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 import {
   initialState,
-  resetStream,
   reducerStreamReducer,
+  resetStream,
 } from '../../../../../common/api/reducer_stream/reducer';
-import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 
 import { Page } from '../../../../components/page';
 

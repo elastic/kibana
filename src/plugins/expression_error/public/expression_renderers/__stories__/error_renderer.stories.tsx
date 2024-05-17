@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { getErrorRenderer } from '../error_renderer';
 
 storiesOf('renderers/error', module).add('default', () => {

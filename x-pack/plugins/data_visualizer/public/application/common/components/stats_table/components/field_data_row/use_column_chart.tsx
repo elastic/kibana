@@ -6,23 +6,23 @@
  */
 
 import moment from 'moment';
-import { BehaviorSubject } from 'rxjs';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import useObservable from 'react-use/lib/useObservable';
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
-  isNumericChartData,
-  isOrdinalChartData,
   type ChartData,
   type ChartDataItem,
   type NumericDataItem,
   type OrdinalDataItem,
+  isNumericChartData,
+  isOrdinalChartData,
 } from '@kbn/ml-data-grid';
 
 const NON_AGGREGATABLE = 'non-aggregatable';

@@ -6,13 +6,17 @@
  */
 
 import { CoreStart } from '@kbn/core-lifecycle-server';
+import { type InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { InfraBackendLibs } from './lib/infra_types';
+import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
+import { initInfraMetricsRoute } from './routes/infra';
 import { initGetHostsAnomaliesRoute, initGetK8sAnomaliesRoute } from './routes/infra_ml';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initInventoryViewRoutes } from './routes/inventory_views';
 import { initIpToHostName } from './routes/ip_to_hostname';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import {
+  initGetLogAnalysisIdFormatsRoute,
   initGetLogEntryAnomaliesDatasetsRoute,
   initGetLogEntryAnomaliesRoute,
   initGetLogEntryCategoriesRoute,
@@ -22,21 +26,17 @@ import {
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
-  initGetLogAnalysisIdFormatsRoute,
 } from './routes/log_analysis';
 import { initMetadataRoute } from './routes/metadata';
 import { initMetricsAPIRoute } from './routes/metrics_api';
+import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
-import { initSnapshotRoute } from './routes/snapshot';
-import { initInfraMetricsRoute } from './routes/infra';
-import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
-import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
-import { type InfraServerPluginStartDeps } from './lib/adapters/framework';
+import { initSnapshotRoute } from './routes/snapshot';
 
 export const initInfraServer = (
   libs: InfraBackendLibs,

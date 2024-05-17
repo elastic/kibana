@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { RawRule } from '../../types';
-import { getBeforeSetup, mockedDateString } from '../tests/lib';
-import { createNewAPIKeySet } from './create_new_api_key_set';
-import { RulesClientContext } from '../types';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { RawRule } from '../../types';
+import { getBeforeSetup, mockedDateString } from '../tests/lib';
+import { RulesClientContext } from '../types';
+import { createNewAPIKeySet } from './create_new_api_key_set';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

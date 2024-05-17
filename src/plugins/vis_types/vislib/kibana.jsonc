@@ -7,20 +7,8 @@
     "id": "visTypeVislib",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "charts",
-      "data",
-      "expressions",
-      "visualizations",
-      "fieldFormats"
-    ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "visTypeHeatmap",
-      "visTypeGauge"
-    ]
+    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "fieldFormats"],
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaUtils", "visTypeHeatmap", "visTypeGauge"]
   }
 }

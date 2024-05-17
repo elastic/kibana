@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { FC, useEffect } from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import {
@@ -22,26 +22,26 @@ import {
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../../common/constants';
-import { MappingErrorPage, MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
-import { CertificatesPage } from './pages/certificates';
-import { OverviewPageComponent } from './pages/overview';
-import {
-  SyntheticsCheckSteps,
-  SyntheticsCheckStepsPageHeader,
-  SyntheticsCheckStepsPageRightSideItem,
-} from './pages/synthetics/synthetics_checks';
-import { MonitorPageTitle } from './components/monitor/monitor_title';
-import { UptimeDatePicker } from './components/common/uptime_date_picker';
+import { UptimePageTemplateComponent } from './app/uptime_page_template';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
+import { UptimeDatePicker } from './components/common/uptime_date_picker';
+import { MonitorPageTitle } from './components/monitor/monitor_title';
+import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
+import { MappingErrorPage, MonitorPage, NotFoundPage, SettingsPage, StepDetailPage } from './pages';
+import { CertificatesPage } from './pages/certificates';
+import { OverviewPageComponent } from './pages/overview';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
-import { UptimePageTemplateComponent } from './app/uptime_page_template';
+import {
+  SyntheticsCheckSteps,
+  SyntheticsCheckStepsPageHeader,
+  SyntheticsCheckStepsPageRightSideItem,
+} from './pages/synthetics/synthetics_checks';
 import { apiService } from './state/api/utils';
-import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;

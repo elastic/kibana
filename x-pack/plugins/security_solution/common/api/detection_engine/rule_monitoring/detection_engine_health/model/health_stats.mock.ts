@@ -7,8 +7,8 @@
 
 import type {
   AggregatedMetric,
-  HealthOverviewStats,
   HealthOverviewState,
+  HealthOverviewStats,
   TotalEnabledDisabled,
 } from './health_stats';
 

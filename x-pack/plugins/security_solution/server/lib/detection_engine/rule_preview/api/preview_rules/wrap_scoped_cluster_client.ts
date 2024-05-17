@@ -7,20 +7,20 @@
 
 import type {
   TransportRequestOptions,
-  TransportResult,
   TransportRequestOptionsWithMeta,
   TransportRequestOptionsWithOutMeta,
+  TransportResult,
 } from '@elastic/elasticsearch';
 import type {
+  AggregateName,
   SearchRequest,
   SearchResponse,
-  AggregateName,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
+  SearchRequest as SearchRequestWithBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 
 interface WrapScopedClusterClientOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -62,28 +62,28 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
   // A bunch of overloads to make TypeScript happy
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptionsWithOutMeta
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptionsWithMeta
   ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions

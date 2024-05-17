@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Readable, Writable, Duplex, Transform } from 'stream';
+import { Duplex, Readable, Transform, Writable } from 'stream';
 
 import { createListStream, createPromiseFromStreams, createReduceStream } from '.';
 

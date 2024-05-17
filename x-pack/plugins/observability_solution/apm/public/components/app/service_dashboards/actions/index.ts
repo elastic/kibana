@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LinkDashboard } from './link_dashboard';
-import { GotoDashboard } from './goto_dashboard';
 import { EditDashboard } from './edit_dashboard';
+import { GotoDashboard } from './goto_dashboard';
+import { LinkDashboard } from './link_dashboard';
 
 export { LinkDashboard, GotoDashboard, EditDashboard };

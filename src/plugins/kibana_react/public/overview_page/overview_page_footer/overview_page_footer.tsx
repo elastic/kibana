@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEvent } from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import React, { FC, MouseEvent } from 'react';
 import { useKibana } from '../../context';
 import { useUiSetting$ } from '../../ui_settings';
 

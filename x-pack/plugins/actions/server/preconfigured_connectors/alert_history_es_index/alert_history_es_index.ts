@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertHistoryDefaultIndexName, AlertHistoryEsIndexConnectorId } from '../../../common';
 import { InMemoryConnector } from '../../types';
-import { AlertHistoryEsIndexConnectorId, AlertHistoryDefaultIndexName } from '../../../common';
 
 const EsIndexActionTypeId = '.index';
 export function getAlertHistoryEsIndex(): Readonly<InMemoryConnector> {

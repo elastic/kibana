@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
+import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
 import { NoFindingsStates } from './no_findings_states';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
-import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 
 jest.mock('../common/api/use_setup_status_api', () => ({
   useCspSetupStatusApi: jest.fn(),

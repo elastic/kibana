@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import valid from 'semver/functions/valid';
 import gte from 'semver/functions/gte';
+import valid from 'semver/functions/valid';
 
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type {
   LogMeta,
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { isFunction, mapValues } from 'lodash';
-import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { isFunction, mapValues } from 'lodash';
 import { AttachmentType } from '../../../common/types/domain';
 import type {
   PersistableStateAttachmentAttributes,
   UserCommentAttachmentAttributes,
 } from '../../../common/types/domain';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {

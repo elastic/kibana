@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { allMetadataIsEmpty } from './helpers';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { PartitionedFieldMetadata } from '../types';
+import { allMetadataIsEmpty } from './helpers';
 
 describe('helpers', () => {
   describe('allMetadataIsEmpty', () => {

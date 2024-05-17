@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { getMobileSessions } from './get_mobile_sessions';
-import { getMobileHttpRequests } from './get_mobile_http_requests';
-import { getMobileCrashRate } from './get_mobile_crash_rate';
-import { getMobileAvgLaunchTime } from './get_mobile_average_launch_time';
 import { Maybe } from '../../../typings/common';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getMobileAvgLaunchTime } from './get_mobile_average_launch_time';
+import { getMobileCrashRate } from './get_mobile_crash_rate';
+import { getMobileHttpRequests } from './get_mobile_http_requests';
+import { getMobileSessions } from './get_mobile_sessions';
 
 export interface Timeseries {
   x: number;

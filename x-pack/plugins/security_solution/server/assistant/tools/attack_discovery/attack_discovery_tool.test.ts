@@ -11,10 +11,10 @@ import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-comm
 import type { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import type { DynamicTool } from '@langchain/core/tools';
 
-import { ATTACK_DISCOVERY_TOOL } from './attack_discovery_tool';
 import { mockAnonymizationFields } from '../mock/mock_anonymization_fields';
 import { mockEmptyOpenAndAcknowledgedAlertsQueryResults } from '../mock/mock_empty_open_and_acknowledged_alerts_qery_results';
 import { mockOpenAndAcknowledgedAlertsQueryResults } from '../mock/mock_open_and_acknowledged_alerts_query_results';
+import { ATTACK_DISCOVERY_TOOL } from './attack_discovery_tool';
 
 jest.mock('langchain/chains', () => {
   const mockLLMChain = jest.fn().mockImplementation(() => ({

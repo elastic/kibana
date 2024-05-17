@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { FileJSON } from '@kbn/files-plugin/common';
 import moment from 'moment';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiTitle,
-  EuiDescriptionList,
-  EuiSpacer,
-} from '@elastic/eui';
-import type { FileJSON } from '@kbn/files-plugin/common';
-import { css } from '@emotion/react';
 import type { MyImageMetadata } from '../../common';
-import { FileClients } from '../types';
 import { Image } from '../imports';
+import { FileClients } from '../types';
 
 interface Props {
   file: FileJSON<MyImageMetadata>;

@@ -36,15 +36,15 @@ import { FieldsList } from '../../../../components/mappings_editor/components/do
 import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 import { MultipleMappingsWarning } from '../../../../components/mappings_editor/components/multiple_mappings_warning';
 import { deNormalize, searchFields } from '../../../../components/mappings_editor/lib';
+import {
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
+} from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
 import {
   useDispatch,
   useMappingsState,
 } from '../../../../components/mappings_editor/mappings_state_context';
-import {
-  getFieldsFromState,
-  getFieldsMatchingFilterFromState,
-} from '../../../../components/mappings_editor/lib';
 import { NormalizedFields, State } from '../../../../components/mappings_editor/types';
 import { MappingsFilter } from './details_page_filter_fields';
 
@@ -52,9 +52,9 @@ import { useMappingsStateListener } from '../../../../components/mappings_editor
 import { documentationService } from '../../../../services';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
+import { parseMappings } from '../../../../shared/parse_mappings';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
-import { parseMappings } from '../../../../shared/parse_mappings';
 
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;

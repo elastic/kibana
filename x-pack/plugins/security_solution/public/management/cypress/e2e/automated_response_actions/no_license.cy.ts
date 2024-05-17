@@ -6,13 +6,13 @@
  */
 
 import { navigateToAlertsList } from '../../screens/alerts';
-import { closeAllToasts } from '../../tasks/toasts';
-import { fillUpNewRule } from '../../tasks/response_actions';
-import { login, ROLE } from '../../tasks/login';
-import { generateRandomStringName } from '../../tasks/utils';
-import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
+import { ROLE, login } from '../../tasks/login';
+import { fillUpNewRule } from '../../tasks/response_actions';
+import { closeAllToasts } from '../../tasks/toasts';
+import { generateRandomStringName } from '../../tasks/utils';
+import type { ReturnTypeFromChainable } from '../../types';
 
 describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } }, () => {
   describe('User cannot use endpoint action in form', () => {

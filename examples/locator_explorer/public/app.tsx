@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import {
-  EuiPage,
   EuiButton,
+  EuiFieldText,
+  EuiLink,
+  EuiPage,
   EuiPageBody,
-  EuiPageTemplate,
+  EuiPageHeader,
   EuiPageSection,
+  EuiPageTemplate,
   EuiSpacer,
   EuiText,
-  EuiFieldText,
-  EuiPageHeader,
-  EuiLink,
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
+  HELLO_LOCATOR,
   HelloLocatorV1Params,
   HelloLocatorV2Params,
-  HELLO_LOCATOR,
 } from '@kbn/locator-examples-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 
 interface Props {
   share: SharePluginSetup;

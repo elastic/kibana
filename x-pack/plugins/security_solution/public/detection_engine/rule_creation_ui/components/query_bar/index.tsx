@@ -6,22 +6,22 @@
  */
 
 import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Subscription } from 'rxjs';
 
-import type { BrowserFields } from '../../../../common/containers/source';
-import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
-import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
 import { QueryBar } from '../../../../common/components/query_bar';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { TimelineModel } from '../../../../timelines/store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
+import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
+import type { TimelineModel } from '../../../../timelines/store/model';
 import * as i18n from './translations';
 
 export interface FieldValueQueryBar {

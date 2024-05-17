@@ -10,10 +10,10 @@ import { Stream } from 'stream';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../../types';
-import { exportListItemRequestQuery } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
 import { getListClient } from '..';
+import { exportListItemRequestQuery } from '../../../common/api';
+import type { ListsPluginRouter } from '../../types';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
 
 export const exportListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned

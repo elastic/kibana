@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCallOut, EuiTextColor, EuiSwitch, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { get } from 'lodash';
+import React, { FunctionComponent } from 'react';
 
 import { useFormData, useKibana } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { useConfiguration, UseField } from '../../../form';
+import { UseField, useConfiguration } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, DescribedFormRow } from '../..';
+import { DescribedFormRow, LearnMoreLink } from '../..';
 
+import { Phase } from '../phase';
 import {
+  DownsampleField,
   ForcemergeField,
   IndexPriorityField,
-  SearchableSnapshotField,
   ReadonlyField,
+  SearchableSnapshotField,
   ShrinkField,
-  DownsampleField,
 } from '../shared_fields';
-import { Phase } from '../phase';
 
-import { useRolloverValueRequiredValidation } from './use_rollover_value_required_validation';
 import {
-  MaxPrimaryShardSizeField,
-  MaxPrimaryShardDocsField,
   MaxAgeField,
   MaxDocumentCountField,
   MaxIndexSizeField,
+  MaxPrimaryShardDocsField,
+  MaxPrimaryShardSizeField,
 } from './components';
+import { useRolloverValueRequiredValidation } from './use_rollover_value_required_validation';
 
 const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 

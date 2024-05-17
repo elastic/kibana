@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import sinon from 'sinon';
 import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { Alert } from '../alert';
+import { AlertInstanceContext, AlertInstanceState } from '../types';
+import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
 
 const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
 

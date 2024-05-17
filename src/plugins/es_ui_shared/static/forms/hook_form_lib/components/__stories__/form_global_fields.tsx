@@ -1,3 +1,4 @@
+import { EuiButton, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +7,10 @@
  * Side Public License, v 1.
  */
 import React, { useState, useContext, createContext, FC, PropsWithChildren } from 'react';
-import { EuiSpacer, EuiText, EuiTextColor, EuiButton } from '@elastic/eui';
 
-import { TextField, NumericField } from '../../../components';
-import { FieldHook } from '../../types';
+import { NumericField, TextField } from '../../../components';
 import { useForm } from '../../hooks';
+import { FieldHook } from '../../types';
 import { Form } from '../form';
 import { UseMultiFields } from '../use_multi_fields';
 import { submitForm } from './form_utils';

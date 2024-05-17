@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import React from 'react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { HostInfo } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';

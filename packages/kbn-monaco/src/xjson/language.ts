@@ -8,11 +8,11 @@
 
 // This file contains a lot of single setup logic for registering a language globally
 
-import { monaco } from '../monaco_imports';
-import { WorkerProxyService } from '../ace_migration/worker_proxy';
 import { setupWorker } from '../ace_migration/setup_worker';
-import { XJsonWorker } from './worker';
+import { WorkerProxyService } from '../ace_migration/worker_proxy';
+import { monaco } from '../monaco_imports';
 import { ID } from './constants';
+import { XJsonWorker } from './worker';
 
 const OWNER = 'XJSON_GRAMMAR_CHECKER';
 const wps = new WorkerProxyService<XJsonWorker>();

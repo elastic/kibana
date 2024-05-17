@@ -8,8 +8,8 @@
 import type { PackageInfo } from '../../../types';
 
 import {
-  getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  getTemplateUrlFromPackageInfo,
 } from './get_template_url_from_package_info';
 
 describe('getTemplateUrlFromPackageInfo', () => {

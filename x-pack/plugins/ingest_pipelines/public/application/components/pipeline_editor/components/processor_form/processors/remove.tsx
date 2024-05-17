@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 import {
+  ComboBoxField,
   FIELD_TYPES,
   UseField,
-  ComboBoxField,
   fieldValidators,
 } from '../../../../../../shared_imports';
 

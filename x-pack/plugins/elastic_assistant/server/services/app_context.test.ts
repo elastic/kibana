@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { appContextService, ElasticAssistantAppContext } from './app_context';
+import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AssistantTool } from '../types';
-import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { ElasticAssistantAppContext, appContextService } from './app_context';
 
 // Mock Logger
 const mockLogger = loggerMock.create();

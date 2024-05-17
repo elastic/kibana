@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { has } from 'lodash';
 import type { Query } from '@kbn/es-query';
+import { has } from 'lodash';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

@@ -8,9 +8,9 @@
 
 import Path from 'path';
 
+import { getLogLevelFlagsHelp } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import dedent from 'dedent';
-import { getLogLevelFlagsHelp } from '@kbn/tooling-log';
 
 import { Command } from './run_with_commands';
 

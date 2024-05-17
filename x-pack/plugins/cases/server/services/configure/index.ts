@@ -13,16 +13,25 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { decodeOrThrow } from '../../common/runtime_types';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
+import type {
+  ConfigurationPersistedAttributes,
+  ConfigurationSavedObjectTransformed,
+  ConfigurationTransformedAttributes,
+} from '../../common/types/configure';
 import {
-  transformFieldsToESModel,
-  transformESConnectorToExternalModel,
-  transformESConnectorOrUseDefault,
-} from '../transform';
+  ConfigurationPartialAttributesRt,
+  ConfigurationTransformedAttributesRt,
+} from '../../common/types/configure';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
+import {
+  transformESConnectorOrUseDefault,
+  transformESConnectorToExternalModel,
+  transformFieldsToESModel,
+} from '../transform';
 import type {
   DeleteCaseConfigureArgs,
   FindCaseConfigureArgs,
@@ -30,15 +39,6 @@ import type {
   PatchCaseConfigureArgs,
   PostCaseConfigureArgs,
 } from './types';
-import type {
-  ConfigurationSavedObjectTransformed,
-  ConfigurationTransformedAttributes,
-  ConfigurationPersistedAttributes,
-} from '../../common/types/configure';
-import {
-  ConfigurationPartialAttributesRt,
-  ConfigurationTransformedAttributesRt,
-} from '../../common/types/configure';
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}

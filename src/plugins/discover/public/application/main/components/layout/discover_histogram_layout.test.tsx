@@ -6,12 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { BehaviorSubject, of } from 'rxjs';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
+import { createSearchSessionMock } from '../../../../__mocks__/search_session';
+import { discoverServiceMock } from '../../../../__mocks__/services';
+import { PanelsToggle } from '../../../../components/panels_toggle';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -19,22 +33,8 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../state_management/discover_data_state_container';
-import { discoverServiceMock } from '../../../../__mocks__/services';
-import { FetchStatus, SidebarToggleState } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { act } from 'react-dom/test-utils';
-import { PanelsToggle } from '../../../../components/panels_toggle';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });

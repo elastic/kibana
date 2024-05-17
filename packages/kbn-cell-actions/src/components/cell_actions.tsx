@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isArray } from 'lodash/fp';
-import { InlineActions } from './inline_actions';
-import { HoverActionsPopover } from './hover_actions_popover';
+import React, { useMemo, useRef } from 'react';
 import { CellActionsMode } from '../constants';
-import type { CellActionsProps, CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext, CellActionsProps } from '../types';
+import { HoverActionsPopover } from './hover_actions_popover';
+import { InlineActions } from './inline_actions';
 
 export const CellActions: React.FC<CellActionsProps> = ({
   data,

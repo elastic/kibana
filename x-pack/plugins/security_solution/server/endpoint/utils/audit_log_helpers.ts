@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { TransportResult } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@kbn/data-plugin/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
-import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import type {
   ActivityLog,
   EndpointAction,
   LogsEndpointAction,
 } from '../../../common/endpoint/types';
-import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
-import { getDateFilters } from '../services/actions/utils';
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import { ACTION_REQUEST_INDICES, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
+import { getDateFilters } from '../services/actions/utils';
+import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 
 const queryOptions = {
   headers: {

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { AppPluginStartDependencies } from './types';
-import { OsqueryApp } from './components/app';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
+import { OsqueryApp } from './components/app';
 import { queryClient } from './query_client';
 import { KibanaRenderContextProvider } from './shared_imports';
+import type { AppPluginStartDependencies } from './types';
 
 export const renderApp = (
   core: CoreStart,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { useCallback, useEffect, useState } from 'react';
 
 interface TestQueryResponse {
   result: string | null;

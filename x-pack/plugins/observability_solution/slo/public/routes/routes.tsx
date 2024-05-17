@@ -6,10 +6,6 @@
  */
 
 import React from 'react';
-import { SlosPage } from '../pages/slos/slos';
-import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
-import { SloDetailsPage } from '../pages/slo_details/slo_details';
-import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   SLOS_OUTDATED_DEFINITIONS_PATH,
   SLOS_PATH,
@@ -19,8 +15,12 @@ import {
   SLO_EDIT_PATH,
   SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
+import { SloDetailsPage } from '../pages/slo_details/slo_details';
+import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
+import { SlosPage } from '../pages/slos/slos';
+import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 
 export const getRoutes = (
   isServerless?: boolean

@@ -9,10 +9,10 @@ import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 
 import { omit } from 'lodash';
 import type { ProductFeaturesService } from '../../../../server/lib/product_features_service';
-import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
-import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
+import type { EndpointAuthz } from '../../types/authz';
+import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 
 /**
  * Checks to see if a given Kibana privilege was granted.

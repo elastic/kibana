@@ -6,7 +6,7 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { MapsAppTileMapLocatorParams, MapsAppTileMapLocatorDependencies } from './types';
+import type { MapsAppTileMapLocatorDependencies, MapsAppTileMapLocatorParams } from './types';
 
 export const MAPS_APP_TILE_MAP_LOCATOR = 'MAPS_APP_TILE_MAP_LOCATOR' as const;
 

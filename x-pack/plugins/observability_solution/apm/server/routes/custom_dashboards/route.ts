@@ -6,14 +6,14 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { saveServiceDashbord } from './save_service_dashboard';
 import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
-import { deleteServiceDashboard } from './remove_service_dashboard';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { rangeRt } from '../default_api_types';
 import { getCustomDashboards } from './get_custom_dashboards';
 import { getServicesWithDashboards } from './get_services_with_dashboards';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { rangeRt } from '../default_api_types';
+import { deleteServiceDashboard } from './remove_service_dashboard';
+import { saveServiceDashbord } from './save_service_dashboard';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/custom-dashboard',

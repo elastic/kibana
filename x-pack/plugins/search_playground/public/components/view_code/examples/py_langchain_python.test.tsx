@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import { ES_CLIENT_DETAILS } from '../view_code_flyout';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { render } from '@testing-library/react';
 import { ChatForm } from '../../../types';
+import { ES_CLIENT_DETAILS } from '../view_code_flyout';
 import { LANGCHAIN_PYTHON } from './py_langchain_python';
 
 describe('PY_LANGCHAIN function', () => {

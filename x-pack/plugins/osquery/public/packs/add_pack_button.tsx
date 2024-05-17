@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 
 interface AddPackButtonComponentProps {

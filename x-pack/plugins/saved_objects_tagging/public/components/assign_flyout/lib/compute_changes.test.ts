@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createAssignableObject } from '../../../../common/test_utils';
 import { getKey } from '../../../../common/assignments';
-import { computeRequiredChanges } from './compute_changes';
+import { createAssignableObject } from '../../../../common/test_utils';
 import { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
+import { computeRequiredChanges } from './compute_changes';
 
 describe('computeRequiredChanges', () => {
   it('returns objects that need to be assigned', () => {

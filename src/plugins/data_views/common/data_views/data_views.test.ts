@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { set } from '@kbn/safer-lodash-set';
 import { defaults, get } from 'lodash';
-import { DataViewsService, DataView, DataViewLazy } from '.';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { DataView, DataViewLazy, DataViewsService } from '.';
 
-import {
-  UiSettingsCommon,
-  PersistenceAPI,
-  SavedObject,
-  DataViewSpec,
-  IDataViewsApiClient,
-} from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 import { DataViewMissingIndices } from '../lib';
+import {
+  DataViewSpec,
+  IDataViewsApiClient,
+  PersistenceAPI,
+  SavedObject,
+  UiSettingsCommon,
+} from '../types';
 
 const createFieldsFetcher = () =>
   ({
     getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: ['test'] })),
-  } as any as IDataViewsApiClient);
+  }) as any as IDataViewsApiClient;
 
 const fieldFormats = fieldFormatsMock;
 let object: any = {};

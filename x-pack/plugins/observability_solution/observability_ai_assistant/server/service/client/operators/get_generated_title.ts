@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { catchError, last, map, Observable, of, tap } from 'rxjs';
 import { Logger } from '@kbn/logging';
+import { Observable, catchError, last, map, of, tap } from 'rxjs';
 import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
+import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { hideTokenCountEvents } from './hide_token_count_events';
-import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
 
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,

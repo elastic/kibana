@@ -26,9 +26,7 @@
         "tags": [],
         "label": "getImageData",
         "description": [],
-        "signature": [
-          "() => Blob"
-        ],
+        "signature": ["() => Blob"],
         "path": "packages/shared-ux/file/image/mocks/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,

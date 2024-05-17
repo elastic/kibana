@@ -77,9 +77,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -91,9 +89,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -109,9 +105,7 @@
             "tags": [],
             "label": "has",
             "description": [],
-            "signature": [
-              "(key: string | string[]) => boolean"
-            ],
+            "signature": ["(key: string | string[]) => boolean"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -123,9 +117,7 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": [
-                  "string | string[]"
-                ],
+                "signature": ["string | string[]"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -141,9 +133,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "(key: string | string[], defaultValue?: any) => any"
-            ],
+            "signature": ["(key: string | string[], defaultValue?: any) => any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -155,9 +145,7 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": [
-                  "string | string[]"
-                ],
+                "signature": ["string | string[]"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -170,9 +158,7 @@
                 "tags": [],
                 "label": "defaultValue",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -188,9 +174,7 @@
             "tags": [],
             "label": "getAll",
             "description": [],
-            "signature": [
-              "() => any"
-            ],
+            "signature": ["() => any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -218,9 +202,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -311,9 +293,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "signature": [
-              "(name: string) => boolean"
-            ],
+            "signature": ["(name: string) => boolean"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -325,9 +305,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -343,9 +321,7 @@
             "tags": [],
             "label": "has",
             "description": [],
-            "signature": [
-              "(name: string) => boolean"
-            ],
+            "signature": ["(name: string) => boolean"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -357,9 +333,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -401,9 +375,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -456,9 +428,7 @@
             "tags": [],
             "label": "parsed",
             "description": [],
-            "signature": [
-              "node_modules/@types/semver/classes/semver"
-            ],
+            "signature": ["node_modules/@types/semver/classes/semver"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -470,9 +440,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -484,9 +452,7 @@
                 "tags": [],
                 "label": "version",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -502,9 +468,7 @@
             "tags": [],
             "label": "toJSON",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -518,9 +482,7 @@
             "tags": [],
             "label": "toString",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -536,9 +498,7 @@
             "description": [
               "\nDetermine if the ES version matches a semver range, like >=7 or ^8.1.0"
             ],
-            "signature": [
-              "(range: string) => boolean"
-            ],
+            "signature": ["(range: string) => boolean"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -550,9 +510,7 @@
                 "tags": [],
                 "label": "range",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -570,9 +528,7 @@
             "description": [
               "\nDetermine if the ES version matches a specific version, ignores things like -SNAPSHOT"
             ],
-            "signature": [
-              "(version: string) => boolean | null"
-            ],
+            "signature": ["(version: string) => boolean | null"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -584,9 +540,7 @@
                 "tags": [],
                 "label": "version",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -616,9 +570,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -698,9 +650,7 @@
             "tags": [],
             "label": "run",
             "description": [],
-            "signature": [
-              "(abortSignal?: AbortSignal | undefined) => Promise<any>"
-            ],
+            "signature": ["(abortSignal?: AbortSignal | undefined) => Promise<any>"],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -712,9 +662,7 @@
                 "tags": [],
                 "label": "abortSignal",
                 "description": [],
-                "signature": [
-                  "AbortSignal | undefined"
-                ],
+                "signature": ["AbortSignal | undefined"],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -746,9 +694,7 @@
             "tags": [],
             "label": "simulateMochaDryRun",
             "description": [],
-            "signature": [
-              "(mocha: any) => number"
-            ],
+            "signature": ["(mocha: any) => number"],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -760,9 +706,7 @@
                 "tags": [],
                 "label": "mocha",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -802,9 +746,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -816,9 +758,7 @@
                 "tags": [],
                 "label": "ctx",
                 "description": [],
-                "signature": [
-                  "ProviderContext"
-                ],
+                "signature": ["ProviderContext"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -848,9 +788,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": [
-              "KbnClientStatus"
-            ],
+            "signature": ["KbnClientStatus"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -862,9 +800,7 @@
             "tags": [],
             "label": "plugins",
             "description": [],
-            "signature": [
-              "KbnClientPlugins"
-            ],
+            "signature": ["KbnClientPlugins"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -876,9 +812,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "KbnClientVersion"
-            ],
+            "signature": ["KbnClientVersion"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -890,9 +824,7 @@
             "tags": [],
             "label": "savedObjects",
             "description": [],
-            "signature": [
-              "KbnClientSavedObjects"
-            ],
+            "signature": ["KbnClientSavedObjects"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -904,9 +836,7 @@
             "tags": [],
             "label": "spaces",
             "description": [],
-            "signature": [
-              "KbnClientSpaces"
-            ],
+            "signature": ["KbnClientSpaces"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -918,9 +848,7 @@
             "tags": [],
             "label": "uiSettings",
             "description": [],
-            "signature": [
-              "KbnClientUiSettings"
-            ],
+            "signature": ["KbnClientUiSettings"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -932,9 +860,7 @@
             "tags": [],
             "label": "importExport",
             "description": [],
-            "signature": [
-              "KbnClientImportExport"
-            ],
+            "signature": ["KbnClientImportExport"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -948,9 +874,7 @@
             "description": [
               "\nBasic Kibana server client that implements common behaviors for talking\nto the Kibana server from dev tooling."
             ],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -985,9 +909,7 @@
             "type": "Function",
             "tags": [],
             "label": "request",
-            "description": [
-              "\nMake a direct request to the Kibana server"
-            ],
+            "description": ["\nMake a direct request to the Kibana server"],
             "signature": [
               "<T>(options: ",
               "ReqOptions",
@@ -1006,9 +928,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "ReqOptions"
-                ],
+                "signature": ["ReqOptions"],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1024,9 +944,7 @@
             "tags": [],
             "label": "resolveUrl",
             "description": [],
-            "signature": [
-              "(relativeUrl: string) => string"
-            ],
+            "signature": ["(relativeUrl: string) => string"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1038,9 +956,7 @@
                 "tags": [],
                 "label": "relativeUrl",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1080,10 +996,7 @@
             "tags": [],
             "label": "axiosError",
             "description": [],
-            "signature": [
-              "AxiosError",
-              "<unknown, any> | undefined"
-            ],
+            "signature": ["AxiosError", "<unknown, any> | undefined"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1095,9 +1008,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1109,9 +1020,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1124,9 +1033,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1155,9 +1062,7 @@
             "type": "Object",
             "tags": [],
             "label": "beforeTests",
-            "description": [
-              "lifecycle phase that will run handlers once before tests execute"
-            ],
+            "description": ["lifecycle phase that will run handlers once before tests execute"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1217,9 +1122,7 @@
             "type": "Object",
             "tags": [],
             "label": "beforeTestSuite",
-            "description": [
-              "lifecycle phase that runs handlers before each suite"
-            ],
+            "description": ["lifecycle phase that runs handlers before each suite"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1248,9 +1151,7 @@
             "type": "Object",
             "tags": [],
             "label": "beforeEachTest",
-            "description": [
-              "lifecycle phase that runs handlers before each test"
-            ],
+            "description": ["lifecycle phase that runs handlers before each test"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1279,9 +1180,7 @@
             "type": "Object",
             "tags": [],
             "label": "afterTestSuite",
-            "description": [
-              "lifecycle phase that runs handlers after each suite"
-            ],
+            "description": ["lifecycle phase that runs handlers after each suite"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1310,9 +1209,7 @@
             "type": "Object",
             "tags": [],
             "label": "testFailure",
-            "description": [
-              "lifecycle phase that runs handlers after a test fails"
-            ],
+            "description": ["lifecycle phase that runs handlers after a test fails"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1341,9 +1238,7 @@
             "type": "Object",
             "tags": [],
             "label": "testHookFailure",
-            "description": [
-              "lifecycle phase that runs handlers after a hook fails"
-            ],
+            "description": ["lifecycle phase that runs handlers after a hook fails"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1372,9 +1267,7 @@
             "type": "Object",
             "tags": [],
             "label": "cleanup",
-            "description": [
-              "lifecycle phase that runs handlers at the very end of execution"
-            ],
+            "description": ["lifecycle phase that runs handlers at the very end of execution"],
             "signature": [
               {
                 "pluginId": "@kbn/test",
@@ -1396,9 +1289,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1469,10 +1360,7 @@
             "tags": [],
             "label": "before$",
             "description": [],
-            "signature": [
-              "Observable",
-              "<void>"
-            ],
+            "signature": ["Observable", "<void>"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1484,10 +1372,7 @@
             "tags": [],
             "label": "after$",
             "description": [],
-            "signature": [
-              "Observable",
-              "<void>"
-            ],
+            "signature": ["Observable", "<void>"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1499,9 +1384,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1513,9 +1396,7 @@
                 "tags": [],
                 "label": "sub",
                 "description": [],
-                "signature": [
-                  "Subscription"
-                ],
+                "signature": ["Subscription"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1539,9 +1420,7 @@
                     "tags": [],
                     "label": "singular",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1558,9 +1437,7 @@
             "tags": [],
             "label": "add",
             "description": [],
-            "signature": [
-              "(fn: (...args: Args) => void | Promise<void>) => void"
-            ],
+            "signature": ["(fn: (...args: Args) => void | Promise<void>) => void"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1572,9 +1449,7 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": [
-                  "(...args: Args) => void | Promise<void>"
-                ],
+                "signature": ["(...args: Args) => void | Promise<void>"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1590,11 +1465,7 @@
             "tags": [],
             "label": "addSub",
             "description": [],
-            "signature": [
-              "(sub: ",
-              "Subscription",
-              ") => void"
-            ],
+            "signature": ["(sub: ", "Subscription", ") => void"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1606,9 +1477,7 @@
                 "tags": [],
                 "label": "sub",
                 "description": [],
-                "signature": [
-                  "Subscription"
-                ],
+                "signature": ["Subscription"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1624,9 +1493,7 @@
             "tags": [],
             "label": "trigger",
             "description": [],
-            "signature": [
-              "(...args: Args) => Promise<void>"
-            ],
+            "signature": ["(...args: Args) => Promise<void>"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1638,9 +1505,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": [
-                  "Args"
-                ],
+                "signature": ["Args"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1658,9 +1523,7 @@
         "type": "Class",
         "tags": [],
         "label": "SamlSessionManager",
-        "description": [
-          "\nManages cookies associated with user roles"
-        ],
+        "description": ["\nManages cookies associated with user roles"],
         "path": "packages/kbn-test/src/auth/session_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1672,9 +1535,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1707,9 +1568,7 @@
                 "tags": [],
                 "label": "rolesFilename",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-test/src/auth/session_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1725,9 +1584,7 @@
             "tags": [],
             "label": "getApiCredentialsForRole",
             "description": [],
-            "signature": [
-              "(role: string) => Promise<{ Cookie: string; }>"
-            ],
+            "signature": ["(role: string) => Promise<{ Cookie: string; }>"],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1739,9 +1596,7 @@
                 "tags": [],
                 "label": "role",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/auth/session_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1757,9 +1612,7 @@
             "tags": [],
             "label": "getSessionCookieForRole",
             "description": [],
-            "signature": [
-              "(role: string) => Promise<string>"
-            ],
+            "signature": ["(role: string) => Promise<string>"],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1771,9 +1624,7 @@
                 "tags": [],
                 "label": "role",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/auth/session_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1789,9 +1640,7 @@
             "tags": [],
             "label": "getUserData",
             "description": [],
-            "signature": [
-              "(role: string) => Promise<{ email: string; fullname: string; }>"
-            ],
+            "signature": ["(role: string) => Promise<{ email: string; fullname: string; }>"],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1803,9 +1652,7 @@
                 "tags": [],
                 "label": "role",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/auth/session_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1840,9 +1687,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1855,9 +1700,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1870,9 +1713,7 @@
             "tags": [],
             "label": "promiseForValue",
             "description": [],
-            "signature": [
-              "Promise<T>"
-            ],
+            "signature": ["Promise<T>"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2117,9 +1958,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options"
-            ],
+            "signature": ["Options"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2195,9 +2034,7 @@
         "tags": [],
         "label": "escapeCdata",
         "description": [],
-        "signature": [
-          "(input: string) => string"
-        ],
+        "signature": ["(input: string) => string"],
         "path": "packages/kbn-test/src/mocha/xml.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2209,9 +2046,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-test/src/mocha/xml.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2228,9 +2063,7 @@
         "tags": [],
         "label": "findTestPluginPaths",
         "description": [],
-        "signature": [
-          "(dirs: string | string[]) => string[]"
-        ],
+        "signature": ["(dirs: string | string[]) => string[]"],
         "path": "packages/kbn-test/src/find_test_plugin_paths.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2242,9 +2075,7 @@
             "tags": [],
             "label": "dirs",
             "description": [],
-            "signature": [
-              "string | string[]"
-            ],
+            "signature": ["string | string[]"],
             "path": "packages/kbn-test/src/find_test_plugin_paths.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2263,9 +2094,7 @@
         "description": [
           "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ES serverless container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
         ],
-        "signature": [
-          "(hostPath: string) => string"
-        ],
+        "signature": ["(hostPath: string) => string"],
         "path": "packages/kbn-es/src/utils/docker.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2277,9 +2106,7 @@
             "tags": [],
             "label": "hostPath",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-es/src/utils/docker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2316,9 +2143,7 @@
             "tags": [],
             "label": "rawFlags",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2331,9 +2156,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2352,9 +2175,7 @@
         "description": [
           "\nParse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended\nin a subsequent FTR config"
         ],
-        "signature": [
-          "(rawFlags: string[]) => unknown[]"
-        ],
+        "signature": ["(rawFlags: string[]) => unknown[]"],
         "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2366,9 +2187,7 @@
             "tags": [],
             "label": "rawFlags",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2382,16 +2201,10 @@
         "parentPluginId": "@kbn/test",
         "id": "def-common.getUrl",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "getUrl",
-        "description": [
-          "\nConverts a config and a pathname to a url"
-        ],
-        "signature": [
-          "(config: UrlParam, app: UrlParam) => string"
-        ],
+        "description": ["\nConverts a config and a pathname to a url"],
+        "signature": ["(config: UrlParam, app: UrlParam) => string"],
         "path": "packages/kbn-test/src/jest/get_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2405,9 +2218,7 @@
             "description": [
               "A url config\nexample:\n{\nprotocol: 'http',\nhostname: 'localhost',\nport: 9220,\nauth: kibanaTestUser.username + ':' + kibanaTestUser.password\n}"
             ],
-            "signature": [
-              "UrlParam"
-            ],
+            "signature": ["UrlParam"],
             "path": "packages/kbn-test/src/jest/get_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2422,9 +2233,7 @@
             "description": [
               "The params to append\nexample:\n{\npathname: 'app/kibana',\nhash: '/discover'\n}"
             ],
-            "signature": [
-              "UrlParam"
-            ],
+            "signature": ["UrlParam"],
             "path": "packages/kbn-test/src/jest/get_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2521,9 +2330,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2536,9 +2343,7 @@
             "tags": [],
             "label": "settingOverrides",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2551,9 +2356,7 @@
             "tags": [],
             "label": "extendSettings",
             "description": [],
-            "signature": [
-              "(vars: any) => any"
-            ],
+            "signature": ["(vars: any) => any"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2570,9 +2373,7 @@
         "tags": [],
         "label": "runCheckFtrCodeOwnersCli",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-test/src/functional_test_runner/run_check_ftr_code_owners.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2587,9 +2388,7 @@
         "tags": [],
         "label": "runCheckFtrConfigsCli",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2604,9 +2403,7 @@
         "tags": [],
         "label": "runCheckJestConfigsCli",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-test/src/jest/run_check_jest_configs_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2621,9 +2418,7 @@
         "tags": [],
         "label": "runElasticsearch",
         "description": [],
-        "signature": [
-          "(options: RunElasticsearchOptions) => Promise<() => Promise<void>>"
-        ],
+        "signature": ["(options: RunElasticsearchOptions) => Promise<() => Promise<void>>"],
         "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2635,9 +2430,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "RunElasticsearchOptions"
-            ],
+            "signature": ["RunElasticsearchOptions"],
             "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2654,9 +2447,7 @@
         "tags": [],
         "label": "runFtrCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-test/src/functional_test_runner/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2671,9 +2462,7 @@
         "tags": [],
         "label": "runJest",
         "description": [],
-        "signature": [
-          "(configName: string) => void"
-        ],
+        "signature": ["(configName: string) => void"],
         "path": "packages/kbn-test/src/jest/run.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2685,9 +2474,7 @@
             "tags": [],
             "label": "configName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-test/src/jest/run.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2704,9 +2491,7 @@
         "tags": [],
         "label": "runKbnArchiverCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-test/src/kbn_archiver_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2802,9 +2587,7 @@
                 "tags": [],
                 "label": "installDir",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2816,9 +2599,7 @@
                 "tags": [],
                 "label": "extraKbnOpts",
                 "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
+                "signature": ["string[] | undefined"],
                 "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2830,9 +2611,7 @@
                 "tags": [],
                 "label": "logsDir",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2844,9 +2623,7 @@
                 "tags": [],
                 "label": "onEarlyExit",
                 "description": [],
-                "signature": [
-                  "((msg: string) => void) | undefined"
-                ],
+                "signature": ["((msg: string) => void) | undefined"],
                 "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2858,9 +2635,7 @@
                     "tags": [],
                     "label": "msg",
                     "description": [],
-                    "signature": [
-                      "string"
-                    ],
+                    "signature": ["string"],
                     "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -2876,9 +2651,7 @@
                 "tags": [],
                 "label": "inspect",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2895,9 +2668,7 @@
         "type": "Function",
         "tags": [],
         "label": "runTests",
-        "description": [
-          "\nRun servers and tests for each config"
-        ],
+        "description": ["\nRun servers and tests for each config"],
         "signature": [
           "(log: ",
           {
@@ -2976,9 +2747,7 @@
         "tags": [],
         "label": "runTestsCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-test/src/functional_tests/run_tests/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2993,9 +2762,7 @@
         "tags": [],
         "label": "setupJUnitReportGeneration",
         "description": [],
-        "signature": [
-          "(runner: any, options: {}) => void"
-        ],
+        "signature": ["(runner: any, options: {}) => void"],
         "path": "packages/kbn-test/src/mocha/junit_report_generation.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -3007,9 +2774,7 @@
             "tags": [],
             "label": "runner",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-test/src/mocha/junit_report_generation.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -3022,9 +2787,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "{}"
-            ],
+            "signature": ["{}"],
             "path": "packages/kbn-test/src/mocha/junit_report_generation.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -3118,12 +2881,8 @@
         "type": "Function",
         "tags": [],
         "label": "startServersCli",
-        "description": [
-          "\nStart servers"
-        ],
-        "signature": [
-          "() => void"
-        ],
+        "description": ["\nStart servers"],
+        "signature": ["() => void"],
         "path": "packages/kbn-test/src/functional_tests/start_servers/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3152,9 +2911,7 @@
             "tags": [],
             "label": "strings",
             "description": [],
-            "signature": [
-              "TemplateStringsArray"
-            ],
+            "signature": ["TemplateStringsArray"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3167,9 +2924,7 @@
             "tags": [],
             "label": "values",
             "description": [],
-            "signature": [
-              "(string | number | boolean)[]"
-            ],
+            "signature": ["(string | number | boolean)[]"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3211,9 +2966,7 @@
             "description": [
               "\nServices that are initialized async are not ready before the tests execute, so you might need\nto call `init()` and await the promise it returns before interacting with the service"
             ],
-            "signature": [
-              "() => Promise<T>"
-            ],
+            "signature": ["() => Promise<T>"],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3241,9 +2994,7 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3255,9 +3006,7 @@
             "tags": [],
             "label": "clusterName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3271,9 +3020,7 @@
             "description": [
               "\nPath to data archive snapshot to run Elasticsearch with.\nTo prepare the snapshot:\n- run Elasticsearch server\n- index necessary data\n- stop Elasticsearch server\n- go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}\n- archive data folder: zip -r my_archive.zip data"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3287,9 +3034,7 @@
             "description": [
               "\nElasticsearch configuration options. These are key/value pairs formatted as:\n`['key.1=val1', 'key.2=val2']`"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3301,9 +3046,7 @@
             "tags": [],
             "label": "esFrom",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3331,9 +3074,7 @@
             "tags": [],
             "label": "esJavaOpts",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3388,9 +3129,7 @@
             "tags": [],
             "label": "writeLogsToPath",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3404,9 +3143,7 @@
             "description": [
               "\nNode-specific configuration if you wish to run a multi-node\ncluster. One node will be added for each item in the array.\n\nIf this option is not provided, the config will default\nto a single-node cluster.\n"
             ],
-            "signature": [
-              "TestEsClusterNodesOptions[] | undefined"
-            ],
+            "signature": ["TestEsClusterNodesOptions[] | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3420,9 +3157,7 @@
             "description": [
               "\nPassword for the `elastic` user. This is set after the cluster has started.\n\nDefaults to `changeme`."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3436,9 +3171,7 @@
             "description": [
               "\nPort to run Elasticsearch on. If you configure a\nmulti-node cluster with the `nodes` option, this\nport will be incremented by one for each added node.\n"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3449,12 +3182,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "ssl",
-            "description": [
-              "\nShould this ES cluster use SSL?"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nShould this ES cluster use SSL?"],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3468,9 +3197,7 @@
             "description": [
               "\nExplicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'\ndefaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`"
             ],
-            "signature": [
-              "string | number | undefined"
-            ],
+            "signature": ["string | number | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3484,9 +3211,7 @@
             "description": [
               "\nReport to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing\nthis caller to react appropriately. If this is not passed then an uncatchable exception will be thrown"
             ],
-            "signature": [
-              "((msg: string) => void) | undefined"
-            ],
+            "signature": ["((msg: string) => void) | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3498,9 +3223,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/es/test_es_cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3515,12 +3238,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "serverless",
-            "description": [
-              "\nIs this a serverless project"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nIs this a serverless project"],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3531,12 +3250,8 @@
             "type": "Array",
             "tags": [],
             "label": "files",
-            "description": [
-              "\nFiles to mount inside ES containers"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFiles to mount inside ES containers"],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3659,9 +3374,7 @@
             "tags": [],
             "label": "waitForLogLine",
             "description": [],
-            "signature": [
-              "string | RegExp | undefined"
-            ],
+            "signature": ["string | RegExp | undefined"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3673,9 +3386,7 @@
             "tags": [],
             "label": "waitForLogLineTimeoutMs",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3736,10 +3447,7 @@
                 "tags": [],
                 "label": "logLine$",
                 "description": [],
-                "signature": [
-                  "Observable",
-                  "<string>"
-                ],
+                "signature": ["Observable", "<string>"],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3755,9 +3463,7 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3771,9 +3477,7 @@
         "type": "Interface",
         "tags": [],
         "label": "EsClientForTestingOptions",
-        "description": [
-          "options for creating es instances used in functional testing scenarios"
-        ],
+        "description": ["options for creating es instances used in functional testing scenarios"],
         "signature": [
           {
             "pluginId": "@kbn/test",
@@ -3796,9 +3500,7 @@
             "type": "string",
             "tags": [],
             "label": "esUrl",
-            "description": [
-              "url of es instance"
-            ],
+            "description": ["url of es instance"],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3812,9 +3514,7 @@
             "description": [
               "overwrite the auth embedded in the url to use a different user in this client instance"
             ],
-            "signature": [
-              "{ username: string; password: string; } | undefined"
-            ],
+            "signature": ["{ username: string; password: string; } | undefined"],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3828,9 +3528,7 @@
             "description": [
               "\nare we running tests against cloud? this is automatically determined\nby checking for the TEST_CLOUD environment variable but can be overriden\nfor special cases"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3918,9 +3616,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3959,9 +3655,7 @@
             "type": "Function",
             "tags": [],
             "label": "hasService",
-            "description": [
-              "\nDetermine if a service is avaliable"
-            ],
+            "description": ["\nDetermine if a service is avaliable"],
             "signature": [
               "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
@@ -4008,9 +3702,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "K"
-                ],
+                "signature": ["K"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4040,9 +3732,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4116,9 +3806,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "\"config\""
-                ],
+                "signature": ["\"config\""],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4190,9 +3878,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "\"log\""
-                ],
+                "signature": ["\"log\""],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4264,9 +3950,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "\"lifecycle\""
-                ],
+                "signature": ["\"lifecycle\""],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4338,9 +4022,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "\"dockerServers\""
-                ],
+                "signature": ["\"dockerServers\""],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4412,9 +4094,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "\"esVersion\""
-                ],
+                "signature": ["\"esVersion\""],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4486,9 +4166,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "\"dedicatedTaskRunner\""
-                ],
+                "signature": ["\"dedicatedTaskRunner\""],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4560,9 +4238,7 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4577,12 +4253,8 @@
             "type": "Function",
             "tags": [],
             "label": "getPageObject",
-            "description": [
-              "\nGet the instance of a page object"
-            ],
-            "signature": [
-              "<K extends keyof PageObjectMap>(pageObjectName: K) => PageObjectMap[K]"
-            ],
+            "description": ["\nGet the instance of a page object"],
+            "signature": ["<K extends keyof PageObjectMap>(pageObjectName: K) => PageObjectMap[K]"],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4594,9 +4266,7 @@
                 "tags": [],
                 "label": "pageObjectName",
                 "description": [],
-                "signature": [
-                  "K"
-                ],
+                "signature": ["K"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4611,9 +4281,7 @@
             "type": "Function",
             "tags": [],
             "label": "getPageObjects",
-            "description": [
-              "\nGet a map of PageObjects"
-            ],
+            "description": ["\nGet a map of PageObjects"],
             "signature": [
               "<K extends keyof PageObjectMap>(pageObjects: K[]) => Pick<PageObjectMap, K>"
             ],
@@ -4628,9 +4296,7 @@
                 "tags": [],
                 "label": "pageObjects",
                 "description": [],
-                "signature": [
-                  "K[]"
-                ],
+                "signature": ["K[]"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4648,9 +4314,7 @@
             "description": [
               "\nSynchronously load a test file, can be called within a `describe()` block to add\ncommon setup/teardown steps to several suites"
             ],
-            "signature": [
-              "(path: string) => void"
-            ],
+            "signature": ["(path: string) => void"],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4662,9 +4326,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4679,9 +4341,7 @@
             "type": "boolean",
             "tags": [],
             "label": "updateBaselines",
-            "description": [
-              "\nDid the user request that baselines get updated?"
-            ],
+            "description": ["\nDid the user request that baselines get updated?"],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4707,9 +4367,7 @@
             "tags": [],
             "label": "protocol",
             "description": [],
-            "signature": [
-              "\"http\" | \"https\""
-            ],
+            "signature": ["\"http\" | \"https\""],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4732,9 +4390,7 @@
             "tags": [],
             "label": "port",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4782,9 +4438,7 @@
             "tags": [],
             "label": "ports",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4817,9 +4471,7 @@
             "tags": [],
             "label": "getStartTimeout",
             "description": [],
-            "signature": [
-              "() => number"
-            ],
+            "signature": ["() => number"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4833,9 +4485,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4849,9 +4499,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4865,9 +4513,7 @@
             "tags": [],
             "label": "cleanup",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4881,10 +4527,7 @@
             "tags": [],
             "label": "getClient",
             "description": [],
-            "signature": [
-              "() => ",
-              "default"
-            ],
+            "signature": ["() => ", "default"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4898,9 +4541,7 @@
             "tags": [],
             "label": "getHostUrls",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4939,9 +4580,7 @@
             "tags": [],
             "label": "certificateAuthorities",
             "description": [],
-            "signature": [
-              "Buffer[] | undefined"
-            ],
+            "signature": ["Buffer[] | undefined"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4973,10 +4612,7 @@
             "tags": [],
             "label": "uiSettingDefaults",
             "description": [],
-            "signature": [
-              "UiSettingValues",
-              " | undefined"
-            ],
+            "signature": ["UiSettingValues", " | undefined"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4988,9 +4624,7 @@
             "tags": [],
             "label": "importExportBaseDir",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5047,9 +4681,7 @@
             "tags": [],
             "label": "supportedRoles",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5106,10 +4738,7 @@
             "tags": [],
             "label": "_beforeAll",
             "description": [],
-            "signature": [
-              "Runnable",
-              "[]"
-            ],
+            "signature": ["Runnable", "[]"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5121,10 +4750,7 @@
             "tags": [],
             "label": "_beforeEach",
             "description": [],
-            "signature": [
-              "Runnable",
-              "[]"
-            ],
+            "signature": ["Runnable", "[]"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5136,10 +4762,7 @@
             "tags": [],
             "label": "_afterEach",
             "description": [],
-            "signature": [
-              "Runnable",
-              "[]"
-            ],
+            "signature": ["Runnable", "[]"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5151,10 +4774,7 @@
             "tags": [],
             "label": "_afterAll",
             "description": [],
-            "signature": [
-              "Runnable",
-              "[]"
-            ],
+            "signature": ["Runnable", "[]"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5367,9 +4987,7 @@
             "tags": [],
             "label": "fullTitle",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5394,9 +5012,7 @@
             "tags": [],
             "label": "file",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5429,9 +5045,7 @@
             "tags": [],
             "label": "isPassed",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5445,9 +5059,7 @@
             "tags": [],
             "label": "pending",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5555,9 +5167,7 @@
         "type": "Type",
         "tags": [],
         "label": "ProvidedType",
-        "description": [
-          "\nCovert a Provider type to the instance type it provides"
-        ],
+        "description": ["\nCovert a Provider type to the instance type it provides"],
         "signature": [
           "ReturnType<T> extends Promise<infer X> ? ",
           {
@@ -5619,9 +5229,7 @@
         "tags": [],
         "label": "esTestConfig",
         "description": [],
-        "signature": [
-          "EsTestConfig"
-        ],
+        "signature": ["EsTestConfig"],
         "path": "packages/kbn-test/src/es/es_test_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5634,9 +5242,7 @@
         "tags": [],
         "label": "kbnTestConfig",
         "description": [],
-        "signature": [
-          "KbnTestConfig"
-        ],
+        "signature": ["KbnTestConfig"],
         "path": "packages/kbn-test/kbn_test_config.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -8,20 +8,20 @@
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { getConfigDirectory } from '@kbn/utils';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ProjectType } from '@kbn/serverless-types';
+import { getConfigDirectory } from '@kbn/utils';
 
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
+import { API_SWITCH_PROJECT } from '../common';
+import { ServerlessConfig } from './config';
 import type {
   ServerlessServerSetup,
-  ServerlessServerStart,
   ServerlessServerSetupDependencies,
+  ServerlessServerStart,
   ServerlessServerStartDependencies,
 } from './types';
-import { ServerlessConfig } from './config';
-import { API_SWITCH_PROJECT } from '../common';
 
 const switchBodySchema = schema.object({
   id: schema.oneOf([

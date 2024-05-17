@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ListClient } from '../../services/lists/list_client';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
+import { ListClient } from '../../services/lists/list_client';
 import type { ListsRequestHandlerContext } from '../../types';
 
 export const getListClient = async (context: ListsRequestHandlerContext): Promise<ListClient> => {

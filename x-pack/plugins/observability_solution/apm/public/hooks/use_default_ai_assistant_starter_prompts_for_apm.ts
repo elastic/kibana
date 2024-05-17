@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
+import { useEffect } from 'react';
 import type { ApmPluginStartDeps } from '../plugin';
 
 export function useDefaultAiAssistantStarterPromptsForAPM({

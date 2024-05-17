@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Index } from '../../../../..';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';

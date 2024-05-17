@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../data_panel';

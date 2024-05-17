@@ -12,9 +12,9 @@ import {
   EuiIconTip,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
 } from '@elastic/eui';
@@ -24,11 +24,11 @@ import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { useLocation } from 'react-router-dom';
-import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
-import * as i18n from './translations';
 import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import * as i18n from './translations';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
@@ -170,8 +170,8 @@ export const ModalInspectQuery = ({
           {inspectResponses[0]?.took === 0
             ? '0ms'
             : inspectResponses[0]?.took
-            ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
-            : i18n.SOMETHING_WENT_WRONG}
+              ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
+              : i18n.SOMETHING_WENT_WRONG}
         </span>
       ),
     },

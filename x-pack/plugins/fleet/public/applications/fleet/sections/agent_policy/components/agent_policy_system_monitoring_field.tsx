@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiIconTip, EuiCheckbox } from '@elastic/eui';
+import { EuiCheckbox, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { AgentPolicyPackageBadge } from '../../../components';
 

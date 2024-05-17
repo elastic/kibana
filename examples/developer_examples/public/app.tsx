@@ -10,17 +10,17 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import {
-  EuiText,
-  EuiPageTemplate,
+  EuiButtonIcon,
   EuiCard,
-  EuiPageHeader,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
-  EuiListGroup,
   EuiHighlight,
   EuiLink,
-  EuiButtonIcon,
+  EuiListGroup,
+  EuiPageHeader,
+  EuiPageTemplate,
+  EuiText,
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { ExampleDefinition } from './types';

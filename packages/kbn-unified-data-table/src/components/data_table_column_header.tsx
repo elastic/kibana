@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
-import { css, CSSObject } from '@emotion/react';
 import { EuiIconTip } from '@elastic/eui';
+import { CSSObject, css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
+import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useMemo } from 'react';
 import type { DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 

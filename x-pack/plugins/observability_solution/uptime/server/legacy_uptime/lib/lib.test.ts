@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UptimeEsClient } from './lib';
-import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { UptimeEsClient } from './lib';
 import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';
 
 describe('UptimeEsClient', () => {

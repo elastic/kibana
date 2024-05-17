@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import moment, { Moment } from 'moment';
-import { FieldFormat, FIELD_FORMAT_IDS } from '..';
+import { FIELD_FORMAT_IDS, FieldFormat } from '..';
 import { TextContextTypeConvert } from '../types';
 
 interface FractPatternObject {

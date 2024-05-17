@@ -96,9 +96,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -132,9 +130,7 @@
             "tags": [],
             "label": "onClick",
             "description": [],
-            "signature": [
-              "React.MouseEventHandler<Element> | undefined"
-            ],
+            "signature": ["React.MouseEventHandler<Element> | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -146,9 +142,7 @@
             "tags": [],
             "label": "openInNewTab",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -160,9 +154,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -217,10 +209,7 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": [
-              "IconType",
-              " | undefined"
-            ],
+            "signature": ["IconType", " | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -232,9 +221,7 @@
             "tags": [],
             "label": "appendSeparator",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -267,9 +254,7 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -281,9 +266,7 @@
             "tags": [],
             "label": "isBeta",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -295,9 +278,7 @@
             "tags": [],
             "label": "betaOptions",
             "description": [],
-            "signature": [
-              "{ text: string; } | undefined"
-            ],
+            "signature": ["{ text: string; } | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -322,9 +303,7 @@
             "type": "Array",
             "tags": [],
             "label": "items",
-            "description": [
-              "All the items to display in the side navigation"
-            ],
+            "description": ["All the items to display in the side navigation"],
             "signature": [
               {
                 "pluginId": "@kbn/security-solution-side-nav",
@@ -384,9 +363,7 @@
             "description": [
               "Css value for the bottom offset of the secondary panel. defaults to 0"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -400,9 +377,7 @@
             "description": [
               "Css value for the top offset of the secondary panel. defaults to the generic kibana header height"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -437,9 +412,7 @@
             "tags": [],
             "label": "onMount",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -498,9 +471,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "string | string[]"
-            ],
+            "signature": ["string | string[]"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -512,9 +483,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

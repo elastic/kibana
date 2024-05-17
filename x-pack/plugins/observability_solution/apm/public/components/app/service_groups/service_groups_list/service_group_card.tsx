@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ServiceGroup, SERVICE_GROUP_COLOR_DEFAULT } from '../../../../../common/service_groups';
+import { SERVICE_GROUP_COLOR_DEFAULT, ServiceGroup } from '../../../../../common/service_groups';
 import { useObservabilityActiveAlertsHref } from '../../../shared/links/kibana';
 import { ServiceStat } from './service_stat';
 

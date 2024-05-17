@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transparentize, type EuiThemeComputed, euiFontSize, type UseEuiTheme } from '@elastic/eui';
+import { type EuiThemeComputed, type UseEuiTheme, euiFontSize, transparentize } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 const EUI_HEADER_HEIGHT = '96px';
@@ -27,8 +27,9 @@ export const SolutionSideNavPanelStyles = (
   background-color: ${euiTheme.colors.body};
 
   // If the bottom bar is visible add padding to the navigation
-  ${$bottomOffset != null &&
-  `
+  ${
+    $bottomOffset != null &&
+    `
       height: inherit;
       bottom: ${$bottomOffset};
       box-shadow:
@@ -38,7 +39,8 @@ export const SolutionSideNavPanelStyles = (
         ${euiTheme.size.s} 0 ${euiTheme.size.s} -${euiTheme.size.s} rgb(0 0 0 / 15%),
         // bottom inset to match timeline bar top shadow
         inset 0 -6px ${euiTheme.size.xs} -${euiTheme.size.xs} rgb(0 0 0 / 15%);
-      `}
+      `
+  }
 
   .solutionSideNavPanelLink {
     &:focus-within {

@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "ContentEditorKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps to known dependency types."
-        ],
+        "description": ["\nKibana-specific Provider that maps to known dependency types."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "ContentEditorKibanaDependencies",
@@ -64,9 +62,7 @@
         "type": "Function",
         "tags": [],
         "label": "ContentEditorProvider",
-        "description": [
-          "\nAbstract external service Provider."
-        ],
+        "description": ["\nAbstract external service Provider."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "Services",
@@ -83,11 +79,7 @@
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
-              "Services",
-              ">>"
-            ],
+            "signature": ["React.PropsWithChildren<React.PropsWithChildren<", "Services", ">>"],
             "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,

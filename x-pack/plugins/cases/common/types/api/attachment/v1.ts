@@ -14,22 +14,22 @@ import {
   MAX_DELETE_FILES,
 } from '../../../constants';
 import {
+  NonEmptyString,
   limitedArraySchema,
   limitedStringSchema,
-  NonEmptyString,
   paginationSchema,
 } from '../../../schema';
 import {
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  AttachmentRt,
+  AttachmentType,
+  AttachmentsRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceSOWithoutRefsAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
-  AttachmentType,
-  AttachmentRt,
-  AttachmentsRt,
+  UserCommentAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**

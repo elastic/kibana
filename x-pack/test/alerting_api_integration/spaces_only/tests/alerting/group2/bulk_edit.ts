@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {

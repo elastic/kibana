@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mapToColumns } from './map_to_columns';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
+import { mapToColumns } from './map_to_columns';
 
 describe('map_to_columns', () => {
   it('should rename columns of a given datatable', async () => {

@@ -10,36 +10,36 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { CoreSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { i18n } from '@kbn/i18n';
 import {
-  getPredictionFieldName,
+  DEFAULT_RESULTS_FIELD,
+  type DataFrameAnalyticsConfig,
+  FEATURE_IMPORTANCE,
+  type FeatureImportanceBaseline,
+  ML__ID_COPY,
+  TOP_CLASSES,
   getDefaultPredictionFieldName,
+  getPredictionFieldName,
   isClassificationAnalysis,
   isRegressionAnalysis,
   sortExplorationResultsFields,
-  DEFAULT_RESULTS_FIELD,
-  FEATURE_IMPORTANCE,
-  ML__ID_COPY,
-  TOP_CLASSES,
-  type DataFrameAnalyticsConfig,
-  type FeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
 import {
+  type UseIndexDataReturnType,
   getDataGridSchemasFromFieldTypes,
   getFieldType,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { MlApiServices } from '../../../../../services/ml_api_service';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
+import type { MlApiServices } from '../../../../../services/ml_api_service';
 
-import { getIndexData, getIndexFields } from '../../../../common';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+import { getIndexData, getIndexFields } from '../../../../common';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (

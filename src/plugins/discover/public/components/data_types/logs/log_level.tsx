@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { LogFlyoutDoc } from '@kbn/discover-utils/src';
+import React from 'react';
 import * as constants from '../../../../common/data_types/logs/constants';
 import { ChipWithPopover } from './popover_chip';
 

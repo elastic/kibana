@@ -7,8 +7,8 @@
  */
 
 import moment from 'moment-timezone';
+import { listFilesExceedingSize, listFilesOlderThan } from './utils';
 import { getFileInfoMock } from './utils.test.mocks';
-import { listFilesOlderThan, listFilesExceedingSize } from './utils';
 
 describe('listFilesExceedingSize', () => {
   beforeEach(() => {

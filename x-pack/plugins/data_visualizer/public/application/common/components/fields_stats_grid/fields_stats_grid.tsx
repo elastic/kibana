@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { DataVisualizerTableState } from '../../../../../common/types';
-import type { ItemIdToExpandedRowMap } from '../stats_table';
-import { DataVisualizerTable } from '../stats_table';
 import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
+import type { ItemIdToExpandedRowMap } from '../stats_table';
+import { DataVisualizerTable } from '../stats_table';
 
 import { DataVisualizerFieldNamesFilter } from '../field_names_filter';
 import { DataVisualizerFieldTypesFilter } from '../field_types_filter';
+import { MetricFieldsCount, TotalFieldsCount } from '../stats_table/components/field_count_stats';
 import { createFields } from './create_fields';
 import { filterFields } from './filter_fields';
-import { MetricFieldsCount, TotalFieldsCount } from '../stats_table/components/field_count_stats';
 
 interface Props {
   results: FindFileStructureResponse;

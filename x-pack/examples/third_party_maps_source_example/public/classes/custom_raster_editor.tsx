@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiCallOut, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { LAYER_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import { RenderWizardArguments } from '@kbn/maps-plugin/public';
-import { LayerDescriptor, LAYER_TYPE } from '@kbn/maps-plugin/common';
+import React, { Component } from 'react';
 import { CustomRasterSource } from './custom_raster_source';
 
 export class CustomRasterEditor extends Component<RenderWizardArguments> {

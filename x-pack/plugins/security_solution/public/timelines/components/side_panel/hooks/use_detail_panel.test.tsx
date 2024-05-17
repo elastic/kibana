@@ -1,19 +1,19 @@
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { TestProviders } from '../../../../common/mock';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { timelineActions } from '../../../store';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
-import { timelineActions } from '../../../store';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { TestProviders } from '../../../../common/mock';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/lib/kibana');

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { RuleStatusDropdown } from './rule_status_dropdown';
+import { Story } from '@storybook/react';
+import React, { ComponentProps } from 'react';
 import { mockRule } from '../../rule_details/components/test_helpers';
+import { RuleStatusDropdown } from './rule_status_dropdown';
 
 type Args = ComponentProps<typeof RuleStatusDropdown>;
 

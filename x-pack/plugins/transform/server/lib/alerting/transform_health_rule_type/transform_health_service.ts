@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import type { TransformStats } from '../../../../common/types/transform_stats';
+import { i18n } from '@kbn/i18n';
+import { keyBy, memoize, partition } from 'lodash';
 import {
   ALL_TRANSFORMS_SELECTION,
-  mapEsHealthStatus2TransformHealthStatus,
   TRANSFORM_HEALTH_CHECK_NAMES,
   TRANSFORM_HEALTH_STATUS,
   TRANSFORM_NOTIFICATIONS_INDEX,
   TRANSFORM_RULE_TYPE,
   TRANSFORM_STATE,
+  mapEsHealthStatus2TransformHealthStatus,
 } from '../../../../common/constants';
-import type { TransformHealthRuleParams } from './schema';
+import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
+import { isContinuousTransform } from '../../../../common/types/transform';
+import type { TransformStats } from '../../../../common/types/transform_stats';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,
   TransformHealthAlertContext,
   TransformStateReportResponse,
 } from './register_transform_health_rule_type';
-import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
-import { isContinuousTransform } from '../../../../common/types/transform';
+import type { TransformHealthRuleParams } from './schema';
 
 interface TestResult {
   isHealthy: boolean;
@@ -279,9 +279,8 @@ export function transformHealthServiceProvider({
       const result: TestResult[] = [];
 
       if (testsConfig.notStarted.enabled) {
-        const [notStartedTransform, startedTransforms] = await this.getTransformsStateReport(
-          transformIds
-        );
+        const [notStartedTransform, startedTransforms] =
+          await this.getTransformsStateReport(transformIds);
 
         const isHealthy = notStartedTransform.length === 0;
 

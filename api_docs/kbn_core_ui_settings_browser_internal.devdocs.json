@@ -47,9 +47,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -61,9 +59,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": [
-                  "UiSettingsClientParams"
-                ],
+                "signature": ["UiSettingsClientParams"],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -79,9 +75,7 @@
             "tags": [],
             "label": "update",
             "description": [],
-            "signature": [
-              "(key: string, newVal: any) => Promise<boolean>"
-            ],
+            "signature": ["(key: string, newVal: any) => Promise<boolean>"],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,9 +87,7 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -108,9 +100,7 @@
                 "tags": [],
                 "label": "newVal",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -126,10 +116,7 @@
         "parentPluginId": "@kbn/core-ui-settings-browser-internal",
         "id": "def-common.UiSettingsService",
         "type": "Class",
-        "tags": [
-          "Internal",
-          "Deprecated"
-        ],
+        "tags": ["Internal", "Deprecated"],
         "label": "UiSettingsService",
         "description": [],
         "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
@@ -166,9 +153,7 @@
                 "tags": [],
                 "label": "{ http, injectedMetadata }",
                 "description": [],
-                "signature": [
-                  "UiSettingsServiceDeps"
-                ],
+                "signature": ["UiSettingsServiceDeps"],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -207,9 +192,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
             "deprecated": false,
             "trackAdoption": false,

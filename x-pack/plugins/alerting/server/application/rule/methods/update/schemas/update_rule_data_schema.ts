@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDuration } from '../../../validation';
 import {
-  notifyWhenSchema,
-  alertDelaySchema,
   actionRequestSchema,
+  alertDelaySchema,
+  notifyWhenSchema,
   systemActionRequestSchema,
 } from '../../../schemas';
+import { validateDuration } from '../../../validation';
 
 export const updateRuleDataSchema = schema.object(
   {

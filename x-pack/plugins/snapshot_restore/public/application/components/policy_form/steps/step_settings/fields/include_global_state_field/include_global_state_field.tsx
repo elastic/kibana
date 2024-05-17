@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 import {
+  EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../../../common/constants';

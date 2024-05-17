@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { EuiButtonIcon } from '@elastic/eui';
+import React, { useState } from 'react';
 
 export function HideableReactQueryDevTools() {
   const [isHidden, setIsHidden] = useState(false);

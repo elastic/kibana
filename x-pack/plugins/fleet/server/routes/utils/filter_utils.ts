@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import * as esKuery from '@kbn/es-query';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import * as esKuery from '@kbn/es-query';
+import { get } from 'lodash';
 
 import { appContextService } from '../../services/app_context';
 

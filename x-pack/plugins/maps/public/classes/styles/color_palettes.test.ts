@@ -6,10 +6,10 @@
  */
 
 import {
+  getColorPalette,
   getColorRampCenterColor,
   getOrdinalMbColorRampStops,
   getPercentilesMbColorRampStops,
-  getColorPalette,
 } from './color_palettes';
 
 describe('getColorPalette', () => {

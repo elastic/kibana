@@ -6,26 +6,26 @@
  */
 
 import {
-  EuiBasicTableColumn,
-  EuiText,
   EuiBadge,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiStat,
+  EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import React from 'react';
 import moment from 'moment';
+import React from 'react';
 import styled from 'styled-components';
 
 import { EMPTY_STAT, getIlmPhaseDescription, getIncompatibleStatColor } from '../../helpers';
-import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../stat_label/translations';
 import { INDEX_SIZE_TOOLTIP } from '../../translations';
-import * as i18n from './translations';
 import type { IlmPhase } from '../../types';
+import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../stat_label/translations';
+import * as i18n from './translations';
 
 const STAT_TITLE_SIZE = 'xxs';
 

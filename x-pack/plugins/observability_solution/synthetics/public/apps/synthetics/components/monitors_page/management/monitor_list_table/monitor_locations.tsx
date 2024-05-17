@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { OverviewStatusState, ServiceLocations } from '../../../../../../../common/runtime_types';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
-import { ServiceLocations, OverviewStatusState } from '../../../../../../../common/runtime_types';
 
 interface Props {
   locations: ServiceLocations;

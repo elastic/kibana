@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiPage } from '@elastic/eui';
+import React from 'react';
 import { Page } from '../../components/page';
 import { DrilldownsManager } from '../drilldowns_manager';
 

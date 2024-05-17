@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { MaintenanceWindowResponseV1 } from '../../../response';
 import { archiveBodySchemaV1, archiveParamsSchemaV1 } from '..';
+import { MaintenanceWindowResponseV1 } from '../../../response';
 
 export type ArchiveMaintenanceWindowRequestBody = TypeOf<typeof archiveBodySchemaV1>;
 export type ArchiveMaintenanceWindowRequestParams = TypeOf<typeof archiveParamsSchemaV1>;

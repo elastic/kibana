@@ -6,9 +6,9 @@
  */
 
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { v4 as uuidv4 } from 'uuid';
 import { SanitizedRule } from '../types';
+import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 
 const alert: SanitizedRule<{
   bar: boolean;

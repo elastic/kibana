@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { isEmpty } from 'lodash';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
-import { useLicense } from '../../../hooks/use_license';
+import { isEmpty } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../../../../../common/endpoint/service/authz';
 import type {
   EndpointPrivileges,
   Immutable,
   MaybeImmutable,
 } from '../../../../../common/endpoint/types';
-import {
-  calculateEndpointAuthz,
-  getEndpointAuthzInitialState,
-} from '../../../../../common/endpoint/service/authz';
+import { useLicense } from '../../../hooks/use_license';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 
 /**

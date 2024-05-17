@@ -1,3 +1,4 @@
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +6,13 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
+import { useHostCountContext } from '../../hooks/use_host_count';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();

@@ -6,27 +6,9 @@
     "id": "rollup",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "rollup"
-    ],
-    "requiredPlugins": [
-      "management",
-      "licensing",
-      "features",
-      "dataViews",
-      "data"
-    ],
-    "optionalPlugins": [
-      "home",
-      "indexManagement",
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "esUiShared",
-      "data"
-    ]
+    "configPath": ["xpack", "rollup"],
+    "requiredPlugins": ["management", "licensing", "features", "dataViews", "data"],
+    "optionalPlugins": ["home", "indexManagement", "usageCollection"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "esUiShared", "data"]
   }
 }

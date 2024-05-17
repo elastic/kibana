@@ -8,9 +8,9 @@
 import { connect } from 'react-redux';
 
 import {
+  getFilter,
   getPageOfJobs,
   getPager,
-  getFilter,
   getSortField,
   isSortAscending,
 } from '../../../store/selectors';

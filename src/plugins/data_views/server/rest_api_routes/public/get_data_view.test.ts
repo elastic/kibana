@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getDataView } from './get_data_view';
 import { dataViewsService } from '../../mocks';
+import { getDataView } from './get_data_view';
 import { getUsageCollection } from './test_utils';
 
 describe('get default data view', () => {

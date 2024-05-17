@@ -7,47 +7,47 @@
 
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import type { FC } from 'react';
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
-import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import {
+  TableId,
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  TableId,
 } from '@kbn/securitysolution-data-table';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useLicense } from '../../../common/hooks/use_license';
+import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { FC } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 import { VIEW_SELECTION } from '../../../../common/constants';
+import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
+import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { useLicense } from '../../../common/hooks/use_license';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../common/lib/kibana';
+import { combineQueries } from '../../../common/lib/kuery';
+import { inputsSelectors } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
-import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
   useSessionView,
   useSessionViewNavigation,
 } from '../../../timelines/components/timeline/tabs/session/use_session_view';
-import { inputsSelectors } from '../../../common/store';
-import { combineQueries } from '../../../common/lib/kuery';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useKibana } from '../../../common/lib/kibana';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getColumns } from '../../configurations/security_solution_detections';
-import { buildTimeRangeFilter } from './helpers';
-import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
-import type { State } from '../../../common/store';
-import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 import { getAlertsDefaultModel } from './default_config';
+import { buildTimeRangeFilter } from './helpers';
+import * as i18n from './translations';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -199,7 +199,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         fontSize: 's',
         header: 'underline',
         stripes: isEventRenderedView,
-      } as EuiDataGridStyle),
+      }) as EuiDataGridStyle,
     [isEventRenderedView]
   );
 

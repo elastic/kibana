@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { FieldCapsRequest, FieldCapsResponse, Indices } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
   size: number;

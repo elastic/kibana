@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
+import { connect } from 'react-redux';
 
 import { GraphState, metaDataSelector } from '../state_management';
 

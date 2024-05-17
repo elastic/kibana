@@ -1,3 +1,6 @@
+import { coreMock } from '@kbn/core/public/mocks';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { act, fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +8,11 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, render, act } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
-import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import * as actions from '../actions';
-import { coreMock } from '@kbn/core/public/mocks';
-import { InvestigateInTimelineAction } from './investigate_in_timeline_action';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
+import * as actions from '../actions';
+import { InvestigateInTimelineAction } from './investigate_in_timeline_action';
 
 const ecsRowData: Ecs = {
   _id: '1',

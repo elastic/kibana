@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Role, User } from '../../../../cases_api_integration/common/lib/authentication/types';
+import { getUrlPrefix } from '../../../../alerting_api_integration/common/lib';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { getUrlPrefix } from '../../../../alerting_api_integration/common/lib';
+import { Role, User } from '../../../../cases_api_integration/common/lib/authentication/types';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getTestAlertData } from '../../../lib/get_test_data';
 
 const SPACE2 = {

@@ -25,8 +25,8 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { ConfigSchema } from '../plugin';
-import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
 import type { TopAlert } from '../typings/alerts';
+import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
 
 const defaultConfig = {
   unsafe: {

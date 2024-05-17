@@ -6,11 +6,11 @@
  */
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { UserAssetTableType } from '../../../../../explore/users/store/model';
+import type { ManagedUserFields } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { State } from '../../../../../common/store/types';
 import { usersSelectors } from '../../../../../explore/users/store';
+import type { UserAssetTableType } from '../../../../../explore/users/store/model';
 import type { ManagedUserTable } from '../types';
-import type { ManagedUserFields } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 export const useManagedUserItems = (
   tableType: UserAssetTableType,

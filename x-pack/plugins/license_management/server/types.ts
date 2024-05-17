@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, IRouter } from '@kbn/core/server';
+import { IRouter, IScopedClusterClient } from '@kbn/core/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';

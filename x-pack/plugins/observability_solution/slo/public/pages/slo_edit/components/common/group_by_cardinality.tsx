@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
-import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useFetchGroupByCardinality } from '../../../../hooks/use_fetch_group_by_cardinality';
-import { CreateSLOForm } from '../../types';
 import { getGroupKeysProse } from '../../../../utils/slo/groupings';
+import { CreateSLOForm } from '../../types';
 
 export function GroupByCardinality({
   titleAppend,

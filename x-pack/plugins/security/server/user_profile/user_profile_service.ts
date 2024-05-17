@@ -19,7 +19,6 @@ import type {
 } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { UserProfileGrant } from './user_profile_grant';
 import type {
   SecurityLicense,
   UserProfile,
@@ -28,7 +27,8 @@ import type {
 } from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import { getPrintableSessionId, type Session } from '../session_management';
+import { type Session, getPrintableSessionId } from '../session_management';
+import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
 const ACTIVATION_MAX_RETRIES = 10;
@@ -138,9 +138,8 @@ export class UserProfileService {
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile(
-          activateRequest
-        );
+        const response =
+          await clusterClient.asInternalUser.security.activateUserProfile(activateRequest);
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 

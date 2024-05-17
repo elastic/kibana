@@ -1,3 +1,13 @@
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { get } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,23 +16,13 @@
  * Side Public License, v 1.
  */
 import React, { FC } from 'react';
-import { get } from 'lodash';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiTitle,
-  EuiHealth,
-} from '@elastic/eui';
 
-import { TextField, SelectField, SuperSelectField } from '../../../components';
+import { SelectField, SuperSelectField, TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
 import { useFormData } from '../../hooks';
 import { FormConfig } from '../../types';
-import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
+import { UseField } from '../use_field';
 import { FormWrapper } from './form_utils';
 
 const { emptyField } = fieldValidators;

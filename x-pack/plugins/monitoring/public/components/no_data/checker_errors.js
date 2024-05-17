@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiCallOut,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
 
 const ErrorList = ({ errors }) => {
   const errorsMap = {};

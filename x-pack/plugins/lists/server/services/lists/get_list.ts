@@ -8,8 +8,8 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { transformElasticToList } from '../utils/transform_elastic_to_list';
 import { SearchEsListSchema } from '../../schemas/elastic_response';
+import { transformElasticToList } from '../utils/transform_elastic_to_list';
 
 interface GetListOptions {
   id: Id;

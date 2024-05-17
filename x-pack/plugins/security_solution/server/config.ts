@@ -8,10 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
+import { type ConfigSettings, parseConfigSettings } from '../common/config_settings';
+import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 /**
  * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)

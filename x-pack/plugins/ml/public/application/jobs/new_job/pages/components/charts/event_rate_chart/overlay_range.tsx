@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { timeFormatter } from '@kbn/ml-date-utils';
-import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
+import type { FC } from 'react';
+import React from 'react';
 import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
 
 interface Props {

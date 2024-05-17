@@ -6,13 +6,13 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { LABEL_POSITIONS, VECTOR_STYLES } from '../../../../../common/constants';
+import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';
+import { DynamicSizeProperty } from './dynamic_size_property';
 import { LabelPositionProperty } from './label_position_property';
 import { StaticIconProperty } from './static_icon_property';
-import { DynamicSizeProperty } from './dynamic_size_property';
 import { StaticSizeProperty } from './static_size_property';
 
 describe('syncLabelPositionWithMb', () => {

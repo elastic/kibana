@@ -1,3 +1,5 @@
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import { VISUALIZE_ESQL_USER_INTENTIONS } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import type { FromSchema } from 'json-schema-to-ts';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
-import { VISUALIZE_ESQL_USER_INTENTIONS } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 
 export const visualizeESQLFunction = {
   name: 'visualize_query',
@@ -29,4 +29,6 @@ export const visualizeESQLFunction = {
   contexts: ['core'],
 };
 
-export type VisualizeESQLFunctionArguments = FromSchema<typeof visualizeESQLFunction['parameters']>;
+export type VisualizeESQLFunctionArguments = FromSchema<
+  (typeof visualizeESQLFunction)['parameters']
+>;

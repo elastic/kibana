@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import moment from 'moment';
 
 /**
  * Get timeZone from uiSettings

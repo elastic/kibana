@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
-import { cloneDeep, isEqual, differenceBy } from 'lodash';
+import { MakeLogicType, kea } from 'kea';
+import { cloneDeep, differenceBy, isEqual } from 'lodash';
 
 import { DropResult } from '@elastic/eui';
 
 import {
-  flashSuccessToast,
   clearFlashMessages,
   flashAPIErrors,
+  flashSuccessToast,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -23,7 +23,7 @@ import {
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
+import { DetailField, OptionValue, Result, SearchResultConfig } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
 import { LEAVE_UNASSIGNED_FIELD, SUCCESS_MESSAGE } from './constants';

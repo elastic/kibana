@@ -16,7 +16,7 @@ import type { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { RuleUpdateProps, RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
+import { RuleResponse, RuleUpdateProps } from '../../../model/rule_schema/rule_schemas.gen';
 
 export type UpdateRuleRequestBody = z.infer<typeof UpdateRuleRequestBody>;
 export const UpdateRuleRequestBody = RuleUpdateProps;

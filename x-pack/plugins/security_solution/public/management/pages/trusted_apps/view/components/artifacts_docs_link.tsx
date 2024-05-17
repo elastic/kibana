@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 export const TrustedAppsArtifactsDocsLink = memo(() => {

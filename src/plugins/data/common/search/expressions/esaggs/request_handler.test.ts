@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { from } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { from } from 'rxjs';
 import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { handleRequest } from './request_handler';
 
@@ -20,9 +20,9 @@ jest.mock('../../tabify', () => ({
   tabifyAggResponse: jest.fn(),
 }));
 
-import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
 import { toArray } from 'rxjs';
+import { tabifyAggResponse } from '../../tabify';
 
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;

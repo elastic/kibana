@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
-import { convertAnomaliesToNetwork, getNetworkFromEntity } from './convert_anomalies_to_network';
+import { mockAnomalies } from '../mock';
 import type { AnomaliesByNetwork } from '../types';
+import { convertAnomaliesToNetwork, getNetworkFromEntity } from './convert_anomalies_to_network';
 
 describe('convert_anomalies_to_hosts', () => {
   let anomalies = cloneDeep(mockAnomalies);

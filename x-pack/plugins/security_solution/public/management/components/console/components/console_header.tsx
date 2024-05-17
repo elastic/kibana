@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import type { ConsoleProps } from '..';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
-import type { ConsoleProps } from '..';
 
 export const HELP_LABEL = i18n.translate(
   'xpack.securitySolution.console.layoutHeader.helpButtonTitle',

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Story } from '@storybook/react';
+import React from 'react';
+import { Indicator, generateMockIndicator } from '../../../../../common/types/indicator';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutOverview } from './overview_tab';
 import { IndicatorsFiltersContext } from '../../hooks/use_filters_context';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import { IndicatorsFlyoutOverview } from './overview_tab';
 
 export default {
   component: IndicatorsFlyoutOverview,

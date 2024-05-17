@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { LangModuleType } from '@kbn/monaco';
-import { languageConfiguration, lexerRules } from './language';
 import { LANG } from './constants';
+import { languageConfiguration, lexerRules } from './language';
 
 export const Lang: LangModuleType = { ID: LANG, languageConfiguration, lexerRules };

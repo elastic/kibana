@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { TestProvider } from '../../../test/test_provider';
 import {

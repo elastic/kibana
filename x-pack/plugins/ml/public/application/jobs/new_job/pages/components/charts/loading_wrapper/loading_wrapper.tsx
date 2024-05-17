@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 interface Props {
   hasData: boolean;

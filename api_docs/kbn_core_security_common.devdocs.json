@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthenticatedUser",
-        "description": [
-          "\nRepresents the currently authenticated user."
-        ],
+        "description": ["\nRepresents the currently authenticated user."],
         "signature": [
           {
             "pluginId": "@kbn/core-security-common",
@@ -56,9 +54,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_realm",
-            "description": [
-              "\nThe name and type of the Realm that has authenticated the user."
-            ],
+            "description": ["\nThe name and type of the Realm that has authenticated the user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -100,9 +96,7 @@
             "type": "Object",
             "tags": [],
             "label": "authentication_provider",
-            "description": [
-              "\nThe authentication provider that used to authenticate user."
-            ],
+            "description": ["\nThe authentication provider that used to authenticate user."],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-common",
@@ -122,9 +116,7 @@
             "type": "string",
             "tags": [],
             "label": "authentication_type",
-            "description": [
-              "\nThe AuthenticationType used by ES to authenticate the user.\n"
-            ],
+            "description": ["\nThe AuthenticationType used by ES to authenticate the user.\n"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -148,12 +140,8 @@
             "type": "string",
             "tags": [],
             "label": "profile_uid",
-            "description": [
-              "\nUser profile ID of this user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nUser profile ID of this user."],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -167,9 +155,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AuthenticationProvider",
-        "description": [
-          "\nType and name tuple to identify provider used to authenticate user."
-        ],
+        "description": ["\nType and name tuple to identify provider used to authenticate user."],
         "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -180,9 +166,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nType of the Kibana authentication provider."
-            ],
+            "description": ["\nType of the Kibana authentication provider."],
             "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -193,9 +177,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nName of the Kibana authentication provider (arbitrary string)."
-            ],
+            "description": ["\nName of the Kibana authentication provider (arbitrary string)."],
             "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -209,9 +191,7 @@
         "type": "Interface",
         "tags": [],
         "label": "User",
-        "description": [
-          "\nA set of fields describing Kibana user."
-        ],
+        "description": ["\nA set of fields describing Kibana user."],
         "path": "packages/core/security/core-security-common/src/authentication/user.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -234,9 +214,7 @@
             "tags": [],
             "label": "email",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -248,9 +226,7 @@
             "tags": [],
             "label": "full_name",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/security/core-security-common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -262,9 +238,7 @@
             "tags": [],
             "label": "roles",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "packages/core/security/core-security-common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -316,9 +290,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nArbitrary name of the security realm."
-            ],
+            "description": ["\nArbitrary name of the security realm."],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -329,9 +301,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nType of the security realm (file, native, saml etc.)."
-            ],
+            "description": ["\nType of the security realm (file, native, saml etc.)."],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false

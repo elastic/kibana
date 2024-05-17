@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT, SetupFormat } from './azure_credentials_form';
+import { useEffect, useRef } from 'react';
+import { CLOUDBEAT_AZURE } from '../../../../common/constants';
+import { AzureCredentialsType } from '../../../../common/types_old';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
+  NewPackagePolicyPostureInput,
   getArmTemplateUrlFromCspmPackage,
   getPosturePolicy,
-  NewPackagePolicyPostureInput,
 } from '../utils';
+import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT, SetupFormat } from './azure_credentials_form';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import { CLOUDBEAT_AZURE } from '../../../../common/constants';
-import { AzureCredentialsType } from '../../../../common/types_old';
 
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,

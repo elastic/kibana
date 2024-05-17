@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiLink, EuiIcon, EuiText, EuiToolTip, type IconType } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiText, EuiToolTip, type IconType } from '@elastic/eui';
 
 interface TableActionButtonProps {
   iconType: IconType;

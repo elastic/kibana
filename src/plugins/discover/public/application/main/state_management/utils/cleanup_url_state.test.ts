@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DataSourceType } from '../../../../../common/data_sources';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { AppStateUrl } from '../discover_app_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { DataSourceType } from '../../../../../common/data_sources';
 
 const services = createDiscoverServicesMock();
 

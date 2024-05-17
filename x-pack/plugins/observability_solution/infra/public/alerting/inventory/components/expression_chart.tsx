@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
+import { Axis, Chart, Position, Settings, Tooltip, niceTimeFormatter } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
@@ -22,6 +21,7 @@ import { calculateDomain } from '../../../pages/metrics/metrics_explorer/compone
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import {
   ChartContainer,
   LoadingState,

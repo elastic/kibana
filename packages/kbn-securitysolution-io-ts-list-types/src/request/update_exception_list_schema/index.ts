@@ -9,18 +9,18 @@
 import * as t from 'io-ts';
 
 import { version } from '@kbn/securitysolution-io-ts-types';
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { Tags, tags } from '../../common/tags';
 import { NamespaceType } from '../../common/default_namespace';
 import { description } from '../../common/description';
-import { name } from '../../common/name';
-import { _version } from '../../common/underscore_version';
 import { exceptionListType } from '../../common/exception_list';
 import { id } from '../../common/id';
 import { list_id } from '../../common/list_id';
 import { meta } from '../../common/meta';
+import { name } from '../../common/name';
 import { namespace_type } from '../../common/namespace_type';
+import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { Tags, tags } from '../../common/tags';
+import { _version } from '../../common/underscore_version';
 
 export const updateExceptionListSchema = t.intersection([
   t.exact(

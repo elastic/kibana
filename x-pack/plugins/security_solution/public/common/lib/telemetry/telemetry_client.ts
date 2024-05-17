@@ -6,38 +6,38 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { TelemetryEventTypes } from './constants';
 import type {
-  TelemetryClientStart,
+  OnboardingHubStepFinishedParams,
+  OnboardingHubStepLinkClickedParams,
+  OnboardingHubStepOpenParams,
+  ReportAddRiskInputToTimelineClickedParams,
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
   ReportAlertsTakeActionParams,
-  ReportEntityDetailsClickedParams,
-  ReportEntityAlertsClickedParams,
-  ReportEntityRiskFilteredParams,
-  ReportMLJobUpdateParams,
-  ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
-  ReportDataQualityIndexCheckedParams,
-  ReportDataQualityCheckAllCompletedParams,
-  ReportBreadcrumbClickedParams,
+  ReportAssetCriticalityCsvImportedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
   ReportAttackDiscoveriesGeneratedParams,
-  ReportRiskInputsExpandedFlyoutOpenedParams,
-  ReportToggleRiskSummaryClickedParams,
+  ReportBreadcrumbClickedParams,
+  ReportCellActionClickedParams,
+  ReportDataQualityCheckAllCompletedParams,
+  ReportDataQualityIndexCheckedParams,
   ReportDetailsFlyoutOpenedParams,
   ReportDetailsFlyoutTabClickedParams,
-  ReportAssetCriticalityCsvPreviewGeneratedParams,
-  ReportAssetCriticalityFileSelectedParams,
-  ReportAssetCriticalityCsvImportedParams,
-  ReportAddRiskInputToTimelineClickedParams,
-  OnboardingHubStepLinkClickedParams,
-  OnboardingHubStepOpenParams,
-  OnboardingHubStepFinishedParams,
+  ReportEntityAlertsClickedParams,
+  ReportEntityDetailsClickedParams,
+  ReportEntityRiskFilteredParams,
+  ReportMLJobUpdateParams,
+  ReportRiskInputsExpandedFlyoutOpenedParams,
+  ReportToggleRiskSummaryClickedParams,
+  TelemetryClientStart,
 } from './types';
-import { TelemetryEventTypes } from './constants';
 
 /**
  * Client which aggregate all the available telemetry tracking functions

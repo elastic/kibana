@@ -8,11 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import Chainable from '../../lib/classes/chainable';
-import ses from './lib/ses';
-import des from './lib/des';
-import tes from './lib/tes';
 import { toMS } from '../../../common/lib/to_milliseconds';
+import Chainable from '../../lib/classes/chainable';
+import des from './lib/des';
+import ses from './lib/ses';
+import tes from './lib/tes';
 
 export default new Chainable('holt', {
   args: [

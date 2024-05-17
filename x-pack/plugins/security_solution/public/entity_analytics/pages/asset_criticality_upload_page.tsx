@@ -6,6 +6,9 @@
  */
 
 import {
+  EuiCallOut,
+  EuiCode,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,18 +19,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiEmptyPrompt,
-  EuiCallOut,
-  EuiCode,
 } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
-import { useUiSetting$, useKibana } from '../../common/lib/kibana';
+import React from 'react';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../common/constants';
-import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
-import { useAssetCriticalityPrivileges } from '../components/asset_criticality/use_asset_criticality';
+import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
+import { useKibana, useUiSetting$ } from '../../common/lib/kibana';
 import { useHasSecurityCapability } from '../../helper_hooks';
+import { useAssetCriticalityPrivileges } from '../components/asset_criticality/use_asset_criticality';
+import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 
 export const AssetCriticalityUploadPage = () => {
   const { docLinks } = useKibana().services;

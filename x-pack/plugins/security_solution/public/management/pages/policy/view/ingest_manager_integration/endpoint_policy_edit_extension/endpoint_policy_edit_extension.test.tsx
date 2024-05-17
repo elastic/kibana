@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import React from 'react';
-import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
-import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
-import { createFleetContextRendererMock } from '../mocks';
-import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createFleetContextRendererMock } from '../mocks';
+import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

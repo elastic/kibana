@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
-import type { EndpointPendingActions } from '../../../../../common/endpoint/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo } from 'react';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
-import { ISOLATED_LABEL, ISOLATING_LABEL, RELEASING_LABEL } from './endpoint/endpoint_agent_status';
+import type { EndpointPendingActions } from '../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
+import { ISOLATED_LABEL, ISOLATING_LABEL, RELEASING_LABEL } from './endpoint/endpoint_agent_status';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
 

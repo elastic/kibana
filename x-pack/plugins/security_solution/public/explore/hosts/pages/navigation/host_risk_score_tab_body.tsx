@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { RiskEnginePrivilegesCallOut } from '../../../../entity_analytics/components/risk_engine_privileges_callout';
-import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
-import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
-import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
-import type { HostsComponentsQueryProps } from './types';
-import { manageQuery } from '../../../../common/components/page/manage_query';
-import { HostRiskScoreTable } from '../../../../entity_analytics/components/host_risk_score_table';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { hostsModel, hostsSelectors } from '../../store';
-import type { State } from '../../../../common/store';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_onboarding/risk_score_no_data_detected';
+import { manageQuery } from '../../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import type { State } from '../../../../common/store';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
+import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
+import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
+import { HostRiskScoreTable } from '../../../../entity_analytics/components/host_risk_score_table';
+import { RiskEnginePrivilegesCallOut } from '../../../../entity_analytics/components/risk_engine_privileges_callout';
+import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_onboarding/risk_score_no_data_detected';
 import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
+import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
+import { hostsModel, hostsSelectors } from '../../store';
+import type { HostsComponentsQueryProps } from './types';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 

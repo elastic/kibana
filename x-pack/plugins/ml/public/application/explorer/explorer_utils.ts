@@ -13,17 +13,17 @@ import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
-  getEntityFieldList,
+  ML_JOB_AGGREGATION,
   type MlEntityField,
   type MlInfluencer,
   type MlRecordForInfluencer,
-  ML_JOB_AGGREGATION,
+  getEntityFieldList,
 } from '@kbn/ml-anomaly-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
@@ -31,18 +31,21 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import type { MlIndexUtils } from '../util/index_service';
 import {
-  isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isSourceDataChartableForDetector,
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
+import { ml } from '../services/ml_api_service';
 import { getUiSettings } from '../util/dependency_cache';
+import type { MlIndexUtils } from '../util/index_service';
 
+import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlResultsService } from '../services/results_service';
 import type { SwimlaneType } from './explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -50,9 +53,6 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlResultsService } from '../services/results_service';
-import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 
 export interface ExplorerJob {
   id: string;

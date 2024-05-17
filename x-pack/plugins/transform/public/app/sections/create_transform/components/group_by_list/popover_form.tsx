@@ -10,7 +10,6 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  htmlIdGenerator,
   EuiButton,
   EuiCheckbox,
   EuiCodeBlock,
@@ -21,13 +20,14 @@ import {
   EuiLink,
   EuiSelect,
   EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ACCEPTED_TIMEZONES, isValidTimeZone } from '../../../../common/time_zone_utils';
 import type { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
+import { ACCEPTED_TIMEZONES, isValidTimeZone } from '../../../../common/time_zone_utils';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 
@@ -38,14 +38,14 @@ import type {
   PivotSupportedGroupByAggsWithInterval,
 } from '../../../../common';
 import {
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
   dateHistogramIntervalFormatRegex,
   getEsAggFromGroupByConfig,
+  histogramIntervalFormatRegex,
+  isAggName,
   isGroupByDateHistogram,
   isGroupByHistogram,
   isPivotGroupByConfigWithUiSupport,
-  histogramIntervalFormatRegex,
-  isAggName,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
 export function isIntervalValid(

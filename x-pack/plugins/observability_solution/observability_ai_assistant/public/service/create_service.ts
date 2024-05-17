@@ -7,7 +7,7 @@
 
 import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
 import { compact, without } from 'lodash';
-import { BehaviorSubject, debounceTime, filter, lastValueFrom, of, Subject, take } from 'rxjs';
+import { BehaviorSubject, Subject, debounceTime, filter, lastValueFrom, of, take } from 'rxjs';
 import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { createFunctionRequestMessage } from '../../common/utils/create_function_request_message';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';

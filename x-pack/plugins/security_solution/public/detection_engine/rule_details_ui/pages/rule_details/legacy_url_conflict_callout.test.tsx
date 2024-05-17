@@ -1,3 +1,5 @@
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +7,9 @@
  * 2.0.
  */
 import React from 'react';
+import type { Rule } from '../../../rule_management/logic';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
-import { render, screen } from '@testing-library/react';
-import type { Rule } from '../../../rule_management/logic';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();

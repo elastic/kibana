@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { keyBy } from 'lodash';
-import type { IEsSearchResponse } from '@kbn/search-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ExpressionAstExpression, buildExpression } from '@kbn/expressions-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import { keyBy } from 'lodash';
+import { stubIndexPattern } from '../../stubs';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { stubIndexPattern } from '../../stubs';
 
 // Mute moment.tz warnings about not finding a mock timezone
 jest.mock('../utils', () => {

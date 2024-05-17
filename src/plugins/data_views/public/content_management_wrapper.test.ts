@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ContentMagementWrapper } from './content_management_wrapper';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import { DataViewSavedObjectConflictError } from '../common';
+import { ContentMagementWrapper } from './content_management_wrapper';
 
 describe('ContentMagementWrapper', () => {
   const cmClient = {} as ContentClient;

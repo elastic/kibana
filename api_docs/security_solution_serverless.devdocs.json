@@ -85,9 +85,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"securitySolutionServerless\""
-        ],
+        "signature": ["\"securitySolutionServerless\""],
         "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -100,9 +98,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"securitySolutionServerless\""
-        ],
+        "signature": ["\"securitySolutionServerless\""],
         "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -115,9 +111,7 @@
         "tags": [],
         "label": "SECURITY_PROJECT_TYPE",
         "description": [],
-        "signature": [
-          "\"security\""
-        ],
+        "signature": ["\"security\""],
         "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

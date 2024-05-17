@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { kibanaResponseFactory } from '@kbn/core/server';
+import expect from '@kbn/expect';
 import { licensePreRoutingFactory } from '.';
 import { LicenseStatus } from '../../types';
 

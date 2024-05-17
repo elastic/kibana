@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import React, { memo, useCallback } from 'react';
 
-import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
+import * as i18n from '../translations';
 import type { RuleDetailsNavigation } from '../types';
 
 interface SingleAlertProps {

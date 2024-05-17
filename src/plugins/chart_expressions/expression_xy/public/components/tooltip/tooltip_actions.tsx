@@ -7,18 +7,18 @@
  */
 
 import { Datum, TooltipAction, TooltipValue, XYChartSeriesIdentifier } from '@elastic/charts';
+import { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { BooleanRelation } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormatFactory } from '@kbn/visualization-ui-components';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { FormatFactory } from '@kbn/visualization-ui-components';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { BooleanRelation } from '@kbn/es-query';
-import { isTimeChart } from '../../../common/helpers';
 import { CommonXYDataLayerConfig } from '../../../common';
+import { isTimeChart } from '../../../common/helpers';
 import { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
 import { MultiFilterEvent } from '../../types';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import {
   IndicesGetIndexTemplateRequest,
   IndicesGetIndexTemplateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export async function getIndexTemplate(

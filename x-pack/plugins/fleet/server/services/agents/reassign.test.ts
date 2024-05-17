@@ -8,11 +8,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../app_context';
 
-import { reassignAgent, reassignAgents } from './reassign';
 import { createClientMock } from './action.mock';
+import { reassignAgent, reassignAgents } from './reassign';
 
 describe('reassignAgent', () => {
   beforeEach(async () => {

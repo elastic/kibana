@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { render } from '@testing-library/react';
+import React from 'react';
 
 import { OsqueryAction } from '.';
+import { useKibana } from '../../common/lib/kibana';
 import { queryClient } from '../../query_client';
 import * as hooks from '../use_is_osquery_available';
-import { useKibana } from '../../common/lib/kibana';
 import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } from './translations';
 
 jest.mock('../../common/lib/kibana');

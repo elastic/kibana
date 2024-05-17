@@ -6,21 +6,21 @@
  */
 import axios from 'axios';
 
-import type { QueueConfig, IAsyncTelemetryEventsSender } from './async_sender.types';
-import {
-  DEFAULT_QUEUE_CONFIG,
-  DEFAULT_RETRY_CONFIG,
-  AsyncTelemetryEventsSender,
-} from './async_sender';
-import { TelemetryChannel, TelemetryCounter } from './types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  createMockTelemetryReceiver,
   createMockTelemetryPluginSetup,
   createMockTelemetryPluginStart,
+  createMockTelemetryReceiver,
   createMockUsageCounter,
 } from './__mocks__';
+import {
+  AsyncTelemetryEventsSender,
+  DEFAULT_QUEUE_CONFIG,
+  DEFAULT_RETRY_CONFIG,
+} from './async_sender';
+import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
 import { TelemetryEventsSender } from './sender';
+import { TelemetryChannel, TelemetryCounter } from './types';
 
 jest.mock('axios');
 jest.mock('./receiver');
@@ -539,7 +539,9 @@ describe('AsyncTelemetryEventsSender', () => {
         1,
         expect.anything(),
         // gets all ch2 events
-        ch2Events.map((e) => JSON.stringify(e)).join('\n'),
+        ch2Events
+          .map((e) => JSON.stringify(e))
+          .join('\n'),
         expect.anything()
       );
       expect(mockedAxiosPost).toHaveBeenNthCalledWith(

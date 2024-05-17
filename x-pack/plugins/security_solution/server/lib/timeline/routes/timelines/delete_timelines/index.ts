@@ -6,16 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';
+import type { SetupPlugins } from '../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { buildFrameworkRequest } from '../../../utils/common';
 import { deleteTimeline } from '../../../saved_object/timelines';
+import { buildFrameworkRequest } from '../../../utils/common';
 
 export const deleteTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

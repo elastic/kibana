@@ -8,15 +8,15 @@
 import React from 'react';
 
 import {
-  EuiTableFieldDataColumnType,
-  EuiTableComputedColumnType,
   EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
 import { EnginesLogic } from '../..';
-import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { FormattedDateTime } from '../../../../utils/formatted_date_time';
 import { EngineDetails } from '../../../engine/types';
 

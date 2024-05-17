@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { adHocRunStatus } from '../../../common/constants';
 import { parseDuration } from '../../../common';
+import { adHocRunStatus } from '../../../common/constants';
 import { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
 
 export function calculateSchedule(

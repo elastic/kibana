@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
-import React from 'react';
 import { StackTracesDisplayOption, TopNType } from '@kbn/profiling-utils';
+import React from 'react';
 import { StorageExplorerSummaryAPIResponse } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { LabelWithHint } from '../../components/label_with_hint';

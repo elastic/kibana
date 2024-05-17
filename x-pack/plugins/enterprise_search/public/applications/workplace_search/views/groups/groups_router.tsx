@@ -9,9 +9,9 @@ import React, { useEffect } from 'react';
 
 import { useActions } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { GROUP_PATH, GROUPS_PATH } from '../../routes';
+import { GROUPS_PATH, GROUP_PATH } from '../../routes';
 
 import { GroupRouter } from './group_router';
 import { Groups } from './groups';

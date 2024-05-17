@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 import { BETA } from '../../translations';
 
 export const NavItemBetaBadge = ({ text, className }: { text?: string; className?: string }) => {

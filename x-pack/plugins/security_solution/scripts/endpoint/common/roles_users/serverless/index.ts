@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { resolve, join } from 'path';
 import { readFileSync } from 'fs';
+import { join, resolve } from 'path';
 
 const ES_RESOURCES_DIR = resolve(__dirname, 'es_serverless_resources');
 

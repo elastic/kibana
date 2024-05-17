@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
 import { queryFilterFunction } from './query_filter';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#queryFilter', () => {
   const fn = functionWrapper(queryFilterFunction);

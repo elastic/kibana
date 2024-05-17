@@ -1,3 +1,9 @@
+import { EuiHealth, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { capitalize } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +11,10 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiHealth, EuiText } from '@elastic/eui';
-import { capitalize } from 'lodash';
-import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { TableId } from '@kbn/securitysolution-data-table';
-import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
-import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
 

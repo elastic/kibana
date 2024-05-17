@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import fs from 'fs/promises';
 import { range } from 'lodash';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../../jest_matchers';
-import { getKibanaMigratorTestKit } from '../../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../../test_utils';
-import { EsRunner, EsServer } from '../../test_types';
 import {
+  dummyModelVersion,
   getBaseMigratorParams,
   getSampleAType,
   getSampleBType,
-  dummyModelVersion,
 } from '../../fixtures/zdt_base.fixtures';
+import { getKibanaMigratorTestKit } from '../../kibana_migrator_test_kit';
+import { EsRunner, EsServer } from '../../test_types';
+import { delay, parseLogFile } from '../../test_utils';
 
 export function createStandardWorkflowTest({
   startES,

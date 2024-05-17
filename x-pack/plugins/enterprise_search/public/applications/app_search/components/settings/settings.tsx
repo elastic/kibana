@@ -9,7 +9,7 @@ import React from 'react';
 
 import { AppSearchPageTemplate } from '../layout';
 
-import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retention';
+import { LogRetentionConfirmationModal, LogRetentionPanel } from './log_retention';
 
 import { SETTINGS_TITLE } from '.';
 

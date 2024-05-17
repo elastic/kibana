@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { ApplicationStart } from '@kbn/core/public';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { AddData } from './add_data';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ApplicationStart } from '@kbn/core/public';
 
 jest.mock('../app_navigation_handler', () => {
   return {

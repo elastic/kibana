@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
 import { throttle } from 'lodash';
+import { useCallback, useMemo, useState } from 'react';
 
 import { scheduleToMinutes } from '../../../../../../common/lib/schedule_to_time';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
-import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { usePingStatuses } from '../hooks/use_ping_statuses';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import {
-  dateToMilli,
-  createTimeBuckets,
-  createStatusTimeBins,
   CHART_CELL_WIDTH,
-  indexBinsByEndTime,
   MonitorStatusPanelProps,
+  createStatusTimeBins,
+  createTimeBuckets,
+  dateToMilli,
+  indexBinsByEndTime,
 } from './monitor_status_data';
 
 export const useMonitorStatusData = ({

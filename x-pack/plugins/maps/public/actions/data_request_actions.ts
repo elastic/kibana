@@ -7,32 +7,40 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { FeatureCollection } from 'geojson';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { v4 as uuidv4 } from 'uuid';
-import { FeatureCollection } from 'geojson';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
 } from '../../common/constants';
+import { DataFilters, DataRequestMeta, MapExtent } from '../../common/descriptor_types';
+import { scaleBounds } from '../../common/elasticsearch_util';
+import { InnerJoin } from '../classes/joins/inner_join';
+import { ILayer } from '../classes/layers/layer';
+import { isLayerGroup } from '../classes/layers/layer_group';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
+import { DataRequestAbortError } from '../classes/util/data_request';
+import {
+  ResultMeta,
+  cancelRequest,
+  getEventHandlers,
+  getInspectorAdapters,
+  registerCancelCallback,
+  unregisterCancelCallback,
+} from '../reducers/non_serializable_instances';
+import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
   getDataRequestDescriptor,
+  getEditState,
   getLayerById,
   getLayerList,
-  getEditState,
 } from '../selectors/map_selectors';
-import {
-  cancelRequest,
-  registerCancelCallback,
-  unregisterCancelCallback,
-  getEventHandlers,
-  getInspectorAdapters,
-  ResultMeta,
-} from '../reducers/non_serializable_instances';
+import { getLayersExtent } from './get_layers_extent';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -43,14 +51,6 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
-import { InnerJoin } from '../classes/joins/inner_join';
-import { ILayer } from '../classes/layers/layer';
-import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
-import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds } from '../../common/elasticsearch_util';
-import { getLayersExtent } from './get_layers_extent';
-import { isLayerGroup } from '../classes/layers/layer_group';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 

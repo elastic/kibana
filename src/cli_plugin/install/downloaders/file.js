@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createWriteStream, createReadStream, statSync } from 'fs';
+import { createReadStream, createWriteStream, statSync } from 'fs';
 
 import { Progress } from '../progress';
 

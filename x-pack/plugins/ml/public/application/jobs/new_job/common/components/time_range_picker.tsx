@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
+import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 const WIDTH = '512px';

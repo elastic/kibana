@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
-import { KibanaServices } from './types';
 import { fetchActiveMaintenanceWindows } from './api';
+import { KibanaServices } from './types';
 
 export const useFetchActiveMaintenanceWindows = (
   { http, notifications: { toasts } }: KibanaServices,

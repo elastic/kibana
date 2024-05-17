@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { AnomaliesNetworkTable } from './anomalies_network_table';
-import { TestProviders } from '../../../mock';
+import { useMlHref } from '@kbn/ml-plugin/public';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { useQueryToggle } from '../../../containers/query_toggle';
-import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { NetworkType } from '../../../../explore/network/store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../../../../common/search_strategy';
-import { fireEvent, render } from '@testing-library/react';
-import { mockAnomalies } from '../mock';
+import { NetworkType } from '../../../../explore/network/store/model';
+import { useQueryToggle } from '../../../containers/query_toggle';
+import { TestProviders } from '../../../mock';
+import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { mockAnomalies } from '../mock';
+import { AnomaliesNetworkTable } from './anomalies_network_table';
 
 jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');

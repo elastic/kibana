@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, waitFor, cleanup, screen } from '@testing-library/react';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import React, { FC, PropsWithChildren } from 'react';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import {
   RECURRING_RUNNING_MAINTENANCE_WINDOW,
   RUNNING_MAINTENANCE_WINDOW_1,

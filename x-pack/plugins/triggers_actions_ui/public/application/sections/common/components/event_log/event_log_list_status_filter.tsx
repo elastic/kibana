@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 import { EventLogListStatus } from './event_log_list_status';
 

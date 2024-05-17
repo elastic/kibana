@@ -6,19 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ElasticsearchLegacySource,
+  ElasticsearchResponse,
+  ElasticsearchSource,
+} from '../../../../common/types/es';
+import { Globals } from '../../../static_globals';
+import { LegacyRequest } from '../../../types';
+import { getElasticsearchDataset, getIndexPatterns } from '../../cluster/get_index_patterns';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
-import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
 import { calculateNodeType } from './calculate_node_type';
+import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
-import {
-  ElasticsearchSource,
-  ElasticsearchResponse,
-  ElasticsearchLegacySource,
-} from '../../../../common/types/es';
-import { LegacyRequest } from '../../../types';
-import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
-import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   clusterState: ElasticsearchSource['cluster_state'],

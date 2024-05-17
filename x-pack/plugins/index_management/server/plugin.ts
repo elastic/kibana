@@ -8,11 +8,11 @@
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants/plugin';
-import { Dependencies } from './types';
+import { IndexManagementConfig } from './config';
 import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
-import { IndexManagementConfig } from './config';
+import { Dependencies } from './types';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Rule, RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RawRule, Rule } from '../../types';
+import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
+import { updateMeta } from '../lib';
 import { MuteOptions } from '../types';
 import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function unmuteInstance(
   context: RulesClientContext,

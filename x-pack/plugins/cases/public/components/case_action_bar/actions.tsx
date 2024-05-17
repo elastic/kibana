@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import * as i18n from '../case_view/translations';
+import type { CaseUI } from '../../../common/ui/types';
+import { AttachmentActionType } from '../../client/attachment_framework/types';
+import { useAllCasesNavigation } from '../../common/navigation';
+import { useCasesToast } from '../../common/use_cases_toast';
 import { useDeleteCases } from '../../containers/use_delete_cases';
+import * as i18n from '../case_view/translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import type { CaseUI } from '../../../common/ui/types';
-import { useAllCasesNavigation } from '../../common/navigation';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesToast } from '../../common/use_cases_toast';
-import { AttachmentActionType } from '../../client/attachment_framework/types';
 
 interface CaseViewActions {
   caseData: CaseUI;

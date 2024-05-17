@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, RequestHandlerContext } from '@kbn/core/server';
-import type { VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
+import type { VersionedRoute } from '@kbn/core-http-server';
+import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { getDataViews, hasUserDataView } from '../../has_user_data_view';
 
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];

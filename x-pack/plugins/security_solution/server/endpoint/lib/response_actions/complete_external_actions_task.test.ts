@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { createMockEndpointAppContext } from '../../mocks';
 import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
   CompleteExternalResponseActionsTask,
 } from './complete_external_actions_task';
-import { createMockEndpointAppContext } from '../../mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 describe('CompleteExternalActionsTask class', () => {
   let endpointAppContextMock: ReturnType<typeof createMockEndpointAppContext>;

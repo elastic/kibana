@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 const TEST_WRITE_INDEX = 'logs-routing_rules.test-test';
 const TEST_REROUTE_INDEX = 'logs-routing_rules.reroute-test';

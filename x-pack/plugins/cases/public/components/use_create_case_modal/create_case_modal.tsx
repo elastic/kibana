@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import React, { memo } from 'react';
 
-import type { CaseUI } from '../../containers/types';
 import * as i18n from '../../common/translations';
+import type { CaseUI } from '../../containers/types';
 import { CreateCase } from '../create';
 
 export interface CreateCaseModalProps {

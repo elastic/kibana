@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { PLUGIN_ID as FLEET_PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { ProfilingPluginStartDeps } from '../../types';
 
 export async function getHasSetupPrivileges({

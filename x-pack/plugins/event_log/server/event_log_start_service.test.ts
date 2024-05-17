@@ -8,8 +8,8 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
+import { EventLogClientService } from './event_log_start_service';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
 jest.mock('./event_log_client');

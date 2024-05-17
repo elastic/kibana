@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ShallowWrapper, ReactWrapper } from 'enzyme';
+import { ReactWrapper, ShallowWrapper } from 'enzyme';
 
 export const updateComponent = async (
   component:

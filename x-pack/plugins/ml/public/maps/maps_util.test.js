@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getResultsForJobId } from './util';
 import {
+  actualExpected,
   mlResultsServiceMock,
   typicalExpected,
-  actualExpected,
   typicalToActualExpected,
 } from './results.test.mock';
+import { getResultsForJobId } from './util';
 
 describe('Maps util', () => {
   describe('getResultsForJobId', () => {

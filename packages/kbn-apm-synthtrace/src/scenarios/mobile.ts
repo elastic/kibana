@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MobileDevice, apm, ApmFields } from '@kbn/apm-synthtrace-client';
+import { ApmFields, MobileDevice, apm } from '@kbn/apm-synthtrace-client';
 import type {
   DeviceInfo,
   GeoInfo,

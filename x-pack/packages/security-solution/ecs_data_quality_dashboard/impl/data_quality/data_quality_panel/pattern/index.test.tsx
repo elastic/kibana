@@ -10,9 +10,9 @@ import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 
+import { Pattern } from '.';
 import { EMPTY_STAT } from '../../helpers';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { Pattern } from '.';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

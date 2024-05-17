@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
+import React from 'react';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
 
 describe('HoverableUserWithAvatar', () => {
   it('renders the avatar and name', () => {

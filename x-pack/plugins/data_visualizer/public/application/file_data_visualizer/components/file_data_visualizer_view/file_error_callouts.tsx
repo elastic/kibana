@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
 import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';

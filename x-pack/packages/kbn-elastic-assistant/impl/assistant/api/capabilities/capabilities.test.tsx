@@ -7,8 +7,8 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
-import { getCapabilities } from './capabilities';
 import { API_ERROR } from '../../translations';
+import { getCapabilities } from './capabilities';
 
 jest.mock('@kbn/core-http-browser');
 

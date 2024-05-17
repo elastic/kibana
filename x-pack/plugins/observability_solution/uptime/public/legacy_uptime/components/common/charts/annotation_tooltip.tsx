@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import React from 'react';
+import styled from 'styled-components';
 
 const Header = styled.div`
   font-weight: bold;

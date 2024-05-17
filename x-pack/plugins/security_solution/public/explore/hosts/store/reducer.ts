@@ -14,17 +14,17 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/
 import {
   setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
-  updateHostsSort,
   updateHostRiskScoreSeverityFilter,
   updateHostRiskScoreSort,
+  updateHostsAnomaliesInterval,
+  updateHostsAnomaliesJobIdFilter,
+  updateHostsSort,
   updateTableActivePage,
   updateTableLimit,
-  updateHostsAnomaliesJobIdFilter,
-  updateHostsAnomaliesInterval,
 } from './actions';
 import {
-  setHostPageQueriesActivePageToZero,
   setHostDetailsQueriesActivePageToZero,
+  setHostPageQueriesActivePageToZero,
 } from './helpers';
 import type { HostsModel } from './model';
 import { HostsTableType } from './model';

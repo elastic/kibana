@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   type Message,
   MessageRole,
-  type TelemetryEventTypeWithPayload,
   ObservabilityAIAssistantTelemetryEventType,
+  type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLastUsedPrompts } from '../../hooks/use_last_used_prompts';
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
-import { useLastUsedPrompts } from '../../hooks/use_last_used_prompts';
 
 export interface PromptEditorProps {
   disabled: boolean;
@@ -204,8 +204,8 @@ export function PromptEditor({
                 ? 'fill'
                 : 'base'
               : innerMessage?.content
-              ? 'fill'
-              : 'base'
+                ? 'fill'
+                : 'base'
           }
           iconType="kqlFunction"
           isLoading={loading}

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { plugin } from './plugin';
-import { LensParser } from './parser';
-import { VISUALIZATION } from './translations';
 import { LensRenderer } from '../../../visualizations/lens_renderer';
+import { LensParser } from './parser';
+import { plugin } from './plugin';
+import { VISUALIZATION } from './translations';
 
 export { plugin, LensParser as parser, LensRenderer as renderer, VISUALIZATION };

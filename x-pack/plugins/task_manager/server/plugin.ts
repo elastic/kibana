@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
-  PluginInitializerContext,
-  Plugin,
   CoreSetup,
-  Logger,
   CoreStart,
-  ServiceStatusLevels,
   CoreStatus,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  ServiceStatusLevels,
 } from '@kbn/core/server';
-import { TaskPollingLifecycle } from './polling_lifecycle';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
 import { TaskManagerConfig } from './config';
-import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
-import { removeIfExists } from './lib/remove_if_exists';
-import { setupSavedObjects } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
-import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
-import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTask, ConcreteTaskInstance } from './task';
-import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { setupIntervalLogging } from './lib/log_health_metrics';
-import { metricsStream, Metrics } from './metrics';
+import { Middleware, addMiddlewareToChain, createInitialMiddleware } from './lib/middleware';
+import { removeIfExists } from './lib/remove_if_exists';
+import { Metrics, metricsStream } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
+import { MonitoringStats, createMonitoringStats } from './monitoring';
+import { TaskPollingLifecycle } from './polling_lifecycle';
+import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import { setupSavedObjects } from './saved_objects';
+import { ConcreteTaskInstance, EphemeralTask } from './task';
+import { TaskScheduling } from './task_scheduling';
+import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
+import { REMOVED_TYPES, TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import { registerTaskManagerUsageCollector } from './usage';
 
 export interface TaskManagerSetupContract {
   /**

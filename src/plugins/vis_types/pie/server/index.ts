@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, PieConfig } from '../config';
+import { PieConfig, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<PieConfig> = {
   exposeToBrowser: {

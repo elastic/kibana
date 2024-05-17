@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import {
-  EuiText,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 const CenteredEuiFlexItem = styled(EuiFlexItem)`

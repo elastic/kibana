@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { shallow, mount } from 'enzyme';
 
-import { AlertsCount } from './alerts_count';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import { TestProviders } from '../../../../common/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import type { AlertsCountAggregation } from './types';
+import { TestProviders } from '../../../../common/mock';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import { AlertsCount } from './alerts_count';
 import { emptyStackByField0Response } from './mocks/mock_response_empty_field0';
 import {
-  buckets as oneGroupByResponseBuckets,
   mockMultiGroupResponse,
+  buckets as oneGroupByResponseBuckets,
 } from './mocks/mock_response_multi_group';
 import {
-  buckets as twoGroupByResponseBuckets,
   singleGroupResponse,
+  buckets as twoGroupByResponseBuckets,
 } from './mocks/mock_response_single_group';
+import type { AlertsCountAggregation } from './types';
 
 jest.mock('../../../../common/lib/kibana');
 const mockDispatch = jest.fn();

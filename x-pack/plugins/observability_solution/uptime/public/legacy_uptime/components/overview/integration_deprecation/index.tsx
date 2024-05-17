@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { getHasIntegrationMonitors } from '../../../state/api/has_integration_monitors';
 import { monitorListSelector } from '../../../state/selectors';

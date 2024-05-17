@@ -9,11 +9,11 @@
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { AttachmentType } from '../../../../common/types/domain';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../common/constants';
+import { AttachmentType } from '../../../../common/types/domain';
 import { createJiraConnector } from '../../../services/test_utils';
 import { payloadMigration } from './payload';
 import type { UserActions } from './types';

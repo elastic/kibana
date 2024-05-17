@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeprecationsRegistry } from '../deprecations_registry';
 
 type DeprecationsRegistryContract = PublicMethodsOf<DeprecationsRegistry>;

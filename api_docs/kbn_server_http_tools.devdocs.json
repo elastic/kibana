@@ -47,9 +47,7 @@
             "tags": [],
             "label": "redirectHttpFromPort",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -61,9 +59,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -75,9 +71,7 @@
             "tags": [],
             "label": "certificate",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -89,9 +83,7 @@
             "tags": [],
             "label": "certificateAuthorities",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -103,9 +95,7 @@
             "tags": [],
             "label": "keyPassphrase",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -139,9 +129,7 @@
             "tags": [],
             "label": "cipherSuites",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -153,9 +141,7 @@
             "tags": [],
             "label": "supportedProtocols",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,9 +155,7 @@
             "description": [
               "\nOptions that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options."
             ],
-            "signature": [
-              "() => number"
-            ],
+            "signature": ["() => number"],
             "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -255,9 +239,7 @@
             "tags": [],
             "label": "serverOptions",
             "description": [],
-            "signature": [
-              "ServerOptions"
-            ],
+            "signature": ["ServerOptions"],
             "path": "packages/kbn-server-http-tools/src/create_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -270,9 +252,7 @@
             "tags": [],
             "label": "listenerOptions",
             "description": [],
-            "signature": [
-              "ListenerOptions"
-            ],
+            "signature": ["ListenerOptions"],
             "path": "packages/kbn-server-http-tools/src/create_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -311,9 +291,7 @@
             "tags": [],
             "label": "request",
             "description": [],
-            "signature": [
-              "Request"
-            ],
+            "signature": ["Request"],
             "path": "packages/kbn-server-http-tools/src/default_validation_error_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -326,9 +304,7 @@
             "tags": [],
             "label": "h",
             "description": [],
-            "signature": [
-              "ResponseToolkit"
-            ],
+            "signature": ["ResponseToolkit"],
             "path": "packages/kbn-server-http-tools/src/default_validation_error_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -341,9 +317,7 @@
             "tags": [],
             "label": "err",
             "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
+            "signature": ["Error | undefined"],
             "path": "packages/kbn-server-http-tools/src/default_validation_error_handler.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -424,9 +398,7 @@
             "tags": [],
             "label": "request",
             "description": [],
-            "signature": [
-              "Request"
-            ],
+            "signature": ["Request"],
             "path": "packages/kbn-server-http-tools/src/get_request_id.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -461,9 +433,7 @@
                 "tags": [],
                 "label": "ipAllowlist",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-server-http-tools/src/get_request_id.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -527,9 +497,7 @@
             "tags": [],
             "label": "{ configureTLS = true }",
             "description": [],
-            "signature": [
-              "{ configureTLS?: boolean | undefined; }"
-            ],
+            "signature": ["{ configureTLS?: boolean | undefined; }"],
             "path": "packages/kbn-server-http-tools/src/get_server_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -625,9 +593,7 @@
             "tags": [],
             "label": "hapiServer",
             "description": [],
-            "signature": [
-              "Server"
-            ],
+            "signature": ["Server"],
             "path": "packages/kbn-server-http-tools/src/set_tls_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -700,9 +666,7 @@
             "tags": [],
             "label": "allowOrigin",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -843,9 +807,7 @@
             "tags": [],
             "label": "shutdownTimeout",
             "description": [],
-            "signature": [
-              "moment.Duration"
-            ],
+            "signature": ["moment.Duration"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -893,9 +855,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -907,9 +867,7 @@
             "tags": [],
             "label": "certificate",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -921,9 +879,7 @@
             "tags": [],
             "label": "certificateAuthorities",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -935,9 +891,7 @@
             "tags": [],
             "label": "cipherSuites",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -949,9 +903,7 @@
             "tags": [],
             "label": "keyPassphrase",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -963,9 +915,7 @@
             "tags": [],
             "label": "requestCert",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -977,9 +927,7 @@
             "tags": [],
             "label": "rejectUnauthorized",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -991,9 +939,7 @@
             "tags": [],
             "label": "getSecureOptions",
             "description": [],
-            "signature": [
-              "(() => number) | undefined"
-            ],
+            "signature": ["(() => number) | undefined"],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,

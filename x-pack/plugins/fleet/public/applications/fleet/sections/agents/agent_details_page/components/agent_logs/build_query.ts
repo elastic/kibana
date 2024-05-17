@@ -6,11 +6,11 @@
  */
 
 import {
-  DATASET_FIELD,
   AGENT_DATASET,
   AGENT_DATASET_PATTERN,
-  LOG_LEVEL_FIELD,
   AGENT_ID_FIELD,
+  DATASET_FIELD,
+  LOG_LEVEL_FIELD,
 } from './constants';
 
 export const buildQuery = ({

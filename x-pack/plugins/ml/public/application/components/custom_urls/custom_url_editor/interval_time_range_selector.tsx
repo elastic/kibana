@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Dispatch, FC } from 'react';
-import React from 'react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Dispatch, FC } from 'react';
+import React from 'react';
 
 interface IntervalTimerangeSelectorProps {
   setAddIntervalTimerange: Dispatch<React.SetStateAction<boolean>>;

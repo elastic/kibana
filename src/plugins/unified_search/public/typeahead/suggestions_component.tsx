@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent, ReactNode } from 'react';
-import { isEmpty } from 'lodash';
-import classNames from 'classnames';
 import { css } from '@emotion/react';
+import classNames from 'classnames';
+import { isEmpty } from 'lodash';
+import React, { PureComponent, ReactNode } from 'react';
 
 import useRafState from 'react-use/lib/useRafState';
 import { QuerySuggestion } from '../autocomplete';
-import { SuggestionComponent } from './suggestion_component';
+import { onRaf, shallowEqual } from '../utils';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
   SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
+import { SuggestionComponent } from './suggestion_component';
 import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
-import { onRaf, shallowEqual } from '../utils';
 
 interface SuggestionsComponentProps {
   index: number | null;

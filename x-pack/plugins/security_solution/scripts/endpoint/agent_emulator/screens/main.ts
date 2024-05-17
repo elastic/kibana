@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { PolicyResponderScreen } from './policy_responder';
-import { ActionResponderScreen } from './actions_responder';
-import { SCREEN_ROW_MAX_WIDTH } from '../../common/screen/constants';
+import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
 import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
-import type { EmulatorRunContext } from '../services/emulator_run_context';
-import { LoadEndpointsScreen } from './load_endpoints';
-import { TOOL_TITLE } from '../constants';
-import { ScreenBaseClass, ChoiceMenuFormatter } from '../../common/screen';
+import { SCREEN_ROW_MAX_WIDTH } from '../../common/screen/constants';
 import type { DataFormatter } from '../../common/screen/data_formatter';
+import { TOOL_TITLE } from '../constants';
+import type { EmulatorRunContext } from '../services/emulator_run_context';
+import { ActionResponderScreen } from './actions_responder';
 import { RunServiceStatus } from './components/run_service_status_formatter';
+import { LoadEndpointsScreen } from './load_endpoints';
+import { PolicyResponderScreen } from './policy_responder';
 
 export class MainScreen extends ScreenBaseClass {
   private readonly loadEndpointsScreen: LoadEndpointsScreen;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
 import { getPalette } from '../../palettes';
+import { RootState, updatePalette } from '../../state/color_mapping';
 
 export function PaletteSelector({
   palettes,

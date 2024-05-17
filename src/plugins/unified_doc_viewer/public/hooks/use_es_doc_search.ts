@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../plugin';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;

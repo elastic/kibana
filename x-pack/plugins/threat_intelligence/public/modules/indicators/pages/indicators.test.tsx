@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { IndicatorsPage } from './indicators';
+import moment from 'moment';
+import React from 'react';
+import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { useFilters } from '../../query_bar/hooks/use_filters';
+import { TABLE_TEST_ID } from '../components/table/test_ids';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
 import { useIndicators } from '../hooks/use_indicators';
-import { useFilters } from '../../query_bar/hooks/use_filters';
-import moment from 'moment';
-import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { TABLE_TEST_ID } from '../components/table/test_ids';
-import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
+import { IndicatorsPage } from './indicators';
 
 jest.mock('../../query_bar/hooks/use_filters');
 jest.mock('../hooks/use_indicators');

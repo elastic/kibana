@@ -1,3 +1,4 @@
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +6,19 @@
  * 2.0.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { mockDataViewsService } from '../../data_views_service/mocks';
-import {
-  getIndexPatternFromTextBasedQuery,
-  loadIndexPatternRefs,
-  getStateFromAggregateQuery,
-  getAllColumns,
-  canColumnBeUsedBeInMetricDimension,
-} from './utils';
-import type { TextBasedLayerColumn } from './types';
 import { type AggregateQuery } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { mockDataViewsService } from '../../data_views_service/mocks';
+import type { TextBasedLayerColumn } from './types';
+import {
+  canColumnBeUsedBeInMetricDimension,
+  getAllColumns,
+  getIndexPatternFromTextBasedQuery,
+  getStateFromAggregateQuery,
+  loadIndexPatternRefs,
+} from './utils';
 
 jest.mock('./fetch_data_from_aggregate_query', () => ({
   fetchDataFromAggregateQuery: jest.fn(() => {

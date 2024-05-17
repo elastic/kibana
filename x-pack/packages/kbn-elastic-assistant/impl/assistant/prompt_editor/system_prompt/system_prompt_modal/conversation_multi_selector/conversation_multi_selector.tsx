@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
-import { TEST_IDS } from '../../../../constants';
 import { Conversation } from '../../../../../..';
+import { TEST_IDS } from '../../../../constants';
 import * as i18n from '../translations';
 
 interface Props {

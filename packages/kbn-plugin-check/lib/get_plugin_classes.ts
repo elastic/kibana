@@ -8,8 +8,8 @@
 
 import { Project } from 'ts-morph';
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { PluginOrPackage } from '@kbn/docs-utils/src/types';
+import { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Return the `client` and `server` plugin classes for a plugin.

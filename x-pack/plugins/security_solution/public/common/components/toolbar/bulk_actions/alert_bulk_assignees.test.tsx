@@ -9,13 +9,13 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
-import { useGetCurrentUserProfile } from '../../user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../user_profiles/use_get_current_user_profile';
 import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 
-import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
+import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 
 jest.mock('../../user_profiles/use_get_current_user_profile');
 jest.mock('../../user_profiles/use_bulk_get_user_profiles');

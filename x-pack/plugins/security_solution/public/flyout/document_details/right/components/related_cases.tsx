@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { CORRELATIONS_RELATED_CASES_TEST_ID } from './test_ids';

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect, useState, useMemo } from 'react';
-import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
-import { parse } from 'query-string';
+import { EuiButton, EuiPageBody, EuiPageSection, EuiPanel } from '@elastic/eui';
+import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { createPath } from '../../routing/router';
+import { parse } from 'query-string';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { createPath } from '../../routing/router';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
 import { MlPageHeader } from '../../components/page_header';

@@ -1,3 +1,4 @@
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +7,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { QueryHistoryAction, getTableColumns, QueryHistory, QueryColumn } from './query_history';
-import { render, screen } from '@testing-library/react';
+import { QueryColumn, QueryHistory, QueryHistoryAction, getTableColumns } from './query_history';
 
 jest.mock('./history_local_storage', () => {
   const module = jest.requireActual('./history_local_storage');

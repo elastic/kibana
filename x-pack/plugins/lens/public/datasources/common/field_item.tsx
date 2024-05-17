@@ -7,29 +7,29 @@
 
 import './field_item.scss';
 
-import React, { useCallback, useState, useMemo } from 'react';
-import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { EuiButton, EuiPopoverFooter, EuiText } from '@elastic/eui';
+import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { Draggable } from '@kbn/dom-drag-drop';
+import { Filter, Query } from '@kbn/es-query';
+import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
-import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import {
   AddFieldFilterHandler,
-  FieldStats,
-  FieldPopover,
-  FieldPopoverHeader,
-  FieldPopoverFooter,
   FieldItemButton,
+  FieldPopover,
+  FieldPopoverFooter,
+  FieldPopoverHeader,
+  FieldStats,
   type GetCustomFieldType,
 } from '@kbn/unified-field-list';
-import { Draggable } from '@kbn/dom-drag-drop';
-import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { type DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DatasourceDataPanelProps } from '../../types';
-import type { IndexPattern, IndexPatternField } from '../../types';
-import type { LensAppServices } from '../../app_plugin/types';
+import React, { useCallback, useState, useMemo } from 'react';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
+import type { LensAppServices } from '../../app_plugin/types';
+import { DatasourceDataPanelProps } from '../../types';
+import type { IndexPattern, IndexPatternField } from '../../types';
 import { getFieldItemActions } from './get_field_item_actions';
 
 type LensFieldListItem = IndexPatternField | DatatableColumn | DataViewField;

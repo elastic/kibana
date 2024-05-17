@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
-import { executionTranslations } from './translations';
+import { v4 as uuidV4 } from 'uuid';
 import type { ParsedCommandInterface } from '../../../service/types';
-import { ConsoleCodeBlock } from '../../console_code_block';
-import { handleInputAreaState } from './handle_input_area_state';
+import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
+import { BadArgument } from '../../bad_argument';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
+import { ConsoleCodeBlock } from '../../console_code_block';
+import { UnknownCommand } from '../../unknown_comand';
+import { ValidationError } from '../../validation_error';
 import type {
   CommandHistoryItem,
   ConsoleDataAction,
   ConsoleDataState,
   ConsoleStoreReducer,
 } from '../types';
-import { UnknownCommand } from '../../unknown_comand';
-import { BadArgument } from '../../bad_argument';
-import { ValidationError } from '../../validation_error';
-import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
+import { handleInputAreaState } from './handle_input_area_state';
+import { executionTranslations } from './translations';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
 

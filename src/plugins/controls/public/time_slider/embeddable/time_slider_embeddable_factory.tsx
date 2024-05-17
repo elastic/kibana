@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { TIME_SLIDER_CONTROL } from '../..';
 import {
   createTimeSliderExtract,
   createTimeSliderInject,
 } from '../../../common/time_slider/time_slider_persistable_state';
-import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlInput, IEditableControlFactory } from '../../types';
 
 export class TimeSliderEmbeddableFactory

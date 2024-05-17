@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getProgressRenderer } from '../progress_renderer';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { Progress } from '../../../common';
+import { getProgressRenderer } from '../progress_renderer';
 
 storiesOf('renderers/progress', module).add('default', () => {
   const config = {

@@ -8,8 +8,8 @@
 import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../constants';
-import { getApiStatus, getApiError } from '../../store/selectors';
-import { saveAutoFollowPattern, clearApiError } from '../../store/actions';
+import { clearApiError, saveAutoFollowPattern } from '../../store/actions';
+import { getApiError, getApiStatus } from '../../store/selectors';
 import { AutoFollowPatternAdd as AutoFollowPatternAddView } from './auto_follow_pattern_add';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;

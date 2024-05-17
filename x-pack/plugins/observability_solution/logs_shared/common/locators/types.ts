@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { LogViewReference } from '../log_views/types';
 import { TimeRange } from './time_range';
 

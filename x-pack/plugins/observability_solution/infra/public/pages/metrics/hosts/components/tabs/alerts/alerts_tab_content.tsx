@@ -1,3 +1,8 @@
+import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useBoolean } from '@kbn/react-hooks';
+import { ALERT_RULE_PRODUCER, AlertConsumers } from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,28 +10,23 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
-import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { useBoolean } from '@kbn/react-hooks';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
+import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
+import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { useAlertsQuery } from '../../../hooks/use_alerts_query';
-import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
-import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
+import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
   infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
-import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
-import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
-import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
+import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
+import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
+import { useAlertsQuery } from '../../../hooks/use_alerts_query';
+import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
+import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();

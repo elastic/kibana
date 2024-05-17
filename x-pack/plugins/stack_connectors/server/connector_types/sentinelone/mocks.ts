@@ -7,25 +7,25 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { DeepPartial } from '@kbn/utility-types';
-import { merge } from 'lodash';
-import { AxiosResponse } from 'axios/index';
+import { Readable } from 'stream';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   ServiceParams,
   SubActionRequestParams,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { Readable } from 'stream';
+import { DeepPartial } from '@kbn/utility-types';
+import { AxiosResponse } from 'axios/index';
+import { merge } from 'lodash';
 import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
-import { SentinelOneConnector } from './sentinelone';
 import {
   SentinelOneConfig,
   SentinelOneFetchAgentFilesResponse,
   SentinelOneGetAgentsResponse,
   SentinelOneSecrets,
 } from '../../../common/sentinelone/types';
+import { SentinelOneConnector } from './sentinelone';
 
 const createAgentDetailsMock = (
   overrides: DeepPartial<SentinelOneGetAgentsResponse['data'][number]> = {}

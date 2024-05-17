@@ -7,23 +7,23 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import DateMath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { FieldStatsResponse } from '../../types';
-import { getFieldExampleBuckets, getFieldValues } from '../field_examples_calculator';
 import {
+  DEFAULT_SIMPLE_EXAMPLES_SIZE,
+  DEFAULT_TOP_VALUES_SIZE,
+  SHARD_SIZE,
+  SIMPLE_EXAMPLES_FETCH_SIZE,
+} from '../../constants';
+import type { FieldStatsResponse } from '../../types';
+import {
+  canProvideAggregatedStatsForField,
   canProvideExamplesForField,
   canProvideNumberSummaryForField,
-  canProvideAggregatedStatsForField,
 } from '../../utils/can_provide_stats';
-import {
-  SHARD_SIZE,
-  DEFAULT_TOP_VALUES_SIZE,
-  SIMPLE_EXAMPLES_FETCH_SIZE,
-  DEFAULT_SIMPLE_EXAMPLES_SIZE,
-} from '../../constants';
+import { getFieldExampleBuckets, getFieldValues } from '../field_examples_calculator';
 
 export type SearchHandler = ({
   aggs,

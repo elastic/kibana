@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { Position } from '@elastic/charts';
-import type { $Values } from '@kbn/utility-types';
-import { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
+import { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { Filter, FilterMeta } from '@kbn/es-query';
+import type { $Values } from '@kbn/utility-types';
 import type { LegendSize, PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
-import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
+import { layerTypes } from './layer_types';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
@@ -37,7 +37,7 @@ export interface PersistableFilter extends Filter {
 
 export type SortingHint = string;
 
-export type LayerType = typeof layerTypes[keyof typeof layerTypes];
+export type LayerType = (typeof layerTypes)[keyof typeof layerTypes];
 
 export type ValueLabelConfig = 'hide' | 'show';
 

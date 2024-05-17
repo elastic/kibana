@@ -7,20 +7,20 @@
 
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
 import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
 import type { LogViewNotificationChannel } from '@kbn/logs-shared-plugin/public';
+import { ActorRefFrom, EmittedFrom, actions, createMachine } from 'xstate';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
 import {
-  createLogStreamQueryStateMachine,
   DEFAULT_TIMERANGE,
   LogStreamQueryStateMachineDependencies,
+  createLogStreamQueryStateMachine,
 } from '../../../log_stream_query_state';
 import { OmitDeprecatedState } from '../../../xstate_helpers';
 import {
-  waitForInitialQueryParameters,
   waitForInitialPositionParameters,
+  waitForInitialQueryParameters,
 } from './initial_parameters_service';
 import type {
   LogStreamPageContext,
@@ -241,10 +241,10 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                 parsedQuery: event.validatedQuery,
               } as LogStreamPageContextWithQuery)
             : event.type === 'VALID_QUERY_CHANGED'
-            ? ({
-                parsedQuery: event.parsedQuery,
-              } as LogStreamPageContextWithQuery)
-            : {}
+              ? ({
+                  parsedQuery: event.parsedQuery,
+                } as LogStreamPageContextWithQuery)
+              : {}
         ),
         storeTime: actions.assign((_context, event) => {
           return 'timeRange' in event && 'refreshInterval' in event && 'timestamps' in event

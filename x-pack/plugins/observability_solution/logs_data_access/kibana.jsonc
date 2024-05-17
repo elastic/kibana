@@ -6,10 +6,7 @@
     "id": "logsDataAccess",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "data", 
-      "dataViews"
-    ],
+    "requiredPlugins": ["data", "dataViews"],
     "optionalPlugins": [],
     "requiredBundles": []
   }

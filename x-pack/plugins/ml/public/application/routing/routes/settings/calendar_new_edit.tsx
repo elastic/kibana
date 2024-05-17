@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
-import { useRouteResolver } from '../../use_resolver';
-import { usePermissionCheck } from '../../../capabilities/check_capabilities';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import type { FC } from 'react';
+import React from 'react';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import type { NavigateToPath } from '../../../contexts/kibana';
 import { getMlNodeCount } from '../../../ml_nodes_check';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import type { MlRoute, PageProps } from '../../router';
+import { PageLoader, createPath } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 
 enum MODE {
   NEW,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileShareJSON, FileShare } from '../../common/types';
-import type { GetArgs, UpdateArgs, DeleteArgs, ListArgs } from './internal_file_share_service';
+import type { FileShare, FileShareJSON } from '../../common/types';
+import type { DeleteArgs, GetArgs, ListArgs, UpdateArgs } from './internal_file_share_service';
 
 /**
  * We only expose functionality here that do not require you to have a {@link File}

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type {
-  NotificationsServerSetupDependencies,
-  NotificationsServerStartDependencies,
-  NotificationsServerStart,
-  NotificationsServerSetup,
-} from './types';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { NotificationsConfigType } from './config';
 import { EmailServiceProvider } from './services/connectors_email_service_provider';
+import type {
+  NotificationsServerSetup,
+  NotificationsServerSetupDependencies,
+  NotificationsServerStart,
+  NotificationsServerStartDependencies,
+} from './types';
 
 export class NotificationsPlugin
   implements

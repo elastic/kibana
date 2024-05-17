@@ -12,8 +12,8 @@ import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { NetflowRenderer } from '../netflow';
 
-import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 import { Details } from '../helpers';
+import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 
 interface Props {
   contextId: string;

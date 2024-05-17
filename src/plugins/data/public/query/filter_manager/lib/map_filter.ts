@@ -9,16 +9,16 @@
 import { cloneDeep, reduceRight } from 'lodash';
 
 import { Filter } from '@kbn/es-query';
+import { generateMappingChain } from './generate_mapping_chain';
 import { mapCombined } from './mappers/map_combined';
-import { mapSpatialFilter } from './mappers/map_spatial_filter';
+import { mapDefault } from './mappers/map_default';
+import { mapExists } from './mappers/map_exists';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
 import { mapPhrases } from './mappers/map_phrases';
-import { mapRange } from './mappers/map_range';
-import { mapExists } from './mappers/map_exists';
 import { mapQueryString } from './mappers/map_query_string';
-import { mapDefault } from './mappers/map_default';
-import { generateMappingChain } from './generate_mapping_chain';
+import { mapRange } from './mappers/map_range';
+import { mapSpatialFilter } from './mappers/map_spatial_filter';
 
 export function mapFilter(filter: Filter) {
   /** Mappers **/

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   AxisExtentConfig,
   FormBasedPersistedState,
@@ -14,8 +16,6 @@ import type {
   XYLayerConfig,
   XYState,
 } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedObjectReference } from '@kbn/core/server';
 import { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 import type { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import type { Chart, ChartConfig, ChartLayer } from '../types';

@@ -7,7 +7,7 @@
 
 import { AutoFollowPatternForm } from '../../app/components/auto_follow_pattern_form';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { nextTick, pageHelpers, setupEnvironment } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT, AUTO_FOLLOW_PATTERN_EDIT_NAME } from './helpers/constants';
 
 const { setup } = pageHelpers.autoFollowPatternEdit;

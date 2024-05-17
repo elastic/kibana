@@ -8,9 +8,9 @@
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {

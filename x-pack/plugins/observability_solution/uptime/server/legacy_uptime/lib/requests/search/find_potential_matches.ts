@@ -6,12 +6,12 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { getQueryStringFilter } from './get_query_string_filter';
-import { QueryContext } from './query_context';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../../common/constants/client_defaults';
+import { getQueryStringFilter } from './get_query_string_filter';
+import { QueryContext } from './query_context';
 
 /**
  * This is the first phase of the query. In it, we find all monitor IDs that have ever matched the given filters.

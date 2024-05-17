@@ -8,15 +8,15 @@
 
 import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import {
+  SerializedSearchSourceFields,
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import { SavedVisState, VisSavedObject } from '../../types';
 
-import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
-import { extractControlsReferences, injectControlsReferences } from './controls_references';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
+import { extractControlsReferences, injectControlsReferences } from './controls_references';
+import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 
 export function extractReferences({
   attributes,

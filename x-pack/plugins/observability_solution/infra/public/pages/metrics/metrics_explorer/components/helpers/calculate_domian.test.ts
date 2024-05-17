@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { calculateDomain } from './calculate_domain';
+import { Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
-import { Color } from '../../../../../../common/color_palette';
+import { calculateDomain } from './calculate_domain';
 describe('calculateDomain()', () => {
   const series: MetricsExplorerSeries = {
     id: 'test-01',

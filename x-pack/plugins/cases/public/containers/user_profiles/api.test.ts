@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { bulkGetUserProfiles, getCurrentUserProfile, suggestUserProfiles } from './api';

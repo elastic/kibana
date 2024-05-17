@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type { DataViewFieldBase, Filter } from '@kbn/es-query';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
-import type { RuleRangeTuple, BulkCreate, WrapHits, WrapSuppressedHits, RunOpts } from '../types';
-import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { createThreatSignals } from './threat_mapping/create_threat_signals';
-import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
+import type { BulkCreate, RuleRangeTuple, RunOpts, WrapHits, WrapSuppressedHits } from '../types';
+import { createThreatSignals } from './threat_mapping/create_threat_signals';
+import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
 
 export const indicatorMatchExecutor = async ({
   inputIndex,

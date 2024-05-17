@@ -6,41 +6,41 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { pick } from 'lodash';
 
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EuiResizeObserver } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
-import moment from 'moment';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import {
   apiHasExecutionContext,
   initializeTimeRange,
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import usePrevious from 'react-use/lib/usePrevious';
 import { throttle } from 'lodash';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import type {
-  SingleMetricViewerRuntimeState,
   SingleMetricViewerEmbeddableApi,
   SingleMetricViewerEmbeddableState,
+  SingleMetricViewerRuntimeState,
 } from '../types';
+import { getServices } from './get_services';
 import { initializeSingleMetricViewerControls } from './single_metric_viewer_controls_initializer';
 import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
-import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
-import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import { getServices } from './get_services';
-import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;

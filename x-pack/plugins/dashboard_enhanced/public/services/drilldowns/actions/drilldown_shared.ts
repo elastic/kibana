@@ -6,18 +6,18 @@
  */
 
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
-  apiIsPresentationContainer,
   type PresentationContainer,
+  apiIsPresentationContainer,
 } from '@kbn/presentation-containers';
 import {
-  getPanelTitle,
-  type PublishesPanelTitle,
-  type HasUniqueId,
   type HasParentApi,
+  type HasUniqueId,
+  type PublishesPanelTitle,
+  getPanelTitle,
 } from '@kbn/presentation-publishing';
-import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**

@@ -7,11 +7,11 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { createLiveQueryRoute } from './create_live_query_route';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createLiveQueryRoute } from './create_live_query_route';
+import { findLiveQueryRoute } from './find_live_query_route';
 import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
 import { getLiveQueryResultsRoute } from './get_live_query_results_route';
-import { findLiveQueryRoute } from './find_live_query_route';
 
 export const initLiveQueryRoutes = (
   router: IRouter<DataRequestHandlerContext>,

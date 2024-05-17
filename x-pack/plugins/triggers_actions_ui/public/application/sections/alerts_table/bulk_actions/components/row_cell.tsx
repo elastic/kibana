@@ -8,9 +8,9 @@
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { ChangeEvent, useCallback } from 'react';
 import { useContext } from 'react';
-import { SELECT_ROW_ARIA_LABEL } from '../translations';
-import { AlertsTableContext } from '../../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../../types';
+import { AlertsTableContext } from '../../contexts/alerts_table_context';
+import { SELECT_ROW_ARIA_LABEL } from '../translations';
 
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
   const {

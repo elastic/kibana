@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiBadge,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 

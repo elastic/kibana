@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCard, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiCard } from '@elastic/eui';
 
 import { SynonymCard, SynonymIcon } from '.';
 

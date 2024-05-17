@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export { METRIC_TYPE };

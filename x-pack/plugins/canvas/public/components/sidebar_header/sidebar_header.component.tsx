@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
-import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ShortcutStrings } from '../../../i18n/shortcuts';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
 
 const strings = {
   getBringForwardAriaLabel: () =>

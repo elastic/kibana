@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
-import { OverwriteModalProps, OverwriteModal } from './overwrite_modal';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { OverwriteModal, OverwriteModalProps } from './overwrite_modal';
 
 describe('OverwriteModal', () => {
   const obj = { type: 'foo', id: 'bar', meta: { title: 'baz' } };

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { UserAgentSummaryItem } from './user_agent_summary_item';
 import { mountWithTheme } from '../../../utils/test_helpers';
+import { UserAgentSummaryItem } from './user_agent_summary_item';
 
 describe('UserAgentSummaryItem', () => {
   describe('render', () => {

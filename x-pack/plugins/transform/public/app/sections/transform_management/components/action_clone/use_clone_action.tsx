@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
+import { useToastNotifications } from '../../../../app_dependencies';
 import type { TransformListAction, TransformListRow } from '../../../../common';
 import { SECTION_SLUG } from '../../../../common/constants';
 import { useGetDataViewsTitleIdMap, useTransformCapabilities } from '../../../../hooks';
-import { useToastNotifications } from '../../../../app_dependencies';
 
-import { cloneActionNameText, CloneActionName } from './clone_action_name';
+import { CloneActionName, cloneActionNameText } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {

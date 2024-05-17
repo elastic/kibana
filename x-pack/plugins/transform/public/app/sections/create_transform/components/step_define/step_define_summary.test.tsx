@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -21,8 +21,8 @@ import { StepDefineSummary } from './step_define_summary';
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
 
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.

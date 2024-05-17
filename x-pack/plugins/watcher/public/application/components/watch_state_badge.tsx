@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import type { EuiTextProps } from '@elastic/eui';
+import React from 'react';
 import { WATCH_STATES } from '../../../common/constants';
 
 interface Props {

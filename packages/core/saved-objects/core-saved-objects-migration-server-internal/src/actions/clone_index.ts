@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import type {
+  ElasticsearchCapabilities,
+  ElasticsearchClient,
+} from '@kbn/core-elasticsearch-server';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import type {
-  ElasticsearchClient,
-  ElasticsearchCapabilities,
-} from '@kbn/core-elasticsearch-server';
+import type { AcknowledgeResponse, IndexNotFound, OperationNotSupported } from '.';
 import {
-  catchRetryableEsClientErrors,
   type RetryableEsClientError,
+  catchRetryableEsClientErrors,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse, OperationNotSupported } from '.';
-import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { isClusterShardLimitExceeded } from './es_errors';
 import type { ClusterShardLimitExceeded } from './create_index';
+import { isClusterShardLimitExceeded } from './es_errors';
+import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 
 export type CloneIndexResponse = AcknowledgeResponse;
 

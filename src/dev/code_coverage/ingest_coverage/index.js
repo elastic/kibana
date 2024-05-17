@@ -7,9 +7,9 @@
  */
 
 import { resolve } from 'path';
-import { prok } from './process';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
+import { prok } from './process';
 import { pathExists } from './team_assignment/enumeration_helpers';
 import { always, ccMark } from './utils';
 

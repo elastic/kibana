@@ -37,9 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
         // The index name in the reporting/bwc/6_2 archive.
         const ARCHIVED_REPORTING_INDEX = '.reporting-2018.03.11';
         // causes reporting to assume the v6.2 index is the one to use for new jobs posted
-        cleanupIndexAlias = await reportingAPI.coerceReportsIntoExistingIndex(
-          ARCHIVED_REPORTING_INDEX
-        );
+        cleanupIndexAlias =
+          await reportingAPI.coerceReportsIntoExistingIndex(ARCHIVED_REPORTING_INDEX);
       });
 
       after('remove index alias', async () => {

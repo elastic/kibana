@@ -8,8 +8,8 @@
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { DetectionRuleCounter } from '../../../components/detection_rule_counter';
 import { getFindingsDetectionRuleSearchTags } from '../../../../common/utils/detection_rules';
+import { DetectionRuleCounter } from '../../../components/detection_rule_counter';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 
 export const FindingsDetectionRuleCounter = ({ finding }: { finding: CspFinding }) => {

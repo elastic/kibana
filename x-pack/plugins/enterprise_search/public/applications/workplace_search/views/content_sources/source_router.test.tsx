@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { Route } from '@kbn/shared-ux-router';
 
-import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
+import { PersonalDashboardLayout, WorkplaceSearchPageTemplate } from '../../components/layout';
 
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';

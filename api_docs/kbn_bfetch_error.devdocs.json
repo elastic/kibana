@@ -24,9 +24,7 @@
         "type": "Class",
         "tags": [],
         "label": "BfetchRequestError",
-        "description": [
-          "\nError thrown when xhr request fails"
-        ],
+        "description": ["\nError thrown when xhr request fails"],
         "signature": [
           {
             "pluginId": "@kbn/bfetch-error",
@@ -47,12 +45,8 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": [
-              "\nconstructor"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nconstructor"],
+            "signature": ["any"],
             "path": "packages/kbn-bfetch-error/src/bfetch_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -63,12 +57,8 @@
                 "type": "number",
                 "tags": [],
                 "label": "code",
-                "description": [
-                  "- Xhr error code"
-                ],
-                "signature": [
-                  "number"
-                ],
+                "description": ["- Xhr error code"],
+                "signature": ["number"],
                 "path": "packages/kbn-bfetch-error/src/bfetch_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,

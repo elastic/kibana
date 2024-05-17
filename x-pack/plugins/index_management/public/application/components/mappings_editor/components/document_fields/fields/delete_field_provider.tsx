@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
-import { useMappingsState, useDispatch } from '../../../mappings_state_context';
-import { NormalizedField } from '../../../types';
 import { getAllDescendantAliases } from '../../../lib';
+import { useDispatch, useMappingsState } from '../../../mappings_state_context';
+import { NormalizedField } from '../../../types';
 import { ModalConfirmationDeleteFields } from './modal_confirmation_delete_fields';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;

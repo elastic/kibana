@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
-import { PageSimpleStringStream } from './containers/app/pages/page_simple_string_stream';
 import { PageReducerStream } from './containers/app/pages/page_reducer_stream';
+import { PageSimpleStringStream } from './containers/app/pages/page_simple_string_stream';
 
 interface RouteSectionDef {
   title: string;

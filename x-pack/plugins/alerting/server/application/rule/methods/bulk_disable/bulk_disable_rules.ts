@@ -1,3 +1,7 @@
+import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
+import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,40 +9,36 @@
  * 2.0.
  */
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
-import pMap from 'p-map';
-import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { RawRule, SanitizedRule, RawRuleAction } from '../../../../types';
+import pMap from 'p-map';
+import { bulkDisableRulesSo } from '../../../../data/rule';
+import type { RuleAttributes } from '../../../../data/rule/types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
-  retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
+  retryIfBulkOperationConflicts,
   tryToRemoveTasks,
 } from '../../../../rules_client/common';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import {
-  getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
+  getAuthorizationFilter,
+  migrateLegacyActions,
   untrackRuleAlerts,
   updateMeta,
-  migrateLegacyActions,
 } from '../../../../rules_client/lib';
-import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
-import type {
-  BulkOperationError,
-  BulkDisableRulesResult,
-  BulkDisableRulesRequestBody,
-} from './types';
-import type { RuleAttributes } from '../../../../data/rule/types';
-import { validateBulkDisableRulesBody } from './validation';
-import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type { RuleParams, RuleDomain } from '../../types';
-import { bulkDisableRulesSo } from '../../../../data/rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { RawRule, RawRuleAction, SanitizedRule } from '../../../../types';
+import { ruleDomainSchema } from '../../schemas';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import type { RuleDomain, RuleParams } from '../../types';
+import type {
+  BulkDisableRulesRequestBody,
+  BulkDisableRulesResult,
+  BulkOperationError,
+} from './types';
+import { validateBulkDisableRulesBody } from './validation';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,

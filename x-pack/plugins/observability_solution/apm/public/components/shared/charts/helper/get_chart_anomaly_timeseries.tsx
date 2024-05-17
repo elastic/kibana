@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
+import { rgba } from 'polished';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';

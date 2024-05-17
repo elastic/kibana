@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import type { RulePreviewTitleProps } from './rule_preview_title';
-import { RulePreviewTitle } from './rule_preview_title';
 import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import type { RulePreviewTitleProps } from './rule_preview_title';
+import { RulePreviewTitle } from './rule_preview_title';
 import {
-  RULE_PREVIEW_TITLE_TEST_ID,
   RULE_PREVIEW_RULE_CREATED_BY_TEST_ID,
-  RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
   RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID,
+  RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
+  RULE_PREVIEW_TITLE_TEST_ID,
 } from './test_ids';
 
 const defaultProps = {

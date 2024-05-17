@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { IToasts } from '@kbn/core/public';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { InvokeCreator } from 'xstate';
 import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
+import * as rt from 'io-ts';
 import { map } from 'rxjs';
-import { createPlainError, formatErrors } from '../../../../common/runtime_types';
+import { InvokeCreator } from 'xstate';
 import {
   LogViewReference,
-  logViewReferenceRT,
   PersistedLogViewReference,
+  logViewReferenceRT,
 } from '../../../../common/log_views';
+import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { LogViewContext, LogViewEvent } from './types';
 
 export const defaultLogViewKey = 'logView';

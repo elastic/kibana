@@ -7,11 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useCapabilities, UseCapabilitiesParams } from './use_capabilities';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { UseCapabilitiesParams, useCapabilities } from './use_capabilities';
 
 const statusResponse = {
   assistantModelEvaluation: true,

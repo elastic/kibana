@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
+import type { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 
 /**

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiPanel, EuiText } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiPanel } from '@elastic/eui';
 
 import type { ActionStatus, AgentPolicy } from '../../../../../types';
 
-import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
+import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 
 export const ActivitySection: React.FunctionComponent<{
   title: ReactNode;

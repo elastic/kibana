@@ -9,8 +9,8 @@ import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import * as i18n from './translations';
 import type { AndOr } from '.';
+import * as i18n from './translations';
 
 const RoundBadge = styled(EuiBadge)`
   align-items: center;

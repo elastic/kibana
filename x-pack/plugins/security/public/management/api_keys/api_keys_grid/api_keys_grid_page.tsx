@@ -35,9 +35,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
-import { ApiKeyFlyout } from './api_key_flyout';
-import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { InvalidateProvider } from './invalidate_provider';
 import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
@@ -45,6 +42,9 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
+import { ApiKeyFlyout } from './api_key_flyout';
+import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
+import { InvalidateProvider } from './invalidate_provider';
 
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();

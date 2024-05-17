@@ -12,14 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
-  EuiLink,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
 
 export interface ObservabilityStatusBoxProps {

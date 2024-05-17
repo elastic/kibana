@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiFormRow,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiTitle,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,13 +21,14 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
+import { DEFAULT_CORRELATION_ID, choicesToEuiOptions } from '../lib/servicenow/helpers';
 import * as i18n from '../lib/servicenow/translations';
+import { Choice, Fields } from '../lib/servicenow/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import { ServiceNowSIRActionParams } from './types';
-import { Fields, Choice } from '../lib/servicenow/types';
-import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../lib/servicenow/helpers';
-import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {

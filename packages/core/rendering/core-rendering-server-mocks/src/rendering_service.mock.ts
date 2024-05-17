@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingService,
 } from '@kbn/core-rendering-server-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export type RenderingServiceMock = jest.Mocked<PublicMethodsOf<RenderingService>>;
 

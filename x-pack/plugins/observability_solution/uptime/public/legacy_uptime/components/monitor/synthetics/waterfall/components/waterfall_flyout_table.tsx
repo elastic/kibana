@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { EuiText, EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 
 interface Row {
   name: string;

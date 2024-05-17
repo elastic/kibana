@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
+import Joi from 'joi';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
-import { deleteField, stripBadDefault, processDeprecated } from './utils';
 import { IContext } from '../context';
+import { deleteField, processDeprecated, stripBadDefault } from './utils';
 
 const {
   META_FIELD_X_OAS_MAX_LENGTH,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { API_VERSIONS, agentRouteService } from '@kbn/fleet-plugin/common';
 import { useQuery as _useQuery } from '@tanstack/react-query';
+import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import type { PolicyData } from '../../../../common/endpoint/types';
 import { allFleetHttpMocks } from '../../mocks';
-import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { useFetchAgentByAgentPolicySummary } from './use_fetch_endpoint_policy_agent_summary';
-import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 

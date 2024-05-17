@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertToResultFormat, convertIdToMeta } from './utils';
+import { convertIdToMeta, convertToResultFormat } from './utils';
 
 describe('convertToResultFormat', () => {
   it('converts curation results to a format that the Result component can use', () => {

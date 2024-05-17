@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TimelineType } from '../../../../../common/api/timeline';
 import {
   eventHasNotes,
   eventIsPinned,
@@ -12,8 +14,6 @@ import {
   getPinTooltip,
   stringifyEvent,
 } from './helpers';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TimelineType } from '../../../../../common/api/timeline';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {

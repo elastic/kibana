@@ -6,7 +6,7 @@
  */
 
 import { reducer } from './reducer';
-import { initialState, State } from './store';
+import { State, initialState } from './store';
 
 describe('Searchprofiler store reducer', () => {
   let state: State;

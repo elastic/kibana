@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFieldText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { EuiFieldText } from '@elastic/eui';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { Description } from './description';
-import { useStringifiedValue } from '../hooks';
 import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { useStringifiedValue } from '../hooks';
+import { Description } from './description';
 
 export const QueryDelayInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =

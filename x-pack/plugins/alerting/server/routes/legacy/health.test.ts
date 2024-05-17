@@ -1,3 +1,5 @@
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +7,14 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { healthRoute } from './health';
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { RegistryAlertTypeWithAuth } from '../../authorization';
 import { licenseStateMock } from '../../lib/license_state.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { alertsMock } from '../../mocks';
 import { rulesClientMock } from '../../rules_client.mock';
 import { HealthStatus, RecoveredActionGroup } from '../../types';
-import { alertsMock } from '../../mocks';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
-import { RegistryAlertTypeWithAuth } from '../../authorization';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { healthRoute } from './health';
 
 const rulesClient = rulesClientMock.create();
 

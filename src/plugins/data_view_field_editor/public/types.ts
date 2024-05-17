@@ -17,9 +17,9 @@ import {
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   RuntimeField,
-  UsageCollectionStart,
   RuntimeType,
   SerializedFieldFormat,
+  UsageCollectionStart,
 } from './shared_imports';
 
 /**

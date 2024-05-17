@@ -6,10 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
-import { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
+import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
 import { ILicenseState } from '../../../lib';
+import { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { transformGetAllConnectorsResponseV1 } from '../get_all/transforms';
 

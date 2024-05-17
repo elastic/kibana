@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync } from 'crypto';
-import { question } from './utils/prompt';
+import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from 'crypto';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import * as errors from './errors';
+import { question } from './utils/prompt';
 
 const VERSION = 1;
 const ALGORITHM = 'aes-256-gcm';

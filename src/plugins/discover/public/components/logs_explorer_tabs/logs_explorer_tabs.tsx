@@ -7,10 +7,10 @@
  */
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { ALL_DATASETS_LOCATOR_ID, AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 
 export interface LogsExplorerTabsProps {

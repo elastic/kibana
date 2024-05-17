@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { useServices } from '../services';

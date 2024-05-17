@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';
-import { SplitFieldSelector } from '../split_field';
 import { Influencers } from '../influencers';
+import { SplitFieldSelector } from '../split_field';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

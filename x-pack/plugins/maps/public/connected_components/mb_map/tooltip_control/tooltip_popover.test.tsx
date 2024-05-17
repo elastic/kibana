@@ -11,10 +11,10 @@ jest.mock('./features_tooltip/features_tooltip', () => ({
   },
 }));
 
-import sinon from 'sinon';
-import React from 'react';
-import { mount, shallow } from 'enzyme';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
+import sinon from 'sinon';
 import { TooltipPopover } from './tooltip_popover';
 
 // mutable map state

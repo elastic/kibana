@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { isPlainObject } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import type { MappingProperty as EsMappingProperty } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  SavedObjectsTypeMappingDefinition,
   SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
+import { set } from '@kbn/safer-lodash-set';
+import { isPlainObject } from 'lodash';
 
 type MaybeMappings = SavedObjectsFieldMapping | EsMappingProperty | undefined;
 

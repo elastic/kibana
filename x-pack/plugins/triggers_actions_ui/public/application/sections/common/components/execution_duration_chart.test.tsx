@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ExecutionDurationChart, padOrTruncateDurations } from './execution_duration_chart';
 

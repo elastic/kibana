@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import type { CommonProps, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
+import React, { memo } from 'react';
 import { COLLAPSE_ACTION, EXPAND_ACTION } from './translations';
 
 export interface CardExpandButtonProps extends Pick<CommonProps, 'data-test-subj'> {

@@ -1,3 +1,6 @@
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +8,17 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import type {
   AssetCriticalityCsvUploadResponse,
   AssetCriticalityUpsert,
 } from '../../../../common/entity_analytics/asset_criticality/types';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
-import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
-import { assetCriticalityFieldMap } from './constants';
-import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { AssetCriticalityAuditActions } from './audit';
+import { assetCriticalityFieldMap } from './constants';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;

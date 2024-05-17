@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 
 import { SerializedPolicy } from '../../../../common/types';
 
 import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
 
-import { toasts } from '../../services/notification';
 import { savePolicy as savePolicyApi } from '../../services/api';
-import { getUiMetricsForPhases, trackUiMetric } from '../../services/ui_metric';
 import { showApiError } from '../../services/api_errors';
+import { toasts } from '../../services/notification';
+import { getUiMetricsForPhases, trackUiMetric } from '../../services/ui_metric';
 
 export const savePolicy = async (
   serializedPolicy: SerializedPolicy,

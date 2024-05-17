@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiFlyout,
@@ -18,7 +15,10 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getTemplateDetailsLink } from '@kbn/index-management-plugin/public';
+import React, { FunctionComponent } from 'react';
 import { useKibana } from '../../shared_imports';
 
 interface Props {

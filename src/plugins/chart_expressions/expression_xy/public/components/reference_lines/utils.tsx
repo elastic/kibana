@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { Position } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-theme';
 import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy, orderBy } from 'lodash';
-import {
-  IconPosition,
-  ReferenceLineConfig,
-  FillStyle,
-  ExtendedReferenceLineDecorationConfig,
-  ReferenceLineDecorationConfig,
-  CommonXYReferenceLineLayerConfig,
-} from '../../../common/types';
+import React from 'react';
 import { FillStyles } from '../../../common/constants';
 import {
+  CommonXYReferenceLineLayerConfig,
+  ExtendedReferenceLineDecorationConfig,
+  FillStyle,
+  IconPosition,
+  ReferenceLineConfig,
+  ReferenceLineDecorationConfig,
+} from '../../../common/types';
+import {
+  AxesMap,
   GroupsConfiguration,
-  mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
   getAxisPosition,
   getOriginalAxisPosition,
-  AxesMap,
   isReferenceLine,
+  mapVerticalToHorizontalPlacement,
 } from '../../helpers';
 import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
@@ -72,15 +72,15 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
     config.lineStyle === 'dashed'
       ? [(config.lineWidth || 1) * 3, config.lineWidth || 1]
       : config.lineStyle === 'dotted'
-      ? [config.lineWidth || 1, config.lineWidth || 1]
-      : config.lineStyle === 'dot-dashed'
-      ? [
-          (config.lineWidth || 1) * 5,
-          config.lineWidth || 1,
-          config.lineWidth || 1,
-          config.lineWidth || 1,
-        ]
-      : undefined,
+        ? [config.lineWidth || 1, config.lineWidth || 1]
+        : config.lineStyle === 'dot-dashed'
+          ? [
+              (config.lineWidth || 1) * 5,
+              config.lineWidth || 1,
+              config.lineWidth || 1,
+              config.lineWidth || 1,
+            ]
+          : undefined,
 });
 
 export const getLineAnnotationProps = (

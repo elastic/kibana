@@ -6,21 +6,21 @@
  */
 
 import {
-  EuiPanel,
+  EuiBadge,
+  EuiButton,
+  EuiCode,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiBadge,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiCode,
-  EuiButton,
-  EuiCodeBlock,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CONNECTORS_INDEX, Connector } from '@kbn/search-connectors';
+import React from 'react';
 import { OPTIONAL_LABEL } from '../../../../../common/i18n_string';
 import { useCreateApiKey } from '../../../hooks/api/use_create_api_key';
 interface ApiKeyPanelProps {

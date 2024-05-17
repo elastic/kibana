@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { TabContentProps } from '.';
+import { DEVICE_MODEL_IDENTIFIER } from '../../../../../../common/es_fields/apm';
 import { isPending } from '../../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
-import { DEVICE_MODEL_IDENTIFIER } from '../../../../../../common/es_fields/apm';
 
 function DevicesTab({
   environment,

@@ -6,16 +6,16 @@
  */
 
 import {
-  EuiText,
-  EuiLink,
-  EuiSpacer,
-  EuiPanel,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CodeEditorField } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 const READ_ONLY_BOILERPLATE = `{

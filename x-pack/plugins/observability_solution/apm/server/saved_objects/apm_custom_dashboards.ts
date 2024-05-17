@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../common/custom_dashboards';
 
 export const apmCustomDashboards: SavedObjectsType = {

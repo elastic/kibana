@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
-import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, fieldValidators } from '../../../../../../shared_imports';
 
 import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { FieldsConfig, to, EDITOR_PX_HEIGHT } from './shared';
+import { EDITOR_PX_HEIGHT, FieldsConfig, to } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component, ComponentProps } from 'react';
-import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
-import { TOCEntry } from './toc_entry';
-import { isLayerGroup } from '../../../../classes/layers/layer_group';
 import { ILayer } from '../../../../classes/layers/layer';
+import { isLayerGroup } from '../../../../classes/layers/layer_group';
+import { TOCEntry } from './toc_entry';
 
 export interface Props {
   isReadOnly: boolean;

@@ -8,8 +8,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { TELEMETRY_SAVED_OBJECT_ID, TELEMETRY_SAVED_OBJECT_TYPE } from './constants';
 import type { TelemetrySavedObject } from './types';
-import { TELEMETRY_SAVED_OBJECT_TYPE, TELEMETRY_SAVED_OBJECT_ID } from './constants';
 
 type GetTelemetrySavedObject = (
   soClient: SavedObjectsClientContract

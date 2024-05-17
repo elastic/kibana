@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableEnhancedSetupContract, EmbeddableEnhancedPluginStart } from '.';
+import { EmbeddableEnhancedPluginStart, EmbeddableEnhancedSetupContract } from '.';
 
 export type Setup = jest.Mocked<EmbeddableEnhancedSetupContract>;
 export type Start = jest.Mocked<EmbeddableEnhancedPluginStart>;

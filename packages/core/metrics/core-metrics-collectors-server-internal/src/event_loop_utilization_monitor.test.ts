@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { eventLoopUtilizationMock } from './event_loop_utilization_monitor.test.mocks';
 import { EventLoopUtilizationMonitor } from './event_loop_utilization_monitor';
+import { eventLoopUtilizationMock } from './event_loop_utilization_monitor.test.mocks';
 
 describe('EventLoopUtilizationMonitor', () => {
   afterEach(() => jest.clearAllMocks());

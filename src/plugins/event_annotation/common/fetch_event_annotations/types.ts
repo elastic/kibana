@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   AggsStart,
   DataViewsContract,
   ExpressionValueSearchContext,
   ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { Observable } from 'rxjs';
 import { EventAnnotationGroupOutput } from '../event_annotation_group';
 
 export type FetchEventAnnotationsOutput = Observable<

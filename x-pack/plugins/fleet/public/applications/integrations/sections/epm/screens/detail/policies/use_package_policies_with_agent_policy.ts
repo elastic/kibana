@@ -9,15 +9,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { API_VERSIONS } from '../../../../../../../../common/constants';
 
+import { useConditionalRequest, useGetPackagePolicies } from '../../../../../hooks';
+import type { SendConditionalRequestConfig } from '../../../../../hooks';
+import { agentPolicyRouteService } from '../../../../../services';
 import type {
-  PackagePolicy,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetPackagePoliciesResponse,
+  PackagePolicy,
 } from '../../../../../types';
-import { agentPolicyRouteService } from '../../../../../services';
-import { useGetPackagePolicies, useConditionalRequest } from '../../../../../hooks';
-import type { SendConditionalRequestConfig } from '../../../../../hooks';
 
 export interface PackagePolicyEnriched extends PackagePolicy {
   _agentPolicy: GetAgentPoliciesResponseItem | undefined;

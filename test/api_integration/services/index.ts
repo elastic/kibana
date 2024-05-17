@@ -8,7 +8,7 @@
 
 import { services as commonServices } from '../../common/services';
 
-import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
+import { ElasticsearchSupertestProvider, KibanaSupertestProvider } from './supertest';
 
 export const services = {
   ...commonServices,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { addBasePath } from '../../../services';
 import { deserializeAutoFollowStats } from '../../../lib/ccr_stats_serialization';
+import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
 
 /**

@@ -7,37 +7,36 @@
  */
 
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import { IEmbeddable } from './i_embeddable';
-import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableInput, EmbeddableOutput } from '..';
+import { EmbeddableFactory } from './embeddable_factory';
+import { IEmbeddable } from './i_embeddable';
 
 export type EmbeddableFactoryDefinition<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends FinderAttributes = FinderAttributes
-> =
+  T extends FinderAttributes = FinderAttributes,
+> = Pick<
   // Required parameters
-  Pick<
-    EmbeddableFactory<I, O, E, T>,
-    'create' | 'type' | 'latestVersion' | 'isEditable' | 'getDisplayName'
-  > &
-    // Optional parameters
-    Partial<
-      Pick<
-        EmbeddableFactory<I, O, E, T>,
-        | 'createFromSavedObject'
-        | 'isContainerType'
-        | 'getExplicitInput'
-        | 'savedObjectMetaData'
-        | 'canCreateNew'
-        | 'getDefaultInput'
-        | 'telemetry'
-        | 'extract'
-        | 'inject'
-        | 'migrations'
-        | 'grouping'
-        | 'getIconType'
-        | 'getDescription'
-      >
-    >;
+  EmbeddableFactory<I, O, E, T>,
+  'create' | 'type' | 'latestVersion' | 'isEditable' | 'getDisplayName'
+> &
+  // Optional parameters
+  Partial<
+    Pick<
+      EmbeddableFactory<I, O, E, T>,
+      | 'createFromSavedObject'
+      | 'isContainerType'
+      | 'getExplicitInput'
+      | 'savedObjectMetaData'
+      | 'canCreateNew'
+      | 'getDefaultInput'
+      | 'telemetry'
+      | 'extract'
+      | 'inject'
+      | 'migrations'
+      | 'grouping'
+      | 'getIconType'
+      | 'getDescription'
+    >
+  >;

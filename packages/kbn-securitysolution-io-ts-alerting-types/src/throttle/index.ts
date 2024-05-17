@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export type RuleActionThrottle = t.TypeOf<typeof RuleActionThrottle>;
 export const RuleActionThrottle = t.union([

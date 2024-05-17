@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiPopoverTitle,
   EuiCallOut,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiHorizontalRule,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSelectable,
-  EuiFilterButton,
-  EuiTextColor,
   EuiSpacer,
-  useEuiTheme,
-  EuiFilterGroup,
   EuiText,
+  EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEqual } from 'lodash/fp';
+import React, { useState, useEffect } from 'react';
 import * as i18n from './translations';
 
 type FilterOption<T extends string, K extends string = string> = EuiSelectableOption<{

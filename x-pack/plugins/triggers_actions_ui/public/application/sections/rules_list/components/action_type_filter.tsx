@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import { EuiFilterButton, EuiFilterSelectItem, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, useEuiTheme } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
 import { ActionType } from '../../../../types';
 
 interface ActionTypeFilterProps {

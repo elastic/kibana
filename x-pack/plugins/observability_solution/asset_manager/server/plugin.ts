@@ -6,21 +6,21 @@
  */
 
 import {
-  Plugin,
   CoreSetup,
-  RequestHandlerContext,
   CoreStart,
-  PluginInitializerContext,
-  PluginConfigDescriptor,
   Logger,
+  Plugin,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 
+import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { AssetClient } from './lib/asset_client';
 import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
-import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
-import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;

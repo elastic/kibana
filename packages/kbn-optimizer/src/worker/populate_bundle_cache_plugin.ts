@@ -9,23 +9,23 @@
 import Path from 'path';
 import { inspect } from 'util';
 
-import webpack from 'webpack';
 import {
-  isExternalModule,
-  isNormalModule,
-  isIgnoredModule,
+  getModulePath,
   isConcatenatedModule,
   isDelegatedModule,
-  getModulePath,
+  isExternalModule,
+  isIgnoredModule,
+  isNormalModule,
 } from '@kbn/optimizer-webpack-helpers';
+import webpack from 'webpack';
 
 import {
   Bundle,
+  Hashes,
+  ParsedDllManifest,
   WorkerConfig,
   ascending,
   parseFilePath,
-  Hashes,
-  ParsedDllManifest,
 } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
 

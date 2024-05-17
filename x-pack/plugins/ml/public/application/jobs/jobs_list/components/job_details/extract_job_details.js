@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { detectorToString } from '../../../../util/string_utils';
-import { formatValues, filterObjects } from './format_values';
-import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';
+import { detectorToString } from '../../../../util/string_utils';
+import { filterObjects, formatValues } from './format_values';
 
 export function extractJobDetails(job, basePath, refreshJobList) {
   if (Object.keys(job).length === 0) {

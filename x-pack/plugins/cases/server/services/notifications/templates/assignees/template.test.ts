@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockCases } from '../../../../mocks';
 import { getByText } from '@testing-library/react';
-import { assigneesTemplateRenderer } from './renderer';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
+import { mockCases } from '../../../../mocks';
+import { assigneesTemplateRenderer } from './renderer';
 
 async function getHTMLNode(caseSO: CaseSavedObjectTransformed, mockCaseUrl: string | null) {
   const div = document.createElement('div');

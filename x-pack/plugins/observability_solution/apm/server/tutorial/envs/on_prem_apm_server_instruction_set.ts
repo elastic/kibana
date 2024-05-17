@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { InstructionsSchema, INSTRUCTION_VARIANT } from '@kbn/home-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { INSTRUCTION_VARIANT, InstructionsSchema } from '@kbn/home-plugin/server';
+import { i18n } from '@kbn/i18n';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
+  createDownloadServerOtherLinux,
   createDownloadServerRpm,
   createEditConfig,
   createStartServerUnix,
+  createStartServerUnixBinari,
   createStartServerUnixSysv,
   createWindowsServerInstructions,
-  createDownloadServerOtherLinux,
-  createStartServerUnixBinari,
 } from '../../../common/tutorial/instructions/apm_server_instructions';
 
 const EDIT_CONFIG = createEditConfig();

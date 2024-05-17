@@ -11,7 +11,6 @@ import { DATA_PROVIDERS } from '../../../screens/timeline';
 
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { networkUrl } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
   clickOnCopyValue,
@@ -22,6 +21,7 @@ import {
   openHoverActions,
 } from '../../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import { networkUrl } from '../../../urls/navigation';
 
 const testDomain = 'myTest';
 

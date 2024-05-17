@@ -6,12 +6,12 @@
  */
 
 import { useSelector } from 'react-redux';
-import type { EndpointState } from '../../types';
 import type { State } from '../../../../../common/store';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../../common/constants';
+import type { EndpointState } from '../../types';
 
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {

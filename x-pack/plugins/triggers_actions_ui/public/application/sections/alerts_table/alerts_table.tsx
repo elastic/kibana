@@ -5,7 +5,27 @@
  * 2.0.
  */
 
+import {
+  EuiCodeBlock,
+  EuiDataGrid,
+  EuiDataGridCellPopoverElementProps,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridStyle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  RenderCellValue,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { useQueryClient } from '@tanstack/react-query';
 import React, {
   useState,
   Suspense,
@@ -16,41 +36,21 @@ import React, {
   useRef,
   memo,
 } from 'react';
-import {
-  EuiDataGrid,
-  EuiDataGridStyle,
-  EuiSkeletonText,
-  EuiDataGridRefProps,
-  EuiFlexGroup,
-  EuiDataGridProps,
-  RenderCellValue,
-  EuiDataGridCellPopoverElementProps,
-  EuiCodeBlock,
-  EuiText,
-  EuiIcon,
-  EuiSpacer,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
-import styled from '@emotion/styled';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import type {
+  AlertsTableConfigurationRegistry,
   AlertsTableProps,
   FetchAlertData,
-  AlertsTableConfigurationRegistry,
 } from '../../../types';
+import { useActionsColumn, useBulkActions, usePagination, useSorting } from './hooks';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
+import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
+import { SystemCellFactory, systemCells } from './cells';
+import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 import { useGetToolbarVisibility } from './toolbar';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
-import { SystemCellFactory, systemCells } from './cells';
-import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
-import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const DefaultGridStyle: EuiDataGridStyle = {

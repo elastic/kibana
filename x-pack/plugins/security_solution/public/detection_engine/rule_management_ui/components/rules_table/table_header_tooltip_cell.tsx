@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 interface Props {
   title: string;

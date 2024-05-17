@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
+import { useMemo } from 'react';
 import { useMonitorQueryId } from './use_monitor_query_id';
 import { useSelectedLocation } from './use_selected_location';
 

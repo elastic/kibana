@@ -8,19 +8,19 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
-import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
+import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
-import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
+import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 

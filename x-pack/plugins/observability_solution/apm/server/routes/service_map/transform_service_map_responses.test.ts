@@ -16,8 +16,8 @@ import {
   SPAN_TYPE,
 } from '../../../common/es_fields/apm';
 import {
-  transformServiceMapResponses,
   ServiceMapResponse,
+  transformServiceMapResponses,
 } from './transform_service_map_responses';
 
 const nodejsService = {

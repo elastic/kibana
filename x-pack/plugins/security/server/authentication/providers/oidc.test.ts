@@ -11,10 +11,6 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import type { MockAuthenticationProviderOptions } from './base.mock';
-import { mockAuthenticationProviderOptions } from './base.mock';
-import type { ProviderLoginAttempt } from './oidc';
-import { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -23,6 +19,10 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
+import type { ProviderLoginAttempt } from './oidc';
+import { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;

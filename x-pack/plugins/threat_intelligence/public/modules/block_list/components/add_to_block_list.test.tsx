@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { AddToBlockListContextMenu } from './add_to_block_list';
-import { BlockListProvider } from '../../indicators/containers/block_list_provider';
-import { SecuritySolutionContext } from '../../../containers/security_solution_context';
+import React from 'react';
 import { SecuritySolutionPluginContext } from '../../..';
+import { SecuritySolutionContext } from '../../../containers/security_solution_context';
 import { getSecuritySolutionContextMock } from '../../../mocks/mock_security_context';
+import { BlockListProvider } from '../../indicators/containers/block_list_provider';
+import { AddToBlockListContextMenu } from './add_to_block_list';
 
 const TEST_ID = 'test';
 

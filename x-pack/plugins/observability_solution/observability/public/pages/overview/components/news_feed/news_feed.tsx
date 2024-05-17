@@ -10,8 +10,8 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiLink,
+  EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';

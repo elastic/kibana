@@ -8,11 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import {
   CoreSetup,
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { FixtureStartDeps } from './plugin';
 

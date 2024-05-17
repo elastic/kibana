@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { ESSearchSource, sourceTitle } from './es_search_source';
-import { BlendedVectorLayer, GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import {
   LAYER_WIZARD_CATEGORY,
   SCALING_TYPES,
@@ -18,11 +14,15 @@ import {
   VECTOR_STYLES,
   WIZARD_ID,
 } from '../../../../common/constants';
-import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
 import {
   ESSearchSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { BlendedVectorLayer, GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
+import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
+import { CreateSourceEditor } from './create_source_editor';
+import { ESSearchSource, sourceTitle } from './es_search_source';
 
 export function createDefaultLayerDescriptor(
   sourceConfig: Partial<ESSearchSourceDescriptor>,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { EuiListGroup, EuiListGroupItemProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import styled from 'styled-components';
 import { Ping } from '../../../../../common/runtime_types/ping';
 
 const ListGroup = styled(EuiListGroup)`

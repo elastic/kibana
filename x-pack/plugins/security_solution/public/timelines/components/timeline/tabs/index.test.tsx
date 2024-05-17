@@ -10,11 +10,11 @@ import React from 'react';
 import { createMockStore, mockGlobalState } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { TabsContent } from '.';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
+import { TabsContent } from '.';
+import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

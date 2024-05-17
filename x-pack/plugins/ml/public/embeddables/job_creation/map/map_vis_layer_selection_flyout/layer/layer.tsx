@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiIcon,
-  EuiText,
-  EuiSplitPanel,
   EuiHorizontalRule,
+  EuiIcon,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
 } from '@elastic/eui';
 import type { MapApi } from '@kbn/maps-plugin/public';
+import type { FC } from 'react';
+import React from 'react';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_map';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';

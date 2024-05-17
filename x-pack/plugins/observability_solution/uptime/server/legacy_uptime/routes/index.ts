@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
+import { createGetIndexStatusRoute } from './index_state';
+import {
+  createGetMonitorDetailsRoute,
+  createGetMonitorLocationsRoute,
+  createGetStatusBarRoute,
+  createMonitorListRoute,
+} from './monitors';
+import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
+import { createNetworkEventsRoute } from './network_events';
 import {
   createGetPingHistogramRoute,
   createGetPingsRoute,
   createJourneyRoute,
-  createJourneyScreenshotRoute,
   createJourneyScreenshotBlocksRoute,
+  createJourneyScreenshotRoute,
 } from './pings';
-import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
-import { createGetSnapshotCount } from './snapshot';
-import { UMRestApiRouteFactory } from './types';
-import {
-  createGetMonitorDetailsRoute,
-  createMonitorListRoute,
-  createGetMonitorLocationsRoute,
-  createGetStatusBarRoute,
-} from './monitors';
-import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
-import { createGetIndexStatusRoute } from './index_state';
-import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
+import { createGetSnapshotCount } from './snapshot';
 import { createLastSuccessfulCheckRoute } from './synthetics/last_successful_check';
+import { UMRestApiRouteFactory } from './types';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';

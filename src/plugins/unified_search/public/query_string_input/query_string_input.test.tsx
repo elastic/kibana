@@ -12,20 +12,20 @@ import {
   mockPersistedLogFactory,
 } from './query_string_input.test.mocks';
 
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { render, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { waitFor, render } from '@testing-library/react';
+import React from 'react';
 
-import { EuiTextArea, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiTextArea } from '@elastic/eui';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 
+import { unifiedSearchPluginMock } from '../mocks';
 import { QueryLanguageSwitcher } from './language_switcher';
 import QueryStringInput from './query_string_input';
-import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 const startMock = coreMock.createStart();

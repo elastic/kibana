@@ -10,23 +10,23 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo } from 'react';
+import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import { useLocation } from 'react-router-dom';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
-import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
-import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineDefaults } from '../../../timelines/store/defaults';
-import { timelineSelectors } from '../../../timelines/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { AssistantHeaderLink } from '../../../assistant/header_link';
+import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
+import { Sourcerer } from '../../../common/components/sourcerer';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
-import { AssistantHeaderLink } from '../../../assistant/header_link';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../common/lib/kibana';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
+import { timelineSelectors } from '../../../timelines/store';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',

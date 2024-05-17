@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useSetUpSections } from './use_setup_sections';
+import { renderHook } from '@testing-library/react-hooks';
 import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from '../types';
 import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
+import { useSetUpSections } from './use_setup_sections';
 
 const mockEuiTheme: EuiThemeComputed = {
   size: {

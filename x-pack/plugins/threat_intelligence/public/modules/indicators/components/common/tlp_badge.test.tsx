@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { EMPTY_VALUE } from '../../../../constants/common';
 import { TLPBadge } from './tlp_badge';
 

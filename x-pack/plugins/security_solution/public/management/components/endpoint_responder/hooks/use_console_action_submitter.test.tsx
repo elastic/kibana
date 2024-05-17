@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type {
-  UseConsoleActionSubmitterOptions,
-  ConsoleActionSubmitter,
-  CommandResponseActionApiState,
-} from './use_console_action_submitter';
-import { useConsoleActionSubmitter } from './use_console_action_submitter';
+import { act, waitFor } from '@testing-library/react';
+import React, { useState } from 'react';
+import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ActionDetails } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import React, { useState } from 'react';
-import type { CommandExecutionResultProps } from '../../console';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import type { DeferredInterface } from '../../../mocks/utils';
 import { getDeferred } from '../../../mocks/utils';
-import type { ActionDetails } from '../../../../../common/endpoint/types';
-import { act, waitFor } from '@testing-library/react';
-import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
+import type { CommandExecutionResultProps } from '../../console';
+import type {
+  CommandResponseActionApiState,
+  ConsoleActionSubmitter,
+  UseConsoleActionSubmitterOptions,
+} from './use_console_action_submitter';
+import { useConsoleActionSubmitter } from './use_console_action_submitter';
 
 describe('When using `useConsoleActionSubmitter()` hook', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

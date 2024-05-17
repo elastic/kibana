@@ -6,16 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SPACES } from '../../common/lib/spaces';
-import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { SPACES } from '../../common/lib/spaces';
+import { TestUser } from '../../common/lib/types';
 import {
-  resolveImportErrorsTestSuiteFactory,
-  resolveImportErrorsTestCaseFailures,
   TEST_CASES as CASES,
-  SPECIAL_TEST_CASES,
   ResolveImportErrorsTestDefinition,
+  SPECIAL_TEST_CASES,
+  resolveImportErrorsTestCaseFailures,
+  resolveImportErrorsTestSuiteFactory,
 } from '../../common/suites/resolve_import_errors';
 
 const {
@@ -52,8 +52,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     spaceId === DEFAULT_SPACE_ID
       ? CASES.SINGLE_NAMESPACE_DEFAULT_SPACE
       : spaceId === SPACE_1_ID
-      ? CASES.SINGLE_NAMESPACE_SPACE_1
-      : CASES.SINGLE_NAMESPACE_SPACE_2;
+        ? CASES.SINGLE_NAMESPACE_SPACE_1
+        : CASES.SINGLE_NAMESPACE_SPACE_2;
   const group1Importable = [
     { ...singleNamespaceObject, ...failConflict(!overwrite) },
     { ...CASES.NAMESPACE_AGNOSTIC, ...failConflict(!overwrite) },
@@ -198,8 +198,8 @@ export default function ({ getService }: FtrProviderContext) {
         overwrite
           ? ' with overwrite enabled'
           : createNewCopies
-          ? ' with createNewCopies enabled'
-          : ''
+            ? ' with createNewCopies enabled'
+            : ''
       }`;
       const { unauthorizedRead, unauthorizedWrite, authorized } = createTests(
         overwrite,

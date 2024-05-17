@@ -8,10 +8,9 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { css } from '@emotion/react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  useEuiTheme,
   EuiAccordion,
   EuiBadge,
   EuiButton,
@@ -26,12 +25,13 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiPanel,
-  EuiStep,
   EuiSpacer,
+  EuiStep,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import {
   AcknowledgeSchema,
   DeleteListSchemaEncoded,
   ExportListItemQuerySchemaEncoded,
   FindListSchemaEncoded,
   FoundListSchema,
+  FoundListsBySizeSchema,
   ImportListItemQuerySchemaEncoded,
   ImportListItemSchemaEncoded,
   ListItemIndexExistSchema,
@@ -23,24 +20,27 @@ import {
   ReadListSchema,
   acknowledgeSchema,
   deleteListSchema,
-  readListSchema,
   exportListItemQuerySchema,
   findListSchema,
   foundListSchema,
+  foundListsBySizeSchema,
   importListItemQuerySchema,
   importListItemSchema,
   listItemIndexExistSchema,
   listSchema,
-  foundListsBySizeSchema,
-  FoundListsBySizeSchema,
+  readListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import {
+  INTERNAL_FIND_LISTS_BY_SIZE,
   LIST_INDEX,
   LIST_ITEM_URL,
   LIST_PRIVILEGES_URL,
   LIST_URL,
-  INTERNAL_FIND_LISTS_BY_SIZE,
 } from '@kbn/securitysolution-list-constants';
+import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { toError, toPromise } from '../fp_utils';
 
 import {
@@ -48,8 +48,8 @@ import {
   DeleteListParams,
   ExportListParams,
   FindListsParams,
-  ImportListParams,
   GetListByIdParams,
+  ImportListParams,
 } from '../types';
 
 export type {

@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "metricbeat-2022-01-18",
     "mappings": {
       "date_detection": false,

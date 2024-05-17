@@ -6,12 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { nodeBuilder } from '@kbn/es-query';
 
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  OWNER_FIELD,
+} from '../../../common/constants';
 import type {
   ActionConnector,
   AlertAttachmentPayload,
@@ -20,31 +25,26 @@ import type {
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
+  AttachmentType,
   CaseRt,
   CaseStatuses,
   UserActionTypes,
-  AttachmentType,
 } from '../../../common/types/domain';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  OWNER_FIELD,
-} from '../../../common/constants';
 
-import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
+import type { CasesClient, CasesClientArgs } from '..';
+import type { ExternalServiceResponse } from '../../../common/types/api';
+import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
+import { decodeOrThrow } from '../../common/runtime_types';
 import {
   createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import type { CasesClient, CasesClientArgs } from '..';
-import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import { decodeOrThrow } from '../../common/runtime_types';
-import type { ExternalServiceResponse } from '../../../common/types/api';
+import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.

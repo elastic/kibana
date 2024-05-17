@@ -12,12 +12,8 @@
       "service_type": [],
       "query": ""
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_connector"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_connector"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/list-connector-api.html",
     "availability": {
       "stack": true,

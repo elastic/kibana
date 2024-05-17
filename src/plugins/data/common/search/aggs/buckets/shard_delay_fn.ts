@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { AggExpressionType, AggConfigSerialized } from '..';
+import { i18n } from '@kbn/i18n';
+import { AggConfigSerialized, AggExpressionType } from '..';
 import { AggParamsShardDelay, SHARD_DELAY_AGG_NAME } from './shard_delay';
 
 export const aggShardDelayFnName = 'aggShardDelay';

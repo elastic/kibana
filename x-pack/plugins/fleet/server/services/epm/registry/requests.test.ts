@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import { RegistryConnectionError, RegistryError, RegistryResponseError } from '../../../errors';
 import { appContextService } from '../../app_context';
 
 import { fetchUrl, getResponse } from './requests';

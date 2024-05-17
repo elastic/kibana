@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { createAxiosResponse, request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { createExternalService } from './service';
-import { SlackApiService } from '../../../common/slack_api/types';
+import axios from 'axios';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { SlackApiService } from '../../../common/slack_api/types';
+import { createExternalService } from './service';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

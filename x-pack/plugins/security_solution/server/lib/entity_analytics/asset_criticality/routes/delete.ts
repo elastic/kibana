@@ -7,18 +7,18 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
 import {
-  ASSET_CRITICALITY_URL,
   APP_ID,
+  ASSET_CRITICALITY_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { AssetCriticalityAuditActions } from '../audit';
+import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 export const assetCriticalityDeleteRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger

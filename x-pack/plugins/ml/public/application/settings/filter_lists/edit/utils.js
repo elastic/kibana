@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getToastNotifications } from '../../../util/dependency_cache';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { ml } from '../../../services/ml_api_service';
+import { getToastNotifications } from '../../../util/dependency_cache';
 
 export function isValidFilterListId(id) {
   //  Filter List ID requires the same format as a Job ID, therefore isJobIdValid can be used

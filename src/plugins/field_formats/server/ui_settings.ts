@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
+import { schema } from '@kbn/config-schema';
+import { UiSettingsParams } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { FORMATS_UI_SETTINGS } from '../common';
 
 // We add the `en` key manually here, since that's not a real numeral locale, but the

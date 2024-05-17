@@ -7,12 +7,12 @@
 
 import { type Conversation } from '@kbn/elastic-assistant';
 
-import { unset } from 'lodash/fp';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
+import { unset } from 'lodash/fp';
 import { useMemo } from 'react';
-import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
-import { useLinkAuthorized } from '../../common/links';
 import { SecurityPageName } from '../../../common';
+import { useLinkAuthorized } from '../../common/links';
+import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 
 export const useBaseConversations = (): Record<string, Conversation> => {
   const isDataQualityDashboardPageExists = useLinkAuthorized(SecurityPageName.dataQuality);

@@ -8,21 +8,21 @@
 // Service for managing job saved objects
 
 import { useMemo } from 'react';
-import { ML_INTERNAL_BASE_PATH, ML_EXTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { useMlKibana } from '../../contexts/kibana';
 
 import type { HttpService } from '../http_service';
 
 import type {
-  JobType,
-  MlSavedObjectType,
   CanDeleteMLSpaceAwareItemsResponse,
-  SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
-  SavedObjectResult,
+  JobType,
   JobsSpacesResponse,
-  TrainedModelsSpacesResponse,
+  MlSavedObjectType,
+  SavedObjectResult,
   SyncCheckResponse,
+  SyncSavedObjectResponse,
+  TrainedModelsSpacesResponse,
 } from '../../../../common/types/saved_objects';
 
 export const savedObjectsApiProvider = (httpService: HttpService) => ({

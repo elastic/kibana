@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  TriggersAndActionsUIPublicPluginStart,
   RuleStatusFilterProps,
+  TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useState } from 'react';
 
 interface SandboxProps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

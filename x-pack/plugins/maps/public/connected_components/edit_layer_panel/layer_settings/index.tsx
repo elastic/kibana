@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { LayerSettings } from './layer_settings';
+import { AnyAction, Dispatch } from 'redux';
+import { Attribution } from '../../../../common/descriptor_types';
 import {
   clearLayerAttribution,
   setLayerAttribution,
+  updateDisableTooltips,
+  updateFittableFlag,
+  updateLabelsOnTop,
+  updateLayerAlpha,
   updateLayerLabel,
   updateLayerLocale,
   updateLayerMaxZoom,
   updateLayerMinZoom,
-  updateLayerAlpha,
-  updateLabelsOnTop,
-  updateFittableFlag,
-  updateDisableTooltips,
 } from '../../../actions';
-import { Attribution } from '../../../../common/descriptor_types';
+import { LayerSettings } from './layer_settings';
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {

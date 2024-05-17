@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { mount } from 'enzyme';
 import React from 'react';
-import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import {
@@ -27,9 +30,6 @@ import {
 } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
-import { APP_UI_ID } from '../../../../../common/constants';
-import { createLicenseServiceMock } from '../../../../../common/license/mocks';
-import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');

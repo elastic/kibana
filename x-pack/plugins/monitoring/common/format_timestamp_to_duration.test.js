@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { formatTimestampToDuration } from './format_timestamp_to_duration';
 import { CALCULATE_DURATION_SINCE, CALCULATE_DURATION_UNTIL } from './constants';
+import { formatTimestampToDuration } from './format_timestamp_to_duration';
 
 const testTime = moment('2010-05-01'); // pick a date where adding/subtracting 2 months formats roundly to '2 months 0 days'
 const getTestTime = () => moment(testTime); // clones the obj so it's not mutated with .adds and .subtracts

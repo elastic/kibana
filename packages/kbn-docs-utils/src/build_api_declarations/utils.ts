@@ -7,9 +7,9 @@
  */
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
-import { BuildApiDecOpts } from './types';
+import { ClassMemberTypes, Node, ParameterDeclaration } from 'ts-morph';
 import { isNamedNode } from '../tsmorph_utils';
+import { BuildApiDecOpts } from './types';
 
 // Collect any paths encountered that are not in the correct scope folder.
 // APIs inside these folders will cause issues with the API docs system. The
@@ -49,8 +49,8 @@ export function getOptsForChild(node: Node, parentOpts: BuildApiDecOpts): BuildA
   const name = Node.isConstructSignatureDeclaration(node)
     ? 'new'
     : isNamedNode(node)
-    ? node.getName()
-    : 'Unnamed';
+      ? node.getName()
+      : 'Unnamed';
   return getOptsForChildWithName(name, parentOpts);
 }
 

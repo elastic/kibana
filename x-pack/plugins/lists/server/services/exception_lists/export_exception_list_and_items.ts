@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   ExceptionListItemSchema,
   ExportExceptionDetails,
@@ -13,9 +14,8 @@ import type {
   ListIdOrUndefined,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { transformDataToNdjson } from '@kbn/securitysolution-utils';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';

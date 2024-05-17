@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 interface Props {
   onClick?: (tag: string) => void;

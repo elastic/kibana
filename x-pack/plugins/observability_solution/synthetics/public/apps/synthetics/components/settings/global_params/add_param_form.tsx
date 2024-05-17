@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React from 'react';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiCheckbox,
   EuiComboBox,
@@ -15,6 +7,14 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { ListParamItem } from './params_list';

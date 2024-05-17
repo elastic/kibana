@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiIcon,
-  EuiText,
   EuiLink,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import type {
-  SeverityMappingItem as SeverityMappingItemType,
   RiskScoreMappingItem as RiskScoreMappingItemType,
+  SeverityMappingItem as SeverityMappingItemType,
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers';
+import { isEmpty } from 'lodash/fp';
+import React from 'react';
+import styled from 'styled-components';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';
+import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';

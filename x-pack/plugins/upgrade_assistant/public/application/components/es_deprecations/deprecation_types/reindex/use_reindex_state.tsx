@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  ReindexStatusResponse,
   ReindexStatus,
+  ReindexStatusResponse,
   ReindexStep,
   ReindexWarning,
 } from '../../../../../../common/types';
-import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
+import { CancelLoadingState, LoadingState } from '../../../types';
 
 const POLL_INTERVAL = 1000;
 

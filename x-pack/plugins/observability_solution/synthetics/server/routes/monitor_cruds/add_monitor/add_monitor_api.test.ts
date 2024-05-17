@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AddEditMonitorAPI } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
+import { AddEditMonitorAPI } from './add_monitor_api';
 
 describe('AddNewMonitorsPublicAPI', () => {
   it('should normalize schedule', async function () {

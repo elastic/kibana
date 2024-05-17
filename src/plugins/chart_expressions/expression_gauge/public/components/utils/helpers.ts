@@ -1,3 +1,4 @@
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import type { PaletteOutput } from '@kbn/coloring';
-import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 
 const calculateRealRangeValueMin = (
   relativeRangeValue: number,

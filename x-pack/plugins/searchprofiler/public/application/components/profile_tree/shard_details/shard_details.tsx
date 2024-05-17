@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
 
-import { Index, Operation, Shard } from '../../../types';
 import { msToPretty } from '../../../lib';
-import { ShardDetailTree } from './shard_details_tree';
+import { Index, Operation, Shard } from '../../../types';
 import { PercentageBadge } from '../../percentage_badge';
+import { ShardDetailTree } from './shard_details_tree';
 
 interface Props {
   index: Index;

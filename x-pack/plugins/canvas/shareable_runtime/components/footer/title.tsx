@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 
 interface Props {

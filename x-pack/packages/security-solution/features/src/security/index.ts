@@ -7,7 +7,7 @@
 import type { SecuritySubFeatureId } from '../product_features_keys';
 import type { ProductFeatureParams } from '../types';
 import { getSecurityBaseKibanaFeature } from './kibana_features';
-import { securitySubFeaturesMap, getSecurityBaseKibanaSubFeatureIds } from './kibana_sub_features';
+import { getSecurityBaseKibanaSubFeatureIds, securitySubFeaturesMap } from './kibana_sub_features';
 import type { SecurityFeatureParams } from './types';
 
 export const getSecurityFeature = (

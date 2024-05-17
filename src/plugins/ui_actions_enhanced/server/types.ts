@@ -8,7 +8,7 @@
 
 import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
-import { SerializedAction, SerializedEvent, DynamicActionsState } from '../common/types';
+import { DynamicActionsState, SerializedAction, SerializedEvent } from '../common/types';
 
 export type ActionFactoryRegistry = Map<string, ActionFactory>;
 

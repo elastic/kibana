@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import normalizePath from 'normalize-path';
 import Qs from 'querystring';
+import normalizePath from 'normalize-path';
 
 class ParsedPath {
   constructor(

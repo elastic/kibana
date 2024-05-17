@@ -13,7 +13,7 @@ import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { listenForCompatibleApi } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, fetch$ } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, lastValueFrom, map, switchMap } from 'rxjs';
 import { StartDeps } from '../../plugin';
 import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
 import { DataTableApi } from './types';

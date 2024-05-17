@@ -8,12 +8,12 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
+import { privilegesTypeRt } from '../../../common/privilege_type';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { CreateAgentKeyResponse, createAgentKey } from './create_agent_key';
 import { AgentKeysResponse, getAgentKeys } from './get_agent_keys';
 import { AgentKeysPrivilegesResponse, getAgentKeysPrivileges } from './get_agent_keys_privileges';
-import { invalidateAgentKey, InvalidateAgentKeyResponse } from './invalidate_agent_key';
-import { createAgentKey, CreateAgentKeyResponse } from './create_agent_key';
-import { privilegesTypeRt } from '../../../common/privilege_type';
+import { InvalidateAgentKeyResponse, invalidateAgentKey } from './invalidate_agent_key';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',

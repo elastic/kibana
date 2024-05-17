@@ -15,7 +15,7 @@ import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 

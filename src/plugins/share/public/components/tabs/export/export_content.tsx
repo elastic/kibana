@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import React, { useCallback, useState, useMemo } from 'react';
 
 import {
   EuiButton,
@@ -19,14 +19,14 @@ import {
   EuiForm,
   EuiIcon,
   EuiRadioGroup,
+  type EuiRadioGroupOption,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
   EuiToolTip,
-  type EuiRadioGroupOption,
 } from '@elastic/eui';
-import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
+import { ShareMenuItemV2, SupportedExportTypes } from '../../../types';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {

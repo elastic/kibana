@@ -9,8 +9,8 @@ import { noop } from 'lodash';
 import { useCallback, useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
 import { useBulkAlertAssigneesItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';

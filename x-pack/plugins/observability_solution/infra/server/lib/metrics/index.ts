@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '../../../common/runtime_types';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
 import { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api';
-import {
-  ESSearchClient,
-  CompositeResponseRT,
-  MetricsESResponse,
-  AggregationResponseRT,
-  AggregationResponse,
-  CompositeResponse,
-  HistogramBucketRT,
-} from './types';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import { EMPTY_RESPONSE } from './constants';
-import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
-import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';
 import { calculateBucketSize } from './lib/calculate_bucket_size';
 import { calculatedInterval } from './lib/calculate_interval';
+import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';
+import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
+import {
+  AggregationResponse,
+  AggregationResponseRT,
+  CompositeResponse,
+  CompositeResponseRT,
+  ESSearchClient,
+  HistogramBucketRT,
+  MetricsESResponse,
+} from './types';
 
 const DEFAULT_LIMIT = 9;
 

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import LRUCache from 'lru-cache';
 import type { ObjectMigrationDefinition } from '@kbn/object-versioning';
 import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import {
   compileServiceDefinitions,
   getContentManagmentServicesTransforms,
 } from '@kbn/object-versioning';
+import LRUCache from 'lru-cache';
 import type { StorageContextGetTransformFn } from '../core';
 
 let isCacheEnabled = true;

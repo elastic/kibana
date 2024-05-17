@@ -8,13 +8,13 @@
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import {
-  CopyToSpaceSavedObjectsManagementAction,
-  ShareToSpaceSavedObjectsManagementAction,
-} from './actions';
-import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
 } from './action_service';
+import {
+  CopyToSpaceSavedObjectsManagementAction,
+  ShareToSpaceSavedObjectsManagementAction,
+} from './actions';
 import { SavedObjectsManagementAction } from './types';
 
 class DummyAction extends SavedObjectsManagementAction {

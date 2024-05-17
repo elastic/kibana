@@ -9,31 +9,31 @@ import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  CaseStatuses,
   CaseSeverity,
+  CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  deleteAllCaseItems,
   createCase,
-  removeServerGeneratedPropertiesFromCase,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
+  deleteAllCaseItems,
+  getCaseUserActions,
   getConfigurationRequest,
+  removeServerGeneratedPropertiesFromCase,
+  removeServerGeneratedPropertiesFromUserAction,
 } from '../../../../common/lib/api';
 import {
-  secOnly,
-  secOnlyRead,
   globalRead,
+  noKibanaPrivileges,
   obsOnlyRead,
   obsSecRead,
-  noKibanaPrivileges,
+  secOnly,
+  secOnlyRead,
   testDisabled,
 } from '../../../../common/lib/authentication/users';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

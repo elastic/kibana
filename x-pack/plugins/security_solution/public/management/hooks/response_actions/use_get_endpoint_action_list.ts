@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
-import { useHttp } from '../../../common/lib/kibana';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import { useHttp } from '../../../common/lib/kibana';
 
 interface ErrorType {
   statusCode: number;

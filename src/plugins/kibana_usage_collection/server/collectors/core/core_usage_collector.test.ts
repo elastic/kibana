@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { CoreUsageData } from '@kbn/core/server';
+import { coreUsageDataServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
-  createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerCoreUsageCollector } from './core_usage_collector';
-import { coreUsageDataServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { CoreUsageData } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 

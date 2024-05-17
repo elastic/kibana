@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
 import { AppMountParameters } from '@kbn/core/public';
+import React, { PropsWithChildren } from 'react';
 
 interface ContextProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];

@@ -8,17 +8,17 @@
 
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { OPTIONS_LIST_CONTROL } from '../../../common';
-import { ControlOutput } from '../../types';
-import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
-import { EditControlAction } from './edit_control_action';
-import { DeleteControlAction } from './delete_control_action';
-import { TimeSliderEmbeddableFactory } from '../../time_slider';
-import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from '../../options_list';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
+import { OPTIONS_LIST_CONTROL } from '../../../common';
+import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from '../../options_list';
+import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
+import { pluginServices } from '../../services';
+import { TimeSliderEmbeddableFactory } from '../../time_slider';
+import { ControlOutput } from '../../types';
+import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupInput } from '../types';
+import { DeleteControlAction } from './delete_control_action';
+import { EditControlAction } from './edit_control_action';
 
 const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
 const deleteControlAction = new DeleteControlAction();

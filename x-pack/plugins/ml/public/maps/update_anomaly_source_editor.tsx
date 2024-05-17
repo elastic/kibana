@@ -7,8 +7,8 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LayerSelector } from './layer_selector';
 import type { MlAnomalyLayersType } from './util';
 

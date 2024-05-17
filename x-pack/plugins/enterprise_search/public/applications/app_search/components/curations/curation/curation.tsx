@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EnterpriseSearchPageTemplateWrapper } from '../../../../shared/layout';
 

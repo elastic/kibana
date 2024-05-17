@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
-import { theme } from '../theme';
 import { ExecutionContext } from '../../../execution/types';
+import { theme } from '../theme';
+import { functionWrapper } from './utils';
 
 describe('expression_functions', () => {
   describe('theme', () => {

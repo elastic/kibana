@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from '@kbn/ml-ui-actions';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { AiopsPluginStartDeps } from '../../types';
 import { showCategorizeFlyout } from './show_flyout';
 

@@ -1,3 +1,5 @@
+import type { AppMountParameters, CoreSetup, ScopedHistory } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import type { Location } from 'history';
-import type { AppMountParameters, CoreSetup, ScopedHistory } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import type { UrlForwardingStart } from '../plugin';
 import { createLegacyUrlForwardApp } from './forward_app';
 
@@ -23,7 +23,7 @@ function createAppMountParams(hash: string): AppMountParameters {
 
 describe('forward_app', () => {
   let coreSetup: CoreSetup<{}, UrlForwardingStart>;
-  let coreStart: ReturnType<typeof coreMock['createStart']>;
+  let coreStart: ReturnType<(typeof coreMock)['createStart']>;
 
   beforeEach(() => {
     coreSetup = coreMock.createSetup({ basePath: '/base/path' });

@@ -7,9 +7,9 @@
 
 import {
   EuiFieldNumber,
+  EuiFormControlLayout,
   EuiFormRow,
   EuiSelect,
-  EuiFormControlLayout,
   transparentize,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';

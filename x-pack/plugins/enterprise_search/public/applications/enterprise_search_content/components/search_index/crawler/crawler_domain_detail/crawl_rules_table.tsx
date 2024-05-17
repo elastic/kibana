@@ -17,8 +17,8 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSelect,
-  EuiText,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -30,7 +30,7 @@ import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables
 
 import { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../../../shared/tables/types';
-import { CrawlerPolicies, CrawlRule, CrawlerRules } from '../../../../api/crawler/types';
+import { CrawlRule, CrawlerPolicies, CrawlerRules } from '../../../../api/crawler/types';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { ComponentMeta } from '@storybook/react';
+import React from 'react';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { isScreenshotMode } from './is_screenshot_mode';
 import type {
   ScreenshotModeRequestHandlerContext,
   ScreenshotModeServerSetup,
-  ScreenshotModeServerStart,
   ScreenshotModeServerSetupDependencies,
+  ScreenshotModeServerStart,
   ScreenshotModeServerStartDependencies,
 } from './types';
-import { isScreenshotMode } from './is_screenshot_mode';
 
 export class ScreenshotModePlugin
   implements

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sample, random, times, sum } from 'lodash';
+import { random, sample, sum, times } from 'lodash';
 import { Moment } from 'moment';
 import { EventFunction, ParsedSchedule, Schedule } from '../../../../../types';
 import { MESSAGE_PROCESSOR_HOSTS } from '../../../common/constants';

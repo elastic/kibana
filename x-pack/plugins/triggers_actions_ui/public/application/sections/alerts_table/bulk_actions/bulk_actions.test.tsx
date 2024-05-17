@@ -1,3 +1,7 @@
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { identity } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +9,6 @@
  * 2.0.
  */
 import React, { useMemo, useReducer } from 'react';
-import { identity } from 'lodash';
-import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { AlertsTable } from '../alerts_table';
 import {
   Alerts,
   AlertsField,
@@ -20,12 +19,13 @@ import {
   InspectQuery,
   RowSelectionState,
 } from '../../../../types';
-import { bulkActionsReducer } from './reducer';
 import { createAppMockRenderer } from '../../test_utils';
+import { AlertsTable } from '../alerts_table';
 import { getCasesMockMap } from '../cases/index.mock';
-import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
-import { createCasesServiceMock } from '../index.mock';
 import { AlertsTableContext, AlertsTableQueryContext } from '../contexts/alerts_table_context';
+import { createCasesServiceMock } from '../index.mock';
+import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
+import { bulkActionsReducer } from './reducer';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -194,7 +194,7 @@ describe('AlertsTable.BulkActions', () => {
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
-    getInspectQuery: () => ({ request: {}, response: {} } as InspectQuery),
+    getInspectQuery: () => ({ request: {}, response: {} }) as InspectQuery,
     onPageChange: () => {},
     onSortChange: () => {},
     refresh: refreshMockFn,

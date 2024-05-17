@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiRange, EuiRangeProps, EuiToolTip } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import type { ProcessStartMarker } from '../../../../common';
-import { useStyles } from './styles';
 import { PlayHead } from './play_head';
+import { useStyles } from './styles';
 
 type Props = {
   processStartMarkers: ProcessStartMarker[];
@@ -56,7 +56,7 @@ export const TTYPlayerControlsMarkers = ({
             : TTYPlayerLineMarkerType.ProcessChanged,
           line,
           name: event.process?.name,
-        } as TTYPlayerLineMarker)
+        }) as TTYPlayerLineMarker
     );
   }, [processStartMarkers]);
 

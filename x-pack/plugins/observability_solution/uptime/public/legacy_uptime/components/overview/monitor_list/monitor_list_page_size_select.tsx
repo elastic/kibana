@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlParams, UpdateUrlParams } from '../../../hooks';
+import React, { useState, useEffect } from 'react';
+import { UpdateUrlParams, useUrlParams } from '../../../hooks';
 
 interface PopoverButtonProps {
   setIsOpen: (isOpen: boolean) => any;

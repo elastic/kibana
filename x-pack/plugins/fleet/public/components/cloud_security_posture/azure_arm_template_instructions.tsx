@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCallOut, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import type { AgentPolicy } from '../../../common';
 

@@ -8,10 +8,10 @@
 
 import moment from 'moment';
 import {
+  REASON_IDS,
   isAbsoluteTimeShift,
   parseAbsoluteTimeShift,
   parseTimeShift,
-  REASON_IDS,
   validateAbsoluteTimeShift,
 } from './parse_time_shift';
 

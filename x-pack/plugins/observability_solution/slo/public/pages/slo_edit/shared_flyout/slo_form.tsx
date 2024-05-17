@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingSpinnerProps } from '@elastic/eui';
 import { lazy } from 'react';
 import React, { Suspense } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingSpinnerProps } from '@elastic/eui';
 
 function CenterJustifiedSpinner({ size }: { size: EuiLoadingSpinnerProps['size'] }) {
   return (

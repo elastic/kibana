@@ -1,3 +1,5 @@
+import { CoreStart } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,22 +7,20 @@
  * 2.0.
  */
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { History } from 'history';
-import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { InfraPublicConfig } from '../../common/plugin_config_types';
+import { SourceProvider } from '../containers/metrics_source';
+import { PluginConfigProvider } from '../containers/plugin_config_context';
+import type { KibanaEnvContext } from '../hooks/use_kibana';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
-import { SourceProvider } from '../containers/metrics_source';
-import { PluginConfigProvider } from '../containers/plugin_config_context';
-import type { KibanaEnvContext } from '../hooks/use_kibana';
 
 export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
-  EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiIcon,
   EuiLink,
-  EuiTitle,
-  EuiText,
-  useEuiTheme,
-  EuiToolTip,
+  EuiPanel,
   EuiSkeletonText,
+  EuiSplitPanel,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 
 export interface ExpandablePanelPanelProps {
   header: {

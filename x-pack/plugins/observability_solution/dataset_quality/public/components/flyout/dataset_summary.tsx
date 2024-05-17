@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import React from 'react';
 import { DataStreamDetails, DataStreamSettings } from '../../../common/data_streams_stats';
 import {
   flyoutDatasetCreatedOnText,

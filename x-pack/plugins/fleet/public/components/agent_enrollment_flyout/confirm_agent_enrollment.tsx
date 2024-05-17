@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  EuiCallOut,
   EuiButton,
-  EuiText,
+  EuiCallOut,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { sendGetAgents, useLink, useStartServices } from '../../hooks';
 import { AGENTS_PREFIX } from '../../constants';
+import { sendGetAgents, useLink, useStartServices } from '../../hooks';
 interface Props {
   policyId?: string;
   troubleshootLink: string;

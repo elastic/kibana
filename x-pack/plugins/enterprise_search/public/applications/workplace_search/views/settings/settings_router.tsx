@@ -10,11 +10,11 @@ import { Redirect } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import {
-  ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,
+  ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
   getEditPath,
 } from '../../routes';

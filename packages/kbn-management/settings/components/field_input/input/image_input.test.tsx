@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { ImageInput, ImageInputProps } from './image_input';
-import { wrap } from '../mocks';
-import { TEST_SUBJ_PREFIX_FIELD } from '.';
-import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { wrap } from '../mocks';
+import { ImageInput, ImageInputProps } from './image_input';
 
 const name = 'Some image field';
 const id = 'some:image:field';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { tableHasFormulas } from '@kbn/data-plugin/common';
+import { exporters } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ShareContext, ShareMenuProvider, downloadMultipleAs } from '@kbn/share-plugin/public';
+import React from 'react';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 

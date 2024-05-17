@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { ComponentProps, FC, PropsWithChildren } from 'react';
-import React, { useEffect } from 'react';
-import type QueryTabContent from '.';
-import { UnifiedTimeline } from '.';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../containers';
-import { useTimelineEventsDetails } from '../../../containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import {
-  createSecuritySolutionStorageMock,
-  mockTimelineData,
-  TestProviders,
-} from '../../../../common/mock';
-import { createMockStore } from '../../../../common/mock/create_store';
-import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import type { StartServices } from '../../../../types';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
-import { timelineActions } from '../../../store';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { allowedExperimentalValues } from '../../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import type { ComponentProps, FC, PropsWithChildren } from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import type QueryTabContent from '.';
+import { UnifiedTimeline } from '.';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { allowedExperimentalValues } from '../../../../../common';
+import type { ColumnHeaderType } from '../../../../../common/types';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import {
+  TestProviders,
+  createSecuritySolutionStorageMock,
+  mockTimelineData,
+} from '../../../../common/mock';
+import { createMockStore } from '../../../../common/mock/create_store';
+import type { StartServices } from '../../../../types';
+import { useTimelineEvents } from '../../../containers';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { timelineActions } from '../../../store';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from './default_headers';
-import type { ColumnHeaderType } from '../../../../../common/types';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),

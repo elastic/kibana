@@ -19,10 +19,10 @@ import {
   FUNCTIONAL_BOOST_FUNCTION_DISPLAY_MAP,
 } from '../../constants';
 import {
-  FunctionalBoost,
   BoostFunction,
   BoostOperation,
   BoostType,
+  FunctionalBoost,
   FunctionalBoostFunction,
 } from '../../types';
 

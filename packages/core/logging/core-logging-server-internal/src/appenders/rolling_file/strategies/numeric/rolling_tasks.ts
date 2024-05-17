@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { readdir, access } from 'fs/promises';
+import { access, readdir } from 'fs/promises';
 import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
 import { moveFile } from './utils';
 

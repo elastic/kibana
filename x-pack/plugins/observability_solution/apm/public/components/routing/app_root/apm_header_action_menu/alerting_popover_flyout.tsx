@@ -12,10 +12,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
+import React, { useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts and rules',

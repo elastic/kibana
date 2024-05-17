@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_LOAD_MARKS } from './events';
-import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
+import { CoreSystem } from './core_system';
+import { KBN_LOAD_MARKS } from './events';
 
 import { LOAD_BOOTSTRAP_START } from './events';
 
@@ -28,7 +28,9 @@ export async function __kbnBootstrap__() {
 
   await Promise.all([
     // eslint-disable-next-line no-console
-    apmSystem.setup().catch(console.warn),
+    apmSystem
+      .setup()
+      .catch(console.warn),
     i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
       i18nError = error;
     }),

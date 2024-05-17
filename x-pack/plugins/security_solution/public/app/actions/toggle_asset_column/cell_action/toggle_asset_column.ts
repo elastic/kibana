@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { type CellActionTemplate, createCellActionFactory } from '@kbn/cell-actions/actions';
 import { i18n } from '@kbn/i18n';
-import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions/actions';
-import { UserAssetTableType } from '../../../../explore/users/store/model';
-import { usersActions, usersSelectors } from '../../../../explore/users/store';
-import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../../common/store';
-import type { SecurityCellAction } from '../../types';
+import { usersActions, usersSelectors } from '../../../../explore/users/store';
+import { UserAssetTableType } from '../../../../explore/users/store/model';
 import { SecurityCellActionType } from '../../constants';
+import type { SecurityCellAction } from '../../types';
+import { fieldHasCellActions } from '../../utils';
 
 const ICON = 'listAdd';
 const TOGGLE_FIELD = i18n.translate(

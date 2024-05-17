@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiLink,
-  EuiInMemoryTable,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexItem,
-  EuiSwitch,
-  EuiSearchBarProps,
+  EuiInMemoryTable,
   EuiInMemoryTableProps,
+  EuiLink,
+  EuiSearchBarProps,
+  EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import moment from 'moment';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
+import { useHistory } from 'react-router-dom';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
+import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { getIndicesListPath, getPolicyEditPath } from '../../../services/navigation';
 import { trackUiMetric } from '../../../services/ui_metric';
 

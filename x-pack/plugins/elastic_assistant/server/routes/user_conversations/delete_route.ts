@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-  DeleteConversationRequestParams,
   API_VERSIONS,
+  DeleteConversationRequestParams,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { buildResponse } from '../utils';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { buildResponse } from '../utils';
 
 export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned

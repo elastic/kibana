@@ -7,9 +7,9 @@
  */
 
 import {
-  createKibanaSupertestProvider,
-  KibanaSupertestWithoutAuthProvider,
   ElasticsearchSupertestProvider,
+  KibanaSupertestWithoutAuthProvider,
+  createKibanaSupertestProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {

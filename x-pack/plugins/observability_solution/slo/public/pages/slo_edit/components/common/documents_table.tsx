@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
-import React, { useCallback, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiProgress, EuiResizableContainer, EuiSpacer } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
-import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
-import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { buildFilter, FILTERS, TimeRange } from '@kbn/es-query';
-import { FieldPath, useFormContext } from 'react-hook-form';
+import { FILTERS, TimeRange, buildFilter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import { Serializable } from '@kbn/utility-types';
-import { useFieldSidebar } from './use_field_sidebar';
-import { useTableDocs } from './use_table_docs';
+import React, { useCallback, useState } from 'react';
+import { FieldPath, useFormContext } from 'react-hook-form';
+import { useKibana } from '../../../../utils/kibana_react';
+import { CreateSLOForm } from '../../types';
 import { SearchBarProps } from './query_builder';
 import { QuerySearchBar } from './query_search_bar';
-import { CreateSLOForm } from '../../types';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useFieldSidebar } from './use_field_sidebar';
+import { useTableDocs } from './use_table_docs';
 
 export function DocumentsTable({
   dataView,

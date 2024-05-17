@@ -8,17 +8,17 @@
 
 import React, { Component } from 'react';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
-import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import { ShareContextMenuPanelItem, ShareMenuItem, UrlParamExtension } from '../types';
 import type { BrowserUrlService } from '../types';
+import { UrlPanelContent } from './url_panel_content';
 
 export interface ShareContextMenuProps {
   allowEmbed: boolean;

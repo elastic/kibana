@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
-import { catchAndWrapError } from '../../utils';
-import { stringify } from '../../utils/stringify';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
-import type { BatchHandlerCallbackOptions } from '../../utils/queue_processor';
-import { QueueProcessor } from '../../utils/queue_processor';
 import type { LogsEndpointActionResponse } from '../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
+import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
+import { catchAndWrapError } from '../../utils';
+import type { BatchHandlerCallbackOptions } from '../../utils/queue_processor';
+import { QueueProcessor } from '../../utils/queue_processor';
+import { stringify } from '../../utils/stringify';
 
 /**
  * A task manager runner responsible for checking the status of and completing pending actions

@@ -9,8 +9,8 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import { KnownParameters, OpenAPIConverter } from '../type';
 
-import { kbnConfigSchemaConverter } from './kbn_config_schema';
 import { catchAllConverter } from './catch_all';
+import { kbnConfigSchemaConverter } from './kbn_config_schema';
 
 export class OasConverter {
   readonly #converters: OpenAPIConverter[] = [kbnConfigSchemaConverter, catchAllConverter];

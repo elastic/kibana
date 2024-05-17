@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
 import { parse } from 'url';
+import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
 
 describe('getRedirectToTransactionDetailPageUrl', () => {
   const transaction = {

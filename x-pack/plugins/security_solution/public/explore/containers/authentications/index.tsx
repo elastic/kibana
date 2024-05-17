@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { UserAuthenticationsRequestOptionsInput } from '../../../../common/api/search_strategy';
+import type { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
 import type {
-  AuthenticationsEdges,
   AuthStackByField,
+  AuthenticationsEdges,
 } from '../../../../common/search_strategy/security_solution';
 import { UsersQueries } from '../../../../common/search_strategy/security_solution';
-import type { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../common/typed_json';
 
-import type { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
+import type { inputsModel } from '../../../common/store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
 import type { InspectResponse } from '../../../types';
 
-import * as i18n from './translations';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import * as i18n from './translations';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];

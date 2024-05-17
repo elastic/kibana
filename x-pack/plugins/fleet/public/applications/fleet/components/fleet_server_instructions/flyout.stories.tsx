@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import React from 'react';
 
 import { FleetServerFlyout as FleetServerFlyoutComponent } from '.';
 

@@ -6,53 +6,53 @@
  * Side Public License, v 1.
  */
 
-import { setImmediate } from 'timers/promises';
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
+import { setImmediate } from 'timers/promises';
 
-import {
-  clientProviderInstanceMock,
-  KibanaMigratorMock,
-  migratorInstanceMock,
-  registerRoutesMock,
-  typeRegistryInstanceMock,
-  applyTypeDefaultsMock,
-} from './saved_objects_service.test.mocks';
-import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
-import { skip } from 'rxjs';
-import { type RawPackageInfo, Env } from '@kbn/config';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { Env, type RawPackageInfo } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import { configServiceMock } from '@kbn/config-mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import {
+  SavedObjectsClientProvider,
+  SavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server-internal';
+import { MAIN_SAVED_OBJECT_INDEX, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
 } from '@kbn/core-saved-objects-server';
-import { configServiceMock } from '@kbn/config-mocks';
-import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { BehaviorSubject, EMPTY, firstValueFrom } from 'rxjs';
+import { skip } from 'rxjs';
 import {
-  SavedObjectsClientProvider,
-  SavedObjectsRepository,
-} from '@kbn/core-saved-objects-api-server-internal';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+  KibanaMigratorMock,
+  applyTypeDefaultsMock,
+  clientProviderInstanceMock,
+  migratorInstanceMock,
+  registerRoutesMock,
+  typeRegistryInstanceMock,
+} from './saved_objects_service.test.mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
 
 import {
-  createDeprecationsSetupMock,
-  createDeprecationRegistryProviderMock,
   createCoreUsageDataSetupMock,
+  createDeprecationRegistryProviderMock,
+  createDeprecationsSetupMock,
 } from './mocks/internal_mocks';
 
-import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { registerCoreObjectTypes } from './object_types';
 
 jest.mock('./object_types');
 jest.mock('./deprecations');

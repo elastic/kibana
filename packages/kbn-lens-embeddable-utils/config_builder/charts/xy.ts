@@ -6,25 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import type {
   FormBasedPersistedState,
   FormulaPublicApi,
-  XYState,
-  XYReferenceLineLayerConfig,
-  XYDataLayerConfig,
   PersistedIndexPatternLayer,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
 } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  mapToFormula,
-} from '../utils';
 import {
   BuildDependencies,
   LensAnnotationLayer,
@@ -33,6 +26,13 @@ import {
   LensSeriesLayer,
   LensXYConfig,
 } from '../types';
+import {
+  addLayerColumn,
+  buildDatasourceStates,
+  buildReferences,
+  getAdhocDataviews,
+  mapToFormula,
+} from '../utils';
 
 const ACCESSOR = 'metric_formula_accessor';
 

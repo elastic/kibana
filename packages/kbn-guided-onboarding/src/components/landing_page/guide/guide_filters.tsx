@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { css } from '@emotion/react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { GuideFilterValuesClassic } from '../../../../classic';
 import { GuideCardSolutions } from './guide_cards';
 

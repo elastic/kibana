@@ -1,3 +1,7 @@
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
+import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
+import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +10,6 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
-import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
-import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
-import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 import { useServices } from './services';
 

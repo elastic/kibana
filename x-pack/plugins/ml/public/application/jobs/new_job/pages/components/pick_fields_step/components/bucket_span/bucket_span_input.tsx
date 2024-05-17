@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFieldText } from '@elastic/eui';
 
 interface Props {
   bucketSpan: string;

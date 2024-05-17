@@ -8,7 +8,7 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
-import { configSchema, ConfigSchema } from '../config';
+import { ConfigSchema, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

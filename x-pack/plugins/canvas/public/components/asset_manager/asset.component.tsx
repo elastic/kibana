@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,13 +17,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC, useState } from 'react';
 
 import { useNotifyService } from '../../services';
 
-import { ConfirmModal } from '../confirm_modal';
-import { Clipboard } from '../clipboard';
-import { Download } from '../download';
 import { AssetType } from '../../../types';
+import { Clipboard } from '../clipboard';
+import { ConfirmModal } from '../confirm_modal';
+import { Download } from '../download';
 
 const strings = {
   getCopyAssetTooltip: () =>

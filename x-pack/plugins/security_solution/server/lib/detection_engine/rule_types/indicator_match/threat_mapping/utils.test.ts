@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SearchAfterAndBulkCreateReturnType } from '../../types';
 import { sampleSignalHit } from '../../__mocks__/es_results';
+import type { SearchAfterAndBulkCreateReturnType } from '../../types';
 import type { ThreatMatchNamedQuery, ThreatTermNamedQuery } from './types';
 
 import {
@@ -19,8 +19,8 @@ import {
   decodeThreatMatchNamedQuery,
   encodeThreatMatchNamedQuery,
   getMatchedFields,
-  getSignalValueMap,
   getMaxClauseCountErrorValue,
+  getSignalValueMap,
 } from './utils';
 
 describe('utils', () => {

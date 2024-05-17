@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { XJsonLang } from './xjson';
+import {
+  CODE_EDITOR_DARK_THEME_ID,
+  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+  CODE_EDITOR_LIGHT_THEME_ID,
+  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
+  buildDarkTheme,
+  buildDarkTransparentTheme,
+  buildLightTheme,
+  buildLightTransparentTheme,
+} from './code_editor';
+import { CONSOLE_THEME_ID, ConsoleLang, ConsoleOutputLang, buildConsoleTheme } from './console';
+import { ESQLLang, ESQL_THEME_ID, buildESQlTheme } from './esql';
+import { registerLanguage, registerTheme } from './helpers';
+import { monaco } from './monaco_imports';
 import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
-import { monaco } from './monaco_imports';
-import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
+import { XJsonLang } from './xjson';
 import { YAML_LANG_ID } from './yaml';
-import { registerLanguage, registerTheme } from './helpers';
-import { ConsoleLang, ConsoleOutputLang, CONSOLE_THEME_ID, buildConsoleTheme } from './console';
-import {
-  CODE_EDITOR_LIGHT_THEME_ID,
-  CODE_EDITOR_DARK_THEME_ID,
-  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
-  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
-  buildLightTheme,
-  buildDarkTheme,
-  buildLightTransparentTheme,
-  buildDarkTransparentTheme,
-} from './code_editor';
 
 export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [

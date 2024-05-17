@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
-import { ShareMenuItem, ShowShareMenuOptions } from '../types';
-import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService } from '../types';
 import { ShareMenu } from '../components/share_tabs';
+import { ShareMenuItem, ShowShareMenuOptions } from '../types';
+import type { BrowserUrlService } from '../types';
+import { ShareMenuRegistryStart } from './share_menu_registry';
 
 export class ShareMenuManager {
   private isOpen = false;

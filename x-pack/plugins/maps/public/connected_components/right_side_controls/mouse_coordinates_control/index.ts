@@ -6,9 +6,9 @@
  */
 
 import { connect } from 'react-redux';
-import { MouseCoordinatesControl } from './mouse_coordinates_control';
-import { getMouseCoordinates, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
+import { getMapZoom, getMouseCoordinates } from '../../../selectors/map_selectors';
+import { MouseCoordinatesControl } from './mouse_coordinates_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

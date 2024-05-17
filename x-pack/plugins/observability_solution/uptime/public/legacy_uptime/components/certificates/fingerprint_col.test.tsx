@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment';
-import { FingerprintCol } from './fingerprint_col';
+import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
+import { FingerprintCol } from './fingerprint_col';
 
 describe('FingerprintCol', () => {
   const cert = {

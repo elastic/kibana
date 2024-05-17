@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import React from 'react';
-import type { DetectPreventProtectionLevelProps } from './detect_prevent_protection_level';
-import { DetectPreventProtectionLevel } from './detect_prevent_protection_level';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep, set } from 'lodash';
+import React from 'react';
+import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { expectIsViewOnly, exactMatchText } from '../mocks';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { exactMatchText, expectIsViewOnly } from '../mocks';
+import type { DetectPreventProtectionLevelProps } from './detect_prevent_protection_level';
+import { DetectPreventProtectionLevel } from './detect_prevent_protection_level';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

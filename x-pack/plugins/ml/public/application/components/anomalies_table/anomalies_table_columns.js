@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiLink, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 
-import React from 'react';
 import { get } from 'lodash';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_JOB_AGGREGATION, isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION, isMultiBucketAnomaly, isRuleSupported } from '@kbn/ml-anomaly-utils';
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
 } from '@kbn/ml-date-utils';
 
-import { DescriptionCell } from './description_cell';
-import { DetectorCell } from './detector_cell';
-import { EntityCell } from '../entity_cell';
-import { InfluencersCell } from './influencers_cell';
-import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { formatValue } from '../../formatters/format_value';
-import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
+import { EntityCell } from '../entity_cell';
+import { ANOMALIES_TABLE_TABS, INFLUENCERS_LIMIT } from './anomalies_table_constants';
+import { DescriptionCell } from './description_cell';
+import { DetectorCell } from './detector_cell';
+import { InfluencersCell } from './influencers_cell';
+import { LinksMenu } from './links_menu';
 import { SeverityCell } from './severity_cell';
 
 function renderTime(date, aggregationInterval) {

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/server';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ShortUrlRecord } from '.';
 import type {
+  ILocatorClient,
   IShortUrlClient,
+  LocatorData,
   ShortUrl,
   ShortUrlCreateParams,
-  ILocatorClient,
   ShortUrlData,
-  LocatorData,
 } from '../../../common/url_service';
 import { UrlServiceError } from '../error';
 import type { ShortUrlStorage } from './types';

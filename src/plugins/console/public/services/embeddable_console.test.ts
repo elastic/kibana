@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { StorageMock } from './storage.mock';
 import { EmbeddableConsoleInfo } from './embeddable_console';
+import { StorageMock } from './storage.mock';
 
 describe('EmbeddableConsoleInfo', () => {
   jest.useFakeTimers();

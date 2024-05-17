@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 export const createMockFilesClient = (): DeeplyMockedKeys<BaseFilesClient> => ({
   create: jest.fn(),

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiBetaBadge,
   EuiButtonIcon,
@@ -17,8 +16,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 import { SearchType } from '../types';
 import { useTriggerUiActionServices } from '../util';
 

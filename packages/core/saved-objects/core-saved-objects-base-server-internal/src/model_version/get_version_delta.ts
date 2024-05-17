@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { VirtualVersionMap, VirtualVersion } from './version_map';
 import { compareVirtualVersions } from './version_compare';
+import type { VirtualVersion, VirtualVersionMap } from './version_map';
 
 interface GetModelVersionDeltaOpts {
   currentVersions: VirtualVersionMap;

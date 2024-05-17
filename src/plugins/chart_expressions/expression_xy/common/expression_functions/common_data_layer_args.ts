@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG, XYCurveTypes } from '../constants';
+import { DATA_DECORATION_CONFIG, SeriesTypes, XScaleTypes, XYCurveTypes } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 

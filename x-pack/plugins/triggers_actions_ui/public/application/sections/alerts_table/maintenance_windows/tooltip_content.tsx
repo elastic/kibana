@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, formatDate, EuiHorizontalRule } from '@elastic/eui';
-import { MaintenanceWindow, MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/alerting-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, formatDate } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { MAINTENANCE_WINDOW_DATE_FORMAT, MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React, { memo, useMemo } from 'react';
 
 const START_TIME = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.maintenanceWindowTooltip.startTime',

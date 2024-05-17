@@ -19,12 +19,15 @@ function schemaToMapping(schemaLeaf: any): any {
     return schemaLeaf;
   }
 
-  return Object.entries<any>(schemaLeaf).reduce((acc, [key, value]) => {
-    const propMapping = schemaToMapping(value);
-    acc[key] = typeof propMapping.type === 'string' ? propMapping : { properties: propMapping };
+  return Object.entries<any>(schemaLeaf).reduce(
+    (acc, [key, value]) => {
+      const propMapping = schemaToMapping(value);
+      acc[key] = typeof propMapping.type === 'string' ? propMapping : { properties: propMapping };
 
-    return acc;
-  }, {} as Record<string, unknown>);
+      return acc;
+    },
+    {} as Record<string, unknown>
+  );
 }
 
 /**

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { pick, isPlainObject } from 'lodash';
-import * as t from 'io-ts';
+import { isLeft, isRight } from 'fp-ts/lib/Either';
 import { ordString } from 'fp-ts/lib/Ord';
 import { toArray } from 'fp-ts/lib/Set';
-import { isLeft, isRight } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { isPlainObject, pick } from 'lodash';
 
-import { errorReporter } from './error_reporter';
-import { ALL_DATA_TYPES, PARAMETERS_DEFINITION, MapperSizePluginId } from '../constants';
+import { ALL_DATA_TYPES, MapperSizePluginId, PARAMETERS_DEFINITION } from '../constants';
 import { FieldMeta } from '../types';
+import { errorReporter } from './error_reporter';
 import { getFieldMeta } from './utils';
 
 const ALLOWED_FIELD_PROPERTIES = [

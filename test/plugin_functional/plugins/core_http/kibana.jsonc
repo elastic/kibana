@@ -6,8 +6,6 @@
     "id": "coreHttp",
     "server": true,
     "browser": true,
-    "configPath": [
-      "core_http"
-    ]
+    "configPath": ["core_http"]
   }
 }

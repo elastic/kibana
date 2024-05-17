@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
-import { RULE_KIBANA_VERSION_MISMATCH } from '../../common/constants';
-import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_KIBANA_VERSION_MISMATCH } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
+import { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
 
 const RealDate = Date;
 

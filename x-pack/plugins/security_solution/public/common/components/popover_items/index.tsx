@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiPopover,
-  EuiBadgeGroup,
   EuiBadge,
-  EuiPopoverTitle,
+  EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 export interface PopoverItemsProps<T> {

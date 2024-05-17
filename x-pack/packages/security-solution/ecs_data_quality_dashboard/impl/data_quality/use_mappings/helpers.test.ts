@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fetchMappings } from './helpers';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
+import { fetchMappings } from './helpers';
 
 describe('helpers', () => {
   describe('fetchMappings', () => {

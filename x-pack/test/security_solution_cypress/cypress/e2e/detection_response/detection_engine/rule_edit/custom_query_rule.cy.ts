@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { getEditedRule, getExistingRule } from '../../../../objects/rule';
 import {
   ADD_FILTER_FORM_FIELD_INPUT,
   ADD_FILTER_FORM_OPERATOR_FIELD,
   GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM,
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
 } from '../../../../screens/search_bar';
-import { getExistingRule, getEditedRule } from '../../../../objects/rule';
 
 import {
   ACTIONS_NOTIFY_WHEN_BUTTON,
@@ -19,8 +19,8 @@ import {
 } from '../../../../screens/common/rule_actions';
 import {
   CUSTOM_QUERY_INPUT,
-  DEFINE_INDEX_INPUT,
   DEFAULT_RISK_SCORE_INPUT,
+  DEFINE_INDEX_INPUT,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
@@ -48,8 +48,8 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../../screens/rule_details';
 
-import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
 import { addEmailConnectorAndRuleAction } from '../../../../tasks/common/rule_actions';
 import {
   fillAboutRule,

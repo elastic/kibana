@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getProjectFeaturesUrl } from './util';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { getProjectFeaturesUrl } from './util';
 
 const cloud = {
   serverless: {

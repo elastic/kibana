@@ -8,24 +8,24 @@
 import { has } from 'lodash/fp';
 import React from 'react';
 
+import type { AuthenticationsEdges } from '../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import type { Columns, ItemsPerRow } from '../paginated_table';
-import { getRowItemsWithActions } from '../../../common/components/tables/helpers';
-import * as i18n from './translations';
 import {
   HostDetailsLink,
   NetworkDetailsLink,
   UserDetailsLink,
 } from '../../../common/components/links';
-import type { AuthenticationsEdges } from '../../../../common/search_strategy';
-import type { AuthTableColumns } from './types';
 import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import type { LensAttributes } from '../../../common/components/visualization_actions/types';
+import { getRowItemsWithActions } from '../../../common/components/tables/helpers';
 import { authenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/authentication';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
+import type { Columns, ItemsPerRow } from '../paginated_table';
+import * as i18n from './translations';
+import type { AuthTableColumns } from './types';
 
 export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
   USER_COLUMN,

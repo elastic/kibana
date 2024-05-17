@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SeriesConfig, SeriesUrl } from '../../types';
 import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
 import { useFilterValues } from '../../series_editor/use_filter_values';
+import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
   query?: string;

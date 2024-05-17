@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { Observable } from 'rxjs';
 
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 

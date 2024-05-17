@@ -6,10 +6,10 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import { findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
 import { FollowerIndicesList } from '../../../app/sections/home/follower_indices_list';
-import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
+import { ccrStore } from '../../../app/store';
 
 const testBedConfig = {
   store: ccrStore,

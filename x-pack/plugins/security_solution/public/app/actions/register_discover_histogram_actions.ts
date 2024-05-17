@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/public';
 import { createFilterAction } from '@kbn/unified-search-plugin/public';
 import type { History } from 'history';
-import type { CoreSetup } from '@kbn/core/public';
 import type { SecurityAppStore } from '../../common/store';
 import type { StartServices } from '../../types';
-import { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
+import { EsqlInTimelineAction, EsqlInTimelineTrigger } from './constants';
 
 const createDiscoverHistogramCustomFilterAction = (
   _store: SecurityAppStore,

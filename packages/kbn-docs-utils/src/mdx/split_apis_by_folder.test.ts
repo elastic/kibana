@@ -7,12 +7,12 @@
  */
 
 import Path from 'path';
-import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
+import { Project } from 'ts-morph';
 
-import { PluginApi, PluginOrPackage } from '../types';
-import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
 import { getPluginApi } from '../get_plugin_api';
+import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
+import { PluginApi, PluginOrPackage } from '../types';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
 
 const log = new ToolingLog({

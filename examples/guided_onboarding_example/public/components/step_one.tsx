@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiText,
-  EuiTourStep,
-  EuiTitle,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
   EuiCode,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPageHeader,
+  EuiPageSection,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiTourStep,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 

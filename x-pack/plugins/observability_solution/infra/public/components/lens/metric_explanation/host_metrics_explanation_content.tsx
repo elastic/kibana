@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { HostMetricsDocsLink } from './host_metrics_docs_link';
 
 export const HostMetricsExplanationContent = () => {

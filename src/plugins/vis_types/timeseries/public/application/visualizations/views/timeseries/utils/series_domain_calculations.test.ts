@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { calculateDomainForSeries } from './series_domain_calculation';
 import { PanelData } from '../../../../../../common/types';
+import { calculateDomainForSeries } from './series_domain_calculation';
 
 describe('calculateDomainForSeries', () => {
   it('should return 0 for domainStart and 3 for domainEnd', () => {

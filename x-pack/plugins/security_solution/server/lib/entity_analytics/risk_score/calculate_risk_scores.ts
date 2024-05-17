@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -18,33 +17,26 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import { isEmpty } from 'lodash';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type {
   AfterKeys,
   EntityRiskScoreRecord,
   RiskScoreWeights,
 } from '../../../../common/api/entity_analytics/common';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import {
   type IdentifierType,
-  getRiskLevel,
   RiskCategories,
+  getRiskLevel,
 } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import {
   applyCriticalityToScore,
   getCriticalityModifier,
   normalize,
 } from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
-import {
-  buildCategoryCountDeclarations,
-  buildCategoryAssignment,
-  buildCategoryScoreDeclarations,
-  buildWeightingOfScoreByCategory,
-  getGlobalWeightForIdentifierType,
-} from './risk_weights';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
@@ -56,6 +48,14 @@ import {
   RISK_SCORING_SUM_MAX,
   RISK_SCORING_SUM_VALUE,
 } from './constants';
+import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
+import {
+  buildCategoryAssignment,
+  buildCategoryCountDeclarations,
+  buildCategoryScoreDeclarations,
+  buildWeightingOfScoreByCategory,
+  getGlobalWeightForIdentifierType,
+} from './risk_weights';
 
 const formatForResponse = ({
   bucket,
@@ -338,16 +338,19 @@ export const calculateRiskScores = async ({
           },
         },
       },
-      aggs: identifierTypes.reduce((aggs, _identifierType) => {
-        aggs[_identifierType] = buildIdentifierTypeAggregation({
-          afterKeys: userAfterKeys,
-          identifierType: _identifierType,
-          pageSize,
-          weights,
-          alertSampleSizePerShard,
-        });
-        return aggs;
-      }, {} as Record<string, AggregationsAggregationContainer>),
+      aggs: identifierTypes.reduce(
+        (aggs, _identifierType) => {
+          aggs[_identifierType] = buildIdentifierTypeAggregation({
+            afterKeys: userAfterKeys,
+            identifierType: _identifierType,
+            pageSize,
+            weights,
+            alertSampleSizePerShard,
+          });
+          return aggs;
+        },
+        {} as Record<string, AggregationsAggregationContainer>
+      ),
     };
 
     if (debug) {

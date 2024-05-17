@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { KibanaRequest } from '@kbn/core/server';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/server';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { KibanaRequest } from '@kbn/core/server';
-import type { ExecutionContext } from '@kbn/expressions-plugin/server';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   AggsCommonStart,
+  EsaggsExpressionFunctionDefinition,
+  EsaggsStartDependencies,
   ISearchStartSearchSource,
   KibanaContext,
-  EsaggsStartDependencies,
-  EsaggsExpressionFunctionDefinition,
 } from '../../../common/search';
 import { getFunctionDefinition } from './esaggs';
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
 import { FlyoutFooter } from './flyout_footer';
 
-import { FLYOUT_STATE } from '../../../reducers/ui';
-import { getSelectedLayer, hasDirtyState } from '../../../selectors/map_selectors';
 import {
-  setSelectedLayer,
   removeSelectedLayer,
   removeTrackedLayerStateForSelectedLayer,
+  setSelectedLayer,
   updateFlyout,
 } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
+import { FLYOUT_STATE } from '../../../reducers/ui';
+import { getSelectedLayer, hasDirtyState } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {

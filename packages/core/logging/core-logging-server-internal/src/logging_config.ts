@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import {
-  ROOT_CONTEXT_NAME,
   DEFAULT_APPENDER_NAME,
+  ROOT_CONTEXT_NAME,
   getLoggerContext,
   getParentLoggerContext,
 } from '@kbn/core-logging-common-internal';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import moment from 'moment-timezone';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
@@ -16,17 +16,17 @@ import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
-import { isTransformStats } from '../../../../../../common/types/transform_stats';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import { isTransformStats } from '../../../../../../common/types/transform_stats';
 
 import type { TransformListRow } from '../../../../common';
-import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useGetTransformStats } from '../../../../hooks';
+import { useEnabledFeatures } from '../../../../serverless_context';
 
-import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import type { SectionConfig, SectionItem } from './expanded_row_column_view';
 import { ExpandedRowColumnView } from './expanded_row_column_view';
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 interface ExpandedRowDetailsPaneProps {
   item: TransformListRow;

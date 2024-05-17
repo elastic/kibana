@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
 import { ClientPluginsStart } from '../../plugin';
 import { apiService } from '../api_service/api_service';
 

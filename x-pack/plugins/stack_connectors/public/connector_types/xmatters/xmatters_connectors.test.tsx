@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import XmattersActionConnectorFields from './xmatters_connectors';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
+import XmattersActionConnectorFields from './xmatters_connectors';
 
 describe('XmattersActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {

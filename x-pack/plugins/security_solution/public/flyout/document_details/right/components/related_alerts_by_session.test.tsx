@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import {
-  SUMMARY_ROW_ICON_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
-  SUMMARY_ROW_LOADING_TEST_ID,
-  CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID,
-} from './test_ids';
-import { RelatedAlertsBySession } from './related_alerts_by_session';
+import React from 'react';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import {
+  CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID,
+  SUMMARY_ROW_ICON_TEST_ID,
+  SUMMARY_ROW_LOADING_TEST_ID,
+  SUMMARY_ROW_VALUE_TEST_ID,
+} from './test_ids';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 

@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  useGeneratedHtmlId,
   EuiContextMenuItem,
-  EuiIcon,
-  EuiText,
-  EuiOutsideClickDetector,
-  useEuiTheme,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiOutsideClickDetector,
+  EuiPopover,
+  EuiText,
   EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback } from 'react';
 import type { LayerType } from '../../../..';
 import type { LayerAction, Visualization } from '../../../../types';
 import { getCloneLayerAction } from './clone_layer_action';
-import { getRemoveLayerAction } from './remove_layer_action';
 import { getOpenLayerSettingsAction } from './open_layer_settings';
+import { getRemoveLayerAction } from './remove_layer_action';
 
 export interface LayerActionsProps {
   layerIndex: number;

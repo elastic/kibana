@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { mockTelemetryConstants, mockTelemetryService } from '../mocks';
-import { OptInStatusNoticeBanner } from './opt_in_status_notice_banner';
 import { OptInMessage } from './opt_in_message';
+import { OptInStatusNoticeBanner } from './opt_in_status_notice_banner';
 
 const mockHttp = httpServiceMock.createStartContract();
 const telemetryConstants = mockTelemetryConstants();

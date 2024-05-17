@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OPEN_DETAIL_PANEL, CLOSE_DETAIL_PANEL } from '../action_types';
+import { CLOSE_DETAIL_PANEL, OPEN_DETAIL_PANEL } from '../action_types';
 
 const initialState = {
   isOpen: false,

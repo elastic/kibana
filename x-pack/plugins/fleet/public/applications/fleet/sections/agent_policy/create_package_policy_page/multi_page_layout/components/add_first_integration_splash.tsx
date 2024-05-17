@@ -7,30 +7,30 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiImageProps } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiImage,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHideFor,
+  EuiImage,
+  EuiLink,
+  EuiShowFor,
+  EuiSpacer,
   EuiStepNumber,
   EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiHideFor,
-  EuiShowFor,
+  EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
-import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
-import { IntegrationBreadcrumb } from '../../components';
 import { Error } from '../../../../../components';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
-import { WithHeaderLayout } from '../../../../../layouts';
 import { useStartServices } from '../../../../../hooks';
 import type { RequestError } from '../../../../../hooks';
+import { WithHeaderLayout } from '../../../../../layouts';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
+import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import { IntegrationBreadcrumb } from '../../components';
 
 import { CreatePackagePolicyBottomBar } from '.';
 

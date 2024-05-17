@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
 import {
-  EuiPageBody,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiPageSection,
-  EuiPage,
   EuiFlexItem,
   EuiFormRow,
-  EuiTextArea,
-  EuiText,
   EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageSection,
+  EuiSpacer,
+  EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
   ActionType,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { CoreStart, HttpSetup } from '@kbn/core/public';
 import {
   ConnectorAddModal,
   loadActionTypes,
 } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { i18n } from '@kbn/i18n';
-import { SetupConnector } from './components/setup_connector';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ListConnectors } from './components/list_connector';
+import { SetupConnector } from './components/setup_connector';
 import { StreamingResponse } from './components/streaming_response';
 
 const width = 800;

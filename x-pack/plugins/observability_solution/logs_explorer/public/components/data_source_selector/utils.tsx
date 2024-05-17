@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { RefCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
+import React, { RefCallback } from 'react';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATA_SOURCE_SELECTOR_WIDTH,
-  noDatasetsDescriptionLabel,
-  noDatasetsLabel,
   noDataViewsDescriptionLabel,
   noDataViewsLabel,
+  noDatasetsDescriptionLabel,
+  noDatasetsLabel,
   noIntegrationsDescriptionLabel,
   noIntegrationsLabel,
 } from './constants';
-import { DatasetSelectionHandler } from './types';
 import ListStatus, { ListStatusProps } from './sub_components/list_status';
+import { DatasetSelectionHandler } from './types';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_SOURCE_SELECTOR_WIDTH,

@@ -1,3 +1,4 @@
+import { ReadOperations } from '@kbn/alerting-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
-import { ReadOperations } from '@kbn/alerting-plugin/server';
 import { getAuthzFilter } from './get_authz_filter';
 
 describe('getAuthzFilter()', () => {

@@ -1,3 +1,5 @@
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React, { FC } from 'react';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { focusNextElement } from './helpers';
 
 // dummy component for testing

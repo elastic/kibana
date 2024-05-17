@@ -1,3 +1,5 @@
+import { i18n } from '@kbn/i18n';
+import { useQuery } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +7,10 @@
  * 2.0.
  */
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useKibana } from '../../common/lib/kibana';
 import { Pagination, RulesListFilters } from '../../types';
 import type { LoadRulesProps } from '../lib/rule_api';
 import { loadRulesWithKueryFilter } from '../lib/rule_api/rules_kuery_filter';
-import { useKibana } from '../../common/lib/kibana';
 
 type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
   filters: RulesListFilters;

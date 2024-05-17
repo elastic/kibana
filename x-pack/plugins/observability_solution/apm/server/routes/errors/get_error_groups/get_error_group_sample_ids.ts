@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType } from '../../../../common/document_type';
 import {
   ERROR_GROUP_ID,
   ERROR_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
 
 const ERROR_SAMPLES_SIZE = 10000;
 

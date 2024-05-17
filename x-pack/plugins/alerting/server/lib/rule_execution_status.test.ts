@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '../types';
-import {
-  executionStatusFromState,
-  executionStatusFromError,
-  ruleExecutionStatusToRaw,
-  ruleExecutionStatusFromRaw,
-} from './rule_execution_status';
-import { ErrorWithReason } from './error_with_reason';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { translations } from '../constants/translations';
-import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '../types';
+import { ErrorWithReason } from './error_with_reason';
+import {
+  executionStatusFromError,
+  executionStatusFromState,
+  ruleExecutionStatusFromRaw,
+  ruleExecutionStatusToRaw,
+} from './rule_execution_status';
+import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
 
 const MockLogger = loggingSystemMock.create().get();
 const executionMetrics = {
@@ -237,8 +237,9 @@ describe('RuleExecutionStatus', () => {
     });
 
     test('status with an error', () => {
-      expect(ruleExecutionStatusToRaw({ lastExecutionDate: date, status, error }))
-        .toMatchInlineSnapshot(`
+      expect(
+        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, error })
+      ).toMatchInlineSnapshot(`
         Object {
           "error": Object {
             "message": "wops",
@@ -253,8 +254,9 @@ describe('RuleExecutionStatus', () => {
     });
 
     test('status with a duration', () => {
-      expect(ruleExecutionStatusToRaw({ lastExecutionDate: date, status, lastDuration: 1234 }))
-        .toMatchInlineSnapshot(`
+      expect(
+        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, lastDuration: 1234 })
+      ).toMatchInlineSnapshot(`
       Object {
         "error": null,
         "lastDuration": 1234,

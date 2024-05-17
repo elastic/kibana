@@ -13,9 +13,9 @@ import {
   EuiText,
   EuiTextTruncate,
 } from '@elastic/eui';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 type ConnectorSelectorBaseProps = UseGenAIConnectorsResult;

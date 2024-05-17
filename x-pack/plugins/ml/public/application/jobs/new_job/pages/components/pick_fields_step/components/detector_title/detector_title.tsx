@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
+import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
 
 interface DetectorTitleProps {
   index: number;

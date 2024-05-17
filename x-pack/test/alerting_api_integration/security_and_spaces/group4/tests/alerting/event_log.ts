@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import {
-  descriptorToArray,
   SavedObjectDescriptor,
+  descriptorToArray,
 } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getEventLog, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { validateEvent } from '../../../../spaces_only/tests/alerting/group1/event_log';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {

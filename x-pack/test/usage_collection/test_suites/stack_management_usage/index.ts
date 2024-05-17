@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { stackManagementSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/management/schema';
+import _ from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

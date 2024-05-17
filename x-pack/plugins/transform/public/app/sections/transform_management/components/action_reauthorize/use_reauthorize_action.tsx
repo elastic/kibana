@@ -7,15 +7,15 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { isTransformListRowWithStats } from '../../../../common/transform_list';
-import { sortTransformsToReauthorize } from './sort_transforms_to_reauthorize';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useReauthorizeTransforms } from '../../../../hooks/use_reauthorize_transform';
 import {
-  isReauthorizeActionDisabled,
   ReauthorizeActionName,
+  isReauthorizeActionDisabled,
   reauthorizeActionNameText,
 } from './reauthorize_action_name';
+import { sortTransformsToReauthorize } from './sort_transforms_to_reauthorize';
 
 import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities } from '../../../../hooks';

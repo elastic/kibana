@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RulesFactory } from './rules_factory';
 import { RULE_CPU_USAGE } from '../../common/constants';
+import { RulesFactory } from './rules_factory';
 
 jest.mock('../static_globals', () => ({
   Globals: {

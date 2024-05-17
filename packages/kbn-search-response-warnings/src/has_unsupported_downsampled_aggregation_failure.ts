@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SearchResponseWarning, SearchResponseIncompleteWarning } from './types';
+import type { SearchResponseIncompleteWarning, SearchResponseWarning } from './types';
 
 export function hasUnsupportedDownsampledAggregationFailure(warning: SearchResponseWarning) {
   return warning.type === 'incomplete'

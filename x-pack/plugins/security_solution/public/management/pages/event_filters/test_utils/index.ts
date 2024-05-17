@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type {
-  FoundExceptionListItemSchema,
-  ExceptionListItemSchema,
-  ExceptionListSummarySchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSummarySchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ResponseProvidersInterface } from '../../../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../../../common/mock/endpoint/http_handler_mock_factory';

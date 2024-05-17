@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { getAllMigrations, LensDocShape } from './saved_object_migrations';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
+import { cloneDeep } from 'lodash';
+import { LegacyMetricState } from '../../common/types';
+import { LensDocShape, getAllMigrations } from './saved_object_migrations';
 import {
   LensDocShape715,
   LensDocShape810,
+  LensDocShape850,
   VisState716,
-  VisStatePost715,
-  VisStatePre715,
   VisState810,
   VisState820,
   VisState830,
-  LensDocShape850,
-  XYVisStatePre850,
   VisState850,
+  VisStatePost715,
+  VisStatePre715,
+  XYVisStatePre850,
 } from './types';
-import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import { LegacyMetricState } from '../../common/types';
-import { Filter } from '@kbn/es-query';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {}, {});
@@ -2230,7 +2230,7 @@ describe('Lens migrations', () => {
               },
             },
           },
-        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>);
+        }) as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
       expect(
         migrate(getDoc('lnsXY', undefined), context).attributes.state.visualization.legend

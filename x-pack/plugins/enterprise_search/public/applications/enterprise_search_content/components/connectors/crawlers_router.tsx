@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { CRAWLERS_PATH, NEW_CRAWLER_PATH } from '../../routes';
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';

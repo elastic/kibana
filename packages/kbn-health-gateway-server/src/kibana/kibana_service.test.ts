@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { IConfigServiceMock, configServiceMock } from '@kbn/config-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import type { ServerStart } from '../server';
 import { serverMock } from '../server/server.mock';
-import { mockReadFileSync } from './kibana_service.test.mocks';
 import { KibanaService } from './kibana_service';
+import { mockReadFileSync } from './kibana_service.test.mocks';
 
 describe('KibanaService', () => {
   let config: IConfigServiceMock;

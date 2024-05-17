@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiFlexItem,
-  EuiPopover,
-  EuiPanel,
-  EuiSpacer,
-  EuiCallOut,
-  EuiSelect,
-  EuiFormRow,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiPopover,
+  EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import type { RandomSampler, RandomSamplerOption } from './random_sampler';
 import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_sampler';
+import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 
 interface Props {
   randomSampler: RandomSampler;

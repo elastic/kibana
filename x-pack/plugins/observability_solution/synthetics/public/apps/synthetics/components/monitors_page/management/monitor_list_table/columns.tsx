@@ -7,21 +7,21 @@
 
 import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   isStatusEnabled,
   toggleStatusAlert,
 } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import {
   CANNOT_PERFORM_ACTION_SYNTHETICS,
   NoPermissionsTooltip,
 } from '../../../common/components/permissions';
 import { TagsBadges } from '../../../common/components/tag_badges';
-import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 

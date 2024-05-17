@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KbnClient } from '@kbn/test';
+import { GuideState } from '@kbn/guided-onboarding';
 import {
+  PluginStateSO,
   guideStateSavedObjectsType,
   pluginStateSavedObjectsId,
   pluginStateSavedObjectsType,
-  PluginStateSO,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects';
-import { GuideState } from '@kbn/guided-onboarding';
+import { KbnClient } from '@kbn/test';
 
 export const createPluginState = async (client: KbnClient, state: PluginStateSO) => {
   await client.savedObjects.create({

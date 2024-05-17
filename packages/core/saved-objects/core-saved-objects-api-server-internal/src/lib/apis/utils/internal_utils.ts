@@ -9,19 +9,19 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Payload } from '@hapi/boom';
 import {
-  SavedObjectsErrorHelpers,
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsRawDoc,
-  type SavedObjectsRawDocSource,
-  type SavedObject,
-  type SavedObjectsRawDocParseOptions,
-  type DecoratedError,
-} from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import {
   decodeRequestVersion,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  type DecoratedError,
+  type ISavedObjectTypeRegistry,
+  type SavedObject,
+  SavedObjectsErrorHelpers,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocParseOptions,
+  type SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.

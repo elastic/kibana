@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
 

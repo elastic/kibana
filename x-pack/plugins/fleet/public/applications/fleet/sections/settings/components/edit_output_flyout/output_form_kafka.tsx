@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiFieldText, EuiFormRow, EuiLink, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 
 import { useStartServices } from '../../../../../../hooks';
 

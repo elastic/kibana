@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import type { DropResult } from '@hello-pangea/dnd';
+import { omit } from 'lodash/fp';
 
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 

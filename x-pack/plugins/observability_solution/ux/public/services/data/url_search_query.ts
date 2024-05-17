@@ -6,10 +6,10 @@
  */
 
 import { TRANSACTION_DURATION, TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
-import { SetupUX } from '../../../typings/ui_filters';
-import { getRumPageLoadTransactionsProjection } from './projections';
-import { callDateMath } from './call_date_math';
 import { mergeProjection } from '../../../common/utils/merge_projection';
+import { SetupUX } from '../../../typings/ui_filters';
+import { callDateMath } from './call_date_math';
+import { getRumPageLoadTransactionsProjection } from './projections';
 
 export function urlSearchQuery(restFilters: any, uxQuery: any, searchValue: string) {
   const setup: SetupUX = { uiFilters: restFilters ? restFilters : {} };

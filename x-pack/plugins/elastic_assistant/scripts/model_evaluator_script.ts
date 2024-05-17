@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
+import yargs from 'yargs/yargs';
 
 export const AVAILABLE_MODELS = ['gpt-3.5', 'gpt-4'] as const;
 

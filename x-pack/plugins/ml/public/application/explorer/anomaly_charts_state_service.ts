@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, skipWhile, switchMap } from 'rxjs';
 import type { PageUrlStateService } from '@kbn/ml-url-state';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import { distinctUntilChanged, map, skipWhile, switchMap } from 'rxjs';
+import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import type { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { getDefaultChartsData } from './explorer_charts/explorer_charts_container_service';
-import type { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { getSelectionInfluencers, getSelectionJobIds } from './explorer_utils';
-import type { TableSeverity } from '../components/controls/select_severity/select_severity';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 export class AnomalyChartsStateService extends StateService {

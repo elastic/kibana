@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import {
+  AreaSeries,
+  AreaSeriesStyle,
+  CurveType,
+  PointShape,
+  RecursivePartial,
+  ScaleType,
+} from '@elastic/charts';
 // @ts-ignore
 import chroma from 'chroma-js';
 import React from 'react';
-import {
-  AreaSeries,
-  ScaleType,
-  CurveType,
-  AreaSeriesStyle,
-  PointShape,
-  RecursivePartial,
-} from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 
 interface AreaSeriesComponentProps {

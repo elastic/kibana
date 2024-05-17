@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { type RenderResult, act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent, act, type RenderResult } from '@testing-library/react';
 import { HoverPopover } from './hover_popover';
 
 describe('HoverPopover', () => {

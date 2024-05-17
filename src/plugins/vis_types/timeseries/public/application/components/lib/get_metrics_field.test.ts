@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getMetricsField } from './get_metrics_field';
 import type { Metric } from '../../../../common/types';
+import { getMetricsField } from './get_metrics_field';
 
 describe('getMetricsField(metrics)', () => {
   it('should return last metric field', () => {

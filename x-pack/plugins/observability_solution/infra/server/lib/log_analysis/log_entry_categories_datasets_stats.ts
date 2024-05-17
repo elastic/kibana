@@ -11,9 +11,9 @@ import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { COMPOSITE_AGGREGATION_BATCH_SIZE } from './common';
 import {
   CompositeDatasetKey,
+  LogEntryCategoryDatasetStatsBucket,
   createLatestLogEntryCategoriesDatasetsStatsQuery,
   latestLogEntryCategoriesDatasetsStatsResponseRT,
-  LogEntryCategoryDatasetStatsBucket,
 } from './queries/latest_log_entry_categories_datasets_stats';
 
 export async function getLatestLogEntriesCategoriesDatasetsStats(

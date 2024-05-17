@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { act, Simulate } from 'react-dom/test-utils';
+import { Simulate, act } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
 

@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiLoadingSpinner, EuiText, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 

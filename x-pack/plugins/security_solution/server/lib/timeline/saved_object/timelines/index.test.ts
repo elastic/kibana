@@ -6,21 +6,20 @@
  */
 
 import type { FrameworkRequest } from '../../../framework';
-import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 import { mockTimeline } from '../../__mocks__/create_timelines';
+import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   convertStringToBase64,
-  getExistingPrepackagedTimelines,
+  copyTimeline,
   getAllTimeline,
   getDraftTimeline,
+  getExistingPrepackagedTimelines,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
-  copyTimeline,
 } from '.';
-import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
-import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
 import { TimelineType } from '../../../../../common/api/timeline';
 import type {
   AllTimelinesResponse,
@@ -28,13 +27,14 @@ import type {
   SavedTimeline,
 } from '../../../../../common/api/timeline';
 import {
+  mockResolveTimelineResponse,
   mockResolvedSavedObject,
   mockResolvedTimeline,
-  mockResolveTimelineResponse,
 } from '../../__mocks__/resolve_timeline';
 import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
+import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
+import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),

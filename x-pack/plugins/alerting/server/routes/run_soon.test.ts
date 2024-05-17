@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { rulesClientMock } from '../rules_client.mock';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 import { runSoonRoute } from './run_soon';
 
 const rulesClient = rulesClientMock.create();

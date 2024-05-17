@@ -1,3 +1,10 @@
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { syntheticsServiceAPIKeySavedObject } from '../../saved_objects/service_api_key';
+import {
+  generateAndSaveServiceAPIKey,
+  getAPIKeyForSyntheticsService,
+  getSyntheticsEnablement,
+} from '../../synthetics_service/get_api_key';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +12,6 @@
  * 2.0.
  */
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsServiceAPIKeySavedObject } from '../../saved_objects/service_api_key';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import {
-  generateAndSaveServiceAPIKey,
-  getAPIKeyForSyntheticsService,
-  getSyntheticsEnablement,
-} from '../../synthetics_service/get_api_key';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',

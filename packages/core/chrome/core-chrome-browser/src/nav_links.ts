@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { AppCategory } from '@kbn/core-application-common';
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
+import type { AppCategory } from '@kbn/core-application-common';
+import type { Observable } from 'rxjs';
 
 /**
  * @public

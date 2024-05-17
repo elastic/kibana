@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
-import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
+import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { persistNote } from '../../containers/notes/api';
-import { refreshTimelines, ensureTimelineIsSaved } from './helpers';
+import { selectTimelineById } from '../selectors';
+import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
 
-import {
-  startTimelineSaving,
-  endTimelineSaving,
-  showCallOutUnauthorizedMsg,
-  addNote,
-  addNoteToEvent,
-  pinEvent,
-} from '../actions';
 import { updateNote } from '../../../common/store/app/actions';
 import { createNote } from '../../components/notes/helpers';
+import {
+  addNote,
+  addNoteToEvent,
+  endTimelineSaving,
+  pinEvent,
+  showCallOutUnauthorizedMsg,
+  startTimelineSaving,
+} from '../actions';
 
 jest.mock('../actions', () => {
   const actual = jest.requireActual('../actions');

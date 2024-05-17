@@ -30,10 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchCronEditor } from '@kbn/search-connectors/components/cron_editor';
 
 import {
-  HOURS_UNIT_LABEL,
   DAYS_UNIT_LABEL,
-  WEEKS_UNIT_LABEL,
+  HOURS_UNIT_LABEL,
   MONTHS_UNIT_LABEL,
+  WEEKS_UNIT_LABEL,
 } from '../../../../../shared/constants';
 
 import { docLinks } from '../../../../../shared/doc_links/doc_links';

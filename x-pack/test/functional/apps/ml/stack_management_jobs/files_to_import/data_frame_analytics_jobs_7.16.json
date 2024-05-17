@@ -3,9 +3,7 @@
     "id": "dfa-test1",
     "description": "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
     "source": {
-      "index": [
-        "ft_bank_marketing"
-      ],
+      "index": ["ft_bank_marketing"],
       "query": {
         "match_all": {}
       }
@@ -32,9 +30,7 @@
     "id": "dfa-test2",
     "description": "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
     "source": {
-      "index": [
-        "missing-index"
-      ],
+      "index": ["missing-index"],
       "query": {
         "match_all": {}
       }

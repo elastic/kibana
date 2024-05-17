@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { goalVisType } from '@kbn/vis-type-gauge-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
-import { toExpressionAst } from './to_ast';
 import { GaugeVisParams } from './gauge';
+import { toExpressionAst } from './to_ast';
 
 export const goalVisTypeDefinition = {
   ...goalVisType({}),

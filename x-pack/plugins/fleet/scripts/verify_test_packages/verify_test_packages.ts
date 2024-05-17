@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { readFile, readdirSync, statSync } from 'fs';
 import path from 'path';
-import { readdirSync, statSync, readFile } from 'fs';
 import { promisify } from 'util';
 
-import partition from 'lodash/partition';
 import type { Logger } from '@kbn/core/server';
+import partition from 'lodash/partition';
 
 import { ToolingLog } from '@kbn/tooling-log';
 

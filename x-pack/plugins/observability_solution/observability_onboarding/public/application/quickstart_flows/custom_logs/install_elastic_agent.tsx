@@ -6,30 +6,30 @@
  */
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  SINGLE_DATASET_LOCATOR_ID,
+  SingleDatasetLocatorParams,
+} from '@kbn/deeplinks-observability/locators';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
-import {
-  SingleDatasetLocatorParams,
-  SINGLE_DATASET_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
-import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
 } from '../shared/get_elastic_agent_setup_command';
 import {
+  EuiStepStatus,
   InstallElasticAgentSteps,
   ProgressStepId,
-  EuiStepStatus,
 } from '../shared/install_elastic_agent_steps';
 import { StepModal } from '../shared/step_panel';
-import { ApiKeyBanner } from './api_key_banner';
-import { WindowsInstallStep } from '../shared/windows_install_step';
 import { TroubleshootingLink } from '../shared/troubleshooting_link';
-import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
+import { WindowsInstallStep } from '../shared/windows_install_step';
+import { ApiKeyBanner } from './api_key_banner';
 
 const defaultDatasetName = '';
 
@@ -186,8 +186,8 @@ export function InstallElasticAgent() {
         stepStatus === 'loading'
           ? CHECK_LOGS_LABELS.loading
           : stepStatus === 'complete'
-          ? CHECK_LOGS_LABELS.completed
-          : CHECK_LOGS_LABELS.incomplete;
+            ? CHECK_LOGS_LABELS.completed
+            : CHECK_LOGS_LABELS.incomplete;
       return {
         title,
         status: stepStatus,
@@ -312,8 +312,8 @@ export function InstallElasticAgent() {
           installShipperSetupStatus === FETCH_STATUS.LOADING
             ? 'loading'
             : isInstallCompleted
-            ? 'complete'
-            : 'current'
+              ? 'complete'
+              : 'current'
         }
         showInstallProgressSteps={isInstallStarted}
         installProgressSteps={

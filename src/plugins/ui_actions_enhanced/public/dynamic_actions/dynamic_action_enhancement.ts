@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
+import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DynamicActionsState } from '..';
 import { UiActionsServiceEnhancements } from '../services';
 

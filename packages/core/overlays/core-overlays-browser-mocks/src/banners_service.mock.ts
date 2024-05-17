@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   type InternalOverlayBannersStart,
   type OverlayBannersService,
 } from '@kbn/core-overlays-browser-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<InternalOverlayBannersStart> = {

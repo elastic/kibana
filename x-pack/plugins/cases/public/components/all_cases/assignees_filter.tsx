@@ -10,6 +10,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 import { useIsUserTyping } from '../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
@@ -20,7 +21,6 @@ import { NoMatches } from '../user_profiles/no_matches';
 import { bringCurrentUserToFrontAndSort, orderAssigneesIncludingNone } from '../user_profiles/sort';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
-import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 
 export const NO_ASSIGNEES_VALUE = null;
 

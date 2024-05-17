@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { UUID, NonEmptyString, User } from '../conversations/common_attributes.gen';
+import { NonEmptyString, UUID, User } from '../conversations/common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;
 export const BulkActionSkipReason = z.literal('PROMPT_FIELD_NOT_MODIFIED');

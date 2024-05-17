@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { UserActionContentToolbar } from './content_toolbar';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { UserActionContentToolbar } from './content_toolbar';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/lib/kibana');

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiCard, EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { reactRouterNavigate } from '../../../../../shared_imports';
 import { DeprecationSource } from '../../../../../../common/types';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
 import { LoadingIssuesError } from './loading_issues_error';
 import { NoDeprecationIssues } from './no_deprecation_issues';

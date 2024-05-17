@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 import { msToPretty } from '../../lib';
 import { Index } from '../../types';

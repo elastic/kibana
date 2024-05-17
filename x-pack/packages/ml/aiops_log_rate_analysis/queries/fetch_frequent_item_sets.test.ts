@@ -7,7 +7,7 @@
 
 import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
-import { getShouldClauses, getFrequentItemSetsAggFields } from './fetch_frequent_item_sets';
+import { getFrequentItemSetsAggFields, getShouldClauses } from './fetch_frequent_item_sets';
 
 describe('getShouldClauses', () => {
   it('returns should clauses for the frequent item sets query', () => {

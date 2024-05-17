@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiMarkdownFormat } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 export function Content({ text }) {
   return <EuiMarkdownFormat>{text}</EuiMarkdownFormat>;

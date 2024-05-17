@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ServiceStatusLevels, ServiceStatusLevel } from '@kbn/core-status-common';
+import { ServiceStatusLevel, ServiceStatusLevels } from '@kbn/core-status-common';
 
 export const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
   test: (val: any) => Object.values(ServiceStatusLevels).includes(val),

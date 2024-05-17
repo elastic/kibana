@@ -1,3 +1,4 @@
+import { EuiToolTip } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import { EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
 const OverflowParent = styled.div`

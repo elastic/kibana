@@ -6,8 +6,8 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case } from '@kbn/cases-plugin/common/types/domain';
 import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { Case } from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 

@@ -1,3 +1,4 @@
+import { History } from 'history';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { range } from 'lodash';
-import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
-import { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
-import { History } from 'history';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
+import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
 
 describe('maybeRedirectToAvailableSpanSample', () => {
   const samples: Array<{

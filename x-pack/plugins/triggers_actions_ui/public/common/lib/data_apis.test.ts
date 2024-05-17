@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
+  getESIndexFields,
+  getMatchingIndices,
   loadIndexPatterns,
   setDataViewsService,
-  getMatchingIndices,
-  getESIndexFields,
 } from './data_apis';
-import { httpServiceMock } from '@kbn/core/public/mocks';
 
 const mockFind = jest.fn();
 const perPage = 1000;

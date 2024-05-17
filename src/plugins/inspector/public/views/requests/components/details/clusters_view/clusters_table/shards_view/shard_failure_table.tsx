@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState, ReactNode } from 'react';
 import { ShardFailureDetails } from './shard_failure_details';
 
 function getRowId(failure: estypes.ShardFailure) {

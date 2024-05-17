@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { cloneDeep } from 'lodash';
 import { FormatFactory } from '../../types';
-import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
+import { transposeTable } from './transpose_helpers';
 import type { DatatableExpressionFunction } from './types';
 
 export const datatableFn =

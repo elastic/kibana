@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createConversations } from './provider';
+import { type HttpSetupMock, httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { createConversations } from './provider';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants');
 let http: HttpSetupMock = coreMock.createSetup().http;

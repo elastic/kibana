@@ -1,3 +1,15 @@
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Comparators } from '@elastic/eui';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { UI_SETTINGS } from '@kbn/data-service';
+import type { AggregateQuery } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getFieldType } from '@kbn/field-utils';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { useUrlState } from '@kbn/ml-url-state';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,44 +17,32 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { merge } from 'rxjs';
-import { Comparators } from '@elastic/eui';
-import { useUrlState } from '@kbn/ml-url-state';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getFieldType } from '@kbn/field-utils';
-import { UI_SETTINGS } from '@kbn/data-service';
 import useObservable from 'react-use/lib/useObservable';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { merge } from 'rxjs';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
+import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
+import { filterFields } from '../../../common/components/fields_stats_grid/filter_fields';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import type {
   MetricFieldsStats,
   TotalFieldsStats,
 } from '../../../common/components/stats_table/components/field_count_stats';
-import { filterFields } from '../../../common/components/fields_stats_grid/filter_fields';
-import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { useESQLFieldStatsData } from './use_esql_field_stats_data';
-import type { NonAggregatableField } from '../../types/overall_stats';
-import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
-import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
-import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_data';
-import { type AggregatableField } from '../../types/esql_data_visualizer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
+import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
 import type {
   ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
-import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
-import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
+import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { type AggregatableField } from '../../types/esql_data_visualizer';
+import type { NonAggregatableField } from '../../types/overall_stats';
+import { useESQLFieldStatsData } from './use_esql_field_stats_data';
+import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_data';
 
 const defaultSearchQuery = {
   match_all: {},

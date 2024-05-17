@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
-import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { isString } from 'lodash/fp';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import type { ExpandedDetailType } from '../../../../../../common/types';
-import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
+import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 
 interface Props {
   contextId: string;

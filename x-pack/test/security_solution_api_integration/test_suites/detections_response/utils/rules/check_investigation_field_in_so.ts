@@ -6,9 +6,9 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { SavedObjectReference } from '@kbn/core/server';
 import { InvestigationFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { isEqual } from 'lodash/fp';
 import { getRuleSOById } from './get_rule_so_by_id';

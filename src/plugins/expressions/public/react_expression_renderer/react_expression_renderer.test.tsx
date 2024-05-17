@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { EuiProgress } from '@elastic/eui';
+import { mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs';
-import { ReactExpressionRenderer } from './react_expression_renderer';
-import { mount } from 'enzyme';
-import { EuiProgress } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '../../common';
 import { ExpressionLoader } from '../loader';
-import { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
+import { ExpressionRendererEvent, RenderErrorHandlerFnType } from '../types';
+import { ReactExpressionRenderer } from './react_expression_renderer';
 
 jest.mock('../loader', () => {
   return {

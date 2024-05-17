@@ -9,12 +9,8 @@
       "from": "",
       "size": ""
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_application/search_application"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_application/search_application"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-search-applications.html",
     "availability": {
       "stack": true,

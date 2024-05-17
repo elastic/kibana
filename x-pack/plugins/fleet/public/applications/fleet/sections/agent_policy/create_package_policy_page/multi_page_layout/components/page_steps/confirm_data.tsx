@@ -7,12 +7,12 @@
 
 import React, { useState } from 'react';
 
-import type { MultiPageStepLayoutProps } from '../../types';
 import { useStartServices } from '../../../../../../hooks';
+import type { MultiPageStepLayoutProps } from '../../types';
 
 import {
-  ConfirmIncomingDataWithPreview,
   ConfirmIncomingDataStandalone,
+  ConfirmIncomingDataWithPreview,
   CreatePackagePolicyFinalBottomBar,
   NotObscuredByBottomBar,
 } from '..';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { safeLoad } from 'js-yaml';
+import React from 'react';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';

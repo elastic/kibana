@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
-  IUiSettingsClient,
   ApplicationStart,
+  ChromeRecentlyAccessed,
+  DocLinksStart,
   HttpStart,
   I18nStart,
-  DocLinksStart,
+  IUiSettingsClient,
   ToastsStart,
-  ChromeRecentlyAccessed,
 } from '@kbn/core/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 

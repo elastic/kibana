@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 
-import { SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { SettingType } from '@kbn/management-settings-types';
 import { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
 
 import { DATA_TEST_SUBJ_SCREEN_READER_MESSAGE, FieldRow } from './field_row';
 import { wrap } from './mocks';
 
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
-import { DATA_TEST_SUBJ_RESET_PREFIX } from './footer/reset_link';
 import { DATA_TEST_SUBJ_CHANGE_LINK_PREFIX } from './footer/change_image_link';
+import { DATA_TEST_SUBJ_RESET_PREFIX } from './footer/reset_link';
 
 const defaults = {
   requiresPageReload: false,

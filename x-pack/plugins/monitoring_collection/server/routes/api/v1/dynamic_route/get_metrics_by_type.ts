@@ -1,3 +1,5 @@
+import { schema } from '@kbn/config-schema';
+import { IRouter, ServiceStatus } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +7,9 @@
  * 2.0.
  */
 import { JsonObject } from '@kbn/utility-types';
-import { schema } from '@kbn/config-schema';
-import { IRouter, ServiceStatus } from '@kbn/core/server';
+import { MONITORING_COLLECTION_BASE_PATH } from '../../../../constants';
 import { getESClusterUuid, getKibanaStats } from '../../../../lib';
 import { MetricResult } from '../../../../plugin';
-import { MONITORING_COLLECTION_BASE_PATH } from '../../../../constants';
 
 export function registerDynamicRoute({
   router,

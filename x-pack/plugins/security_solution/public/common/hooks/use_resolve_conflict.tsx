@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
+import { encode, safeDecode } from '@kbn/rison';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { EuiSpacer } from '@elastic/eui';
-import { safeDecode, encode } from '@kbn/rison';
-import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store';
-import type { TimelineUrl } from '../../timelines/store/model';
 import { timelineDefaults } from '../../timelines/store/defaults';
+import type { TimelineUrl } from '../../timelines/store/model';
 import { useKibana } from '../lib/kibana';
+import { useDeepEqualSelector } from './use_selector';
 import { URL_PARAM_KEY } from './use_url_state';
 
 /**

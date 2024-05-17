@@ -7,22 +7,20 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { i18n } from '@kbn/i18n';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { EuiIcon } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import {
-  getWarningsTitle,
   type SearchResponseWarning,
   ViewDetailsPopover,
+  getWarningsTitle,
 } from '@kbn/search-response-warnings';
+import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
-import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { FeatureCollection } from 'geojson';
-import { DataRequest } from '../util/data_request';
-import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import {
   LAYER_TYPE,
   MAX_ZOOM,
@@ -30,24 +28,26 @@ import {
   MIN_ZOOM,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
-import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,
   CustomIcon,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  StyleMetaDescriptor,
   TileMetaFeature,
   Timeslice,
-  StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
-import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { hasESSourceMethod, isESVectorTileSource } from '../sources/es_source';
-import { TileErrorsList } from './tile_errors_list';
+import { ISource, SourceEditorArgs } from '../sources/source';
+import { IStyle } from '../styles/style';
+import { DataRequest } from '../util/data_request';
+import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import { isLayerGroup } from './layer_group';
+import { TileErrorsList } from './tile_errors_list';
 
 export const INCOMPLETE_RESULTS_WARNING = i18n.translate(
   'xpack.maps.layer.incompleteResultsWarning',

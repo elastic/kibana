@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { CrudClient } from '@kbn/content-management-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
 import type {
-  TodoCreateIn,
-  TodoUpdateIn,
-  TodoDeleteIn,
-  TodoGetIn,
-  TodoSearchIn,
-  TodoUpdateOut,
-  TodoCreateOut,
-  TodoSearchOut,
-  TodoDeleteOut,
   Todo,
+  TodoCreateIn,
+  TodoCreateOut,
+  TodoDeleteIn,
+  TodoDeleteOut,
+  TodoGetIn,
   TodoGetOut,
+  TodoSearchIn,
+  TodoSearchOut,
+  TodoUpdateIn,
+  TodoUpdateOut,
 } from '../../../../common/examples/todos';
 
 /**

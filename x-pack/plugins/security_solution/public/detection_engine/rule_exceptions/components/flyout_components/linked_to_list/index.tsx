@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiInMemoryTable, EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import * as i18n from './translations';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import { getSharedListsTableColumns } from '../utils';
+import * as i18n from './translations';
 
 interface ExceptionsLinkedToListComponentProps {
   isLoadingReferences: boolean;

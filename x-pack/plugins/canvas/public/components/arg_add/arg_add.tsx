@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, ReactEventHandler } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { FC, ReactEventHandler } from 'react';
 
 interface Props {
   displayName: string;

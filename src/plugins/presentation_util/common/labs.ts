@@ -50,9 +50,9 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
   },
 };
 
-export type ProjectID = typeof projectIDs[number];
-export type EnvironmentName = typeof environmentNames[number];
-export type SolutionName = typeof solutionNames[number];
+export type ProjectID = (typeof projectIDs)[number];
+export type EnvironmentName = (typeof environmentNames)[number];
+export type SolutionName = (typeof solutionNames)[number];
 
 export type EnvironmentStatus = {
   [env in EnvironmentName]?: boolean;

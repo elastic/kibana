@@ -135,9 +135,7 @@
             "type": "Array",
             "tags": [],
             "label": "fields",
-            "description": [
-              "A list of {@link FieldDefinition } objects."
-            ],
+            "description": ["A list of {@link FieldDefinition } objects."],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -162,9 +160,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "A {@link CategoryCounts } object."
-        ],
+        "returnComment": ["A {@link CategoryCounts } object."],
         "initialIsOpen": false
       },
       {
@@ -174,9 +170,7 @@
         "tags": [],
         "label": "getCategoryName",
         "description": [],
-        "signature": [
-          "(category: string | undefined) => string"
-        ],
+        "signature": ["(category: string | undefined) => string"],
         "path": "packages/kbn-management/settings/utilities/category/get_category_name.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -188,9 +182,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-management/settings/utilities/category/get_category_name.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -222,12 +214,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `array` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"array\">"
-            ],
+            "description": ["The `array` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"array\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -239,12 +227,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `array` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"array\"> | undefined"
-            ],
+            "description": ["The `array` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"array\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -276,12 +260,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `color` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"color\">"
-            ],
+            "description": ["The `color` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"color\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -293,12 +273,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `color` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"color\"> | undefined"
-            ],
+            "description": ["The `color` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"color\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -330,12 +306,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `boolean` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"boolean\">"
-            ],
+            "description": ["The `boolean` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"boolean\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -347,12 +319,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `boolean` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"boolean\"> | undefined"
-            ],
+            "description": ["The `boolean` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"boolean\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -384,12 +352,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `image` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"image\">"
-            ],
+            "description": ["The `image` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"image\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -401,12 +365,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `image` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"image\"> | undefined"
-            ],
+            "description": ["The `image` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"image\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -425,9 +385,7 @@
         "description": [
           "\nConvenience function to compare an `json` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
         ],
-        "signature": [
-          "(field: F<\"json\">, change: C<\"json\"> | undefined) => [string, boolean]"
-        ],
+        "signature": ["(field: F<\"json\">, change: C<\"json\"> | undefined) => [string, boolean]"],
         "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -438,12 +396,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `json` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"json\">"
-            ],
+            "description": ["The `json` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"json\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -455,12 +409,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `json` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"json\"> | undefined"
-            ],
+            "description": ["The `json` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"json\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -492,12 +442,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `markdown` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"markdown\">"
-            ],
+            "description": ["The `markdown` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"markdown\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -509,12 +455,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `markdown` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"markdown\"> | undefined"
-            ],
+            "description": ["The `markdown` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"markdown\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -546,12 +488,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `number` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"number\">"
-            ],
+            "description": ["The `number` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"number\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -563,12 +501,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `number` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"number\"> | undefined"
-            ],
+            "description": ["The `number` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"number\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -600,12 +534,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `select` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"select\">"
-            ],
+            "description": ["The `select` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"select\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -617,12 +547,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `select` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"select\"> | undefined"
-            ],
+            "description": ["The `select` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"select\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -654,12 +580,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `string` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"string\">"
-            ],
+            "description": ["The `string` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"string\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -671,12 +593,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `string` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"string\"> | undefined"
-            ],
+            "description": ["The `string` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"string\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -708,12 +626,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The `undefined` {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<\"undefined\">"
-            ],
+            "description": ["The `undefined` {@link FieldDefinition } to compare."],
+            "signature": ["F<\"undefined\">"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -725,12 +639,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The `undefined` {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<\"undefined\"> | undefined"
-            ],
+            "description": ["The `undefined` {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<\"undefined\"> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -770,12 +680,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The {@link FieldDefinition } to compare."
-            ],
-            "signature": [
-              "F<S>"
-            ],
+            "description": ["The {@link FieldDefinition } to compare."],
+            "signature": ["F<S>"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -787,12 +693,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The {@link UnsavedFieldChange } to compare."
-            ],
-            "signature": [
-              "C<S> | undefined"
-            ],
+            "description": ["The {@link UnsavedFieldChange } to compare."],
+            "signature": ["C<S> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -856,9 +758,7 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The field to compare."
-            ],
+            "description": ["The field to compare."],
             "signature": [
               "Pick<",
               {
@@ -889,9 +789,7 @@
             "type": "Object",
             "tags": [],
             "label": "unsavedChange",
-            "description": [
-              "The unsaved change to compare."
-            ],
+            "description": ["The unsaved change to compare."],
             "signature": [
               "Pick<",
               {
@@ -921,9 +819,7 @@
         "description": [
           "\nUtility function to determine if a given value is equal to the default value of\na {@link FieldDefinition}.\n"
         ],
-        "signature": [
-          "(field: F<S>, change: C<S> | undefined) => boolean"
-        ],
+        "signature": ["(field: F<S>, change: C<S> | undefined) => boolean"],
         "path": "packages/kbn-management/settings/utilities/field/is_default_value.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -934,12 +830,8 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The field to compare."
-            ],
-            "signature": [
-              "F<S>"
-            ],
+            "description": ["The field to compare."],
+            "signature": ["F<S>"],
             "path": "packages/kbn-management/settings/utilities/field/is_default_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -951,12 +843,8 @@
             "type": "Object",
             "tags": [],
             "label": "change",
-            "description": [
-              "The unsaved change to compare."
-            ],
-            "signature": [
-              "C<S> | undefined"
-            ],
+            "description": ["The unsaved change to compare."],
+            "signature": ["C<S> | undefined"],
             "path": "packages/kbn-management/settings/utilities/field/is_default_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1012,9 +900,7 @@
             "type": "Object",
             "tags": [],
             "label": "setting",
-            "description": [
-              "The source {@link UiSettingMetadata } object."
-            ],
+            "description": ["The source {@link UiSettingMetadata } object."],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -1108,18 +994,14 @@
             "description": [
               "The raw settings retrieved from the {@link IUiSettingsClient }, which\nmay be missing the `type` or `value` properties."
             ],
-            "signature": [
-              "RawSettings"
-            ],
+            "signature": ["RawSettings"],
             "path": "packages/kbn-management/settings/utilities/setting/normalize_settings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "A mapped collection of normalized {@link UiSetting } objects."
-        ],
+        "returnComment": ["A mapped collection of normalized {@link UiSetting } objects."],
         "initialIsOpen": false
       },
       {
@@ -1168,9 +1050,7 @@
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": [
-              "The {@link UseUpdateParameters } to use."
-            ],
+            "description": ["The {@link UseUpdateParameters } to use."],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-utilities",
@@ -1187,9 +1067,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "An {@link OnInputChangeFn } that will send an update to the field."
-        ],
+        "returnComment": ["An {@link OnInputChangeFn } that will send an update to the field."],
         "initialIsOpen": false
       }
     ],
@@ -1221,9 +1099,7 @@
             "type": "Function",
             "tags": [],
             "label": "onInputChange",
-            "description": [
-              "The {@link OnInputChangeFn} to invoke."
-            ],
+            "description": ["The {@link OnInputChangeFn} to invoke."],
             "signature": [
               "(change?: ",
               {
@@ -1269,9 +1145,7 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The {@link FieldDefinition} to use to create an update."
-            ],
+            "description": ["The {@link FieldDefinition} to use to create an update."],
             "signature": [
               "{ defaultValue?: ",
               {

@@ -96,9 +96,7 @@
             "tags": [],
             "label": "filter",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -110,9 +108,7 @@
             "tags": [],
             "label": "locale",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -124,9 +120,7 @@
             "tags": [],
             "label": "dropNullColumns",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -495,9 +489,7 @@
         "tags": [],
         "label": "ESFilter",
         "description": [],
-        "signature": [
-          "QueryDslQueryContainer"
-        ],
+        "signature": ["QueryDslQueryContainer"],
         "path": "packages/kbn-es-types/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -510,9 +502,7 @@
         "tags": [],
         "label": "ESQLRow",
         "description": [],
-        "signature": [
-          "unknown[]"
-        ],
+        "signature": ["unknown[]"],
         "path": "packages/kbn-es-types/src/search.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -525,9 +515,7 @@
         "tags": [],
         "label": "ESSearchRequest",
         "description": [],
-        "signature": [
-          "SearchRequest"
-        ],
+        "signature": ["SearchRequest"],
         "path": "packages/kbn-es-types/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -563,9 +551,7 @@
         "tags": [],
         "label": "ESSourceOptions",
         "description": [],
-        "signature": [
-          "string | boolean | string[]"
-        ],
+        "signature": ["string | boolean | string[]"],
         "path": "packages/kbn-es-types/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -601,9 +587,7 @@
         "tags": [],
         "label": "MaybeReadonlyArray",
         "description": [],
-        "signature": [
-          "T[] | readonly T[]"
-        ],
+        "signature": ["T[] | readonly T[]"],
         "path": "packages/kbn-es-types/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,

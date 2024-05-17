@@ -8,34 +8,34 @@
 
 import type {
   AJAXError,
-  Map,
-  LayerSpecification,
-  Source,
+  CustomLayerInterface,
+  FeatureIdentifier,
+  FilterSpecification,
   GeoJSONSource,
-  VectorTileSource,
-  RasterTileSource,
-  SourceSpecification,
-  StyleSpecification,
-  MapEvent,
-  MapOptions,
-  MapMouseEvent,
-  MapSourceDataEvent,
+  LayerSpecification,
   LngLat,
   LngLatBounds,
+  Map,
+  MapEvent,
+  MapGeoJSONFeature,
+  MapMouseEvent,
+  MapOptions,
+  MapSourceDataEvent,
   Point2D,
   PointLike,
-  MapGeoJSONFeature,
-  CustomLayerInterface,
-  FilterSpecification,
-  FeatureIdentifier,
+  RasterTileSource,
+  Source,
+  SourceSpecification,
+  StyleSpecification,
+  VectorTileSource,
 } from 'maplibre-gl';
 
-// @ts-expect-error
-import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
 import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
+// @ts-expect-error
+import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const maplibregl: any = maplibreglDist;

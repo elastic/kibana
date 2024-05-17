@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stringifyJson, parseJson } from './utils';
+import { parseJson, stringifyJson } from './utils';
 
 describe('utils', () => {
   describe('stringifyJson()', () => {

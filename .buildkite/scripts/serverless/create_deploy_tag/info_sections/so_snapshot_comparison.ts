@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
 import { readFileSync } from 'fs';
-import { exec } from '../shared';
+import path from 'path';
 import { BuildkiteClient, getKibanaDir } from '#pipeline-utils';
+import { exec } from '../shared';
 
 type VersionChanges = Record<string, { from: number; to: number; emoji: string }>;
 

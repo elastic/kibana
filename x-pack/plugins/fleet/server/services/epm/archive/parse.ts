@@ -7,8 +7,8 @@
 
 import { readFile } from 'fs';
 
-import { promisify } from 'util';
 import path from 'path';
+import { promisify } from 'util';
 
 import { merge } from '@kbn/std';
 import yaml from 'js-yaml';
@@ -20,22 +20,22 @@ import { appContextService } from '../..';
 
 import type {
   ArchivePackage,
-  RegistryPolicyTemplate,
+  PackageSpecManifest,
+  PackageSpecTags,
   RegistryDataStream,
+  RegistryDataStreamLifecycle,
+  RegistryDataStreamRoutingRules,
   RegistryInput,
+  RegistryPolicyTemplate,
   RegistryStream,
   RegistryVarsEntry,
-  PackageSpecManifest,
-  RegistryDataStreamRoutingRules,
-  RegistryDataStreamLifecycle,
-  PackageSpecTags,
 } from '../../../../common/types';
 import {
+  RegistryDataStreamKeys,
   RegistryInputKeys,
-  RegistryVarsEntryKeys,
   RegistryPolicyTemplateKeys,
   RegistryStreamKeys,
-  RegistryDataStreamKeys,
+  RegistryVarsEntryKeys,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
@@ -83,11 +83,14 @@ export const expandDottedObject = (dottedObj: object = {}) => {
 };
 
 export const expandDottedEntries = (obj: object) => {
-  return Object.entries<any>(obj).reduce<any>((acc, [key, value]) => {
-    acc[key] = expandDottedObject(value);
+  return Object.entries<any>(obj).reduce<any>(
+    (acc, [key, value]) => {
+      acc[key] = expandDottedObject(value);
 
-    return acc;
-  }, {} as Record<string, any>);
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 };
 
 type AssetsBufferMap = Record<string, Buffer>;

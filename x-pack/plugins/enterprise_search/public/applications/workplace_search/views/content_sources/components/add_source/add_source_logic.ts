@@ -6,21 +6,21 @@
  */
 
 import { Search } from 'history';
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 import { keys, pickBy } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
 import {
+  clearFlashMessages,
   flashAPIErrors,
   flashSuccessToast,
-  clearFlashMessages,
   setErrorMessage,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
+import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { getSourceData } from '../../source_data';

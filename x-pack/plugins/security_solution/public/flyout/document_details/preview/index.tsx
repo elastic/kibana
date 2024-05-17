@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import React, { memo, useMemo } from 'react';
 import type { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { panels } from './panels';
 

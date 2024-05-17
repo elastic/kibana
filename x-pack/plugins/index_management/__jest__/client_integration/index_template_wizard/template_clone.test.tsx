@@ -12,7 +12,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { getComposableTemplate } from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 
-import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './constants';
+import { INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS, TEMPLATE_NAME } from './constants';
 import { setup } from './template_clone.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 

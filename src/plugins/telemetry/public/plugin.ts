@@ -7,30 +7,30 @@
  */
 
 import type { ApmBase } from '@elastic/apm-rum';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 import type {
-  Plugin,
-  CoreStart,
-  CoreSetup,
-  HttpStart,
-  PluginInitializerContext,
   ApplicationStart,
+  CoreSetup,
+  CoreStart,
   DocLinksStart,
   HttpSetup,
+  HttpStart,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
-import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
-import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
-import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
+import type { TelemetryConfigLabels } from '../server/config';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
+import { TelemetryNotifications, TelemetrySender, TelemetryService } from './services';
 
 /**
  * Publicly exposed APIs from the Telemetry Service

@@ -7,15 +7,15 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiPageHeader, EuiSpacer, EuiPageSection } from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExecuteDetails } from '../../../../models/execute_details';
+import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
 import { getActionType } from '../../../../../../common/lib/get_action_type';
 import { BaseWatch, ExecutedWatchDetails } from '../../../../../../common/types/watch_types';
-import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
+import { ExecuteDetails } from '../../../../models/execute_details';
+import { WatchContext } from '../../watch_context';
 import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';
-import { WatchContext } from '../../watch_context';
 
 interface WatchAction {
   actionId: string;

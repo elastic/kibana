@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import { EuiButtonEmpty, EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import React, { useState, useRef, useCallback } from 'react';
 
+import { MappingsValidationError, validateMappings } from '../../lib';
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { validateMappings, MappingsValidationError } from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 

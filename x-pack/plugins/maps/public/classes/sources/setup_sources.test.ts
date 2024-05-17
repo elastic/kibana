@@ -17,8 +17,8 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-import { setupSources } from './setup_sources';
 import { SOURCE_TYPES } from '../../../common/constants';
+import { setupSources } from './setup_sources';
 import { getSourceByType } from './source_registry';
 
 const EXPECTED_UNREGISTERED_SOURCE_TYPES = [

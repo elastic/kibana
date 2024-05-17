@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -13,15 +12,16 @@ import {
   EuiOutsideClickDetector,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { I18LABELS } from '../translations';
 import {
   COUNTRY_NAME,
   REGION_NAME,
   TRANSACTION_DURATION_COUNTRY,
   TRANSACTION_DURATION_REGION,
 } from './use_layer_list';
-import { I18LABELS } from '../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
 import { resolve } from 'path';
 import expect from '@kbn/expect';
+import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { FileWrapper } from '../audit/file_wrapper';

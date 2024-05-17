@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import * as api from '@kbn/securitysolution-list-api';
+import { coreMock } from '@kbn/core/public/mocks';
 import { PersistHookProps } from '@kbn/securitysolution-io-ts-list-types';
+import * as api from '@kbn/securitysolution-list-api';
 import {
   ReturnPersistExceptionItem,
   usePersistExceptionItem,
 } from '@kbn/securitysolution-list-hooks';
-import { coreMock } from '@kbn/core/public/mocks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';

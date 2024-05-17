@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
+  AppMountParameters,
   AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { checkLicense } from '../common/check_license';
-import { ConfigSchema } from '../config';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { ConfigSchema } from '../config';
 
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;

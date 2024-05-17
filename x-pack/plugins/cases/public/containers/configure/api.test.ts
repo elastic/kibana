@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { ConnectorTypes } from '../../../common/types/domain';
+import { KibanaServices } from '../../common/lib/kibana';
+import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
 import {
-  getSupportedActionConnectors,
-  getCaseConfigure,
-  postCaseConfigure,
-  patchCaseConfigure,
   fetchActionTypes,
+  getCaseConfigure,
+  getSupportedActionConnectors,
+  patchCaseConfigure,
+  postCaseConfigure,
 } from './api';
 import {
   caseConfigurationRequest,
   caseConfigurationResponseMock,
   casesConfigurationsMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common/types/domain';
-import { KibanaServices } from '../../common/lib/kibana';
-import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

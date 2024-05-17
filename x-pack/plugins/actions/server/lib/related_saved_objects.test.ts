@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { validatedRelatedSavedObjects } from './related_saved_objects';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { validatedRelatedSavedObjects } from './related_saved_objects';
 
 const loggerMock = loggingSystemMock.createLogger();
 

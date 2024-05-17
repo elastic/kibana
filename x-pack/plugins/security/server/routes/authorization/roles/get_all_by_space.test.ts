@@ -10,8 +10,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { defineGetAllRolesBySpaceRoutes } from './get_all_by_space';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetAllRolesBySpaceRoutes } from './get_all_by_space';
 
 const application = 'kibana-.kibana';
 

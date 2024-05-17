@@ -7,7 +7,7 @@
  */
 import * as t from 'io-ts';
 import { mapValues } from 'lodash';
-import { isParsableType, ParseableType } from '../parseable_types';
+import { ParseableType, isParsableType } from '../parseable_types';
 
 interface JSONSchemaObject {
   type: 'object';

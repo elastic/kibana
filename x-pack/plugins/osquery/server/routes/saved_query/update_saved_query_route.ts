@@ -8,14 +8,7 @@
 import { filter, some } from 'lodash';
 
 import type { IRouter } from '@kbn/core/server';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
-import { isSavedQueryPrebuilt } from './utils';
 import { PLUGIN_ID } from '../../../common';
-import { savedQuerySavedObjectType } from '../../../common/types';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
-import type { UpdateSavedQueryResponse } from './types';
 import type {
   UpdateSavedQueryRequestBodySchema,
   UpdateSavedQueryRequestParamsSchema,
@@ -24,6 +17,13 @@ import {
   updateSavedQueryRequestBodySchema,
   updateSavedQueryRequestParamsSchema,
 } from '../../../common/api/saved_query/update_saved_query_route';
+import { API_VERSIONS } from '../../../common/constants';
+import { savedQuerySavedObjectType } from '../../../common/types';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
+import type { UpdateSavedQueryResponse } from './types';
+import { isSavedQueryPrebuilt } from './utils';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

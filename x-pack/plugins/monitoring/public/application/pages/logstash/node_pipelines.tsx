@@ -1,3 +1,6 @@
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +8,16 @@
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DetailStatus } from '../../../components/logstash/detail_status';
+import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useCharts } from '../../hooks/use_charts';
+import { useTable } from '../../hooks/use_table';
 import { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
-import { DetailStatus } from '../../../components/logstash/detail_status';
-import { useTable } from '../../hooks/use_table';
-import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
-import { useCharts } from '../../hooks/use_charts';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

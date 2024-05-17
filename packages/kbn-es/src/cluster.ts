@@ -7,34 +7,33 @@
  */
 
 import fs from 'fs';
-import fsp from 'fs/promises';
-import chalk from 'chalk';
 import * as path from 'path';
-import execa from 'execa';
 import { Readable } from 'stream';
-import { combineLatest, fromEvent, first } from 'rxjs';
-import { Client } from '@elastic/elasticsearch';
 import { promisify } from 'util';
+import { Client } from '@elastic/elasticsearch';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
+import execa from 'execa';
+import fsp from 'fs/promises';
+import { combineLatest, first, fromEvent } from 'rxjs';
 import treeKill from 'tree-kill';
-import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
-import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
+import { createCliError } from './errors';
+import { downloadSnapshot, installArchive, installSnapshot, installSource } from './install';
+import { ES_BIN, ES_KEYSTORE_BIN, ES_PLUGIN_BIN } from './paths';
 import {
   DockerOptions,
-  extractConfigFiles,
-  log as defaultLog,
   NativeRealm,
+  ServerlessOptions,
+  log as defaultLog,
+  extractConfigFiles,
   parseEsLog,
   runDockerContainer,
   runServerlessCluster,
-  ServerlessOptions,
   stopServerlessCluster,
   teardownServerlessClusterSync,
 } from './utils';
-import { createCliError } from './errors';
 const treeKillAsync = promisify<number, string>(treeKill);
-import { parseSettings, SettingsFilter } from './settings';
 import { EsClusterExecOptions } from './cluster_exec_options';
 import {
   DownloadSnapshotOptions,
@@ -42,6 +41,7 @@ import {
   InstallSnapshotOptions,
   InstallSourceOptions,
 } from './install/types';
+import { SettingsFilter, parseSettings } from './settings';
 import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
 
 // listen to data on stream until map returns anything but undefined

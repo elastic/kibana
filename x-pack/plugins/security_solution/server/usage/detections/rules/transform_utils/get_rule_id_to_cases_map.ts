@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 
 export const getRuleIdToCasesMap = (
   cases: Array<SavedObjectsFindResult<AttachmentAttributes>>

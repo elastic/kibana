@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext, useWaterfallContext } from './context/waterfall_context';
 import { WaterfallChartSidebarWrapper } from './styles';

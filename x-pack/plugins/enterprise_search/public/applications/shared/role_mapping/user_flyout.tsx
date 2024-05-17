@@ -18,9 +18,9 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiPortal,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 
 interface Props {
@@ -36,13 +36,13 @@ interface Props {
 import { CANCEL_BUTTON_LABEL, CLOSE_BUTTON_LABEL } from '../constants';
 
 import {
-  USERS_HEADING_LABEL,
-  UPDATE_USER_LABEL,
   ADD_USER_LABEL,
-  USER_ADDED_LABEL,
-  USER_UPDATED_LABEL,
   NEW_USER_DESCRIPTION,
   UPDATE_USER_DESCRIPTION,
+  UPDATE_USER_LABEL,
+  USERS_HEADING_LABEL,
+  USER_ADDED_LABEL,
+  USER_UPDATED_LABEL,
 } from './constants';
 
 export const UserFlyout: React.FC<Props> = ({

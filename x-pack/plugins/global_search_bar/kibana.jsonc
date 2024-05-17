@@ -6,16 +6,8 @@
     "id": "globalSearchBar",
     "server": false,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "global_search_bar"
-    ],
-    "requiredPlugins": [
-      "globalSearch"
-    ],
-    "optionalPlugins": [
-      "usageCollection",
-      "savedObjectsTagging"
-    ]
+    "configPath": ["xpack", "global_search_bar"],
+    "requiredPlugins": ["globalSearch"],
+    "optionalPlugins": ["usageCollection", "savedObjectsTagging"]
   }
 }

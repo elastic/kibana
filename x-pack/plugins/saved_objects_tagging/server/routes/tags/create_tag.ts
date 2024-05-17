@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { TagsPluginRouter } from '../../types';
 import { TagValidationError } from '../../services/tags';
+import type { TagsPluginRouter } from '../../types';
 
 export const registerCreateTagRoute = (router: TagsPluginRouter) => {
   router.post(

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 
 import { sendDeleteFleetProxy, useStartServices } from '../../../hooks';
 import type { FleetProxy } from '../../../types';

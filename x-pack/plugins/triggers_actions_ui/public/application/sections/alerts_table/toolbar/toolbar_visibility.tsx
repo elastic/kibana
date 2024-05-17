@@ -9,21 +9,21 @@ import {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import React, { lazy, Suspense, memo, useMemo, useContext } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { AlertsCount } from './components/alerts_count/alerts_count';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
+import React, { lazy, Suspense, memo, useMemo, useContext } from 'react';
 import type {
   Alerts,
   BulkActionsPanelConfig,
   GetInspectQuery,
   RowSelection,
 } from '../../../../types';
-import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 import { FieldBrowserOptions } from '../../field_browser/types';
-import { InspectButton } from './components/inspect';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { ALERTS_TABLE_TITLE } from '../translations';
+import { AlertsCount } from './components/alerts_count/alerts_count';
+import { InspectButton } from './components/inspect';
+import { LastUpdatedAt } from './components/last_updated_at';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { ListResult } from '@kbn/fleet-plugin/common';
 import type {
   Artifact,
   ArtifactsClientInterface,
   ListArtifactsProps,
 } from '@kbn/fleet-plugin/server';
-import type { ListResult } from '@kbn/fleet-plugin/common';
 import type { FetchAllArtifactsOptions } from '@kbn/fleet-plugin/server/services';
 import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 

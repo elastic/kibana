@@ -7,23 +7,23 @@
  */
 
 import type {
-  ESQLAstItem,
-  ESQLSingleAstItem,
   ESQLAst,
-  ESQLFunction,
+  ESQLAstItem,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLCommandMode,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
 import { EDITOR_MARKER } from './constants';
 import {
-  isOptionItem,
-  isColumnItem,
-  getLastCharFromTrimmed,
   getFunctionDefinition,
-  isSourceItem,
+  getLastCharFromTrimmed,
+  isColumnItem,
+  isOptionItem,
   isSettingItem,
+  isSourceItem,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {

@@ -40,9 +40,7 @@
             "tags": [],
             "label": "{ configs, cliArgs, applyConfigOverrides }",
             "description": [],
-            "signature": [
-              "BootstrapArgs"
-            ],
+            "signature": ["BootstrapArgs"],
             "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
             "deprecated": false,
             "trackAdoption": false,

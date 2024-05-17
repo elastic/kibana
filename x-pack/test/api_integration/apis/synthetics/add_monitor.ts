@@ -1,3 +1,4 @@
+import { format as formatUrl } from 'url';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +6,26 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import moment from 'moment/moment';
-import { v4 as uuidv4 } from 'uuid';
-import { omit, omitBy } from 'lodash';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  HTTPFields,
-} from '@kbn/synthetics-plugin/common/runtime_types';
-import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { format as formatUrl } from 'url';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
+import {
+  ConfigKey,
+  HTTPFields,
+  MonitorTypeEnum,
+} from '@kbn/synthetics-plugin/common/runtime_types';
+import { omit, omitBy } from 'lodash';
+import moment from 'moment/moment';
+import { v4 as uuidv4 } from 'uuid';
 
-import supertest from 'supertest';
-import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import {
   removeMonitorEmptyValues,
   transformPublicKeys,
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';

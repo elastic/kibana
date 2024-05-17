@@ -8,8 +8,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { ExceptionListRuleReferencesSchema } from '../../../../common/api/detection_engine/rule_exceptions';
-import { findRuleExceptionReferences } from '../../rule_management/api/api';
 import { useToasts } from '../../../common/lib/kibana';
+import { findRuleExceptionReferences } from '../../rule_management/api/api';
 import type { FindRulesReferencedByExceptionsListProp } from '../../rule_management/logic/types';
 import * as i18n from '../utils/translations';
 
@@ -25,7 +25,7 @@ export type ReturnUseFindExceptionListReferences = [
   boolean,
   boolean,
   RuleReferences | null,
-  FetchReferencesFunc | null
+  FetchReferencesFunc | null,
 ];
 
 /**

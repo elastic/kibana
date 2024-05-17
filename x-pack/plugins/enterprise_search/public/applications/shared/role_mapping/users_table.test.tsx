@@ -6,18 +6,18 @@
  */
 
 import {
-  asSingleUserRoleMapping,
-  wsSingleUserRoleMapping,
   asRoleMapping,
+  asSingleUserRoleMapping,
   wsRoleMapping,
+  wsSingleUserRoleMapping,
 } from './__mocks__/roles';
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { EuiInMemoryTable, EuiTextColor, EuiBadge, EuiTableRow } from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable, EuiTableRow, EuiTextColor } from '@elastic/eui';
 import type { EuiSearchBarProps } from '@elastic/eui';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';

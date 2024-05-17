@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
-import styled from 'styled-components';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
+import React, { useMemo, useState, useEffect } from 'react';
+import styled from 'styled-components';
 import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
 } from '../../../../common/types/response_actions';
-import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
 import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
+import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 

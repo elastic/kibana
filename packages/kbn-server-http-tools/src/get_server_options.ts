@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import { ServerOptions as TLSOptions } from 'https';
+import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
 import { IHttpConfig, ISslConfig } from './types';
 

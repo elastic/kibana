@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
-import type { CustomFieldFormState } from './form';
-import { CustomFieldsForm } from './form';
+import React, { useCallback, useState } from 'react';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldFormState } from './form';
+import { CustomFieldsForm } from './form';
 
 import * as i18n from './translations';
 

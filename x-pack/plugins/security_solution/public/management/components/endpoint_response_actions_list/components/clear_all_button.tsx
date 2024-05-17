@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { memo } from 'react';
 import { UX_MESSAGES } from '../translations';
 
 const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty).attrs({

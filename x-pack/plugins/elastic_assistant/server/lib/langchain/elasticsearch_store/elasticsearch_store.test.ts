@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   IndicesCreateResponse,
   MlGetTrainedModelsStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Document } from 'langchain/document';
 
+import { coreMock } from '@kbn/core/server/mocks';
+import { mockMsearchResponse } from '../../../__mocks__/msearch_response';
+import { mockQueryText } from '../../../__mocks__/query_text';
+import {
+  KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
+} from '../../telemetry/event_based_telemetry';
 import {
   ElasticsearchStore,
   FALLBACK_SIMILARITY_SEARCH_SIZE,
   TERMS_QUERY_SIZE,
 } from './elasticsearch_store';
-import { mockMsearchResponse } from '../../../__mocks__/msearch_response';
-import { mockQueryText } from '../../../__mocks__/query_text';
-import { coreMock } from '@kbn/core/server/mocks';
-import {
-  KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
-  KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
-} from '../../telemetry/event_based_telemetry';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),

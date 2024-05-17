@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import type {
-  RuleCreateProps,
   PreviewRulesSchema,
+  RuleCreateProps,
   RulePreviewLogs,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 

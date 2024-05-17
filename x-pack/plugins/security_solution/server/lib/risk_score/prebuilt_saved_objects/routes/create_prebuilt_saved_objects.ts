@@ -14,9 +14,9 @@ import type { SetupPlugins } from '../../../../plugin';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
+import { createPrebuiltSavedObjectsRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkCreateSavedObjects } from '../helpers/bulk_create_saved_objects';
-import { createPrebuiltSavedObjectsRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,

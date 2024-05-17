@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { duplicateExceptions } from './duplicate_exceptions';
+import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { duplicateExceptions } from './duplicate_exceptions';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),

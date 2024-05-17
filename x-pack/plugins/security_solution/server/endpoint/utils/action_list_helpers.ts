@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SearchRequest } from '@kbn/data-plugin/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@kbn/data-plugin/public';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import type { LogsEndpointAction } from '../../../common/endpoint/types';
+import type { GetActionDetailsListParam } from '../services/actions/action_list';
 import { getDateFilters } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
-import type { GetActionDetailsListParam } from '../services/actions/action_list';
 
 const queryOptions = Object.freeze({
   ignore: [404],
@@ -30,14 +30,14 @@ const getActionTypeFilter = (actionType: string): SearchRequest => {
         },
       }
     : actionType === 'automated'
-    ? {
-        filter: {
-          exists: {
-            field: 'data.alert_id',
+      ? {
+          filter: {
+            exists: {
+              field: 'data.alert_id',
+            },
           },
-        },
-      }
-    : {};
+        }
+      : {};
 };
 export const getActions = async ({
   agentTypes,

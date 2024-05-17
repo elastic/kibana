@@ -1,3 +1,13 @@
+import { getNewRule } from '../../../../../../objects/rule';
+import { ALERTS_COUNT } from '../../../../../../screens/alerts';
+import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
+import {
+  addExceptionFromFirstAlert,
+  goToClosedAlertsOnRuleDetailsPage,
+  waitForAlerts,
+} from '../../../../../../tasks/alerts';
+import { deleteAlertsAndRules, postDataView } from '../../../../../../tasks/api_calls/common';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,25 +16,15 @@
  */
 import { waitForAlertsToPopulate } from '../../../../../../tasks/create_new_rule';
 import {
-  addExceptionFromFirstAlert,
-  goToClosedAlertsOnRuleDetailsPage,
-  waitForAlerts,
-} from '../../../../../../tasks/alerts';
-import { deleteAlertsAndRules, postDataView } from '../../../../../../tasks/api_calls/common';
-import { login } from '../../../../../../tasks/login';
-import { visitRuleDetailsPage } from '../../../../../../tasks/rule_details';
-import { createRule } from '../../../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../../../objects/rule';
-import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
-import { ALERTS_COUNT } from '../../../../../../screens/alerts';
-import {
   addExceptionEntryFieldValue,
-  addExceptionEntryOperatorValue,
   addExceptionEntryFieldValueValue,
+  addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   selectBulkCloseAlerts,
   submitNewExceptionItem,
 } from '../../../../../../tasks/exceptions';
+import { login } from '../../../../../../tasks/login';
+import { visitRuleDetailsPage } from '../../../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967

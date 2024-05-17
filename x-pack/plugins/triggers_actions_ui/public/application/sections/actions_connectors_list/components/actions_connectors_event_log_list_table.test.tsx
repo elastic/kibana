@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { loadGlobalConnectorExecutionLogAggregations } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import { ConnectorEventLogListTable } from './actions_connectors_event_log_list_table';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   ...jest.requireActual('../../../../common/lib/kibana'),

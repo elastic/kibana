@@ -9,18 +9,18 @@ import { connect } from 'react-redux';
 import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edit';
 
 import {
-  isLoading,
+  getEditClusterError,
   getEditedCluster,
   isEditingCluster,
-  getEditClusterError,
+  isLoading,
 } from '../../store/selectors';
 
 import {
+  clearEditClusterErrors,
   editCluster,
+  openDetailPanel,
   startEditingCluster,
   stopEditingCluster,
-  clearEditClusterErrors,
-  openDetailPanel,
 } from '../../store/actions';
 
 const mapStateToProps = (state) => {

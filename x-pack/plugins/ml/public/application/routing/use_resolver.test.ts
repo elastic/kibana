@@ -6,10 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
-import { useRouteResolver } from './use_resolver';
 import type { MlLicenseInfo } from '../../../common/license/ml_license';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
+import { useRouteResolver } from './use_resolver';
 
 jest.mock('../contexts/kibana');
 jest.mock('../capabilities/check_capabilities');

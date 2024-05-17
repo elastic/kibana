@@ -7,15 +7,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { CollectorOptions } from './types';
 import { Collector } from './collector';
+import type { CollectorOptions } from './types';
 
 /**
  * Same as {@link CollectorOptions} but with the `schema` property enforced
  */
 export type UsageCollectorOptions<
   TFetchReturn = unknown,
-  ExtraOptions extends object = {}
+  ExtraOptions extends object = {},
 > = CollectorOptions<TFetchReturn, ExtraOptions> &
   Required<Pick<CollectorOptions<TFetchReturn>, 'schema'>>;
 

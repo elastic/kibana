@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TutorialsCategory, TutorialSchema } from '../../services/tutorials';
+import { TutorialSchema, TutorialsCategory } from '../../services/tutorials';
+import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 import {
-  onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
+  onPremInstructions,
 } from '../instructions/metricbeat_instructions';
-import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'traefik';

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  Plugin,
-  CoreSetup,
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-} from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
+import { schema } from '@kbn/config-schema';
+import {
+  CoreSetup,
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Plugin,
+  RequestHandlerContext,
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;

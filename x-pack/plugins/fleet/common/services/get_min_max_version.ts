@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { uniq } from 'lodash';
-import semverGt from 'semver/functions/gt';
 import semverCoerce from 'semver/functions/coerce';
+import semverGt from 'semver/functions/gt';
 
 // Sort array in ascending order
 export function sortVersions(versions: string[]) {

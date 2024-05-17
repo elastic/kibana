@@ -6,11 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { ServerlessFunctions } from './serverless_functions';
-import { ServerlessSummary } from './serverless_summary';
-import { ServerlessActiveInstances } from './serverless_active_instances';
-import { ServerlessMetricsCharts } from './serverless_metrics_charts';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { ServerlessActiveInstances } from './serverless_active_instances';
+import { ServerlessFunctions } from './serverless_functions';
+import { ServerlessMetricsCharts } from './serverless_metrics_charts';
+import { ServerlessSummary } from './serverless_summary';
 
 interface Props {
   serverlessId?: string;

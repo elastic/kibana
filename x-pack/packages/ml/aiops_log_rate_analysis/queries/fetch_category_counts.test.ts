@@ -7,7 +7,7 @@
 
 import { paramsMock } from './__mocks__/params_match_all';
 
-import { getCategoryCountRequest, getCategoryCountMSearchRequest } from './fetch_category_counts';
+import { getCategoryCountMSearchRequest, getCategoryCountRequest } from './fetch_category_counts';
 
 describe('getCategoryCountRequest', () => {
   it('returns the category count request', () => {

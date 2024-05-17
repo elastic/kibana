@@ -8,9 +8,9 @@
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { cloneDeep, remove } from 'lodash';
 import type { AppLinkItems, LinkItem } from '../../../common/links/types';
+import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
-import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createSettingsLinksFromManage } from './sections/settings_links';
 
 // This function is called by the security_solution plugin to alter the app links

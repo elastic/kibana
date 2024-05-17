@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
-import { createFormToggleAction } from './form_toggle_action';
+import { act } from 'react-dom/test-utils';
 import { createFormSetValueAction } from './form_set_value_action';
+import { createFormToggleAction } from './form_toggle_action';
 
 const createSetPrimaryShardSizeAction =
   (testBed: TestBed) => async (value: string, units?: string) => {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 const geti18nTexts = (fieldsToDelete?: string[]) => {
   let modalTitle = '';

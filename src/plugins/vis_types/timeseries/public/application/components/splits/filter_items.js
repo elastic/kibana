@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import _ from 'lodash';
-import { collectionActions } from '../lib/collection_actions';
-import { AddDeleteButtons } from '../add_delete_buttons';
-import { ColorPicker } from '../color_picker';
-import { v4 as uuidv4 } from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, withEuiTheme } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { tsvbEditorRowStyles } from '../../styles/common.styles';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { ColorPicker } from '../color_picker';
+import { collectionActions } from '../lib/collection_actions';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { tsvbEditorRowStyles } from '../../styles/common.styles';
 
 class FilterItemsUi extends Component {
   constructor(props) {

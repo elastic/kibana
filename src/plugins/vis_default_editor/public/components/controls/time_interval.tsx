@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { get, find } from 'lodash';
-import React, { useEffect } from 'react';
-import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { find, get } from 'lodash';
+import React, { useEffect } from 'react';
 
-import { search, AggParamOption } from '@kbn/data-plugin/public';
+import { AggParamOption, search } from '@kbn/data-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';
 const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
@@ -114,8 +114,8 @@ function TimeIntervalParamEditor({
     selectedOptions = definedOption
       ? [definedOption]
       : value === autoInterval
-      ? []
-      : [{ label: value, key: 'custom' }];
+        ? []
+        : [{ label: value, key: 'custom' }];
   }
 
   const { isValid, error, interval } = validateInterval(agg, value, definedOption, timeBase);

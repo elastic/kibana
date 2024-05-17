@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { registerLayerWizardInternal } from './layer_wizard_registry';
-import { uploadLayerWizardConfig } from './file_upload_wizard';
-import { layerGroupWizardConfig } from './layer_group_wizard';
-import {
-  esDocumentsLayerWizardConfig,
-  esTopHitsLayerWizardConfig,
-} from '../../sources/es_search_source';
+import { emsBoundariesLayerWizardConfig } from '../../sources/ems_file_source';
+import { emsBaseMapLayerWizardConfig } from '../../sources/ems_tms_source';
 import {
   clustersLayerWizardConfig,
   heatmapLayerWizardConfig,
 } from '../../sources/es_geo_grid_source';
 import { geoLineLayerWizardConfig } from '../../sources/es_geo_line_source';
 import { point2PointLayerWizardConfig } from '../../sources/es_pew_pew_source/point_2_point_layer_wizard';
+import {
+  esDocumentsLayerWizardConfig,
+  esTopHitsLayerWizardConfig,
+} from '../../sources/es_search_source';
 import { esqlLayerWizardConfig } from '../../sources/esql_source';
-import { emsBoundariesLayerWizardConfig } from '../../sources/ems_file_source';
-import { emsBaseMapLayerWizardConfig } from '../../sources/ems_tms_source';
 import { kibanaBasemapLayerWizardConfig } from '../../sources/kibana_tilemap_source/kibana_base_map_layer_wizard';
-import { tmsLayerWizardConfig } from '../../sources/xyz_tms_source';
-import { wmsLayerWizardConfig } from '../../sources/wms_source/wms_layer_wizard';
 import { mvtVectorSourceWizardConfig } from '../../sources/mvt_single_layer_vector_source';
+import { wmsLayerWizardConfig } from '../../sources/wms_source/wms_layer_wizard';
+import { tmsLayerWizardConfig } from '../../sources/xyz_tms_source';
+import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
+import { uploadLayerWizardConfig } from './file_upload_wizard';
+import { layerGroupWizardConfig } from './layer_group_wizard';
+import { registerLayerWizardInternal } from './layer_wizard_registry';
+import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
-import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
-import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
 import { spatialJoinWizardConfig } from './spatial_join_wizard';
 
 let registered = false;

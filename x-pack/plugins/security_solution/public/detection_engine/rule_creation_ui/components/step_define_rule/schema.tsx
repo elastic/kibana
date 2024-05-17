@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React from 'react';
 
 import { fromKueryExpression } from '@kbn/es-query';
-import {
-  singleEntryThreat,
-  containsInvalidItems,
-  customValidators,
-} from '../../../../common/components/threat_match/helpers';
+import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import {
   isEqlRule,
   isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
+  isSuppressionRuleConfiguredWithGroupBy,
   isThreatMatchRule,
   isThresholdRule,
-  isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
-import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { FieldValueQueryBar } from '../query_bar';
-import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
-import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
+import {
+  containsInvalidItems,
+  customValidators,
+  singleEntryThreat,
+} from '../../../../common/components/threat_match/helpers';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
+import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
+import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
+import type { FieldValueQueryBar } from '../query_bar';
 import {
   CUSTOM_QUERY_REQUIRED,
-  INVALID_CUSTOM_QUERY,
+  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
   INDEX_HELPER_TEXT,
+  INVALID_CUSTOM_QUERY,
+  THREAT_MATCH_EMPTIES,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
-  THREAT_MATCH_EMPTIES,
-  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
 

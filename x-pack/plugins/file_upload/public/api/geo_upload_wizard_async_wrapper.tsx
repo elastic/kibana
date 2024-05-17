@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
+import React from 'react';
 import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {

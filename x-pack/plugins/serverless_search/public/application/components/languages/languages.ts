@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 
 import { curlDefinition } from './curl';
 import { dotnetDefinition } from './dotnet';

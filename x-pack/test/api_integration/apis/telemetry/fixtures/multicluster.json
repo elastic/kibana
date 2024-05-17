@@ -152,9 +152,7 @@
             "min": 163
           }
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ]
+        "versions": ["7.0.0-alpha1"]
       },
       "status": "green",
       "timestamp": 1502835059952
@@ -215,9 +213,7 @@
           },
           "audit": {
             "enabled": false,
-            "outputs": [
-              "logfile"
-            ]
+            "outputs": ["logfile"]
           },
           "available": false,
           "enabled": true,
@@ -443,9 +439,7 @@
             "min": 178
           }
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ]
+        "versions": ["7.0.0-alpha1"]
       },
       "status": "yellow",
       "timestamp": 1502835054610
@@ -506,9 +500,7 @@
           },
           "audit": {
             "enabled": false,
-            "outputs": [
-              "logfile"
-            ]
+            "outputs": ["logfile"]
           },
           "available": true,
           "enabled": true,
@@ -524,15 +516,9 @@
             "file": {
               "available": true,
               "enabled": true,
-              "name": [
-                "default_file"
-              ],
-              "order": [
-                2147483647
-              ],
-              "size": [
-                0
-              ]
+              "name": ["default_file"],
+              "order": [2147483647],
+              "size": [0]
             },
             "ldap": {
               "available": true,
@@ -541,15 +527,9 @@
             "native": {
               "available": true,
               "enabled": true,
-              "name": [
-                "default_native"
-              ],
-              "order": [
-                2147483647
-              ],
-              "size": [
-                2
-              ]
+              "name": ["default_native"],
+              "order": [2147483647],
+              "size": [2]
             },
             "pki": {
               "available": true,
@@ -760,9 +740,7 @@
             "min": 218
           }
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ]
+        "versions": ["7.0.0-alpha1"]
       },
       "status": "green",
       "timestamp": 1502835052641
@@ -856,9 +834,7 @@
           },
           "audit": {
             "enabled": false,
-            "outputs": [
-              "logfile"
-            ]
+            "outputs": ["logfile"]
           },
           "available": true,
           "enabled": true,
@@ -874,15 +850,9 @@
             "file": {
               "available": true,
               "enabled": true,
-              "name": [
-                "default_file"
-              ],
-              "order": [
-                2147483647
-              ],
-              "size": [
-                0
-              ]
+              "name": ["default_file"],
+              "order": [2147483647],
+              "size": [0]
             },
             "ldap": {
               "available": true,
@@ -891,15 +861,9 @@
             "native": {
               "available": true,
               "enabled": true,
-              "name": [
-                "default_native"
-              ],
-              "order": [
-                2147483647
-              ],
-              "size": [
-                1
-              ]
+              "name": ["default_native"],
+              "order": [2147483647],
+              "size": [1]
             },
             "pki": {
               "available": true,
@@ -976,49 +940,50 @@
         "plugins": {}
       },
       "logstash": {
-        "count":  1,
+        "count": 1,
         "cluster_stats": {
           "collection_types": {
             "internal_collection": 1
-        },
-        "pipelines": {
-          "batch_size_min": 125,
-          "batch_size_max": 125,
-          "batch_size_avg": 125,
-          "batch_size_total": 125,
-          "count": 1,
-          "sources": {
-            "string": true
           },
-          "workers_avg": 4,
-          "workers_total": 4,
-          "workers_min": 4,
-          "workers_max": 4
-        },
-        "plugins": [
-              {
-                  "count": 1,
-                  "name": "logstash-input-twitter"
-                },
-              {
-                  "count": 1,
-                  "name": "logstash-output-stdout"
-                },
-              {
-                  "count": 1,
-                  "name": "logstash-output-elasticsearch"
-                }
-        ],
+          "pipelines": {
+            "batch_size_min": 125,
+            "batch_size_max": 125,
+            "batch_size_avg": 125,
+            "batch_size_total": 125,
+            "count": 1,
+            "sources": {
+              "string": true
+            },
+            "workers_avg": 4,
+            "workers_total": 4,
+            "workers_min": 4,
+            "workers_max": 4
+          },
+          "plugins": [
+            {
+              "count": 1,
+              "name": "logstash-input-twitter"
+            },
+            {
+              "count": 1,
+              "name": "logstash-output-stdout"
+            },
+            {
+              "count": 1,
+              "name": "logstash-output-elasticsearch"
+            }
+          ],
           "queues": {
             "memory": 1
           }
         },
         "versions": [
-                  {
-                      "count": 1,
-                      "version": "7.0.0-alpha1"
-                    }
-                ]}
+          {
+            "count": 1,
+            "version": "7.0.0-alpha1"
+          }
+        ]
+      }
     },
     "timestamp": "2017-08-15T22:10:52.642Z",
     "version": "7.0.0-alpha1",

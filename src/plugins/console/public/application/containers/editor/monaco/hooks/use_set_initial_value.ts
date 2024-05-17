@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { debounce } from 'lodash';
-import { parse } from 'query-string';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+import { decompressFromEncodedURIComponent } from 'lz-string';
+import { parse } from 'query-string';
 import { useEffect } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
 

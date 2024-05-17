@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { EsQueryRuleParams, SearchType } from '../types';
-import { SearchSourceExpression } from './search_source_expression';
+import { EuiLoadingSpinner, copyToClipboard } from '@elastic/eui';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { DataPlugin } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
-import { ISearchSource } from '@kbn/data-plugin/common';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { ReactWrapper } from 'enzyme';
-import { DataPlugin } from '@kbn/data-plugin/public';
+import { EsQueryRuleParams, SearchType } from '../types';
+import { SearchSourceExpression } from './search_source_expression';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

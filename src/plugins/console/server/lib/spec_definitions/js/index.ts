@@ -15,10 +15,10 @@ import { filter } from './filter';
 import { globals } from './globals';
 import { ingest } from './ingest';
 import { mappings } from './mappings';
-import { settings } from './settings';
 import { query } from './query';
 import { reindex } from './reindex';
 import { search } from './search';
+import { settings } from './settings';
 
 export const jsSpecLoaders: Array<(registry: SpecDefinitionsService) => void> = [
   aggs,

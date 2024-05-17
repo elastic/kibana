@@ -12,8 +12,8 @@ import {
   snoozeParamsSchema,
 } from '../../../../../common/routes/rule/apis/snooze';
 import { ILicenseState, RuleMutedError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_ALERTING_SNOOZE_RULE } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformSnoozeBodyV1 } from './transforms';
 
 export type SnoozeRuleRequestParamsV1 = TypeOf<typeof snoozeParamsSchema>;

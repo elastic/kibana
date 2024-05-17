@@ -8,7 +8,7 @@
 
 import React, { ReactElement } from 'react';
 
-import { EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiIcon, EuiToolTip } from '@elastic/eui';
 
 export interface FormRowProps {
   label: string;

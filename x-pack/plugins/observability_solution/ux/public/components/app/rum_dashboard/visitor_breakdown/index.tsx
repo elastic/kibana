@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
-import { VisitorBreakdownChart, VisitorBreakdownMetric } from '../charts/visitor_breakdown_chart';
-import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { VisitorBreakdownChart, VisitorBreakdownMetric } from '../charts/visitor_breakdown_chart';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 import { getExcludedName } from '../local_uifilters';
 import { useDataView } from '../local_uifilters/use_data_view';
+import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 
 type VisitorBreakdownFieldMap = Record<VisitorBreakdownMetric, UxLocalUIFilterName>;
 

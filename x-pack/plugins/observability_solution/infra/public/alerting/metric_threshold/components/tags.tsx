@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { EuiBadge, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
 export function Tags({ tags }: { tags: string[] }) {
   const [isMoreTagsOpen, setIsMoreTagsOpen] = useState(false);

@@ -11,6 +11,9 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { KueryNode } from '@kbn/es-query';
 import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 
+import type { CustomFieldsConfiguration } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
+import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
@@ -20,9 +23,6 @@ import {
   constructSearch,
   convertSortField,
 } from './utils';
-import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
-import type { CustomFieldsConfiguration } from '../../common/types/domain';
-import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
 
 describe('utils', () => {
   describe('buildFilter', () => {
@@ -35,8 +35,9 @@ describe('utils', () => {
     });
 
     it('returns a KueryNode using or operator', () => {
-      expect(buildFilter({ filters: ['value1'], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({ filters: ['value1'], field: 'abc', operator: 'or' })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -57,8 +58,9 @@ describe('utils', () => {
     });
 
     it("returns multiple nodes or'd together", () => {
-      expect(buildFilter({ filters: ['value1', 'value2'], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({ filters: ['value1', 'value2'], field: 'abc', operator: 'or' })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -103,8 +105,9 @@ describe('utils', () => {
     it('does not escape special kql characters in the filter values', () => {
       const specialCharacters = 'awesome:()\\<>"*';
 
-      expect(buildFilter({ filters: [specialCharacters], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({ filters: [specialCharacters], field: 'abc', operator: 'or' })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -678,8 +681,9 @@ describe('utils', () => {
     });
 
     it('creates a filter with tags and reporters', () => {
-      expect(constructQueryOptions({ tags: ['tag1', 'tag2'], reporters: 'sam' }).filter)
-        .toMatchInlineSnapshot(`
+      expect(
+        constructQueryOptions({ tags: ['tag1', 'tag2'], reporters: 'sam' }).filter
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -964,8 +968,9 @@ describe('utils', () => {
       });
 
       it("returns 'b' in the added items when the updated value contains an added value", () => {
-        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a' }, { uid: 'b' }]))
-          .toMatchInlineSnapshot(`
+        expect(
+          arraysDifference([{ uid: 'a' }], [{ uid: 'a' }, { uid: 'b' }])
+        ).toMatchInlineSnapshot(`
           Object {
             "addedItems": Array [
               Object {
@@ -978,8 +983,9 @@ describe('utils', () => {
       });
 
       it("returns 'b' in the deleted items when the updated value removes an item", () => {
-        expect(arraysDifference([{ uid: 'a' }, { uid: 'b' }], [{ uid: 'a' }]))
-          .toMatchInlineSnapshot(`
+        expect(
+          arraysDifference([{ uid: 'a' }, { uid: 'b' }], [{ uid: 'a' }])
+        ).toMatchInlineSnapshot(`
           Object {
             "addedItems": Array [],
             "deletedItems": Array [
@@ -1105,8 +1111,9 @@ describe('utils', () => {
     it('returns the rootSearchFields and search with correct values when given a uuid', () => {
       const uuid = uuidv1(); // the specific version is irrelevant
 
-      expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
-        .toMatchInlineSnapshot(`
+      expect(
+        constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)
+      ).toMatchInlineSnapshot(`
         Object {
           "rootSearchFields": Array [
             "_id",

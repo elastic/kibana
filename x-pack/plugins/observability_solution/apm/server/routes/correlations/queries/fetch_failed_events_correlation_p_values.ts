@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { termQuery } from '@kbn/observability-plugin/server';
-import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { EVENT_OUTCOME, PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { getCommonCorrelationsQuery } from './get_common_correlations_query';
-import { fetchDurationRanges } from './fetch_duration_ranges';
-import { getEventType } from '../utils';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getEventType } from '../utils';
+import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 export const fetchFailedEventsCorrelationPValues = async ({
   apmEventClient,

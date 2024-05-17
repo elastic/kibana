@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Plugin, CoreSetup, AppMountParameters, CoreStart } from '@kbn/core/public';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import { EuiDataGridColumn } from '@elastic/eui';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { get } from 'lodash';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
 import {
+  AlertTableFlyoutComponent,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
-  AlertTableFlyoutComponent,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { get } from 'lodash';
+import React from 'react';
 import { getConnectorType as getSystemLogExampleConnectorType } from './connector_types/system_log_example/system_log_example';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {

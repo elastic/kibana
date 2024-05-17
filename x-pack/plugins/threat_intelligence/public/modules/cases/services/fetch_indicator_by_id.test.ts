@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockedSearchService } from '../../../mocks/test_providers';
-import { BehaviorSubject, throwError } from 'rxjs';
-import { createFetchIndicatorById } from './fetch_indicator_by_id';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { BehaviorSubject, throwError } from 'rxjs';
+import { mockedSearchService } from '../../../mocks/test_providers';
+import { createFetchIndicatorById } from './fetch_indicator_by_id';
 
 const indicatorsResponse = {
   rawResponse: { hits: { hits: [{ _id: 'testId' }], total: 0 } },

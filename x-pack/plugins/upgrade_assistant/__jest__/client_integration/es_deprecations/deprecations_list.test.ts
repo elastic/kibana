@@ -12,10 +12,10 @@ import type { MlAction } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import {
-  esDeprecationsMockResponse,
-  MOCK_SNAPSHOT_ID,
   MOCK_JOB_ID,
+  MOCK_SNAPSHOT_ID,
   createEsDeprecationsMockResponse,
+  esDeprecationsMockResponse,
 } from './mocked_responses';
 
 describe('ES deprecations table', () => {

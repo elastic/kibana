@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { euiPaletteColorBlind } from '@elastic/eui';
+import _ from 'lodash';
 
 const thresholdLineDefaults = {
   show: false,

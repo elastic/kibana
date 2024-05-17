@@ -8,10 +8,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCaseUserActionsStats } from './api';
 
-import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
-import { ERROR_TITLE } from './translations';
+import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
+import { ERROR_TITLE } from './translations';
 
 export const useGetCaseUserActionsStats = (caseId: string) => {
   const { showErrorToast } = useCasesToast();

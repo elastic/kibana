@@ -12,8 +12,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineInvalidateApiKeysRoutes } from './invalidate';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;

@@ -1,3 +1,8 @@
+import { EuiButton } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +10,9 @@
  * 2.0.
  */
 import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { SystemActionTypeForm } from './system_action_type_form';
+import { ActionParamsProps, ActionType, GenericValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, GenericValidationResult, ActionParamsProps } from '../../../types';
-import { EuiButton } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { I18nProvider } from '@kbn/i18n-react';
-import userEvent from '@testing-library/user-event';
+import { SystemActionTypeForm } from './system_action_type_form';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 

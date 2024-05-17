@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
 import type { AiopsPluginStartDeps } from '../types';
 import type { ChangePointDetectionSharedComponent } from './change_point_detection';
 

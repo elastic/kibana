@@ -13,10 +13,10 @@ import { TestProviders } from '../../../../common/mock';
 import { networkModel } from '../../store';
 
 import { IpOverview } from '.';
-import { mockData } from './mock';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { mockData } from './mock';
 
 describe('IP Overview Component', () => {
   describe('rendering', () => {

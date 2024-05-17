@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { ScriptRecorderFields } from './script_recorder_fields';
 

@@ -9,8 +9,8 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { HeaderSection, getHeaderAlignment } from '.';
 import { TestProviders } from '../../mock';
-import { getHeaderAlignment, HeaderSection } from '.';
 import { ModalInspectQuery } from '../inspect/modal';
 
 jest.mock('../inspect/modal', () => {

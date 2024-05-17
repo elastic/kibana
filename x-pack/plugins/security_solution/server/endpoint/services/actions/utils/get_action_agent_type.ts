@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
-import { catchAndWrapError } from '../../../utils';
-import { NotFoundError } from '../../../errors';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
+import { NotFoundError } from '../../../errors';
+import { catchAndWrapError } from '../../../utils';
 
 /**
  * Returns the `agentType` for a given response action

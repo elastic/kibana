@@ -6,10 +6,10 @@
  */
 
 import type {
+  AnalyticsMapEdgeElement,
+  AnalyticsMapNodeElement,
   JobMapNodeTypes,
   MapElements,
-  AnalyticsMapNodeElement,
-  AnalyticsMapEdgeElement,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 interface AnalyticsMapArg {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
-import { take, map, takeLast } from 'rxjs';
 import { type App, AppStatus } from '@kbn/core-application-browser';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { map, take, takeLast } from 'rxjs';
 import { NavLinksService } from './nav_links_service';
 
 const availableApps: ReadonlyMap<string, App> = new Map([

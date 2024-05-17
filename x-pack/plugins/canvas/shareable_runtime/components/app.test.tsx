@@ -11,25 +11,25 @@
   in the meantime.
 */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
-// import { act } from 'react-dom/test-utils';
-import { App } from './app';
-import { sharedWorkpads, WorkpadNames, tick } from '../test';
+import { WorkpadNames, sharedWorkpads, tick } from '../test';
+import { openSettings, selectMenuItem } from '../test/interactions';
 import {
+  getCanvas as canvas,
+  getPageControlsCenter as center,
+  getFooter as footer,
+  getPageControlsNext as next,
+  getPageControlsPrevious as previous,
   getScrubber as scrubber,
   getScrubberSlideContainer as scrubberContainer,
-  getPageControlsCenter as center,
   // getAutoplayTextField as autoplayText,
   // getAutoplayCheckbox as autoplayCheck,
   // getAutoplaySubmit as autoplaySubmit,
   getToolbarCheckbox as toolbarCheck,
-  getCanvas as canvas,
-  getFooter as footer,
-  getPageControlsPrevious as previous,
-  getPageControlsNext as next,
 } from '../test/selectors';
-import { openSettings, selectMenuItem } from '../test/interactions';
+// import { act } from 'react-dom/test-utils';
+import { App } from './app';
 
 // Mock the renderers
 jest.mock('../supported_renderers');

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
-import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { firstValueFrom } from 'rxjs';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
+import { getMockSearchConfig } from '../../../../config.mock';
+import { KbnSearchError } from '../../report_search_error';
 import { SearchStrategyDependencies } from '../../types';
 import { esqlAsyncSearchStrategyProvider } from './esql_async_search_strategy';
-import { getMockSearchConfig } from '../../../../config.mock';
 
 const mockAsyncResponse = {
   body: {

@@ -11,7 +11,7 @@ import type { CommandsByPlatform } from '../../applications/fleet/components/fle
 
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
 
-import type { K8sMode, CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
+import type { CloudSecurityIntegration, K8sMode } from '../agent_enrollment_flyout/types';
 import { PlatformSelector } from '../platform_selector';
 
 interface Props {

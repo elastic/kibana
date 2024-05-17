@@ -7,7 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 
@@ -33,7 +33,7 @@ export function getEsClient({
 
   async function search<
     TDocument = unknown,
-    TSearchRequest extends ESSearchRequest = ESSearchRequest
+    TSearchRequest extends ESSearchRequest = ESSearchRequest,
   >(request: TSearchRequest) {
     const response = await originalSearch(request);
 

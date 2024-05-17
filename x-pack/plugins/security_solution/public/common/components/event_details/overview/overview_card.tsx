@@ -10,13 +10,13 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { getSourcererScopeId } from '../../../../helpers';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../cell_actions';
 import type { EnrichedFieldInfo } from '../types';
-import { getSourcererScopeId } from '../../../../helpers';
 
 const ActionWrapper = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};

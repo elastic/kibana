@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 
-import { getEqlRuleForAlertTesting } from '../../../utils';
 import {
-  createRule,
   createAlertsIndex,
-  deleteAllRules,
+  createRule,
   deleteAllAlerts,
+  deleteAllRules,
   getAlertsById,
-  waitForRuleSuccess,
   waitForAlertsToBePresent,
+  waitForRuleSuccess,
 } from '../../../../../../common/utils/security_solution';
+import { getEqlRuleForAlertTesting } from '../../../utils';
 
 interface Ignore {
   normal_constant?: string;

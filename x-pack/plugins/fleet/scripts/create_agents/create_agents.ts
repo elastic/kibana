@@ -1,3 +1,5 @@
+import { ToolingLog } from '@kbn/tooling-log';
+import { omit } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +7,8 @@
  * 2.0.
  */
 import fetch from 'node-fetch';
-import { ToolingLog } from '@kbn/tooling-log';
 import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
-import { omit } from 'lodash';
 
 import type { AgentStatus } from '../../common';
 import type { Agent } from '../../common';

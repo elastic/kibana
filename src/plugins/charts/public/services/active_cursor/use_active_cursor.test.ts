@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { TestScheduler } from 'rxjs/testing';
-import { renderHook } from '@testing-library/react-hooks';
 import type { Chart, PointerEvent } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
 import type { RefObject } from 'react';
+import { TestScheduler } from 'rxjs/testing';
 
 import type { ActiveCursor } from './active_cursor';
 import { useActiveCursor } from './use_active_cursor';
 
-import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
+import type { ActiveCursorPayload, ActiveCursorSyncOption } from './types';
 
 /** @internal **/
 type DispatchExternalPointerEventFn = (pointerEvent: PointerEvent) => void;

@@ -6,8 +6,6 @@
     "id": "corePluginRouteTimeouts",
     "server": true,
     "browser": false,
-    "configPath": [
-      "core_plugin_route_timeouts"
-    ]
+    "configPath": ["core_plugin_route_timeouts"]
   }
 }

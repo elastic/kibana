@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -14,6 +13,7 @@ import {
   EuiPanel,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
 
@@ -22,13 +22,13 @@ import { EventTypeFilter } from '../basic/filters/event_type_filter';
 import { LogLevelFilter } from '../basic/filters/log_level_filter';
 import { ExecutionEventsTableRowDetails } from './execution_events_table_row_details';
 
-import { useFilters } from './use_filters';
-import { useSorting } from '../basic/tables/use_sorting';
-import { usePagination } from '../basic/tables/use_pagination';
-import { useColumns } from './use_columns';
 import { useExpandableRows } from '../basic/tables/use_expandable_rows';
-import { useExecutionEvents } from './use_execution_events';
+import { usePagination } from '../basic/tables/use_pagination';
+import { useSorting } from '../basic/tables/use_sorting';
 import { EventMessageFilter } from './event_message_filter';
+import { useColumns } from './use_columns';
+import { useExecutionEvents } from './use_execution_events';
+import { useFilters } from './use_filters';
 
 import * as i18n from './translations';
 

@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "metricbeat-8.7.0",
     "mappings": {
       "date_detection": false,

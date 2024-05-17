@@ -8,28 +8,28 @@
 // TODO Consolidate with duplicate saved search utils file in
 // `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts`
 
-import { cloneDeep } from 'lodash';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import { SearchSource, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { isQuery, mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import {
+  buildEsQuery,
+  buildQueryFromFilters,
   fromKueryExpression,
   toElasticsearchQuery,
-  buildQueryFromFilters,
-  buildEsQuery,
 } from '@kbn/es-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
-  getDefaultDSLQuery,
-  type SearchQueryLanguage,
   SEARCH_QUERY_LANGUAGE,
+  type SearchQueryLanguage,
+  getDefaultDSLQuery,
 } from '@kbn/ml-query-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { cloneDeep } from 'lodash';
 
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 

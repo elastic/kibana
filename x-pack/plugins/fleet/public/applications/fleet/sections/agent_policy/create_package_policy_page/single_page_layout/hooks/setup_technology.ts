@@ -7,12 +7,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
+import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import type { AgentPolicy, NewAgentPolicy } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
-import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
-import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 
 export const useAgentlessPolicy = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();

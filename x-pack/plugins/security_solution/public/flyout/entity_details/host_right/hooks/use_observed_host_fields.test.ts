@@ -6,9 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useObservedHostFields } from './use_observed_host_fields';
-import { mockObservedHostData } from '../../mocks';
 import { TestProviders } from '../../../../common/mock';
+import { mockObservedHostData } from '../../mocks';
+import { useObservedHostFields } from './use_observed_host_fields';
 
 describe('useManagedUserItems', () => {
   it('returns managed user items for Entra user', () => {

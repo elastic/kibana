@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { buildSystemMessage } from '../../utils/builders';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ChatBody as Component } from './chat_body';
-import { buildSystemMessage } from '../../utils/builders';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,

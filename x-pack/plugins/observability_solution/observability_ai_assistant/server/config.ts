@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 
 export const config = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

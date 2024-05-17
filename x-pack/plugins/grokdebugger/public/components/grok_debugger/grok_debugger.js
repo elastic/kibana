@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
+import React from 'react';
 
-import { EuiForm, EuiButton, EuiPage, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
-import { EventInput } from '../event_input';
-import { PatternInput } from '../pattern_input';
-import { CustomPatternsInput } from '../custom_patterns_input';
-import { EventOutput } from '../event_output';
-import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiButton, EuiForm, EuiPage, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
+import { CustomPatternsInput } from '../custom_patterns_input';
+import { EventInput } from '../event_input';
+import { EventOutput } from '../event_output';
+import { PatternInput } from '../pattern_input';
 
 const i18nTexts = {
   simulate: {

@@ -7,6 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { useLocalStorage } from '.';
 import { APP_ID } from '../../../../common/constants';
 import { DEFAULT_STACK_BY_FIELD } from '../../../detections/components/alerts_kpis/common/config';
 import {
@@ -15,9 +16,8 @@ import {
   STACK_BY_SETTING_NAME,
   TREEMAP_CATEGORY,
 } from '../../../detections/pages/detection_engine/chart_panels/alerts_local_storage/constants';
-import { getSettingKey, isDefaultWhenEmptyString } from './helpers';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
-import { useLocalStorage } from '.';
+import { getSettingKey, isDefaultWhenEmptyString } from './helpers';
 
 const mockedUseKibana = {
   ...mockUseKibana(),

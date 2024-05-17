@@ -1,3 +1,5 @@
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createConcreteWriteIndex } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 

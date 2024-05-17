@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { TimeIntervalParamEditor } from './time_interval';
-import { aggParamCommonPropsMock } from './test_utils';
+import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
+import { aggParamCommonPropsMock } from './test_utils';
+import { TimeIntervalParamEditor } from './time_interval';
 
 jest.mock('@kbn/data-plugin/public', () => ({
   search: {

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { ComponentStory } from '@storybook/react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { CellActionsProvider } from '../context/cell_actions_context';
-import { makeAction } from '../mocks/helpers';
+import type { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { CellActions } from '../components/cell_actions';
 import { CellActionsMode } from '../constants';
+import { CellActionsProvider } from '../context/cell_actions_context';
+import { makeAction } from '../mocks/helpers';
 import type { CellActionsProps } from '../types';
 
 const TRIGGER_ID = 'testTriggerId';

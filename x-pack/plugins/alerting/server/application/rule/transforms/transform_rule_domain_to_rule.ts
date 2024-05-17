@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDomain, Rule, RuleParams } from '../types';
+import { Rule, RuleDomain, RuleParams } from '../types';
 
 interface TransformRuleDomainToRuleOptions {
   isPublic?: boolean;

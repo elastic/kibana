@@ -42,9 +42,7 @@
             "tags": [],
             "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content,\n  showIcon = true,\n  link = false,\n}",
             "description": [],
-            "signature": [
-              "TryInConsoleButtonProps"
-            ],
+            "signature": ["TryInConsoleButtonProps"],
             "path": "packages/kbn-try-in-console/components/try_in_console_button.tsx",
             "deprecated": false,
             "trackAdoption": false,

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { AgentOptions } from 'https';
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
-import { Duration } from 'moment';
 import type { ClientOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { AgentOptions } from 'https';
+import { Duration } from 'moment';
 import { getDefaultHeaders } from './headers';
 
 export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: AgentOptions };

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { TimeRange } from '../../query';
 
 export type KibanaTimerangeOutput = ExpressionValueBoxed<'timerange', TimeRange>;

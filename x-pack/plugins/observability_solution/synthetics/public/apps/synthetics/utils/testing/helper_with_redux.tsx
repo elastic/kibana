@@ -7,14 +7,14 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import type { Store } from 'redux';
-import { createStore as createReduxStore, applyMiddleware } from 'redux';
+import { applyMiddleware, createStore as createReduxStore } from 'redux';
 
 import { Provider as ReduxProvider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 
 import { AppState } from '../../state';
-import { rootReducer } from '../../state/root_reducer';
 import { rootEffect } from '../../state/root_effect';
+import { rootReducer } from '../../state/root_reducer';
 
 const createRealStore = (): Store => {
   const sagaMW = createSagaMiddleware();

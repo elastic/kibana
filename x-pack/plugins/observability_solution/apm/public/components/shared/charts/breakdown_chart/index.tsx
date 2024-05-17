@@ -12,20 +12,20 @@ import {
   Chart,
   CurveType,
   LineAnnotation,
-  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
   TickFormatter,
-  XYBrushEvent,
   Tooltip,
+  XYBrushEvent,
+  niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,
@@ -33,17 +33,17 @@ import {
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimeZone } from '../helper/timezone';
+import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 
 interface Props {
   fetchStatus: FETCH_STATUS;

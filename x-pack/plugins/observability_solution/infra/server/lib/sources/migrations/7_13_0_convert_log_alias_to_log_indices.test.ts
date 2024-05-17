@@ -6,8 +6,8 @@
  */
 
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { convertLogAliasToLogIndices } from './7_13_0_convert_log_alias_to_log_indices';
 import { infraSourceConfigurationSavedObjectName } from '../saved_object_type';
+import { convertLogAliasToLogIndices } from './7_13_0_convert_log_alias_to_log_indices';
 
 describe('infra source configuration migration function for 7.13.0', () => {
   test('migrates the logAlias property to logIndices', () => {

@@ -151,9 +151,7 @@
             "tags": [],
             "label": "getChildContext",
             "description": [],
-            "signature": [
-              "() => { intl: ReactIntl.InjectedIntl; }"
-            ],
+            "signature": ["() => { intl: ReactIntl.InjectedIntl; }"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -174,9 +172,7 @@
         "description": [
           "\nThe library uses the provider pattern to scope an i18n context to a tree\nof components. This component is used to setup the i18n context for a tree.\nIntlProvider should wrap react app's root component (inside each react render method)."
         ],
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
+        "signature": ["({ children }: { children?: React.ReactNode; }) => JSX.Element"],
         "path": "packages/kbn-i18n-react/src/provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -188,9 +184,7 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "signature": [
-              "{ children?: React.ReactNode; }"
-            ],
+            "signature": ["{ children?: React.ReactNode; }"],
             "path": "packages/kbn-i18n-react/src/provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -221,9 +215,7 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": [
-              "React.ComponentType<P & ReactIntl.InjectedIntlProps>"
-            ],
+            "signature": ["React.ComponentType<P & ReactIntl.InjectedIntlProps>"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -236,9 +228,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "ReactIntl.InjectIntlConfig | undefined"
-            ],
+            "signature": ["ReactIntl.InjectIntlConfig | undefined"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -255,9 +245,7 @@
         "tags": [],
         "label": "intlShape",
         "description": [],
-        "signature": [
-          "ReactIntl.IntlShape"
-        ],
+        "signature": ["ReactIntl.IntlShape"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -270,9 +258,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "object"
-            ],
+            "signature": ["object"],
             "path": "node_modules/@types/react/node_modules/@types/prop-types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -333,9 +319,7 @@
         "tags": [],
         "label": "InjectedIntl",
         "description": [],
-        "signature": [
-          "ReactIntl.InjectedIntl"
-        ],
+        "signature": ["ReactIntl.InjectedIntl"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -361,9 +345,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "ReactIntl.DateSource"
-                ],
+                "signature": ["ReactIntl.DateSource"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -376,9 +358,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "ReactIntl.IntlComponent.DateTimeFormatProps | undefined"
-                ],
+                "signature": ["ReactIntl.IntlComponent.DateTimeFormatProps | undefined"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -408,9 +388,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "ReactIntl.DateSource"
-                ],
+                "signature": ["ReactIntl.DateSource"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -423,9 +401,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "ReactIntl.IntlComponent.DateTimeFormatProps | undefined"
-                ],
+                "signature": ["ReactIntl.IntlComponent.DateTimeFormatProps | undefined"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -455,9 +431,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "ReactIntl.DateSource"
-                ],
+                "signature": ["ReactIntl.DateSource"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -502,9 +476,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -517,9 +489,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "ReactIntl.FormattedNumber.PropsBase | undefined"
-                ],
+                "signature": ["ReactIntl.FormattedNumber.PropsBase | undefined"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -549,9 +519,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -564,9 +532,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "ReactIntl.FormattedPlural.Base | undefined"
-                ],
+                "signature": ["ReactIntl.FormattedPlural.Base | undefined"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -596,9 +562,7 @@
                 "tags": [],
                 "label": "messageDescriptor",
                 "description": [],
-                "signature": [
-                  "ReactIntl.FormattedMessage.MessageDescriptor"
-                ],
+                "signature": ["ReactIntl.FormattedMessage.MessageDescriptor"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -622,9 +586,7 @@
                     "tags": [],
                     "label": "[key: string]: MessageValue",
                     "description": [],
-                    "signature": [
-                      "[key: string]:  ReactIntl.MessageValue"
-                    ],
+                    "signature": ["[key: string]:  ReactIntl.MessageValue"],
                     "path": "node_modules/@types/react-intl/index.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -655,9 +617,7 @@
                 "tags": [],
                 "label": "messageDescriptor",
                 "description": [],
-                "signature": [
-                  "ReactIntl.FormattedMessage.MessageDescriptor"
-                ],
+                "signature": ["ReactIntl.FormattedMessage.MessageDescriptor"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -681,9 +641,7 @@
                     "tags": [],
                     "label": "[key: string]: MessageValue",
                     "description": [],
-                    "signature": [
-                      "[key: string]:  ReactIntl.MessageValue"
-                    ],
+                    "signature": ["[key: string]:  ReactIntl.MessageValue"],
                     "path": "node_modules/@types/react-intl/index.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -711,9 +669,7 @@
             "tags": [],
             "label": "formats",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -725,9 +681,7 @@
             "tags": [],
             "label": "messages",
             "description": [],
-            "signature": [
-              "{ [id: string]: string; }"
-            ],
+            "signature": ["{ [id: string]: string; }"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -750,9 +704,7 @@
             "tags": [],
             "label": "defaultFormats",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -764,9 +716,7 @@
             "tags": [],
             "label": "now",
             "description": [],
-            "signature": [
-              "() => number"
-            ],
+            "signature": ["() => number"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -780,9 +730,7 @@
             "tags": [],
             "label": "onError",
             "description": [],
-            "signature": [
-              "(error: string) => void"
-            ],
+            "signature": ["(error: string) => void"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -794,9 +742,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "node_modules/@types/react-intl/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -815,9 +761,7 @@
         "tags": [],
         "label": "InjectedIntlProps",
         "description": [],
-        "signature": [
-          "ReactIntl.InjectedIntlProps"
-        ],
+        "signature": ["ReactIntl.InjectedIntlProps"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -829,9 +773,7 @@
             "tags": [],
             "label": "intl",
             "description": [],
-            "signature": [
-              "ReactIntl.InjectedIntl"
-            ],
+            "signature": ["ReactIntl.InjectedIntl"],
             "path": "node_modules/@types/react-intl/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -850,9 +792,7 @@
         "tags": [],
         "label": "FormattedDate",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedDate"
-        ],
+        "signature": ["typeof ReactIntl.FormattedDate"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -865,9 +805,7 @@
         "tags": [],
         "label": "FormattedMessage",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedMessage"
-        ],
+        "signature": ["typeof ReactIntl.FormattedMessage"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -880,9 +818,7 @@
         "tags": [],
         "label": "FormattedNumber",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedNumber"
-        ],
+        "signature": ["typeof ReactIntl.FormattedNumber"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -895,9 +831,7 @@
         "tags": [],
         "label": "FormattedPlural",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedPlural"
-        ],
+        "signature": ["typeof ReactIntl.FormattedPlural"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -910,9 +844,7 @@
         "tags": [],
         "label": "FormattedRelative",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedRelative"
-        ],
+        "signature": ["typeof ReactIntl.FormattedRelative"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -925,9 +857,7 @@
         "tags": [],
         "label": "FormattedTime",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedTime"
-        ],
+        "signature": ["typeof ReactIntl.FormattedTime"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -940,9 +870,7 @@
         "tags": [],
         "label": "IntlProvider",
         "description": [],
-        "signature": [
-          "typeof ReactIntl.IntlProvider"
-        ],
+        "signature": ["typeof ReactIntl.IntlProvider"],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
+import Url from 'url';
 
-import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
@@ -90,7 +90,10 @@ export class KbnClientRequester {
   private readonly url: string;
   private readonly httpsAgent: Https.Agent | null;
 
-  constructor(private readonly log: ToolingLog, options: Options) {
+  constructor(
+    private readonly log: ToolingLog,
+    options: Options
+  ) {
     this.url = options.url;
     this.httpsAgent =
       Url.parse(options.url).protocol === 'https:'

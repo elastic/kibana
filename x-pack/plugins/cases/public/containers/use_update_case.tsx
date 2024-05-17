@@ -7,15 +7,15 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import { patchCase } from './api';
-import * as i18n from './translations';
-import { useCasesToast } from '../common/use_cases_toast';
-import { casesMutationsKeys } from './constants';
-import type { ServerError } from '../types';
-import type { UpdateByKey } from './types';
-import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
-import { createUpdateSuccessToaster } from './utils';
 import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import type { ServerError } from '../types';
+import { patchCase } from './api';
+import { casesMutationsKeys } from './constants';
+import * as i18n from './translations';
+import type { UpdateByKey } from './types';
+import { createUpdateSuccessToaster } from './utils';
 
 export const useUpdateCase = () => {
   const toasts = useToasts();

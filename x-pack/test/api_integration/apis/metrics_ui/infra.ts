@@ -11,8 +11,8 @@ import {
   GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';
-import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { DATES } from './constants';
 
 const ENDPOINT = '/api/metrics/infra';
 

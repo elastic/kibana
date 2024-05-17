@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { isEmpty } from 'lodash';
+import { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { ActionConnector } from '../../../../common/types/domain';
-import { getIssues } from './api';
-import type { Issues } from './types';
-import * as i18n from './translations';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ServerError } from '../../../types';
 import { connectorsQueriesKeys } from '../constants';
+import { getIssues } from './api';
+import * as i18n from './translations';
+import type { Issues } from './types';
 
 interface Props {
   http: HttpSetup;

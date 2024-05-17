@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useState, useCallback, useRef } from 'react';
-import { isEmpty } from 'lodash';
 import { ToastsApi } from '@kbn/core/public';
+import { isEmpty } from 'lodash';
+import { useCallback, useRef, useState } from 'react';
 import { getApplication as getApplicationApi } from './api';
 import * as i18n from './translations';
 import { SwimlaneFieldMappingConfig } from './types';

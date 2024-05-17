@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
-import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
-import { Subject } from 'rxjs';
 import { unsafeConsole } from '@kbn/security-hardening';
+import { Subject } from 'rxjs';
 
 function createRoot() {
   return createkbnTestServerRoot({

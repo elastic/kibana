@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { getConsoleTestSetup } from './mocks';
-import userEvent from '@testing-library/user-event';
 import type { ConsoleProps } from './types';
 
 describe('When using Console component', () => {

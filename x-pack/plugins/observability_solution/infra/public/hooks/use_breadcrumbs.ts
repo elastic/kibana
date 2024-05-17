@@ -6,8 +6,8 @@
  */
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
-import { useEffect } from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useEffect } from 'react';
 import { observabilityTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';
 

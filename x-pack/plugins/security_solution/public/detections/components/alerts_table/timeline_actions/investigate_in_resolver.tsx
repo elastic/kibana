@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { get } from 'lodash/fp';
+import { useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FieldDefinition, SettingType, OnInputChangeFn } from '@kbn/management-settings-types';
+import type { FieldDefinition, OnInputChangeFn, SettingType } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
 export interface UseUpdateParameters<T extends SettingType> {

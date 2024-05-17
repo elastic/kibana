@@ -7,11 +7,11 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant-common';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
   AttackDiscoveryPostRequestBody,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>

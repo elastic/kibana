@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import { NO_DATA_RECOMMENDED, NoDataPageActions } from '../no_data_page';
 
 // Custom cards require all the props the EuiCard does
 type NoDataCard = EuiCardProps & NoDataPageActions;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFormControlLayoutDelimited,
   EuiFieldNumber,
   EuiFieldNumberProps,
+  EuiFormControlLayoutDelimited,
   EuiFormRow,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { FieldHook } from '../../../shared_imports';
 

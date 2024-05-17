@@ -32,8 +32,8 @@ import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
 import {
-  LicensingCallout,
   LICENSING_FEATURE,
+  LicensingCallout,
 } from '../../../shared/licensing_callout/licensing_callout';
 
 import { SEARCH_APPLICATIONS_PATH, SEARCH_APPLICATION_CREATION_PATH } from '../../routes';
@@ -207,8 +207,8 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
           rightSideItems: isLoading
             ? []
             : !hasNoSearchApplications
-            ? [<CreateSearchApplicationButton disabled={isGated} />]
-            : [],
+              ? [<CreateSearchApplicationButton disabled={isGated} />]
+              : [],
         }}
         pageViewTelemetry="Search Applications"
         isLoading={isLoading && !isGated}

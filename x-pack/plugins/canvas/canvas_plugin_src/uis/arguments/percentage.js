@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { useState, useCallback } from 'react';
+import { ArgumentStrings } from '../../../i18n';
 import { withDebounceArg } from '../../../public/components/with_debounce_arg';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../../i18n';
 
 const { Percentage: strings } = ArgumentStrings;
 
@@ -29,11 +29,11 @@ const PercentageArgInput = ({ onValueChange, argValue }) => {
 
   return (
     <EuiRange
-      compressed
+      compressed={true}
       min={0}
       max={100}
-      showLabels
-      showInput
+      showLabels={true}
+      showInput={true}
       value={value * 100}
       onChange={handleChange}
     />

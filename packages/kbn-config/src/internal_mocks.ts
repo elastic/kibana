@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Observable, of } from 'rxjs';
 import { DocLinks } from '@kbn/doc-links';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { Observable, of } from 'rxjs';
+import type { ConfigDeprecationContext } from './deprecation';
 import type { EnvOptions } from './env';
 import type { RawConfigService } from './raw';
-import type { ConfigDeprecationContext } from './deprecation';
 
 type DeepPartial<T> = {
   [P in keyof T]?: P extends 'repoPackages'
     ? T[P]
     : T[P] extends Array<infer R>
-    ? Array<DeepPartial<R>>
-    : DeepPartial<T[P]>;
+      ? Array<DeepPartial<R>>
+      : DeepPartial<T[P]>;
 };
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {

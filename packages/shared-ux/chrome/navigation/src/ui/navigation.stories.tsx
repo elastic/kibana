@@ -21,12 +21,12 @@ import {
 } from '@elastic/eui';
 
 import type { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
-import { NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
-import type { NavigationServices } from '../types';
+import { NavigationStorybookMock } from '../../mocks';
 import { NavigationProvider } from '../services';
-import { Navigation } from './navigation';
+import type { NavigationServices } from '../types';
 import { ContentProvider } from './components/panel';
+import { Navigation } from './navigation';
 
 const storybookMock = new NavigationStorybookMock();
 

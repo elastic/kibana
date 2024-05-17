@@ -446,9 +446,7 @@
         "parentPluginId": "@kbn/securitysolution-list-api",
         "id": "def-common.duplicateExceptionList",
         "type": "Function",
-        "tags": [
-          "throws"
-        ],
+        "tags": ["throws"],
         "label": "duplicateExceptionList",
         "description": [
           "\nDuplicate an ExceptionList and its items by providing a ExceptionList list_id\n"
@@ -497,13 +495,9 @@
         "parentPluginId": "@kbn/securitysolution-list-api",
         "id": "def-common.exportExceptionList",
         "type": "Function",
-        "tags": [
-          "throws"
-        ],
+        "tags": ["throws"],
         "label": "exportExceptionList",
-        "description": [
-          "\nExport an ExceptionList by providing a ExceptionList ID\n"
-        ],
+        "description": ["\nExport an ExceptionList by providing a ExceptionList ID\n"],
         "signature": [
           "({ http, id, includeExpiredExceptions, listId, namespaceType, signal, }: ",
           {
@@ -924,13 +918,9 @@
         "parentPluginId": "@kbn/securitysolution-list-api",
         "id": "def-common.getExceptionFilterFromExceptionListIds",
         "type": "Function",
-        "tags": [
-          "throws"
-        ],
+        "tags": ["throws"],
         "label": "getExceptionFilterFromExceptionListIds",
-        "description": [
-          "\nCreate a Filter query from an exception list id\n"
-        ],
+        "description": ["\nCreate a Filter query from an exception list id\n"],
         "signature": [
           "({ alias, chunkSize, exceptionListIds, excludeExceptions, http, signal, }: ",
           {
@@ -983,13 +973,9 @@
         "parentPluginId": "@kbn/securitysolution-list-api",
         "id": "def-common.getExceptionFilterFromExceptions",
         "type": "Function",
-        "tags": [
-          "throws"
-        ],
+        "tags": ["throws"],
         "label": "getExceptionFilterFromExceptions",
-        "description": [
-          "\nCreate a Filter query from a list of exceptions\n"
-        ],
+        "description": ["\nCreate a Filter query from a list of exceptions\n"],
         "signature": [
           "({ exceptions, alias, excludeExceptions, http, chunkSize, signal, }: ",
           {
@@ -1280,9 +1266,7 @@
         "tags": [],
         "label": "toError",
         "description": [],
-        "signature": [
-          "(e: unknown) => Error"
-        ],
+        "signature": ["(e: unknown) => Error"],
         "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1294,9 +1278,7 @@
             "tags": [],
             "label": "e",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1313,11 +1295,7 @@
         "tags": [],
         "label": "toPromise",
         "description": [],
-        "signature": [
-          "<E, A>(taskEither: ",
-          "TaskEither",
-          "<E, A>) => Promise<A>"
-        ],
+        "signature": ["<E, A>(taskEither: ", "TaskEither", "<E, A>) => Promise<A>"],
         "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1329,10 +1307,7 @@
             "tags": [],
             "label": "taskEither",
             "description": [],
-            "signature": [
-              "TaskEither",
-              "<E, A>"
-            ],
+            "signature": ["TaskEither", "<E, A>"],
             "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1456,9 +1431,7 @@
             "tags": [],
             "label": "http",
             "description": [],
-            "signature": [
-              "HttpStart"
-            ],
+            "signature": ["HttpStart"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1470,9 +1443,7 @@
             "tags": [],
             "label": "signal",
             "description": [],
-            "signature": [
-              "AbortSignal"
-            ],
+            "signature": ["AbortSignal"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1515,9 +1486,7 @@
             "tags": [],
             "label": "refresh",
             "description": [],
-            "signature": [
-              "\"true\" | \"false\" | \"wait_for\" | undefined"
-            ],
+            "signature": ["\"true\" | \"false\" | \"wait_for\" | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1582,9 +1551,7 @@
             "tags": [],
             "label": "refresh",
             "description": [],
-            "signature": [
-              "\"true\" | \"false\" | undefined"
-            ],
+            "signature": ["\"true\" | \"false\" | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1638,9 +1605,7 @@
             "tags": [],
             "label": "deleteReferences",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1663,9 +1628,7 @@
             "tags": [],
             "label": "ignoreReferences",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1750,9 +1713,7 @@
             "tags": [],
             "label": "cursor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1764,9 +1725,7 @@
             "tags": [],
             "label": "pageSize",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1778,9 +1737,7 @@
             "tags": [],
             "label": "pageIndex",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1792,9 +1749,7 @@
             "tags": [],
             "label": "sortOrder",
             "description": [],
-            "signature": [
-              "\"asc\" | \"desc\" | undefined"
-            ],
+            "signature": ["\"asc\" | \"desc\" | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1806,9 +1761,7 @@
             "tags": [],
             "label": "sortField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1820,9 +1773,7 @@
             "tags": [],
             "label": "filter",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1876,9 +1827,7 @@
             "tags": [],
             "label": "cursor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1890,9 +1839,7 @@
             "tags": [],
             "label": "pageSize",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1904,9 +1851,7 @@
             "tags": [],
             "label": "pageIndex",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1918,9 +1863,7 @@
             "tags": [],
             "label": "sortOrder",
             "description": [],
-            "signature": [
-              "\"asc\" | \"desc\" | undefined"
-            ],
+            "signature": ["\"asc\" | \"desc\" | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1932,9 +1875,7 @@
             "tags": [],
             "label": "sortField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2019,9 +1960,7 @@
             "tags": [],
             "label": "file",
             "description": [],
-            "signature": [
-              "File"
-            ],
+            "signature": ["File"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2033,9 +1972,7 @@
             "tags": [],
             "label": "listId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2061,9 +1998,7 @@
             "tags": [],
             "label": "refresh",
             "description": [],
-            "signature": [
-              "\"true\" | \"false\" | \"wait_for\" | undefined"
-            ],
+            "signature": ["\"true\" | \"false\" | \"wait_for\" | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2106,9 +2041,7 @@
             "tags": [],
             "label": "refresh",
             "description": [],
-            "signature": [
-              "\"true\" | \"false\" | undefined"
-            ],
+            "signature": ["\"true\" | \"false\" | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2142,9 +2075,7 @@
             "tags": [],
             "label": "_version",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2162,9 +2093,7 @@
         "tags": [],
         "label": "ApiPayload",
         "description": [],
-        "signature": [
-          "{ [P in Exclude<keyof T, \"http\" | \"signal\">]: T[P]; }"
-        ],
+        "signature": ["{ [P in Exclude<keyof T, \"http\" | \"signal\">]: T[P]; }"],
         "path": "packages/kbn-securitysolution-list-api/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

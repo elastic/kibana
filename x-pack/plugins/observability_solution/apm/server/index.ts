@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';

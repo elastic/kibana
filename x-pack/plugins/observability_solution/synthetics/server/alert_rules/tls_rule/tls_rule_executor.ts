@@ -1,3 +1,5 @@
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,30 +10,28 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
-import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
-import { formatFilterString } from '../common';
-import { SyntheticsServerSetup } from '../../types';
-import { getSyntheticsCerts } from '../../queries/get_certs';
-import { TLSParams } from '../../../common/runtime_types/alerts/tls';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
+import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import {
   CertResult,
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   Ping,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { monitorAttributes } from '../../../common/types/saved_objects';
-import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { UptimeEsClient } from '../../lib';
+import { getSyntheticsCerts } from '../../queries/get_certs';
+import { savedObjectsAdapter } from '../../saved_objects';
+import {
+  getAllMonitors,
+  processMonitors,
+} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsServerSetup } from '../../types';
+import { formatFilterString } from '../common';
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;

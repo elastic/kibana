@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo, useCallback, useRef } from 'react';
 
-import { isActiveTimeline } from '../../../../../helpers';
 import { TimelineId } from '../../../../../../common/types/timeline';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../../../common/components/exit_full_screen';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
+import { isActiveTimeline } from '../../../../../helpers';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
-import * as i18n from './translations';
-import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../../../common/components/exit_full_screen';
 import { FixedWidthLastUpdatedContainer } from '../../footer/last_updated';
+import * as i18n from './translations';
 
 export const isFullScreen = ({
   globalFullScreen,

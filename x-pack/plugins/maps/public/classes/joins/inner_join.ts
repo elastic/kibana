@@ -8,7 +8,6 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
-import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
   META_DATA_REQUEST_ID_SUFFIX,
@@ -21,17 +20,18 @@ import {
   JoinSourceDescriptor,
   TableSourceDescriptor,
 } from '../../../common/descriptor_types';
-import { IVectorSource } from '../sources/vector_source';
-import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
+import { IField } from '../fields/field';
 import { IJoinSource } from '../sources/join_sources';
 import {
   ESDistanceSource,
-  isSpatialSourceComplete,
   ESTermSource,
-  isTermSourceComplete,
   TableSource,
+  isSpatialSourceComplete,
+  isTermSourceComplete,
 } from '../sources/join_sources';
+import { IVectorSource } from '../sources/vector_source';
+import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 
 export function createJoinSource(
   descriptor: Partial<JoinSourceDescriptor> | undefined

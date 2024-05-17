@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DATA_LAYER, LayerTypes, XY_VIS_RENDERER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
-import type { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs, XYRender } from '../types';
+import type { DataLayerConfigResult, XYArgs, XYLayerConfig, XYRender, XyVisFn } from '../types';
+import { logDatatable } from '../utils';
 import {
   hasAreaLayer,
   hasBarLayer,
+  validateAddTimeMarker,
+  validateAxes,
   validateExtents,
   validateFillOpacity,
-  validateMarkSizeRatioLimits,
-  validateValueLabels,
-  validateAddTimeMarker,
-  validateMinTimeBarInterval,
-  validateMarkSizeForChartType,
-  validateMarkSizeRatioWithAccessor,
-  validateShowPointsForChartType,
   validateLineWidthForChartType,
-  validatePointsRadiusForChartType,
   validateLinesVisibilityForChartType,
-  validateAxes,
+  validateMarkSizeForChartType,
+  validateMarkSizeRatioLimits,
+  validateMarkSizeRatioWithAccessor,
   validateMinBarHeight,
+  validateMinTimeBarInterval,
+  validatePointsRadiusForChartType,
+  validateShowPointsForChartType,
+  validateValueLabels,
 } from './validate';
-import { logDatatable } from '../utils';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);

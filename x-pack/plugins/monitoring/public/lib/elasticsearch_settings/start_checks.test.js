@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SettingsChecker } from './checkers/settings_checker';
 import { startChecks } from '.';
+import { SettingsChecker } from './checkers/settings_checker';
 
 describe('Start Checks of Elasticsearch Settings', () => {
   const getHttp = (data) => ({

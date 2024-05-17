@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 export async function setupTestServers(settings = {}) {
   const { startES } = createTestServers({

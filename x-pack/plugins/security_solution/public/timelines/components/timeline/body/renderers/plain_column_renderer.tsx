@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { head } from 'lodash/fp';
 import React from 'react';
-import type { Filter } from '@kbn/es-query';
 
-import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';

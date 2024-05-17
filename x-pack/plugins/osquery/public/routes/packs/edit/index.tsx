@@ -20,11 +20,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
+import { WithHeaderLayout } from '../../../components/layouts';
 import { PackForm } from '../../../packs/form';
-import { usePack } from '../../../packs/use_pack';
 import { useDeletePack } from '../../../packs/use_delete_pack';
+import { usePack } from '../../../packs/use_pack';
 
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { useController } from 'react-hook-form';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
+import React, { useCallback, useMemo } from 'react';
+import { useController } from 'react-hook-form';
 
 interface VersionFieldProps {
   euiFieldProps?: Record<string, unknown>;

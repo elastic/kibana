@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import type { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../services/types';
 
 type ServiceStatusSerialized = Omit<ServiceStatus, 'level'> & { level: string };

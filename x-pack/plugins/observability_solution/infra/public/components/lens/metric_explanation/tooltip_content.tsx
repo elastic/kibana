@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { HTMLAttributes } from 'react';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { HTMLAttributes } from 'react';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
 
 export interface TooltipContentProps extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {

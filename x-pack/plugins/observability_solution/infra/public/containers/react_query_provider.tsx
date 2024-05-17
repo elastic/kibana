@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { QueryClient, QueryClientConfig, QueryClientProvider } from '@tanstack/react-query';
-import merge from 'lodash/merge';
 import { EuiButtonIcon } from '@elastic/eui';
+import { QueryClient, QueryClientConfig, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import merge from 'lodash/merge';
+import React, { useState } from 'react';
 
 const DEFAULT_CONFIG = {
   defaultOptions: {

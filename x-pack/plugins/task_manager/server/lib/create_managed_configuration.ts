@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { interval, merge, of, Observable } from 'rxjs';
-import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
+import { Observable, interval, merge, of } from 'rxjs';
+import { distinctUntilChanged, filter, map, mergeScan, scan, startWith } from 'rxjs';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 
 const FLUSH_MARKER = Symbol('flush');

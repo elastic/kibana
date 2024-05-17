@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
+import { Logger } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { ConnectorTokenClient } from './connector_token_client';
-import { Logger } from '@kbn/core/server';
+import sinon from 'sinon';
 import { ConnectorToken } from '../types';
+import { ConnectorTokenClient } from './connector_token_client';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('@kbn/core-saved-objects-utils-server', () => {

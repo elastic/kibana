@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import { HealthCheck } from './health_check';
 
 import { act } from 'react-dom/test-utils';
-import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
+import { HealthContextProvider } from '../context/health_context';
 jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

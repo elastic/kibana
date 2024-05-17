@@ -12,8 +12,8 @@ import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import type { Annotation } from '../../../common/types/annotations';
 import { isAnnotations } from '../../../common/types/annotations';
 
-import type { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
 import { annotationServiceProvider } from '.';
+import type { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
 
 const acknowledgedResponseMock = { acknowledged: true };
 

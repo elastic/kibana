@@ -7,26 +7,26 @@
 
 import {
   FIELDS_BROWSER_CATEGORIES_COUNT,
-  FIELDS_BROWSER_FIELDS_COUNT,
-  FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
-  FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
-  FIELDS_BROWSER_MESSAGE_HEADER,
-  FIELDS_BROWSER_FILTER_INPUT,
   FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER,
   FIELDS_BROWSER_CATEGORY_BADGE,
+  FIELDS_BROWSER_FIELDS_COUNT,
+  FIELDS_BROWSER_FILTER_INPUT,
+  FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
+  FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
+  FIELDS_BROWSER_MESSAGE_HEADER,
 } from '../../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../../screens/timeline';
 
 import {
+  activateViewSelected,
   addsHostGeoCityNameToTimeline,
   addsHostGeoContinentNameToTimeline,
   closeFieldsBrowser,
   filterFieldsBrowser,
-  toggleCategoryFilter,
   removesMessageField,
   resetFields,
   toggleCategory,
-  activateViewSelected,
+  toggleCategoryFilter,
 } from '../../../tasks/fields_browser';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';

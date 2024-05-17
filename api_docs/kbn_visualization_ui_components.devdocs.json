@@ -71,9 +71,7 @@
                 "tags": [],
                 "label": "overwriteColor",
                 "description": [],
-                "signature": [
-                  "string | null | undefined"
-                ],
+                "signature": ["string | null | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -85,9 +83,7 @@
                 "tags": [],
                 "label": "defaultColor",
                 "description": [],
-                "signature": [
-                  "string | null | undefined"
-                ],
+                "signature": ["string | null | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -99,9 +95,7 @@
                 "tags": [],
                 "label": "isClearable",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -113,9 +107,7 @@
                 "tags": [],
                 "label": "setConfig",
                 "description": [],
-                "signature": [
-                  "(config: { color?: string | undefined; }) => void"
-                ],
+                "signature": ["(config: { color?: string | undefined; }) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -138,9 +130,7 @@
                         "tags": [],
                         "label": "color",
                         "description": [],
-                        "signature": [
-                          "string | undefined"
-                        ],
+                        "signature": ["string | undefined"],
                         "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                         "deprecated": false,
                         "trackAdoption": false
@@ -157,9 +147,7 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -171,9 +159,7 @@
                 "tags": [],
                 "label": "disableHelpTooltip",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -185,9 +171,7 @@
                 "tags": [],
                 "label": "disabledMessage",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -199,9 +183,7 @@
                 "tags": [],
                 "label": "showAlpha",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -221,9 +203,7 @@
         "description": [
           "\nWhen testing this component, mock the \"debounce\" function in lodash (see this module test for an example)"
         ],
-        "signature": [
-          "(props: Props) => JSX.Element"
-        ],
+        "signature": ["(props: Props) => JSX.Element"],
         "path": "packages/kbn-visualization-ui-components/components/debounced_input.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -235,9 +215,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-visualization-ui-components/components/debounced_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -273,9 +251,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -315,9 +291,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -329,9 +303,7 @@
                 "tags": [],
                 "label": "children",
                 "description": [],
-                "signature": [
-                  "React.ReactNode | React.ReactNode[]"
-                ],
+                "signature": ["React.ReactNode | React.ReactNode[]"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -390,9 +362,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -420,9 +390,7 @@
                 "tags": [],
                 "label": "dataTestSubj",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -465,9 +433,7 @@
                 "tags": [],
                 "label": "items",
                 "description": [],
-                "signature": [
-                  "T[]"
-                ],
+                "signature": ["T[]"],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -504,9 +470,7 @@
                 "tags": [],
                 "label": "onDragStart",
                 "description": [],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
+                "signature": ["(() => void) | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -520,9 +484,7 @@
                 "tags": [],
                 "label": "onDragEnd",
                 "description": [],
-                "signature": [
-                  "((items: T[]) => void) | undefined"
-                ],
+                "signature": ["((items: T[]) => void) | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -534,9 +496,7 @@
                     "tags": [],
                     "label": "items",
                     "description": [],
-                    "signature": [
-                      "T[]"
-                    ],
+                    "signature": ["T[]"],
                     "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -702,9 +662,7 @@
                 "tags": [],
                 "label": "onClick",
                 "description": [],
-                "signature": [
-                  "() => void"
-                ],
+                "signature": ["() => void"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -718,9 +676,7 @@
                 "tags": [],
                 "label": "dataTestSubj",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -732,9 +688,7 @@
                 "tags": [],
                 "label": "iconType",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -752,11 +706,7 @@
         "tags": [],
         "label": "FieldPicker",
         "description": [],
-        "signature": [
-          "(props: ",
-          "FieldPickerProps",
-          "<T>) => JSX.Element"
-        ],
+        "signature": ["(props: ", "FieldPickerProps", "<T>) => JSX.Element"],
         "path": "packages/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -768,10 +718,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "FieldPickerProps",
-              "<T>"
-            ],
+            "signature": ["FieldPickerProps", "<T>"],
             "path": "packages/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -804,9 +751,7 @@
             "tags": [],
             "label": "{\n  idx,\n  onRemoveClick,\n  removeTitle,\n  children,\n  draggableProvided,\n  isNotRemovable,\n  isNotDraggable,\n  isDragging,\n  'data-test-subj': dataTestSubj = 'lns-fieldsBucketContainer',\n}",
             "description": [],
-            "signature": [
-              "BucketContainerProps"
-            ],
+            "signature": ["BucketContainerProps"],
             "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -969,9 +914,7 @@
                 "tags": [],
                 "label": "helpMessage",
                 "description": [],
-                "signature": [
-                  "string | null | undefined"
-                ],
+                "signature": ["string | null | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -983,9 +926,7 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -997,9 +938,7 @@
                 "tags": [],
                 "label": "initiallyOpen",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1011,9 +950,7 @@
                 "tags": [],
                 "label": "['data-test-subj']",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1095,9 +1032,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "Icon | undefined"
-                ],
+                "signature": ["Icon | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1109,9 +1044,7 @@
                 "tags": [],
                 "label": "onChange",
                 "description": [],
-                "signature": [
-                  "(newIcon: Icon) => void"
-                ],
+                "signature": ["(newIcon: Icon) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1123,9 +1056,7 @@
                     "tags": [],
                     "label": "newIcon",
                     "description": [],
-                    "signature": [
-                      "Icon"
-                    ],
+                    "signature": ["Icon"],
                     "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1157,9 +1088,7 @@
                 "tags": [],
                 "label": "defaultIcon",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1210,9 +1139,7 @@
                 "tags": [],
                 "label": "currentIcon",
                 "description": [],
-                "signature": [
-                  "Icon | undefined"
-                ],
+                "signature": ["Icon | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1224,9 +1151,7 @@
                 "tags": [],
                 "label": "setIcon",
                 "description": [],
-                "signature": [
-                  "(icon: Icon) => void"
-                ],
+                "signature": ["(icon: Icon) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1238,9 +1163,7 @@
                     "tags": [],
                     "label": "icon",
                     "description": [],
-                    "signature": [
-                      "Icon"
-                    ],
+                    "signature": ["Icon"],
                     "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1272,9 +1195,7 @@
                 "tags": [],
                 "label": "defaultIcon",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1440,9 +1361,7 @@
                 "tags": [],
                 "label": "currentConfig",
                 "description": [],
-                "signature": [
-                  "LineStyleConfig | undefined"
-                ],
+                "signature": ["LineStyleConfig | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1454,9 +1373,7 @@
                 "tags": [],
                 "label": "setConfig",
                 "description": [],
-                "signature": [
-                  "(config: LineStyleConfig) => void"
-                ],
+                "signature": ["(config: LineStyleConfig) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1468,9 +1385,7 @@
                     "tags": [],
                     "label": "config",
                     "description": [],
-                    "signature": [
-                      "LineStyleConfig"
-                    ],
+                    "signature": ["LineStyleConfig"],
                     "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1539,9 +1454,7 @@
                 "tags": [],
                 "label": "onChange",
                 "description": [],
-                "signature": [
-                  "(value: string) => void"
-                ],
+                "signature": ["(value: string) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1553,9 +1466,7 @@
                     "tags": [],
                     "label": "value",
                     "description": [],
-                    "signature": [
-                      "string"
-                    ],
+                    "signature": ["string"],
                     "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1571,9 +1482,7 @@
                 "tags": [],
                 "label": "defaultValue",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1605,9 +1514,7 @@
             "tags": [],
             "label": "{\n  label,\n  onClick,\n  isDisabled,\n  className,\n  'data-test-subj': dataTestSubj = 'lns-newBucket-add',\n}",
             "description": [],
-            "signature": [
-              "NewBucketButtonProps"
-            ],
+            "signature": ["NewBucketButtonProps"],
             "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1673,9 +1580,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "{ query: string | { [key: string]: any; }; language: string; }"
-                ],
+                "signature": ["{ query: string | { [key: string]: any; }; language: string; }"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1733,9 +1638,7 @@
                 "tags": [],
                 "label": "dataView",
                 "description": [],
-                "signature": [
-                  "string | { type: \"id\" | \"title\"; value: string; }"
-                ],
+                "signature": ["string | { type: \"id\" | \"title\"; value: string; }"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1758,9 +1661,7 @@
                 "tags": [],
                 "label": "onSubmit",
                 "description": [],
-                "signature": [
-                  "() => void"
-                ],
+                "signature": ["() => void"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1774,9 +1675,7 @@
                 "tags": [],
                 "label": "disableAutoFocus",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1788,9 +1687,7 @@
                 "tags": [],
                 "label": "'data-test-subj'",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1802,9 +1699,7 @@
                 "tags": [],
                 "label": "placeholder",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1889,9 +1784,7 @@
                 "tags": [],
                 "label": "currentConfig",
                 "description": [],
-                "signature": [
-                  "TextDecorationConfig | undefined"
-                ],
+                "signature": ["TextDecorationConfig | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1903,9 +1796,7 @@
                 "tags": [],
                 "label": "setConfig",
                 "description": [],
-                "signature": [
-                  "(config: TextDecorationConfig) => void"
-                ],
+                "signature": ["(config: TextDecorationConfig) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1917,9 +1808,7 @@
                     "tags": [],
                     "label": "config",
                     "description": [],
-                    "signature": [
-                      "TextDecorationConfig"
-                    ],
+                    "signature": ["TextDecorationConfig"],
                     "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1935,9 +1824,7 @@
                 "tags": [],
                 "label": "isQueryBased",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1965,9 +1852,7 @@
                     "tags": [],
                     "label": "textDecoration",
                     "description": [],
-                    "signature": [
-                      "\"none\" | \"name\" | \"field\""
-                    ],
+                    "signature": ["\"none\" | \"name\" | \"field\""],
                     "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -2016,9 +1901,7 @@
                 "tags": [],
                 "label": "onChange",
                 "description": [],
-                "signature": [
-                  "(val: T) => void"
-                ],
+                "signature": ["(val: T) => void"],
                 "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2030,9 +1913,7 @@
                     "tags": [],
                     "label": "val",
                     "description": [],
-                    "signature": [
-                      "T"
-                    ],
+                    "signature": ["T"],
                     "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -2048,9 +1929,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2062,9 +1941,7 @@
                 "tags": [],
                 "label": "defaultValue",
                 "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
+                "signature": ["T | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2089,9 +1966,7 @@
                 "tags": [],
                 "label": "allowFalsyValue",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2224,10 +2099,7 @@
             "tags": [],
             "label": "customIcon",
             "description": [],
-            "signature": [
-              "IconType",
-              " | undefined"
-            ],
+            "signature": ["IconType", " | undefined"],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2239,9 +2111,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2253,9 +2123,7 @@
             "tags": [],
             "label": "palette",
             "description": [],
-            "signature": [
-              "string[] | { color: string; stop: number; }[] | undefined"
-            ],
+            "signature": ["string[] | { color: string; stop: number; }[] | undefined"],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2281,9 +2149,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"field\""
-            ],
+            "signature": ["\"field\""],
             "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2508,9 +2374,7 @@
         "tags": [],
         "label": "DataType",
         "description": [],
-        "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"date\" | FieldOnlyDataType"
-        ],
+        "signature": ["\"string\" | \"number\" | \"boolean\" | \"date\" | FieldOnlyDataType"],
         "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2535,11 +2399,7 @@
         "tags": [],
         "label": "FieldOption",
         "description": [],
-        "signature": [
-          "FieldValue<T> & ",
-          "EuiComboBoxOptionOption",
-          "<T>"
-        ],
+        "signature": ["FieldValue<T> & ", "EuiComboBoxOptionOption", "<T>"],
         "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2639,9 +2499,7 @@
         "tags": [],
         "label": "LineStyle",
         "description": [],
-        "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\""
-        ],
+        "signature": ["\"solid\" | \"dashed\" | \"dotted\""],
         "path": "packages/kbn-visualization-ui-components/types.ts",
         "deprecated": false,
         "trackAdoption": false,

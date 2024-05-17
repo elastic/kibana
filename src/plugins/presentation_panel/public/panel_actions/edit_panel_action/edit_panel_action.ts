@@ -9,13 +9,13 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  hasEditCapabilities,
-  HasEditCapabilities,
-  EmbeddableApiContext,
   CanAccessViewMode,
+  EmbeddableApiContext,
+  HasEditCapabilities,
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
+  hasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import {
   Action,

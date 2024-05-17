@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createFilterFilters } from './filters';
+import { QueryStringFilter } from '@kbn/es-query';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { QueryStringFilter } from '@kbn/es-query';
+import { createFilterFilters } from './filters';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {

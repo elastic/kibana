@@ -16,8 +16,8 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import * as React from 'react';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 import { ManageKeysLink } from '../../components/manage_keys_link';
 
 export interface ConfigurationFormControlledProps {

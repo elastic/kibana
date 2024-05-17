@@ -9,9 +9,9 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { getErrorsViewerTableColumns } from './helpers';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { ErrorSummary } from '../../../types';
+import { getErrorsViewerTableColumns } from './helpers';
 
 const errorSummary: ErrorSummary[] = [
   {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { registerConnectorTypes } from '..';
-import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getEmailServices } from './email';
 import {
-  ValidatedEmail,
   InvalidEmailReason,
-  ValidateEmailAddressesOptions,
   MustacheInEmailRegExp,
+  ValidateEmailAddressesOptions,
+  ValidatedEmail,
 } from '@kbn/actions-plugin/common';
-import { experimentalFeaturesMock } from '../../mocks';
+import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { registerConnectorTypes } from '..';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { experimentalFeaturesMock } from '../../mocks';
+import { getEmailServices } from './email';
 
 const CONNECTOR_TYPE_ID = '.email';
 let connectorTypeModel: ConnectorTypeModel;

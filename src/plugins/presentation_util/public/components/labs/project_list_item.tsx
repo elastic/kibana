@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
-  EuiTitle,
-  EuiText,
   EuiFormFieldset,
+  EuiIconTip,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiIconTip,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
+import React from 'react';
 
-import { ProjectID, EnvironmentName, Project, environmentNames } from '../../../common/labs';
+import { EnvironmentName, Project, ProjectID, environmentNames } from '../../../common/labs';
 import { EnvironmentSwitch } from './environment_switch';
 
 import { LabsStrings } from '../../i18n';

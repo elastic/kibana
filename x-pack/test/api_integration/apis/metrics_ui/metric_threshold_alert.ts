@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import {
   Aggregators,
   Comparator,
@@ -19,6 +18,7 @@ import {
   EvaluatedRuleParams,
   evaluateRule,
 } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 import { createFakeLogger } from './create_fake_logger';

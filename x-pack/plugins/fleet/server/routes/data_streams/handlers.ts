@@ -1,3 +1,4 @@
+import type { RequestHandler } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +6,14 @@
  * 2.0.
  */
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from '@kbn/core/server';
 import pMap from 'p-map';
 
-import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common/types';
 import type { GetDataStreamsResponse } from '../../../common/types';
-import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultFleetErrorHandler } from '../../errors';
 import { dataStreamService } from '../../services/data_streams';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import type { DataStream } from '../../types';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 

@@ -9,9 +9,9 @@ import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import type { IBasePath } from '@kbn/core/server';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { IStaticAssets } from '@kbn/core-http-server';
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

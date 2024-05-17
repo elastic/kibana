@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFilterGroup,
-  EuiPopover,
   EuiFilterButton,
+  EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 
 interface SolutionFilterProps {
   solutions: Map<string, string>;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { Type, schema } from '@kbn/config-schema';
 
 const ALPHA_NUMERIC_WITH_SPACES_REGEX = /^[a-z0-9\s_]+$/i;
 const ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX = /^[a-z0-9\s\._]+$/i;

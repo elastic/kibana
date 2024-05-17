@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MAX_SUGGESTED_PROFILES } from '../../../common/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserProfileService } from '.';
+import { MAX_SUGGESTED_PROFILES } from '../../../common/constants';
 
 describe('suggest', () => {
   beforeEach(() => {

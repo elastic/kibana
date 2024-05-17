@@ -7,24 +7,24 @@
 import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts';
-import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
 import {
   FormulaPublicApi,
   LensEmbeddableInput,
   LensPublicStart,
   XYState,
 } from '@kbn/lens-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { AllSeries } from '../../../..';
-import { AppDataType, ReportViewType } from '../types';
-import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
-import { DataViewState } from '../hooks/use_app_data_view';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
-import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
+import { DataViewState } from '../hooks/use_app_data_view';
+import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
+import { AppDataType, ReportViewType } from '../types';
+import { ActionTypes, useActions } from './use_actions';
 import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
 export interface ExploratoryEmbeddableProps {
@@ -231,8 +231,7 @@ const Wrapper = styled.div<{
   position: relative;
   &&& {
     > :nth-child(2) {
-      height: ${(props) =>
-        props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`};
+      height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`)};
     }
     .expExpressionRenderer__expression {
       padding: 0 !important;
@@ -244,8 +243,8 @@ const Wrapper = styled.div<{
           props.align === 'left'
             ? `flex-start;`
             : props.align === 'right'
-            ? `flex-end;`
-            : 'center;'};
+              ? `flex-end;`
+              : 'center;'};
       }
       justify-content: flex-end;
       .legacyMtrVis__container {

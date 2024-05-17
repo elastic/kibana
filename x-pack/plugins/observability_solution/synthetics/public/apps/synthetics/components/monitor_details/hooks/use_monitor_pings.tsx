@@ -8,13 +8,13 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { useSelectedMonitor } from './use_selected_monitor';
-import { useSelectedLocation } from './use_selected_location';
 import {
   getMonitorRecentPingsAction,
   selectMonitorPingsMetadata,
   selectStatusFilter,
 } from '../../../state';
+import { useSelectedLocation } from './use_selected_location';
+import { useSelectedMonitor } from './use_selected_monitor';
 
 interface UseMonitorPingsProps {
   lastRefresh?: number;

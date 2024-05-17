@@ -9,15 +9,15 @@
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
-  RouteConfig,
-  RouteMethod,
-  RequestHandler,
   IKibanaResponse,
-  RouteConfigOptions,
-  RouteValidatorFullConfigRequest,
-  RequestHandlerContextBase,
-  RouteValidationFunction,
   LazyValidator,
+  RequestHandler,
+  RequestHandlerContextBase,
+  RouteConfig,
+  RouteConfigOptions,
+  RouteMethod,
+  RouteValidationFunction,
+  RouteValidatorFullConfigRequest,
 } from '../..';
 
 type RqCtx = RequestHandlerContextBase;
@@ -306,7 +306,7 @@ export interface AddVersionOpts<P, Q, B> {
  */
 export interface VersionedRoute<
   Method extends RouteMethod = RouteMethod,
-  Ctx extends RqCtx = RqCtx
+  Ctx extends RqCtx = RqCtx,
 > {
   /**
    * Add a new version of this route

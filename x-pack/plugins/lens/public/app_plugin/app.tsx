@@ -6,43 +6,43 @@
  */
 
 import './app.scss';
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
-import { LensAppProps, LensAppServices } from './types';
-import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
 import { Document } from '../persistence/saved_object_store';
+import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
+import { LensTopNavMenu } from './lens_top_nav';
+import { LensAppProps, LensAppServices } from './types';
 
-import {
-  setState,
-  applyChanges,
-  useLensSelector,
-  useLensDispatch,
-  LensAppState,
-  selectSavedObjectFormat,
-  updateIndexPatterns,
-  selectActiveDatasourceId,
-  selectFramePublicAPI,
-  selectIsManaged,
-} from '../state_management';
-import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
-import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common/constants';
-import { isLensEqual } from './lens_document_equality';
 import {
   type IndexPatternServiceAPI,
   createIndexPatternService,
 } from '../data_views_service/service';
+import { LensInspector } from '../lens_inspector_service';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import {
+  LensAppState,
+  applyChanges,
+  selectActiveDatasourceId,
+  selectFramePublicAPI,
+  selectIsManaged,
+  selectSavedObjectFormat,
+  setState,
+  updateIndexPatterns,
+  useLensDispatch,
+  useLensSelector,
+} from '../state_management';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import { isLensEqual } from './lens_document_equality';
+import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;

@@ -50,11 +50,11 @@ import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import {
-  SearchApplicationViewTabs,
-  SearchApplicationConnectTabs,
-  SearchApplicationContentTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
+  SearchApplicationConnectTabs,
+  SearchApplicationContentTabs,
+  SearchApplicationViewTabs,
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
@@ -73,8 +73,8 @@ import {
   ResultView,
   ResultsPerPageView,
   ResultsView,
-  Sorting,
   SearchBar,
+  Sorting,
 } from './search_ui_components';
 import '../search_application_layout.scss';
 

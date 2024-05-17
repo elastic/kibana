@@ -5,6 +5,9 @@
  * 2.0.
  */
 import moment from 'moment';
+import { NetworkEvent } from '../../../../../../../common/runtime_types';
+import type { DateFormatter } from '../../../../../../hooks/use_date_format';
+import { mockMoment } from '../../../../utils/formatting/test_helpers';
 import {
   colourPalette,
   formatTooltipHeading,
@@ -12,11 +15,8 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
-import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
+import { FriendlyFlyoutLabels, FriendlyTimingLabels, Metadata, MimeType, Timings } from './types';
 import { WaterfallDataEntry } from './types';
-import type { DateFormatter } from '../../../../../../hooks/use_date_format';
-import { mockMoment } from '../../../../utils/formatting/test_helpers';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
 
 export const networkItems: NetworkEvent[] = [
   {

@@ -1,3 +1,4 @@
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useRef } from 'react';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 import { useServices } from './services';
 

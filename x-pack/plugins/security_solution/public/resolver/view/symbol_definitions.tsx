@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
-import { useSymbolIDs } from './use_symbol_ids';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 import { usePaintServerIDs } from './use_paint_server_ids';
+import { useSymbolIDs } from './use_symbol_ids';
 
 const loadingProcessTitle = i18n.translate(
   'xpack.securitySolution.resolver.symbolDefinitions.loadingProcess',

@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FatalErrorInfo",
-        "description": [
-          "\nRepresents the `message` and `stack` of a fatal Error\n"
-        ],
+        "description": ["\nRepresents the `message` and `stack` of a fatal Error\n"],
         "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -51,9 +49,7 @@
             "tags": [],
             "label": "stack",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -83,9 +79,7 @@
             "description": [
               "\nAdd a new fatal error. This will stop the Kibana Public Core and display\na fatal error screen with details about the Kibana build and the error.\n"
             ],
-            "signature": [
-              "(error: string | Error, source?: string | undefined) => never"
-            ],
+            "signature": ["(error: string | Error, source?: string | undefined) => never"],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -96,12 +90,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": [
-                  "- The error to display"
-                ],
-                "signature": [
-                  "string | Error"
-                ],
+                "description": ["- The error to display"],
+                "signature": ["string | Error"],
                 "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -113,12 +103,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "source",
-                "description": [
-                  "- Adds a prefix of the form `${source}: ` to the error message"
-                ],
-                "signature": [
-                  "string | undefined"
-                ],
+                "description": ["- Adds a prefix of the form `${source}: ` to the error message"],
+                "signature": ["string | undefined"],
                 "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,

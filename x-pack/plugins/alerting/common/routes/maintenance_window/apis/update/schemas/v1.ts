@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../shared';
-import { rRuleRequestSchemaV1 } from '../../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
+import { rRuleRequestSchemaV1 } from '../../../../r_rule';
+import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../shared';
 
 export const updateParamsSchema = schema.object({
   id: schema.string(),

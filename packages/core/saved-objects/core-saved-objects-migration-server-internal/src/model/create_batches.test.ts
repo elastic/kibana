@@ -1,3 +1,4 @@
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import * as Either from 'fp-ts/lib/Either';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { buildTempIndexMap, createBatches } from './create_batches';
 
 describe('createBatches', () => {

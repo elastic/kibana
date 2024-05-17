@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiSuperSelectProps } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-import { ActionNotifyWhen } from './action_notify_when';
 import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { ActionNotifyWhen } from './action_notify_when';
 
 describe('action_notify_when', () => {
   async function setup(

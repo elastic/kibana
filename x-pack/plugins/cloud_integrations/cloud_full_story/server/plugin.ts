@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { registerFullStoryRoute } from './routes';
 

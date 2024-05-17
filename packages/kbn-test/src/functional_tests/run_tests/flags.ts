@@ -8,10 +8,10 @@
 
 import Path from 'path';
 
-import { v4 as uuidV4 } from 'uuid';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { v4 as uuidV4 } from 'uuid';
 
 import { EsVersion } from '../../functional_test_runner';
 
@@ -78,8 +78,8 @@ export function parseFlags(flags: FlagsReader) {
   const logsDir = flags.path('writeLogsToPath')
     ? Path.resolve(REPO_ROOT, flags.path('writeLogsToPath')!)
     : flags.boolean('logToFile')
-    ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-    : undefined;
+      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+      : undefined;
 
   return {
     configs,

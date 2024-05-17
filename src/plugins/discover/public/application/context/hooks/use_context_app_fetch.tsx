@@ -1,3 +1,9 @@
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Markdown } from '@kbn/shared-ux-markdown';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,26 +12,20 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Markdown } from '@kbn/shared-ux-markdown';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { SortDirection } from '@kbn/data-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import {
+  getEsQuerySort,
+  getTieBreakerFieldName,
+} from '../../../../common/utils/sorting/get_es_query_sort';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { fetchAnchor } from '../services/anchor';
-import { fetchSurroundingDocs, SurrDocType } from '../services/context';
+import { SurrDocType, fetchSurroundingDocs } from '../services/context';
 import {
   ContextFetchState,
   FailureReason,
-  getInitialContextQueryState,
   LoadingStatus,
+  getInitialContextQueryState,
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import {
-  getTieBreakerFieldName,
-  getEsQuerySort,
-} from '../../../../common/utils/sorting/get_es_query_sort';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },

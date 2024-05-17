@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { mount, ReactWrapper } from 'enzyme';
 import { MountPoint, UnmountCallback } from '@kbn/core/public';
-import { MountPointPortal } from './mount_point_portal';
+import { ReactWrapper, mount } from 'enzyme';
+import React, { FC } from 'react';
 import { act } from 'react-dom/test-utils';
+import { MountPointPortal } from './mount_point_portal';
 
 describe('MountPointPortal', () => {
   let portalTarget: HTMLElement;

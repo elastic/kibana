@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiIconTip, EuiLink, EuiSkeletonText, EuiToolTip, EuiText } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { EuiIconTip, EuiLink, EuiSkeletonText, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSyntheticsSettingsContext } from '../../contexts';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { ClientPluginsStart } from '../../../../plugin';
+import { useSyntheticsSettingsContext } from '../../contexts';
 
 export const PolicyLink = ({ name }: { name: string }) => {
   const { share, application } = useKibana<ClientPluginsStart>().services;

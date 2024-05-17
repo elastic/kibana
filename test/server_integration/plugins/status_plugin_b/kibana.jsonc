@@ -6,8 +6,6 @@
     "id": "statusPluginB",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "statusPluginA"
-    ]
+    "requiredPlugins": ["statusPluginA"]
   }
 }

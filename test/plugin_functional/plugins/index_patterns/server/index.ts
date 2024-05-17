@@ -13,7 +13,5 @@ import {
   IndexPatternsTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<
-  IndexPatternsTestPluginSetup,
-  IndexPatternsTestPluginStart
-> = async () => new IndexPatternsTestPlugin();
+export const plugin: PluginInitializer<IndexPatternsTestPluginSetup, IndexPatternsTestPluginStart> =
+  async () => new IndexPatternsTestPlugin();

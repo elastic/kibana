@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subject, startWith, shareReplay, distinctUntilChanged } from 'rxjs';
 import type { History } from 'history';
+import { Observable, Subject, distinctUntilChanged, shareReplay, startWith } from 'rxjs';
 
 // interface compatible for both window.location and history.location...
 export interface Location {

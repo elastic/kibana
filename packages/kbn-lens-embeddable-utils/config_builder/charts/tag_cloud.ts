@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedPersistedState,
   FormulaPublicApi,
   TagcloudState,
 } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTagCloudConfig } from '../types';
 import {
   addLayerColumn,
@@ -21,7 +22,6 @@ import {
   isFormulaDataset,
   mapToFormula,
 } from '../utils';
-import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 

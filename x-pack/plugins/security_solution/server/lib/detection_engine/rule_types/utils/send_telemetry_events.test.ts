@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { selectEvents, enrichEndpointAlertsSignalID } from './send_telemetry_events';
+import { enrichEndpointAlertsSignalID, selectEvents } from './send_telemetry_events';
 
 describe('sendAlertTelemetry', () => {
   it('selectEvents', () => {

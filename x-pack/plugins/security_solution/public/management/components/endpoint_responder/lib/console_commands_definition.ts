@@ -6,12 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
-import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
-import { UploadActionResult } from '../command_render_components/upload_action';
-import { ArgumentFileSelector } from '../../console_argument_selectors';
-import type { ParsedArgData } from '../../console/service/types';
-import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   ConsoleResponseActionCommands,
   EndpointCapabilities,
@@ -21,27 +15,33 @@ import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { GetFileActionResult } from '../command_render_components/get_file_action';
-import type { Command, CommandDefinition } from '../../console';
-import { IsolateActionResult } from '../command_render_components/isolate_action';
-import { ReleaseActionResult } from '../command_render_components/release_action';
-import { KillProcessActionResult } from '../command_render_components/kill_process_action';
-import { SuspendProcessActionResult } from '../command_render_components/suspend_process_action';
-import { EndpointStatusActionResult } from '../command_render_components/status_action';
-import { GetProcessesActionResult } from '../command_render_components/get_processes_action';
-import {
-  ExecuteActionResult,
-  getExecuteCommandArgAboutInfo,
-} from '../command_render_components/execute_action';
+import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../common/translations';
+import type { Command, CommandDefinition } from '../../console';
+import type { ParsedArgData } from '../../console/service/types';
+import { ArgumentFileSelector } from '../../console_argument_selectors';
+import {
+  ExecuteActionResult,
+  getExecuteCommandArgAboutInfo,
+} from '../command_render_components/execute_action';
+import { GetFileActionResult } from '../command_render_components/get_file_action';
+import { GetProcessesActionResult } from '../command_render_components/get_processes_action';
+import { IsolateActionResult } from '../command_render_components/isolate_action';
+import { KillProcessActionResult } from '../command_render_components/kill_process_action';
+import { ReleaseActionResult } from '../command_render_components/release_action';
+import { EndpointStatusActionResult } from '../command_render_components/status_action';
+import { SuspendProcessActionResult } from '../command_render_components/suspend_process_action';
+import { UploadActionResult } from '../command_render_components/upload_action';
 import { getCommandAboutInfo } from './get_command_about_info';
 
-import { validateUnitOfTime } from './utils';
 import { CONSOLE_COMMANDS } from '../../../common/translations';
+import { validateUnitOfTime } from './utils';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {

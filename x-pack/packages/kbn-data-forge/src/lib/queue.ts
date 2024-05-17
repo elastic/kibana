@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { cargoQueue } from 'async';
-import moment from 'moment';
-import { omit } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
+import { cargoQueue } from 'async';
+import { omit } from 'lodash';
+import moment from 'moment';
+import { INDEX_PREFIX } from '../constants';
 import type { Config, Doc } from '../types';
 import { indices } from './indices';
-import { INDEX_PREFIX } from '../constants';
 
 type CargoQueue = ReturnType<typeof cargoQueue<Doc, Error>>;
 let queue: CargoQueue;

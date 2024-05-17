@@ -7,16 +7,8 @@
     "id": "screenshotting",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "screenshotting"
-    ],
-    "requiredPlugins": [
-      "expressions",
-      "screenshotMode"
-    ],
-    "optionalPlugins": [
-      "cloud"
-    ]
+    "configPath": ["xpack", "screenshotting"],
+    "requiredPlugins": ["expressions", "screenshotMode"],
+    "optionalPlugins": ["cloud"]
   }
 }

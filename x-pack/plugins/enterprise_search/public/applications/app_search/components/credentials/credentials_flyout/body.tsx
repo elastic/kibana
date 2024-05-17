@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 
@@ -16,10 +16,10 @@ import { ApiTokenTypes } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';
 
 import {
-  FormKeyName,
-  FormKeyType,
-  FormKeyReadWriteAccess,
   FormKeyEngineAccess,
+  FormKeyName,
+  FormKeyReadWriteAccess,
+  FormKeyType,
   FormKeyUpdateWarning,
 } from './form_components';
 

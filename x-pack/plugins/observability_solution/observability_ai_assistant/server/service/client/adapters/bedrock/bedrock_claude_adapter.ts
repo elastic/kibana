@@ -11,11 +11,11 @@ import {
   BedrockChunkMember,
   eventstreamSerdeIntoObservable,
 } from '../../../util/eventstream_serde_into_observable';
-import { processBedrockStream } from './process_bedrock_stream';
-import type { LlmApiAdapterFactory } from '../types';
+import { TOOL_USE_END } from '../simulate_function_calling/constants';
 import { getMessagesWithSimulatedFunctionCalling } from '../simulate_function_calling/get_messages_with_simulated_function_calling';
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
-import { TOOL_USE_END } from '../simulate_function_calling/constants';
+import type { LlmApiAdapterFactory } from '../types';
+import { processBedrockStream } from './process_bedrock_stream';
 
 function replaceFunctionsWithTools(content: string) {
   return content.replaceAll(/(function)(s|[\s*\.])?(?!\scall)/g, (match, p1, p2) => {

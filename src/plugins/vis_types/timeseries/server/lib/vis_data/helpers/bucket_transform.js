@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getBucketsPath } from './get_buckets_path';
+import { i18n } from '@kbn/i18n';
 import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { getBucketsPath } from './get_buckets_path';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
 import { convertIntervalToUnit } from './unit_to_seconds';
 

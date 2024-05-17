@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TOASTER_CLOSE_ICON } from '../../screens/alerts_detection_rules';
 import {
   DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
@@ -21,7 +22,6 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT,
   VIEW_CASE_TOASTER_LINK,
 } from '../../screens/expandable_flyout/common';
-import { TOASTER_CLOSE_ICON } from '../../screens/alerts_detection_rules';
 
 /* Header */
 

@@ -6,9 +6,9 @@
  */
 
 import { useEuiBackgroundColor } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import { FlyoutBody } from '../../../../shared/components/flyout_body';
 import type { EntityDetailsLeftPanelTab, LeftPanelTabsType } from './left_panel_header';
 

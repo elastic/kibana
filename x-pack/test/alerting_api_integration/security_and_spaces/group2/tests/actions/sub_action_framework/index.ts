@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type SuperTest from 'supertest';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { ObjectRemover, getUrlPrefix } from '../../../../../common/lib';
 
 /**
  * The sub action connector is defined here

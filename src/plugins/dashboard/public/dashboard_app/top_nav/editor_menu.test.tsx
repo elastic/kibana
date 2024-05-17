@@ -11,8 +11,8 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { GroupedAddPanelActions } from './add_panel_action_menu_items';
 import {
   FactoryGroup,
-  mergeGroupedItemsProvider,
   getEmbeddableFactoryMenuItemProvider,
+  mergeGroupedItemsProvider,
 } from './editor_menu';
 
 describe('mergeGroupedItemsProvider', () => {

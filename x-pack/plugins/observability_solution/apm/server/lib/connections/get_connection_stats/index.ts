@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
-import { merge } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { merge } from 'lodash';
+import { ValuesType } from 'utility-types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getStats } from './get_stats';
-import { getDestinationMap } from './get_destination_map';
-import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { getDestinationMap } from './get_destination_map';
+import { getStats } from './get_stats';
 
 export function getConnectionStats({
   apmEventClient,

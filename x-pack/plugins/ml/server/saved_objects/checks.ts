@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import Boom from '@hapi/boom';
 import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from '@kbn/core/server';
 import type {
-  MLSavedObjectService,
-  TrainedModelJob,
-  JobObject,
-  TrainedModelObject,
-} from './service';
-import type {
-  JobType,
   DeleteMLSpaceAwareItemsCheckResponse,
+  JobType,
   MlSavedObjectType,
 } from '../../common/types/saved_objects';
+import type {
+  JobObject,
+  MLSavedObjectService,
+  TrainedModelJob,
+  TrainedModelObject,
+} from './service';
 
 import type { ResolveMlCapabilities } from '../../common/types/capabilities';
 import { getJobDetailsFromTrainedModel, getJobsAndModels } from './util';
@@ -401,14 +401,17 @@ export function checksFactory(
         .flat() as JobSavedObjectStatus[]
     )
       .filter((s) => s.checks.jobExists)
-      .reduce((acc, cur) => {
-        const type = cur.type;
-        if (acc[type] === undefined) {
-          acc[type] = {};
-        }
-        acc[type][cur.jobId] = cur.namespaces;
-        return acc;
-      }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+      .reduce(
+        (acc, cur) => {
+          const type = cur.type;
+          if (acc[type] === undefined) {
+            acc[type] = {};
+          }
+          acc[type][cur.jobId] = cur.namespaces;
+          return acc;
+        },
+        {} as { [id: string]: { [id: string]: string[] | undefined } }
+      );
   }
 
   async function trainedModelsSpaces() {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/test';
+import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 class EndpointPolicyGenerator extends BaseDataGenerator {

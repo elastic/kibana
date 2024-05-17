@@ -46,9 +46,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -156,9 +154,7 @@
             "tags": [],
             "label": "getPartitionedFilters",
             "description": [],
-            "signature": [
-              "() => PartitionedFilters"
-            ],
+            "signature": ["() => PartitionedFilters"],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -172,11 +168,7 @@
             "tags": [],
             "label": "getUpdates$",
             "description": [],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<void>"
-            ],
+            "signature": ["() => ", "Observable", "<void>"],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -190,11 +182,7 @@
             "tags": [],
             "label": "getFetches$",
             "description": [],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<void>"
-            ],
+            "signature": ["() => ", "Observable", "<void>"],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -268,9 +256,7 @@
                 "tags": [],
                 "label": "pinFilterStatus",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -330,9 +316,7 @@
                 "tags": [],
                 "label": "pinFilterStatus",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -492,9 +476,7 @@
             "tags": [],
             "label": "removeAll",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -581,9 +563,7 @@
                 "tags": [],
                 "label": "shouldOverrideStore",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -788,9 +768,7 @@
                 "tags": [],
                 "label": "collector",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "src/plugins/data/common/query/filters/persistable_state.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -862,9 +840,7 @@
             "tags": [],
             "label": "maxLength",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -876,9 +852,7 @@
             "tags": [],
             "label": "filterDuplicates",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -890,9 +864,7 @@
             "tags": [],
             "label": "isDuplicate",
             "description": [],
-            "signature": [
-              "(oldItem: T, newItem: T) => boolean"
-            ],
+            "signature": ["(oldItem: T, newItem: T) => boolean"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -905,9 +877,7 @@
                 "tags": [],
                 "label": "oldItem",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -919,9 +889,7 @@
                 "tags": [],
                 "label": "newItem",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -956,9 +924,7 @@
             "tags": [],
             "label": "items",
             "description": [],
-            "signature": [
-              "T[]"
-            ],
+            "signature": ["T[]"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -970,9 +936,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -984,9 +948,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -999,9 +961,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "PersistedLogOptions<T>"
-                ],
+                "signature": ["PersistedLogOptions<T>"],
                 "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1039,9 +999,7 @@
             "tags": [],
             "label": "add",
             "description": [],
-            "signature": [
-              "(val: any) => T[]"
-            ],
+            "signature": ["(val: any) => T[]"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1053,9 +1011,7 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1071,9 +1027,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "() => T[]"
-            ],
+            "signature": ["() => T[]"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1087,11 +1041,7 @@
             "tags": [],
             "label": "get$",
             "description": [],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<T[]>"
-            ],
+            "signature": ["() => ", "Observable", "<T[]>"],
             "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1119,9 +1069,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1258,9 +1206,7 @@
         "type": "Function",
         "tags": [],
         "label": "connectToQueryState",
-        "description": [
-          "\nHelper to setup two-way syncing of global data and a state container"
-        ],
+        "description": ["\nHelper to setup two-way syncing of global data and a state container"],
         "signature": [
           "<S extends ",
           {
@@ -1345,9 +1291,7 @@
             "type": "Object",
             "tags": [],
             "label": "stateContainer",
-            "description": [
-              "to use for syncing"
-            ],
+            "description": ["to use for syncing"],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -1381,9 +1325,7 @@
                 "tags": [],
                 "label": "time",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1395,9 +1337,7 @@
                 "tags": [],
                 "label": "refreshInterval",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1431,9 +1371,7 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1593,9 +1531,7 @@
             "type": "Object",
             "tags": [],
             "label": "filterManager",
-            "description": [
-              "- The active filter manager to lookup for existing filters"
-            ],
+            "description": ["- The active filter manager to lookup for existing filters"],
             "signature": [
               {
                 "pluginId": "data",
@@ -1616,9 +1552,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "field",
-            "description": [
-              "- The field for which filters should be generated"
-            ],
+            "description": ["- The field for which filters should be generated"],
             "signature": [
               "string | ",
               {
@@ -1640,12 +1574,8 @@
             "type": "Any",
             "tags": [],
             "label": "values",
-            "description": [
-              "- One or more values to filter for."
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["- One or more values to filter for."],
+            "signature": ["any"],
             "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1657,12 +1587,8 @@
             "type": "string",
             "tags": [],
             "label": "operation",
-            "description": [
-              "- \"-\" to create a negated filter"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["- \"-\" to create a negated filter"],
+            "signature": ["string"],
             "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1674,9 +1600,7 @@
             "type": "Object",
             "tags": [],
             "label": "index",
-            "description": [
-              "- Index string to generate filters for"
-            ],
+            "description": ["- Index string to generate filters for"],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -1692,9 +1616,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "An array of filters to be added back to filterManager"
-        ],
+        "returnComment": ["An array of filters to be added back to filterManager"],
         "initialIsOpen": false
       },
       {
@@ -1704,9 +1626,7 @@
         "tags": [],
         "label": "getDefaultQuery",
         "description": [],
-        "signature": [
-          "(language: QueryLanguage) => { query: string; language: QueryLanguage; }"
-        ],
+        "signature": ["(language: QueryLanguage) => { query: string; language: QueryLanguage; }"],
         "path": "src/plugins/data/public/query/lib/get_default_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1718,9 +1638,7 @@
             "tags": [],
             "label": "language",
             "description": [],
-            "signature": [
-              "QueryLanguage"
-            ],
+            "signature": ["QueryLanguage"],
             "path": "src/plugins/data/public/query/lib/get_default_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1950,9 +1868,7 @@
             "tags": [],
             "label": "indexPatterns",
             "description": [],
-            "signature": [
-              "T[]"
-            ],
+            "signature": ["T[]"],
             "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2095,9 +2011,7 @@
             "type": "Object",
             "tags": [],
             "label": "kbnUrlStateStorage",
-            "description": [
-              "to use for syncing"
-            ],
+            "description": ["to use for syncing"],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -2120,9 +2034,7 @@
         "parentPluginId": "data",
         "id": "def-public.syncQueryStateWithUrl",
         "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "syncQueryStateWithUrl",
         "description": [],
         "signature": [
@@ -2244,9 +2156,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GlobalQueryStateFromUrl",
-        "description": [
-          "\nPart of {@link QueryState} serialized in the `_g` portion of Url"
-        ],
+        "description": ["\nPart of {@link QueryState} serialized in the `_g` portion of Url"],
         "path": "src/plugins/data/public/query/state_sync/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2815,9 +2725,7 @@
                 "tags": [],
                 "label": "__1",
                 "description": [],
-                "signature": [
-                  "{ query: string | { [key: string]: any; }; language: string; }"
-                ],
+                "signature": ["{ query: string | { [key: string]: any; }; language: string; }"],
                 "path": "src/plugins/data/public/query/lib/add_to_query_log.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3001,9 +2909,7 @@
             "tags": [],
             "label": "appFilters",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3015,9 +2921,7 @@
             "tags": [],
             "label": "globalFilters",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3043,9 +2947,7 @@
             "tags": [],
             "label": "isDuplicateTitle",
             "description": [],
-            "signature": [
-              "(title: string, id?: string | undefined) => Promise<boolean>"
-            ],
+            "signature": ["(title: string, id?: string | undefined) => Promise<boolean>"],
             "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3057,9 +2959,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3072,9 +2972,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3174,9 +3072,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3235,9 +3131,7 @@
                 "tags": [],
                 "label": "searchText",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3250,9 +3144,7 @@
                 "tags": [],
                 "label": "perPage",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3265,9 +3157,7 @@
                 "tags": [],
                 "label": "activePage",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3305,9 +3195,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3323,9 +3211,7 @@
             "tags": [],
             "label": "deleteSavedQuery",
             "description": [],
-            "signature": [
-              "(id: string) => Promise<{}>"
-            ],
+            "signature": ["(id: string) => Promise<{}>"],
             "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3337,9 +3223,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3355,9 +3239,7 @@
             "tags": [],
             "label": "getSavedQueryCount",
             "description": [],
-            "signature": [
-              "() => Promise<number>"
-            ],
+            "signature": ["() => Promise<number>"],
             "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3613,9 +3495,7 @@
         "tags": [],
         "label": "AutoRefreshDoneFn",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "src/plugins/data/public/query/timefilter/lib/auto_refresh_loop.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4079,9 +3959,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "CalculateBoundsOptions"
-            ],
+            "signature": ["CalculateBoundsOptions"],
             "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4159,9 +4037,7 @@
                 "tags": [],
                 "label": "forceNow",
                 "description": [],
-                "signature": [
-                  "Date | undefined"
-                ],
+                "signature": ["Date | undefined"],
                 "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4281,9 +4157,7 @@
                 "tags": [],
                 "label": "forceNow",
                 "description": [],
-                "signature": [
-                  "Date | undefined"
-                ],
+                "signature": ["Date | undefined"],
                 "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4295,9 +4169,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4417,9 +4289,7 @@
                 "tags": [],
                 "label": "forceNow",
                 "description": [],
-                "signature": [
-                  "Date | undefined"
-                ],
+                "signature": ["Date | undefined"],
                 "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4431,9 +4301,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4472,9 +4340,7 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/data/common/query/is_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4512,9 +4378,7 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4530,9 +4394,7 @@
         "type": "Function",
         "tags": [],
         "label": "textBasedQueryStateToAstWithValidation",
-        "description": [
-          "\nConverts QueryState to expression AST"
-        ],
+        "description": ["\nConverts QueryState to expression AST"],
         "signature": [
           "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => Promise<",
           {
@@ -4555,9 +4417,7 @@
             "tags": [],
             "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
-            "signature": [
-              "Args"
-            ],
+            "signature": ["Args"],
             "path": "src/plugins/data/common/query/text_based_query_state_to_ast_with_validation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4573,9 +4433,7 @@
         "type": "Function",
         "tags": [],
         "label": "textBasedQueryStateToExpressionAst",
-        "description": [
-          "\nConverts QueryState to expression AST"
-        ],
+        "description": ["\nConverts QueryState to expression AST"],
         "signature": [
           "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => ",
           {
@@ -4597,9 +4455,7 @@
             "tags": [],
             "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
-            "signature": [
-              "Args"
-            ],
+            "signature": ["Args"],
             "path": "src/plugins/data/common/query/text_based_query_state_to_ast.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4660,9 +4516,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "src/plugins/data/common/query/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4710,9 +4564,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "{ query: string | { [key: string]: any; }; language: string; }"
-            ],
+            "signature": ["{ query: string | { [key: string]: any; }; language: string; }"],
             "path": "src/plugins/data/common/query/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4780,9 +4632,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "signature": [
-              "moment.Moment | undefined"
-            ],
+            "signature": ["moment.Moment | undefined"],
             "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4794,9 +4644,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "signature": [
-              "moment.Moment | undefined"
-            ],
+            "signature": ["moment.Moment | undefined"],
             "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4813,9 +4661,7 @@
         "type": "Type",
         "tags": [],
         "label": "QueryState",
-        "description": [
-          "\nAll query state service state\n"
-        ],
+        "description": ["\nAll query state service state\n"],
         "signature": [
           "{ time?: ",
           {
@@ -4871,9 +4717,7 @@
         "tags": [],
         "label": "RefreshInterval",
         "description": [],
-        "signature": [
-          "{ pause: boolean; value: number; }"
-        ],
+        "signature": ["{ pause: boolean; value: number; }"],
         "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -10,7 +10,7 @@ import type { Dispatch } from 'react';
 import { createContext } from 'react';
 import { SecurityPageName } from '../../../app/types';
 
-import type { RouteSpyState, RouteSpyAction } from './types';
+import type { RouteSpyAction, RouteSpyState } from './types';
 
 export const initRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.noPage,

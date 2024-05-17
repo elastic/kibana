@@ -54,8 +54,9 @@ export const useComparisonCss = ({
       background-color: ${baseCellBackgroundColor};
     }
 
-    ${diffMode === 'basic' &&
-    css`
+    ${
+      diffMode === 'basic' &&
+      css`
       .${MATCH_CELL_CLASS} {
         .${CELL_CLASS} {
           &,
@@ -73,7 +74,8 @@ export const useComparisonCss = ({
           }
         }
       }
-    `}
+    `
+    }
 
     .${SEGMENT_CLASS} {
       position: relative;
@@ -89,9 +91,10 @@ export const useComparisonCss = ({
       color: ${euiTheme.colors.dangerText};
     }
 
-    ${(diffMode === 'chars' || diffMode === 'words') &&
-    showDiffDecorations &&
-    css`
+    ${
+      (diffMode === 'chars' || diffMode === 'words') &&
+      showDiffDecorations &&
+      css`
       .${ADDED_SEGMENT_CLASS} {
         text-decoration: underline;
       }
@@ -99,16 +102,19 @@ export const useComparisonCss = ({
       .${REMOVED_SEGMENT_CLASS} {
         text-decoration: line-through;
       }
-    `}
+    `
+    }
 
-    ${diffMode === 'lines' &&
-    css`
+    ${
+      diffMode === 'lines' &&
+      css`
       .${SEGMENT_CLASS} {
         padding-left: calc(${euiTheme.size.xs} / 2);
       }
 
-      ${showDiffDecorations &&
-      css`
+      ${
+        showDiffDecorations &&
+        css`
         .${ADDED_SEGMENT_CLASS}:before {
           content: '+';
           ${indicatorCss}
@@ -122,7 +128,9 @@ export const useComparisonCss = ({
           background-color: ${tint(euiTheme.colors.danger, 0.25)};
           color: ${euiTheme.colors.lightestShade};
         }
-      `}
-    `}
+      `
+      }
+    `
+    }
   `;
 };

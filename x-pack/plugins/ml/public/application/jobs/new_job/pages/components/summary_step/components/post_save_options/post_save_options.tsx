@@ -14,12 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import type { JobRunner } from '../../../../../common/job_runner';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
+import type { JobRunner } from '../../../../../common/job_runner';
 
-import { JobCreatorContext } from '../../../job_creator_context';
 import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
 import { MlAnomalyAlertFlyout } from '../../../../../../../../alerting/ml_alerting_flyout';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 interface Props {
   jobRunner: JobRunner | null;

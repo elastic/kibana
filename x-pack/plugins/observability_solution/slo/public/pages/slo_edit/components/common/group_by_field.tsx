@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
-import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
-import React from 'react';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { OptionalText } from './optional_text';
 import { CreateSLOForm } from '../../types';
-import { IndexFieldSelector } from './index_field_selector';
 import { GroupByCardinality } from './group_by_cardinality';
+import { IndexFieldSelector } from './index_field_selector';
+import { OptionalText } from './optional_text';
 
 export function GroupByField({
   dataView,

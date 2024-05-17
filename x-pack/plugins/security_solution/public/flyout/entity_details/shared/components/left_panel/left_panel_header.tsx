@@ -6,9 +6,9 @@
  */
 
 import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ReactElement, VFC } from 'react';
 import React, { memo } from 'react';
-import { css } from '@emotion/react';
 import { FlyoutHeader } from '../../../../shared/components/flyout_header';
 
 export type LeftPanelTabsType = Array<{

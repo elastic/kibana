@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { login, visit } from '../tasks/login';
 import {
   EMPTY_PAGE_BODY,
   EMPTY_PAGE_DOCS_LINK,
   EMPTY_PAGE_INTEGRATIONS_LINK,
 } from '../screens/empty_page';
+import { login, visit } from '../tasks/login';
 
 const THREAT_INTEL_PATH = '/app/security/threat_intelligence/';
 

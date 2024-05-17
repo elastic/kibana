@@ -7,19 +7,19 @@
  */
 
 import {
-  getCoreTransformsMock,
   getConversionTransformsMock,
-  getModelVersionTransformsMock,
+  getCoreTransformsMock,
   getModelVersionSchemasMock,
+  getModelVersionTransformsMock,
   getReferenceTransformsMock,
   resetAllMocks,
   validateTypeMigrationsMock,
 } from './build_active_migrations.test.mocks';
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { buildActiveMigrations } from './build_active_migrations';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { buildActiveMigrations } from './build_active_migrations';
 import { Transform, TransformType } from './types';
 
 const kibanaVersion = '3.2.3';

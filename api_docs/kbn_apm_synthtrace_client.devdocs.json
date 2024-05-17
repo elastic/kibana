@@ -67,9 +67,7 @@
             "tags": [],
             "label": "spanEndTimes",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -81,10 +79,7 @@
             "tags": [],
             "label": "childSpans",
             "description": [],
-            "signature": [
-              "BaseSpan",
-              "[]"
-            ],
+            "signature": ["BaseSpan", "[]"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -96,9 +91,7 @@
             "tags": [],
             "label": "transaction",
             "description": [],
-            "signature": [
-              "Transaction"
-            ],
+            "signature": ["Transaction"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -110,9 +103,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -228,10 +219,7 @@
             "tags": [],
             "label": "getTransaction",
             "description": [],
-            "signature": [
-              "() => ",
-              "Transaction"
-            ],
+            "signature": ["() => ", "Transaction"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -317,9 +305,7 @@
                     "tags": [],
                     "label": "repeat",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -331,9 +317,7 @@
                     "tags": [],
                     "label": "timestamp",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -345,9 +329,7 @@
                     "tags": [],
                     "label": "latency",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -359,9 +341,7 @@
                     "tags": [],
                     "label": "duration",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -473,10 +453,7 @@
                     "tags": [],
                     "label": "method",
                     "description": [],
-                    "signature": [
-                      "HttpMethod",
-                      " | undefined"
-                    ],
+                    "signature": ["HttpMethod", " | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -488,9 +465,7 @@
                     "tags": [],
                     "label": "statusCode",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -513,9 +488,7 @@
                     "tags": [],
                     "label": "timestamp",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -579,9 +552,7 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": [
-                      "\"elasticsearch\" | \"sqlite\" | \"redis\""
-                    ],
+                    "signature": ["\"elasticsearch\" | \"sqlite\" | \"redis\""],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -593,9 +564,7 @@
                     "tags": [],
                     "label": "statement",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -607,9 +576,7 @@
                     "tags": [],
                     "label": "timestamp",
                     "description": [],
-                    "signature": [
-                      "number | undefined"
-                    ],
+                    "signature": ["number | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -710,11 +677,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "[string, string] | [string, string, string] | [",
-                  "SpanParams",
-                  "]"
-                ],
+                "signature": ["[string, string] | [string, string, string] | [", "SpanParams", "]"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -767,9 +730,7 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -823,9 +784,7 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -837,9 +796,7 @@
                     "tags": [],
                     "label": "culprit",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -856,9 +813,7 @@
             "tags": [],
             "label": "containerId",
             "description": [],
-            "signature": [
-              "(containerId: string) => this"
-            ],
+            "signature": ["(containerId: string) => this"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -870,9 +825,7 @@
                 "tags": [],
                 "label": "containerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -888,9 +841,7 @@
             "tags": [],
             "label": "hostName",
             "description": [],
-            "signature": [
-              "(hostName: string) => this"
-            ],
+            "signature": ["(hostName: string) => this"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -902,9 +853,7 @@
                 "tags": [],
                 "label": "hostName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -920,9 +869,7 @@
             "tags": [],
             "label": "podId",
             "description": [],
-            "signature": [
-              "(podId: string) => this"
-            ],
+            "signature": ["(podId: string) => this"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -934,9 +881,7 @@
                 "tags": [],
                 "label": "podId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1048,9 +993,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1182,9 +1125,7 @@
             "tags": [],
             "label": "startNewSession",
             "description": [],
-            "signature": [
-              "() => this"
-            ],
+            "signature": ["() => this"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1290,10 +1231,7 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": [
-              "() => ",
-              "Event"
-            ],
+            "signature": ["() => ", "Event"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1357,11 +1295,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "[string, string] | [string, string, string] | [",
-                  "SpanParams",
-                  "]"
-                ],
+                "signature": ["[string, string] | [string, string, string] | [", "SpanParams", "]"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1489,9 +1423,7 @@
                     "tags": [],
                     "label": "groupingName",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1534,9 +1466,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/serializable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1548,9 +1478,7 @@
                 "tags": [],
                 "label": "fields",
                 "description": [],
-                "signature": [
-                  "TFields"
-                ],
+                "signature": ["TFields"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/serializable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1566,9 +1494,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "signature": [
-              "(time: number) => this"
-            ],
+            "signature": ["(time: number) => this"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/serializable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1580,9 +1506,7 @@
                 "tags": [],
                 "label": "time",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/serializable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1598,9 +1522,7 @@
             "tags": [],
             "label": "serialize",
             "description": [],
-            "signature": [
-              "() => TFields[]"
-            ],
+            "signature": ["() => TFields[]"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/serializable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1628,9 +1550,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1642,9 +1562,7 @@
                 "tags": [],
                 "label": "from",
                 "description": [],
-                "signature": [
-                  "Date"
-                ],
+                "signature": ["Date"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1657,9 +1575,7 @@
                 "tags": [],
                 "label": "to",
                 "description": [],
-                "signature": [
-                  "Date"
-                ],
+                "signature": ["Date"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1691,9 +1607,7 @@
                 "tags": [],
                 "label": "interval",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1725,9 +1639,7 @@
                 "tags": [],
                 "label": "rate",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1748,9 +1660,7 @@
         "tags": [],
         "label": "appendHash",
         "description": [],
-        "signature": [
-          "(hash: string, value: string) => string"
-        ],
+        "signature": ["(hash: string, value: string) => string"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1762,9 +1672,7 @@
             "tags": [],
             "label": "hash",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/hash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1777,9 +1685,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/hash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1810,9 +1716,7 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": [
-              "Record<string, any>"
-            ],
+            "signature": ["Record<string, any>"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/dedot.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1825,9 +1729,7 @@
             "tags": [],
             "label": "target",
             "description": [],
-            "signature": [
-              "Record<string, any>"
-            ],
+            "signature": ["Record<string, any>"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/dedot.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1844,9 +1746,7 @@
         "tags": [],
         "label": "generateLongId",
         "description": [],
-        "signature": [
-          "(seed: string | undefined) => string"
-        ],
+        "signature": ["(seed: string | undefined) => string"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1858,9 +1758,7 @@
             "tags": [],
             "label": "seed",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1877,9 +1775,7 @@
         "tags": [],
         "label": "generateShortId",
         "description": [],
-        "signature": [
-          "(seed: string | undefined) => string"
-        ],
+        "signature": ["(seed: string | undefined) => string"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1891,9 +1787,7 @@
             "tags": [],
             "label": "seed",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1910,9 +1804,7 @@
         "tags": [],
         "label": "hashKeysOf",
         "description": [],
-        "signature": [
-          "(source: T, keys: (keyof T)[]) => string"
-        ],
+        "signature": ["(source: T, keys: (keyof T)[]) => string"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1924,9 +1816,7 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/hash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1939,9 +1829,7 @@
             "tags": [],
             "label": "keys",
             "description": [],
-            "signature": [
-              "(keyof T)[]"
-            ],
+            "signature": ["(keyof T)[]"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/hash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2008,10 +1896,7 @@
                 "tags": [],
                 "label": "method",
                 "description": [],
-                "signature": [
-                  "HttpMethod",
-                  " | undefined"
-                ],
+                "signature": ["HttpMethod", " | undefined"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/span.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2023,9 +1908,7 @@
                 "tags": [],
                 "label": "statusCode",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/span.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2043,10 +1926,7 @@
         "tags": [],
         "label": "observer",
         "description": [],
-        "signature": [
-          "() => ",
-          "Observer"
-        ],
+        "signature": ["() => ", "Observer"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/agent_config/observer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2075,9 +1955,7 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/interval.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2112,9 +1990,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "ServiceMapOpts"
-            ],
+            "signature": ["ServiceMapOpts"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/service_map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2152,9 +2028,7 @@
             "tags": [],
             "label": "from",
             "description": [],
-            "signature": [
-              "DateLike"
-            ],
+            "signature": ["DateLike"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2167,9 +2041,7 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": [
-              "DateLike"
-            ],
+            "signature": ["DateLike"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2221,9 +2093,7 @@
             "tags": [],
             "label": "modelName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2260,9 +2130,7 @@
             "tags": [],
             "label": "cityName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2274,9 +2142,7 @@
             "tags": [],
             "label": "continentName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2288,9 +2154,7 @@
             "tags": [],
             "label": "countryIsoCode",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2302,9 +2166,7 @@
             "tags": [],
             "label": "countryName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2316,9 +2178,7 @@
             "tags": [],
             "label": "regionName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2330,9 +2190,7 @@
             "tags": [],
             "label": "regionIsoCode",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2344,10 +2202,7 @@
             "tags": [],
             "label": "location",
             "description": [],
-            "signature": [
-              "GeoLocation",
-              " | undefined"
-            ],
+            "signature": ["GeoLocation", " | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2373,9 +2228,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"unknown\" | \"cell\" | \"unavailable\" | \"wifi\" | \"wired\""
-            ],
+            "signature": ["\"unknown\" | \"cell\" | \"unavailable\" | \"wifi\" | \"wired\""],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2387,9 +2240,7 @@
             "tags": [],
             "label": "subType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2401,9 +2252,7 @@
             "tags": [],
             "label": "carrierName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2415,9 +2264,7 @@
             "tags": [],
             "label": "carrierMCC",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2429,9 +2276,7 @@
             "tags": [],
             "label": "carrierMNC",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2443,9 +2288,7 @@
             "tags": [],
             "label": "carrierICC",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2471,9 +2314,7 @@
             "tags": [],
             "label": "osType",
             "description": [],
-            "signature": [
-              "\"ios\" | \"android\""
-            ],
+            "signature": ["\"ios\" | \"android\""],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2496,9 +2337,7 @@
             "tags": [],
             "label": "osFull",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2510,9 +2349,7 @@
             "tags": [],
             "label": "runtimeVersion",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2574,9 +2411,7 @@
         "tags": [],
         "label": "AssetDocument",
         "description": [],
-        "signature": [
-          "ServiceAssetDocument"
-        ],
+        "signature": ["ServiceAssetDocument"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/assets/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2663,11 +2498,7 @@
         "tags": [],
         "label": "MonitoringDocument",
         "description": [],
-        "signature": [
-          "ClusterStatsDocument",
-          " | ",
-          "KibanaStatsDocument"
-        ],
+        "signature": ["ClusterStatsDocument", " | ", "KibanaStatsDocument"],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/monitoring/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2865,9 +2696,7 @@
             "tags": [],
             "label": "host",
             "description": [],
-            "signature": [
-              "(name: string) => Host"
-            ],
+            "signature": ["(name: string) => Host"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2893,10 +2722,7 @@
             "tags": [],
             "label": "pod",
             "description": [],
-            "signature": [
-              "(uid: string, nodeName: string) => ",
-              "Pod"
-            ],
+            "signature": ["(uid: string, nodeName: string) => ", "Pod"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2933,10 +2759,7 @@
             "tags": [],
             "label": "dockerContainer",
             "description": [],
-            "signature": [
-              "(id: string) => ",
-              "DockerContainer"
-            ],
+            "signature": ["(id: string) => ", "DockerContainer"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2962,10 +2785,7 @@
             "tags": [],
             "label": "k8sContainer",
             "description": [],
-            "signature": [
-              "(id: string, uid: string, nodeName: string) => ",
-              "K8sContainer"
-            ],
+            "signature": ["(id: string, uid: string, nodeName: string) => ", "K8sContainer"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3027,9 +2847,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => Log"
-            ],
+            "signature": ["() => Log"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3057,9 +2875,7 @@
             "tags": [],
             "label": "cluster",
             "description": [],
-            "signature": [
-              "(name: string) => Cluster"
-            ],
+            "signature": ["(name: string) => Cluster"],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/monitoring/index.ts",
             "deprecated": false,
             "trackAdoption": false,

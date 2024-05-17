@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiFlexItem,
-  EuiTitle,
   EuiButton,
   EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiListGroup,
-  EuiFlexGroup,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import {
   getIndexManagementHref,
   getStorageExplorerFeedbackHref,

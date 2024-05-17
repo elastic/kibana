@@ -8,8 +8,8 @@
 import { z } from 'zod';
 
 import {
-  threatIntelSourceRequestOptionsSchema,
   eventEnrichmentRequestOptionsSchema,
+  threatIntelSourceRequestOptionsSchema,
 } from './cti/cti';
 
 import { firstLastSeenRequestOptionsSchema } from './first_seen_last_seen/first_seen_last_seen';

@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { ValidateEmailAddressesOptions, ValidatedEmail } from '@kbn/actions-plugin/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
+import { getBedrockConnectorType } from './bedrock';
 import { getCasesWebhookConnectorType } from './cases_webhook';
+import { getCrowdStrikeConnectorType } from './crowdstrike';
+import { getD3SecurityConnectorType } from './d3security';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
-import { getBedrockConnectorType } from './bedrock';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
+import { getSentinelOneConnectorType } from './sentinelone';
 import { getServerLogConnectorType } from './server_log';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
@@ -28,10 +32,6 @@ import { getTinesConnectorType } from './tines';
 import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
-import { getD3SecurityConnectorType } from './d3security';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
-import { getSentinelOneConnectorType } from './sentinelone';
-import { getCrowdStrikeConnectorType } from './crowdstrike';
 
 export interface RegistrationServices {
   validateEmailAddresses: (

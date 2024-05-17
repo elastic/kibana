@@ -14,7 +14,7 @@ import type { FrameworkRequest } from '../../../../framework';
 
 import { importTimelines } from '../../timelines/import_timelines';
 
-import { loadData, getReadables } from '../../../utils/common';
+import { getReadables, loadData } from '../../../utils/common';
 
 export const installPrepackagedTimelines = async (
   maxTimelineImportExportSize: number,

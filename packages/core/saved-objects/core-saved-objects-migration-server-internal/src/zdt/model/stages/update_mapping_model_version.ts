@@ -8,8 +8,8 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
-import type { ModelStage } from '../types';
 import { setMetaMappingMigrationComplete } from '../../utils';
+import type { ModelStage } from '../types';
 
 export const updateMappingModelVersion: ModelStage<
   'UPDATE_MAPPING_MODEL_VERSIONS',

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 import { useLoadIndexSettings } from '../../../../services';
 import { DetailsPageSettingsContent } from './details_page_settings_content';

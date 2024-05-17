@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import * as React from 'react';
 import { ConnectionDetailsOptsProvider } from '../context';
-import { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
+import { ConnectionDetailsOpts } from '../types';
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;

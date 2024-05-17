@@ -7,9 +7,9 @@
 
 import type { ChildProcess } from 'child_process';
 
-import * as Rx from 'rxjs';
-import { filter, take, map, tap } from 'rxjs';
 import execa from 'execa';
+import * as Rx from 'rxjs';
+import { filter, map, take, tap } from 'rxjs';
 
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEcsAllowedValue, getEcsAllowedValueDescription } from './event_utils';
+import { getEcsAllowedValueDescription, isEcsAllowedValue } from './event_utils';
 
 describe('test isEcsAllowedValue', () => {
   it('should return if the value is an allowed value given by field name', () => {

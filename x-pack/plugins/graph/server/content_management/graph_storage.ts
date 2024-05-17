@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { SOContentStorage } from '@kbn/content-management-utils';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
+import { Logger } from '@kbn/logging';
 import type { GraphCrudTypes } from '../../common/content_management';
+import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
 const SO_TYPE = 'graph-workspace';
 

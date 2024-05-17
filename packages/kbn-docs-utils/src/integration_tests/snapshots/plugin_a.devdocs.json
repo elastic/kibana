@@ -77,9 +77,7 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": [
-              "React.ComponentType<{}> | undefined"
-            ],
+            "signature": ["React.ComponentType<{}> | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -91,9 +89,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,9 +101,7 @@
                 "tags": [],
                 "label": "t",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -122,9 +116,7 @@
             "type": "Function",
             "tags": [],
             "label": "arrowFn",
-            "description": [
-              "\nan arrow fn on a class."
-            ],
+            "description": ["\nan arrow fn on a class."],
             "signature": [
               "(a: ",
               {
@@ -153,9 +145,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "a",
-                "description": [
-                  "im a string"
-                ],
+                "description": ["im a string"],
                 "signature": [
                   {
                     "pluginId": "pluginA",
@@ -179,9 +169,7 @@
             "type": "Function",
             "tags": [],
             "label": "getVar",
-            "description": [
-              "\nA function on a class."
-            ],
+            "description": ["\nA function on a class."],
             "signature": [
               "(a: ",
               {
@@ -203,9 +191,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "a",
-                "description": [
-                  "a param"
-                ],
+                "description": ["a param"],
                 "signature": [
                   {
                     "pluginId": "pluginA",
@@ -234,9 +220,7 @@
         "type": "Function",
         "tags": [],
         "label": "arrowFn",
-        "description": [
-          "\nThis is an arrow function.\n"
-        ],
+        "description": ["\nThis is an arrow function.\n"],
         "signature": [
           "(a: string, b: number | undefined, c: ",
           {
@@ -274,12 +258,8 @@
             "type": "string",
             "tags": [],
             "label": "a",
-            "description": [
-              "The letter A"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The letter A"],
+            "signature": ["string"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -291,12 +271,8 @@
             "type": "number",
             "tags": [],
             "label": "b",
-            "description": [
-              "Feed me to the function"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["Feed me to the function"],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -308,9 +284,7 @@
             "type": "Array",
             "tags": [],
             "label": "c",
-            "description": [
-              "So many params"
-            ],
+            "description": ["So many params"],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -332,9 +306,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "d",
-            "description": [
-              "a great param"
-            ],
+            "description": ["a great param"],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -355,21 +327,15 @@
             "type": "string",
             "tags": [],
             "label": "e",
-            "description": [
-              "Another comment"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Another comment"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "something!"
-        ],
+        "returnComment": ["something!"],
         "initialIsOpen": false
       },
       {
@@ -430,9 +396,7 @@
                 "tags": [],
                 "label": "fn1",
                 "description": [],
-                "signature": [
-                  "(foo: { param: string; }) => number"
-                ],
+                "signature": ["(foo: { param: string; }) => number"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -471,9 +435,7 @@
                 "tags": [],
                 "label": "fn2",
                 "description": [],
-                "signature": [
-                  "() => void"
-                ],
+                "signature": ["() => void"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -507,9 +469,7 @@
             ]
           }
         ],
-        "returnComment": [
-          "I have no idea."
-        ],
+        "returnComment": ["I have no idea."],
         "initialIsOpen": false
       },
       {
@@ -519,12 +479,7 @@
         "tags": [],
         "label": "fnWithNonExportedRef",
         "description": [],
-        "signature": [
-          "(a: ",
-          "ImNotExportedFromIndex",
-          ") => ",
-          "ImNotExportedFromIndex"
-        ],
+        "signature": ["(a: ", "ImNotExportedFromIndex", ") => ", "ImNotExportedFromIndex"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -536,9 +491,7 @@
             "tags": [],
             "label": "a",
             "description": [],
-            "signature": [
-              "ImNotExportedFromIndex"
-            ],
+            "signature": ["ImNotExportedFromIndex"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -554,9 +507,7 @@
         "type": "Function",
         "tags": [],
         "label": "notAnArrowFn",
-        "description": [
-          "\nThis is a non arrow function.\n"
-        ],
+        "description": ["\nThis is a non arrow function.\n"],
         "signature": [
           "(a: string, b: number | undefined, c: ",
           {
@@ -594,12 +545,8 @@
             "type": "string",
             "tags": [],
             "label": "a",
-            "description": [
-              "The letter A"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The letter A"],
+            "signature": ["string"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -611,12 +558,8 @@
             "type": "number",
             "tags": [],
             "label": "b",
-            "description": [
-              "Feed me to the function"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["Feed me to the function"],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -628,9 +571,7 @@
             "type": "Array",
             "tags": [],
             "label": "c",
-            "description": [
-              "So many params"
-            ],
+            "description": ["So many params"],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -652,9 +593,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "d",
-            "description": [
-              "a great param"
-            ],
+            "description": ["a great param"],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -675,21 +614,15 @@
             "type": "string",
             "tags": [],
             "label": "e",
-            "description": [
-              "Another comment"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Another comment"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "something!"
-        ],
+        "returnComment": ["something!"],
         "initialIsOpen": false
       }
     ],
@@ -698,13 +631,9 @@
         "parentPluginId": "pluginA",
         "id": "def-public.AnotherInterface",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "AnotherInterface",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           {
             "pluginId": "pluginA",
@@ -737,9 +666,7 @@
             "tags": [],
             "label": "t",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -776,9 +703,7 @@
             "tags": [],
             "label": "new",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -850,12 +775,8 @@
             "type": "Function",
             "tags": [],
             "label": "getAPromiseThatResolvesToString",
-            "description": [
-              "\nThis gets a promise that resolves to a string."
-            ],
-            "signature": [
-              "() => Promise<string>"
-            ],
+            "description": ["\nThis gets a promise that resolves to a string."],
+            "signature": ["() => Promise<string>"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -871,9 +792,7 @@
             "description": [
               "\nThis function takes a generic. It was sometimes being tripped on\nand returned as an unknown type with no signature."
             ],
-            "signature": [
-              "<T>(t: T) => void"
-            ],
+            "signature": ["<T>(t: T) => void"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -884,21 +803,15 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "t",
-                "description": [
-                  "This a parameter."
-                ],
-                "signature": [
-                  "T"
-                ],
+                "description": ["This a parameter."],
+                "signature": ["T"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "nothing!"
-            ]
+            "returnComment": ["nothing!"]
           },
           {
             "parentPluginId": "pluginA",
@@ -909,9 +822,7 @@
             "description": [
               "\nAdd coverage for this bug report: https://github.com/elastic/kibana/issues/107145"
             ],
-            "signature": [
-              "((foo: string) => string) | undefined"
-            ],
+            "signature": ["((foo: string) => string) | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -923,9 +834,7 @@
                 "tags": [],
                 "label": "foo",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -940,12 +849,8 @@
             "type": "Function",
             "tags": [],
             "label": "aFn",
-            "description": [
-              "\nThese are not coming back properly."
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nThese are not coming back properly."],
+            "signature": ["() => void"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -992,9 +897,7 @@
                 "tags": [],
                 "label": "t",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1027,9 +930,7 @@
             "type": "Function",
             "tags": [],
             "label": "fnTypeWithGenericThatIsOptional",
-            "description": [
-              "\nOptional code path is different than others."
-            ],
+            "description": ["\nOptional code path is different than others."],
             "signature": [
               {
                 "pluginId": "pluginA",
@@ -1088,9 +989,7 @@
                 "tags": [],
                 "label": "t",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1118,9 +1017,7 @@
             "tags": [],
             "label": "[key: string]: { foo: string; }",
             "description": [],
-            "signature": [
-              "[key: string]:  { foo: string; }"
-            ],
+            "signature": ["[key: string]:  { foo: string; }"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1134,9 +1031,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IReturnAReactComponent",
-        "description": [
-          "\nAn interface that has a react component."
-        ],
+        "description": ["\nAn interface that has a react component."],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1148,9 +1043,7 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
-            ],
+            "signature": ["React.ComponentClass<{}, any> | React.FunctionComponent<{}>"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1210,9 +1103,7 @@
                 "tags": [],
                 "label": "t",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1241,9 +1132,7 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [
-              "\nStores the username. Duh,"
-            ],
+            "description": ["\nStores the username. Duh,"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1254,9 +1143,7 @@
             "type": "string",
             "tags": [],
             "label": "password",
-            "description": [
-              "\nStores the password. I hope it's encrypted!"
-            ],
+            "description": ["\nStores the password. I hope it's encrypted!"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1270,9 +1157,7 @@
         "type": "Interface",
         "tags": [],
         "label": "WithGen",
-        "description": [
-          "\nAn interface with a generic."
-        ],
+        "description": ["\nAn interface with a generic."],
         "signature": [
           {
             "pluginId": "pluginA",
@@ -1294,9 +1179,7 @@
             "tags": [],
             "label": "t",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1312,9 +1195,7 @@
         "type": "Enum",
         "tags": [],
         "label": "DayOfWeek",
-        "description": [
-          "\nComments on enums."
-        ],
+        "description": ["\nComments on enums."],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1328,12 +1209,8 @@
         "type": "number",
         "tags": [],
         "label": "aNum",
-        "description": [
-          "\nIt's a number. A special number."
-        ],
-        "signature": [
-          "10"
-        ],
+        "description": ["\nIt's a number. A special number."],
+        "signature": ["10"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1345,12 +1222,8 @@
         "type": "Array",
         "tags": [],
         "label": "aNumArray",
-        "description": [
-          "\nThis is an array of numbers. The type is implied."
-        ],
-        "signature": [
-          "number[]"
-        ],
+        "description": ["\nThis is an array of numbers. The type is implied."],
+        "signature": ["number[]"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1387,9 +1260,7 @@
         "type": "string",
         "tags": [],
         "label": "aStr",
-        "description": [
-          "\nA string that says hi to you!"
-        ],
+        "description": ["\nA string that says hi to you!"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1401,12 +1272,8 @@
         "type": "Array",
         "tags": [],
         "label": "aStrArray",
-        "description": [
-          "\nThis is an array of strings. The type is explicit."
-        ],
-        "signature": [
-          "string[]"
-        ],
+        "description": ["\nThis is an array of strings. The type is explicit."],
+        "signature": ["string[]"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1418,9 +1285,7 @@
         "type": "CompoundType",
         "tags": [],
         "label": "aUnionProperty",
-        "description": [
-          "\nThis is a complicated union type"
-        ],
+        "description": ["\nThis is a complicated union type"],
         "signature": [
           "string | number | (() => string) | ",
           {
@@ -1441,9 +1306,7 @@
         "parentPluginId": "pluginA",
         "id": "def-public.FnTypeWithGeneric",
         "type": "Type",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "FnTypeWithGeneric",
         "description": [
           "\nEver so slightly different than above. Users of this type must specify the generic.\n"
@@ -1470,9 +1333,7 @@
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [
-          "something!"
-        ],
+        "returnComment": ["something!"],
         "children": [
           {
             "parentPluginId": "pluginA",
@@ -1480,12 +1341,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "t",
-            "description": [
-              "something!"
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["something!"],
+            "signature": ["T"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1519,9 +1376,7 @@
         "type": "Type",
         "tags": [],
         "label": "FnWithGeneric",
-        "description": [
-          "\nThis is a type that defines a function.\n"
-        ],
+        "description": ["\nThis is a type that defines a function.\n"],
         "signature": [
           "<T>(t: T) => ",
           {
@@ -1544,12 +1399,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "t",
-            "description": [
-              "This is a generic T type. It can be anything."
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["This is a generic T type. It can be anything."],
+            "signature": ["T"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1564,9 +1415,7 @@
         "tags": [],
         "label": "imAnAny",
         "description": [],
-        "signature": [
-          "any"
-        ],
+        "signature": ["any"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1579,9 +1428,7 @@
         "tags": [],
         "label": "imAnUnknown",
         "description": [],
-        "signature": [
-          "unknown"
-        ],
+        "signature": ["unknown"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1632,10 +1479,7 @@
         "tags": [],
         "label": "IRefANotExportedType",
         "description": [],
-        "signature": [
-          "ImNotExportedFromIndex",
-          " | { zed: \"hi\"; }"
-        ],
+        "signature": ["ImNotExportedFromIndex", " | { zed: \"hi\"; }"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1647,12 +1491,8 @@
         "type": "string",
         "tags": [],
         "label": "literalString",
-        "description": [
-          "\nI'm a type of string, but more specifically, a literal string type."
-        ],
-        "signature": [
-          "\"HI\""
-        ],
+        "description": ["\nI'm a type of string, but more specifically, a literal string type."],
+        "signature": ["\"HI\""],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1740,9 +1580,7 @@
             "tags": [],
             "label": "b",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1754,9 +1592,7 @@
             "tags": [],
             "label": "c",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1805,9 +1641,7 @@
             "tags": [],
             "label": "e",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1821,12 +1655,8 @@
         "type": "Type",
         "tags": [],
         "label": "StringOrUndefinedType",
-        "description": [
-          "\nHow should a potentially undefined type show up."
-        ],
-        "signature": [
-          "string | undefined"
-        ],
+        "description": ["\nHow should a potentially undefined type show up."],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1839,9 +1669,7 @@
         "tags": [],
         "label": "TypeWithGeneric",
         "description": [],
-        "signature": [
-          "T[]"
-        ],
+        "signature": ["T[]"],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1868,9 +1696,7 @@
             "type": "Function",
             "tags": [],
             "label": "notAnArrowFn",
-            "description": [
-              "/**\n   * The docs should show this inline comment.\n   */"
-            ],
+            "description": ["/**\n   * The docs should show this inline comment.\n   */"],
             "signature": [
               "(a: string, b: number | undefined, c: ",
               {
@@ -1921,9 +1747,7 @@
                 "tags": [],
                 "label": "b",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1935,9 +1759,7 @@
                 "tags": [],
                 "label": "c",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1986,9 +1808,7 @@
                 "tags": [],
                 "label": "e",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2001,9 +1821,7 @@
             "type": "Function",
             "tags": [],
             "label": "aPropertyMisdirection",
-            "description": [
-              "/**\n   * Should this comment show up?\n   */"
-            ],
+            "description": ["/**\n   * Should this comment show up?\n   */"],
             "signature": [
               "(a: string, b: number | undefined, c: ",
               {
@@ -2054,9 +1872,7 @@
                 "tags": [],
                 "label": "b",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2068,9 +1884,7 @@
                 "tags": [],
                 "label": "c",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2119,9 +1933,7 @@
                 "tags": [],
                 "label": "e",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2134,9 +1946,7 @@
             "type": "Function",
             "tags": [],
             "label": "aPropertyInlineFn",
-            "description": [
-              "/**\n   * I'm a property inline fun.\n   */"
-            ],
+            "description": ["/**\n   * I'm a property inline fun.\n   */"],
             "signature": [
               "(a: ",
               {
@@ -2243,9 +2053,7 @@
           "parentPluginId": "pluginA",
           "id": "def-public.Setup.getSearchService",
           "type": "Function",
-          "tags": [
-            "beta"
-          ],
+          "tags": ["beta"],
           "label": "getSearchService",
           "description": [
             "\nA factory function that returns a new instance of Foo based\non the spec. We aren't sure if this is a good function so it's marked\nbeta. That should be clear in the docs because of the js doc tag.\n"
@@ -2271,9 +2079,7 @@
               "type": "Object",
               "tags": [],
               "label": "searchSpec",
-              "description": [
-                "Provide the settings neccessary to create a new Search Service"
-              ],
+              "description": ["Provide the settings neccessary to create a new Search Service"],
               "signature": [
                 {
                   "pluginId": "pluginA",
@@ -2289,9 +2095,7 @@
               "isRequired": true
             }
           ],
-          "returnComment": [
-            "the id of the search service."
-          ]
+          "returnComment": ["the id of the search service."]
         },
         {
           "parentPluginId": "pluginA",
@@ -2302,9 +2106,7 @@
           "description": [
             "\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way {@link getSearchService} is typed.\n"
           ],
-          "signature": [
-            "(searchSpec: { username: string; password: string; }) => string"
-          ],
+          "signature": ["(searchSpec: { username: string; password: string; }) => string"],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -2351,9 +2153,7 @@
           "parentPluginId": "pluginA",
           "id": "def-public.Setup.doTheThing",
           "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": ["deprecated"],
           "label": "doTheThing",
           "description": [
             "\nThis function does the thing and it's so good at it!  But we decided to deprecate it\nanyway. I hope that's clear to developers in the docs!\n"
@@ -2372,12 +2172,8 @@
               "type": "number",
               "tags": [],
               "label": "thingOne",
-              "description": [
-                "Thing one comment"
-              ],
-              "signature": [
-                "number"
-              ],
+              "description": ["Thing one comment"],
+              "signature": ["number"],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -2389,12 +2185,8 @@
               "type": "string",
               "tags": [],
               "label": "thingTwo",
-              "description": [
-                "ThingTwo comment"
-              ],
-              "signature": [
-                "string"
-              ],
+              "description": ["ThingTwo comment"],
+              "signature": ["string"],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -2461,9 +2253,7 @@
                   "tags": [],
                   "label": "fn",
                   "description": [],
-                  "signature": [
-                    "(foo: { param: string; }) => number"
-                  ],
+                  "signature": ["(foo: { param: string; }) => number"],
                   "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
                   "deprecated": false,
                   "trackAdoption": false,
@@ -2508,9 +2298,7 @@
           "type": "string",
           "tags": [],
           "label": "id",
-          "description": [
-            "\nHi, I'm a comment for an id string!"
-          ],
+          "description": ["\nHi, I'm a comment for an id string!"],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -2539,17 +2327,12 @@
           "tags": [],
           "label": "getSearchLanguage",
           "description": [],
-          "signature": [
-            "() => ",
-            "SearchLanguage"
-          ],
+          "signature": ["() => ", "SearchLanguage"],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
-          "returnComment": [
-            "The currently selected {@link SearchLanguage }"
-          ]
+          "returnComment": ["The currently selected {@link SearchLanguage }"]
         }
       ],
       "lifecycle": "start",

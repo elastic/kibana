@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
-import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
 import { Conversation } from '../../../..';
-import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
-import { Prompt } from '../../types';
+import { useAssistantContext } from '../../../assistant_context';
+import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
-import { useAssistantContext } from '../../../assistant_context';
+import { Prompt } from '../../types';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
+import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,

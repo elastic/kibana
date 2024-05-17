@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiTextColor,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { EuiOverlayMaskProps } from '@elastic/eui/src/components/overlay_mask';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { useWithArtifactSubmitData } from '../../../../components/artifact_list_page/hooks/use_with_artifact_submit_data';
 import type {
+  ArtifactConfirmModalLabelProps,
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
-  ArtifactConfirmModalLabelProps,
 } from '../../../../components/artifact_list_page/types';
-import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { EventFiltersForm } from './form';
 
-import { getInitialExceptionFromEvent } from '../utils';
 import { useHttp, useKibana, useToasts } from '../../../../../common/lib/kibana';
-import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../../common/translations';
+import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
+import { getInitialExceptionFromEvent } from '../utils';
 
 import { EventFiltersApiClient } from '../../service/api_client';
-import { getCreationSuccessMessage, getCreationErrorMessage } from '../translations';
+import { getCreationErrorMessage, getCreationSuccessMessage } from '../translations';
 export interface EventFiltersFlyoutProps {
   data?: Ecs;
   onCancel(): void;

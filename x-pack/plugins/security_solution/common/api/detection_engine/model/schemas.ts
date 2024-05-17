@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import * as t from 'io-ts';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const file_name = t.string;
 export type FileName = t.TypeOf<typeof file_name>;

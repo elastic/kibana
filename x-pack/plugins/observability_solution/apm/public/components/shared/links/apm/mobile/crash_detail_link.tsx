@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import { EuiLink } from '@elastic/eui';
-import { mobileServiceDetailRoute } from '../../../../routing/mobile_service_detail';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import React from 'react';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { mobileServiceDetailRoute } from '../../../../routing/mobile_service_detail';
 
 interface Props {
   children: React.ReactNode;

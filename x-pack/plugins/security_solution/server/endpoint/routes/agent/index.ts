@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { registerAgentStatusRoute } from './agent_status_handler';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { EndpointAppContext } from '../../types';
+import { registerAgentStatusRoute } from './agent_status_handler';
 
 export const registerAgentRoutes = (
   router: SecuritySolutionPluginRouter,

@@ -1,3 +1,4 @@
+import { Duplex, Readable, Transform } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +8,6 @@
  */
 import { eachSeries } from 'async';
 import MultiStream from 'multistream';
-import { Duplex, Readable, Transform } from 'stream';
 
 export function sequential(...streams: Readable[]) {
   return new MultiStream(streams, { objectMode: true });

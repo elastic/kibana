@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
-import {
-  SyntheticsCommonState,
-  SyntheticsMonitorStatusAlertState,
-} from '../../../common/runtime_types/alert_rules/common';
-import { OverviewStatus } from '../../../common/runtime_types';
-import { StatusRuleExecutor } from './status_rule_executor';
-import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
+import { IRuleDataClient, createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { isEmpty } from 'lodash';
 import {
   MONITOR_STATUS,
   SYNTHETICS_ALERT_RULE_TYPES,
 } from '../../../common/constants/synthetics_alerts';
+import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
+import { OverviewStatus } from '../../../common/runtime_types';
 import {
+  SyntheticsCommonState,
+  SyntheticsMonitorStatusAlertState,
+} from '../../../common/runtime_types/alert_rules/common';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
+import { ALERT_DETAILS_URL, VIEW_IN_APP_URL, getActionVariables } from '../action_variables';
+import {
+  UptimeRuleTypeAlertDefinition,
+  getAlertDetailsUrl,
+  getFullViewInAppMessage,
+  getRelativeViewInAppUrl,
+  getViewInAppUrl,
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
-  getViewInAppUrl,
-  getRelativeViewInAppUrl,
-  getFullViewInAppMessage,
-  UptimeRuleTypeAlertDefinition,
 } from '../common';
-import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
+import { StatusRuleExecutor } from './status_rule_executor';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 

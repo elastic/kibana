@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
-import PropTypes from 'prop-types';
 import {
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
+  DragDropContextProps,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
-  DragDropContextProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { Fragment, Component } from 'react';
 
-import { ConfirmModal } from '../confirm_modal';
-import { RoutingLink } from '../routing';
 import { WorkpadRoutingContext } from '../../routes/workpad';
+import { ConfirmModal } from '../confirm_modal';
 import { PagePreview } from '../page_preview';
+import { RoutingLink } from '../routing';
 
 import { CanvasPage } from '../../../types';
 

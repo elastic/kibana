@@ -136,9 +136,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,10 +171,7 @@
             "tags": [],
             "label": "controls",
             "description": [],
-            "signature": [
-              "ControlOptions",
-              " | undefined"
-            ],
+            "signature": ["ControlOptions", " | undefined"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -261,9 +256,7 @@
             "tags": [],
             "label": "actions",
             "description": [],
-            "signature": [
-              "{}"
-            ],
+            "signature": ["{}"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -295,9 +288,7 @@
             "tags": [],
             "label": "datasetsClient",
             "description": [],
-            "signature": [
-              "IDatasetsClient"
-            ],
+            "signature": ["IDatasetsClient"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -333,12 +324,7 @@
             "tags": [],
             "label": "event$",
             "description": [],
-            "signature": [
-              "Observable",
-              "<",
-              "LogsExplorerPublicEvent",
-              ">"
-            ],
+            "signature": ["Observable", "<", "LogsExplorerPublicEvent", ">"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -633,10 +619,7 @@
             "tags": [],
             "label": "onUknownDataViewSelection",
             "description": [],
-            "signature": [
-              "OnUknownDataViewSelectionHandler",
-              " | undefined"
-            ],
+            "signature": ["OnUknownDataViewSelectionHandler", " | undefined"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -961,9 +944,7 @@
           "tags": [],
           "label": "locators",
           "description": [],
-          "signature": [
-            "LogsExplorerLocators"
-          ],
+          "signature": ["LogsExplorerLocators"],
           "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -1116,9 +1097,7 @@
             "tags": [],
             "label": "selectionType",
             "description": [],
-            "signature": [
-              "\"all\""
-            ],
+            "signature": ["\"all\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1130,11 +1109,7 @@
             "tags": [],
             "label": "selection",
             "description": [],
-            "signature": [
-              "{ dataset: ",
-              "Dataset",
-              "; }"
-            ],
+            "signature": ["{ dataset: ", "Dataset", "; }"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1146,10 +1121,7 @@
             "tags": [],
             "label": "toDataviewSpec",
             "description": [],
-            "signature": [
-              "() => ",
-              "DataViewSpecWithId"
-            ],
+            "signature": ["() => ", "DataViewSpecWithId"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1163,9 +1135,7 @@
             "tags": [],
             "label": "toPlainSelection",
             "description": [],
-            "signature": [
-              "() => { selectionType: \"all\"; }"
-            ],
+            "signature": ["() => { selectionType: \"all\"; }"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1227,9 +1197,7 @@
             "tags": [],
             "label": "selectionType",
             "description": [],
-            "signature": [
-              "\"dataView\""
-            ],
+            "signature": ["\"dataView\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1241,11 +1209,7 @@
             "tags": [],
             "label": "selection",
             "description": [],
-            "signature": [
-              "{ dataView: ",
-              "DataViewDescriptor",
-              "; }"
-            ],
+            "signature": ["{ dataView: ", "DataViewDescriptor", "; }"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1257,10 +1221,7 @@
             "tags": [],
             "label": "toDataviewSpec",
             "description": [],
-            "signature": [
-              "() => ",
-              "DataViewSpecWithId"
-            ],
+            "signature": ["() => ", "DataViewSpecWithId"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1352,9 +1313,7 @@
                 "tags": [],
                 "label": "dataViewDescriptor",
                 "description": [],
-                "signature": [
-                  "DataViewDescriptor"
-                ],
+                "signature": ["DataViewDescriptor"],
                 "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1395,9 +1354,7 @@
             "tags": [],
             "label": "selectionType",
             "description": [],
-            "signature": [
-              "\"unresolved\""
-            ],
+            "signature": ["\"unresolved\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1409,11 +1366,7 @@
             "tags": [],
             "label": "selection",
             "description": [],
-            "signature": [
-              "{ name?: string | undefined; dataset: ",
-              "Dataset",
-              "; }"
-            ],
+            "signature": ["{ name?: string | undefined; dataset: ", "Dataset", "; }"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1425,10 +1378,7 @@
             "tags": [],
             "label": "toDataviewSpec",
             "description": [],
-            "signature": [
-              "() => ",
-              "DataViewSpecWithId"
-            ],
+            "signature": ["() => ", "DataViewSpecWithId"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1532,9 +1482,7 @@
                 "tags": [],
                 "label": "dataset",
                 "description": [],
-                "signature": [
-                  "Dataset"
-                ],
+                "signature": ["Dataset"],
                 "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1629,10 +1577,7 @@
         "tags": [],
         "label": "isDatasetSelection",
         "description": [],
-        "signature": [
-          "(input: any) => input is ",
-          "DatasetSelection"
-        ],
+        "signature": ["(input: any) => input is ", "DatasetSelection"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1644,9 +1589,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1663,10 +1606,7 @@
         "tags": [],
         "label": "isDataSourceSelection",
         "description": [],
-        "signature": [
-          "(input: any) => input is ",
-          "DataSourceSelection"
-        ],
+        "signature": ["(input: any) => input is ", "DataSourceSelection"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1678,9 +1618,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1718,9 +1656,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1758,9 +1694,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1790,9 +1724,7 @@
             "tags": [],
             "label": "breakdownField",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2021,9 +1953,7 @@
         "tags": [],
         "label": "availableControlPanelFields",
         "description": [],
-        "signature": [
-          "\"data_stream.namespace\"[]"
-        ],
+        "signature": ["\"data_stream.namespace\"[]"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2036,9 +1966,7 @@
         "tags": [],
         "label": "AvailableControlPanels",
         "description": [],
-        "signature": [
-          "{ readonly NAMESPACE: \"data_stream.namespace\"; }"
-        ],
+        "signature": ["{ readonly NAMESPACE: \"data_stream.namespace\"; }"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2051,9 +1979,7 @@
         "tags": [],
         "label": "CONTENT_FIELD",
         "description": [],
-        "signature": [
-          "\"content\""
-        ],
+        "signature": ["\"content\""],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2104,11 +2030,7 @@
         "tags": [],
         "label": "GridColumnDisplayOptions",
         "description": [],
-        "signature": [
-          "DocumentFieldGridColumnOptions",
-          " | ",
-          "SmartFieldGridColumnOptions"
-        ],
+        "signature": ["DocumentFieldGridColumnOptions", " | ", "SmartFieldGridColumnOptions"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2121,9 +2043,7 @@
         "tags": [],
         "label": "PartialChartDisplayOptions",
         "description": [],
-        "signature": [
-          "{ breakdownField?: string | null | undefined; }"
-        ],
+        "signature": ["{ breakdownField?: string | null | undefined; }"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2167,9 +2087,7 @@
         "tags": [],
         "label": "PartialGridRowsDisplayOptions",
         "description": [],
-        "signature": [
-          "{ rowHeight?: number | undefined; rowsPerPage?: number | undefined; }"
-        ],
+        "signature": ["{ rowHeight?: number | undefined; rowsPerPage?: number | undefined; }"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2184,9 +2102,7 @@
         "tags": [],
         "label": "availableControlsPanels",
         "description": [],
-        "signature": [
-          "{ readonly NAMESPACE: \"data_stream.namespace\"; }"
-        ],
+        "signature": ["{ readonly NAMESPACE: \"data_stream.namespace\"; }"],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2210,9 +2126,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"smart-field\""
-            ],
+            "signature": ["\"smart-field\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2224,9 +2138,7 @@
             "tags": [],
             "label": "smartField",
             "description": [],
-            "signature": [
-              "\"content\""
-            ],
+            "signature": ["\"content\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2238,9 +2150,7 @@
             "tags": [],
             "label": "fallbackFields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2288,9 +2198,7 @@
                 "tags": [],
                 "label": "width",
                 "description": [],
-                "signature": [
-                  "\"medium\""
-                ],
+                "signature": ["\"medium\""],
                 "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2302,9 +2210,7 @@
                 "tags": [],
                 "label": "grow",
                 "description": [],
-                "signature": [
-                  "false"
-                ],
+                "signature": ["false"],
                 "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2338,9 +2244,7 @@
                     "tags": [],
                     "label": "id",
                     "description": [],
-                    "signature": [
-                      "\"data_stream.namespace\""
-                    ],
+                    "signature": ["\"data_stream.namespace\""],
                     "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2352,9 +2256,7 @@
                     "tags": [],
                     "label": "fieldName",
                     "description": [],
-                    "signature": [
-                      "\"data_stream.namespace\""
-                    ],
+                    "signature": ["\"data_stream.namespace\""],
                     "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2567,9 +2469,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"smart-field\""
-            ],
+            "signature": ["\"smart-field\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2581,9 +2481,7 @@
             "tags": [],
             "label": "smartField",
             "description": [],
-            "signature": [
-              "\"resource\""
-            ],
+            "signature": ["\"resource\""],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2595,9 +2493,7 @@
             "tags": [],
             "label": "fallbackFields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2684,9 +2580,7 @@
             "tags": [],
             "label": "[CONTENT_FIELD]",
             "description": [],
-            "signature": [
-              "SmartFieldGridColumnOptions"
-            ],
+            "signature": ["SmartFieldGridColumnOptions"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2698,9 +2592,7 @@
             "tags": [],
             "label": "[RESOURCE_FIELD]",
             "description": [],
-            "signature": [
-              "SmartFieldGridColumnOptions"
-            ],
+            "signature": ["SmartFieldGridColumnOptions"],
             "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false

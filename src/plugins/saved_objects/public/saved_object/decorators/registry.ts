@@ -7,8 +7,8 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { SavedObjectDecoratorFactory } from './types';
-import { SavedObjectKibanaServices, SavedObject } from '../../types';
 
 export interface SavedObjectDecoratorConfig<T extends SavedObject = SavedObject> {
   /**

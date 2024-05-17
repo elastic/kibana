@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Story } from '@storybook/react';
+import React from 'react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 

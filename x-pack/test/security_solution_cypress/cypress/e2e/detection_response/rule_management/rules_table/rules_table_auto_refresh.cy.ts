@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
-  RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULES_MANAGEMENT_TABLE,
+  RULES_TABLE_AUTOREFRESH_INDICATOR,
 } from '../../../../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../../../../screens/common/controls';
 import {
-  selectAllRules,
   clearAllRuleSelection,
-  mockGlobalClock,
   disableAutoRefresh,
+  expectAutoRefreshIsDeactivated,
   expectAutoRefreshIsDisabled,
   expectAutoRefreshIsEnabled,
-  expectAutoRefreshIsDeactivated,
   expectNumberOfRules,
-  selectRulesByName,
   getRuleRow,
+  mockGlobalClock,
+  selectAllRules,
+  selectRulesByName,
   setRulesTableAutoRefreshIntervalSetting,
 } from '../../../../tasks/alerts_detection_rules';
 import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
-import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
 
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 

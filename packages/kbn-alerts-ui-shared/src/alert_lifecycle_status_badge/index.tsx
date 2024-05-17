@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
-import { AlertStatus, ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
+import { ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED, AlertStatus } from '@kbn/rule-data-utils';
+import React, { memo } from 'react';
 
 export interface AlertLifecycleStatusBadgeProps {
   alertStatus: AlertStatus;

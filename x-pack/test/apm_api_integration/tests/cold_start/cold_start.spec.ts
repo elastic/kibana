@@ -1,3 +1,9 @@
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,14 +13,8 @@
 import expect from '@kbn/expect';
 import { first, last, uniq } from 'lodash';
 import moment from 'moment';
-import {
-  APIReturnType,
-  APIClientRequestParamsOf,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { dataConfig, generateData } from './generate_data';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { dataConfig, generateData } from './generate_data';
 
 type ColdStartRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate'>;

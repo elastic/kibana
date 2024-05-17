@@ -9,22 +9,22 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiIconTip,
-  euiPaletteForStatus,
   EuiSpacer,
   EuiStat,
+  euiPaletteForStatus,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteLegends } from './palette_legends';
+import React, { useState } from 'react';
 import { ColorPaletteFlexItem } from './color_palette_flex_item';
+import { PaletteLegends } from './palette_legends';
 import {
   CV_AVERAGE_LABEL,
   CV_GOOD_LABEL,
+  CV_POOR_LABEL,
+  IS_LABEL,
   LESS_LABEL,
   MORE_LABEL,
   NO_DATA,
-  CV_POOR_LABEL,
-  IS_LABEL,
   TAKES_LABEL,
 } from './translations';
 

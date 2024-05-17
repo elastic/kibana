@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
 } from '../expression_functions/types';
 import {
-  buildExpression,
   ExpressionAstExpressionBuilder,
-  isExpressionAstBuilder,
+  buildExpression,
   isExpressionAst,
+  isExpressionAstBuilder,
 } from './build_expression';
 import { format } from './format';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 
 // Infers the types from an ExpressionFunctionDefinition.
 // @internal
@@ -53,7 +53,7 @@ interface FunctionBuilderArguments<FnDef extends AnyExpressionFunctionDefinition
 }
 
 export interface ExpressionAstFunctionBuilder<
-  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition,
 > {
   /**
    * Used to identify expression function builder objects.
@@ -148,7 +148,7 @@ export interface ExpressionAstFunctionBuilder<
  * @return `this`
  */
 export function buildExpressionFunction<
-  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition,
 >(
   fnName: InferFunctionDefinition<FnDef>['name'],
   /**

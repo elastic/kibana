@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { URL, format as formatUrl } from 'url';
 import type { Request } from '@hapi/hapi';
-import { format as formatUrl, URL } from 'url';
-import { merge } from 'lodash';
 import type { DeepPartial } from '@kbn/utility-types';
+import { merge } from 'lodash';
 
 export const createRequestMock = (customization: DeepPartial<Request> = {}): Request => {
   const pathname = customization.url?.pathname || '/';

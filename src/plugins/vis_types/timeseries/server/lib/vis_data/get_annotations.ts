@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { handleAnnotationResponse } from './response_processors/annotations';
+import type { Annotation, Panel, PanelSeries, TrackedEsSearches } from '../../../common/types';
+import type { VisTypeTimeseriesVisDataRequest } from '../../types';
 import { AnnotationServices, getAnnotationRequestParams } from './annotations/get_request_params';
 import { getLastSeriesTimestamp } from './helpers/timestamp';
-import type { VisTypeTimeseriesVisDataRequest } from '../../types';
-import type { Annotation, Panel, TrackedEsSearches, PanelSeries } from '../../../common/types';
+import { handleAnnotationResponse } from './response_processors/annotations';
 
 function validAnnotation(annotation: Annotation) {
   return annotation.fields && annotation.icon && annotation.template && !annotation.hidden;
@@ -49,11 +49,14 @@ export async function getAnnotations({
       trackedEsSearches
     );
 
-    return annotations.reduce((acc, annotation, index) => {
-      acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);
+    return annotations.reduce(
+      (acc, annotation, index) => {
+        acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);
 
-      return acc;
-    }, {} as { [key: string]: any });
+        return acc;
+      },
+      {} as { [key: string]: any }
+    );
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;

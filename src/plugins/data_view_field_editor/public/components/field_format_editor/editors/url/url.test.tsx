@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
-import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { Serializable } from '@kbn/utility-types';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Serializable } from '@kbn/utility-types';
+import React from 'react';
+import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 
 const fieldType = 'string';
 const format = {

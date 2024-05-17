@@ -10,8 +10,8 @@ import { validateTagMock } from './tags_client.test.mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { TagAttributes, TagSavedObject } from '../../../common/types';
 import { TagValidation } from '../../../common/validation';
-import { TagsClient } from './tags_client';
 import { TagValidationError } from './errors';
+import { TagsClient } from './tags_client';
 
 const createAttributes = (parts: Partial<TagAttributes> = {}): TagAttributes => ({
   name: 'a-tag',

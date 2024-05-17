@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import {
-  EuiFlyout,
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiText,
-  EuiFieldText,
-  EuiSpacer,
-  EuiTextArea,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
-import { i18n as translate } from '@kbn/i18n';
-import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n as translate } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
+import type { ChangeEvent } from 'react';
+import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useCreateSharedExceptionListWithOptionalSignal } from '../../hooks/use_create_shared_list';
 import {
-  CREATE_SHARED_LIST_TITLE,
-  CREATE_SHARED_LIST_NAME_FIELD,
-  CREATE_SHARED_LIST_DESCRIPTION,
-  CREATE_BUTTON,
   CLOSE_FLYOUT,
+  CREATE_BUTTON,
+  CREATE_SHARED_LIST_DESCRIPTION,
   CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER,
+  CREATE_SHARED_LIST_NAME_FIELD,
   CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER,
+  CREATE_SHARED_LIST_TITLE,
   SUCCESS_TITLE,
   getSuccessText,
 } from '../../translations';

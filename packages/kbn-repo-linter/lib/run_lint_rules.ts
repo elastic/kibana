@@ -8,11 +8,11 @@
 
 import Fs from 'fs';
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import type { RepoPath } from '@kbn/repo-path';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import type { LintTarget } from './lint_target';
-import type { Rule, NamedViolation } from './rule';
+import type { NamedViolation, Rule } from './rule';
 
 export interface LintOptions<T extends LintTarget> {
   fix: boolean;

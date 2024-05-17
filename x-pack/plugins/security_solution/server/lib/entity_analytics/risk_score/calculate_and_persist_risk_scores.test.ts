@@ -12,8 +12,8 @@ import { assetCriticalityServiceMock } from '../asset_criticality/asset_critical
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
-import { riskScoreDataClientMock } from './risk_score_data_client.mock';
 import type { RiskScoreDataClient } from './risk_score_data_client';
+import { riskScoreDataClientMock } from './risk_score_data_client.mock';
 
 jest.mock('./calculate_risk_scores');
 

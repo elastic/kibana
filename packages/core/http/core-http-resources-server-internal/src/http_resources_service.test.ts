@@ -11,10 +11,10 @@ import { getApmConfigMock } from './http_resources_service.test.mocks';
 import type { RouteConfig } from '@kbn/core-http-server';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import type { HttpResources } from '@kbn/core-http-resources-server';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
-import type { HttpResources } from '@kbn/core-http-resources-server';
 import {
   createCoreRequestHandlerContextMock,
   createHttpResourcesResponseFactory,

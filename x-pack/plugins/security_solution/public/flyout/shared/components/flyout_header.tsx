@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
 
 interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   children: React.ReactNode;

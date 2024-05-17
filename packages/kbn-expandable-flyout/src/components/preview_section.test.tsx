@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { State } from '../state';
+import { TestProvider } from '../test/provider';
 import { PreviewBanner, PreviewSection } from './preview_section';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { TestProvider } from '../test/provider';
-import { State } from '../state';
 
 describe('PreviewSection', () => {
   const context = {

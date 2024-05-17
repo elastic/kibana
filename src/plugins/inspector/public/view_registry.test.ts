@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { InspectorViewRegistry } from './view_registry';
 import { InspectorViewDescription } from './types';
+import { InspectorViewRegistry } from './view_registry';
 
 import { Adapters } from '../common';
 

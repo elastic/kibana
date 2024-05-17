@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
-import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
-import { combineQueries } from '../../../common/lib/kuery';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import type { AlertsGroupingAggregation } from './grouping_settings/types';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { useKibana } from '../../../common/lib/kibana';
+import { combineQueries } from '../../../common/lib/kuery';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useInspectButton } from '../alerts_kpis/common/hooks';
+import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { buildTimeRangeFilter } from './helpers';
 
-import * as i18n from './translations';
-import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
+import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
+import * as i18n from './translations';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 

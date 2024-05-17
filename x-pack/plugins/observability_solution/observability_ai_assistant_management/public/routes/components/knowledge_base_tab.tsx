@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   Criteria,
   EuiBadge,
@@ -23,14 +21,16 @@ import {
   EuiPopover,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { KnowledgeBaseEntryCategory, categorizeEntries } from '../../helpers/categorize_entries';
 import { useAppContext } from '../../hooks/use_app_context';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
-import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
-import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
-import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
+import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
+import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 
 export function KnowledgeBaseTab() {
   const { uiSettings } = useAppContext();

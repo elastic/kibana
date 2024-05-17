@@ -8,8 +8,8 @@
 import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
-import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 
 const ACTION_TYPE_ID = '.torq';
 let actionTypeModel: ActionTypeModel;

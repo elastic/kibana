@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
 import { FIELD_ORIGIN } from '../../../../../../../common/constants';
-import type { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
 import type { IField } from '../../../../../fields/field';
+import type { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
 import { MarkerSizeLegend } from './marker_size_legend';
 
 const dynamicSizeOptions = {

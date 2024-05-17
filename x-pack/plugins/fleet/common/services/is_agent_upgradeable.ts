@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
+import semverEq from 'semver/functions/eq';
 import semverGt from 'semver/functions/gt';
 import semverGte from 'semver/functions/gte';
-import semverEq from 'semver/functions/eq';
-import moment from 'moment';
+import semverLt from 'semver/functions/lt';
 
 import type { Agent } from '../types';
 

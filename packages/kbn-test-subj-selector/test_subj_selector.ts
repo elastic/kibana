@@ -63,7 +63,10 @@ export function subj(selector: string) {
   return selectorToTerms(selector)
     .map((term) =>
       // split each term by joins/& and map to css selectors
-      term.split('&').map(termToCssSelector).join('')
+      term
+        .split('&')
+        .map(termToCssSelector)
+        .join('')
     )
     .join(' ');
 }

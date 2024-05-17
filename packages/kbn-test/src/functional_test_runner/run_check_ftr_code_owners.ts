@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-cli-runner';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { getRepoFiles } from '@kbn/get-repo-files';
 
 const TEST_DIRECTORIES = ['test', 'x-pack/test', 'x-pack/test_serverless'];
 

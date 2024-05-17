@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
@@ -16,11 +16,11 @@ import { ExtendedBounds, extendedBoundsToAst } from '../../expressions';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
+import { autoInterval, isAutoInterval } from './_interval_options';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
-import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { createFilterHistogram } from './create_filter/histogram';
 import { aggHistogramFnName } from './histogram_fn';
-import { isAutoInterval, autoInterval } from './_interval_options';
 import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
 
 export interface AutoBounds {

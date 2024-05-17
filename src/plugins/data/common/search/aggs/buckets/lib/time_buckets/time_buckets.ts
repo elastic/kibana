@@ -1,3 +1,5 @@
+import { isObject as isObjectLodash, isPlainObject, isString, sortBy } from 'lodash';
+import moment, { Moment } from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +8,18 @@
  * Side Public License, v 1.
  */
 import { Assign } from 'utility-types';
-import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
-import moment, { Moment } from 'moment';
 
 import { Unit } from '@kbn/datemath';
-import { parseInterval, splitStringInterval } from '../../../utils';
 import { TimeRangeBounds } from '../../../../../query';
+import { parseInterval, splitStringInterval } from '../../../utils';
+import { autoInterval } from '../../_interval_options';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
+  EsInterval,
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
-  EsInterval,
   getPreciseDurationDescription,
 } from './calc_es_interval';
-import { autoInterval } from '../../_interval_options';
 
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed

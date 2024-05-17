@@ -1,3 +1,4 @@
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,21 +6,20 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { Router } from '@kbn/shared-ux-router';
-import { createBrowserHistory } from 'history';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  fetch$,
   initializeTitles,
   useBatchedPublishingSubjects,
-  fetch$,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createBrowserHistory } from 'history';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SLO_ERROR_BUDGET_ID } from './constants';
-import { SloErrorBudgetEmbeddableState, SloEmbeddableDeps, ErrorBudgetApi } from './types';
 import { SloErrorBudget } from './error_budget_burn_down';
+import { ErrorBudgetApi, SloEmbeddableDeps, SloErrorBudgetEmbeddableState } from './types';
 
 export const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {

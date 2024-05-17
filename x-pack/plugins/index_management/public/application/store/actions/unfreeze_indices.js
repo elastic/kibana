@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import { unfreezeIndices as request } from '../../services';
+import { createAction } from 'redux-actions';
 import { clearRowStatus, reloadIndices } from '.';
+import { unfreezeIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';
 
 export const unfreezeIndicesStart = createAction('INDEX_MANAGEMENT_UNFREEZE_INDICES_START');

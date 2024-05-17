@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlSearchStrategyResponse } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 

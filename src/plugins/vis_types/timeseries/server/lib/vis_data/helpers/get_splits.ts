@@ -12,8 +12,8 @@ import { overwrite } from '.';
 
 import { calculateLabel } from '../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../common/constants';
-import { getLastMetric } from './get_last_metric';
 import { formatKey } from './format_key';
+import { getLastMetric } from './get_last_metric';
 
 import type { Panel, Series } from '../../../../common/types';
 import type { BaseMeta } from '../request_processors/types';
@@ -35,7 +35,7 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
           // should be typed
           values: Record<string, unknown>;
         };
-      } & { key: string | number }
+      } & { key: string | number },
     ];
   };
 }

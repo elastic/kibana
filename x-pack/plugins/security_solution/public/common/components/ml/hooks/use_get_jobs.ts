@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import type { CombinedJobWithStats } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { useEffect, useState } from 'react';
 import { getJobs } from '../api/get_jobs';
 
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';
-import { useMlCapabilities } from './use_ml_capabilities';
 import * as i18n from '../translations';
+import { useMlCapabilities } from './use_ml_capabilities';
 
 const _getJobs = withOptionalSignal(getJobs);
 

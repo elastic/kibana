@@ -8,10 +8,10 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import type {
+  GetSortForThreatList,
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,
-  GetSortForThreatList,
 } from './types';
 
 /**

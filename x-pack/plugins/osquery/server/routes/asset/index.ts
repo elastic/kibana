@@ -6,9 +6,9 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAssetsStatusRoute } from './get_assets_status_route';
 import { updateAssetsRoute } from './update_assets_route';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const initAssetRoutes = (router: IRouter, context: OsqueryAppContext) => {
   getAssetsStatusRoute(router, context);

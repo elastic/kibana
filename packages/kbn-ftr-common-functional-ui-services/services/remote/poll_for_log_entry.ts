@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { WebDriver, logging } from 'selenium-webdriver';
 import * as Rx from 'rxjs';
-import { mergeMap, catchError, delay, repeat } from 'rxjs';
+import { catchError, delay, mergeMap, repeat } from 'rxjs';
+import { WebDriver, logging } from 'selenium-webdriver';
 import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
 
 export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS STOPPED';

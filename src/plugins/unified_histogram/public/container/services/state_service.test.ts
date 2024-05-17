@@ -8,17 +8,17 @@
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UnifiedHistogramFetchStatus } from '../..';
-import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
+import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
+  getBreakdownField,
   getChartHidden,
   getTopPanelHeight,
-  getBreakdownField,
+  setBreakdownField,
   setChartHidden,
   setTopPanelHeight,
-  setBreakdownField,
 } from '../utils/local_storage_utils';
-import { createStateService, UnifiedHistogramState } from './state_service';
+import { UnifiedHistogramState, createStateService } from './state_service';
 
 jest.mock('../utils/local_storage_utils', () => {
   const originalModule = jest.requireActual('../utils/local_storage_utils');

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import { EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { EuiToolTip, EuiFormRow } from '@elastic/eui';
+import React, { useCallback, useContext } from 'react';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
 import { FiltersBuilderContextType } from '../context';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { merge } from 'lodash';
+import moment from 'moment';
 import type { DeepPartial } from 'utility-types';
 import { v4 as uuidV4 } from 'uuid';
 
 import type {
+  BulkCreateResponse,
   FleetActionRequest,
   FleetActionResult,
   FleetActionsClientInterface,
-  BulkCreateResponse,
 } from './types';
 
 export const generateFleetAction = (

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { ChatForm } from '../../types';
 import { EditContextFlyout } from './edit_context_flyout';
 

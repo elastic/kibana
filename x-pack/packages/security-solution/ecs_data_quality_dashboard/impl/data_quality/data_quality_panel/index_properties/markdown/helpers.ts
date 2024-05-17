@@ -6,23 +6,12 @@
  */
 
 import {
-  ERRORS_MAY_OCCUR,
-  ERRORS_CALLOUT_SUMMARY,
-  MANAGE,
-  MONITOR,
-  OR,
-  READ,
-  THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
-  VIEW_INDEX_METADATA,
-} from '../../data_quality_summary/errors_popover/translations';
-import {
   EMPTY_STAT,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
 } from '../../../helpers';
-import { SAME_FAMILY } from '../../same_family/translations';
-import { HOT, WARM, COLD, FROZEN, UNMANAGED } from '../../../ilm_phases_empty_prompt/translations';
-import * as i18n from '../translations';
+import { COLD, FROZEN, HOT, UNMANAGED, WARM } from '../../../ilm_phases_empty_prompt/translations';
+import { DATA_QUALITY_TITLE } from '../../../translations';
 import type {
   AllowedValue,
   EnrichedFieldMetadata,
@@ -33,6 +22,17 @@ import type {
   PatternRollup,
   UnallowedValueCount,
 } from '../../../types';
+import {
+  ERRORS_CALLOUT_SUMMARY,
+  ERRORS_MAY_OCCUR,
+  MANAGE,
+  MONITOR,
+  OR,
+  READ,
+  THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
+  VIEW_INDEX_METADATA,
+} from '../../data_quality_summary/errors_popover/translations';
+import { SAME_FAMILY } from '../../same_family/translations';
 import { getDocsCountPercent } from '../../summary_table/helpers';
 import {
   DOCS,
@@ -44,7 +44,7 @@ import {
   RESULT,
   SIZE,
 } from '../../summary_table/translations';
-import { DATA_QUALITY_TITLE } from '../../../translations';
+import * as i18n from '../translations';
 
 export const EMPTY_PLACEHOLDER = '--';
 

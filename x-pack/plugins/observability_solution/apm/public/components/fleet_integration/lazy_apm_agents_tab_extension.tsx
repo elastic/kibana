@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
+import { lazy } from 'react';
 
 export const getLazyApmAgentsTabExtension = () => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {

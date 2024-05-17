@@ -7,8 +7,8 @@
 
 import { LIGHT_THEME } from '@elastic/charts';
 import { action } from '@storybook/addon-actions';
-import { AlertSummaryWidgetCompact as Component } from './alert_summary_widget_compact';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
+import { AlertSummaryWidgetCompact as Component } from './alert_summary_widget_compact';
 
 export default {
   component: Component,

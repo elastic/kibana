@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { PageLoader } from '../../../common/components/page_loader';
 
 interface Props {

@@ -7,7 +7,7 @@
  */
 
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from './errors';
+import { EmbeddableFactoryNotFoundError, PanelNotFoundError } from './errors';
 
 describe('IncompatibleActionError', () => {
   test('is instance of error', () => {

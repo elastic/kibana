@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import { SloEditForm as Component, Props } from './slo_edit_form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { SloEditForm as Component, Props } from './slo_edit_form';
 
 export default {
   component: Component,

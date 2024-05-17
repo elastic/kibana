@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import {
+  EuiButton,
   EuiButtonGroup,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -17,17 +18,16 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  EuiFlexItem,
-  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { useStartServices, useFlyoutContext, useCheckPermissions } from '../../hooks';
+import { useCheckPermissions, useFlyoutContext, useStartServices } from '../../hooks';
 import { FleetServerMissingESPrivileges } from '../../sections/agents/components';
 
-import { QuickStartTab } from './quick_start_tab';
 import { AdvancedTab } from './advanced_tab';
+import { QuickStartTab } from './quick_start_tab';
 
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;

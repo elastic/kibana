@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import { PassThrough, Stream } from 'stream';
 import { Logger } from '@kbn/core/server';
-import { Stream, PassThrough } from 'stream';
+import { Observable } from 'rxjs';
 
 const delimiter = '\n';
 

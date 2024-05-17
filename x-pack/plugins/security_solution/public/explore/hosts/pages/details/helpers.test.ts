@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getHostDetailsPageFilters } from './helpers';
 import type { Filter } from '@kbn/es-query';
+import { getHostDetailsPageFilters } from './helpers';
 
 describe('hosts page helpers', () => {
   describe('getHostDetailsPageFilters', () => {

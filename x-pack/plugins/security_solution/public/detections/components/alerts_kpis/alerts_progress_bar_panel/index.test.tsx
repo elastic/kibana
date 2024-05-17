@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, screen, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
 import { AlertsProgressBarPanel } from '.';
+import { TestProviders } from '../../../../common/mock';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { STACK_BY_ARIA_LABEL } from '../common/translations';
 import type { GroupBySelection } from './types';

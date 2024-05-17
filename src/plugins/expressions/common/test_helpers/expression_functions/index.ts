@@ -6,6 +6,19 @@
  * Side Public License, v 1.
  */
 
+import {
+  AnyExpressionFunctionDefinition,
+  clog,
+  cumulativeSum,
+  derivative,
+  font,
+  mapColumn,
+  math,
+  movingAverage,
+  theme,
+  variable,
+  variableSet,
+} from '../../expression_functions';
 import { access } from './access';
 import { add } from './add';
 import { error } from './error';
@@ -13,19 +26,6 @@ import { introspectContext } from './introspect_context';
 import { mult } from './mult';
 import { sleep } from './sleep';
 import { sum } from './sum';
-import {
-  AnyExpressionFunctionDefinition,
-  clog,
-  font,
-  variableSet,
-  variable,
-  theme,
-  cumulativeSum,
-  derivative,
-  movingAverage,
-  mapColumn,
-  math,
-} from '../../expression_functions';
 
 export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
   access,

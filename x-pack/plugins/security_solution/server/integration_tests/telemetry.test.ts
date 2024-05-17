@@ -17,40 +17,40 @@ import type {
 import { ENDPOINT_STAGING } from '@kbn/telemetry-plugin/common/constants';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../lib/telemetry/constants';
 
-import { eventually, setupTestServers, removeFile } from './lib/helpers';
+import { eventually, removeFile, setupTestServers } from './lib/helpers';
 import {
   cleanupMockedAlerts,
-  cleanupMockedExceptionLists,
   cleanupMockedEndpointAlerts,
+  cleanupMockedExceptionLists,
   createMockedAlert,
   createMockedEndpointAlert,
   createMockedExceptionList,
+  dropEndpointIndices,
   getAsyncTelemetryEventSender,
+  getTelemetryReceiver,
   getTelemetryTask,
   getTelemetryTaskType,
   getTelemetryTasks,
   initEndpointIndices,
-  dropEndpointIndices,
   mockEndpointData,
-  getTelemetryReceiver,
 } from './lib/telemetry_helpers';
 
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Plugin as SecuritySolutionPlugin } from '../plugin';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import {
   TaskManagerPlugin,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
-import type { SecurityTelemetryTask } from '../lib/telemetry/task';
-import { TelemetryChannel } from '../lib/telemetry/types';
 import type { AsyncTelemetryEventsSender } from '../lib/telemetry/async_sender';
-import endpointMetaTelemetryRequest from './__mocks__/endpoint-meta-telemetry-request.json';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../lib/telemetry/receiver';
+import type { SecurityTelemetryTask } from '../lib/telemetry/task';
 import type { TaskMetric } from '../lib/telemetry/task_metrics.types';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { TelemetryChannel } from '../lib/telemetry/types';
+import { Plugin as SecuritySolutionPlugin } from '../plugin';
+import endpointMetaTelemetryRequest from './__mocks__/endpoint-meta-telemetry-request.json';
 
 jest.mock('axios');
 

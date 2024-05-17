@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 const i18nTexts = {
   critical: i18n.translate('xpack.upgradeAssistant.levelInfoTip.criticalLabel', {

@@ -7,35 +7,35 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { useDispatch, useSelector } from 'react-redux';
-import React, { memo, useMemo, useCallback, useContext } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SideEffectContext } from '../side_effect_context';
-import { StyledPanel } from '../styles';
-import {
-  StyledLabelTitle,
-  StyledAnalyzedEvent,
-  StyledLabelContainer,
-  StyledButtonTextContainer,
-} from './styles';
+import React, { memo, useMemo, useCallback, useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import * as nodeModel from '../../../../common/endpoint/models/node';
-import * as selectors from '../../store/selectors';
-import { Breadcrumbs } from './breadcrumbs';
-import { CubeForProcess } from './cube_for_process';
-import { LimitWarning } from '../limit_warnings';
-import { useLinkProps } from '../use_link_props';
-import { useColors } from '../use_colors';
-import { useFormattedDate } from './use_formatted_date';
-import { userSelectedResolverNode } from '../../store/actions';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
 import type { State } from '../../../common/store/types';
+import { getSourcererScopeId } from '../../../helpers';
+import { userSelectedResolverNode } from '../../store/actions';
+import * as selectors from '../../store/selectors';
+import { LimitWarning } from '../limit_warnings';
+import { SideEffectContext } from '../side_effect_context';
+import { StyledPanel } from '../styles';
+import { useColors } from '../use_colors';
+import { useLinkProps } from '../use_link_props';
+import { Breadcrumbs } from './breadcrumbs';
+import { CubeForProcess } from './cube_for_process';
+import {
+  StyledAnalyzedEvent,
+  StyledButtonTextContainer,
+  StyledLabelContainer,
+  StyledLabelTitle,
+} from './styles';
+import { useFormattedDate } from './use_formatted_date';
 
 interface ProcessTableView {
   name?: string;

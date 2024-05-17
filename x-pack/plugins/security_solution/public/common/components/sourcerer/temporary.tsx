@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiCallOut,
-  EuiText,
-  EuiTextColor,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import * as i18n from './translations';
-import { Blockquote, ResetButton } from './helpers';
-import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
-import { TimelineId } from '../../../../common/types';
 import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types';
 import { timelineSelectors } from '../../../timelines/store';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/defaults';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { Blockquote, ResetButton } from './helpers';
+import * as i18n from './translations';
+import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 import {
   BadCurrentPatternsMessage,
   CurrentPatternsMessage,

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { mergeWith, uniqWith, isEqual } from 'lodash';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type {
   DashboardAPI,
   DashboardLocatorParams,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
-import { getPanelTitle } from '@kbn/presentation-publishing';
-import type { Filter, Query, DataViewBase } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { MlApiServices } from '../../../services/ml_api_service';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
-import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import { getPanelTitle } from '@kbn/presentation-publishing';
+import { isEqual, mergeWith, uniqWith } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
-import { createQueries } from '../utils/new_job_utils';
+import type { Datafeed, Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
+import type { MlApiServices } from '../../../services/ml_api_service';
+import { createQueries } from '../utils/new_job_utils';
 
 interface CreationState {
   success: boolean;

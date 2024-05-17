@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsPlugin, DataViewsContract } from '.';
+import { DataViewsContract, DataViewsPlugin } from '.';
 
 export type Setup = jest.Mocked<ReturnType<DataViewsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;

@@ -1,3 +1,5 @@
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject } from 'rxjs';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   ExecutionContextService,
   InternalExecutionContextSetup,

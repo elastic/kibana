@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import type { ReactElement } from 'react';
 import type { Observable } from 'rxjs';
-import { combineLatest, ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject, combineLatest } from 'rxjs';
 import { map, startWith, tap } from 'rxjs';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import {
-  basicJobValidation,
   basicDatafeedValidation,
   basicJobAndDatafeedValidation,
+  basicJobValidation,
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import type { JobCreator, JobCreatorType } from '../job_creator';
 import { isCategorizationJobCreator } from '../job_creator';
 import { populateValidationMessages } from './util';
-import type { CardinalityValidatorResult, JobExistsResult, GroupsExistResult } from './validators';
-import { cardinalityValidator, jobIdValidator, groupIdsValidator } from './validators';
+import type { CardinalityValidatorResult, GroupsExistResult, JobExistsResult } from './validators';
+import { cardinalityValidator, groupIdsValidator, jobIdValidator } from './validators';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 

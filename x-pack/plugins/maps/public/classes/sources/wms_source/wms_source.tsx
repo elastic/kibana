@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RasterTileSource } from 'maplibre-gl';
-import { AbstractSource } from '../source';
+import { ReactElement } from 'react';
+import { SOURCE_TYPES } from '../../../../common/constants';
+import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
+import { IRasterSource, RasterTileSourceData } from '../raster_source';
+import { AbstractSource } from '../source';
 // @ts-ignore
 import { WmsClient } from './wms_client';
-import { SOURCE_TYPES } from '../../../../common/constants';
-import { IRasterSource, RasterTileSourceData } from '../raster_source';
-import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });

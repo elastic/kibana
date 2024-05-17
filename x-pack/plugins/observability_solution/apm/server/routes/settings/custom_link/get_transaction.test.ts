@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { inspectSearchParams, SearchParamsMock } from '../../../utils/test_helpers';
-import { getTransaction } from './get_transaction';
 import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
+import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
+import { getTransaction } from './get_transaction';
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;

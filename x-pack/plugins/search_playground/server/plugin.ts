@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { sendMessageEvent } from './analytics/events';
+import { defineRoutes } from './routes';
 import {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
-import { defineRoutes } from './routes';
 
 export class SearchPlaygroundPlugin
   implements

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
+import React from 'react';
 import OsqueryLogo from './osquery.svg';
 
 export type OsqueryIconProps = Omit<EuiIconProps, 'type'>;

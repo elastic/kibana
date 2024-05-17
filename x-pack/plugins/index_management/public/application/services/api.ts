@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import {
+  DataStream,
+  Index,
+  IndexSettingsResponse,
+  TemplateDeserialized,
+  TemplateListItem,
+} from '../../../common';
+import type { FieldFromIndicesRequest } from '../../../common';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
-  UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
   UIM_INDEX_CLEAR_CACHE_MANY,
   UIM_INDEX_CLOSE,
@@ -29,25 +36,18 @@ import {
   UIM_INDEX_REFRESH_MANY,
   UIM_INDEX_UNFREEZE,
   UIM_INDEX_UNFREEZE_MANY,
+  UIM_TEMPLATE_CLONE,
+  UIM_TEMPLATE_CREATE,
   UIM_TEMPLATE_DELETE,
   UIM_TEMPLATE_DELETE_MANY,
-  UIM_TEMPLATE_CREATE,
-  UIM_TEMPLATE_UPDATE,
-  UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
+  UIM_TEMPLATE_UPDATE,
+  UIM_UPDATE_SETTINGS,
 } from '../../../common/constants';
-import {
-  TemplateDeserialized,
-  TemplateListItem,
-  DataStream,
-  Index,
-  IndexSettingsResponse,
-} from '../../../common';
-import { useRequest, sendRequest } from './use_request';
+import { Fields } from '../components/mappings_editor/types';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import type { FieldFromIndicesRequest } from '../../../common';
-import { Fields } from '../components/mappings_editor/types';
+import { sendRequest, useRequest } from './use_request';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;

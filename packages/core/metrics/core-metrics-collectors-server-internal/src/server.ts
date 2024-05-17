@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ResponseObject, Server as HapiServer } from '@hapi/hapi';
-import type { OpsServerMetrics, MetricsCollector } from '@kbn/core-metrics-server';
+import type { Server as HapiServer, ResponseObject } from '@hapi/hapi';
+import type { MetricsCollector, OpsServerMetrics } from '@kbn/core-metrics-server';
 
 interface ServerResponseTime {
   count: number;

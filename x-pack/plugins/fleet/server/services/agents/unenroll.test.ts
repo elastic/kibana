@@ -17,9 +17,9 @@ import { createAppContextStartContractMock } from '../../mocks';
 
 import type { Agent } from '../../types';
 
+import { createClientMock } from './action.mock';
 import { unenrollAgent, unenrollAgents } from './unenroll';
 import { invalidateAPIKeysForAgents, isAgentUnenrolled } from './unenroll_action_runner';
-import { createClientMock } from './action.mock';
 
 jest.mock('../api_keys');
 

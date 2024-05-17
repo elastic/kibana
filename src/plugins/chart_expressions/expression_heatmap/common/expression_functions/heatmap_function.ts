@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
-  prepareLogTable,
   Dimension,
+  prepareLogTable,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import type { HeatmapExpressionFunctionDefinition, HeatmapExpressionProps } from '../types';
 import {
-  EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
+  EXPRESSION_HEATMAP_NAME,
 } from '../constants';
+import type { HeatmapExpressionFunctionDefinition, HeatmapExpressionProps } from '../types';
 
 const convertToVisDimension = (
   columns: DatatableColumn[],

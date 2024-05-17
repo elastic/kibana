@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getSplits, getLastMetric, getSiblingAggValue } from '../../helpers';
+import { getLastMetric, getSiblingAggValue, getSplits } from '../../helpers';
 
-import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
+import type { TableResponseProcessorsFunction } from './types';
 
 export const stdSibling: TableResponseProcessorsFunction =
   ({ response, panel, series, meta, extractFields }) =>

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+import { VisParams } from '../../common';
 import { BaseVisType } from './base_vis_type';
 import { VisTypeDefinition } from './types';
 import { VisGroups } from './vis_groups_enum';
-import { VisParams } from '../../common';
+import { VisTypeAlias, visTypeAliasRegistry } from './vis_type_alias_registry';
 
 /**
  * Vis Types Service

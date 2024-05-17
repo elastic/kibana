@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';

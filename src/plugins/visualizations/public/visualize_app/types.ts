@@ -7,52 +7,52 @@
  */
 
 import type { EventEmitter } from 'events';
-import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { History } from 'history';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type {
+  AppMountParameters,
+  ChromeStart,
   CoreStart,
   PluginInitializerContext,
-  ChromeStart,
-  ToastsStart,
   ScopedHistory,
-  AppMountParameters,
   ThemeServiceStart,
+  ToastsStart,
 } from '@kbn/core/public';
 
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
-  Storage,
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
+  Storage,
 } from '@kbn/kibana-utils-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type {
-  Vis,
-  VisualizeEmbeddableContract,
-  VisSavedObject,
   PersistedState,
+  Vis,
   VisParams,
+  VisSavedObject,
+  VisualizeEmbeddableContract,
 } from '..';
 
-import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
+import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { login } from '../../../tasks/login';
-import { visitWithTimeRange } from '../../../tasks/navigation';
-import {
-  openAddFilterPopover,
-  fillAddFilterForm,
-  openKqlQueryBar,
-  fillKqlQueryBar,
-} from '../../../tasks/search_bar';
+import { getHostIpFilter } from '../../../objects/filter';
 import {
   AUTO_SUGGEST_AGENT_NAME,
   AUTO_SUGGEST_HOST_NAME_VALUE,
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
 } from '../../../screens/search_bar';
-import { getHostIpFilter } from '../../../objects/filter';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
+import {
+  fillAddFilterForm,
+  fillKqlQueryBar,
+  openAddFilterPopover,
+  openKqlQueryBar,
+} from '../../../tasks/search_bar';
 
-import { hostsUrl } from '../../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
+import { hostsUrl } from '../../../urls/navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/182932
 describe.skip('SearchBar', { tags: ['@ess', '@serverless'] }, () => {

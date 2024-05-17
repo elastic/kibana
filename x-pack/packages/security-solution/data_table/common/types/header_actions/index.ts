@@ -7,14 +7,14 @@
 
 import type { EuiDataGridColumn, EuiDataGridProps } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ComponentType } from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { SetEventsDeleted, SetEventsLoading } from '..';
 import { OnRowSelected } from '../../../components/data_table/types';
 import type { SortColumnTable } from '../data_table';
-import { SetEventsDeleted, SetEventsLoading } from '..';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 

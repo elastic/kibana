@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { config, ServerConfig } from './server_config';
+import { ServerConfig, config } from './server_config';
 
 describe('server config', () => {
   test('has defaults for config', () => {

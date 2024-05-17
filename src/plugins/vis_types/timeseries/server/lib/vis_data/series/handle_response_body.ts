@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import type { Panel } from '../../../../common/types';
+import { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import {
+  FieldsFetcherServices,
+  createFieldsFetcher,
+} from '../../search_strategies/lib/fields_fetcher';
 import { _legacyBuildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/series';
-import {
-  createFieldsFetcher,
-  FieldsFetcherServices,
-} from '../../search_strategies/lib/fields_fetcher';
-import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export function handleResponseBody(
   panel: Panel,

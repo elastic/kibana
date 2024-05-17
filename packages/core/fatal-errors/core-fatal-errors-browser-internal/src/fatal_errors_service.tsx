@@ -11,10 +11,10 @@ import { render } from 'react-dom';
 import { ReplaySubject, first, tap } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { getErrorInfo } from './get_error_info';
@@ -38,7 +38,10 @@ export class FatalErrorsService {
    * @param onFirstErrorCb - Callback function that gets executed after the first error,
    *   but before the FatalErrorsService renders the error to the DOM.
    */
-  constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
+  constructor(
+    private rootDomElement: HTMLElement,
+    private onFirstErrorCb: () => void
+  ) {}
 
   public setup(deps: FatalErrorsServiceSetupDeps) {
     this.errorInfo$

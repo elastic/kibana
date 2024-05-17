@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer } from '@elastic/eui';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 
 import { ThresholdIndicator } from '../../common/components/thershold_indicator';
-import { useNetworkTimingsPrevious24Hours } from '../hooks/use_network_timings_prev';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 import { useNetworkTimings } from '../hooks/use_network_timings';
+import { useNetworkTimingsPrevious24Hours } from '../hooks/use_network_timings_prev';
 
 export const BreakdownLegend = () => {
   const networkTimings = useNetworkTimings();

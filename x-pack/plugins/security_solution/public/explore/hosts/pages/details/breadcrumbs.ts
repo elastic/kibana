@@ -8,13 +8,13 @@
 import { get } from 'lodash/fp';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
+import { HostsTableType } from '../../store/model';
 
-import * as i18n from '../translations';
-import type { HostRouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
+import type { HostRouteSpyState } from '../../../../common/utils/route/types';
+import * as i18n from '../translations';
 
 const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,

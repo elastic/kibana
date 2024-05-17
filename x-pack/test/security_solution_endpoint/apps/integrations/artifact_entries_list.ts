@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { unzip } from 'zlib';
 import { promisify } from 'util';
+import { unzip } from 'zlib';
 import expect from '@kbn/expect';
+import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import {
   ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  ArtifactBodyType,
-  getArtifactsListTestsData,
-  ArtifactActionsType,
-  AgentPolicyResponseType,
-  getCreateMultipleData,
-  MultipleArtifactActionsType,
-} from './mocks';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { targetTags } from '../../target_tags';
+import {
+  AgentPolicyResponseType,
+  ArtifactActionsType,
+  ArtifactBodyType,
+  MultipleArtifactActionsType,
+  getArtifactsListTestsData,
+  getCreateMultipleData,
+} from './mocks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);

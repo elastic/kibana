@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { debounce, keys, has, includes, isFunction, difference, assign } from 'lodash';
+import { assign, debounce, difference, has, includes, isFunction, keys } from 'lodash';
 import React from 'react';
-import { getLastValue } from './get_last_value';
-import { TimeseriesContainer } from './timeseries_container';
-import { HorizontalLegend } from './horizontal_legend';
-import { getValuesForSeriesIndex, getValuesByX } from './get_values_for_legend';
 import { DEBOUNCE_SLOW_MS } from '../../../common/constants';
+import { getLastValue } from './get_last_value';
+import { getValuesByX, getValuesForSeriesIndex } from './get_values_for_legend';
+import { HorizontalLegend } from './horizontal_legend';
+import { TimeseriesContainer } from './timeseries_container';
 import './timeseries_visualization.scss';
 
 export class TimeseriesVisualization extends React.Component {

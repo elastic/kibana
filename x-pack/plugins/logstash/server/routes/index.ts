@@ -13,7 +13,7 @@ import {
   registerPipelineLoadRoute,
   registerPipelineSaveRoute,
 } from './pipeline';
-import { registerPipelinesListRoute, registerPipelinesDeleteRoute } from './pipelines';
+import { registerPipelinesDeleteRoute, registerPipelinesListRoute } from './pipelines';
 
 export function registerRoutes(router: LogstashPluginRouter, security?: SecurityPluginSetup) {
   registerClusterLoadRoute(router);

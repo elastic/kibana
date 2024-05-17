@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 import { FoundWorkpad } from '../../../services/workpad';
-import { UploadDropzone } from './upload_dropzone';
 import { HomeEmptyPrompt } from './empty_prompt';
+import { UploadDropzone } from './upload_dropzone';
 import { WorkpadTable } from './workpad_table';
 
 export interface Props {

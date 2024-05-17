@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
-import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
+import { ValidationTestBed, setupValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> hot phase validation', () => {
   let testBed: ValidationTestBed;

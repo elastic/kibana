@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import dedent from 'dedent';
 import { RuleTester } from 'eslint';
 import { RequireImportRule } from './require_import';
-import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';
 

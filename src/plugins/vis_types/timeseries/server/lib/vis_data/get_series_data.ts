@@ -8,20 +8,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
-import { handleResponseBody } from './series/handle_response_body';
-import { getSeriesRequestParams } from './series/get_request_params';
-import { getActiveSeries } from './helpers/get_active_series';
+import { handleErrorResponse } from './handle_error_response';
 import { isAggSupported } from './helpers/check_aggs';
+import { getActiveSeries } from './helpers/get_active_series';
+import { getSeriesRequestParams } from './series/get_request_params';
+import { handleResponseBody } from './series/handle_response_body';
 
+import { PANEL_TYPES } from '../../../common/enums';
+import type { DataResponseMeta, Panel } from '../../../common/types';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
-  VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestServices,
+  VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { Panel, DataResponseMeta } from '../../../common/types';
-import { PANEL_TYPES } from '../../../common/enums';
 
 export async function getSeriesData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,

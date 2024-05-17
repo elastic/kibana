@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,12 +15,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isUndefined } from 'lodash';
 import {
   ActionParamsProps,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { isUndefined } from 'lodash';
+import React from 'react';
 import { PagerDutyActionParams } from '../types';
 import { LinksList } from './links_list';
 import { OPTIONAL_LABEL } from './translations';

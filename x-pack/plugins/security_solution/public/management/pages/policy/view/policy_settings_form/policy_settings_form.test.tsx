@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import userEvent from '@testing-library/user-event';
+import { cloneDeep } from 'lodash';
 import React from 'react';
+import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import type { PolicyConfig } from '../../../../../../common/endpoint/types';
+import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   expectIsViewOnly,
   getPolicySettingsFormTestSubjects,
@@ -13,16 +21,8 @@ import {
   setMalwareMode,
   setMalwareModeToDetect,
 } from './mocks';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { PolicySettingsFormProps } from './policy_settings_form';
 import { PolicySettingsForm } from './policy_settings_form';
-import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
-import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
-import userEvent from '@testing-library/user-event';
-import { cloneDeep } from 'lodash';
 
 jest.mock('../../../../../common/hooks/use_license');
 

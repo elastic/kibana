@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildQueryFilter, Filter, FilterStateStore } from '../build_filters';
+import { Filter, FilterStateStore, buildQueryFilter } from '../build_filters';
 import { updateFilter } from './update_filter';
 
 describe('updateFilter', () => {

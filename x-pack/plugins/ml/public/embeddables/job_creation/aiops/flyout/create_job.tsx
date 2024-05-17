@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiCheckableCard,
-  EuiTitle,
-  EuiSpacer,
-  EuiSwitch,
-  EuiHorizontalRule,
   EuiComboBox,
   EuiFormRow,
-  EuiCallOut,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { redirectToADJobWizards } from '../../../../application/jobs/new_job/job_from_pattern_analysis/utils';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { createFieldOptions } from '../../../../application/jobs/new_job/common/job_creator/util/general';
-import { NewJobCapsService } from '../../../../application/services/new_job_capabilities/new_job_capabilities_service';
 import {
-  type CategorizationType,
   CATEGORIZATION_TYPE,
+  type CategorizationType,
   QuickCategorizationJobCreator,
 } from '../../../../application/jobs/new_job/job_from_pattern_analysis';
+import { redirectToADJobWizards } from '../../../../application/jobs/new_job/job_from_pattern_analysis/utils';
+import { NewJobCapsService } from '../../../../application/services/new_job_capabilities/new_job_capabilities_service';
 import { useMlFromLensKibanaContext } from '../../common/context';
-import { JobDetails, type CreateADJobParams } from '../../common/job_details';
+import { type CreateADJobParams, JobDetails } from '../../common/job_details';
 
 interface Props {
   dataView: DataView;

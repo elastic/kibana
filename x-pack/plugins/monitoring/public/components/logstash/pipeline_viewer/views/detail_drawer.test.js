@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
 import { DetailDrawer } from './detail_drawer';
-import { shallow } from 'enzyme';
 
 jest.mock('../../../sparkline', () => ({
   Sparkline: () => 'Sparkline',

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { schema } from '@kbn/config-schema';
 import { IKibanaResponse } from '@kbn/core/server';
 import { isRight } from 'fp-ts/lib/Either';
-import { schema } from '@kbn/config-schema';
-import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_screenshot_blocks';
-import { UMServerLibs } from '../../lib/lib';
-import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
+import * as t from 'io-ts';
 import { API_URLS } from '../../../../common/constants';
 import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
+import { UMServerLibs } from '../../lib/lib';
+import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_screenshot_blocks';
+import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 
 function isStringArray(data: unknown): data is string[] {
   return isRight(t.array(t.string).decode(data));

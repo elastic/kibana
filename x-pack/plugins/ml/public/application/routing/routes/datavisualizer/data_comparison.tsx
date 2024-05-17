@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { DataSourceContextProvider } from '../../../contexts/ml';
+import type { FC } from 'react';
+import React from 'react';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
-import { useRouteResolver } from '../../use_resolver';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import {
-  breadcrumbOnClickFactory,
   DATA_DRIFT_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
+  breadcrumbOnClickFactory,
   getBreadcrumbWithUrlForApp,
 } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
+import type { MlRoute, PageProps } from '../../router';
+import { PageLoader, createPath } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 
 const DataDriftPage = dynamic(async () => ({
   default: (await import('../../../datavisualizer/data_drift/data_drift_page')).DataDriftPage,

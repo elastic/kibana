@@ -6,12 +6,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getSupportedActionConnectors } from './api';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
-import * as i18n from './translations';
-import { casesQueriesKeys } from '../constants';
-import type { ServerError } from '../../types';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
+import type { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
+import { getSupportedActionConnectors } from './api';
+import * as i18n from './translations';
 
 export function useGetSupportedActionConnectors() {
   const toasts = useToasts();

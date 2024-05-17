@@ -7,12 +7,26 @@
  */
 import mockFs from 'mock-fs';
 
-import Fsp from 'fs/promises';
 import { basename } from 'path';
+import Fsp from 'fs/promises';
 
+import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
+import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import {
+  SERVERLESS_CONFIG_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
+  SERVERLESS_JWKS_PATH,
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+} from '../paths';
 import {
   DOCKER_IMG,
+  ES_SERVERLESS_DEFAULT_IMAGE,
+  ServerlessOptions,
+  ServerlessProjectType,
   detectRunningNodes,
+  getESp12Volume,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
   resolveDockerCmd,
@@ -22,27 +36,13 @@ import {
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
-  ES_SERVERLESS_DEFAULT_IMAGE,
   setupServerlessVolumes,
   stopServerlessCluster,
   teardownServerlessClusterSync,
   verifyDockerInstalled,
-  getESp12Volume,
-  ServerlessOptions,
-  ServerlessProjectType,
 } from './docker';
-import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
-import {
-  SERVERLESS_CONFIG_PATH,
-  SERVERLESS_RESOURCES_PATHS,
-  SERVERLESS_SECRETS_PATH,
-  SERVERLESS_JWKS_PATH,
-  SERVERLESS_IDP_METADATA_PATH,
-} from '../paths';
-import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
-import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+import * as waitClusterUtil from './wait_until_cluster_ready';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');

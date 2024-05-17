@@ -8,10 +8,10 @@ import type { Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import {
-  serverMock,
-  requestContextMock,
   mockGetCurrentUser,
+  requestContextMock,
   requestMock,
+  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetTagsResult } from '../__mocks__';
 import { createTagRoute } from './create_tag';

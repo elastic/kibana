@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,9 +18,10 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { UPGRADE_LICENSE_TITLE } from '../../i18n';
+import React from 'react';
 import ctaImage from '../../assets/elastic_ai_assistant.png';
 import { useLicenseManagementLocator } from '../../hooks/use_license_management_locator';
+import { UPGRADE_LICENSE_TITLE } from '../../i18n';
 
 const incorrectLicenseContainer = css`
   height: 100%;

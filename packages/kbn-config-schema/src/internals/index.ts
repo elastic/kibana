@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Stream } from 'stream';
 import Joi from 'joi';
-import type { JoiRoot, CustomHelpers } from 'joi';
+import type { CustomHelpers, JoiRoot } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
-import { Stream } from 'stream';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';
 

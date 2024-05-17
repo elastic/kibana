@@ -7,9 +7,9 @@
  */
 
 import { ImportResolver } from '@kbn/import-resolver';
+import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { ModuleId } from './module_id';
 import { ModuleType } from './module_type';
-import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { RepoPath } from './repo_path';
 
 const STATIC_EXTS = new Set(

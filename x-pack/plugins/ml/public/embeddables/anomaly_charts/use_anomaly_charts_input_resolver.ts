@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import type { Observable } from 'rxjs';
-import { combineLatest, of, Subject } from 'rxjs';
-import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import type { MlStartDependencies } from '../../plugin';
-import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import {
-  getSelectionInfluencers,
-  getSelectionJobIds,
-  getSelectionTimeRange,
-} from '../../application/explorer/explorer_utils';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { useEffect, useMemo, useState } from 'react';
+import type { Observable } from 'rxjs';
+import { Subject, combineLatest, of } from 'rxjs';
+import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs';
 import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
 } from '..';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
-import { processFilters } from '../common/process_filters';
+import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import {
+  getSelectionInfluencers,
+  getSelectionJobIds,
+  getSelectionTimeRange,
+} from '../../application/explorer/explorer_utils';
+import type { MlStartDependencies } from '../../plugin';
 import { getJobsObservable } from '../common/get_jobs_observable';
+import { processFilters } from '../common/process_filters';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 

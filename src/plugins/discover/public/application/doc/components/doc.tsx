@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
-import { setBreadcrumbs } from '../../../utils/breadcrumbs';
+import React, { useEffect } from 'react';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 
 export interface DocProps extends EsDocSearchProps {
   /**

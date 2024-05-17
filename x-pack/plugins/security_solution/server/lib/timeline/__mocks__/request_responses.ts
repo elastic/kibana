@@ -8,20 +8,20 @@
 import path, { join, resolve } from 'path';
 import type * as rt from 'io-ts';
 
+import type {
+  GetTimelineQuery,
+  SavedTimeline,
+  createTimelineSchema,
+  patchTimelineSchema,
+} from '../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import {
   TIMELINE_DRAFT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
-  TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
+  TIMELINE_URL,
 } from '../../../../common/constants';
-import type {
-  SavedTimeline,
-  patchTimelineSchema,
-  createTimelineSchema,
-  GetTimelineQuery,
-} from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 

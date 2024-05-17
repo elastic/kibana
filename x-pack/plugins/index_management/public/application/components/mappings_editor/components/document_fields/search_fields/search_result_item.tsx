@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import React from 'react';
 
-import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
-import { useDispatch } from '../../../mappings_state_context';
 import { getTypeLabelFromField } from '../../../lib';
+import { useDispatch } from '../../../mappings_state_context';
+import { SearchResult } from '../../../types';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
 
 interface Props {

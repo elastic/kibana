@@ -8,13 +8,13 @@
 import type { ProcedureName } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { get } from './get';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
-import { update } from './update';
 import { deleteProc } from './delete';
-import { search } from './search';
+import { get } from './get';
 import { mSearch } from './msearch';
+import { search } from './search';
+import { update } from './update';
 
 export const procedures: { [key in ProcedureName]: ProcedureDefinition<Context, any, any> } = {
   get,

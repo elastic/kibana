@@ -8,8 +8,8 @@
 import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import { logoutApp } from './logout_app';
 import { AnalyticsService } from '../../analytics';
+import { logoutApp } from './logout_app';
 
 describe('logoutApp', () => {
   beforeAll(() => {

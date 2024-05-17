@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { TimelineType } from '../../../../common/api/timeline';
+import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { useUserPrivileges } from '../user_privileges';
-import * as i18n from './translations';
 import { ActionIconItem } from './action_icon_item';
+import * as i18n from './translations';
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;

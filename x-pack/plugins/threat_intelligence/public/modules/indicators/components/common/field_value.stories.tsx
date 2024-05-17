@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockIndicator } from '../../../../../common/types/indicator';
+import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { IndicatorFieldValue } from './field_value';
 
 export default {

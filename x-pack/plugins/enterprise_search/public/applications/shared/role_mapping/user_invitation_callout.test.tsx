@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiText, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiText } from '@elastic/eui';
 
 import { EXISTING_INVITATION_LABEL } from './constants';
 

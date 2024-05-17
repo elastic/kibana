@@ -1,7 +1,5 @@
 {
-  "index_patterns": [
-    "kbn-data-forge-fake_stack.admin-console-*"
-  ],
+  "index_patterns": ["kbn-data-forge-fake_stack.admin-console-*"],
   "mappings": {
     "_meta": {
       "version": "1.6.0"

@@ -11,8 +11,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import { DataViewsCommonService } from '@kbn/data-plugin/server';
-import { CreateDocSourceResp } from '../../common/types';
 import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
+import { CreateDocSourceResp } from '../../common/types';
 
 const DEFAULT_META = {
   _meta: {

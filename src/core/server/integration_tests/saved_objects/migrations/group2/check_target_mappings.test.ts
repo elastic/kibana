@@ -7,16 +7,16 @@
  */
 
 import Path from 'path';
-import fs from 'fs/promises';
 import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { Root } from '@kbn/core-root-server-internal';
 import {
+  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
-  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { REPO_ROOT } from '@kbn/repo-info';
+import fs from 'fs/promises';
 import { delay } from '../test_utils';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');

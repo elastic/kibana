@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getTotalLoaded, toKibanaSearchResponse, shimHitsTotal } from './response_utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getTotalLoaded, shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 
 describe('response utils', () => {
   describe('getTotalLoaded', () => {

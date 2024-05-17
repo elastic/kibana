@@ -23,8 +23,8 @@ import {
   RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import {
-  RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,
+  RULE_SAVED_OBJECT_TYPE,
 } from '../../event_log/event_log_constants';
 
 export interface IEventLogWriter {

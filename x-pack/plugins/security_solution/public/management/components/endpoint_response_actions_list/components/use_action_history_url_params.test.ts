@@ -8,9 +8,9 @@ import { actionsLogFiltersFromUrlParams } from './use_action_history_url_params'
 
 import {
   CONSOLE_RESPONSE_ACTION_COMMANDS,
+  type ConsoleResponseActionCommands,
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_TYPE,
-  type ConsoleResponseActionCommands,
   type ResponseActionAgentType,
   type ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';

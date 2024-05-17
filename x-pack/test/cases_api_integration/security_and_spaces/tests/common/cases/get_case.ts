@@ -12,35 +12,35 @@ import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  defaultUser,
-  postCaseReq,
-  postCaseResp,
-  postCommentUserReq,
-  getPostCaseRequest,
-  postCommentAlertReq,
-} from '../../../../common/lib/mock';
-import {
-  deleteCasesByESQuery,
+  bulkCreateAttachments,
   createCase,
-  getCase,
   createComment,
+  deleteCasesByESQuery,
+  extractWarningValueFromWarningHeader,
+  getCase,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
-  extractWarningValueFromWarningHeader,
-  bulkCreateAttachments,
 } from '../../../../common/lib/api';
-import {
-  secOnly,
-  obsOnly,
-  globalRead,
-  superUser,
-  secOnlyRead,
-  obsOnlyRead,
-  obsSecRead,
-  noKibanaPrivileges,
-  obsSec,
-} from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
+import {
+  defaultUser,
+  getPostCaseRequest,
+  postCaseReq,
+  postCaseResp,
+  postCommentAlertReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

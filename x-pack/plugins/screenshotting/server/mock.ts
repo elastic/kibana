@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ScreenshottingStart } from '.';
 import { createMockBrowserDriverFactory } from './browsers/mock';
 import { createMockScreenshots } from './screenshots/mock';
-import type { ScreenshottingStart } from '.';
 
 export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart> {
   const driver = createMockBrowserDriverFactory();

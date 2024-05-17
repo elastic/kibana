@@ -8,7 +8,7 @@
 import { RefreshInterval, TimefilterContract } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { IStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { map, merge, Observable, of } from 'rxjs';
+import { Observable, map, merge, of } from 'rxjs';
 
 export const timefilterStateStorageKey = 'timefilter';
 type TimefilterStateStorageKey = typeof timefilterStateStorageKey;

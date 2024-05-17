@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmFields, SynthtraceGenerator, apm, timerange } from '@kbn/apm-synthtrace-client';
 
 describe('simple trace', () => {
   let iterable: SynthtraceGenerator<ApmFields>;

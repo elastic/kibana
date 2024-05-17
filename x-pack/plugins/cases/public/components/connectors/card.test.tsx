@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { ConnectorTypes } from '../../../common/types/domain';
-import { ConnectorCard } from './card';
 import { createQueryWithMarkup } from '../../common/test_utils';
+import { ConnectorCard } from './card';
 
 describe('ConnectorCard ', () => {
   it('does not throw when accessing the icon if the connector type is not registered', () => {

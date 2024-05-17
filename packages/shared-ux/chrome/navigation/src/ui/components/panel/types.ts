@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ReactNode, ComponentType } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ComponentType, ReactNode } from 'react';
 
 export interface PanelComponentProps {
   /** Handler to close the panel */

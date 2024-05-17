@@ -12,24 +12,24 @@ import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/de
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
-  getPreviewAlerts,
-  previewRule,
-  getAlerts,
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import {
   dataGeneratorFactory,
+  getAlerts,
+  getPreviewAlerts,
+  patchRule,
+  previewRule,
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
-  patchRule,
 } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../../common/utils/security_solution';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

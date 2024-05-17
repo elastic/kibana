@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
 
-import type { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
+import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core/server';
 
 import type {
   CommonResponseStatusSchema,

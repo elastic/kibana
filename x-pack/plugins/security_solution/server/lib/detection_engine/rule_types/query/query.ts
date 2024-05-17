@@ -11,18 +11,18 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 
-import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { getFilter } from '../utils/get_filter';
-import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
-import { groupAndBulkCreate } from './alert_suppression/group_and_bulk_create';
-import { searchAfterAndBulkCreate } from '../utils/search_after_bulk_create';
+import { firstValueFrom } from 'rxjs';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { UnifiedQueryRuleParams } from '../../rule_schema';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { CreateQueryRuleAdditionalOptions, RunOpts } from '../types';
+import { getFilter } from '../utils/get_filter';
+import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
+import { searchAfterAndBulkCreate } from '../utils/search_after_bulk_create';
+import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
+import { groupAndBulkCreate } from './alert_suppression/group_and_bulk_create';
 
 export const queryExecutor = async ({
   runOpts,

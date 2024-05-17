@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { useNavigateToPath } from '../../../../../../../contexts/kibana';
 

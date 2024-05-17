@@ -1,3 +1,7 @@
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { coreMock } from '@kbn/core/public/mocks';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +9,9 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { coreMock } from '@kbn/core/public/mocks';
-import userEvent from '@testing-library/user-event';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
-import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
 import { Response, Selector } from '../../../common';
+import { TestProvider } from '../../test/test_provider';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 import {
-  FieldConfig,
   FIELD_TYPES,
-  fieldValidators,
+  FieldConfig,
   UseField,
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
 const { emptyField, isJsonField } = fieldValidators;

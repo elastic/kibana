@@ -7,35 +7,35 @@
 
 /* eslint-disable no-continue */
 
-import React, { memo, useMemo } from 'react';
+import type { EuiBasicTableColumn, EuiBreadcrumb, EuiSearchBarProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
-import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime } from './styles';
-import { GeneratedText } from '../generated_text';
+import styled from 'styled-components';
+import * as eventModel from '../../../../common/endpoint/models/event';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
-import { Breadcrumbs } from './breadcrumbs';
-import * as eventModel from '../../../../common/endpoint/models/event';
-import * as selectors from '../../store/selectors';
-import { PanelLoading } from './panel_loading';
-import { PanelContentError } from './panel_content_error';
-import { DescriptiveName } from './descriptive_name';
-import { useLinkProps } from '../use_link_props';
-import type { SafeResolverEvent } from '../../../../common/endpoint/types';
-import { deepObjectEntries } from './deep_object_entries';
-import { useFormattedDate } from './use_formatted_date';
-import * as nodeDataModel from '../../models/node_data';
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
+import { getSourcererScopeId } from '../../../helpers';
+import * as nodeDataModel from '../../models/node_data';
+import * as selectors from '../../store/selectors';
+import { GeneratedText } from '../generated_text';
+import { StyledPanel } from '../styles';
+import { useLinkProps } from '../use_link_props';
+import { Breadcrumbs } from './breadcrumbs';
+import { deepObjectEntries } from './deep_object_entries';
+import { DescriptiveName } from './descriptive_name';
+import { PanelContentError } from './panel_content_error';
+import { PanelLoading } from './panel_loading';
+import { BoldCode, StyledTime } from './styles';
+import { useFormattedDate } from './use_formatted_date';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',

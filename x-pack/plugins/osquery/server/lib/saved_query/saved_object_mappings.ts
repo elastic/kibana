@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
-import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core/server';
+import { produce } from 'immer';
+import {
+  packAssetSavedObjectType,
+  packSavedObjectType,
+  savedQuerySavedObjectType,
+  usageMetricSavedObjectType,
+} from '../../../common/types';
 import {
   packAssetSavedObjectModelVersion1,
   packSavedObjectModelVersion1,
   savedQueryModelVersion1,
 } from './saved_object_model_versions';
-import {
-  savedQuerySavedObjectType,
-  packSavedObjectType,
-  packAssetSavedObjectType,
-  usageMetricSavedObjectType,
-} from '../../../common/types';
 
 export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {

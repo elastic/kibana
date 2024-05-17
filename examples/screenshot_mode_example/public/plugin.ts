@@ -7,9 +7,9 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
-import { MetricsTracking } from './services';
 import { PLUGIN_NAME } from '../common';
+import { MetricsTracking } from './services';
+import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 
 export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
   uiTracking = new MetricsTracking();

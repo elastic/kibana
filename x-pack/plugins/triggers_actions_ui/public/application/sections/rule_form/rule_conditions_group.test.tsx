@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import { EuiButtonIcon, EuiFormRow } from '@elastic/eui';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import * as React from 'react';
+import { act } from 'react-dom/test-utils';
 import { RuleConditionsGroup } from './rule_conditions_group';
-import { EuiFormRow, EuiButtonIcon } from '@elastic/eui';
 
 describe('rule_conditions_group', () => {
   async function setup(element: React.ReactElement): Promise<ReactWrapper<unknown>> {

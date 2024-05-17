@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchLastSuccessfulCheck } from '../../../state';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { fetchLastSuccessfulCheck } from '../../../state';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 import { ScreenshotImageSize } from '../../common/screenshot/screenshot_size';
 

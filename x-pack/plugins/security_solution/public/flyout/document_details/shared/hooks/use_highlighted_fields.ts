@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
-import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import {
-  SENTINEL_ONE_AGENT_ID_FIELD,
-  isAlertFromSentinelOneEvent,
-} from '../../../../common/utils/sentinelone_alert_check';
-import { isAlertFromEndpointEvent } from '../../../../common/utils/endpoint_alert_check';
 import {
   getEventCategoriesFromData,
   getEventFieldsToDisplay,
 } from '../../../../common/components/event_details/get_alert_summary_rows';
+import { isAlertFromEndpointEvent } from '../../../../common/utils/endpoint_alert_check';
+import {
+  SENTINEL_ONE_AGENT_ID_FIELD,
+  isAlertFromSentinelOneEvent,
+} from '../../../../common/utils/sentinelone_alert_check';
 
 export interface UseHighlightedFieldsParams {
   /**

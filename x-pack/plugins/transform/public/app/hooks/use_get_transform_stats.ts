@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+import { TRANSFORM_REACT_QUERY_KEYS, addInternalBasePath } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 
 import { useAppDependencies } from '../app_dependencies';

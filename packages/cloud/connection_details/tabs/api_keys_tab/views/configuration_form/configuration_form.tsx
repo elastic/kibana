@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { ConfigurationFormControlled } from './configuration_form_controlled';
+import * as React from 'react';
 import { useConnectionDetailsService } from '../../../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
+import { ConfigurationFormControlled } from './configuration_form_controlled';
 
 export const ConfigurationForm: React.FC = () => {
   const service = useConnectionDetailsService();

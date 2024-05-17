@@ -6,12 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import * as fixtures from '../../test/fixtures';
-import { SNAPSHOT_STATE } from '../../public/application/constants';
 import { API_BASE_PATH } from '../../common';
-import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
-import { HomeTestBed } from './helpers/home.helpers';
+import { SNAPSHOT_STATE } from '../../public/application/constants';
+import * as fixtures from '../../test/fixtures';
+import { findTestSubject, getRandomString, pageHelpers, setupEnvironment } from './helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
+import { HomeTestBed } from './helpers/home.helpers';
 
 const { setup } = pageHelpers.home;
 

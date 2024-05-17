@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { ShardFailureTable } from './shard_failure_table';
 
 interface Props {

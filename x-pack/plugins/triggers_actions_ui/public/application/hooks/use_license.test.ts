@@ -1,3 +1,5 @@
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +7,8 @@
  * 2.0.
  */
 import { BehaviorSubject } from 'rxjs';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
-import { useLicense } from './use_license';
 import { useKibana } from '../../common/lib/kibana';
+import { useLicense } from './use_license';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

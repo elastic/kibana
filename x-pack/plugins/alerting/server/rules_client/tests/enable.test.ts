@@ -6,28 +6,28 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { migrateLegacyActions } from '../lib';
 import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { ConstructorOptions, RulesClient } from '../rules_client';
+import { getBeforeSetup, setGlobalDate } from './lib';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {

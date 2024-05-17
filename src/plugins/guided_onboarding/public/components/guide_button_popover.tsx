@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useRef, useState } from 'react';
 import { EuiPopover, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
 interface GuideButtonPopoverProps {

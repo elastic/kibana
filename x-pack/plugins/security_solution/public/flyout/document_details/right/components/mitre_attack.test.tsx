@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, render } from '@testing-library/react';
-import { MitreAttack } from './mitre_attack';
-import { RightPanelContext } from '../context';
-import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
+import React from 'react';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
+import { RightPanelContext } from '../context';
+import { MitreAttack } from './mitre_attack';
+import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
 const renderMitreAttack = (contextValue: RightPanelContext) =>
   render(

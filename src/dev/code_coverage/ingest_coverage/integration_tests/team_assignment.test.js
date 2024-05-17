@@ -7,8 +7,8 @@
  */
 
 import { resolve } from 'path';
-import execa from 'execa';
 import del from 'del';
+import execa from 'execa';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');

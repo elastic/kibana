@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { WriteSettings } from '../../common/types';
 
 export async function writeDataToIndex(

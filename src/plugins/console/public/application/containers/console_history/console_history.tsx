@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+  keys,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
-import {
-  keys,
-  EuiSpacer,
-  EuiIcon,
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiButton,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { useServicesContext } from '../../contexts';
-import { HistoryViewer } from './history_viewer';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { useRestoreRequestFromHistory } from '../../hooks';
+import { HistoryViewer } from './history_viewer';
 
 interface Props {
   close: () => void;

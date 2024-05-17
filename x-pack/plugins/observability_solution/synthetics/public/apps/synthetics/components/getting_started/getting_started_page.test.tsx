@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
-import * as permissionsHooks from '../../hooks/use_fleet_permissions';
-import { render } from '../../utils/testing/rtl_helpers';
-import { GettingStartedPage } from './getting_started_page';
-import * as privateLocationsHooks from '../settings/private_locations/hooks/use_locations_api';
+import { kibanaService } from '../../../../utils/kibana_service';
 import * as settingsHooks from '../../contexts/synthetics_settings_context';
 import { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
-import { fireEvent } from '@testing-library/react';
-import { kibanaService } from '../../../../utils/kibana_service';
+import * as permissionsHooks from '../../hooks/use_fleet_permissions';
+import { render } from '../../utils/testing/rtl_helpers';
+import * as privateLocationsHooks from '../settings/private_locations/hooks/use_locations_api';
+import { GettingStartedPage } from './getting_started_page';
 
 describe('GettingStartedPage', () => {
   beforeEach(() => {

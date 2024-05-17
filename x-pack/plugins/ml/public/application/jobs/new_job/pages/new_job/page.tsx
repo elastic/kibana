@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect, Fragment, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { Wizard } from './wizard';
-import { WIZARD_STEPS } from '../components/step_types';
-import { getJobCreatorTitle } from '../../common/job_creator/util/general';
+import type { FC } from 'react';
+import React, { useEffect, Fragment, useMemo } from 'react';
 import {
-  jobCreatorFactory,
-  isAdvancedJobCreator,
-  isCategorizationJobCreator,
-  isRareJobCreator,
-  isGeoJobCreator,
-} from '../../common/job_creator';
-import {
-  JOB_TYPE,
-  DEFAULT_MODEL_MEMORY_LIMIT,
   DEFAULT_BUCKET_SPAN,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+  JOB_TYPE,
 } from '../../../../../../common/constants/new_job';
-import { ChartLoader } from '../../common/chart_loader';
-import { MapLoader } from '../../common/map_loader';
-import { ResultsLoader } from '../../common/results_loader';
-import { JobValidator } from '../../common/job_validator';
-import { useDataSource } from '../../../../contexts/ml';
+import { MlPageHeader } from '../../../../components/page_header';
 import { useMlKibana } from '../../../../contexts/kibana';
+import { useDataSource } from '../../../../contexts/ml';
 import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { mlJobService } from '../../../../services/job_service';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { MlPageHeader } from '../../../../components/page_header';
+import { ChartLoader } from '../../common/chart_loader';
+import {
+  isAdvancedJobCreator,
+  isCategorizationJobCreator,
+  isGeoJobCreator,
+  isRareJobCreator,
+  jobCreatorFactory,
+} from '../../common/job_creator';
+import { getJobCreatorTitle } from '../../common/job_creator/util/general';
+import { JobValidator } from '../../common/job_validator';
+import { MapLoader } from '../../common/map_loader';
+import { ResultsLoader } from '../../common/results_loader';
+import { WIZARD_STEPS } from '../components/step_types';
+import { Wizard } from './wizard';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;

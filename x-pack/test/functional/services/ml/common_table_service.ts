@@ -43,14 +43,17 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       for (const tr of $.findTestSubjects(`~${this.tableRowSubj}`).toArray()) {
         const $tr = $(tr);
 
-        const rowObject = this.columns.reduce((acc, curr) => {
-          acc[curr.id] = $tr
-            .findTestSubject(curr.testSubj)
-            .find('.euiTableCellContent')
-            .text()
-            .trim();
-          return acc;
-        }, {} as Record<typeof this.columns[number]['id'], string>);
+        const rowObject = this.columns.reduce(
+          (acc, curr) => {
+            acc[curr.id] = $tr
+              .findTestSubject(curr.testSubj)
+              .find('.euiTableCellContent')
+              .text()
+              .trim();
+            return acc;
+          },
+          {} as Record<(typeof this.columns)[number]['id'], string>
+        );
 
         rows.push(rowObject);
       }

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { CustomThresholdAlertFields } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { CustomThresholdAlertFields } from '../types';
 
 import { CustomThresholdAlert, CustomThresholdRule } from '../components/types';
 

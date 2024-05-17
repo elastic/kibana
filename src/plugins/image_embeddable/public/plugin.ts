@@ -7,19 +7,19 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { IMAGE_EMBEDDABLE_TYPE } from './image_embeddable/constants';
 import { registerCreateImageAction } from './actions/create_image_action';
+import { IMAGE_EMBEDDABLE_TYPE } from './image_embeddable/constants';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;

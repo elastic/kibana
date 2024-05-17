@@ -8,17 +8,17 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IngestPipelinePanel } from './ingest_pipelines/ingest_pipeline_panel';
-import { CodeBox } from './code_box';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { LanguageDefinition } from '../types';
-import { OverviewPanel } from './overview_panel';
+import { CodeBox } from './code_box';
+import { IngestPipelinePanel } from './ingest_pipelines/ingest_pipeline_panel';
 import { IngestionsPanel } from './ingestions_panel';
+import { OverviewPanel } from './overview_panel';
 interface IngestDataProps {
   codeSnippet: string;
   selectedLanguage: LanguageDefinition;

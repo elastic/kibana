@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback } from 'react';
 import { MlPluginStart, TrainedModelConfigResponse } from '@kbn/ml-plugin/public';
+import { useCallback } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useComponentTemplatesContext } from '../../../../../../component_templates/component_templates_context';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import { v4 as uuidV4 } from 'uuid';
-import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { v4 as uuidV4 } from 'uuid';
 import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
-import type { EndpointCommandDefinitionMeta } from '../types';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import { getAgentStatusText } from '../../../../common/components/agents/agent_status_text';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../../hooks';
+import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import { POLICY_STATUS_TO_TEXT } from '../../../pages/endpoint_hosts/view/host_constants';
+import { ConsoleCodeBlock } from '../../console/components/console_code_block';
 import type { CommandExecutionComponentProps } from '../../console/types';
 import { FormattedError } from '../../formatted_error';
-import { ConsoleCodeBlock } from '../../console/components/console_code_block';
-import { POLICY_STATUS_TO_TEXT } from '../../../pages/endpoint_hosts/view/host_constants';
-import { getAgentStatusText } from '../../../../common/components/agents/agent_status_text';
+import type { EndpointCommandDefinitionMeta } from '../types';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<

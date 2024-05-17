@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import dedent from 'dedent';
-import { resolve, basename } from 'path';
 import { createHash } from 'crypto';
-import { promisify } from 'util';
-import { pipeline, Transform } from 'stream';
 import Fs from 'fs';
+import { basename, resolve } from 'path';
+import { Transform, pipeline } from 'stream';
+import { promisify } from 'util';
+import dedent from 'dedent';
 
-import getopts from 'getopts';
 import del from 'del';
+import getopts from 'getopts';
 
 import { buildSnapshot, log } from '../utils';
 import { Command } from './types';

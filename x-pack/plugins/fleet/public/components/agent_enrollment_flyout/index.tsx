@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiLink,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 
+import { FLEET_SERVER_PACKAGE } from '../../constants';
 import {
-  useStartServices,
-  useFleetStatus,
   useAgentEnrollmentFlyoutData,
   useFleetServerHostsForPolicy,
+  useFleetStatus,
+  useStartServices,
 } from '../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
-import type { PackagePolicy, AgentPolicy } from '../../types';
+import type { AgentPolicy, PackagePolicy } from '../../types';
 
 import { Loading } from '..';
 
 import { Instructions } from './instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
-import type { FlyOutProps, SelectionType, FlyoutMode } from './types';
+import type { FlyOutProps, FlyoutMode, SelectionType } from './types';
 
 import {
-  useIsK8sPolicy,
   useAgentPolicyWithPackagePolicies,
   useCloudSecurityIntegration,
+  useIsK8sPolicy,
 } from './hooks';
 
 export * from './agent_policy_selection';

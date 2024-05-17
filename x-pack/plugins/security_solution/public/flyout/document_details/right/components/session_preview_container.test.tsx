@@ -6,13 +6,9 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { RightPanelContext } from '../context';
-import { SessionPreviewContainer } from './session_preview_container';
-import { useSessionPreview } from '../hooks/use_session_preview';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { SESSION_PREVIEW_TEST_ID } from './test_ids';
+import { TestProviders } from '../../../../common/mock';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -21,6 +17,10 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { RightPanelContext } from '../context';
+import { useSessionPreview } from '../hooks/use_session_preview';
+import { SessionPreviewContainer } from './session_preview_container';
+import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 
 jest.mock('../hooks/use_session_preview');
 jest.mock('../../../../common/hooks/use_license');

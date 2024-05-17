@@ -7,11 +7,11 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
-import { createDatasetFilter } from './create_dataset_query_filter';
-import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
+import { Globals } from '../../static_globals';
+import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;

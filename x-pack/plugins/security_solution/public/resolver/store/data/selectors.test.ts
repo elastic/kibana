@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import * as selectors from './selectors';
-import type { DataState, AnalyzerById } from '../../types';
-import type { Reducer, AnyAction } from 'redux';
-import { dataReducer } from './reducer';
+import type { AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
-import {
-  mockTreeWithNoAncestorsAnd2Children,
-  mockTreeWith2AncestorsAndNoChildren,
-  mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
-  mockTreeWithNoProcessEvents,
-} from '../../mocks/resolver_tree';
-import { endpointSourceSchema } from '../../mocks/tree_schema';
 import * as nodeModel from '../../../../common/endpoint/models/node';
-import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
+import {
+  mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
+  mockTreeWith2AncestorsAndNoChildren,
+  mockTreeWithNoAncestorsAnd2Children,
+  mockTreeWithNoProcessEvents,
+} from '../../mocks/resolver_tree';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
+import { endpointSourceSchema } from '../../mocks/tree_schema';
 import { maxDate } from '../../models/time_range';
+import type { AnalyzerById, DataState } from '../../types';
+import { appReceivedNewExternalProperties } from '../actions';
 import { EMPTY_RESOLVER } from '../helpers';
 import {
-  serverReturnedResolverData,
-  appRequestedResolverData,
   appAbortedResolverDataRequest,
+  appRequestedResolverData,
   serverFailedToReturnResolverData,
   serverReturnedNodeData,
+  serverReturnedResolverData,
 } from './action';
-import { appReceivedNewExternalProperties } from '../actions';
+import { dataReducer } from './reducer';
+import * as selectors from './selectors';
 
 function mockNodeDataWithAllProcessesTerminated({
   originID,

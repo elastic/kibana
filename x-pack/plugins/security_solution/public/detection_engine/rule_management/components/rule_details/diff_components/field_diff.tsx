@@ -8,9 +8,9 @@
 import { EuiFlexGroup, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { camelCase, startCase } from 'lodash';
 import React from 'react';
+import type { FieldDiff, FormattedFieldDiff } from '../../../model/rule_details/rule_field_diff';
 import { DiffView } from '../json_diff/diff_view';
 import { RuleDiffPanelWrapper } from './panel_wrapper';
-import type { FormattedFieldDiff, FieldDiff } from '../../../model/rule_details/rule_field_diff';
 import { fieldToDisplayNameMap } from './translations';
 
 const SubFieldComponent = ({

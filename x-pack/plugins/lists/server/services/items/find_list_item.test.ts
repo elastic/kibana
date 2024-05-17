@@ -11,8 +11,8 @@ import { getFoundListItemSchemaMock } from '../../../common/schemas/response/fou
 import { getShardMock } from '../../schemas/common/get_shard.mock';
 import { getEmptySearchListMock } from '../../schemas/elastic_response/search_es_list_schema.mock';
 
-import { getFindListItemOptionsMock } from './find_list_item.mock';
 import { findListItem } from './find_list_item';
+import { getFindListItemOptionsMock } from './find_list_item.mock';
 
 describe('find_list_item', () => {
   test('should find a simple single list item', async () => {

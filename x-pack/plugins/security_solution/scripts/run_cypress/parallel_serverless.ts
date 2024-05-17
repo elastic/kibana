@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { run } from '@kbn/dev-cli-runner';
-import yargs from 'yargs';
-import _ from 'lodash';
-import globby from 'globby';
-import pMap from 'p-map';
-import { ToolingLog } from '@kbn/tooling-log';
-import { withProcRunner } from '@kbn/dev-proc-runner';
-import cypress from 'cypress';
-import grep from '@cypress/grep/src/plugin';
+import { exec } from 'child_process';
 import crypto from 'crypto';
 import fs from 'fs';
-import { exec } from 'child_process';
-import { createFailError } from '@kbn/dev-cli-errors';
-import axios, { AxiosError } from 'axios';
-import path from 'path';
 import os from 'os';
+import path from 'path';
+import grep from '@cypress/grep/src/plugin';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosError } from 'axios';
+import cypress from 'cypress';
+import globby from 'globby';
+import _ from 'lodash';
+import pMap from 'p-map';
 import pRetry from 'p-retry';
+import yargs from 'yargs';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
-import { prefixedOutputLogger } from '../endpoint/common/utils';
 
-import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
 import { CloudHandler } from './project_handler/cloud_project_handler';
+import type { Credentials, ProductType, ProjectHandler } from './project_handler/project_handler';
 import { ProxyHandler } from './project_handler/proxy_project_handler';
 
 const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
@@ -298,15 +298,18 @@ export const cli = () => {
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
-          arg.split(',').reduce((acc, curr) => {
-            const [key, value] = curr.split('=');
-            if (key === 'burn') {
-              acc[key] = parseInt(value, 10);
-            } else {
-              acc[key] = value;
-            }
-            return acc;
-          }, {} as Record<string, string | number>)
+          arg.split(',').reduce(
+            (acc, curr) => {
+              const [key, value] = curr.split('=');
+              if (key === 'burn') {
+                acc[key] = parseInt(value, 10);
+              } else {
+                acc[key] = value;
+              }
+              return acc;
+            },
+            {} as Record<string, string | number>
+          )
         )
         .option('tier', {
           alias: 't',

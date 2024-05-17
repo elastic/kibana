@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
@@ -18,9 +16,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
-import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
 
 interface TestsSelectionControlProps {
@@ -47,7 +47,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
       <>
         <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
           {(
-            Object.entries(uiConfig) as Array<[JobsHealthTests, typeof uiConfig[JobsHealthTests]]>
+            Object.entries(uiConfig) as Array<[JobsHealthTests, (typeof uiConfig)[JobsHealthTests]]>
           ).map(([name, conf], i) => {
             return (
               <EuiDescribedFormGroup

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
-import { LocationStatusTags } from '../availability_reporting';
 import { MonitorLocations } from '../../../../../../common/runtime_types';
+import { LocationStatusTags } from '../availability_reporting';
 import { MonitoringFrom } from '../translations';
 
 const EuiFlexItemTags = styled(EuiFlexItem)`

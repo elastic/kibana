@@ -33,44 +33,44 @@ import {
 
 import {
   sendPostOutput,
-  useComboInput,
-  useInput,
-  useSecretInput,
-  useNumberInput,
-  useSelectInput,
-  useSwitchInput,
-  useStartServices,
-  useFleetStatus,
-  useRadioInput,
   sendPutOutput,
-  useKeyValueInput,
   useAuthz,
+  useComboInput,
+  useFleetStatus,
+  useInput,
+  useKeyValueInput,
+  useNumberInput,
+  useRadioInput,
+  useSecretInput,
+  useSelectInput,
+  useStartServices,
+  useSwitchInput,
 } from '../../../../hooks';
+import { ExperimentalFeaturesService } from '../../../../services';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { ExperimentalFeaturesService } from '../../../../services';
 
+import { confirmUpdate } from './confirm_update';
 import {
-  validateName,
-  validateESHosts,
-  validateLogstashHosts,
-  validateYamlConfig,
   validateCATrustedFingerPrint,
-  validateServiceToken,
-  validateServiceTokenSecret,
+  validateESHosts,
+  validateKafkaClientId,
+  validateKafkaDefaultTopic,
+  validateKafkaHeaders,
+  validateKafkaHosts,
+  validateKafkaPartitioningGroupEvents,
+  validateKafkaPassword,
+  validateKafkaPasswordSecret,
+  validateKafkaUsername,
+  validateLogstashHosts,
+  validateName,
   validateSSLCertificate,
   validateSSLKey,
   validateSSLKeySecret,
-  validateKafkaUsername,
-  validateKafkaPassword,
-  validateKafkaPasswordSecret,
-  validateKafkaHeaders,
-  validateKafkaDefaultTopic,
-  validateKafkaClientId,
-  validateKafkaHosts,
-  validateKafkaPartitioningGroupEvents,
+  validateServiceToken,
+  validateServiceTokenSecret,
+  validateYamlConfig,
 } from './output_form_validators';
-import { confirmUpdate } from './confirm_update';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 

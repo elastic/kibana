@@ -8,16 +8,16 @@
 
 import Path from 'path';
 
-import { TSESTree } from '@typescript-eslint/typescript-estree';
 import * as Bt from '@babel/types';
+import { ModuleType } from '@kbn/repo-source-classifier';
+import { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import ESTree from 'estree';
-import { ModuleType } from '@kbn/repo-source-classifier';
 
-import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
-import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
+import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
+import { getSourcePath } from '../helpers/source';
+import { Importer, visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
 const ANY = Symbol();
 

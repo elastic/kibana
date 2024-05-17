@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { argTypeSpecs } from '../expression_types/arg_types';
 import { argTypeRegistry } from '../expression_types';
+import { argTypeSpecs } from '../expression_types/arg_types';
 
 export function loadExpressionTypes() {
   // register default args, arg types, and expression types

@@ -6,42 +6,42 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { useCallback, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
-import { NewTimelineButton } from '../actions/new_timeline_button';
-import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
+import { InspectButton } from '../../../../common/components/inspect';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useKibana } from '../../../../common/lib/kibana';
+import { combineQueries } from '../../../../common/lib/kuery';
+import type { State } from '../../../../common/store';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
+import { timelineActions } from '../../../store';
 import {
   selectDataInTimeline,
   selectKqlQuery,
   selectTimelineById,
   selectTitleByTimelineById,
 } from '../../../store/selectors';
-import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
-import { timelineActions } from '../../../store';
-import type { State } from '../../../../common/store';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { combineQueries } from '../../../../common/lib/kuery';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import * as i18n from '../translations';
 import { AddToFavoritesButton } from '../../add_to_favorites';
 import { TimelineSaveStatus } from '../../save_status';
-import { InspectButton } from '../../../../common/components/inspect';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 import { AttachToCaseButton } from '../actions/attach_to_case_button';
+import { NewTimelineButton } from '../actions/new_timeline_button';
+import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { SaveTimelineButton } from '../actions/save_timeline_button';
+import * as i18n from '../translations';
 
 const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
 const autoOverflowXCSS = { 'overflow-x': 'auto' };

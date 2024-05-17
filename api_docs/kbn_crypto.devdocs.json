@@ -42,9 +42,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "string | Buffer"
-            ],
+            "signature": ["string | Buffer"],
             "path": "packages/kbn-crypto/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,9 +55,7 @@
             "tags": [],
             "label": "outputEncoding",
             "description": [],
-            "signature": [
-              "BinaryToTextEncoding"
-            ],
+            "signature": ["BinaryToTextEncoding"],
             "path": "packages/kbn-crypto/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,13 +69,9 @@
         "parentPluginId": "@kbn/crypto",
         "id": "def-common.readPkcs12Keystore",
         "type": "Function",
-        "tags": [
-          "privateRemarks"
-        ],
+        "tags": ["privateRemarks"],
         "label": "readPkcs12Keystore",
-        "description": [
-          "\nReads a private key and certificate chain from a PKCS12 key store.\n"
-        ],
+        "description": ["\nReads a private key and certificate chain from a PKCS12 key store.\n"],
         "signature": [
           "(path: string, password?: string | undefined) => ",
           {
@@ -100,12 +92,8 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": [
-              "The file path of the PKCS12 key store"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The file path of the PKCS12 key store"],
+            "signature": ["string"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -120,18 +108,14 @@
             "description": [
               "The optional password of the key store and private key;\nif there is no password, this may be an empty string or `undefined`,\ndepending on how the key store was generated."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "the parsed private key and certificate(s) in PEM format"
-        ],
+        "returnComment": ["the parsed private key and certificate(s) in PEM format"],
         "initialIsOpen": false
       },
       {
@@ -140,12 +124,8 @@
         "type": "Function",
         "tags": [],
         "label": "readPkcs12Truststore",
-        "description": [
-          "\nReads a certificate chain from a PKCS12 trust store.\n"
-        ],
-        "signature": [
-          "(path: string, password?: string | undefined) => string[] | undefined"
-        ],
+        "description": ["\nReads a certificate chain from a PKCS12 trust store.\n"],
+        "signature": ["(path: string, password?: string | undefined) => string[] | undefined"],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -156,12 +136,8 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": [
-              "The file path of the PKCS12 trust store"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The file path of the PKCS12 trust store"],
+            "signature": ["string"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,18 +152,14 @@
             "description": [
               "The optional password of the trust store; if there is\nno password, this may be an empty string or `undefined`, depending on\nhow the trust store was generated."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "the parsed certificate(s) in PEM format"
-        ],
+        "returnComment": ["the parsed certificate(s) in PEM format"],
         "initialIsOpen": false
       }
     ],
@@ -210,9 +182,7 @@
             "tags": [],
             "label": "ca",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -224,9 +194,7 @@
             "tags": [],
             "label": "cert",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -238,9 +206,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
             "trackAdoption": false

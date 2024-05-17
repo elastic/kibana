@@ -10,8 +10,8 @@ import {
   StateContainer,
   createStateContainer,
 } from '@kbn/kibana-utils-plugin/common/state_containers';
-import { ExecutorState, defaultState as executorDefaultState } from '../executor';
 import { ExpressionAstExpression } from '../ast';
+import { ExecutorState, defaultState as executorDefaultState } from '../executor';
 import { ExpressionValue } from '../expression_types';
 
 export interface ExecutionState<Output = ExpressionValue> extends ExecutorState {

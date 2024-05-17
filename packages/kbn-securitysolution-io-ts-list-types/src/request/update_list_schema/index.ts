@@ -9,12 +9,12 @@
 import * as t from 'io-ts';
 
 import { version } from '@kbn/securitysolution-io-ts-types';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { id } from '../../common/id';
-import { name } from '../../common/name';
 import { description } from '../../common/description';
-import { _version } from '../../common/underscore_version';
+import { id } from '../../common/id';
 import { meta } from '../../common/meta';
+import { name } from '../../common/name';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { _version } from '../../common/underscore_version';
 
 export const updateListSchema = t.intersection([
   t.exact(

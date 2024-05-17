@@ -8,9 +8,9 @@
 import type { CoreSetup } from '@kbn/core/server';
 
 import {
-  savedQueryType,
-  packType,
   packAssetType,
+  packType,
+  savedQueryType,
   usageMetricType,
 } from './lib/saved_query/saved_object_mappings';
 

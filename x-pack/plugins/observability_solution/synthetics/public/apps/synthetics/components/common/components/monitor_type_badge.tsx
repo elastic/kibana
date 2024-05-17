@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { MouseEvent, KeyboardEvent } from 'react';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { MouseEvent, KeyboardEvent } from 'react';
 import {
-  EncryptedSyntheticsMonitor,
   ConfigKey,
+  EncryptedSyntheticsMonitor,
   FormMonitorType,
   MonitorTypeEnum,
 } from '../../../../../../common/runtime_types';

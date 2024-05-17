@@ -6,8 +6,6 @@
     "id": "savedObjectImportWarnings",
     "server": true,
     "browser": false,
-    "configPath": [
-      "saved_object_import_warnings"
-    ]
+    "configPath": ["saved_object_import_warnings"]
   }
 }

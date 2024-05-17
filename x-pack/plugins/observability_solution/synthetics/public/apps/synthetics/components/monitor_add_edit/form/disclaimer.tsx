@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ConfigKey, MonitorServiceLocation } from '../types';
 

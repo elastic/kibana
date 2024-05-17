@@ -7,10 +7,6 @@
     "id": "locatorExplorer",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "share",
-      "locatorExamples",
-      "developerExamples"
-    ]
+    "requiredPlugins": ["share", "locatorExamples", "developerExamples"]
   }
 }

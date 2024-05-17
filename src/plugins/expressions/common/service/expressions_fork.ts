@@ -14,8 +14,8 @@ import {
 } from '.';
 import { ExpressionAstExpression } from '../ast';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionRenderDefinition } from '../expression_renderers';
+import { AnyExpressionTypeDefinition } from '../expression_types';
 
 export interface ExpressionServiceFork {
   setup(): ExpressionsServiceSetup;
@@ -45,7 +45,10 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   /**
    * @note Workaround since the expressions service is frozen.
    */
-  constructor(private namespace: string, private expressionsService: ExpressionsService) {
+  constructor(
+    private namespace: string,
+    private expressionsService: ExpressionsService
+  ) {
     this.registerFunction = this.registerFunction.bind(this);
     this.registerRenderer = this.registerRenderer.bind(this);
     this.registerType = this.registerType.bind(this);

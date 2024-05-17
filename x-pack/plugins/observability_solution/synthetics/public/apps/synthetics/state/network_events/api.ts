@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   SyntheticsNetworkEventsApiResponse,
   SyntheticsNetworkEventsApiResponseType,
 } from '../../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 import { FetchNetworkEventsParams } from './actions';
 

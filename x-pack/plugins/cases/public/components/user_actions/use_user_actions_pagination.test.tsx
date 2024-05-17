@@ -7,11 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useUserActionsPagination } from './use_user_actions_pagination';
-import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { defaultInfiniteUseFindCaseUserActions } from '../case_view/mocks';
 import { basicCase } from '../../containers/mock';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import { defaultInfiniteUseFindCaseUserActions } from '../case_view/mocks';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
+import { useUserActionsPagination } from './use_user_actions_pagination';
 
 const userActivityQueryParams: UserActivityParams = {
   type: 'all',

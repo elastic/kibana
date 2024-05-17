@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { extract, inject } from './persistable_state';
-import { Filter } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
+import { extract, inject } from './persistable_state';
 
 describe('filter manager persistable state tests', () => {
   const filters: Filter[] = [

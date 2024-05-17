@@ -6,8 +6,8 @@
  */
 
 import {
-  AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
+  AlertingAuthorizationFilterType,
 } from '../../authorization';
 
 export {

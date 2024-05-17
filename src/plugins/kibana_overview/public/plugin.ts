@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import {
+  AppMountParameters,
+  AppStatus,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { distinct, map, switchMap } from 'rxjs';
+import { PLUGIN_ICON, PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
+import { init as initStatsReporter } from './lib/ui_metric';
 import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-  AppStatus,
-} from '@kbn/core/public';
-import {
-  KibanaOverviewPluginSetup,
-  KibanaOverviewPluginStart,
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
+  KibanaOverviewPluginSetup,
+  KibanaOverviewPluginStart,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
-import { init as initStatsReporter } from './lib/ui_metric';
 
 export class KibanaOverviewPlugin
   implements

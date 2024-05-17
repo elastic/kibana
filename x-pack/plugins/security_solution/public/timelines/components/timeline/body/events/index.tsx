@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import { isEmpty } from 'lodash';
+import React from 'react';
 
-import type { ControlColumnProps } from '../../../../../../common/types';
-import type { inputsModel } from '../../../../../common/store';
 import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import type {
-  ColumnHeaderOptions,
   CellValueElementProps,
+  ColumnHeaderOptions,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { inputsModel } from '../../../../../common/store';
 import type { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
-import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';
+import { StatefulEvent } from './stateful_event';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;

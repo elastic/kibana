@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { EuiIcon } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import type { Query } from '@kbn/es-query';
 import { asyncMap } from '@kbn/std';
+import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { DataRequest } from '../../util/data_request';
-import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import {
   Attribution,
   CustomIcon,
@@ -25,12 +23,14 @@ import {
   StyleDescriptor,
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
-import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
-import { ILayer, LayerIcon, LayerMessage } from '../layer';
-import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
+import { ISource, SourceEditorArgs } from '../../sources/source';
+import { IStyle } from '../../styles/style';
+import { DataRequest } from '../../util/data_request';
+import { ILayer, LayerIcon, LayerMessage } from '../layer';
 
 export function isLayerGroup(layer: ILayer): layer is LayerGroup {
   return layer instanceof LayerGroup;

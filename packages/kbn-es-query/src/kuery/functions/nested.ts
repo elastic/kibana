@@ -7,10 +7,10 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as ast from '../ast';
-import * as literal from '../node_types/literal';
 import type { DataViewBase, KueryQueryOptions } from '../../..';
+import * as ast from '../ast';
 import type { KqlFunctionNode, KqlLiteralNode } from '../node_types';
+import * as literal from '../node_types/literal';
 import type { KqlContext } from '../types';
 
 export const KQL_FUNCTION_NESTED = 'nested';

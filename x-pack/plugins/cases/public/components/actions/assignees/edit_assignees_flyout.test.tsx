@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { basicCase } from '../../../containers/mock';
-import { EditAssigneesFlyout } from './edit_assignees_flyout';
-import { screen, waitFor } from '@testing-library/react';
+import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
-import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
+import { EditAssigneesFlyout } from './edit_assignees_flyout';
 
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');

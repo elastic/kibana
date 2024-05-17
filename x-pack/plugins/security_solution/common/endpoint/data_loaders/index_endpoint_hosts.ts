@@ -6,32 +6,33 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { cloneDeep } from 'lodash';
-import type { AxiosResponse } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
-import type { KbnClient } from '@kbn/test';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
-import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { KbnClient } from '@kbn/test';
+import type { AxiosResponse } from 'axios';
+import { cloneDeep } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { EndpointError } from '../errors';
-import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
-import type {
-  DeleteIndexedFleetAgentsResponse,
-  IndexedFleetAgentResponse,
-} from './index_fleet_agent';
-import { buildFleetAgentBulkCreateOperations, deleteIndexedFleetAgents } from './index_fleet_agent';
 import type {
   DeleteIndexedEndpointFleetActionsResponse,
   IndexedEndpointAndFleetActionsForHostResponse,
 } from './index_endpoint_fleet_actions';
 import {
+  type IndexEndpointAndFleetActionsForHostOptions,
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
-  type IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
+import type {
+  DeleteIndexedFleetAgentsResponse,
+  IndexedFleetAgentResponse,
+} from './index_fleet_agent';
+import { buildFleetAgentBulkCreateOperations, deleteIndexedFleetAgents } from './index_fleet_agent';
+import { usageTracker } from './usage_tracker';
 
+import { metadataCurrentIndexPattern } from '../constants';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
@@ -40,7 +41,6 @@ import {
   deleteIndexedFleetEndpointPolicies,
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
-import { metadataCurrentIndexPattern } from '../constants';
 import { EndpointDataLoadingError, mergeAndAppendArrays, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse

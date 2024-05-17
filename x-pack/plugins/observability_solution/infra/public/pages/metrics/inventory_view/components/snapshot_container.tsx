@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { SnapshotNode } from '../../../../../common/http_api';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';

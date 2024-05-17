@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useTogglePanel } from './use_toggle_panel';
 
-import type { StepId } from '../types';
-import {
-  QuickStartSectionCardsId,
-  SectionId,
-  CreateProjectSteps,
-  OverviewSteps,
-  AddAndValidateYourDataCardsId,
-  AddIntegrationsSteps,
-  ViewDashboardSteps,
-  GetStartedWithAlertsCardsId,
-  ViewAlertsSteps,
-  EnablePrebuiltRulesSteps,
-} from '../types';
+import * as mockStorage from '../__mocks__/storage';
 import type { SecurityProductTypes } from '../configs';
 import { ProductLine } from '../configs';
 import { OnboardingStorage } from '../storage';
-import * as mockStorage from '../__mocks__/storage';
+import type { StepId } from '../types';
+import {
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  GetStartedWithAlertsCardsId,
+  OverviewSteps,
+  QuickStartSectionCardsId,
+  SectionId,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
+} from '../types';
 
 jest.mock('../storage', () => ({
   OnboardingStorage: jest.fn(),

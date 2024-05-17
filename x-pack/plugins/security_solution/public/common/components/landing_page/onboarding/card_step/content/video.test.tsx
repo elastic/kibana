@@ -1,3 +1,5 @@
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { fireEvent, render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { Video } from './video';
-import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../../types';
-import type { EuiFlexGroupProps } from '@elastic/eui';
 import { useStepContext } from '../../context/step_context';
-import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
 import { defaultExpandedCards } from '../../storage';
+import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
+import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../../types';
+import { Video } from './video';
 
 jest.mock('../../context/step_context');
 jest.mock('./content_wrapper');

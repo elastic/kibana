@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import React, { useEffect, useState } from 'react';
 import type { GeoContainmentAlertParams } from '../types';
 import { DataViewSelect } from './data_view_select';
-import { SingleFieldSelect } from './single_field_select';
 import { QueryInput } from './query_input';
+import { SingleFieldSelect } from './single_field_select';
 
 export const BOUNDARY_GEO_FIELD_TYPES = ['geo_shape'];
 

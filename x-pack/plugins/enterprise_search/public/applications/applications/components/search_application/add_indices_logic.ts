@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { UpdateSearchApplicationApiLogic } from '../../api/search_applications/update_search_application_api_logic';
 

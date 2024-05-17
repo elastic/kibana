@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { addInternalBasePath } from '../../../../common/constants';
 import {
-  transformIdParamSchema,
   type TransformIdParamSchema,
+  transformIdParamSchema,
 } from '../../../../common/api_schemas/common';
+import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 

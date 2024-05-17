@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import React from 'react';
 import {
   FIELD_ORIGIN,
   MIDDLE_TRUNCATION_PROPS,

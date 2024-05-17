@@ -9,7 +9,7 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import {
   EuiButton,

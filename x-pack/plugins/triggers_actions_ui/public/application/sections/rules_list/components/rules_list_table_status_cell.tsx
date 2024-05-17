@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiHealth,
-  EuiToolTip,
   EuiStat,
+  EuiToolTip,
 } from '@elastic/eui';
-import { RuleTableItem } from '../../../../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
-  getRuleHealthColor,
   getIsLicenseError,
+  getRuleHealthColor,
   getRuleStatusMessage,
 } from '../../../../common/lib/rule_status_helpers';
+import { RuleTableItem } from '../../../../types';
 import {
   ALERT_STATUS_LICENSE_ERROR,
   rulesLastRunOutcomeTranslationMapping,

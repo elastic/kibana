@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
-import moment from 'moment';
 
 import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 

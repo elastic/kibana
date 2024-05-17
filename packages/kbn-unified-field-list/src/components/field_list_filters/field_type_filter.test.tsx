@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
 
 const docLinks = coreMock.createStart().docLinks;

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import { getFlattenedObject } from '@kbn/std';
-import type { Filter, AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type {
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
+  PublishesDataViews,
   PublishesPanelTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
-  PublishesDataViews,
 } from '@kbn/presentation-publishing';
 import { getPanelTitle } from '@kbn/presentation-publishing';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { getFlattenedObject } from '@kbn/std';
+import type { ActionFactoryContext } from '../url_drilldown';
 import { txtValue } from './i18n';
 import { deleteUndefinedKeys } from './util';
-import type { ActionFactoryContext } from '../url_drilldown';
 
 /**
  * Part of context scope extracted from an api

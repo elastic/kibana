@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { isEqual } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { distinctUntilChanged, map } from 'rxjs';
-import { isEqual } from 'lodash';
 import { PLUGIN_ID } from '../constants/app';
 
 export const MINIMUM_LICENSE = 'basic';

@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, FieldSpec, SavedObject } from '../common';
 import type { QueryDslQueryContainer } from '../common/types';
 
 /**

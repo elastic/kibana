@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { FC, useMemo } from 'react';
 import type { FormattedStatus } from '../lib';
 
 interface StatusExpandedRowProps {

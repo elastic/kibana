@@ -6,9 +6,9 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { EditorFrameService } from './editor_frame_service';
-import { createChartInfoApi } from './chart_info_api';
 import type { LensSavedObjectAttributes } from '.';
+import { createChartInfoApi } from './chart_info_api';
+import type { EditorFrameService } from './editor_frame_service';
 
 const mockGetVisualizationInfo = jest.fn().mockReturnValue({
   layers: [

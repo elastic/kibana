@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { CertificatesPage } from './certificates';
 import { render } from '../lib/helper/rtl_helpers';
+import { CertificatesPage } from './certificates';
 
 describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {

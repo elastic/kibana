@@ -8,9 +8,9 @@
 
 import { inspect } from 'util';
 import {
-  createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
+  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
 
 describe('elasticsearch clients errors', () => {

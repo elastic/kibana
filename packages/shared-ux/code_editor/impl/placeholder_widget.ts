@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '@kbn/monaco';
-import { css } from '@emotion/css';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { monaco } from '@kbn/monaco';
 
 export class PlaceholderWidget implements monaco.editor.IContentWidget {
   constructor(

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { FlexGroup, StyledTitle } from './utils';
 import * as i18n from '../../../common/containers/query_toggle/translations';
+import { FlexGroup, StyledTitle } from './utils';
 
 const StatItemHeaderComponent = ({
   onToggle,

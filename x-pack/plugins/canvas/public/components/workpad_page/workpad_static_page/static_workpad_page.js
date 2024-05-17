@@ -6,9 +6,9 @@
  */
 
 import React, { PureComponent } from 'react';
+import { isGroupId } from '../../../lib/workpad';
 import { ElementWrapper } from '../../element_wrapper';
 import { staticWorkpadPagePropTypes } from '../prop_types';
-import { isGroupId } from '../../../lib/workpad';
 
 export class StaticWorkpadPage extends PureComponent {
   static propTypes = staticWorkpadPagePropTypes;
@@ -22,7 +22,7 @@ export class StaticWorkpadPage extends PureComponent {
         id={pageId}
         data-test-subj="canvasWorkpadPage"
         className={`canvasPage kbn-resetFocusState canvasStaticPage ${className}`}
-        data-shared-items-container
+        data-shared-items-container={true}
         style={{ ...pageStyle, ...animationStyle, height, width }}
       >
         {elements

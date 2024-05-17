@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
-import { satisfies } from 'semver';
-import { set } from '@kbn/safer-lodash-set';
-import { filter, reduce, mapKeys, each, unset, uniq, map, has } from 'lodash';
+import type { IRouter } from '@kbn/core/server';
 import type { PackagePolicyInputStream } from '@kbn/fleet-plugin/common';
 import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set';
+import { produce } from 'immer';
+import { each, filter, has, map, mapKeys, reduce, uniq, unset } from 'lodash';
+import { satisfies } from 'semver';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
-import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertPackQueriesToSO } from '../pack/utils';
 import { getInternalSavedObjectsClient } from '../utils';

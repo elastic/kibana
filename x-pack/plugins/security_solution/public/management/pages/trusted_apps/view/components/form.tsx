@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiSuperSelect,
-  EuiTextArea,
-  EuiText,
-  EuiTitle,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
-  hasSimpleExecutableName,
-  validateHasWildcardWithWrongOperator,
-  isPathValid,
   ConditionEntryField,
   OperatingSystem,
+  hasSimpleExecutableName,
+  isPathValid,
+  validateHasWildcardWithWrongOperator,
 } from '@kbn/securitysolution-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  getDuplicateFields,
+  isValidHash,
+} from '../../../../../../common/endpoint/service/artifacts/validations';
 import type {
-  TrustedAppConditionEntry,
   NewTrustedApp,
   PolicyData,
+  TrustedAppConditionEntry,
 } from '../../../../../../common/endpoint/types';
-import {
-  isValidHash,
-  getDuplicateFields,
-} from '../../../../../../common/endpoint/service/artifacts/validations';
 
 import {
-  isArtifactGlobal,
   getPolicyIdsFromArtifact,
+  isArtifactGlobal,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
@@ -50,30 +50,30 @@ import {
 } from '../../state/type_guards';
 
 import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { CONFIRM_WARNING_MODAL_LABELS, OS_TITLES } from '../../../../common/translations';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
+import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
+  DESCRIPTION_LABEL,
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
-  DESCRIPTION_LABEL,
   INPUT_ERRORS,
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
 } from '../translations';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
-import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
-import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
-import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { Route, HashRouter as Router, Routes } from '@kbn/shared-ux-router';
 import PropTypes from 'prop-types';
-import { Home } from './home';
-import { TutorialDirectory } from './tutorial_directory';
-import { Tutorial } from './tutorial/tutorial';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+import { Home } from './home';
+import { Tutorial } from './tutorial/tutorial';
+import { TutorialDirectory } from './tutorial_directory';
 
-import { getTutorial } from '../load_tutorials';
-import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
+import { getTutorial } from '../load_tutorials';
 import { GettingStarted } from './guided_onboarding';
+import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 

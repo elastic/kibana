@@ -13,18 +13,18 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
+import { ObservabilityOnboardingConfig } from '.';
 import { getObservabilityOnboardingServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
+import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
+import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import {
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStart,
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
-import { ObservabilityOnboardingConfig } from '.';
-import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
-import { EsLegacyConfigService } from './services/es_legacy_config_service';
 
 export class ObservabilityOnboardingPlugin
   implements

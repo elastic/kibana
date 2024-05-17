@@ -7,10 +7,10 @@
 
 import { stringMatch } from '../../util/string_utils';
 import type {
-  TermClause,
-  FieldClause,
-  Value,
   DataFrameAnalyticsListRow,
+  FieldClause,
+  TermClause,
+  Value,
 } from '../pages/analytics_management/components/analytics_list/common';
 
 export function filterAnalytics(

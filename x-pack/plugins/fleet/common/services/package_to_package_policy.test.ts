@@ -7,8 +7,8 @@
 
 import type { PackageInfo } from '../types';
 
-import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 import { AWS_PACKAGE } from './fixtures/aws_package';
+import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
 describe('Fleet - packageToPackagePolicy', () => {
   const mockPackage: PackageInfo = {

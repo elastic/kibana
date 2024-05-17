@@ -16,7 +16,7 @@ import {
   LEGACY_SHORT_URL_LOCATOR_ID,
   LegacyShortUrlLocatorParams,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
-import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
+import { RedirectOptions, parseSearchParams } from '../../../common/url_service/locators/redirect';
 import { getHomeHref } from '../../lib/get_home_href';
 
 export interface RedirectManagerDependencies {

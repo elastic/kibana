@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { Settings, TooltipType, SeriesIdentifier, Tooltip, TooltipAction } from '@elastic/charts';
+import { SeriesIdentifier, Settings, Tooltip, TooltipAction, TooltipType } from '@elastic/charts';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { shallow } from 'enzyme';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { shallow } from 'enzyme';
+import { cloneDeep } from 'lodash';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
+import { ChartTypes } from '../../common/types';
 import {
   createMockDonutParams,
   createMockPieParams,
@@ -24,9 +26,7 @@ import {
   createMockVisData,
   createMockWaffleParams,
 } from '../mocks';
-import { ChartTypes } from '../../common/types';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
-import { cloneDeep } from 'lodash';
+import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(

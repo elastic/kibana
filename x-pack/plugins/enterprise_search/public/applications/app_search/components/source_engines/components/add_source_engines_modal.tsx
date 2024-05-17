@@ -13,9 +13,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiModalFooter,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
@@ -25,8 +25,8 @@ import {
 import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 
 import {
-  ADD_SOURCE_ENGINES_MODAL_TITLE,
   ADD_SOURCE_ENGINES_MODAL_DESCRIPTION,
+  ADD_SOURCE_ENGINES_MODAL_TITLE,
   ADD_SOURCE_ENGINES_PLACEHOLDER,
 } from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { groups } from './groups.json';
 import { BuildkiteStep } from '#pipeline-utils';
+import { groups } from './groups.json';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {

@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LensConfigWithId } from '../../../types';
-import { formulas } from '../formulas';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
@@ -18,6 +16,8 @@ import {
   DISK_THROUGHPUT_LABEL,
   DISK_USAGE_BY_MOUNT_POINT_LABEL,
 } from '../../../shared/charts/constants';
+import { LensConfigWithId } from '../../../types';
+import { formulas } from '../formulas';
 
 const diskIOReadWrite: LensConfigWithId = {
   id: 'diskIOReadWrite',

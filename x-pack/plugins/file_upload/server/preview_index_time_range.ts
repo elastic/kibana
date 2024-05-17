@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import type {
   IngestPipeline,
   IngestSimulateDocument,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import dateMath from '@kbn/datemath';
 
 type Doc = IngestSimulateDocument['_source'];
 

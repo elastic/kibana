@@ -6,8 +6,8 @@
  */
 
 import { DocLinksStart } from '@kbn/core/public';
-import { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
+import { DataType } from '../components/mappings_editor/types';
 
 class DocumentationService {
   private links: DocLinksStart['links'] | undefined;

@@ -13,74 +13,74 @@ import {
   CASES_INTERNAL_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  SECURITY_SOLUTION_OWNER,
-  INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
+  SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
 
 import {
+  createAttachments,
   deleteCases,
   deleteComment,
+  deleteFileAttachments,
+  findCaseUserActions,
   getActionLicense,
   getCase,
-  getCases,
-  findCaseUserActions,
-  getTags,
-  patchCase,
-  updateCases,
-  patchComment,
-  postCase,
-  createAttachments,
-  pushCase,
-  resolveCase,
-  getFeatureIds,
-  postComment,
   getCaseConnectors,
   getCaseUserActionsStats,
-  deleteFileAttachments,
+  getCases,
   getCategories,
+  getFeatureIds,
+  getTags,
+  patchCase,
+  patchComment,
+  postCase,
+  postComment,
+  pushCase,
   replaceCustomField,
+  resolveCase,
+  updateCases,
 } from './api';
 
 import {
   actionLicenses,
   allCases,
-  basicCase,
   allCasesSnake,
-  basicCaseSnake,
-  pushedCaseSnake,
-  categories,
-  casesStatus,
-  casesSnake,
-  cases,
-  pushedCase,
-  tags,
-  findCaseUserActionsResponse,
-  casesStatusSnake,
+  basicCase,
   basicCaseId,
-  caseWithRegisteredAttachmentsSnake,
-  caseWithRegisteredAttachments,
-  caseUserActionsWithRegisteredAttachmentsSnake,
-  basicPushSnake,
-  getCaseUserActionsStatsResponse,
+  basicCaseSnake,
   basicFileMock,
+  basicPushSnake,
+  caseUserActionsWithRegisteredAttachmentsSnake,
+  caseWithRegisteredAttachments,
+  caseWithRegisteredAttachmentsSnake,
+  cases,
+  casesSnake,
+  casesStatus,
+  casesStatusSnake,
+  categories,
   customFieldsMock,
+  findCaseUserActionsResponse,
+  getCaseUserActionsStatsResponse,
+  pushedCase,
+  pushedCaseSnake,
+  tags,
 } from './mock';
 
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
-import { getCasesStatus } from '../api';
-import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
-import type { CaseUserActionTypeWithAll } from './types';
 import {
+  AttachmentType,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
-  AttachmentType,
   CustomFieldTypes,
 } from '../../common/types/domain';
+import { getCasesStatus } from '../api';
+import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
+import type { CaseUserActionTypeWithAll } from './types';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');

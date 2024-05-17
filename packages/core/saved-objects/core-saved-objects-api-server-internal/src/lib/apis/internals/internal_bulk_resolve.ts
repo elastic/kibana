@@ -11,42 +11,42 @@ import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   SavedObjectsBulkResolveObject,
-  SavedObjectsResolveOptions,
-  SavedObjectsResolveResponse,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsResolveOptions,
+  SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import {
-  type SavedObjectsRawDocSource,
-  type SavedObject,
-  type BulkResolveError,
-  type ISavedObjectsSerializer,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  type BulkResolveError,
+  type ISavedObjectsSerializer,
+  type SavedObject,
+  SavedObjectsErrorHelpers,
+  type SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
 import pMap from 'p-map';
+import type { RepositoryEsClient } from '../../repository_es_client';
+import type { ApiExecutionContext } from '../types';
 import {
-  getCurrentTime,
-  getSavedObjectFromSource,
-  normalizeNamespace,
-  rawDocExistsInNamespace,
   type Either,
   type Right,
+  getCurrentTime,
+  getSavedObjectFromSource,
   isLeft,
   isRight,
   left,
+  normalizeNamespace,
+  rawDocExistsInNamespace,
   right,
 } from '../utils';
-import type { ApiExecutionContext } from '../types';
-import type { RepositoryEsClient } from '../../repository_es_client';
 
 const MAX_CONCURRENT_RESOLVE = 10;
 

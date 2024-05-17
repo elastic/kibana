@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
+import { type ContentClient, ContentClientProvider } from '@kbn/content-management-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import React from 'react';
 import { MSearchTable } from './msearch_table';
 
 export const MSearchApp = (props: {

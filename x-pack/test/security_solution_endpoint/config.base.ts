@@ -7,11 +7,11 @@
 
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { pageObjects } from './page_objects';
 import {
-  getRegistryUrlAsArray,
   createEndpointDockerConfig,
+  getRegistryUrlAsArray,
 } from '../security_solution_endpoint_api_int/registry';
+import { pageObjects } from './page_objects';
 import type { TargetTags } from './target_tags';
 
 export const SUITE_TAGS: Record<

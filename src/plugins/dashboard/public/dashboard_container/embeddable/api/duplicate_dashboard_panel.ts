@@ -7,9 +7,9 @@
  */
 
 import {
-  isReferenceOrValueEmbeddable,
   PanelIncompatibleError,
   PanelNotFoundError,
+  isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';

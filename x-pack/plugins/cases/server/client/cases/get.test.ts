@@ -6,7 +6,7 @@
  */
 
 import { createCasesClientMockArgs } from '../mocks';
-import { getCasesByAlertID, getTags, getReporters, getCategories } from './get';
+import { getCasesByAlertID, getCategories, getReporters, getTags } from './get';
 
 describe('get', () => {
   const clientArgs = createCasesClientMockArgs();

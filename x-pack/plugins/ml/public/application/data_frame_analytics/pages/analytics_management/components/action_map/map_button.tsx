@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiToolTip } from '@elastic/eui';
 
 import {
-  isRegressionAnalysis,
-  isOutlierAnalysis,
   isClassificationAnalysis,
+  isOutlierAnalysis,
+  isRegressionAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import type { DataFrameAnalyticsListRow } from '../analytics_list/common';

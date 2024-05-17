@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import type { Capabilities } from '@kbn/core/public';
-import { RedirectRoute } from './app_routes';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
 import {
   allCasesCapabilities,
   noCasesCapabilities,
   readCasesCapabilities,
 } from '../cases_test_utils';
-import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
+import { RedirectRoute } from './app_routes';
 
 const mockNotFoundPage = jest.fn(() => null);
 jest.mock('./404', () => ({

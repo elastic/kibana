@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { CSSObject } from '@emotion/serialize';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 
 export const TREE_EMPTY_STATE = 'kubernetesSecurity:treeEmptyState';

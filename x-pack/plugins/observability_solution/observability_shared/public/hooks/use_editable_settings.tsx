@@ -1,3 +1,4 @@
+import { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,6 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo, useState } from 'react';
-import { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
-import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
   FieldDefinition,
@@ -16,6 +14,8 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
+import { isEmpty } from 'lodash';
+import React, { useMemo, useState } from 'react';
 
 function getSettingsFields({
   settingsKeys,

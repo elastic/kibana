@@ -18,9 +18,9 @@ import {
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { GenericMetricsChart } from '../fetch_and_transform_metrics';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { convertComputeUsageToGbSec } from './helper';
 
 export const computeUsageAvgScript = {

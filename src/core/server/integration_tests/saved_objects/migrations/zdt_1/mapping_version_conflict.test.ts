@@ -7,17 +7,17 @@
  */
 
 import Path from 'path';
-import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import fs from 'fs/promises';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
 import {
+  dummyModelVersion,
+  getBarType,
   getBaseMigratorParams,
   getFooType,
-  getBarType,
-  dummyModelVersion,
 } from '../fixtures/zdt_base.fixtures';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { delay, parseLogFile } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'mapping_version_conflict.test.log');
 

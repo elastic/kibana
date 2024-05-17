@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { aggTopHitFnName } from './top_hit_fn';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { METRIC_TYPES } from './metric_agg_types';
-import { flattenHit, KBN_FIELD_TYPES } from '../../..';
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import { KBN_FIELD_TYPES, flattenHit } from '../../..';
 import { BaseAggParams } from '../types';
 import { createTopHitFilter } from './lib/create_filter';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+import { aggTopHitFnName } from './top_hit_fn';
 
 export interface BaseAggParamsTopHit extends BaseAggParams {
   field: string;

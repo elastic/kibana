@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { deepFreeze } from '@kbn/std';
 
 const SECURITY_SOLUTION_APP_ID = 'siem';
 

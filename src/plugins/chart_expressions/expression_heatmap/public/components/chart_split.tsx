@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Accessor, AccessorFn, GroupBy, Predicate, SmallMultiples } from '@elastic/charts';
 import React from 'react';
-import { Accessor, AccessorFn, GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;

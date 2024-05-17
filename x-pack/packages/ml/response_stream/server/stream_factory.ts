@@ -9,8 +9,8 @@ import crypto from 'crypto';
 import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
-import type { Logger } from '@kbn/logging';
 import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 
 import { acceptCompression } from './accept_compression';
 
@@ -30,8 +30,8 @@ type StreamTypeUnion = string | object;
 type StreamType<T extends StreamTypeUnion> = T extends string
   ? string
   : T extends object
-  ? T
-  : never;
+    ? T
+    : never;
 
 export interface StreamResponseWithHeaders {
   body: zlib.Gzip | UncompressedResponseStream;

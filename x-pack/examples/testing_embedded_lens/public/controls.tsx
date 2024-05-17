@@ -1,3 +1,20 @@
+import {
+  EuiButton,
+  EuiCodeBlock,
+  EuiColorPicker,
+  EuiFormRow,
+  EuiIcon,
+  EuiNotificationBadge,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+  useColorPickerState,
+} from '@elastic/eui';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,23 +22,6 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { isEqual } from 'lodash';
-import {
-  EuiButton,
-  EuiText,
-  EuiSpacer,
-  EuiColorPicker,
-  EuiFormRow,
-  EuiPopover,
-  useColorPickerState,
-  EuiSwitch,
-  EuiNotificationBadge,
-  EuiCodeBlock,
-  EuiIcon,
-  EuiToolTip,
-  EuiPopoverTitle,
-} from '@elastic/eui';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export type LensAttributesByType<VizType> = Extract<
   TypedLensByValueInput['attributes'],

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { isEmpty, without } from 'lodash/fp';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EuiTitle,
-  EuiFlyout,
-  EuiSpacer,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { SearchExceptions } from '../../../../../components/search_exceptions';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useQueryClient } from '@tanstack/react-query';
+import { isEmpty, without } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../../common/lib/kibana';
-import { PolicyArtifactsAssignableList } from '../assignable';
+import { SearchExceptions } from '../../../../../components/search_exceptions';
+import { useBulkUpdateArtifact, useListArtifact } from '../../../../../hooks/artifacts';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
-import { useListArtifact, useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
+import { PolicyArtifactsAssignableList } from '../assignable';
 import type { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 interface PolicyArtifactsFlyoutProps {

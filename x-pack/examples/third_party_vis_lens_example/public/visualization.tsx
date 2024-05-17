@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
-import { Ast } from '@kbn/interpreter';
+import { EuiColorPicker, EuiFormRow } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
+import { Ast } from '@kbn/interpreter';
+import { OperationMetadata, Visualization } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
-import type { RotatingNumberState } from '../common/types';
+import React from 'react';
 import { DEFAULT_COLOR } from '../common/constants';
+import type { RotatingNumberState } from '../common/types';
 
 const toExpression = (
   state: RotatingNumberState,

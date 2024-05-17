@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -66,7 +66,7 @@ export interface LogstashStats {
         queue?: {
           type: string;
         };
-      }
+      },
     ];
     logstash?: {
       version?: string;
@@ -85,7 +85,7 @@ export interface LogstashStats {
             queue?: {
               type: string;
             };
-          }
+          },
         ];
         logstash?: {
           version?: string;
@@ -119,7 +119,7 @@ export interface LogstashState {
                   protocol?: string;
                 };
               };
-            }
+            },
           ];
         };
       };
@@ -143,7 +143,7 @@ export interface LogstashState {
                       protocol?: string;
                     };
                   };
-                }
+                },
               ];
             };
           };

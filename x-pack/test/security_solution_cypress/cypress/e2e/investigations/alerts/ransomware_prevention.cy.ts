@@ -8,13 +8,13 @@
 import { login } from '../../../tasks/login';
 import { visitTimeline, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { ALERTS_URL } from '../../../urls/navigation';
+import { getTimeline } from '../../../objects/timeline';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../screens/alerts';
 import { TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
 import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { getTimeline } from '../../../objects/timeline';
+import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

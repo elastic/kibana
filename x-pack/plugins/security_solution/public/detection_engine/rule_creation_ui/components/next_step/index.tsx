@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 interface NextStepProps {

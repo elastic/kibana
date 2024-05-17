@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiSkeletonText } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
 import { IntegrationsStateContextProvider, useBreadcrumbs } from '../../hooks';
 
-import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
-import { Policy } from './screens/policy';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
+import { EPMHomePage } from './screens/home';
+import { Policy } from './screens/policy';
 
 export const EPMApp: React.FunctionComponent = () => {
   useBreadcrumbs('integrations');

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import type { HTMLAttributeAnchorTarget } from 'react';
 import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'react';
-import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import { useGetAppUrl, useNavigateTo } from './navigation';
 
 export interface BaseLinkProps {

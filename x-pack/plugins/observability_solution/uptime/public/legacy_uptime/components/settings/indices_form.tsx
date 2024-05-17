@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiDescribedFormGroup,
-  EuiFormRow,
   EuiCode,
+  EuiDescribedFormGroup,
   EuiFieldText,
-  EuiTitle,
+  EuiFormRow,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { SettingsFormProps } from '../../pages/settings';
 

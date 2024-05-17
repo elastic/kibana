@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,6 +24,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
 import { encode } from '@kbn/presentation-util-plugin/common';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';

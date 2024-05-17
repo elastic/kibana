@@ -19,8 +19,8 @@ import {
   CaseConfigureRequestParamsRt,
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
-  GetConfigurationFindRequestRt,
   CustomFieldConfigurationWithoutTypeRt,
+  GetConfigurationFindRequestRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
 } from './v1';

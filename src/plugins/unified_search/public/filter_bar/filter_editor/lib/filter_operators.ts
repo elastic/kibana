@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FILTERS } from '@kbn/es-query';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { FILTERS } from '@kbn/es-query';
 import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
 import { isRangeParams } from '../range_value_input';
 
 export const strings = {

@@ -11,16 +11,16 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
-  NetworkDnsStrategyResponse,
   NetworkDnsEdges,
+  NetworkDnsStrategyResponse,
   NetworkQueries,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
+import type { SecuritySolutionFactory } from '../../types';
 import { getDnsEdges } from './helpers';
 import { buildDnsQuery } from './query.dns_network.dsl';
-import type { SecuritySolutionFactory } from '../../types';
 
 export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
   buildDsl: (options) => {

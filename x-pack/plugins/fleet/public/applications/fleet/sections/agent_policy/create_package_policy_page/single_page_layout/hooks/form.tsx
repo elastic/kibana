@@ -5,26 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type {
-  AgentPolicy,
-  NewPackagePolicy,
-  NewAgentPolicy,
-  CreatePackagePolicyRequest,
-  PackagePolicy,
-  PackageInfo,
-} from '../../../../../types';
-import {
-  useStartServices,
-  sendCreateAgentPolicy,
-  sendCreatePackagePolicy,
-  sendBulkInstallPackages,
-  sendGetPackagePolicies,
-} from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -32,18 +16,34 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
 import { getMaxPackageName } from '../../../../../../../../common/services';
-import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
-import { validatePackagePolicy, validationHasErrors } from '../../services';
-import type { PackagePolicyValidationResults } from '../../services';
-import type { PackagePolicyFormState } from '../../types';
-import { SelectedPolicyTab } from '../../components';
-import { useOnSaveNavigate } from '../../hooks';
-import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 import {
   getAzureArmPropsFromPackagePolicy,
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
+import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
+import {
+  sendBulkInstallPackages,
+  sendCreateAgentPolicy,
+  sendCreatePackagePolicy,
+  sendGetPackagePolicies,
+  useStartServices,
+} from '../../../../../hooks';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import type {
+  AgentPolicy,
+  CreatePackagePolicyRequest,
+  NewAgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+} from '../../../../../types';
+import { SelectedPolicyTab } from '../../components';
+import { useOnSaveNavigate } from '../../hooks';
+import { validatePackagePolicy, validationHasErrors } from '../../services';
+import type { PackagePolicyValidationResults } from '../../services';
+import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
+import type { PackagePolicyFormState } from '../../types';
 
 import { useAgentlessPolicy } from './setup_technology';
 

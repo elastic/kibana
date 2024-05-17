@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { APMQueryParams } from '../url_helpers';
-import { LegacyAPMLink, APMLinkExtendProps, useAPMHref } from './apm_link';
+import { APMLinkExtendProps, LegacyAPMLink, useAPMHref } from './apm_link';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'host',

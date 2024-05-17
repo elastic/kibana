@@ -7,14 +7,14 @@
  */
 
 import Path from 'path';
-import fs from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import {
+  TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
-  TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import fs from 'fs/promises';
 
 const logFilePath = Path.join(__dirname, '7_13_failed_action_tasks.log');
 

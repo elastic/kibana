@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  loginAsInteractiveUser,
-  setupInteractiveUser,
-  sampleDashboard,
   cleanupInteractiveUser,
+  loginAsInteractiveUser,
+  sampleDashboard,
+  setupInteractiveUser,
 } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {

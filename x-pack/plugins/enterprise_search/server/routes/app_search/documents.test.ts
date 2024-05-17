@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
+import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
 
-import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
+import { registerDocumentRoutes, registerDocumentsRoutes } from './documents';
 
 describe('documents routes', () => {
   describe('POST /internal/app_search/engines/{engineName}/documents', () => {

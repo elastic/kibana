@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { useNodeDetailsRedirect } from './use_node_details_redirect';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import { useNodeDetailsRedirect } from './use_node_details_redirect';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

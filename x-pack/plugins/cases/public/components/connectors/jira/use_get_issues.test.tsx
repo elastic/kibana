@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { connector as actionConnector } from '../mock';
-import { useGetIssues } from './use_get_issues';
-import * as api from './api';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { connector as actionConnector } from '../mock';
+import * as api from './api';
+import { useGetIssues } from './use_get_issues';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');

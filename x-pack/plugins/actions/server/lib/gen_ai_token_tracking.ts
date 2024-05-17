@@ -7,16 +7,16 @@
 
 import { PassThrough, Readable } from 'stream';
 import { Logger } from '@kbn/logging';
-import { Stream } from 'openai/streaming';
 import { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
+import { ActionTypeExecutorRawResult } from '../../common';
+import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import {
   InvokeAsyncIteratorBody,
   getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
-import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
-import { ActionTypeExecutorRawResult } from '../../common';
+import { InvokeBody, getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
-import { getTokenCountFromInvokeStream, InvokeBody } from './get_token_count_from_invoke_stream';
 
 interface OwnProps {
   actionTypeId: string;

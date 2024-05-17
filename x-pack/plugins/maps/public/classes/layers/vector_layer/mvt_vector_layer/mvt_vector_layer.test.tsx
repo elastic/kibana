@@ -16,16 +16,16 @@ jest.mock('../../../../kibana_services', () => {
 import { shallow } from 'enzyme';
 
 import { Feature } from 'geojson';
-import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
-import { IVectorSource } from '../../../sources/vector_source';
-import { InnerJoin } from '../../../joins/inner_join';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import {
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
-import { MvtVectorLayer } from './mvt_vector_layer';
+import { InnerJoin } from '../../../joins/inner_join';
 import { IJoinSource } from '../../../sources/join_sources';
+import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
+import { IVectorSource } from '../../../sources/vector_source';
+import { MvtVectorLayer } from './mvt_vector_layer';
 
 const defaultConfig = {
   urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',

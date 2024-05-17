@@ -9,8 +9,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
 
-import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 
 jest.mock('../../../../../../common/lib/kibana');
 

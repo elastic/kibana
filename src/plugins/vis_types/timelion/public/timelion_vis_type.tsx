@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { lazy } from 'react';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
 import { VIS_EVENT_TO_TRIGGER, VisParams } from '@kbn/visualizations-plugin/public';
 import { TIMELION_VIS_NAME } from '../common/constants';
-import { TimelionOptionsProps } from './timelion_options';
-import { TimelionVisDependencies } from './plugin';
-import { toExpressionAst } from './to_ast';
 import { getIndexPatterns } from './helpers/plugin_services';
+import { TimelionVisDependencies } from './plugin';
+import { TimelionOptionsProps } from './timelion_options';
+import { toExpressionAst } from './to_ast';
 
 import { parseTimelionExpressionAsync } from '../common/parser_async';
 

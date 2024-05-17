@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -15,27 +14,28 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import React, { memo, useMemo } from 'react';
+import styled from 'styled-components';
+import type { HostInfo } from '../../../../../../common/endpoint/types';
 import {
   AgentStatus,
   EndpointAgentStatus,
 } from '../../../../../common/components/agents/agent_status';
-import { isPolicyOutOfDate } from '../../utils';
-import type { HostInfo } from '../../../../../../common/endpoint/types';
-import { useEndpointSelector } from '../hooks';
+import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { getEndpointDetailsPath } from '../../../../common/routing';
+import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import {
   getEndpointPendingActionsCallback,
   nonExistingPolicies,
   uiQueryParams,
 } from '../../store/selectors';
-import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
-import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getEndpointDetailsPath } from '../../../../common/routing';
-import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
+import { isPolicyOutOfDate } from '../../utils';
 import { OutOfDate } from '../components/out_of_date';
+import { useEndpointSelector } from '../hooks';
+import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 
 const EndpointDetailsContentStyled = styled.div`
   .policyLineText {

@@ -23,13 +23,17 @@ export type TypeToString<T> = KnownTypeToString<T> | UnmappedTypeStrings;
  * the `type` key as a string literal type for it.
  */
 // prettier-ignore
-export type KnownTypeToString<T> =
-  T extends string ? 'string' :
-  T extends boolean ? 'boolean' :
-  T extends number ? 'number' :
-  T extends null ? 'null' :
-  T extends { type: string } ? T['type'] :
-  never;
+export type KnownTypeToString<T> = T extends string
+  ? 'string'
+  : T extends boolean
+    ? 'boolean'
+    : T extends number
+      ? 'number'
+      : T extends null
+        ? 'null'
+        : T extends { type: string }
+          ? T['type']
+          : never;
 
 /**
  * If the type extends a Promise, we still need to return the string representation:

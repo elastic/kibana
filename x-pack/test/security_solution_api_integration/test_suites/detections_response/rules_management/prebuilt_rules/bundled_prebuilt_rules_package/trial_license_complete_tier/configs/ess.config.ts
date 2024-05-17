@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 export const BUNDLED_PACKAGE_DIR = path.join(
   path.dirname(__filename),

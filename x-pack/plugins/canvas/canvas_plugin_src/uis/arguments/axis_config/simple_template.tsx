@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
 import { EuiSwitch } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 
 export interface Props {
   onValueChange: (argValue: boolean) => void;

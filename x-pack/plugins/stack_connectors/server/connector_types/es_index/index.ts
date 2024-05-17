@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import {
+  BulkOperationType,
+  BulkResponseItem,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryEsIndexConnectorId,
+  buildAlertHistoryDocument,
+} from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
-import {
-  AlertHistoryEsIndexConnectorId,
-  ALERT_HISTORY_PREFIX,
-  buildAlertHistoryDocument,
-} from '@kbn/actions-plugin/common';
-import {
-  BulkOperationType,
-  BulkResponseItem,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,

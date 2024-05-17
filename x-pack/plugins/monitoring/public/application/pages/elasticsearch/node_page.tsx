@@ -1,3 +1,6 @@
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,32 +9,29 @@
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { find } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ItemTemplate } from './item_template';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { Node } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { useLocalStorage } from '../../hooks/use_local_storage';
-import { useCharts } from '../../hooks/use_charts';
-import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
-// @ts-ignore
-import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
-import { AlertsByName } from '../../../alerts/types';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
   ELASTICSEARCH_SYSTEM_ID,
   RULE_CPU_USAGE,
-  RULE_THREAD_POOL_SEARCH_REJECTIONS,
-  RULE_THREAD_POOL_WRITE_REJECTIONS,
-  RULE_MISSING_MONITORING_DATA,
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
 } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { Node } from '../../../components/elasticsearch';
+// @ts-ignore
+import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+import { SetupModeProps, SetupModeRenderer } from '../../../components/renderers/setup_mode';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useCharts } from '../../hooks/use_charts';
+import { useLocalStorage } from '../../hooks/use_local_storage';
+import { ComponentProps } from '../../route_init';
+import { ItemTemplate } from './item_template';
 
 export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

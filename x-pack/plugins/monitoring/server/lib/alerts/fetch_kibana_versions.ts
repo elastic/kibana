@@ -6,11 +6,11 @@
  */
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
-import { createDatasetFilter } from './create_dataset_query_filter';
-import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { Globals } from '../../static_globals';
 import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ESAggResponse {
   key: string;

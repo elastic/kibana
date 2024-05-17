@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
+import { getToastNotifications } from '../../../util/dependency_cache';
 
 export async function deleteCalendars(calendarsToDelete, callback) {
   if (calendarsToDelete === undefined || calendarsToDelete.length === 0) {

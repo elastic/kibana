@@ -7,10 +7,10 @@
 
 import {
   LogMeta,
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';

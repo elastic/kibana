@@ -8,9 +8,9 @@
 
 const { Client, HttpConnection } = require('@elastic/elasticsearch');
 import { RESEARCH_CI_JOB_NAME } from './constants';
-import { whichIndex } from './ingest_helpers';
 import { fromNullable } from './either';
-import { always, id, flatMap, ccMark, lazyF } from './utils';
+import { whichIndex } from './ingest_helpers';
+import { always, ccMark, flatMap, id, lazyF } from './utils';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const client = new Client({

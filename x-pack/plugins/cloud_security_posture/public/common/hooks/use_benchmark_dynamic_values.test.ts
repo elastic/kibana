@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useBenchmarkDynamicValues } from './use_benchmark_dynamic_values';
 import { renderHook } from '@testing-library/react-hooks/dom';
-import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
 import { BenchmarksCisId } from '../../../common/types/benchmarks/v2';
+import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
+import { useBenchmarkDynamicValues } from './use_benchmark_dynamic_values';
 
 jest.mock('../navigation/use_csp_integration_link');
 

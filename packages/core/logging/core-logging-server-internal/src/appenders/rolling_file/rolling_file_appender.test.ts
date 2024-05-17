@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
+import { LogLevel, LogRecord } from '@kbn/logging';
+import moment from 'moment-timezone';
+import { rollingFileAppenderMocks } from './mocks';
+import { RollingFileAppender } from './rolling_file_appender';
 import {
-  createRollingStrategyMock,
-  createTriggeringPolicyMock,
-  createRetentionPolicyMock,
   LayoutsMock,
-  resetAllMocks,
   RollingFileContextMock,
   RollingFileManagerMock,
+  createRetentionPolicyMock,
+  createRollingStrategyMock,
+  createTriggeringPolicyMock,
+  resetAllMocks,
 } from './rolling_file_appender.test.mocks';
-import { rollingFileAppenderMocks } from './mocks';
-import moment from 'moment-timezone';
-import { LogLevel, LogRecord } from '@kbn/logging';
-import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
-import { RollingFileAppender } from './rolling_file_appender';
 
 const config: RollingFileAppenderConfig = {
   type: 'rolling-file',

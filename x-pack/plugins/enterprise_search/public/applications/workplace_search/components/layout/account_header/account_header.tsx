@@ -12,22 +12,22 @@ import { useValues } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiHeader,
-  EuiHeaderLogo,
   EuiHeaderLinks,
+  EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiText,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 
 import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
-import { WORKPLACE_SEARCH_TITLE, ACCOUNT_NAV } from '../../../constants';
-import { PRIVATE_SOURCES_PATH, LOGOUT_ROUTE, PERSONAL_SETTINGS_PATH } from '../../../routes';
+import { ACCOUNT_NAV, WORKPLACE_SEARCH_TITLE } from '../../../constants';
+import { LOGOUT_ROUTE, PERSONAL_SETTINGS_PATH, PRIVATE_SOURCES_PATH } from '../../../routes';
 
 export const AccountHeader: React.FC = () => {
   const [isPopoverOpen, setPopover] = useState(false);

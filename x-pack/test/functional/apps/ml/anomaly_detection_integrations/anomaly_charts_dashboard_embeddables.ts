@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { JOB_CONFIG, DATAFEED_CONFIG, ML_EMBEDDABLE_TYPES } from './constants';
+import { DATAFEED_CONFIG, JOB_CONFIG, ML_EMBEDDABLE_TYPES } from './constants';
 
 const testDataList = [
   {

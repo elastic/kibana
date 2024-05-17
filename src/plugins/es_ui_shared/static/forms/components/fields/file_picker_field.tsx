@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { EuiFormRow, EuiFilePicker } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

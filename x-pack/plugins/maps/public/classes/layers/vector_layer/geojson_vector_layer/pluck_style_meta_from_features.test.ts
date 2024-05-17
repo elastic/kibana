@@ -13,11 +13,11 @@ import {
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../vector_layer';
-import { IVectorSource } from '../../../sources/vector_source';
-import { OTHER_CATEGORY_KEY } from '../../../styles/vector/properties/dynamic_style_property';
-import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
 import { InlineField } from '../../../fields/inline_field';
+import { IVectorSource } from '../../../sources/vector_source';
+import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
+import { OTHER_CATEGORY_KEY } from '../../../styles/vector/properties/dynamic_style_property';
+import { IVectorLayer } from '../vector_layer';
 import {
   isOnlySingleFeatureType,
   pluckCategoricalStyleMetaFromFeatures,

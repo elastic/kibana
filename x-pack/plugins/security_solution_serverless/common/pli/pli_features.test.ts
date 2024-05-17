@@ -1,3 +1,5 @@
+import { ProductLine, ProductTier } from '../product';
+import * as pliConfig from './pli_config';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { getProductProductFeatures } from './pli_features';
-import * as pliConfig from './pli_config';
-import { ProductLine, ProductTier } from '../product';
 
 describe('getProductProductFeatures', () => {
   it('should return the essentials PLIs features', () => {

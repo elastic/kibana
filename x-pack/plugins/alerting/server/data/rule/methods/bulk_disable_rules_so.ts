@@ -6,10 +6,10 @@
  */
 
 import {
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
 } from '@kbn/core/server';
 import { RuleAttributes } from '../types';
 

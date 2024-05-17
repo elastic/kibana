@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { ComponentStory } from '@storybook/react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { action } from '@storybook/addon-actions';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { action } from '@storybook/addon-actions';
+import { ComponentStory } from '@storybook/react';
+import React, { FC } from 'react';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
 import FiltersBuilder, { FiltersBuilderProps } from '../filters_builder';
 

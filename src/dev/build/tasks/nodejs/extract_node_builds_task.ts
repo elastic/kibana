@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { untar, GlobalTask, copy } from '../../lib';
+import { GlobalTask, copy, untar } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 
 export const ExtractNodeBuilds: GlobalTask = {

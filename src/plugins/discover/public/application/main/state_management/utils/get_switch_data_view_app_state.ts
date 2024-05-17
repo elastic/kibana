@@ -1,3 +1,6 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +9,9 @@
  * Side Public License, v 1.
  */
 import { uniq } from 'lodash';
-import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { getSortArray } from '../../../../utils/sorting';
 import { DiscoverAppState } from '../discover_app_state_container';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

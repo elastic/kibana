@@ -1,3 +1,16 @@
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiLink,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
+import type { UseQueryResult } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,25 +18,12 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import type { UseQueryResult } from '@tanstack/react-query';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiImage,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
-import { SubscriptionNotAllowed } from '../subscription_not_allowed';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { FullSizeCenteredPage } from '../full_size_page';
 import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { LoadingState } from '../loading_state';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
+import { FullSizeCenteredPage } from '../full_size_page';
+import { LoadingState } from '../loading_state';
+import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 
 import noDataIllustration from '../../assets/icons/logo.svg';
 

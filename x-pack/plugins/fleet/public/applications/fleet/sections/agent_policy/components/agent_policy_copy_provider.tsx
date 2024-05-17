@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiConfirmModal, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useRef, useState } from 'react';
 
-import type { AgentPolicy } from '../../../types';
 import { sendCopyAgentPolicy, useStartServices } from '../../../hooks';
+import type { AgentPolicy } from '../../../types';
 
 interface Props {
   children: (copyAgentPolicy: CopyAgentPolicy) => React.ReactElement;

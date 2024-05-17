@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import {
-  InfraWaffleMapBounds,
   InfraFormatter,
+  InfraWaffleMapBounds,
   InfraWaffleMapSteppedGradientLegend,
 } from '../../../../../lib/lib';
 
@@ -76,10 +76,10 @@ const GradientStep = euiStyled.div`
   flex: 1 1 auto;
   &:first-child {
     border-radius: ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
-  props.theme.eui.euiBorderRadius} 0 0;
+      props.theme.eui.euiBorderRadius} 0 0;
   }
   &:last-child {
     border-radius: 0 0 ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
-  props.theme.eui.euiBorderRadius};
+      props.theme.eui.euiBorderRadius};
   }
 `;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
-import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
-import { FleetError, EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
+import { EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError, FleetError } from '../../errors';
+import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
@@ -207,7 +207,10 @@ export async function generateEnrollmentAPIKey(
       keys.some((k: EnrollmentAPIKey) =>
         // Prevent false positives when the providedKeyName is a prefix of a token name that already exists
         // After removing the providedKeyName and trimming whitespace, the only string left should be a uuid in parens.
-        k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
+        k.name
+          ?.replace(providedKeyName, '')
+          .trim()
+          .match(uuidRegex)
       )
     ) {
       throw new EnrollmentKeyNameExistsError(

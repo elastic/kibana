@@ -10,11 +10,11 @@ import { ProfilingESField } from './elasticsearch';
 import {
   Executable,
   FileID,
-  isErrorFrame,
   StackFrame,
   StackFrameID,
   StackTrace,
   StackTraceID,
+  isErrorFrame,
 } from './profiling';
 import { convertTonsToKgs } from './utils';
 

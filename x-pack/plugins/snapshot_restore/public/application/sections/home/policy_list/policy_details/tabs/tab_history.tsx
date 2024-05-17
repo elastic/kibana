@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiTitle,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiText,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
-  EuiCodeBlock,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
+import { useServices } from '../../../../../app_context';
 import { FormattedDateTime } from '../../../../../components';
 import { linkToSnapshot } from '../../../../../services/navigation';
-import { useServices } from '../../../../../app_context';
 
 interface Props {
   policy: SlmPolicy;

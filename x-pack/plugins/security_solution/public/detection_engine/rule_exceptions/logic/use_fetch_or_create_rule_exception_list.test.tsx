@@ -9,19 +9,19 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import * as rulesApi from '../../rule_management/api/api';
-import * as listsApi from '@kbn/securitysolution-list-api';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { savedRuleMock } from '../../rule_management/logic/mock';
 import type {
+  ExceptionListSchema,
   ExceptionListType,
   ListArray,
-  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import * as listsApi from '@kbn/securitysolution-list-api';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import * as rulesApi from '../../rule_management/api/api';
+import { savedRuleMock } from '../../rule_management/logic/mock';
 import type {
-  UseFetchOrCreateRuleExceptionListProps,
   ReturnUseFetchOrCreateRuleExceptionList,
+  UseFetchOrCreateRuleExceptionListProps,
 } from './use_fetch_or_create_rule_exception_list';
 import { useFetchOrCreateRuleExceptionList } from './use_fetch_or_create_rule_exception_list';
 

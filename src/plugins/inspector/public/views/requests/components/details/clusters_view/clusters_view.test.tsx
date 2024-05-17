@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ClustersView } from './clusters_view';
 import { Request } from '../../../../../../common/adapters/request/types';
+import { ClustersView } from './clusters_view';
 
 describe('shouldShow', () => {
   test('should return true when response contains _shards', () => {

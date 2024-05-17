@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { GraphWorkspaceSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
-import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
+import { findObjectByTitle } from './find_object_by_title';
 
 /**
  * check for an existing VisSavedObject with the same title in ES

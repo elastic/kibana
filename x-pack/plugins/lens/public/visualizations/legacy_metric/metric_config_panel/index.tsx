@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
-import type { VisualizationToolbarProps } from '../../../types';
+import React, { memo } from 'react';
 import type { LegacyMetricState } from '../../../../common/types';
+import type { VisualizationToolbarProps } from '../../../types';
 
 import { AppearanceOptionsPopover } from './appearance_options_popover';
 

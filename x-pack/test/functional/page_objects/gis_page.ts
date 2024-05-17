@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { APP_ID } from '@kbn/maps-plugin/common/constants';
+import _ from 'lodash';
 import { FtrService } from '../ftr_provider_context';
 
 function escapeLayerName(layerName: string) {

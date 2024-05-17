@@ -6,8 +6,8 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 
 interface ViewSourceConfigurationButtonProps {
   'data-test-subj'?: string;

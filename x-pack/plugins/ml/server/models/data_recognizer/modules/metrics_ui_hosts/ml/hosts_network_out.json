@@ -1,9 +1,6 @@
 {
   "description": "Metrics: Hosts - Identify unusual spikes in outbound traffic across hosts.",
-  "groups": [
-    "hosts",
-    "metrics"
-  ],
+  "groups": ["hosts", "metrics"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -13,9 +10,7 @@
         "field_name": "bytes_out_derivative"
       }
     ],
-    "influencers": [
-      "host.name"
-    ],
+    "influencers": ["host.name"],
     "summary_count_field_name": "doc_count"
   },
   "data_description": {

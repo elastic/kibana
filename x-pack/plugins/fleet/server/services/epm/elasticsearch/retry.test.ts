@@ -8,8 +8,8 @@
 jest.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { retryTransientEsErrors } from './retry';
 

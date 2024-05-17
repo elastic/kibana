@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorClientSideDefinition } from './types';
 import { docLinks } from './doc_links';
+import { ConnectorClientSideDefinition } from './types';
 
 // needs to be a function because, docLinks are only populated with actual
 // documentation links in browser after SearchConnectorsPlugin starts

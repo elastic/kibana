@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '@kbn/core/server';
+import { difference } from 'lodash';
+import { ElasticsearchFeatureConfig, FeatureKibanaPrivileges } from '.';
 import { KibanaFeatureConfig } from '../common';
-import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import { i18n as I18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import { i18n as I18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
+import { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import { BatchUpdateListItem } from '../context_editor/types';
 import { SelectedPromptContextEditorModal } from '../context_editor_modal';
 import { SelectedPromptContextPreview } from '../context_preview';
 import { getStats } from '../get_stats';
 import { AllowedStat } from '../stats/allowed_stat';
 import { AnonymizedStat } from '../stats/anonymized_stat';
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
-import { BatchUpdateListItem } from '../context_editor/types';
 
 interface ContextEditorFlyoutComponentProps {
   selectedPromptContext: SelectedPromptContext;

@@ -6,8 +6,6 @@
     "id": "corePluginChromeless",
     "server": false,
     "browser": true,
-    "configPath": [
-      "core_plugin_chromeless"
-    ]
+    "configPath": ["core_plugin_chromeless"]
   }
 }

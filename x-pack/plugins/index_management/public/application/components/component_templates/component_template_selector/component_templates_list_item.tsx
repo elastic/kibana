@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-import React from 'react';
 import {
+  DraggableProvidedDragHandleProps,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiLink,
   EuiIcon,
+  EuiLink,
   EuiToolTip,
-  DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
+import classNames from 'classnames';
+import React from 'react';
 
 import { ComponentTemplateListItem } from '../../../../../common';
 import { TemplateContentIndicator } from '../../shared';

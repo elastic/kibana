@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { History } from 'history';
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
-import { History } from 'history';
 import { ApmDocumentType } from '../../../common/document_type';
-import { getDefaultTransactionType } from '../../../common/transaction_types';
-import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { useAnyOfApmParams } from '../../hooks/use_apm_params';
-import { useTimeRange } from '../../hooks/use_time_range';
-import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
-import { replace } from '../../components/shared/links/url_helpers';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { ServerlessType } from '../../../common/serverless';
+import { getDefaultTransactionType } from '../../../common/transaction_types';
+import { replace } from '../../components/shared/links/url_helpers';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
+import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useServiceAgentFetcher } from './use_service_agent_fetcher';
+import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 
 export interface APMServiceContextValue {
   serviceName: string;

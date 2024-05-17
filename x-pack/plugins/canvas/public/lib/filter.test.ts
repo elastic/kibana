@@ -14,13 +14,13 @@ import {
   SimpleFilterViewField,
 } from '../../types';
 import {
-  defaultFormatter,
-  formatFilterView,
-  flattenFilterView,
   createFilledFilterView,
-  groupFiltersBy,
-  getFiltersExprsFromExpression,
+  defaultFormatter,
+  flattenFilterView,
+  formatFilterView,
   getFiltersByFilterExpressions,
+  getFiltersExprsFromExpression,
+  groupFiltersBy,
   isExpressionWithFilters,
 } from './filter';
 

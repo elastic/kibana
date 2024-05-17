@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
 import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import styled from 'styled-components';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { SearchState } from '../../hooks/use_url_search_state';
 
 interface Props {

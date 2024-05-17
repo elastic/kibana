@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent } from 'react';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import React, { ChangeEvent } from 'react';
 
 export interface TruncateLabelsOptionProps {
   disabled?: boolean;

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import type { Query } from '@kbn/es-query';
-import {
-  type UnifiedSearchPublicPluginStart,
-  QueryStringInput,
-} from '@kbn/unified-search-plugin/public';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import {
+  QueryStringInput,
+  type UnifiedSearchPublicPluginStart,
+} from '@kbn/unified-search-plugin/public';
+import { isEqual } from 'lodash';
+import React from 'react';
 import { useDebouncedValue } from '../debounced_value';
 
 export interface QueryInputServices {

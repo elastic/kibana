@@ -1,3 +1,4 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import type { Assign } from '@kbn/utility-types';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FetchedIndexPattern, IndexPatternValue } from '../../../../../common/types';
 
 /** @internal **/

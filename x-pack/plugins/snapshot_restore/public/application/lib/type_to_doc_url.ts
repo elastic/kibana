@@ -6,8 +6,8 @@
  */
 
 import { DocLinksStart } from '@kbn/core/public';
-import { RepositoryType } from '../../../common/types';
 import { REPOSITORY_TYPES } from '../../../common';
+import { RepositoryType } from '../../../common/types';
 
 export const getRepositoryTypeDocUrl = (docLinks: DocLinksStart, type: RepositoryType) => {
   switch (type) {

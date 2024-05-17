@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import * as buildQuery from './query.users_network.dsl';
 import { networkUsers } from '.';
+import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
+  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
-  formattedSearchStrategyResponse,
 } from './__mocks__';
-import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
+import * as buildQuery from './query.users_network.dsl';
 
 describe('networkUsers search strategy', () => {
   const buildUsersQuery = jest.spyOn(buildQuery, 'buildUsersQuery');

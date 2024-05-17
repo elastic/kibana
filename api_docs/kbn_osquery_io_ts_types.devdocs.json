@@ -74,9 +74,7 @@
         "tags": [],
         "label": "Description",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -89,9 +87,7 @@
         "tags": [],
         "label": "DescriptionOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -134,9 +130,7 @@
         "tags": [],
         "label": "ExecutionContext",
         "description": [],
-        "signature": [
-          "{ name: string | undefined; url: string | undefined; }"
-        ],
+        "signature": ["{ name: string | undefined; url: string | undefined; }"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -149,9 +143,7 @@
         "tags": [],
         "label": "ExecutionContextOrUndefined",
         "description": [],
-        "signature": [
-          "{ name: string | undefined; url: string | undefined; } | undefined"
-        ],
+        "signature": ["{ name: string | undefined; url: string | undefined; } | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -164,9 +156,7 @@
         "tags": [],
         "label": "Id",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -179,9 +169,7 @@
         "tags": [],
         "label": "IdOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -194,9 +182,7 @@
         "tags": [],
         "label": "Interval",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -209,9 +195,7 @@
         "tags": [],
         "label": "IntervalOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -239,9 +223,7 @@
         "tags": [],
         "label": "PackId",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -254,9 +236,7 @@
         "tags": [],
         "label": "PackIdOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -269,9 +249,7 @@
         "tags": [],
         "label": "Platform",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -284,9 +262,7 @@
         "tags": [],
         "label": "PlatformOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -329,9 +305,7 @@
         "tags": [],
         "label": "Query",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -344,9 +318,7 @@
         "tags": [],
         "label": "QueryOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -359,9 +331,7 @@
         "tags": [],
         "label": "Removed",
         "description": [],
-        "signature": [
-          "boolean"
-        ],
+        "signature": ["boolean"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -374,9 +344,7 @@
         "tags": [],
         "label": "RemovedOrUndefined",
         "description": [],
-        "signature": [
-          "boolean | undefined"
-        ],
+        "signature": ["boolean | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -389,9 +357,7 @@
         "tags": [],
         "label": "SavedQueryId",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -404,9 +370,7 @@
         "tags": [],
         "label": "SavedQueryIdOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -419,9 +383,7 @@
         "tags": [],
         "label": "Snapshot",
         "description": [],
-        "signature": [
-          "boolean"
-        ],
+        "signature": ["boolean"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -434,9 +396,7 @@
         "tags": [],
         "label": "SnapshotOrUndefined",
         "description": [],
-        "signature": [
-          "boolean | undefined"
-        ],
+        "signature": ["boolean | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -449,9 +409,7 @@
         "tags": [],
         "label": "StringArrayOrUndefined",
         "description": [],
-        "signature": [
-          "string[] | undefined"
-        ],
+        "signature": ["string[] | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -464,9 +422,7 @@
         "tags": [],
         "label": "Timeout",
         "description": [],
-        "signature": [
-          "number"
-        ],
+        "signature": ["number"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -479,9 +435,7 @@
         "tags": [],
         "label": "TimeoutOrUndefined",
         "description": [],
-        "signature": [
-          "number | undefined"
-        ],
+        "signature": ["number | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -494,9 +448,7 @@
         "tags": [],
         "label": "Version",
         "description": [],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -509,9 +461,7 @@
         "tags": [],
         "label": "VersionOrUndefined",
         "description": [],
-        "signature": [
-          "string | undefined"
-        ],
+        "signature": ["string | undefined"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -656,9 +606,7 @@
         "tags": [],
         "label": "description",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -671,14 +619,7 @@
         "tags": [],
         "label": "descriptionOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -815,9 +756,7 @@
         "tags": [],
         "label": "id",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -830,14 +769,7 @@
         "tags": [],
         "label": "idOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -850,9 +782,7 @@
         "tags": [],
         "label": "interval",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -865,14 +795,7 @@
         "tags": [],
         "label": "intervalOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -959,9 +882,7 @@
         "tags": [],
         "label": "packId",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -974,14 +895,7 @@
         "tags": [],
         "label": "packIdOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -994,9 +908,7 @@
         "tags": [],
         "label": "platform",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1009,14 +921,7 @@
         "tags": [],
         "label": "platformOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1227,9 +1132,7 @@
         "tags": [],
         "label": "query",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1242,14 +1145,7 @@
         "tags": [],
         "label": "queryOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1262,9 +1158,7 @@
         "tags": [],
         "label": "removed",
         "description": [],
-        "signature": [
-          "BooleanC"
-        ],
+        "signature": ["BooleanC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1277,14 +1171,7 @@
         "tags": [],
         "label": "removedOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "BooleanC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "BooleanC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1297,9 +1184,7 @@
         "tags": [],
         "label": "savedQueryId",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1312,14 +1197,7 @@
         "tags": [],
         "label": "savedQueryIdOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1332,9 +1210,7 @@
         "tags": [],
         "label": "snapshot",
         "description": [],
-        "signature": [
-          "BooleanC"
-        ],
+        "signature": ["BooleanC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1347,14 +1223,7 @@
         "tags": [],
         "label": "snapshotOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "BooleanC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "BooleanC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1367,16 +1236,7 @@
         "tags": [],
         "label": "stringArrayOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">, ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "ArrayC", "<", "StringC", ">, ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1389,10 +1249,7 @@
         "tags": [],
         "label": "timeout",
         "description": [],
-        "signature": [
-          "Type",
-          "<number, number, unknown>"
-        ],
+        "signature": ["Type", "<number, number, unknown>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1405,14 +1262,7 @@
         "tags": [],
         "label": "timeoutOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "Type",
-          "<number, number, unknown>, ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "Type", "<number, number, unknown>, ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1425,9 +1275,7 @@
         "tags": [],
         "label": "version",
         "description": [],
-        "signature": [
-          "StringC"
-        ],
+        "signature": ["StringC"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1440,14 +1288,7 @@
         "tags": [],
         "label": "versionOrUndefined",
         "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>"
-        ],
+        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
         "path": "packages/kbn-osquery-io-ts-types/src/live_query/index.ts",
         "deprecated": false,
         "trackAdoption": false,

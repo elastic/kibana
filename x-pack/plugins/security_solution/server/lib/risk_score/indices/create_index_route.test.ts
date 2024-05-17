@@ -11,15 +11,15 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import {
-  serverMock,
   requestContextMock,
   requestMock,
+  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { createEsIndexRoute } from './create_index_route';
-import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import { createIndex } from './lib/create_index';
-import { transformError } from '@kbn/securitysolution-es-utils';
 const testIndex = 'test-index';
 
 jest.mock('./lib/create_index', () => {

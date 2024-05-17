@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ProductFeatures } from './product_features';
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import type {
+  BaseKibanaFeatureConfig,
   ProductFeatureKeyType,
   ProductFeatureKibanaConfig,
-  BaseKibanaFeatureConfig,
 } from '@kbn/security-solution-features';
-import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import { ProductFeatures } from './product_features';
 
 const category = {
   id: 'security',

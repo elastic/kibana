@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, NewsfeedConfigType } from './config';
+import { NewsfeedConfigType, configSchema } from './config';
 
 export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
   schema: configSchema,

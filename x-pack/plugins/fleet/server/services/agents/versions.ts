@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { readFile } from 'fs/promises';
 import Path from 'path';
+import { readFile } from 'fs/promises';
 
+import { uniq } from 'lodash';
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
-import { uniq } from 'lodash';
-import semverGte from 'semver/functions/gte';
-import semverGt from 'semver/functions/gt';
-import semverRcompare from 'semver/functions/rcompare';
-import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
+import semverGt from 'semver/functions/gt';
+import semverGte from 'semver/functions/gte';
+import semverLt from 'semver/functions/lt';
+import semverRcompare from 'semver/functions/rcompare';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 

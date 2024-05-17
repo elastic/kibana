@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
+import { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';

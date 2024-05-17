@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
-import { CategoryAxis } from '../../../../types';
-import { LabelOptions } from './label_options';
-import { TruncateLabelsOption } from '../../common';
-import { categoryAxis } from './mocks';
 import { Position } from '@elastic/charts';
+import { shallow } from 'enzyme';
+import React from 'react';
+import { CategoryAxis } from '../../../../types';
+import { TruncateLabelsOption } from '../../common';
+import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
+import { LabelOptions } from './label_options';
+import { categoryAxis } from './mocks';
 
 describe('CategoryAxisPanel component', () => {
   let setCategoryAxis: jest.Mock;

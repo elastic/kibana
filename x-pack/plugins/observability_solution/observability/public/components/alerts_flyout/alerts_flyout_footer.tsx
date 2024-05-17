@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../utils/kibana_react';
+import React, { useState, useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import type { TopAlert } from '../../typings/alerts';
+import { useKibana } from '../../utils/kibana_react';
 
 interface FlyoutProps {
   alert: TopAlert;

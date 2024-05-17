@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-anomaly-utils';
 import type { Filter } from '@kbn/es-query';
+import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-anomaly-utils';
 
 export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;

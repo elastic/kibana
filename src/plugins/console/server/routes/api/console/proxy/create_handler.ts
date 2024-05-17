@@ -15,18 +15,18 @@ import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { ESConfigForProxy } from '../../../../types';
 import {
-  getElasticsearchProxyConfig,
   ProxyConfigCollection,
+  getElasticsearchProxyConfig,
   proxyRequest,
   setHeaders,
 } from '../../../../lib';
+import { ESConfigForProxy } from '../../../../types';
 
 import { RouteDependencies } from '../../..';
 
-import { Body, Query } from './validation_config';
 import { toURL } from '../../../../lib/utils';
+import { Body, Query } from './validation_config';
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
   const normalizeHeader = function (header: string) {

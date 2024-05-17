@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { memoize } from 'lodash';
 
 /**
  * Represents the result of number validation.

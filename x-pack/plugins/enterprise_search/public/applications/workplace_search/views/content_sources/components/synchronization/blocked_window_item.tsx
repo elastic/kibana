@@ -26,18 +26,18 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_DAYS_LABEL, DAYS_OF_WEEK_LABELS } from '../../../../../shared/constants';
-import { BLOCK_LABEL, BETWEEN_LABEL, ON_LABEL, REMOVE_BUTTON } from '../../../../constants';
+import { BETWEEN_LABEL, BLOCK_LABEL, ON_LABEL, REMOVE_BUTTON } from '../../../../constants';
 import { BlockedWindow, DAYS_OF_WEEK_VALUES } from '../../../../types';
 
 import {
-  FULL_SYNC_LABEL,
-  INCREMENTAL_SYNC_LABEL,
-  DELETION_SYNC_LABEL,
-  PERMISSIONS_SYNC_LABEL,
-  FULL_SYNC_DESCRIPTION,
-  INCREMENTAL_SYNC_DESCRIPTION,
   DELETION_SYNC_DESCRIPTION,
+  DELETION_SYNC_LABEL,
+  FULL_SYNC_DESCRIPTION,
+  FULL_SYNC_LABEL,
+  INCREMENTAL_SYNC_DESCRIPTION,
+  INCREMENTAL_SYNC_LABEL,
   PERMISSIONS_SYNC_DESCRIPTION,
+  PERMISSIONS_SYNC_LABEL,
   UTC_TITLE,
 } from '../../constants';
 

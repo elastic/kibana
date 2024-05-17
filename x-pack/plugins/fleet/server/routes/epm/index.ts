@@ -12,8 +12,8 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthz } from '../../../common';
 
 import {
-  calculateRouteAuthz,
   type FleetAuthzRouter,
+  calculateRouteAuthz,
   getRouteRequiredAuthz,
 } from '../../services/security';
 import type { FleetAuthzRouteConfig } from '../../services/security/types';
@@ -28,48 +28,48 @@ import type {
 import { EPM_API_ROUTES } from '../../constants';
 import { splitPkgKey } from '../../services/epm/registry';
 import {
+  BulkInstallPackagesFromRegistryRequestSchema,
+  CreateCustomIntegrationRequestSchema,
+  DeletePackageRequestSchema,
+  DeletePackageRequestSchemaDeprecated,
+  GetBulkAssetsRequestSchema,
   GetCategoriesRequestSchema,
-  GetPackagesRequestSchema,
-  GetInstalledPackagesRequestSchema,
+  GetDataStreamsRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
-  GetBulkAssetsRequestSchema,
+  GetInputsRequestSchema,
+  GetInstalledPackagesRequestSchema,
+  GetPackagesRequestSchema,
+  GetStatsRequestSchema,
+  InstallPackageByUploadRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
-  InstallPackageByUploadRequestSchema,
-  DeletePackageRequestSchema,
-  DeletePackageRequestSchemaDeprecated,
-  BulkInstallPackagesFromRegistryRequestSchema,
-  GetStatsRequestSchema,
+  ReauthorizeTransformRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
-  ReauthorizeTransformRequestSchema,
-  GetDataStreamsRequestSchema,
-  CreateCustomIntegrationRequestSchema,
-  GetInputsRequestSchema,
 } from '../../types';
 
+import { getFileHandler } from './file_handler';
 import {
+  bulkInstallPackagesFromRegistryHandler,
+  createCustomIntegrationHandler,
+  deletePackageHandler,
+  getBulkAssetsHandler,
   getCategoriesHandler,
-  getListHandler,
+  getDataStreamsHandler,
+  getInfoHandler,
+  getInputsHandler,
   getInstalledListHandler,
   getLimitedListHandler,
-  getInfoHandler,
-  getBulkAssetsHandler,
-  installPackageFromRegistryHandler,
-  installPackageByUploadHandler,
-  deletePackageHandler,
-  bulkInstallPackagesFromRegistryHandler,
+  getListHandler,
   getStatsHandler,
-  updatePackageHandler,
   getVerificationKeyIdHandler,
+  installPackageByUploadHandler,
+  installPackageFromRegistryHandler,
   reauthorizeTransformsHandler,
-  getDataStreamsHandler,
-  createCustomIntegrationHandler,
-  getInputsHandler,
+  updatePackageHandler,
 } from './handlers';
-import { getFileHandler } from './file_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 

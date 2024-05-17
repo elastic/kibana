@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,11 +21,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { useAppContext } from '../../hooks/use_app_context';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
-import { useAppContext } from '../../hooks/use_app_context';
 
 export function KnowledgeBaseEditManualEntryFlyout({
   entry,

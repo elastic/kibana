@@ -6,9 +6,9 @@
  */
 
 import {
+  NormalizedProjectProps,
   flattenAndFormatObject,
   getNormalizeCommonFields,
-  NormalizedProjectProps,
 } from './common_fields';
 
 describe('normalizeYamlConfig', () => {

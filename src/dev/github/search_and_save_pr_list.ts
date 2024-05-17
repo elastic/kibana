@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Octokit } from '@octokit/rest';
-import fs from 'fs';
 
 interface Labels {
   include: string[];

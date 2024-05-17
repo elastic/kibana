@@ -1,3 +1,4 @@
+import dateMath from '@kbn/datemath';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import dateMath from '@kbn/datemath';
 import type { RiskScoresPreviewRequest } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 

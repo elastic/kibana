@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { capitalize } from 'lodash';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
 import type { Module } from '@kbn/ml-plugin/common/types/modules';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-import type { Filter } from '@kbn/es-query';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { capitalize } from 'lodash';
 import {
   ALERT_SUPPRESSION_DURATION_TITLE,
   ALERT_SUPPRESSION_DURATION_VALUE,
-  ALERT_SUPPRESSION_MISSING_FIELD_TITLE,
-  ALERT_SUPPRESSION_MISSING_FIELD_VALUE,
   ALERT_SUPPRESSION_GROUP_BY_TITLE,
   ALERT_SUPPRESSION_GROUP_BY_VALUE_ITEM,
+  ALERT_SUPPRESSION_MISSING_FIELD_TITLE,
+  ALERT_SUPPRESSION_MISSING_FIELD_VALUE,
   ANOMALY_THRESHOLD_TITLE,
   ANOMALY_THRESHOLD_VALUE,
   AUTHOR_PROPERTY_TITLE,

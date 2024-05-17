@@ -9,21 +9,21 @@
 
 import { getMapsCapabilities } from '../kibana_services';
 
+import { DRAW_MODE } from '../../common/constants';
 import {
-  UPDATE_FLYOUT,
+  CLEAR_DELETED_FEATURE_IDS,
+  HIDE_TOC_DETAILS,
+  PUSH_DELETED_FEATURE_ID,
+  SET_AUTO_OPEN_WIZARD_ID,
+  SET_DRAW_MODE,
+  SET_FULL_SCREEN,
   SET_IS_LAYER_TOC_OPEN,
   SET_IS_TIME_SLIDER_OPEN,
-  SET_FULL_SCREEN,
-  SET_READ_ONLY,
   SET_OPEN_TOC_DETAILS,
+  SET_READ_ONLY,
   SHOW_TOC_DETAILS,
-  HIDE_TOC_DETAILS,
-  SET_DRAW_MODE,
-  SET_AUTO_OPEN_WIZARD_ID,
-  PUSH_DELETED_FEATURE_ID,
-  CLEAR_DELETED_FEATURE_IDS,
+  UPDATE_FLYOUT,
 } from '../actions';
-import { DRAW_MODE } from '../../common/constants';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',

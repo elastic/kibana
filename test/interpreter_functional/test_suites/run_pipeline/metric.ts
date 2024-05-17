@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpectExpression, expectExpressionProvider, ExpressionResult } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { ExpectExpression, ExpressionResult, expectExpressionProvider } from './helpers';
 
 export default function ({
   getService,

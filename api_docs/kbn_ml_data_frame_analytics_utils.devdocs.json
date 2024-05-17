@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "getAnalysisType",
-        "description": [
-          "\nHelper function to get the analysis type of a DFA configuration\n"
-        ],
+        "description": ["\nHelper function to get the analysis type of a DFA configuration\n"],
         "signature": [
           "(analysis: ",
           "MlDataframeAnalysisContainer",
@@ -50,12 +48,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -71,14 +65,8 @@
         "type": "Function",
         "tags": [],
         "label": "getDefaultPredictionFieldName",
-        "description": [
-          "\nHelper function to get the default prediction field name\n"
-        ],
-        "signature": [
-          "(analysis: ",
-          "MlDataframeAnalysisContainer",
-          ") => string"
-        ],
+        "description": ["\nHelper function to get the default prediction field name\n"],
+        "signature": ["(analysis: ", "MlDataframeAnalysisContainer", ") => string"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -89,12 +77,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -110,14 +94,8 @@
         "type": "Function",
         "tags": [],
         "label": "getDependentVar",
-        "description": [
-          "\nHelper function to get the dependent variable of a DFA configuration\n"
-        ],
-        "signature": [
-          "(analysis: ",
-          "MlDataframeAnalysisContainer",
-          ") => string"
-        ],
+        "description": ["\nHelper function to get the dependent variable of a DFA configuration\n"],
+        "signature": ["(analysis: ", "MlDataframeAnalysisContainer", ") => string"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -128,12 +106,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -152,11 +126,7 @@
         "description": [
           "\nGet the `num_top_classes` attribute of a DFA classification configuration\n"
         ],
-        "signature": [
-          "(analysis: ",
-          "MlDataframeAnalysisContainer",
-          ") => number | undefined"
-        ],
+        "signature": ["(analysis: ", "MlDataframeAnalysisContainer", ") => number | undefined"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_classes.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -167,12 +137,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_classes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -191,11 +157,7 @@
         "description": [
           "\nGet the `num_top_feature_importance_values` attribute of DFA regression and classification configurations\n"
         ],
-        "signature": [
-          "(analysis: ",
-          "MlDataframeAnalysisContainer",
-          ") => number | undefined"
-        ],
+        "signature": ["(analysis: ", "MlDataframeAnalysisContainer", ") => number | undefined"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_feature_importance_values.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -206,12 +168,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_feature_importance_values.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -230,11 +188,7 @@
         "description": [
           "\nHelper function to get the prediction field name of a DFA configuration\n"
         ],
-        "signature": [
-          "(analysis: ",
-          "MlDataframeAnalysisContainer",
-          ") => string | undefined"
-        ],
+        "signature": ["(analysis: ", "MlDataframeAnalysisContainer", ") => string | undefined"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -245,12 +199,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -266,14 +216,8 @@
         "type": "Function",
         "tags": [],
         "label": "getTrainingPercent",
-        "description": [
-          "\nHelper function to get the training percent of a DFA configuration\n"
-        ],
-        "signature": [
-          "(analysis: ",
-          "MlDataframeAnalysisContainer",
-          ") => number | undefined"
-        ],
+        "description": ["\nHelper function to get the training percent of a DFA configuration\n"],
+        "signature": ["(analysis: ", "MlDataframeAnalysisContainer", ") => number | undefined"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -284,12 +228,8 @@
             "type": "Object",
             "tags": [],
             "label": "analysis",
-            "description": [
-              "The analysis configuration"
-            ],
-            "signature": [
-              "MlDataframeAnalysisContainer"
-            ],
+            "description": ["The analysis configuration"],
+            "signature": ["MlDataframeAnalysisContainer"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -305,9 +245,7 @@
         "type": "Function",
         "tags": [],
         "label": "isClassificationAnalysis",
-        "description": [
-          "\nType guard for DFA classification analysis configurations\n"
-        ],
+        "description": ["\nType guard for DFA classification analysis configurations\n"],
         "signature": [
           "(arg: unknown) => arg is ",
           {
@@ -328,12 +266,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The config to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The config to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -349,12 +283,8 @@
         "type": "Function",
         "tags": [],
         "label": "isClassificationFeatureImportanceBaseline",
-        "description": [
-          "\nType guard for classification feature importance baseline\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for classification feature importance baseline\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -365,12 +295,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The baseline to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The baseline to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -386,12 +312,8 @@
         "type": "Function",
         "tags": [],
         "label": "isClassificationTotalFeatureImportance",
-        "description": [
-          "\nType guard for total feature importance\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for total feature importance\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -402,12 +324,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The feature importance to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The feature importance to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -423,12 +341,8 @@
         "type": "Function",
         "tags": [],
         "label": "isDataFrameAnalyticsConfigs",
-        "description": [
-          "\nType guard for a DFA config\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for a DFA config\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -439,12 +353,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The config to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The config to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -460,9 +370,7 @@
         "type": "Function",
         "tags": [],
         "label": "isOutlierAnalysis",
-        "description": [
-          "\nType guard for DFA outlier analysis configurations\n"
-        ],
+        "description": ["\nType guard for DFA outlier analysis configurations\n"],
         "signature": [
           "(arg: unknown) => arg is ",
           {
@@ -483,12 +391,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The config to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The config to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -504,9 +408,7 @@
         "type": "Function",
         "tags": [],
         "label": "isRegressionAnalysis",
-        "description": [
-          "\nType guard for DFA regression analysis configurations\n"
-        ],
+        "description": ["\nType guard for DFA regression analysis configurations\n"],
         "signature": [
           "(arg: unknown) => arg is ",
           {
@@ -527,12 +429,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The config to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The config to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -548,12 +446,8 @@
         "type": "Function",
         "tags": [],
         "label": "isRegressionFeatureImportanceBaseline",
-        "description": [
-          "\nType guard for regression feature importance baseline\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for regression feature importance baseline\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -564,12 +458,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The baseline to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The baseline to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -585,12 +475,8 @@
         "type": "Function",
         "tags": [],
         "label": "isRegressionTotalFeatureImportance",
-        "description": [
-          "\nType guard for regression total feature importance\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for regression total feature importance\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -601,12 +487,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "The feature importance to identify"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["The feature importance to identify"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -646,12 +528,8 @@
             "type": "string",
             "tags": [],
             "label": "a",
-            "description": [
-              "First field name to compare for sorting"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["First field name to compare for sorting"],
+            "signature": ["string"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -663,12 +541,8 @@
             "type": "string",
             "tags": [],
             "label": "b",
-            "description": [
-              "Second field name to compare for sorting"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["Second field name to compare for sorting"],
+            "signature": ["string"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -680,9 +554,7 @@
             "type": "Object",
             "tags": [],
             "label": "jobConfig",
-            "description": [
-              "The DFA analysis config"
-            ],
+            "description": ["The DFA analysis config"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -709,9 +581,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsMapEdgeElement",
-        "description": [
-          "\nInterface for an edge element for the map view"
-        ],
+        "description": ["\nInterface for an edge element for the map view"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -722,12 +592,8 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": [
-              "\nInner data of the edge element"
-            ],
-            "signature": [
-              "{ id: string; source: string; target: string; }"
-            ],
+            "description": ["\nInner data of the edge element"],
+            "signature": ["{ id: string; source: string; target: string; }"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -741,9 +607,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsMapNodeElement",
-        "description": [
-          "\nInterface for a node element for the map view"
-        ],
+        "description": ["\nInterface for a node element for the map view"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -754,9 +618,7 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": [
-              "\nInner data of the node element"
-            ],
+            "description": ["\nInner data of the node element"],
             "signature": [
               "{ id: string; label: string; type: string; analysisType?: string | undefined; isRoot?: boolean | undefined; }"
             ],
@@ -773,9 +635,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsMapReturnType",
-        "description": [
-          "\nInterface for DFA map return type"
-        ],
+        "description": ["\nInterface for DFA map return type"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -786,9 +646,7 @@
             "type": "Array",
             "tags": [],
             "label": "elements",
-            "description": [
-              "\nMap elements"
-            ],
+            "description": ["\nMap elements"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -809,12 +667,8 @@
             "type": "Object",
             "tags": [],
             "label": "details",
-            "description": [
-              "\nTransform, job or index details"
-            ],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
+            "description": ["\nTransform, job or index details"],
+            "signature": ["{ [x: string]: any; }"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -825,12 +679,8 @@
             "type": "Any",
             "tags": [],
             "label": "error",
-            "description": [
-              "\nError"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nError"],
+            "signature": ["any"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -844,9 +694,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ClassFeatureImportance",
-        "description": [
-          "\nES result class feature importance"
-        ],
+        "description": ["\nES result class feature importance"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -857,12 +705,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "class_name",
-            "description": [
-              "\nThe class name"
-            ],
-            "signature": [
-              "string | number | boolean"
-            ],
+            "description": ["\nThe class name"],
+            "signature": ["string | number | boolean"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -873,9 +717,7 @@
             "type": "number",
             "tags": [],
             "label": "importance",
-            "description": [
-              "\nThe importance"
-            ],
+            "description": ["\nThe importance"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -889,9 +731,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ClassFeatureImportanceSummary",
-        "description": [
-          "\nES result for class feature importance summary"
-        ],
+        "description": ["\nES result for class feature importance summary"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -902,12 +742,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "class_name",
-            "description": [
-              "\nThe class name"
-            ],
-            "signature": [
-              "string | number | boolean"
-            ],
+            "description": ["\nThe class name"],
+            "signature": ["string | number | boolean"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -918,12 +754,8 @@
             "type": "Object",
             "tags": [],
             "label": "importance",
-            "description": [
-              "\nThe importance"
-            ],
-            "signature": [
-              "{ max: number; min: number; mean_magnitude: number; }"
-            ],
+            "description": ["\nThe importance"],
+            "signature": ["{ max: number; min: number; mean_magnitude: number; }"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -937,9 +769,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ClassificationAnalysis",
-        "description": [
-          "\nInterface for classification job configuation"
-        ],
+        "description": ["\nInterface for classification job configuation"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -950,12 +780,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: Classification",
-            "description": [
-              "\nKey spec for interface"
-            ],
-            "signature": [
-              "[key: string]:  Classification"
-            ],
+            "description": ["\nKey spec for interface"],
+            "signature": ["[key: string]:  Classification"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -966,12 +792,8 @@
             "type": "Object",
             "tags": [],
             "label": "classification",
-            "description": [
-              "\nOutlier detection options"
-            ],
-            "signature": [
-              "Classification"
-            ],
+            "description": ["\nOutlier detection options"],
+            "signature": ["Classification"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -985,9 +807,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ClassificationEvaluateResponse",
-        "description": [
-          "\nInterface for classification evaluate response"
-        ],
+        "description": ["\nInterface for classification evaluate response"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -998,9 +818,7 @@
             "type": "Object",
             "tags": [],
             "label": "classification",
-            "description": [
-              "\nClassification evaluation"
-            ],
+            "description": ["\nClassification evaluation"],
             "signature": [
               "{ multiclass_confusion_matrix?: { confusion_matrix: ",
               {
@@ -1033,9 +851,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ClassificationFeatureImportanceBaseline",
-        "description": [
-          "\nBaseline interface for ES result classification feature importance"
-        ],
+        "description": ["\nBaseline interface for ES result classification feature importance"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1046,9 +862,7 @@
             "type": "Array",
             "tags": [],
             "label": "classes",
-            "description": [
-              "\nClasses"
-            ],
+            "description": ["\nClasses"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1072,9 +886,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ClassificationTotalFeatureImportance",
-        "description": [
-          "\nES result classification total feature importance"
-        ],
+        "description": ["\nES result classification total feature importance"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1085,9 +897,7 @@
             "type": "string",
             "tags": [],
             "label": "feature_name",
-            "description": [
-              "\nThe feature name"
-            ],
+            "description": ["\nThe feature name"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1098,9 +908,7 @@
             "type": "Array",
             "tags": [],
             "label": "classes",
-            "description": [
-              "\nThe classes, array of ClassFeatureImportanceSummary"
-            ],
+            "description": ["\nThe classes, array of ClassFeatureImportanceSummary"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1124,9 +932,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ConfusionMatrix",
-        "description": [
-          "\nInterface for confusion matrix"
-        ],
+        "description": ["\nInterface for confusion matrix"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1137,9 +943,7 @@
             "type": "string",
             "tags": [],
             "label": "actual_class",
-            "description": [
-              "\nActual class"
-            ],
+            "description": ["\nActual class"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1150,9 +954,7 @@
             "type": "number",
             "tags": [],
             "label": "actual_class_doc_count",
-            "description": [
-              "\nActual class doc count"
-            ],
+            "description": ["\nActual class doc count"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1163,9 +965,7 @@
             "type": "Array",
             "tags": [],
             "label": "predicted_classes",
-            "description": [
-              "\nArray of predicted classes"
-            ],
+            "description": ["\nArray of predicted classes"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1186,9 +986,7 @@
             "type": "number",
             "tags": [],
             "label": "other_predicted_class_doc_count",
-            "description": [
-              "\nDoc count of other predicted classes"
-            ],
+            "description": ["\nDoc count of other predicted classes"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1202,9 +1000,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DataFrameAnalyticsConfig",
-        "description": [
-          "\nInterface for a DFA config with fix for estypes provided types"
-        ],
+        "description": ["\nInterface for a DFA config with fix for estypes provided types"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1227,13 +1023,8 @@
             "type": "Object",
             "tags": [],
             "label": "analyzed_fields",
-            "description": [
-              "\nOptional analyzed fields"
-            ],
-            "signature": [
-              "MlDataframeAnalysisAnalyzedFields",
-              " | undefined"
-            ],
+            "description": ["\nOptional analyzed fields"],
+            "signature": ["MlDataframeAnalysisAnalyzedFields", " | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1244,9 +1035,7 @@
             "type": "Object",
             "tags": [],
             "label": "_meta",
-            "description": [
-              "\nOptional meta data"
-            ],
+            "description": ["\nOptional meta data"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1270,9 +1059,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DataFrameAnalyticsMeta",
-        "description": [
-          "\nMeta data for a DFA job"
-        ],
+        "description": ["\nMeta data for a DFA job"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1283,9 +1070,7 @@
             "type": "Array",
             "tags": [],
             "label": "custom_urls",
-            "description": [
-              "\nOptional custom urls"
-            ],
+            "description": ["\nOptional custom urls"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -1306,12 +1091,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: any",
-            "description": [
-              "\nKey spec for interface"
-            ],
-            "signature": [
-              "[key: string]:  any"
-            ],
+            "description": ["\nKey spec for interface"],
+            "signature": ["[key: string]:  any"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1325,9 +1106,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DataFrameAnalyticsStats",
-        "description": [
-          "\nInterface for DFA stats"
-        ],
+        "description": ["\nInterface for DFA stats"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1350,12 +1129,8 @@
             "type": "string",
             "tags": [],
             "label": "failure_reason",
-            "description": [
-              "\nOptional failure reason"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional failure reason"],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1366,13 +1141,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "state",
-            "description": [
-              "\nTask state"
-            ],
-            "signature": [
-              "\"analyzing\" | \"reindexing\" | ",
-              "MlDataframeState"
-            ],
+            "description": ["\nTask state"],
+            "signature": ["\"analyzing\" | \"reindexing\" | ", "MlDataframeState"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1386,9 +1156,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DeleteDataFrameAnalyticsWithIndexStatus",
-        "description": [
-          "\nInterface for DFA API response for deletion status"
-        ],
+        "description": ["\nInterface for DFA API response for deletion status"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1399,9 +1167,7 @@
             "type": "boolean",
             "tags": [],
             "label": "success",
-            "description": [
-              "\nSuccess"
-            ],
+            "description": ["\nSuccess"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1412,15 +1178,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "error",
-            "description": [
-              "\nOptional error"
-            ],
-            "signature": [
-              "ErrorResponseBase",
-              " | ",
-              "Boom",
-              "<any> | undefined"
-            ],
+            "description": ["\nOptional error"],
+            "signature": ["ErrorResponseBase", " | ", "Boom", "<any> | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1434,9 +1193,7 @@
         "type": "Interface",
         "tags": [],
         "label": "EvaluateMetrics",
-        "description": [
-          "\nInterface for evalute metrics"
-        ],
+        "description": ["\nInterface for evalute metrics"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1447,9 +1204,7 @@
             "type": "Object",
             "tags": [],
             "label": "classification",
-            "description": [
-              "\nClassification evalute metrics"
-            ],
+            "description": ["\nClassification evalute metrics"],
             "signature": [
               "{ accuracy?: object | undefined; recall?: object | undefined; multiclass_confusion_matrix?: object | undefined; auc_roc?: { include_curve: boolean; class_name: string; } | undefined; }"
             ],
@@ -1463,12 +1218,8 @@
             "type": "Object",
             "tags": [],
             "label": "regression",
-            "description": [
-              "\nRegression evaluate metrics"
-            ],
-            "signature": [
-              "{ r_squared: object; mse: object; msle: object; huber: object; }"
-            ],
+            "description": ["\nRegression evaluate metrics"],
+            "signature": ["{ r_squared: object; mse: object; msle: object; huber: object; }"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1495,9 +1246,7 @@
             "type": "string",
             "tags": [],
             "label": "feature_name",
-            "description": [
-              "\nThe feature name"
-            ],
+            "description": ["\nThe feature name"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1508,9 +1257,7 @@
             "type": "Array",
             "tags": [],
             "label": "classes",
-            "description": [
-              "\nOptional classes"
-            ],
+            "description": ["\nOptional classes"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1531,12 +1278,8 @@
             "type": "number",
             "tags": [],
             "label": "importance",
-            "description": [
-              "\nOptional importance"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nOptional importance"],
+            "signature": ["number | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1550,9 +1293,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FeatureImportanceClassBaseline",
-        "description": [
-          "\nBaseline interface for ES result feature importance class"
-        ],
+        "description": ["\nBaseline interface for ES result feature importance class"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1563,12 +1304,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "class_name",
-            "description": [
-              "\nClass name"
-            ],
-            "signature": [
-              "string | number | boolean"
-            ],
+            "description": ["\nClass name"],
+            "signature": ["string | number | boolean"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1579,9 +1316,7 @@
             "type": "number",
             "tags": [],
             "label": "baseline",
-            "description": [
-              "\nBaseline"
-            ],
+            "description": ["\nBaseline"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1595,9 +1330,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldSelectionItem",
-        "description": [
-          "\nInterface for field selection item"
-        ],
+        "description": ["\nInterface for field selection item"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1618,16 +1351,10 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.FieldSelectionItem.mapping_types",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": ["type"],
             "label": "mapping_types",
-            "description": [
-              "\nOptional mapping types"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nOptional mapping types"],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1641,9 +1368,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OutlierAnalysis",
-        "description": [
-          "\nInterface for outlier analysis job configuation"
-        ],
+        "description": ["\nInterface for outlier analysis job configuation"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1654,12 +1379,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: {}",
-            "description": [
-              "\nKey spec for interface"
-            ],
-            "signature": [
-              "[key: string]:  {}"
-            ],
+            "description": ["\nKey spec for interface"],
+            "signature": ["[key: string]:  {}"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1670,12 +1391,8 @@
             "type": "Object",
             "tags": [],
             "label": "outlier_detection",
-            "description": [
-              "\nOutlier detection options"
-            ],
-            "signature": [
-              "{ compute_feature_influence?: boolean | undefined; }"
-            ],
+            "description": ["\nOutlier detection options"],
+            "signature": ["{ compute_feature_influence?: boolean | undefined; }"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1689,9 +1406,7 @@
         "type": "Interface",
         "tags": [],
         "label": "PredictedClass",
-        "description": [
-          "\nInterface for predicted class"
-        ],
+        "description": ["\nInterface for predicted class"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1702,9 +1417,7 @@
             "type": "string",
             "tags": [],
             "label": "predicted_class",
-            "description": [
-              "\nPredicted class"
-            ],
+            "description": ["\nPredicted class"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1715,9 +1428,7 @@
             "type": "number",
             "tags": [],
             "label": "count",
-            "description": [
-              "\nCount"
-            ],
+            "description": ["\nCount"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1731,9 +1442,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegressionAnalysis",
-        "description": [
-          "\nInterface for regression analysis job configuation"
-        ],
+        "description": ["\nInterface for regression analysis job configuation"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1744,12 +1453,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: Regression",
-            "description": [
-              "\nKey spec for interface"
-            ],
-            "signature": [
-              "[key: string]:  Regression"
-            ],
+            "description": ["\nKey spec for interface"],
+            "signature": ["[key: string]:  Regression"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1760,12 +1465,8 @@
             "type": "Object",
             "tags": [],
             "label": "regression",
-            "description": [
-              "\nRegression options"
-            ],
-            "signature": [
-              "Regression"
-            ],
+            "description": ["\nRegression options"],
+            "signature": ["Regression"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1779,9 +1480,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegressionFeatureImportanceBaseline",
-        "description": [
-          "\nBaseline interface for ES result regression feature importance"
-        ],
+        "description": ["\nBaseline interface for ES result regression feature importance"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1792,9 +1491,7 @@
             "type": "number",
             "tags": [],
             "label": "baseline",
-            "description": [
-              "\nBaseline"
-            ],
+            "description": ["\nBaseline"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1808,9 +1505,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegressionFeatureImportanceSummary",
-        "description": [
-          "\nES result regression feature importance summary"
-        ],
+        "description": ["\nES result regression feature importance summary"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1821,9 +1516,7 @@
             "type": "number",
             "tags": [],
             "label": "max",
-            "description": [
-              "\nMax feature importance"
-            ],
+            "description": ["\nMax feature importance"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1834,9 +1527,7 @@
             "type": "number",
             "tags": [],
             "label": "min",
-            "description": [
-              "\nMin feature importance"
-            ],
+            "description": ["\nMin feature importance"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1847,9 +1538,7 @@
             "type": "number",
             "tags": [],
             "label": "mean_magnitude",
-            "description": [
-              "\nMean magnitude"
-            ],
+            "description": ["\nMean magnitude"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1863,9 +1552,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegressionTotalFeatureImportance",
-        "description": [
-          "\nES result for regression total feature importance"
-        ],
+        "description": ["\nES result for regression total feature importance"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1876,9 +1563,7 @@
             "type": "string",
             "tags": [],
             "label": "feature_name",
-            "description": [
-              "\nFeature name"
-            ],
+            "description": ["\nFeature name"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1889,9 +1574,7 @@
             "type": "Object",
             "tags": [],
             "label": "importance",
-            "description": [
-              "\nImportance"
-            ],
+            "description": ["\nImportance"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1914,9 +1597,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RocCurveItem",
-        "description": [
-          "\nData item for ROC curve"
-        ],
+        "description": ["\nData item for ROC curve"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1927,9 +1608,7 @@
             "type": "number",
             "tags": [],
             "label": "fpr",
-            "description": [
-              "\nFPR"
-            ],
+            "description": ["\nFPR"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1940,9 +1619,7 @@
             "type": "number",
             "tags": [],
             "label": "threshold",
-            "description": [
-              "\nThreshold"
-            ],
+            "description": ["\nThreshold"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1953,9 +1630,7 @@
             "type": "number",
             "tags": [],
             "label": "tpr",
-            "description": [
-              "\nTPR"
-            ],
+            "description": ["\nTPR"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1969,9 +1644,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TopClass",
-        "description": [
-          "\nES result top class interface"
-        ],
+        "description": ["\nES result top class interface"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1982,12 +1655,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "class_name",
-            "description": [
-              "\nThe class name"
-            ],
-            "signature": [
-              "string | number | boolean"
-            ],
+            "description": ["\nThe class name"],
+            "signature": ["string | number | boolean"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1998,9 +1667,7 @@
             "type": "number",
             "tags": [],
             "label": "class_probability",
-            "description": [
-              "\nThe class probability"
-            ],
+            "description": ["\nThe class probability"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2011,9 +1678,7 @@
             "type": "number",
             "tags": [],
             "label": "class_score",
-            "description": [
-              "\nThe class score"
-            ],
+            "description": ["\nThe class score"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2027,9 +1692,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TrackTotalHitsSearchResponse",
-        "description": [
-          "\nInterface for a search response's track total hits option"
-        ],
+        "description": ["\nInterface for a search response's track total hits option"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2040,12 +1703,8 @@
             "type": "Object",
             "tags": [],
             "label": "hits",
-            "description": [
-              "\nInner structure of the response"
-            ],
-            "signature": [
-              "{ total: { value: number; relation: string; }; hits: any[]; }"
-            ],
+            "description": ["\nInner structure of the response"],
+            "signature": ["{ total: { value: number; relation: string; }; hits: any[]; }"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2059,9 +1718,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UpdateDataFrameAnalyticsConfig",
-        "description": [
-          "\nInterface for a requect object to update a DFA job"
-        ],
+        "description": ["\nInterface for a requect object to update a DFA job"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2072,12 +1729,8 @@
             "type": "string",
             "tags": [],
             "label": "allow_lazy_start",
-            "description": [
-              "\nOptional allow lazy start"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional allow lazy start"],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2088,12 +1741,8 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [
-              "\nOptional description"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional description"],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2104,12 +1753,8 @@
             "type": "string",
             "tags": [],
             "label": "model_memory_limit",
-            "description": [
-              "\nOptional model memory limit"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional model memory limit"],
+            "signature": ["string | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2120,12 +1765,8 @@
             "type": "number",
             "tags": [],
             "label": "max_num_threads",
-            "description": [
-              "\nOptional max num threads"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nOptional max num threads"],
+            "signature": ["number | undefined"],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2136,9 +1777,7 @@
             "type": "Object",
             "tags": [],
             "label": "_meta",
-            "description": [
-              "\nOptional meta data"
-            ],
+            "description": ["\nOptional meta data"],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -2164,9 +1803,7 @@
         "type": "Enum",
         "tags": [],
         "label": "ANALYSIS_ADVANCED_FIELDS",
-        "description": [
-          "\nEnum for a DFA configuration's advanced fields"
-        ],
+        "description": ["\nEnum for a DFA configuration's advanced fields"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2178,9 +1815,7 @@
         "type": "Enum",
         "tags": [],
         "label": "OUTLIER_ANALYSIS_METHOD",
-        "description": [
-          "\nEnum for a DFA configuration's outlier analysis method"
-        ],
+        "description": ["\nEnum for a DFA configuration's outlier analysis method"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2194,12 +1829,8 @@
         "type": "Type",
         "tags": [],
         "label": "AnalysisConfig",
-        "description": [
-          "\nAlias of estypes.MlDataframeAnalysisContainer"
-        ],
-        "signature": [
-          "MlDataframeAnalysisContainer"
-        ],
+        "description": ["\nAlias of estypes.MlDataframeAnalysisContainer"],
+        "signature": ["MlDataframeAnalysisContainer"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2211,12 +1842,8 @@
         "type": "Type",
         "tags": [],
         "label": "DataFrameAnalysisConfigType",
-        "description": [
-          "\nUnion type of DFA anlaysis config types"
-        ],
-        "signature": [
-          "\"outlier_detection\" | \"regression\" | \"classification\""
-        ],
+        "description": ["\nUnion type of DFA anlaysis config types"],
+        "signature": ["\"outlier_detection\" | \"regression\" | \"classification\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2228,12 +1855,8 @@
         "type": "Type",
         "tags": [],
         "label": "DataFrameAnalyticsId",
-        "description": [
-          "\nData frame analytics id"
-        ],
-        "signature": [
-          "string"
-        ],
+        "description": ["\nData frame analytics id"],
+        "signature": ["string"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2245,13 +1868,8 @@
         "type": "Type",
         "tags": [],
         "label": "DataFrameTaskStateType",
-        "description": [
-          "\nUnion type of DFA task states"
-        ],
-        "signature": [
-          "\"analyzing\" | \"reindexing\" | ",
-          "MlDataframeState"
-        ],
+        "description": ["\nUnion type of DFA task states"],
+        "signature": ["\"analyzing\" | \"reindexing\" | ", "MlDataframeState"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2263,12 +1881,8 @@
         "type": "number",
         "tags": [],
         "label": "DEFAULT_REGRESSION_COLUMNS",
-        "description": [
-          "\nDefault regression columns"
-        ],
-        "signature": [
-          "8"
-        ],
+        "description": ["\nDefault regression columns"],
+        "signature": ["8"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2280,12 +1894,8 @@
         "type": "string",
         "tags": [],
         "label": "DEFAULT_RESULTS_FIELD",
-        "description": [
-          "\nDefault results field"
-        ],
-        "signature": [
-          "\"ml\""
-        ],
+        "description": ["\nDefault results field"],
+        "signature": ["\"ml\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2297,12 +1907,8 @@
         "type": "Type",
         "tags": [],
         "label": "DfAnalyticsExplainResponse",
-        "description": [
-          "\nAlias for estypes.MlExplainDataFrameAnalyticsResponse"
-        ],
-        "signature": [
-          "MlExplainDataFrameAnalyticsResponse"
-        ],
+        "description": ["\nAlias for estypes.MlExplainDataFrameAnalyticsResponse"],
+        "signature": ["MlExplainDataFrameAnalyticsResponse"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2314,12 +1920,8 @@
         "type": "string",
         "tags": [],
         "label": "FEATURE_IMPORTANCE",
-        "description": [
-          "\nFeature importance constant"
-        ],
-        "signature": [
-          "\"feature_importance\""
-        ],
+        "description": ["\nFeature importance constant"],
+        "signature": ["\"feature_importance\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2331,12 +1933,8 @@
         "type": "string",
         "tags": [],
         "label": "FEATURE_INFLUENCE",
-        "description": [
-          "\nFeature influence constant"
-        ],
-        "signature": [
-          "\"feature_influence\""
-        ],
+        "description": ["\nFeature influence constant"],
+        "signature": ["\"feature_influence\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2348,9 +1946,7 @@
         "type": "Type",
         "tags": [],
         "label": "FeatureImportanceBaseline",
-        "description": [
-          "\nUnion type of feature importance baseline types"
-        ],
+        "description": ["\nUnion type of feature importance baseline types"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -2379,12 +1975,8 @@
         "type": "Type",
         "tags": [],
         "label": "FeatureImportanceClassName",
-        "description": [
-          "\nUnion type for ES result feature importance class name"
-        ],
-        "signature": [
-          "string | number | boolean"
-        ],
+        "description": ["\nUnion type for ES result feature importance class name"],
+        "signature": ["string | number | boolean"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2396,12 +1988,8 @@
         "type": "Type",
         "tags": [],
         "label": "FeatureProcessor",
-        "description": [
-          "\nAlias for estypes.MlDataframeAnalysisFeatureProcessor"
-        ],
-        "signature": [
-          "MlDataframeAnalysisFeatureProcessor"
-        ],
+        "description": ["\nAlias for estypes.MlDataframeAnalysisFeatureProcessor"],
+        "signature": ["MlDataframeAnalysisFeatureProcessor"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2413,9 +2001,7 @@
         "type": "Type",
         "tags": [],
         "label": "JobMapNodeTypes",
-        "description": [
-          "\nUnion type of JOB_MAP_NODE_TYPES"
-        ],
+        "description": ["\nUnion type of JOB_MAP_NODE_TYPES"],
         "signature": [
           "\"index\" | \"transform\" | \"analytics\" | \"analytics-job-missing\" | \"trainedModel\" | \"ingestPipeline\""
         ],
@@ -2430,9 +2016,7 @@
         "type": "Type",
         "tags": [],
         "label": "MapElements",
-        "description": [
-          "\nUnion type of map node and edge elements"
-        ],
+        "description": ["\nUnion type of map node and edge elements"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -2461,12 +2045,8 @@
         "type": "string",
         "tags": [],
         "label": "ML__ID_COPY",
-        "description": [
-          "\nES field name for copy of the doc _id"
-        ],
-        "signature": [
-          "\"ml__id_copy\""
-        ],
+        "description": ["\nES field name for copy of the doc _id"],
+        "signature": ["\"ml__id_copy\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2478,12 +2058,8 @@
         "type": "string",
         "tags": [],
         "label": "ML__INCREMENTAL_ID",
-        "description": [
-          "\nES field name for ML's incremental id"
-        ],
-        "signature": [
-          "\"ml__incremental_id\""
-        ],
+        "description": ["\nES field name for ML's incremental id"],
+        "signature": ["\"ml__incremental_id\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2495,12 +2071,8 @@
         "type": "number",
         "tags": [],
         "label": "NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN",
-        "description": [
-          "\nMinimum value for feature importance"
-        ],
-        "signature": [
-          "0"
-        ],
+        "description": ["\nMinimum value for feature importance"],
+        "signature": ["0"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2512,12 +2084,8 @@
         "type": "string",
         "tags": [],
         "label": "OUTLIER_SCORE",
-        "description": [
-          "\nOutlier score constant"
-        ],
-        "signature": [
-          "\"outlier_score\""
-        ],
+        "description": ["\nOutlier score constant"],
+        "signature": ["\"outlier_score\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2529,12 +2097,8 @@
         "type": "string",
         "tags": [],
         "label": "TOP_CLASSES",
-        "description": [
-          "\nTop classes constant"
-        ],
-        "signature": [
-          "\"top_classes\""
-        ],
+        "description": ["\nTop classes constant"],
+        "signature": ["\"top_classes\""],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2546,9 +2110,7 @@
         "type": "Type",
         "tags": [],
         "label": "TopClasses",
-        "description": [
-          "\nArray of TopClass"
-        ],
+        "description": ["\nArray of TopClass"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -2570,9 +2132,7 @@
         "type": "Type",
         "tags": [],
         "label": "TotalFeatureImportance",
-        "description": [
-          "\nUnion type of total feature importance types"
-        ],
+        "description": ["\nUnion type of total feature importance types"],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -2601,12 +2161,8 @@
         "type": "number",
         "tags": [],
         "label": "TRAINING_PERCENT_MAX",
-        "description": [
-          "\nMaximum training percent"
-        ],
-        "signature": [
-          "100"
-        ],
+        "description": ["\nMaximum training percent"],
+        "signature": ["100"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2618,12 +2174,8 @@
         "type": "number",
         "tags": [],
         "label": "TRAINING_PERCENT_MIN",
-        "description": [
-          "\nMinimum training percent"
-        ],
-        "signature": [
-          "1"
-        ],
+        "description": ["\nMinimum training percent"],
+        "signature": ["1"],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2637,9 +2189,7 @@
         "type": "Object",
         "tags": [],
         "label": "ANALYSIS_CONFIG_TYPE",
-        "description": [
-          "\nCustom enum for DFA config types"
-        ],
+        "description": ["\nCustom enum for DFA config types"],
         "signature": [
           "{ readonly OUTLIER_DETECTION: \"outlier_detection\"; readonly REGRESSION: \"regression\"; readonly CLASSIFICATION: \"classification\"; }"
         ],
@@ -2654,9 +2204,7 @@
         "type": "Object",
         "tags": [],
         "label": "BASIC_NUMERICAL_TYPES",
-        "description": [
-          "\nSet of basic numerical types"
-        ],
+        "description": ["\nSet of basic numerical types"],
         "signature": [
           "Set<",
           {
@@ -2679,9 +2227,7 @@
         "type": "Object",
         "tags": [],
         "label": "DATA_FRAME_TASK_STATE",
-        "description": [
-          "\nCustom enum for DFA task states"
-        ],
+        "description": ["\nCustom enum for DFA task states"],
         "signature": [
           "{ readonly ANALYZING: \"analyzing\"; readonly FAILED: \"failed\"; readonly REINDEXING: \"reindexing\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPED: \"stopped\"; }"
         ],
@@ -2696,9 +2242,7 @@
         "type": "Object",
         "tags": [],
         "label": "EXTENDED_NUMERICAL_TYPES",
-        "description": [
-          "\nSet of extended numerical types"
-        ],
+        "description": ["\nSet of extended numerical types"],
         "signature": [
           "Set<",
           {
@@ -2738,9 +2282,7 @@
         "type": "Object",
         "tags": [],
         "label": "JOB_MAP_NODE_TYPES",
-        "description": [
-          "\nCustom enum for job map node types for the DFA map view"
-        ],
+        "description": ["\nCustom enum for job map node types for the DFA map view"],
         "signature": [
           "{ readonly ANALYTICS: \"analytics\"; readonly ANALYTICS_JOB_MISSING: \"analytics-job-missing\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; readonly INGEST_PIPELINE: \"ingestPipeline\"; }"
         ],

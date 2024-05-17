@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 import { UrlFormat } from './url';
-import { TEXT_CONTEXT_TYPE, HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {

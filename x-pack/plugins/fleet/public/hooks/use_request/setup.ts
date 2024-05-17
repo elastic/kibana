@@ -7,9 +7,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { setupRouteService, fleetSetupRouteService } from '../../services';
-import type { GetFleetStatusResponse } from '../../types';
 import { API_VERSIONS } from '../../../common/constants';
+import { fleetSetupRouteService, setupRouteService } from '../../services';
+import type { GetFleetStatusResponse } from '../../types';
 
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq } from './use_request';

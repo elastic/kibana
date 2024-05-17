@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
-import { FieldSelect } from './field_select';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
+import type { DataType, DatasourceDimensionEditorProps } from '../../../types';
+import { getColumnsFromCache, retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 import type { TextBasedPrivateState } from '../types';
-import { retrieveLayerColumnsFromCache, getColumnsFromCache } from '../fieldlist_cache';
 import { isNotNumeric, isNumeric } from '../utils';
+import { FieldSelect } from './field_select';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {

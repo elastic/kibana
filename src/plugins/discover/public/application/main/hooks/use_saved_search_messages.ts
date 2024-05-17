@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { combineReducers, applyMiddleware, createStore, compose } from 'redux';
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
-import { ui, DEFAULT_MAP_UI_STATE } from './ui';
-import { map, DEFAULT_MAP_STATE } from './map'; // eslint-disable-line import/named
+import { DEFAULT_MAP_STATE, map } from './map'; // eslint-disable-line import/named
 import { nonSerializableInstances } from './non_serializable_instances';
+import { DEFAULT_MAP_UI_STATE, ui } from './ui';
 
 export const DEFAULT_MAP_STORE_STATE = {
   ui: { ...DEFAULT_MAP_UI_STATE },

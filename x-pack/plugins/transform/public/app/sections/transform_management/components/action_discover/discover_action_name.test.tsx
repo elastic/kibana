@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
-import { isDiscoverActionDisabled, DiscoverActionName } from './discover_action_name';
+import { DiscoverActionName, isDiscoverActionDisabled } from './discover_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 import type { TransformListRowWithStats } from '../../../../common/transform_list';

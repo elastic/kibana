@@ -6,12 +6,12 @@
  */
 
 import type { ResultLinks } from '../../common/app';
-import { lazyLoadModules } from '../lazy_load_bundle';
 import type {
   DataDriftSpec,
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
 } from '../application';
+import { lazyLoadModules } from '../lazy_load_bundle';
 
 export interface SpecWithLinks<T> {
   resultLinks: ResultLinks;

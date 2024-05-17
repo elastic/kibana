@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useState, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-  ValidationConfig,
-  FieldConfig,
-} from '../../shared_imports';
-import { canAppendWildcard } from '../../lib';
-import { schema } from '../form_schema';
-import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
+import { i18n } from '@kbn/i18n';
+import React, { ChangeEvent, useState, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
+import { canAppendWildcard } from '../../lib';
+import {
+  FieldConfig,
+  UseField,
+  ValidationConfig,
+  getFieldValidityAndErrorMessage,
+} from '../../shared_imports';
+import { IndexPatternConfig, MatchedIndicesSet, RollupIndicesCapsResponse } from '../../types';
+import { schema } from '../form_schema';
 import { TitleDocsPopover } from './title_docs_popover';
 
 interface TitleFieldProps {

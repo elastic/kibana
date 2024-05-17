@@ -13,8 +13,8 @@ import {
 import { TimeRange } from '../../../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import {
-  getIndexPatterns,
   getElasticsearchDataset,
+  getIndexPatterns,
 } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';

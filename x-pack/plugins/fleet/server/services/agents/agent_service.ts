@@ -19,14 +19,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
-import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
+import type { AgentStatus, ListWithKuery } from '../../types';
 
 import { getAuthzFromRequest } from '../security';
 
 import { FleetUnauthorizedError } from '../../errors';
 
-import { getAgentsByKuery, getAgentById } from './crud';
+import { getAgentById, getAgentsByKuery } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 import { getLatestAvailableAgentVersion } from './versions';
 

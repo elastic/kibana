@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NumeralFormat } from './numeral';
 import { FIELD_FORMAT_IDS } from '../types';
+import { NumeralFormat } from './numeral';
 
 /** @public */
 export class BytesFormat extends NumeralFormat {

@@ -10,15 +10,15 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiPage,
-  EuiPageSidebar,
-  EuiPageBody,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiIcon,
+  EuiPage,
+  EuiPageBody,
+  EuiPageSidebar,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { KibanaLogic } from '../kibana';

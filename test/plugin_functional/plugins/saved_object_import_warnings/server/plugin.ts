@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class SavedObjectImportWarningsPlugin implements Plugin {
   public setup({ savedObjects }: CoreSetup, deps: {}) {

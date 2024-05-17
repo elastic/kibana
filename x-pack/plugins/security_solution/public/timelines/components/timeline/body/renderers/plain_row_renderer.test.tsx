@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../../../common/types/timeline';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';

@@ -82,9 +82,7 @@
             "tags": [],
             "label": "baseHref",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -101,11 +99,7 @@
         "tags": [],
         "label": "ExploratoryView",
         "description": [],
-        "signature": [
-          "(props: ",
-          "ExploratoryViewPageProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["(props: ", "ExploratoryViewPageProps", ") => JSX.Element"],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -117,9 +111,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "ExploratoryViewPageProps"
-            ],
+            "signature": ["ExploratoryViewPageProps"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -136,11 +128,7 @@
         "tags": [],
         "label": "FilterValueLabel",
         "description": [],
-        "signature": [
-          "(props: ",
-          "FilterValueLabelProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["(props: ", "FilterValueLabelProps", ") => JSX.Element"],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -152,9 +140,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "FilterValueLabelProps"
-            ],
+            "signature": ["FilterValueLabelProps"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -171,9 +157,7 @@
         "tags": [],
         "label": "fromQuery",
         "description": [],
-        "signature": [
-          "(query: Record<string, any>) => string"
-        ],
+        "signature": ["(query: Record<string, any>) => string"],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -185,9 +169,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "Record<string, any>"
-            ],
+            "signature": ["Record<string, any>"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -204,11 +186,7 @@
         "tags": [],
         "label": "SelectableUrlList",
         "description": [],
-        "signature": [
-          "(props: ",
-          "SelectableUrlListProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["(props: ", "SelectableUrlListProps", ") => JSX.Element"],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -220,9 +198,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "SelectableUrlListProps"
-            ],
+            "signature": ["SelectableUrlListProps"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -239,11 +215,7 @@
         "tags": [],
         "label": "toQuery",
         "description": [],
-        "signature": [
-          "(search: string | undefined) => ",
-          "ParsedQuery",
-          "<string>"
-        ],
+        "signature": ["(search: string | undefined) => ", "ParsedQuery", "<string>"],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -255,9 +227,7 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -329,9 +299,7 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -357,9 +325,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -371,9 +337,7 @@
             "tags": [],
             "label": "appendTitle",
             "description": [],
-            "signature": [
-              "JSX.Element | undefined"
-            ],
+            "signature": ["JSX.Element | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -448,9 +412,7 @@
             "tags": [],
             "label": "customHeight",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -462,9 +424,7 @@
             "tags": [],
             "label": "customTimeRange",
             "description": [],
-            "signature": [
-              "{ from: string; to: string; } | undefined"
-            ],
+            "signature": ["{ from: string; to: string; } | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -476,11 +436,7 @@
             "tags": [],
             "label": "dataTypesIndexPatterns",
             "description": [],
-            "signature": [
-              "Partial<Record<",
-              "AppDataType",
-              ", string>> | undefined"
-            ],
+            "signature": ["Partial<Record<", "AppDataType", ", string>> | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -492,9 +448,7 @@
             "tags": [],
             "label": "isSingleMetric",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -506,9 +460,7 @@
             "tags": [],
             "label": "legendIsVisible",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -520,10 +472,7 @@
             "tags": [],
             "label": "legendPosition",
             "description": [],
-            "signature": [
-              "Position",
-              " | undefined"
-            ],
+            "signature": ["Position", " | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -535,9 +484,7 @@
             "tags": [],
             "label": "hideTicks",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -549,9 +496,7 @@
             "tags": [],
             "label": "onBrushEnd",
             "description": [],
-            "signature": [
-              "((param: { range: number[]; }) => void) | undefined"
-            ],
+            "signature": ["((param: { range: number[]; }) => void) | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -574,9 +519,7 @@
                     "tags": [],
                     "label": "range",
                     "description": [],
-                    "signature": [
-                      "number[]"
-                    ],
+                    "signature": ["number[]"],
                     "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
                     "deprecated": false,
                     "trackAdoption": false
@@ -593,9 +536,7 @@
             "tags": [],
             "label": "onLoad",
             "description": [],
-            "signature": [
-              "((loading: boolean) => void) | undefined"
-            ],
+            "signature": ["((loading: boolean) => void) | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -607,9 +548,7 @@
                 "tags": [],
                 "label": "loading",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -625,9 +564,7 @@
             "tags": [],
             "label": "caseOwner",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -639,10 +576,7 @@
             "tags": [],
             "label": "reportConfigMap",
             "description": [],
-            "signature": [
-              "ReportConfigMap",
-              " | undefined"
-            ],
+            "signature": ["ReportConfigMap", " | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -668,9 +602,7 @@
             "tags": [],
             "label": "showCalculationMethod",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -682,9 +614,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | JSX.Element | undefined"
-            ],
+            "signature": ["string | JSX.Element | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -696,11 +626,7 @@
             "tags": [],
             "label": "withActions",
             "description": [],
-            "signature": [
-              "boolean | ",
-              "ActionTypes",
-              "[] | undefined"
-            ],
+            "signature": ["boolean | ", "ActionTypes", "[] | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -712,9 +638,7 @@
             "tags": [],
             "label": "align",
             "description": [],
-            "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
-            ],
+            "signature": ["\"right\" | \"left\" | \"center\" | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -726,9 +650,7 @@
             "tags": [],
             "label": "sparklineMode",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -740,9 +662,7 @@
             "tags": [],
             "label": "noLabel",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -754,9 +674,7 @@
             "tags": [],
             "label": "fontSize",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -768,9 +686,7 @@
             "tags": [],
             "label": "lineHeight",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -782,9 +698,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -796,9 +710,7 @@
             "tags": [],
             "label": "searchSessionId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1434,9 +1346,7 @@
             "tags": [],
             "label": "breakdownFields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1573,9 +1483,7 @@
             "tags": [],
             "label": "textDefinitionFields",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1605,9 +1513,7 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": [
-              "{ [x: string]: string; }"
-            ],
+            "signature": ["{ [x: string]: string; }"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1651,9 +1557,7 @@
             "tags": [],
             "label": "yTitle",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1686,9 +1590,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "{ query: string; language: \"kuery\"; } | undefined"
-            ],
+            "signature": ["{ query: string; language: \"kuery\"; } | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1725,9 +1627,7 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": [
-              "{ to: string; from: string; }"
-            ],
+            "signature": ["{ to: string; from: string; }"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1739,9 +1639,7 @@
             "tags": [],
             "label": "breakdown",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1795,9 +1693,7 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1823,10 +1719,7 @@
             "tags": [],
             "label": "reportDefinitions",
             "description": [],
-            "signature": [
-              "URLReportDefinition",
-              " | undefined"
-            ],
+            "signature": ["URLReportDefinition", " | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1838,10 +1731,7 @@
             "tags": [],
             "label": "textReportDefinitions",
             "description": [],
-            "signature": [
-              "URLTextReportDefinition",
-              " | undefined"
-            ],
+            "signature": ["URLTextReportDefinition", " | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1853,9 +1743,7 @@
             "tags": [],
             "label": "selectedMetricField",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1867,9 +1755,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1881,9 +1767,7 @@
             "tags": [],
             "label": "showPercentileAnnotations",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1895,9 +1779,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1934,9 +1816,7 @@
             "tags": [],
             "label": "values",
             "description": [],
-            "signature": [
-              "(string | number)[] | undefined"
-            ],
+            "signature": ["(string | number)[] | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1948,9 +1828,7 @@
             "tags": [],
             "label": "notValues",
             "description": [],
-            "signature": [
-              "(string | number)[] | undefined"
-            ],
+            "signature": ["(string | number)[] | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1962,9 +1840,7 @@
             "tags": [],
             "label": "wildcards",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1976,9 +1852,7 @@
             "tags": [],
             "label": "notWildcards",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2009,9 +1883,7 @@
         "tags": [],
         "label": "ALL_VALUES_SELECTED",
         "description": [],
-        "signature": [
-          "\"ALL_VALUES\""
-        ],
+        "signature": ["\"ALL_VALUES\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/url_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2046,9 +1918,7 @@
         "tags": [],
         "label": "APP_ROUTE",
         "description": [],
-        "signature": [
-          "\"/app/exploratory-view\""
-        ],
+        "signature": ["\"/app/exploratory-view\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2061,9 +1931,7 @@
         "tags": [],
         "label": "ENVIRONMENT_ALL",
         "description": [],
-        "signature": [
-          "\"ENVIRONMENT_ALL\""
-        ],
+        "signature": ["\"ENVIRONMENT_ALL\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2076,9 +1944,7 @@
         "tags": [],
         "label": "FILTER_RECORDS",
         "description": [],
-        "signature": [
-          "\"FILTER_RECORDS\""
-        ],
+        "signature": ["\"FILTER_RECORDS\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2091,9 +1957,7 @@
         "tags": [],
         "label": "OPERATION_COLUMN",
         "description": [],
-        "signature": [
-          "\"operation\""
-        ],
+        "signature": ["\"operation\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2106,9 +1970,7 @@
         "tags": [],
         "label": "RECORDS_FIELD",
         "description": [],
-        "signature": [
-          "\"___records___\""
-        ],
+        "signature": ["\"___records___\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2121,9 +1983,7 @@
         "tags": [],
         "label": "RECORDS_PERCENTAGE_FIELD",
         "description": [],
-        "signature": [
-          "\"RecordsPercentage\""
-        ],
+        "signature": ["\"RecordsPercentage\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2136,9 +1996,7 @@
         "tags": [],
         "label": "REPORT_METRIC_FIELD",
         "description": [],
-        "signature": [
-          "\"REPORT_METRIC_FIELD\""
-        ],
+        "signature": ["\"REPORT_METRIC_FIELD\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2151,9 +2009,7 @@
         "tags": [],
         "label": "TERMS_COLUMN",
         "description": [],
-        "signature": [
-          "\"TERMS_COLUMN\""
-        ],
+        "signature": ["\"TERMS_COLUMN\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2166,9 +2022,7 @@
         "tags": [],
         "label": "USE_BREAK_DOWN_COLUMN",
         "description": [],
-        "signature": [
-          "\"USE_BREAK_DOWN_COLUMN\""
-        ],
+        "signature": ["\"USE_BREAK_DOWN_COLUMN\""],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

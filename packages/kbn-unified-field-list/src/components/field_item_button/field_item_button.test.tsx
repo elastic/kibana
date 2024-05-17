@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { FieldItemButton } from './field_item_button';
 
 const bytesField = dataView.getFieldByName('bytes')!;

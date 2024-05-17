@@ -8,7 +8,7 @@
 
 import { createHash } from 'crypto';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { extractMigrationInfo, ModelVersionSummary } from './extract_migration_info';
+import { ModelVersionSummary, extractMigrationInfo } from './extract_migration_info';
 
 type SavedObjectTypeMigrationHash = string;
 

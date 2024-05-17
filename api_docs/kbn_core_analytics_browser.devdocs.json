@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KbnAnalyticsWindowApi",
-        "description": [
-          "\nAPI exposed through `window.__kbnAnalytics`"
-        ],
+        "description": ["\nAPI exposed through `window.__kbnAnalytics`"],
         "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +40,7 @@
             "description": [
               "\nReturns a promise that resolves when all the events in the queue have been sent."
             ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,

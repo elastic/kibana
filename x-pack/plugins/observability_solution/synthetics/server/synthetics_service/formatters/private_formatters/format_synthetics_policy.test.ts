@@ -1,3 +1,4 @@
+import { PROFILES_MAP, PROFILE_VALUES_ENUM } from '../../../../common/constants/monitor_defaults';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
-import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
 describe('formatSyntheticsPolicy', () => {

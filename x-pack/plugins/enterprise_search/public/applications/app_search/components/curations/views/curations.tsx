@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +17,7 @@ import { ENGINE_CURATIONS_NEW_PATH } from '../../../routes';
 import { EngineLogic, generateEnginePath } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
-import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
+import { CREATE_NEW_CURATION_TITLE, CURATIONS_OVERVIEW_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
 

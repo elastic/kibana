@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',

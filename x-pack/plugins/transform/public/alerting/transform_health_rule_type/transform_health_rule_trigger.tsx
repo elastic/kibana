@@ -6,17 +6,17 @@
  */
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
+import { useToastNotifications } from '../../app/app_dependencies';
+import { useGetTransforms } from '../../app/hooks';
 import { TestsSelectionControl } from './tests_selection_control';
 import { TransformSelectorControl } from './transform_selector_control';
-import { useGetTransforms } from '../../app/hooks';
-import { useToastNotifications } from '../../app/app_dependencies';
-import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
 export type TransformHealthRuleTriggerProps =
   RuleTypeParamsExpressionProps<TransformHealthRuleParams>;

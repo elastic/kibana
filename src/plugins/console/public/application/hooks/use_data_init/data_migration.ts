@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { History } from '../../../services';
 import { ObjectStorageClient } from '../../../../common/types';
+import { History } from '../../../services';
 
 export interface Dependencies {
   history: History;

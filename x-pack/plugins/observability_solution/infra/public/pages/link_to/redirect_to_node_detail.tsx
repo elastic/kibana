@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
-import rison from '@kbn/rison';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
+import rison from '@kbn/rison';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AssetDetailsUrlState } from '../../components/asset_details/types';
+import { useEffect } from 'react';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
+import { AssetDetailsUrlState } from '../../components/asset_details/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const REDIRECT_NODE_DETAILS_FROM_KEY = 'from';

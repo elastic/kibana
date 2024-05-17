@@ -7,14 +7,14 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type { State, AllActionStates } from '../state';
-import type { ResponseType } from '../next';
-import { delayRetryState, resetRetryState } from '../../model/retry_state';
 import { throwBadControlState } from '../../model/helpers';
+import { delayRetryState, resetRetryState } from '../../model/retry_state';
 import { isTypeof } from '../actions';
 import type { MigratorContext } from '../context';
-import type { ModelStage } from './types';
+import type { ResponseType } from '../next';
+import type { AllActionStates, State } from '../state';
 import * as Stages from './stages';
+import type { ModelStage } from './types';
 
 type ModelStageMap = {
   [K in AllActionStates]: ModelStage<K, any>;

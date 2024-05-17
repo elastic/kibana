@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiAccordion,
   EuiCallOut,
@@ -21,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,12 +30,12 @@ import { useLink, useStartServices } from '../../hooks';
 
 import {
   AgentPolicyDebugger,
-  IntegrationDebugger,
-  PreconfigurationDebugger,
   FleetIndexDebugger,
-  SavedObjectDebugger,
-  OrphanedIntegrationPolicyDebugger,
   HealthCheckPanel,
+  IntegrationDebugger,
+  OrphanedIntegrationPolicyDebugger,
+  PreconfigurationDebugger,
+  SavedObjectDebugger,
 } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app

@@ -10,8 +10,8 @@ import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { Settings } from '../../../common/types';
 
 import type { Installation } from '../../../common';
-import { FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common/constants';
 import type { PackagePolicy } from '../../../common';
+import { FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common/constants';
 
 import { migratePackagePolicyToV860 as SecSolMigratePackagePolicyToV860 } from './security_solution';
 

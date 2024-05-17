@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   epmRouteService,
 } from '@kbn/fleet-plugin/common';
-import type { Client } from '@elastic/elasticsearch';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
+import type SuperTest from 'supertest';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
 const MAX_RETRIES = 2;

@@ -10,8 +10,8 @@
 import { resolve } from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from './services';
 import { pageObjects } from './page_objects';
+import { services } from './services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values

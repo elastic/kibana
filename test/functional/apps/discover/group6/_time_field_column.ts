@@ -80,8 +80,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             !hasTimeField
               ? ['@timestamp']
               : hideTimeFieldColumnSetting
-              ? ['Document'] // legacy behaviour
-              : ['@timestamp', 'Document'] // legacy behaviour
+                ? ['Document'] // legacy behaviour
+                : ['@timestamp', 'Document'] // legacy behaviour
           );
         });
 
@@ -126,8 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             !hasTimeField
               ? ['@timestamp']
               : hideTimeFieldColumnSetting
-              ? ['Document'] // legacy behaviour
-              : ['@timestamp', 'Document'] // legacy behaviour
+                ? ['Document'] // legacy behaviour
+                : ['@timestamp', 'Document'] // legacy behaviour
           );
         });
       }

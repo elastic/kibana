@@ -8,11 +8,11 @@
 
 import type { URL } from 'url';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
-import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
-import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions } from './route';
+import type { Observable } from 'rxjs';
 import type { Headers } from './headers';
+import type { RouteConfigOptions, RouteMethod } from './route';
+import type { IKibanaSocket } from './socket';
 
 /**
  * @public
@@ -89,7 +89,7 @@ export interface KibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > {
   /**
    * A identifier to identify this request.

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
 import { EuiSuperSelect } from '@elastic/eui';
-import { fonts, FontValue } from '../../../common/lib/fonts';
+import PropTypes from 'prop-types';
+import React, { FC } from 'react';
+import { FontValue, fonts } from '../../../common/lib/fonts';
 
 interface DisplayedFont {
   label: string;

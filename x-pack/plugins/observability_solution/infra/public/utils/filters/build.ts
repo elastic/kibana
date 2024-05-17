@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   BooleanRelation,
+  type Filter,
   buildCombinedFilter,
   buildPhraseFilter,
-  type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 

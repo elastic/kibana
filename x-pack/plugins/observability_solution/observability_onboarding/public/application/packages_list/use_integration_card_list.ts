@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useMemo } from 'react';
 import { CustomCard } from './types';
 import { toCustomCard } from './utils';
 

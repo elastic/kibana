@@ -9,17 +9,17 @@ import { createVerify } from 'crypto';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
+import { appContextService } from '..';
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
-import { appContextService } from '..';
 
 import {
-  type MessageSigningServiceInterface,
   MessageSigningService,
+  type MessageSigningServiceInterface,
 } from './message_signing_service';
 
 describe('MessageSigningService', () => {

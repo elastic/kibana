@@ -7,16 +7,16 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import {
   getDetectionsExceptionListSchemaMock,
   getTrustedAppsListSchemaMock,
 } from '../../../common/schemas/response/exception_list_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 
-import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
-import { duplicateExceptionListAndItems } from './duplicate_exception_list';
-import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
+import { duplicateExceptionListAndItems } from './duplicate_exception_list';
+import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
+import { getExceptionList } from './get_exception_list';
 
 jest.mock('./get_exception_list');
 jest.mock('./create_exception_list');

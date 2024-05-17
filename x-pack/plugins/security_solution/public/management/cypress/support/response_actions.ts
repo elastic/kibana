@@ -9,12 +9,12 @@
 
 import { get } from 'lodash';
 
-import { setupStackServicesUsingCypressConfig } from './common';
 import {
   getLatestActionDoc,
   updateActionDoc,
   waitForNewActionDoc,
 } from '../../../../scripts/endpoint/common/response_actions';
+import { setupStackServicesUsingCypressConfig } from './common';
 
 export const responseActionTasks = (
   on: Cypress.PluginEvents,

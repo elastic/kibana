@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { XJsonMode } from '@kbn/ace';
+import { useEffect, useState } from 'react';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 

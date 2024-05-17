@@ -6,25 +6,9 @@
     "id": "ingestPipelines",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "ingest_pipelines"
-    ],
-    "requiredPlugins": [
-      "licensing",
-      "management",
-      "features",
-      "share",
-      "fileUpload"
-    ],
-    "optionalPlugins": [
-      "security",
-      "usageCollection",
-      "console"
-    ],
-    "requiredBundles": [
-      "esUiShared",
-      "kibanaReact"
-    ]
+    "configPath": ["xpack", "ingest_pipelines"],
+    "requiredPlugins": ["licensing", "management", "features", "share", "fileUpload"],
+    "optionalPlugins": ["security", "usageCollection", "console"],
+    "requiredBundles": ["esUiShared", "kibanaReact"]
   }
 }

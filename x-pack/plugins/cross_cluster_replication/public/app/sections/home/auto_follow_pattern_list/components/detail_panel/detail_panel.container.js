@@ -8,12 +8,12 @@
 import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
+import { SECTIONS } from '../../../../../constants';
 import {
+  getApiStatus,
   getSelectedAutoFollowPattern,
   getSelectedAutoFollowPatternId,
-  getApiStatus,
 } from '../../../../../store/selectors';
-import { SECTIONS } from '../../../../../constants';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useMemo } from 'react';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
 export type TextValueDisplayProps = Pick<CommonProps, 'data-test-subj'> &

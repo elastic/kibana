@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
-  createContainerWithEntries,
   createContainerWithEndpointEntries,
+  createContainerWithEntries,
 } from '../exception_list_and_item';
 import { previewRule } from './preview_rule';
 

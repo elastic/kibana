@@ -36,9 +36,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "GaugeTypeProps"
-            ],
+            "signature": ["GaugeTypeProps"],
             "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,9 +79,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "GaugeTypeProps"
-            ],
+            "signature": ["GaugeTypeProps"],
             "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -147,9 +143,7 @@
         "tags": [],
         "label": "LEGACY_GAUGE_CHARTS_LIBRARY",
         "description": [],
-        "signature": [
-          "\"visualization:visualize:legacyGaugeChartsLibrary\""
-        ],
+        "signature": ["\"visualization:visualize:legacyGaugeChartsLibrary\""],
         "path": "src/plugins/vis_types/gauge/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

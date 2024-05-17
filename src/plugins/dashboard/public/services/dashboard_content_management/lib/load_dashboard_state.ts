@@ -1,3 +1,4 @@
+import { has } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,26 +7,25 @@
  * Side Public License, v 1.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { has } from 'lodash';
 
-import { Filter, Query } from '@kbn/es-query';
+import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
+import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
-import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 
 import {
-  injectReferences,
   type DashboardOptions,
   convertSavedPanelsToPanelMap,
+  injectReferences,
 } from '../../../../common';
-import { migrateDashboardInput } from './migrate_dashboard_input';
-import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { DashboardCrudTypes } from '../../../../common/content_management';
-import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
+import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
+import { convertNumberToDashboardVersion } from './dashboard_versioning';
+import { migrateDashboardInput } from './migrate_dashboard_input';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene

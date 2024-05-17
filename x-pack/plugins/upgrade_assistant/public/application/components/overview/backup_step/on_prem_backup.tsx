@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { useAppContext } from '../../../app_context';
-import { uiMetricService, UIM_BACKUP_DATA_ON_PREM_CLICK } from '../../../lib/ui_metric';
+import { UIM_BACKUP_DATA_ON_PREM_CLICK, uiMetricService } from '../../../lib/ui_metric';
 
 const SnapshotRestoreAppLink: React.FunctionComponent = () => {
   const {

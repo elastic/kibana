@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import { EnrichmentButtonContent } from './enrichment_button_content';
 
 describe('EnrichmentButtonContent', () => {

@@ -7,21 +7,21 @@
  */
 
 import {
-  PaletteContinuity,
-  PaletteRegistry,
+  ColorStop,
   CustomPaletteParams,
   DataBounds,
-  ColorStop,
+  PaletteContinuity,
+  PaletteRegistry,
 } from './types';
 
 import {
+  COMPLEMENTARY_PALETTE,
   DEFAULT_COLOR_STEPS,
-  DEFAULT_PALETTE_NAME,
+  DEFAULT_FALLBACK_PALETTE,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
-  DEFAULT_FALLBACK_PALETTE,
+  DEFAULT_PALETTE_NAME,
   LEGACY_COMPLIMENTARY_PALETTE,
-  COMPLEMENTARY_PALETTE,
 } from './constants';
 
 /** @internal **/

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback, useMemo, useState } from 'react';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -22,16 +22,16 @@ import type {
 } from '../../../../../common';
 import { getRequestPayload, isPivotGroupByConfigWithUiSupport } from '../../../../../common';
 
-import type { StepDefineExposedState } from '../common';
-import { getAggNameConflictToastMessages, getPivotDropdownOptions } from '../common';
-import type { StepDefineFormProps } from '../step_define_form';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
+import type { TransformPivotConfig } from '../../../../../../../common/types/transform';
 import {
   isPivotAggConfigTopMetric,
   isPivotAggsWithExtendedForm,
 } from '../../../../../common/pivot_aggs';
-import type { TransformPivotConfig } from '../../../../../../../common/types/transform';
-import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
 import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group_by';
+import type { StepDefineExposedState } from '../common';
+import { getAggNameConflictToastMessages, getPivotDropdownOptions } from '../common';
+import type { StepDefineFormProps } from '../step_define_form';
 
 /**
  * Clones aggregation configuration and updates parent references

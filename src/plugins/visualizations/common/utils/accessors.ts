@@ -1,3 +1,5 @@
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
 import { ExpressionValueVisDimension } from '../expression_functions';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>

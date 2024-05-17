@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { findListsBySize } from '@kbn/securitysolution-list-api';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { findListsBySize } from '@kbn/securitysolution-list-api';
 
 const findListsBySizeWithOptionalSignal = withOptionalSignal(findListsBySize);
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiFlexGrid,
+  EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiScreenReaderOnly,
+  EuiSpacer,
 } from '@elastic/eui';
-import { IndexDetailStatus } from '../index_detail_status';
-import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { AlertsCallout } from '../../../alerts/callout';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { IndexDetailStatus } from '../index_detail_status';
 
 export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
   const metricsToShow = [

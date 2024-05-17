@@ -1,28 +1,28 @@
+import reduceReducers from 'reduce-reducers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Reducer, AnyAction } from 'redux';
+import type { AnyAction, Reducer } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import reduceReducers from 'reduce-reducers';
-import { immerCase, EMPTY_RESOLVER } from './helpers';
-import { animatePanning } from './camera/methods';
-import { layout } from './selectors';
-import { cameraReducer } from './camera/reducer';
-import { dataReducer } from './data/reducer';
-import type { AnalyzerById } from '../types';
-import { panAnimationDuration } from './camera/scaling_constants';
 import { nodePosition } from '../models/indexed_process_tree/isometric_taxi_layout';
+import type { AnalyzerById } from '../types';
 import {
   appReceivedNewExternalProperties,
+  clearResolver,
+  createResolver,
   userFocusedOnResolverNode,
   userSelectedResolverNode,
-  createResolver,
-  clearResolver,
 } from './actions';
+import { animatePanning } from './camera/methods';
+import { cameraReducer } from './camera/reducer';
+import { panAnimationDuration } from './camera/scaling_constants';
 import { serverReturnedResolverData } from './data/action';
+import { dataReducer } from './data/reducer';
+import { EMPTY_RESOLVER, immerCase } from './helpers';
+import { layout } from './selectors';
 
 export const initialAnalyzerState: AnalyzerById = {};
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-import { CustomFieldFlyout } from './flyout';
-import { customFieldsConfigurationMock } from '../../containers/mock';
 import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../common/constants';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import { customFieldsConfigurationMock } from '../../containers/mock';
+import { CustomFieldFlyout } from './flyout';
 
 import * as i18n from './translations';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexGroupProps, useResizeObserver } from '@elastic/eui';
-import { SunburstChart } from './sunburst_chart';
-import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { i18n } from '@kbn/i18n';
+import React, { useRef } from 'react';
 import { MobileProperty } from '../../../../../../common/mobile_types';
+import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
+import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { SunburstChart } from './sunburst_chart';
 
 type MostUsedCharts =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/most_used_charts'>['mostUsedCharts'][0];

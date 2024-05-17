@@ -15,7 +15,7 @@ import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
 import { getAlertingHealthStatus } from './get_health';
-import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { type LatestTaskStateSchema, emptyState, stateSchemaByVersion } from './task_state';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
@@ -74,9 +74,7 @@ export function healthCheckTaskRunner(
       async run() {
         try {
           const result = await getAlertingHealthStatus(
-            (
-              await coreStartServices
-            )[0].savedObjects,
+            (await coreStartServices)[0].savedObjects,
             state.runs
           );
           const updatedState: LatestTaskStateSchema = result.state;

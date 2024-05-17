@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiSpacer,
   EuiIcon,
-  EuiToolTip,
   EuiLink,
-  EuiText,
+  EuiSpacer,
   EuiSuperSelect,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessContext } from '@kbn/monaco';
+import React, { FunctionComponent } from 'react';
 
 import { CodeEditor } from '@kbn/code-editor';
 import { painlessContextOptions } from '../../constants';

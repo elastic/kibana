@@ -7,12 +7,12 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import { throwBadResponse } from '../../../model/helpers';
-import type { ModelStage } from '../types';
-import { incrementProcessedProgress } from '../../../model/progress';
-import { fatalReasonDocumentExceedsMaxBatchSizeBytes } from '../../../model/extract_errors';
 import { createBatches } from '../../../model/create_batches';
+import { fatalReasonDocumentExceedsMaxBatchSizeBytes } from '../../../model/extract_errors';
+import { throwBadResponse } from '../../../model/helpers';
+import { incrementProcessedProgress } from '../../../model/progress';
 import { isTypeof } from '../../actions';
+import type { ModelStage } from '../types';
 
 export const outdatedDocumentsSearchTransform: ModelStage<
   'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM',

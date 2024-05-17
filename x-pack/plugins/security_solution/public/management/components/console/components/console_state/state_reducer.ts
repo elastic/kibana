@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { getBuiltinCommands } from '../../service/builtin_commands';
 import { parseCommandInput } from '../../service/parsed_command_input';
+import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
 import {
-  handleInputAreaState,
   INPUT_DEFAULT_PLACEHOLDER_TEXT,
+  handleInputAreaState,
 } from './state_update_handlers/handle_input_area_state';
 import { handleSidePanel } from './state_update_handlers/handle_side_panel';
 import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
 import type { ConsoleDataState, ConsoleStoreReducer } from './types';
-import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
-import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,

@@ -10,15 +10,15 @@
  *
  * */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
-import { VideoToast } from './video_toast';
-import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { attackDiscoveryTourStepOne, tourConfig } from './step_config';
 import * as i18n from './translations';
+import { VideoToast } from './video_toast';
 
 interface TourState {
   currentTourStep: number;

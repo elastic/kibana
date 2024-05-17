@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext, Logger } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
-import { SampleDataInstaller } from '../sample_data_installer';
 import { getUniqueObjectTypes } from '../lib/utils';
+import { SampleDataInstaller } from '../sample_data_installer';
 
 export const SAMPLE_DATA_INSTALLED_EVENT = 'sample_data_installed';
 export const SAMPLE_DATA_UNINSTALLED_EVENT = 'sample_data_uninstalled';

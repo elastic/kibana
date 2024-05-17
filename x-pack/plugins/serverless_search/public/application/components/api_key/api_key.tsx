@@ -18,14 +18,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import { ApiKey } from '@kbn/security-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
+import { useKibanaServices } from '../../hooks/use_kibana';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import './api_key.scss';
 import { CreateApiKeyResponse } from '../../hooks/api/use_create_api_key';

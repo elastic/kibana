@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
 import { ActionTypeRegistry } from '../action_type_registry';
+import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { register } from './register';
 import { SubActionConnectorType } from './types';
-import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 
 export const createSubActionConnectorFramework = ({
   actionsConfigUtils: configurationUtilities,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
-import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import type { FileLayer } from '@elastic/ems-client';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import { getExpressionFunction } from './expression_function';
 import { getExpressionRenderer } from './expression_renderer';

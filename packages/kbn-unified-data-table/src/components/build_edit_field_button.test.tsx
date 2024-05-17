@@ -8,9 +8,9 @@
 
 import { EuiListGroupItem, EuiListGroupItemProps } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { servicesMock } from '../../__mocks__/services';
 import { buildEditFieldButton } from './build_edit_field_button';
 

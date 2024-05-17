@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButton,
-  EuiText,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type {
   CanDeleteMLSpaceAwareItemsResponse,
   MlSavedObjectType,
 } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
-import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 const shouldUnTagJobLabel = i18n.translate(
   'xpack.ml.deleteSpaceAwareItemCheckModal.shouldUnTagLabel.job',

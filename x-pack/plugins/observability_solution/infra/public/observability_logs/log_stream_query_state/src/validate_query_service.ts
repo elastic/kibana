@@ -6,7 +6,7 @@
  */
 
 import { IToasts } from '@kbn/core-notifications-browser';
-import { buildEsQuery, EsQueryConfig, isOfQueryType } from '@kbn/es-query';
+import { EsQueryConfig, buildEsQuery, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { InvokeCreator } from 'xstate';
 import { QueryParsingError, UnsupportedLanguageError } from './errors';

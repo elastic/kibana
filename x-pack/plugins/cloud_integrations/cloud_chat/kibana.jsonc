@@ -7,19 +7,9 @@
     "id": "cloudChat",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "cloud_integrations",
-      "chat"
-    ],
-    "requiredPlugins": [
-      "cloud"
-    ],
-    "requiredBundles": [
-    ],
-    "optionalPlugins": [
-      "security",
-      "cloudExperiments"
-    ]
+    "configPath": ["xpack", "cloud_integrations", "chat"],
+    "requiredPlugins": ["cloud"],
+    "requiredBundles": [],
+    "optionalPlugins": ["security", "cloudExperiments"]
   }
 }

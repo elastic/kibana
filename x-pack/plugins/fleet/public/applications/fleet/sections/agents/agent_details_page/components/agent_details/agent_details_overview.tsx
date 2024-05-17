@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiIcon,
+  EuiPanel,
   EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 
-import type { Agent, AgentPolicy } from '../../../../../types';
+import { AgentPolicySummaryLine } from '../../../../../components';
 import { useAgentVersion } from '../../../../../hooks';
 import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicySummaryLine } from '../../../../../components';
+import type { Agent, AgentPolicy } from '../../../../../types';
+import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
-import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`

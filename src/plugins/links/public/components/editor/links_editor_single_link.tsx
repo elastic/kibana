@@ -11,24 +11,24 @@ import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
-  EuiText,
+  DraggableProvidedDragHandleProps,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
   EuiSkeletonTitle,
-  DraggableProvidedDragHandleProps,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { LinkInfo } from '../../embeddable/types';
-import { validateUrl } from '../external_link/external_link_tools';
-import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
-import { LinksStrings } from '../links_strings';
-import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { DASHBOARD_LINK_TYPE, Link } from '../../../common/content_management';
+import { LinkInfo } from '../../embeddable/types';
+import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
+import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
+import { validateUrl } from '../external_link/external_link_tools';
+import { LinksStrings } from '../links_strings';
 
 export const LinksEditorSingleLink = ({
   link,

@@ -12,10 +12,10 @@ import { EuiButtonEmpty, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { TimelineId } from '../../../../common/types';
-import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useTourContext } from './tour';
 import { AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour_config';
 

@@ -7,8 +7,8 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { Logger } from '@kbn/core/server';
 
@@ -16,9 +16,9 @@ import type { DownloadSourceSOAttributes } from '../types';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
-import { downloadSourceService } from './download_source';
-import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
+import { appContextService } from './app_context';
+import { downloadSourceService } from './download_source';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');

@@ -187,11 +187,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "ICoreUsageStatsClient",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "ICoreUsageStatsClient", ">"],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_stats_client.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

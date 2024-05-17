@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getTermsSearchQuery } from './get_terms_search_query';
 import { mockTerms } from '../../../../__mocks__/terms';
+import { getTermsSearchQuery } from './get_terms_search_query';
 
 describe('getTermsSearchQuery', () => {
   it('returns the expected Elasticsearch query DSL', () => {

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
-  EuiIconTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, Fragment } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { REPOSITORY_TYPES } from '../../../../../../common';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { UseRequestResponse } from '../../../../../shared_imports';
+import { useServices } from '../../../../app_context';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
-import { useServices } from '../../../../app_context';
+import { linkToAddRepository, linkToEditRepository } from '../../../../services/navigation';
 import { textService } from '../../../../services/text';
-import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
 
 interface Props {
   repositories: Repository[];

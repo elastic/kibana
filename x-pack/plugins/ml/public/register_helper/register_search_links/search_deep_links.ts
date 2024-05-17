@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
+import { i18n } from '@kbn/i18n';
 
 import { type AppDeepLink } from '@kbn/core/public';
-import type { MlCapabilities } from '../../../common/types/capabilities';
 import { ML_PAGES } from '../../../common/constants/locator';
+import type { MlCapabilities } from '../../../common/types/capabilities';
 
 function createDeepLinks(
   mlCapabilities: MlCapabilities,

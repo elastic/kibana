@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 const DEPRECATED_CONNECTOR_WARNING_TITLE = i18n.translate(
   'xpack.cases.connectors.serviceNow.deprecatedConnectorWarningTitle',

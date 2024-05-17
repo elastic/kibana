@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { contextMock, MOCK_RETRY_DELAY } from './context.mock';
+import { MOCK_RETRY_DELAY, contextMock } from './context.mock';
 import { initializeEs, parseIndexAliases } from './init';
 
 describe('initializeEs', () => {

@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Filter } from '@kbn/es-query';
-import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
-import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
-import { lastValueFrom } from 'rxjs';
+import { DataView, DataViewField, ISearchSource } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
-import { hasESAggSourceMethod } from '../es_agg_source/types';
-import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
-import {
-  getAutocompleteService,
-  getIndexPatternService,
-  getInspector,
-  getSearchService,
-  getTimeFilter,
-} from '../../../kibana_services';
-import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { copyPersistentState } from '../../../reducers/copy_persistent_state';
-import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../../util/geo_tile_utils';
+import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import { type SearchResponseWarning, extractWarnings } from '@kbn/search-response-warnings';
+import { lastValueFrom } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { FieldFormatter } from '../../../../common/constants';
 import {
   AbstractESSourceDescriptor,
   AbstractSourceDescriptor,
@@ -37,12 +24,25 @@ import {
   MapExtent,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { IVectorStyle } from '../../styles/vector/vector_style';
-import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { createExtentFilter } from '../../../../common/elasticsearch_util';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
+import {
+  getAutocompleteService,
+  getIndexPatternService,
+  getInspector,
+  getSearchService,
+  getTimeFilter,
+} from '../../../kibana_services';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { IField } from '../../fields/field';
-import { FieldFormatter } from '../../../../common/constants';
+import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { IVectorStyle } from '../../styles/vector/vector_style';
+import { DataRequestAbortError } from '../../util/data_request';
+import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { hasESAggSourceMethod } from '../es_agg_source/types';
 import { mergeExecutionContext } from '../execution_context_utils';
+import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import type { IESSource } from './types';
 
 export function isSearchSourceAbortError(error: Error) {

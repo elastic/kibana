@@ -8,16 +8,16 @@
 import { createSelector, defaultMemoize } from 'reselect';
 import { easing } from 'ts-easing';
 import { clamp, lerp } from '../../lib/math';
-import * as vector2 from '../../models/vector2';
-import { multiply, add as addMatrix } from '../../models/matrix3';
 import {
   inverseOrthographicProjection,
-  scalingTransformation,
   orthographicProjection,
+  scalingTransformation,
   translationTransformation,
 } from '../../lib/transformation';
+import { add as addMatrix, multiply } from '../../models/matrix3';
+import * as vector2 from '../../models/vector2';
+import type { AABB, CameraAnimationState, CameraState, Matrix3, Vector2 } from '../../types';
 import * as scalingConstants from './scaling_constants';
-import type { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
 
 export interface ClippingPlanes {
   renderWidth: number;
@@ -381,9 +381,15 @@ export const inverseProjectionMatrix: (state: CameraState) => (time: number) => 
        */
       // prettier-ignore
       const screenToNDC: Matrix3 = [
-        renderWidth === 0 ? 0 : 2 / renderWidth, 0, -1,
-        0, renderHeight === 0 ? 0 : 2 / renderHeight, -1,
-        0, 0, 0
+        renderWidth === 0 ? 0 : 2 / renderWidth,
+        0,
+        -1,
+        0,
+        renderHeight === 0 ? 0 : 2 / renderHeight,
+        -1,
+        0,
+        0,
+        0,
       ];
 
       /**
@@ -483,11 +489,7 @@ export const projectionMatrix: (state: CameraState) => (time: number) => Matrix3
        * 3. Convert values from the scale of -1<=n<=1 to 0<=n<=2
        */
       // prettier-ignore
-      const fromNDCtoZeroToTwo: Matrix3 = [
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 0
-      ]
+      const fromNDCtoZeroToTwo: Matrix3 = [0, 0, 1, 0, 0, 1, 0, 0, 0];
 
       /**
        * 4. convert from 0->2 to 0->rasterDimension by multiplying by rasterDimension/2

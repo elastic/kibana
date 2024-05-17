@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Event, Tree, TreeNode, TreeOptions } from '../../../common/endpoint/generate_data';
+import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
+import * as eventModel from '../../../common/endpoint/models/event';
 import type {
   EventStats,
   FieldsObject,
@@ -13,9 +16,6 @@ import type {
   SafeResolverEvent,
 } from '../../../common/endpoint/types';
 import type { EventOptions } from '../../../common/endpoint/types/generator';
-import type { Tree, TreeNode, TreeOptions, Event } from '../../../common/endpoint/generate_data';
-import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import * as eventModel from '../../../common/endpoint/models/event';
 
 /**
  * A structure for holding the generated tree.

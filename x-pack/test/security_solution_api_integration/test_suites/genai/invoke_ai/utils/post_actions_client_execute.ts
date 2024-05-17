@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { Response } from 'superagent';
+import type SuperTest from 'supertest';
 
 /**
  * Executes an invoke AI action

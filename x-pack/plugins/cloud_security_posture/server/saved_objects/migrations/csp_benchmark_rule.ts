@@ -6,9 +6,9 @@
  */
 
 import {
+  SavedObjectMigrationContext,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { rulesV1, rulesV2, rulesV3 } from '../../../common/types';
 

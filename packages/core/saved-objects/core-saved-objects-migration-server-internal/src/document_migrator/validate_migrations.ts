@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import Semver from 'semver';
-import { getFlattenedObject } from '@kbn/std';
+import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type {
+  SavedObjectsModelVersionMap,
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
-  SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
-import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';
+import { getFlattenedObject } from '@kbn/std';
+import Semver from 'semver';
 
 /**
  * Validates the consistency of the given type for use with the document migrator.

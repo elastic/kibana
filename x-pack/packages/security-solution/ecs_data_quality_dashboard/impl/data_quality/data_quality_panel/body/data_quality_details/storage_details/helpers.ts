@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Datum, Key, ArrayNode } from '@elastic/charts';
+import type { ArrayNode, Datum, Key } from '@elastic/charts';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { orderBy } from 'lodash/fp';
 
 import { getDocsCount, getSizeInBytes } from '../../../../helpers';
-import { getIlmPhase } from '../../../pattern/helpers';
 import { PatternRollup } from '../../../../types';
+import { getIlmPhase } from '../../../pattern/helpers';
 
 export interface LegendItem {
   color: string | null;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
-import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../../common/types';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import { IndexPatternRef, TextBasedLayer, TextBasedPrivateState } from './types';
 
 function getExpressionForLayer(
   layer: TextBasedLayer,

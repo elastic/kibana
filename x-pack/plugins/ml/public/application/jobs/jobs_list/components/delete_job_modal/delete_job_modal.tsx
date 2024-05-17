@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiSpacer,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiLoadingSpinner,
-  EuiText,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { deleteJobs } from '../utils';
 import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
-import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+import { deleteJobs } from '../utils';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 

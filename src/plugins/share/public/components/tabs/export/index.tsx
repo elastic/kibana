@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
+import React from 'react';
+import { type ShareMenuItemV2, useShareTabsContext } from '../../context';
 import { ExportContent } from './export_content';
-import { useShareTabsContext, type ShareMenuItemV2 } from '../../context';
 
 type IExportTab = IModalTabDeclaration;
 

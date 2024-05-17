@@ -1,3 +1,4 @@
+import querystring from 'querystring';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   logsExplorerUrlSchemaV2,
 } from '@kbn/observability-logs-explorer-plugin/common';
 import rison from '@kbn/rison';
-import querystring from 'querystring';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface IntegrationPackage {

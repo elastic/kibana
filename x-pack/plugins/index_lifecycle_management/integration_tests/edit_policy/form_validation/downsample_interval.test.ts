@@ -10,7 +10,7 @@ import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n
 
 import { PhaseWithDownsample } from '../../../common/types';
 import { setupEnvironment } from '../../helpers';
-import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
+import { ValidationTestBed, setupValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> downsample interval validation', () => {
   let testBed: ValidationTestBed;

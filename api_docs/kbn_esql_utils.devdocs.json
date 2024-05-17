@@ -26,9 +26,7 @@
         "tags": [],
         "label": "appendToESQLQuery",
         "description": [],
-        "signature": [
-          "(baseESQLQuery: string, appendedText: string) => string"
-        ],
+        "signature": ["(baseESQLQuery: string, appendedText: string) => string"],
         "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,9 +38,7 @@
             "tags": [],
             "label": "baseESQLQuery",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,9 +51,7 @@
             "tags": [],
             "label": "appendedText",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,9 +82,7 @@
             "tags": [],
             "label": "baseESQLQuery",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -103,9 +95,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -118,9 +108,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,9 +121,7 @@
             "tags": [],
             "label": "operation",
             "description": [],
-            "signature": [
-              "\"+\" | \"-\" | \"_exists_\""
-            ],
+            "signature": ["\"+\" | \"-\" | \"_exists_\""],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -148,9 +134,7 @@
             "tags": [],
             "label": "fieldType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -197,9 +181,7 @@
             "tags": [],
             "label": "indexPattern",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -354,9 +336,7 @@
                     "tags": [],
                     "label": "request",
                     "description": [],
-                    "signature": [
-                      "SearchStrategyRequest"
-                    ],
+                    "signature": ["SearchStrategyRequest"],
                     "path": "packages/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -391,9 +371,7 @@
                 "tags": [],
                 "label": "signal",
                 "description": [],
-                "signature": [
-                  "AbortSignal | undefined"
-                ],
+                "signature": ["AbortSignal | undefined"],
                 "path": "packages/kbn-esql-utils/src/utils/run_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -528,9 +506,7 @@
                     "tags": [],
                     "label": "request",
                     "description": [],
-                    "signature": [
-                      "SearchStrategyRequest"
-                    ],
+                    "signature": ["SearchStrategyRequest"],
                     "path": "packages/kbn-search-types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -565,9 +541,7 @@
                 "tags": [],
                 "label": "signal",
                 "description": [],
-                "signature": [
-                  "AbortSignal | undefined"
-                ],
+                "signature": ["AbortSignal | undefined"],
                 "path": "packages/kbn-esql-utils/src/utils/run_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -585,9 +559,7 @@
         "tags": [],
         "label": "getESQLWithSafeLimit",
         "description": [],
-        "signature": [
-          "(esql: string, limit: number) => string"
-        ],
+        "signature": ["(esql: string, limit: number) => string"],
         "path": "packages/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -599,9 +571,7 @@
             "tags": [],
             "label": "esql",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -614,9 +584,7 @@
             "tags": [],
             "label": "limit",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -696,9 +664,7 @@
         "tags": [],
         "label": "getIndexPatternFromESQLQuery",
         "description": [],
-        "signature": [
-          "(esql: string | undefined) => string"
-        ],
+        "signature": ["(esql: string | undefined) => string"],
         "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -710,9 +676,7 @@
             "tags": [],
             "label": "esql",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -728,12 +692,8 @@
         "type": "Function",
         "tags": [],
         "label": "getInitialESQLQuery",
-        "description": [
-          "\nBuilds an ES|QL query for the provided index or index pattern"
-        ],
-        "signature": [
-          "(indexOrIndexPattern: string) => string"
-        ],
+        "description": ["\nBuilds an ES|QL query for the provided index or index pattern"],
+        "signature": ["(indexOrIndexPattern: string) => string"],
         "path": "packages/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -745,9 +705,7 @@
             "tags": [],
             "label": "indexOrIndexPattern",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -764,9 +722,7 @@
         "tags": [],
         "label": "getLimitFromESQLQuery",
         "description": [],
-        "signature": [
-          "(esql: string) => number"
-        ],
+        "signature": ["(esql: string) => number"],
         "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -778,9 +734,7 @@
             "tags": [],
             "label": "esql",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -797,9 +751,7 @@
         "tags": [],
         "label": "removeDropCommandsFromESQLQuery",
         "description": [],
-        "signature": [
-          "(esql: string | undefined) => string"
-        ],
+        "signature": ["(esql: string | undefined) => string"],
         "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -811,9 +763,7 @@
             "tags": [],
             "label": "esql",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -834,9 +784,7 @@
         "tags": [],
         "label": "ENABLE_ESQL",
         "description": [],
-        "signature": [
-          "\"enableESQL\""
-        ],
+        "signature": ["\"enableESQL\""],
         "path": "packages/kbn-esql-utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -849,9 +797,7 @@
         "tags": [],
         "label": "ESQL_LATEST_VERSION",
         "description": [],
-        "signature": [
-          "\"2024.04.01\""
-        ],
+        "signature": ["\"2024.04.01\""],
         "path": "packages/kbn-esql-utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

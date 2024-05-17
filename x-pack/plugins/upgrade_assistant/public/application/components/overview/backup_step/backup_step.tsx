@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { OnPremBackup } from './on_prem_backup';
-import { CloudBackup } from './cloud_backup';
 import type { OverviewStepProps } from '../../types';
+import { CloudBackup } from './cloud_backup';
+import { OnPremBackup } from './on_prem_backup';
 
 const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
   defaultMessage: 'Back up your data',

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { unset } from 'lodash';
 import { ConnectorMappingsService } from '.';
-import { mappings } from '../../mocks';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
 import type { ConnectorMappingsPersistedAttributes } from '../../common/types/connector_mappings';
+import { mappings } from '../../mocks';
 
 describe('CaseConfigureService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

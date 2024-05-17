@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { PainlessContext, PainlessLang } from '@kbn/monaco';
 import React from 'react';
-import { PainlessLang, PainlessContext } from '@kbn/monaco';
 
 import { CodeEditor } from '@kbn/code-editor';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AggType, AggTypeConfig } from './agg_type';
 import { IAggConfig } from './agg_config';
+import { AggType, AggTypeConfig } from './agg_type';
 
 describe('AggType Class', () => {
   describe('constructor', () => {

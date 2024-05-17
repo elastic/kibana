@@ -15,17 +15,17 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { type PluginName, PluginType } from '@kbn/core-base-common';
-import type { CoreContext } from '@kbn/core-base-server-internal';
-import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { type PluginName, PluginType } from '@kbn/core-base-common';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { Logger } from '@kbn/logging';
+import { REPO_ROOT } from '@kbn/repo-info';
 
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { PluginWrapper } from './plugin';
 import { PluginsSystem } from './plugins_system';
-import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 function createPlugin(
   id: string,

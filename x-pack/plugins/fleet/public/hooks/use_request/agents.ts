@@ -25,34 +25,34 @@ import { API_VERSIONS } from '../../../common/constants';
 import { agentRouteService } from '../../services';
 
 import type {
-  GetOneAgentResponse,
-  PostAgentUnenrollRequest,
-  PostBulkAgentUnenrollRequest,
-  PostBulkAgentUnenrollResponse,
-  PostAgentUnenrollResponse,
-  PostAgentReassignRequest,
-  PostAgentReassignResponse,
-  PostBulkAgentReassignRequest,
-  PostBulkAgentReassignResponse,
-  GetAgentsRequest,
-  GetAgentsResponse,
-  GetAgentStatusRequest,
-  GetAgentStatusResponse,
   GetAgentIncomingDataRequest,
   GetAgentIncomingDataResponse,
+  GetAgentStatusRequest,
+  GetAgentStatusResponse,
+  GetAgentsRequest,
+  GetAgentsResponse,
+  GetAvailableVersionsResponse,
+  GetCurrentUpgradesResponse,
+  GetOneAgentResponse,
+  PostAgentReassignRequest,
+  PostAgentReassignResponse,
+  PostAgentUnenrollRequest,
+  PostAgentUnenrollResponse,
   PostAgentUpgradeRequest,
-  PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
+  PostBulkAgentReassignRequest,
+  PostBulkAgentReassignResponse,
+  PostBulkAgentUnenrollRequest,
+  PostBulkAgentUnenrollResponse,
+  PostBulkAgentUpgradeRequest,
   PostBulkAgentUpgradeResponse,
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
-  GetCurrentUpgradesResponse,
-  GetAvailableVersionsResponse,
   PostRetrieveAgentsByActionsRequest,
   PostRetrieveAgentsByActionsResponse,
 } from '../../types';
 
-import { useRequest, sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;

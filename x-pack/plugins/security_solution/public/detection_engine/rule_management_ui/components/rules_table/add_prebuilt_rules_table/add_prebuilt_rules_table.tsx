@@ -6,13 +6,13 @@
  */
 
 import {
-  EuiInMemoryTable,
-  EuiSkeletonLoading,
-  EuiProgress,
-  EuiSkeletonTitle,
-  EuiSkeletonText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiProgress,
+  EuiSkeletonLoading,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
 } from '@elastic/eui';
 import React from 'react';
 

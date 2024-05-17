@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment, { type Moment } from 'moment';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import moment, { type Moment } from 'moment';
-import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
 
 interface CustomUrlTimeRangePickerProps {

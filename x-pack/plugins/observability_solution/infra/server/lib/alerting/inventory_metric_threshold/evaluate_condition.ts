@@ -6,16 +6,16 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { mapValues } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { mapValues } from 'lodash';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
 import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
+import { AdditionalContext } from '../common/utils';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
-import { AdditionalContext } from '../common/utils';
 
 export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;

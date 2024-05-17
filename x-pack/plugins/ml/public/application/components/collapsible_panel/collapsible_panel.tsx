@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { type FC } from 'react';
-import { PanelHeaderItems } from './panel_header_items';
 import { useCurrentThemeVars } from '../../contexts/kibana';
+import { PanelHeaderItems } from './panel_header_items';
 
 export interface CollapsiblePanelProps {
   isOpen: boolean;

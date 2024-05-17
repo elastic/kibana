@@ -10,12 +10,12 @@ import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
 import { heatmapVisType } from '@kbn/vis-type-heatmap-plugin/public';
 
 import { ColorSchemaParams } from '@kbn/charts-plugin/public';
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { ValueAxis } from '@kbn/vis-type-xy-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
-import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
+import { CommonVislibParams } from './types';
+import { TimeMarker } from './vislib/visualizations/time_marker';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
   type: 'heatmap';

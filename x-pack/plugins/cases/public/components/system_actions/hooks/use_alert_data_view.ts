@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import type { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
-import { fetchAlertIndexNames } from './alert_index';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import { fetchAlertFields } from './alert_fields';
+import { fetchAlertIndexNames } from './alert_index';
 
 export interface UserAlertDataViews {
   dataViews?: DataView[];
@@ -141,11 +141,11 @@ export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataVi
         featureIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
           : isOnlySecurity
-          ? isIndexNameInitialLoading || isIndexNameLoading
-          : isIndexNameInitialLoading ||
-            isIndexNameLoading ||
-            isAlertFieldsInitialLoading ||
-            isAlertFieldsLoading,
+            ? isIndexNameInitialLoading || isIndexNameLoading
+            : isIndexNameInitialLoading ||
+              isIndexNameLoading ||
+              isAlertFieldsInitialLoading ||
+              isAlertFieldsLoading,
     }),
     [
       dataViews,

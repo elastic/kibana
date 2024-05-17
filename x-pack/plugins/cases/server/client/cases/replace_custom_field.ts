@@ -9,15 +9,15 @@ import Boom from '@hapi/boom';
 import type { CasesClient, CasesClientArgs } from '..';
 
 import type { CustomFieldPutRequest } from '../../../common/types/api';
-import { CustomFieldPutRequestRt, CaseRequestCustomFieldsRt } from '../../../common/types/api';
-import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CaseRequestCustomFieldsRt, CustomFieldPutRequestRt } from '../../../common/types/api';
 import type { CaseCustomField } from '../../../common/types/domain';
 import { CaseCustomFieldRt } from '../../../common/types/domain';
-import { validateCustomFieldTypesInRequest } from './validators';
-import type { UserActionEvent } from '../../services/user_actions/types';
+import { Operations } from '../../authorization';
+import { createCaseError } from '../../common/error';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { validateMaxUserActions } from '../../common/validators';
+import type { UserActionEvent } from '../../services/user_actions/types';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 export interface ReplaceCustomFieldArgs {
   /**

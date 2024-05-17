@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-import type { CustomFieldFormState } from './form';
-import { CustomFieldsForm } from './form';
+import userEvent from '@testing-library/user-event';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
-import * as i18n from './translations';
-import userEvent from '@testing-library/user-event';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import type { CustomFieldFormState } from './form';
+import { CustomFieldsForm } from './form';
+import * as i18n from './translations';
 
 describe('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;

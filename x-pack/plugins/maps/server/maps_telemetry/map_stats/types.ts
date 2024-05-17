@@ -6,11 +6,11 @@
  */
 
 import type {
-  LAYER_KEYS,
-  SCALING_KEYS,
-  JOIN_KEYS,
   EMS_BASEMAP_KEYS,
+  JOIN_KEYS,
+  LAYER_KEYS,
   RESOLUTION_KEYS,
+  SCALING_KEYS,
 } from '../../../common/telemetry/types';
 
 export interface ClusterCountStats {

@@ -1,3 +1,4 @@
+import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,43 +6,42 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  ThreatQuery,
-  ThreatMapping,
-  ThreatMappingEntries,
-  ThreatIndex,
-  ThreatLanguageOrUndefined,
-  ConcurrentSearches,
-  ItemsPerSearch,
-  ThreatIndicatorPath,
-  LanguageOrUndefined,
-  Type,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ListClient } from '@kbn/lists-plugin/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase, Filter } from '@kbn/es-query';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type {
+  ConcurrentSearches,
+  ItemsPerSearch,
+  LanguageOrUndefined,
+  ThreatIndex,
+  ThreatIndicatorPath,
+  ThreatLanguageOrUndefined,
+  ThreatMapping,
+  ThreatMappingEntries,
+  ThreatQuery,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type {
   BulkCreate,
+  OverrideBodyQuery,
   RuleRangeTuple,
+  RunOpts,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   WrapSuppressedHits,
-  OverrideBodyQuery,
-  RunOpts,
 } from '../../types';
-import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { ExperimentalFeatures } from '../../../../../../common';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 

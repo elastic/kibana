@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ROUTES, MONITORING } from '../../../common/constants';
+import { MONITORING, ROUTES } from '../../../common/constants';
 import { PipelineListItem } from '../../models/pipeline_list_item';
 
 export class MonitoringService {

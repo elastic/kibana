@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiHeaderLinks, EuiToolTip, EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks, EuiToolTip } from '@elastic/eui';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import { stringifyUrlParams } from '../../../lib/helper/url_params/stringify_url_params';
+import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
-import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
-import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
-import { InspectorHeaderLink } from './inspector_header_link';
+import { stringifyUrlParams } from '../../../lib/helper/url_params/stringify_url_params';
 import { monitorStatusSelector } from '../../../state/selectors';
+import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
+import { InspectorHeaderLink } from './inspector_header_link';
 import { ManageMonitorsBtn } from './manage_monitors_btn';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {

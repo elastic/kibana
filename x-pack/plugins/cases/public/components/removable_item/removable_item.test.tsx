@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
-import { noUpdateCasesPermissions, createAppMockRenderer } from '../../common/mock';
-import { fireEvent, screen } from '@testing-library/react';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
 import { RemovableItem } from './removable_item';
-import userEvent from '@testing-library/user-event';
 
 const MockComponent = () => {
   return <span>{'My component'}</span>;

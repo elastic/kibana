@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<DocLinksServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<DocLinksServiceContract>"],
             "path": "packages/core/doc-links/core-doc-links-browser-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,9 +55,7 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mock<any, any, any>"
-            ],
+            "signature": ["() => jest.Mock<any, any, any>"],
             "path": "packages/core/doc-links/core-doc-links-browser-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

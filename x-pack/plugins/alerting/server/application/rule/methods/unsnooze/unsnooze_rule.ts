@@ -7,15 +7,15 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { getRuleSavedObject } from '../../../../rules_client/lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { RulesClientContext } from '../../../../rules_client/types';
-import { getUnsnoozeAttributes } from '../../../../rules_client/common';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { updateRuleSo } from '../../../../data/rule';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { getUnsnoozeAttributes } from '../../../../rules_client/common';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { unsnoozeRuleParamsSchema } from './schemas';
 
 export interface UnsnoozeParams {

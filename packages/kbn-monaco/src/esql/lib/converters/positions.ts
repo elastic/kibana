@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
-import type { MonacoEditorError } from '../../../types';
+import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import { monaco } from '../../../monaco_imports';
+import type { MonacoEditorError } from '../../../types';
 
 // from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {

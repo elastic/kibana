@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   IndexMappingMeta,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import { cloneDeep } from 'lodash';
 
 /**
  * Creates an index mapping with the core properties required by saved object

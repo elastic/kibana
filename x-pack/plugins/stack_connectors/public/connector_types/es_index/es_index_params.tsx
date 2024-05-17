@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { isEmpty } from 'lodash';
 import {
-  EuiIcon,
-  EuiText,
   EuiCodeBlock,
   EuiFieldText,
   EuiFormRow,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentTemplate,
-  AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryEsIndexConnectorId,
   JsonEditorWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { IndexActionParams } from '../types';
 
 export const IndexParamsFields = ({
@@ -56,11 +56,11 @@ export const IndexParamsFields = ({
         typeof docs[0] === 'string'
         ? docs[0]
         : // otherwise check that the array entry is non-empty as sometimes we
-        // use an empty object to trigger validation but we don't want to auto-populate with an empty object
-        !isEmpty(docs[0])
-        ? // if non-empty object, stringify it into format that JSON editor expects
-          JSON.stringify(docs[0], null, 2)
-        : null
+          // use an empty object to trigger validation but we don't want to auto-populate with an empty object
+          !isEmpty(docs[0])
+          ? // if non-empty object, stringify it into format that JSON editor expects
+            JSON.stringify(docs[0], null, 2)
+          : null
       : undefined;
   };
 

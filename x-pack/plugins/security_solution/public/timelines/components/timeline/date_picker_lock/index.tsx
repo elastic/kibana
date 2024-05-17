@@ -9,9 +9,9 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import * as i18n from './translations';
 
 const TimelineDatePickerLockComponent = () => {

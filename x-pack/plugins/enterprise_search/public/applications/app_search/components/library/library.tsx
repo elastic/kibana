@@ -10,16 +10,16 @@
 import React, { useState } from 'react';
 
 import {
-  EuiSpacer,
-  EuiPageHeader,
-  EuiTitle,
-  EuiPageSection,
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
   EuiButtonIconProps,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiEmptyPrompt,
   EuiPageBody,
+  EuiPageHeader,
+  EuiPageSection,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';

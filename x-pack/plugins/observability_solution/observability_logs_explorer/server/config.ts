@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, offeringBasedSchema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { ObservabilityLogsExplorerConfig } from '../common/plugin_config';
 

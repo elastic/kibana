@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import TelemetryManagementSection from './telemetry_management_section';
-import { TelemetryService } from '@kbn/telemetry-plugin/public/services';
-import { coreMock } from '@kbn/core/public/mocks';
-import { render } from '@testing-library/react';
 import type { DocLinksStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { TelemetryService } from '@kbn/telemetry-plugin/public/services';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { render } from '@testing-library/react';
+import React from 'react';
+import TelemetryManagementSection from './telemetry_management_section';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();

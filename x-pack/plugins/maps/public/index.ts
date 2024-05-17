@@ -7,8 +7,8 @@
 
 import { PluginInitializer } from '@kbn/core/public';
 import { PluginInitializerContext } from '@kbn/core/public';
-import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 import { MapsXPackConfig } from '../config';
+import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   initContext: PluginInitializerContext<MapsXPackConfig>

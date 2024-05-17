@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { sample, random } from 'lodash';
 import { faker } from '@faker-js/faker';
+import { random, sample } from 'lodash';
+import { EventFunction } from '../../../../../types';
 import { ADMIN_CONSOLE, DOMAINS } from '../../../common/constants';
 import { createEvent } from './create_base_event';
-import { EventFunction } from '../../../../../types';
 
 export const internalError: EventFunction = (_schedule, timestamp) => {
   const user = {

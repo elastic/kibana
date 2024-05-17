@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { plot } from '..';
 import { Render } from '../../__stories__/render';
 

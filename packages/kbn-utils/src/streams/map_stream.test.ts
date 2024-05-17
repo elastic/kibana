@@ -8,10 +8,10 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
-import { createPromiseFromStreams } from './promise_from_streams';
+import { createConcatStream } from './concat_stream';
 import { createListStream } from './list_stream';
 import { createMapStream } from './map_stream';
-import { createConcatStream } from './concat_stream';
+import { createPromiseFromStreams } from './promise_from_streams';
 
 describe('createMapStream()', () => {
   test('calls the function with each item in the source stream', async () => {

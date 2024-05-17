@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import {
-  EuiPageTemplate,
+  EuiButton,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiPageTemplate,
   EuiPanel,
   EuiTitle,
-  EuiButton,
-  EuiFlexGroup,
 } from '@elastic/eui';
-import { Router } from '@kbn/shared-ux-router';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Router } from '@kbn/shared-ux-router';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 export interface RenderAppProps {
   mountParams: AppMountParameters;

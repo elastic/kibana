@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.observed_user_details.dsl';
 import { observedUserDetails } from '.';
 import { mockOptions, mockSearchStrategyResponse } from './__mocks__';
+import * as buildQuery from './query.observed_user_details.dsl';
 
 describe('userDetails search strategy', () => {
   const buildUserDetailsQuery = jest.spyOn(buildQuery, 'buildObservedUserDetailsQuery');

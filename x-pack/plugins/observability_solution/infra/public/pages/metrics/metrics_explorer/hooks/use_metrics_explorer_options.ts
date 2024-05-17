@@ -6,23 +6,23 @@
  */
 
 import DateMath from '@kbn/datemath';
-import * as t from 'io-ts';
-import createContainer from 'constate';
 import type { TimeRange } from '@kbn/es-query';
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import createContainer from 'constate';
+import * as t from 'io-ts';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Color } from '../../../../../common/color_palette';
 import {
   type MetricsExplorerChartOptions,
+  MetricsExplorerChartType,
   type MetricsExplorerOptions,
   type MetricsExplorerOptionsMetric,
   type MetricsExplorerTimeOptions,
   MetricsExplorerYAxisMode,
-  MetricsExplorerChartType,
-  metricsExplorerOptionsRT,
   metricsExplorerChartOptionsRT,
+  metricsExplorerOptionsRT,
   metricsExplorerTimeOptionsRT,
 } from '../../../../../common/metrics_explorer_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { Color } from '../../../../../common/color_palette';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
+import { v4 as uuidv4 } from 'uuid';
 
 import { partition } from 'lodash';
 
-import { appContextService } from '../app_context';
-import type {
-  Agent,
-  AgentAction,
-  AgentActionType,
-  NewAgentAction,
-  FleetServerAgentAction,
-} from '../../../common/types/models';
 import {
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
   SO_SEARCH_LIMIT,
 } from '../../../common/constants';
+import type {
+  Agent,
+  AgentAction,
+  AgentActionType,
+  FleetServerAgentAction,
+  NewAgentAction,
+} from '../../../common/types/models';
 import { AgentActionNotFoundError } from '../../errors';
+import { appContextService } from '../app_context';
 
 import { auditLoggingService } from '../audit_logging';
 

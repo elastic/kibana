@@ -15,13 +15,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { StackTracesDisplayOption, TopNType } from '@kbn/profiling-utils';
-import { StackedBarChart, StackedBarChartProps } from '../stacked_bar_chart';
+import React, { useState } from 'react';
 import { TopNSubchart } from '../../../common/topn';
-import { ChartGrid } from '../chart_grid';
 import { AsyncState } from '../../hooks/use_async';
 import { AsyncComponent } from '../async_component';
+import { ChartGrid } from '../chart_grid';
+import { StackedBarChart, StackedBarChartProps } from '../stacked_bar_chart';
 import { SubChart } from '../subchart';
 
 interface Props {

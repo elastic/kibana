@@ -6,12 +6,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MONITORS_ROUTE, MONITOR_ROUTE } from '../../../../../../common/constants';
+import { PLUGIN } from '../../../../../../common/constants/plugin';
+import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { ConfigKey } from '../../../../../../common/runtime_types';
-import { MONITOR_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
-import { PLUGIN } from '../../../../../../common/constants/plugin';
 
 export const useTestRunDetailsBreadcrumbs = (
   extraCrumbs?: Array<{ text: string; href?: string }>

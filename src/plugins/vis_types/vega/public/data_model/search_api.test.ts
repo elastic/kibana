@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { extendSearchParamsWithRuntimeFields } from './search_api';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { extendSearchParamsWithRuntimeFields } from './search_api';
 
 import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -41,8 +41,9 @@ describe('extendSearchParamsWithRuntimeFields', () => {
 
     mockComputedFields(dataViewsStart, 'index', runtimeFields);
 
-    expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
-      .toMatchInlineSnapshot(`
+    expect(
+      await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index')
+    ).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "runtime_mappings": Object {
@@ -65,8 +66,9 @@ describe('extendSearchParamsWithRuntimeFields', () => {
 
     mockComputedFields(dataViewsStart, 'index', runtimeFields);
 
-    expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
-      .toMatchInlineSnapshot(`
+    expect(
+      await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index')
+    ).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "runtime_mappings": Object {

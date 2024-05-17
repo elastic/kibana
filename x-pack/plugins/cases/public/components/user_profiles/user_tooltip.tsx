@@ -9,10 +9,10 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { UserProfileUserInfo } from '@kbn/user-profile-components';
-import { CaseUserAvatar } from './user_avatar';
 import { getName } from './display_name';
 import * as i18n from './translations';
 import type { UserInfoWithAvatar } from './types';
+import { CaseUserAvatar } from './user_avatar';
 
 const UserFullInformation: React.FC<{ userInfo?: UserInfoWithAvatar }> = React.memo(
   ({ userInfo }) => {
@@ -46,9 +46,8 @@ const getNameOrMissingText = (user?: UserProfileUserInfo) => {
 
 UserFullInformation.displayName = 'UserFullInformation';
 
-const UserToolTipAvatar: React.FC<
-  Pick<React.ComponentProps<typeof CaseUserAvatar>, 'userInfo'>
-> = ({ userInfo }) => <CaseUserAvatar size={'m'} userInfo={userInfo} />;
+const UserToolTipAvatar: React.FC<Pick<React.ComponentProps<typeof CaseUserAvatar>, 'userInfo'>> =
+  ({ userInfo }) => <CaseUserAvatar size={'m'} userInfo={userInfo} />;
 UserToolTipAvatar.displayName = 'UserToolTipAvatar';
 
 interface UserFullRepresentationProps {

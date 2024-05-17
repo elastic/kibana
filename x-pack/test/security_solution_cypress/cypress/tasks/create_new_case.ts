@@ -12,19 +12,19 @@ import type {
   TestCase,
   TestCaseWithoutTimeline,
 } from '../objects/case';
-import { ALL_CASES_STATUS_FILTER, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
+import { ALL_CASES_OPEN_FILTER, ALL_CASES_STATUS_FILTER } from '../screens/all_cases';
 import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
 
 import {
   BACK_TO_CASES_BTN,
   DESCRIPTION_INPUT,
-  SUBMIT_BTN,
+  EMPTY_TIMELINE,
   INSERT_TIMELINE_BTN,
   LOADING_SPINNER,
+  SUBMIT_BTN,
   TAGS_INPUT,
-  TITLE_INPUT,
   TIMELINE,
-  EMPTY_TIMELINE,
+  TITLE_INPUT,
 } from '../screens/create_new_case';
 import {
   CONNECTOR_RESILIENT,

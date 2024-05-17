@@ -1,3 +1,5 @@
+import { EuiHealth } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +7,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiHealth } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-theme';
-import { CRITICALITY_LEVEL_TITLE } from './translations';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
+import { CRITICALITY_LEVEL_TITLE } from './translations';
 
 export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevelWithUnassigned, string> = {
   extreme_impact: '#E7664C',

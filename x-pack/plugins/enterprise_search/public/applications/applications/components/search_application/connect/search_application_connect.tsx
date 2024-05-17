@@ -15,9 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
-  SearchApplicationViewTabs,
-  SearchApplicationConnectTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
+  SearchApplicationConnectTabs,
+  SearchApplicationViewTabs,
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 

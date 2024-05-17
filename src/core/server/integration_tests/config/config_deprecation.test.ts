@@ -7,8 +7,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { mockLoggingSystem } from './config_deprecation.test.mocks';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { mockLoggingSystem } from './config_deprecation.test.mocks';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof createRoot>;

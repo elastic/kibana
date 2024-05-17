@@ -1,3 +1,7 @@
+import Path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
+import dedent from 'dedent';
+import Fsp from 'fs/promises';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +10,8 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import Fsp from 'fs/promises';
-import Path from 'path';
-import dedent from 'dedent';
-import { ToolingLog } from '@kbn/tooling-log';
-import { PluginApi, PluginMetaInfo } from '../types';
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
+import { PluginApi, PluginMetaInfo } from '../types';
 import { getPluginApiDocId } from '../utils';
 
 function hasPublicApi(doc: PluginApi): boolean {

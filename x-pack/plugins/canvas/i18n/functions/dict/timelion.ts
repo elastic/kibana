@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { timelionFunctionFactory } from '../../../public/functions/timelion';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { ELASTICSEARCH, DATEMATH, MOMENTJS_TIMEZONE_URL } from '../../constants';
+import { DATEMATH, ELASTICSEARCH, MOMENTJS_TIMEZONE_URL } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<ReturnType<typeof timelionFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.timelionHelpText', {

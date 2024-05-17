@@ -12,19 +12,19 @@ import type { Logger, SavedObject } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
+import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import { DEFAULT_MAX_ALERTS } from '@kbn/alerting-plugin/server/config';
+import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
-import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
-import type { ConfigType } from '../../../../config';
-import type { AlertAttributes } from '../types';
-import { createRuleMock } from './rule';
-import { listMock } from '@kbn/lists-plugin/server/mocks';
-import type { QueryRuleParams, RuleParams } from '../../rule_schema';
 // this is only used in tests
 import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor.test_helpers';
+import type { ConfigType } from '../../../../config';
+import type { QueryRuleParams, RuleParams } from '../../rule_schema';
 import { getCompleteRuleMock } from '../../rule_schema/mocks';
-import { DEFAULT_MAX_ALERTS } from '@kbn/alerting-plugin/server/config';
+import type { AlertAttributes } from '../types';
+import { createRuleMock } from './rule';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',

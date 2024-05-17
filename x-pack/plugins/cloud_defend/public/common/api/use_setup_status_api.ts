@@ -6,9 +6,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../hooks/use_kibana';
 import { CloudDefendSetupStatus } from '../../../common';
 import { CURRENT_API_VERSION, STATUS_ROUTE_PATH } from '../../../common/constants';
+import { useKibana } from '../hooks/use_kibana';
 
 const getCloudDefendSetupStatusQueryKey = 'cloud_defend_status_key';
 

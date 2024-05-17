@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiLink,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiButton,
   EuiPageSection,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { useMemo, useCallback, useState } from 'react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { ManagementPageLoader } from '../../../../../components/management_page_loader';
-import { useUrlParams } from '../../../../../hooks/use_url_params';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
-import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
+import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { useListArtifact } from '../../../../../hooks/artifacts';
+import { useUrlParams } from '../../../../../hooks/use_url_params';
+import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
+import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
+import { PolicyArtifactsDeleteModal } from '../delete_modal';
 import { PolicyArtifactsEmptyUnassigned, PolicyArtifactsEmptyUnexisting } from '../empty';
-import { PolicyArtifactsList } from '../list';
 import { PolicyArtifactsFlyout } from '../flyout';
+import { PolicyArtifactsList } from '../list';
 import type { PolicyArtifactsPageLabels } from '../translations';
 import { policyArtifactsPageLabels } from '../translations';
-import { PolicyArtifactsDeleteModal } from '../delete_modal';
-import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;

@@ -1,3 +1,4 @@
+import { sortedUniqBy } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,25 +6,24 @@
  * 2.0.
  */
 import memoizeOne from 'memoize-one';
-import { sortedUniqBy } from 'lodash';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
   AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
   Process,
   ProcessEvent,
-  ProcessMap,
   ProcessEventsPage,
+  ProcessMap,
 } from '../../../common';
+import { sortProcesses } from '../../../common/utils/sort_processes';
 import {
+  autoExpandProcessTree,
   inferProcessFromLeaderInfo,
-  updateAlertEventStatus,
   processNewEvents,
   searchProcessTree,
-  autoExpandProcessTree,
+  updateAlertEventStatus,
 } from './helpers';
-import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;

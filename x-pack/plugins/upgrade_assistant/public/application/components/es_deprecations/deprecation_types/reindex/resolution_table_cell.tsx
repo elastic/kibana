@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';

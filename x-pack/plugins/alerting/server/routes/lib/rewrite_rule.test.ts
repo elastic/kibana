@@ -1,3 +1,5 @@
+import { isPlainObject } from 'lodash';
+import { RuleTypeParams, SanitizedRule } from '../../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { rewriteRule } from './rewrite_rule';
-import { RuleTypeParams, SanitizedRule } from '../../types';
-import { isPlainObject } from 'lodash';
 
 const DATE_2020 = new Date('1/1/2020');
 

@@ -15,12 +15,12 @@ import React, { Component } from 'react';
 import {
   EuiButtonIcon,
   EuiExpression,
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiSelect,
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

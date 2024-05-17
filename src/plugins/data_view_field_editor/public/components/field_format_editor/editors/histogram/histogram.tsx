@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import { EuiFieldText, EuiFormRow, EuiIcon, EuiLink, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSelect, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
-import { DefaultFormatEditor, defaultState } from '../default/default';
+import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
+import { DefaultFormatEditor, defaultState } from '../default/default';
 import { formatId } from './constants';
 
 export interface HistogramFormatEditorParams {

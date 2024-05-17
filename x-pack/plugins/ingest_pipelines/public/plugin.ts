@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
-import { CoreStart, CoreSetup, Plugin } from '@kbn/core/public';
 
 import { PLUGIN_ID } from '../common/constants';
-import { uiMetricService, apiService } from './application/services';
-import { SetupDependencies, StartDependencies, ILicense } from './types';
+import { apiService, uiMetricService } from './application/services';
 import { IngestPipelinesLocatorDefinition } from './locator';
+import { ILicense, SetupDependencies, StartDependencies } from './types';
 
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>

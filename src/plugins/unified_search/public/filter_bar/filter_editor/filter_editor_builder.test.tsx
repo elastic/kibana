@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { FilterEditor, FilterEditorProps } from './filter_editor';
-import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { Filter, FilterStateStore } from '@kbn/es-query';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
+import { FilterEditor, FilterEditorProps } from './filter_editor';
 
 const getStorage = (v: string) => {
   const storage = createMockStorage();

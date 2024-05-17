@@ -1,3 +1,7 @@
+import { timerange } from '@kbn/apm-synthtrace-client';
+import { castArray } from 'lodash';
+import pidusage from 'pidusage';
+import { memoryUsage } from 'process';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +10,13 @@
  * Side Public License, v 1.
  */
 import { parentPort, workerData } from 'worker_threads';
-import pidusage from 'pidusage';
-import { castArray } from 'lodash';
-import { memoryUsage } from 'process';
-import { timerange } from '@kbn/apm-synthtrace-client';
 import { getApmEsClient } from './get_apm_es_client';
+import { getAssetsEsClient } from './get_assets_es_client';
+import { getInfraEsClient } from './get_infra_es_client';
+import { getLogsEsClient } from './get_logs_es_client';
 import { getScenario } from './get_scenario';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
-import { getLogsEsClient } from './get_logs_es_client';
-import { getInfraEsClient } from './get_infra_es_client';
-import { getAssetsEsClient } from './get_assets_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;

@@ -6,8 +6,8 @@
  */
 
 import { EuiI18nNumber, EuiTextColor } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 interface NumberCellProps {
   value?: number;

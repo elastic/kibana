@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields, ApmUserAgentFields } from './apm_fields';
 import { Entity } from '../entity';
+import { ApmFields, ApmUserAgentFields } from './apm_fields';
 import { RumSpan } from './rum_span';
 import { RumTransaction } from './rum_transaction';
 

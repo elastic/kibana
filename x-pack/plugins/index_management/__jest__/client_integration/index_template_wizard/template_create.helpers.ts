@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { AsyncTestBedConfig, registerTestBed } from '@kbn/test-jest-helpers';
 import { TemplateCreate } from '../../../public/application/sections/template_create';
 import { WithAppDependencies } from '../helpers';
 
-import { formSetup, TestSubjects } from './template_form.helpers';
+import { TestSubjects, formSetup } from './template_form.helpers';
 
 export const setup = async (httpSetup: HttpSetup, isLegacy: boolean = false) => {
   const route = isLegacy

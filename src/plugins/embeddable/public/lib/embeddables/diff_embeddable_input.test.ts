@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode } from '..';
 import { KibanaExecutionContext } from '@kbn/core/types';
-import { EmbeddableInput, omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from '.';
+import { EmbeddableInput, genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from '.';
+import { ViewMode } from '..';
 
 const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): EmbeddableInput => {
   const defaultState: EmbeddableInput = {

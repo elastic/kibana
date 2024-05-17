@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * See {@link CapabilitiesSetup}

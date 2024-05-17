@@ -10,10 +10,10 @@ import { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import {
   ColumnsFromLocatorFn,
+  FiltersFromLocatorFn,
+  QueryFromLocatorFn,
   SearchSourceFromLocatorFn,
   TitleFromLocatorFn,
-  QueryFromLocatorFn,
-  FiltersFromLocatorFn,
 } from './locator';
 
 export interface DiscoverServerPluginStartDeps {

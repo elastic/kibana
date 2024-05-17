@@ -1,3 +1,5 @@
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import '@kbn/code-editor-mock/jest_helper';
-import { TestProvider } from '../../test/test_provider';
-import { getCloudDefendNewPolicyMock } from '../../test/mocks';
-import { ControlSettings } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ControlSettings } from '.';
+import { getCloudDefendNewPolicyMock } from '../../test/mocks';
+import { TestProvider } from '../../test/test_provider';
 
 describe('<ControlSettings />', () => {
   const onChange = jest.fn();

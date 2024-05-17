@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { each, find, get } from 'lodash';
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
 import { useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { get, find, each } from 'lodash';
 import { map } from 'rxjs';
-import type { MlApiServices } from './ml_api_service';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../contexts/kibana';
+import type { MlApiServices } from './ml_api_service';
 
 export interface AggType {
   avg: string;

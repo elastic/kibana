@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelCopy } from '.';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 
 const TEST_TEXT_COPY = 'copy component test';
 const TEST_CHILD = <span>{TEST_TEXT_COPY}</span>;

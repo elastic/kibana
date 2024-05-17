@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
+import { TagFactory } from '../../../public/lib/tag';
 
 export const presentation: TagFactory = () => ({
   name: strings.presentation(),

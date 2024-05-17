@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAppUrl } from '../../../../../common/lib/kibana';
-import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../common/constants';
+import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../../../../common/lib/kibana';
+import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
 
 /**
  * Returns a link component that navigates to the endpoint list page filtered by a specific policy

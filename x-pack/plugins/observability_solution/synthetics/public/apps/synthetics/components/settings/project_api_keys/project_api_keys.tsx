@@ -1,3 +1,8 @@
+import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +10,12 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiText, EuiLink, EuiEmptyPrompt, EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { HelpCommands } from './help_commands';
-import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { ApiKeyBtn } from './api_key_btn';
 import { useEnablement } from '../../../hooks';
+import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
+import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
+import { ApiKeyBtn } from './api_key_btn';
+import { HelpCommands } from './help_commands';
 
 const syntheticsTestRunDocsLink =
   'https://www.elastic.co/guide/en/observability/current/synthetic-run-tests.html';

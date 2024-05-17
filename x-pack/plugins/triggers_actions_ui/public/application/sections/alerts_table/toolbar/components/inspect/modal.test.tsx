@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery } from './modal';
 

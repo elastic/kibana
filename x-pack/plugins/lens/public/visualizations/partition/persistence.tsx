@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { cloneDeep } from 'lodash';
 import { PieLayerState, PieVisualizationState } from '../../../common/types';
 
 type PersistedPieLayerState = PieLayerState & {

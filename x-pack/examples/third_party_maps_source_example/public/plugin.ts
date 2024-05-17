@@ -6,11 +6,11 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { MapsCustomRasterSourcePluginSetup, MapsCustomRasterSourcePluginStart } from './types';
-import { CustomRasterSource } from './classes/custom_raster_source';
-import { customRasterLayerWizard } from './classes/custom_raster_layer_wizard';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { customRasterLayerWizard } from './classes/custom_raster_layer_wizard';
+import { CustomRasterSource } from './classes/custom_raster_source';
 import image from './third_party_maps_source_example.png';
+import { MapsCustomRasterSourcePluginSetup, MapsCustomRasterSourcePluginStart } from './types';
 
 export class MapsCustomRasterSourcePlugin
   implements

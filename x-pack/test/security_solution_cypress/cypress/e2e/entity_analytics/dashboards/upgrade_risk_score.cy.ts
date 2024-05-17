@@ -7,12 +7,12 @@
 
 import { getNewRule } from '../../../objects/rule';
 import {
+  HOSTS_TABLE,
+  HOSTS_TABLE_ROWS,
+  HOST_RISK_SCORE_NO_DATA_DETECTED,
   UPGRADE_RISK_SCORE_BUTTON,
   USERS_TABLE,
-  HOSTS_TABLE_ROWS,
-  HOSTS_TABLE,
   USERS_TABLE_ROWS,
-  HOST_RISK_SCORE_NO_DATA_DETECTED,
   USER_RISK_SCORE_NO_DATA_DETECTED,
 } from '../../../screens/entity_analytics';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
@@ -29,9 +29,9 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 
-import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
-import { upgradeRiskEngine } from '../../../tasks/entity_analytics';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
+import { upgradeRiskEngine } from '../../../tasks/entity_analytics';
+import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 

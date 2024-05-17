@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { useLicense } from '../../../common/hooks/use_license';
+import { NotFoundPage } from '../../../app/404';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { PolicyDetails, PolicyList } from './view';
+import { useLicense } from '../../../common/hooks/use_license';
 import {
-  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
 } from '../../common/constants';
-import { NotFoundPage } from '../../../app/404';
 import { getPolicyDetailPath } from '../../common/routing';
+import { PolicyDetails, PolicyList } from './view';
 
 export const PolicyContainer = memo(() => {
   const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(

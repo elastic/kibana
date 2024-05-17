@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getRandomString, getRandomNumber } from '@kbn/test-jest-helpers';
-import { TemplateDeserialized, TemplateType, TemplateListItem } from '../../common';
-import { IndexSettings, Aliases, Mappings, DataStream } from '../../common/types';
+import { getRandomNumber, getRandomString } from '@kbn/test-jest-helpers';
+import { TemplateDeserialized, TemplateListItem, TemplateType } from '../../common';
+import { Aliases, DataStream, IndexSettings, Mappings } from '../../common/types';
 
 const objHasProperties = (obj?: Record<string, any>): boolean => {
   return obj === undefined || Object.keys(obj).length === 0 ? false : true;

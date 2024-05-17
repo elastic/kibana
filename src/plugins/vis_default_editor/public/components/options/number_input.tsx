@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface NumberInputOptionProps<ParamName extends string> {
   disabled?: boolean;

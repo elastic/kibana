@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { cloneDeep, uniq } from 'lodash';
+import { layerTypes } from '../..';
 import {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   VisualizationType,
 } from '../../types';
+import { isHorizontalChart } from './state_helpers';
 import {
-  State,
-  visualizationTypes,
-  XYState,
-  XYAnnotationLayerConfig,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
   SeriesType,
+  State,
+  XYAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
+  visualizationTypes,
 } from './types';
-import { isHorizontalChart } from './state_helpers';
-import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
 
 export function getAxisName(

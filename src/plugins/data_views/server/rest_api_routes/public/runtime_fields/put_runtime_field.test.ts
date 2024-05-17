@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { putRuntimeField } from './put_runtime_field';
+import { DataViewLazy } from '../../../../common';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataViewLazy } from '../../../../common';
+import { putRuntimeField } from './put_runtime_field';
 
 describe('put runtime field', () => {
   it('call usageCollection', async () => {
@@ -24,7 +24,7 @@ describe('put runtime field', () => {
             runtimeField: {},
           }),
           getRuntimeField: jest.fn(),
-        } as unknown as DataViewLazy)
+        }) as unknown as DataViewLazy
     );
 
     await putRuntimeField({

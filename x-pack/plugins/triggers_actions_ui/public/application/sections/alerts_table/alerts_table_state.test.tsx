@@ -1,3 +1,13 @@
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_UUID,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { get } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +16,10 @@
  */
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import userEvent from '@testing-library/user-event';
-import { get } from 'lodash';
-import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import {
-  AlertConsumers,
-  ALERT_CASE_IDS,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { PLUGIN_ID } from '../../../common/constants';
 import {
   Alerts,
   AlertsField,
@@ -25,19 +28,16 @@ import {
   FetchAlertData,
   RenderCustomActionsRowArgs,
 } from '../../../types';
-import { PLUGIN_ID } from '../../../common/constants';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
+import { getCasesMockMap } from './cases/index.mock';
+import { DefaultSort } from './hooks';
+import { useBulkGetCases } from './hooks/use_bulk_get_cases';
+import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
-import { useBulkGetCases } from './hooks/use_bulk_get_cases';
-import { DefaultSort } from './hooks';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
-import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
-import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');

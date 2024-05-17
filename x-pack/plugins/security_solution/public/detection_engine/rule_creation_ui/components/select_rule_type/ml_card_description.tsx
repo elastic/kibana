@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import styled from 'styled-components';
 
 import { ML_TYPE_DESCRIPTION } from './translations';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { deepFreeze } from '@kbn/std';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
+import { deepFreeze } from '@kbn/std';
+import { get } from 'lodash';
 import type {
   InjectedMetadataParams,
   InternalInjectedMetadataSetup,

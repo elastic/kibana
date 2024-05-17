@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
-import { LocatorPublic, LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import { KibanaLocation, LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { PLUGIN_ID } from '../common/constants';
 import {
   getClonePath,
   getCreatePath,
   getEditPath,
   getListPath,
 } from './application/services/navigation';
-import { PLUGIN_ID } from '../common/constants';
 
 export enum INGEST_PIPELINES_PAGES {
   LIST = 'pipelines_list',

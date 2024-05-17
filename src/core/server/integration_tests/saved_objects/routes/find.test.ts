@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import supertest from 'supertest';
 import querystring from 'querystring';
+import supertest from 'supertest';
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import {
+  type InternalSavedObjectsRequestHandlerContext,
+  registerFindRoute,
+} from '@kbn/core-saved-objects-server-internal';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
-  coreUsageStatsClientMock,
   coreUsageDataServiceMock,
+  coreUsageStatsClientMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  registerFindRoute,
-  type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
 import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

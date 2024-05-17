@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import {
   type Field,
@@ -18,6 +17,7 @@ import {
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils';
+import { cloneDeep } from 'lodash';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 

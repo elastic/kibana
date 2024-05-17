@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ShareWebsiteFlyout } from '../flyout.component';
 import { reduxDecorator } from '../../../../../../storybook';
+import { ShareWebsiteFlyout } from '../flyout.component';
 
 storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
   .addDecorator(reduxDecorator())

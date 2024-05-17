@@ -14,8 +14,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
+  WorkplaceSearchPageTemplate,
 } from '../../../../components/layout';
 
 import { AddSourceIntro } from './add_source_intro';

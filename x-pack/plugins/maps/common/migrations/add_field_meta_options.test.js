@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { addFieldMetaOptions } from './add_field_meta_options';
 import { LAYER_TYPE, STYLE_TYPE } from '../constants';
+import { addFieldMetaOptions } from './add_field_meta_options';
 
 describe('addFieldMetaOptions', () => {
   test('Should handle missing layerListJSON attribute', () => {

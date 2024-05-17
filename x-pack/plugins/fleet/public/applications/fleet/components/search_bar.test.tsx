@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from '@testing-library/react';
+import React from 'react';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
@@ -14,9 +14,9 @@ import { createFleetTestRendererMock } from '../../../mock';
 
 import {
   AGENTS_PREFIX,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   FLEET_ENROLLMENT_API_PREFIX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { SearchBar, getFieldSpecs } from './search_bar';

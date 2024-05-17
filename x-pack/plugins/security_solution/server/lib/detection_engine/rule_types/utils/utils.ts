@@ -8,21 +8,16 @@ import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 
-import dateMath from '@kbn/datemath';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import dateMath from '@kbn/datemath';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type {
-  ListArray,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  ListArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  ElasticsearchClient,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -30,24 +25,24 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
-  BulkResponseErrorAggregation,
-  SignalHit,
-  SearchAfterAndBulkCreateReturnType,
-  SignalSearchResponse,
-  Signal,
-  WrappedSignalHit,
-  RuleRangeTuple,
-  BaseSignalHit,
-  SignalSourceHit,
-  SimpleHit,
-  WrappedEventHit,
-} from '../types';
+  ElasticsearchClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { Privilege } from '../../../../../common/api/detection_engine';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+} from '../../../../../common/api/detection_engine/model/alerts';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
+import type { BaseHit, SearchTypes } from '../../../../../common/detection_engine/types';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ShardError } from '../../../types';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
   EqlRuleParams,
   EsqlRuleParams,
@@ -57,15 +52,20 @@ import type {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../../rule_schema';
-import type { BaseHit, SearchTypes } from '../../../../../common/detection_engine/types';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type {
-  BaseFieldsLatest,
-  DetectionAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
-import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
+import type {
+  BaseSignalHit,
+  BulkResponseErrorAggregation,
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  Signal,
+  SignalHit,
+  SignalSearchResponse,
+  SignalSourceHit,
+  SimpleHit,
+  WrappedEventHit,
+  WrappedSignalHit,
+} from '../types';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -290,7 +290,10 @@ export const generateId = (
   docId: string,
   version: string,
   ruleId: string
-): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+): string =>
+  createHash('sha256')
+    .update(docIndex.concat(docId, version, ruleId))
+    .digest('hex');
 
 // TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
 export const generateSignalId = (signal: Signal) =>
@@ -583,7 +586,7 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * @param primaryTimestamp The primary timestamp to use.
  */
 export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -618,8 +621,8 @@ export const getValidDateFromDoc = ({
     doc.fields != null && doc.fields[primaryTimestamp] != null
       ? doc.fields[primaryTimestamp][0]
       : doc._source != null
-      ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
-      : undefined;
+        ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
+        : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
       ? timestampValue
@@ -644,7 +647,7 @@ export const getValidDateFromDoc = ({
 };
 
 export const createSearchAfterReturnTypeFromResponse = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -717,7 +720,7 @@ export const createSearchAfterReturnType = ({
 };
 
 export const createSearchResultReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >(): SignalSearchResponse<TAggregations> => {
   const hits: SignalSourceHit[] = [];
   return {
@@ -809,7 +812,7 @@ export const mergeReturns = (
 };
 
 export const mergeSearchResults = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >(
   searchResults: Array<SignalSearchResponse<TAggregations>>
 ) => {
@@ -860,8 +863,8 @@ export const getTotalHitsValue = (totalHits: number | { value: number } | undefi
   typeof totalHits === 'undefined'
     ? -1
     : typeof totalHits === 'number'
-    ? totalHits
-    : totalHits.value;
+      ? totalHits
+      : totalHits.value;
 
 export const calculateTotal = (
   prevTotal: number | { value: number } | undefined,

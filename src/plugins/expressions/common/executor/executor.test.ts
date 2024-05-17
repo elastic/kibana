@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Executor } from './executor';
-import * as expressionTypes from '../expression_types';
-import * as expressionFunctions from '../expression_functions';
-import { Execution } from '../execution';
-import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { SavedObjectReference } from '@kbn/core/types';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { ExpressionAstFunction, formatExpression, parseExpression } from '../ast';
+import { Execution } from '../execution';
+import * as expressionFunctions from '../expression_functions';
+import * as expressionTypes from '../expression_types';
+import { Executor } from './executor';
 
 describe('Executor', () => {
   test('can instantiate', () => {

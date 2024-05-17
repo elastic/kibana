@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import sinon from 'sinon';
-import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 import { createStubClient, createStubLogger, createStubStats } from './__mocks__/stubs';
 

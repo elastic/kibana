@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
-import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
+import { takeOsqueryActionWithParams } from '../../tasks/live_query';
+import { initializeDataViews } from '../../tasks/login';
 
 describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {

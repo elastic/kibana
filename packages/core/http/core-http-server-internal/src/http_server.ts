@@ -6,61 +6,61 @@
  * Side Public License, v 1.
  */
 
-import { Server, Request } from '@hapi/hapi';
-import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
-import { v4 as uuidv4 } from 'uuid';
+import { Request, Server } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
 import {
   createServer,
   getListenerOptions,
+  getRequestId,
   getServerOptions,
   setTlsConfig,
-  getRequestId,
 } from '@kbn/server-http-tools';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { Duration } from 'moment';
-import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
-import apm from 'elastic-apm-node';
-// @ts-expect-error no type definition
-import Brok from 'brok';
-import type { Logger, LoggerFactory } from '@kbn/logging';
-import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
-import type {
-  IRouter,
-  RouteConfigOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  RouterRoute,
-  AuthenticationHandler,
-  OnPreAuthHandler,
-  OnPostAuthHandler,
-  OnPreRoutingHandler,
-  OnPreResponseHandler,
-  SessionStorageCookieOptions,
-  HttpServiceSetup,
-  HttpServerInfo,
-  HttpAuth,
-  IAuthHeadersStorage,
-} from '@kbn/core-http-server';
-import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity } from 'lodash';
-import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import { CoreVersionedRouter, Router, isSafeMethod } from '@kbn/core-http-router-server-internal';
+import type {
+  AuthenticationHandler,
+  HttpAuth,
+  HttpServerInfo,
+  HttpServiceSetup,
+  IAuthHeadersStorage,
+  IRouter,
+  KibanaRequestState,
+  KibanaRouteOptions,
+  OnPostAuthHandler,
+  OnPreAuthHandler,
+  OnPreResponseHandler,
+  OnPreRoutingHandler,
+  RouteConfigOptions,
+  RouterRoute,
+  SessionStorageCookieOptions,
+} from '@kbn/core-http-server';
+import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { Logger, LoggerFactory } from '@kbn/logging';
+// @ts-expect-error no type definition
+import Brok from 'brok';
+import apm from 'elastic-apm-node';
+import { identity } from 'lodash';
+import type { Duration } from 'moment';
+import { performance } from 'perf_hooks';
+import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
+import { AuthHeadersStorage } from './auth_headers_storage';
+import { AuthStateStorage } from './auth_state_storage';
+import { BasePath } from './base_path_service';
+import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
-import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
-import { adoptToHapiOnRequest } from './lifecycle/on_pre_routing';
+import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat } from './lifecycle/on_pre_response';
-import { createCookieSessionStorageFactory } from './cookie_session_storage';
-import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage } from './auth_headers_storage';
-import { BasePath } from './base_path_service';
+import { adoptToHapiOnRequest } from './lifecycle/on_pre_routing';
 import { getEcsResponseLog } from './logging';
-import { StaticAssets, type InternalStaticAssets } from './static_assets';
+import { type InternalStaticAssets, StaticAssets } from './static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction

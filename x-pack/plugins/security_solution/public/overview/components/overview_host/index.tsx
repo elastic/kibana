@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import type { ESQuery } from '../../../../common/typed_json';
-import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
+import { SecurityPageName } from '../../../app/types';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useUiSetting$ } from '../../../common/lib/kibana';
-import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
-import { manageQuery } from '../../../common/components/page/manage_query';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
-import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { SecurityPageName } from '../../../app/types';
+import { manageQuery } from '../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useUiSetting$ } from '../../../common/lib/kibana';
+import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
+import { OverviewHostStats, getOverviewHostStats } from '../overview_host_stats';
 
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];

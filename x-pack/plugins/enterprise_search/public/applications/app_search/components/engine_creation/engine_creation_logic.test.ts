@@ -7,9 +7,9 @@
 
 import {
   LogicMounter,
+  mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-  mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
 import {

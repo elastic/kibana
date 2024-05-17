@@ -6,8 +6,8 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
 import moment from 'moment-timezone';
+import React from 'react';
 import { TimestampTooltip } from './timestamp_tooltip';
 
 function mockNow(date: string | number | Date) {

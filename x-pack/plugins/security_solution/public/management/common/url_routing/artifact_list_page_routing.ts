@@ -8,15 +8,15 @@
 // FIXME: Remove references to `querystring`
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import type { ArtifactListPageUrlParams } from '../../components/artifact_list_page';
-import {
-  isDefaultOrMissing,
-  extractFirstParamValue,
-  extractPageSizeNumber,
-  extractPageNumber,
-} from './utils';
-import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../constants';
 import { appendSearch } from '../../../common/components/link_to/helpers';
+import type { ArtifactListPageUrlParams } from '../../components/artifact_list_page';
+import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../constants';
+import {
+  extractFirstParamValue,
+  extractPageNumber,
+  extractPageSizeNumber,
+  isDefaultOrMissing,
+} from './utils';
 
 const SHOW_PARAM_ALLOWED_VALUES: ReadonlyArray<Required<ArtifactListPageUrlParams>['show']> = [
   'edit',

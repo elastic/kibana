@@ -7,8 +7,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { VisTypeXyPlugin as Plugin } from './plugin';
 import type { XyPublicConfig } from '../config';
+import { VisTypeXyPlugin as Plugin } from './plugin';
 
 export type { VisTypeXyPluginSetup } from './plugin';
 

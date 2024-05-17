@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Reducer } from 'react';
-import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
+import { produce } from 'immer';
+import { Reducer } from 'react';
 
 import {
   EmbeddableConsoleView,

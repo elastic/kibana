@@ -30,9 +30,7 @@
             "tags": [],
             "label": "getKibanaStats",
             "description": [],
-            "signature": [
-              "() => any"
-            ],
+            "signature": ["() => any"],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -46,9 +44,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,9 +104,7 @@
             "tags": [],
             "label": "handleNotEnabled",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -152,9 +146,7 @@
             "description": [
               "\nA functional representation of the `monitoring.ui.*` configuration tree passed in from kibana.yml"
             ],
-            "signature": [
-              "MonitoringConfigTypeOverriddenUIElasticsearch"
-            ],
+            "signature": ["MonitoringConfigTypeOverriddenUIElasticsearch"],
             "path": "x-pack/plugins/monitoring/server/config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -208,9 +200,7 @@
           "tags": [],
           "label": "getKibanaStats",
           "description": [],
-          "signature": [
-            "() => any"
-          ],
+          "signature": ["() => any"],
           "path": "x-pack/plugins/monitoring/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -232,9 +222,7 @@
         "tags": [],
         "label": "formatTimestampToDuration",
         "description": [],
-        "signature": [
-          "(timestamp: any, calculationFlag: any, initialTime: any) => string"
-        ],
+        "signature": ["(timestamp: any, calculationFlag: any, initialTime: any) => string"],
         "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -246,9 +234,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -261,9 +247,7 @@
             "tags": [],
             "label": "calculationFlag",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -276,9 +260,7 @@
             "tags": [],
             "label": "initialTime",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
             "deprecated": false,
             "trackAdoption": false,

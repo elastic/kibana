@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
-import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlyoutFooter, EuiFlyoutHeader, Query } from '@elastic/eui';
 import { NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { AssignableObject } from '../../../common/assignments';
 import { ITagAssignmentService, ITagsCache } from '../../services';
-import { parseQuery, computeRequiredChanges } from './lib';
-import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
 import {
-  AssignFlyoutHeader,
-  AssignFlyoutSearchBar,
-  AssignFlyoutResultList,
-  AssignFlyoutFooter,
   AssignFlyoutActionBar,
+  AssignFlyoutFooter,
+  AssignFlyoutHeader,
+  AssignFlyoutResultList,
+  AssignFlyoutSearchBar,
 } from './components';
+import { computeRequiredChanges, parseQuery } from './lib';
+import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
 import { getKey, sortByStatusAndTitle } from './utils';
 
 import './assign_flyout.scss';

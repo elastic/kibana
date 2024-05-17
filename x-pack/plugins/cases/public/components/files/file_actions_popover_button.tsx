@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
-import type { FileJSON } from '@kbn/shared-ux-file-types';
+import { EuiButtonIcon, EuiContextMenu, EuiIcon, EuiPopover, EuiTextColor } from '@elastic/eui';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { Owner } from '../../../common/constants/types';
 import * as i18n from './translations';
 
 import { constructFileKindIdByOwner } from '../../../common/files';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesToast } from '../../common/use_cases_toast';
-import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 
 export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJSON }> = ({

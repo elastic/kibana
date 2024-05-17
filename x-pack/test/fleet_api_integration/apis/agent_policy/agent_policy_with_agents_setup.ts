@@ -10,8 +10,8 @@ import {
   AGENT_POLICY_INDEX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
 } from '@kbn/fleet-plugin/common';
-import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {

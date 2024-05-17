@@ -8,10 +8,10 @@
 import { SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient, LogQueryFields } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
-import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
+import { copyMissingMetrics } from './copy_missing_metrics';
 import { queryAllData } from './query_all_data';
 import { transformMetricsApiResponseToSnapshotResponse } from './transform_metrics_ui_response';
-import { copyMissingMetrics } from './copy_missing_metrics';
+import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
 
 export interface SourceOverrides {
   indexPattern: string;

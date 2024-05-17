@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 
-import { ErrorsPopover } from '../errors_popover';
 import * as i18n from '../../../translations';
 import type { ErrorSummary, IndexToCheck } from '../../../types';
+import { ErrorsPopover } from '../errors_popover';
 
 export const EMPTY_LAST_CHECKED_DATE = '--';
 

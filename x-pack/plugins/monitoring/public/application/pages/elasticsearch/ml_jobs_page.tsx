@@ -1,3 +1,6 @@
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +8,16 @@
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ElasticsearchTemplate } from './elasticsearch_template';
-import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ElasticsearchMLJobs } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { useTable } from '../../hooks/use_table';
 import type { MLJobs } from '../../../types';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { useTable } from '../../hooks/use_table';
+import { ComponentProps } from '../../route_init';
+import { ElasticsearchTemplate } from './elasticsearch_template';
 
 interface SetupModeProps {
   setupMode: any;

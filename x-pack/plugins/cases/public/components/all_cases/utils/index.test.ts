@@ -6,9 +6,9 @@
  */
 
 import {
-  isFlattenCustomField,
-  flattenCustomFieldKey,
   deflattenCustomFieldKey,
+  flattenCustomFieldKey,
+  isFlattenCustomField,
   stringToInteger,
   stringToIntegerWithDefault,
 } from '.';

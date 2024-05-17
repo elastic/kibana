@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { DEFAULT_MAX_RESULT_WINDOW, DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../common/constants';
+import { DEFAULT_MAX_INNER_RESULT_WINDOW, DEFAULT_MAX_RESULT_WINDOW } from '../../common/constants';
 
 export function getIndexPatternSettings(
   indicesSettingsResp: Record<string, string | number | boolean>

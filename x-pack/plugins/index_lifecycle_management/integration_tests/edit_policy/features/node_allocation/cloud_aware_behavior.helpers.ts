@@ -9,7 +9,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { TestBedConfig } from '@kbn/test-jest-helpers';
 
 import { AppServicesContext } from '../../../../public/types';
-import { createTogglePhaseAction, createNodeAllocationActions } from '../../../helpers';
+import { createNodeAllocationActions, createTogglePhaseAction } from '../../../helpers';
 import { initTestBed } from '../../init_test_bed';
 
 type SetupReturn = ReturnType<typeof setupCloudNodeAllocation>;

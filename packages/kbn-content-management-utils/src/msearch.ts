@@ -12,12 +12,12 @@ import { pick } from 'lodash';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 
 import type {
-  SavedObjectsFindResult,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 
-import type { ServicesDefinitionSet, SOWithMetadata, SOWithMetadataPartial } from './types';
+import type { SOWithMetadata, SOWithMetadataPartial, ServicesDefinitionSet } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;

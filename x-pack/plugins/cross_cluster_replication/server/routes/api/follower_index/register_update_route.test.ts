@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import { RequestHandler, kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 
 import { handleEsError } from '../../../shared_imports';
-import { mockRouteContext, mockLicense } from '../test_lib';
+import { mockLicense, mockRouteContext } from '../test_lib';
 import { registerUpdateRoute } from './register_update_route';
 
 const httpService = httpServiceMock.createSetupContract();

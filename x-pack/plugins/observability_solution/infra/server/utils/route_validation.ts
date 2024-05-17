@@ -5,15 +5,15 @@
  * 2.0.
  */
 import type {
+  RouteValidationError,
   RouteValidationFunction,
   RouteValidationResultFactory,
-  RouteValidationError,
 } from '@kbn/core/server';
-import { either, fold } from 'fp-ts/lib/Either';
-import get from 'lodash/get';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { either, fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
+import get from 'lodash/get';
 
 type RequestValidationResult<T> =
   | {
@@ -32,7 +32,7 @@ export const buildRouteValidationWithExcess =
       | GenericIntersectionC
       | rt.PartialType<rt.Props>
       | rt.ExactC<any>,
-    A = rt.TypeOf<T>
+    A = rt.TypeOf<T>,
   >(
     schema: T
   ): RouteValidationFunction<A> =>
@@ -56,7 +56,7 @@ export const excess = <
     | rt.InterfaceType<rt.Props>
     | GenericIntersectionC
     | rt.PartialType<rt.Props>
-    | rt.ExactC<any>
+    | rt.ExactC<any>,
 >(
   codec: C
 ): C => {

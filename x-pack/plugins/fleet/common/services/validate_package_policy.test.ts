@@ -8,14 +8,14 @@
 import { safeLoad } from 'js-yaml';
 
 import { installationStatuses } from '../constants';
-import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
+import type { NewPackagePolicy, PackageInfo, RegistryPolicyTemplate } from '../types';
 
+import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 import {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
 } from './validate_package_policy';
-import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
 describe('Fleet - validatePackagePolicy()', () => {
   describe('works for packages with single policy template (aka no integrations)', () => {

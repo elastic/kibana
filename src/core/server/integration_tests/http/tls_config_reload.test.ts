@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import supertest from 'supertest';
-import { duration } from 'moment';
-import { BehaviorSubject, of } from 'rxjs';
-import { KBN_CERT_PATH, KBN_KEY_PATH, ES_KEY_PATH, ES_CERT_PATH } from '@kbn/dev-utils';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import {
-  HttpServer,
   HttpConfig,
-  config as httpConfig,
+  HttpServer,
   cspConfig,
   externalUrlConfig,
+  config as httpConfig,
 } from '@kbn/core-http-server-internal';
-import { isServerTLS, flattenCertificateChain, fetchPeerCertificate } from './tls_utils';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { ES_CERT_PATH, ES_KEY_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import type { Logger } from '@kbn/logging';
+import { duration } from 'moment';
+import { BehaviorSubject, of } from 'rxjs';
+import supertest from 'supertest';
+import { fetchPeerCertificate, flattenCertificateChain, isServerTLS } from './tls_utils';
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});

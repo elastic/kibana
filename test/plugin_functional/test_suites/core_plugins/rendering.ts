@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
+import _ from 'lodash';
 
 import '@kbn/core-provider-plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';

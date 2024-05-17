@@ -40,9 +40,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Record<string, string | number | boolean | object | null | undefined>"
-            ],
+            "signature": ["Record<string, string | number | boolean | object | null | undefined>"],
             "path": "x-pack/packages/maps/vector_tile_utils/src/get_tile_url_params.ts",
             "deprecated": false,
             "trackAdoption": false,

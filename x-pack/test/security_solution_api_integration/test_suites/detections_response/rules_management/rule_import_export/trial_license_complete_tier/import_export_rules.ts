@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import expect from 'expect';
 
 import {
   getCreateExceptionListItemMinimalSchemaMock,
@@ -18,19 +18,19 @@ import {
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
-import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import {
+  createAlertsIndex,
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 
 // This test was meant to be more full flow, ensuring that
 // exported rules are able to be reimported as opposed to

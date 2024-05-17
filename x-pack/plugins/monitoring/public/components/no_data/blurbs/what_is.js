@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiTitle, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
 export const WhatIs = () => {
   return (

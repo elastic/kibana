@@ -41,9 +41,7 @@
             "tags": [],
             "label": "rules",
             "description": [],
-            "signature": [
-              "{ id: string; selector: string; }[]"
-            ],
+            "signature": ["{ id: string; selector: string; }[]"],
             "path": "packages/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -69,9 +67,7 @@
             "tags": [],
             "label": "reporter",
             "description": [],
-            "signature": [
-              "\"raw\" | \"v2\" | \"v1\" | \"rawEnv\" | \"no-passes\""
-            ],
+            "signature": ["\"raw\" | \"v2\" | \"v1\" | \"rawEnv\" | \"no-passes\""],
             "path": "packages/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -83,9 +79,7 @@
             "tags": [],
             "label": "runOnly",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-axe-config/index.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { search } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 import { SwitchParamEditor } from './switch';
 
 import { AggParamEditorProps } from '../agg_param_props';

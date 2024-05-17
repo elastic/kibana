@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import type { InfraMetadata } from '../../../../../../common/http_api';
-import { NOT_AVAILABLE_LABEL } from '../../../translations';
-import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
-import { ContentTabIds } from '../../../types';
 import { ExpandableContent } from '../../../components/expandable_content';
-import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
-import { SectionTitle } from '../../../components/section_title';
 import { Section } from '../../../components/section';
+import { SectionTitle } from '../../../components/section_title';
+import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import { NOT_AVAILABLE_LABEL } from '../../../translations';
+import { ContentTabIds } from '../../../types';
+import { MetadataHeader } from './metadata_header';
 
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;

@@ -1,3 +1,13 @@
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiPagination,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +15,6 @@
  * 2.0.
  */
 import React, { Suspense, lazy, useCallback, useMemo, useRef, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPagination,
-  EuiProgress,
-} from '@elastic/eui';
 import type { Alert, AlertsTableConfigurationRegistry } from '../../../../types';
 
 const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));

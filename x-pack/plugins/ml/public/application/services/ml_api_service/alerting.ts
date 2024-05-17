@@ -6,13 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   MlAnomalyDetectionAlertParams,
   PreviewResponse,
 } from '../../../../common/types/alerts';
+import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
 
 export const alertingApiProvider = (httpService: HttpService) => {
   return {

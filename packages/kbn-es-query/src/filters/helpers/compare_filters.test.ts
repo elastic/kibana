@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
 import {
   BooleanRelation,
+  FilterStateStore,
   buildCombinedFilter,
   buildEmptyFilter,
   buildQueryFilter,
-  FilterStateStore,
 } from '..';
 import { DataViewBase } from '../../..';
+import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {

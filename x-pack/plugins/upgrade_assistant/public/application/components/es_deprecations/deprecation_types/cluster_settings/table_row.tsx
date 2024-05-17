@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
-import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
-import { ClusterSettingsResolutionCell } from './resolution_table_cell';
+import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { RemoveClusterSettingsFlyout, RemoveClusterSettingsFlyoutProps } from './flyout';
+import { ClusterSettingsResolutionCell } from './resolution_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { EditorFrameSetup } from '../../types';
 import { transparentizePalettes } from './palette_config';
 

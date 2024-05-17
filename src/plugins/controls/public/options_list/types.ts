@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
-import { ControlOutput } from '../types';
 import {
-  OptionsListSuggestions,
   OptionsListEmbeddableInput,
+  OptionsListSuggestions,
 } from '../../common/options_list/types';
+import { ControlOutput } from '../types';
 
 export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;

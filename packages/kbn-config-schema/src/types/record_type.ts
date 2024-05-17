@@ -9,8 +9,8 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
+import { ExtendsDeepOptions, Type, TypeOptions } from './type';
 
 export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>>;
 

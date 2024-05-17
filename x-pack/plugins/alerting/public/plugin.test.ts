@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AlertingPublicPlugin, AlertingUIConfig } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createManagementSectionMock,
   managementPluginMock,
 } from '@kbn/management-plugin/public/mocks';
+import { AlertingPublicPlugin, AlertingUIConfig } from './plugin';
 
 jest.mock('./services/rule_api', () => ({
   loadRule: jest.fn(),

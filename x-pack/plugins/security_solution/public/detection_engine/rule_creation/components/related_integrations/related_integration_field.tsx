@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React, { useCallback, useMemo } from 'react';
-import { capitalize } from 'lodash';
-import semver from 'semver';
-import { css } from '@emotion/css';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiTextTruncate,
   EuiButtonIcon,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiTextTruncate,
 } from '@elastic/eui';
-import type { FieldHook } from '../../../../shared_imports';
+import { css } from '@emotion/css';
+import { capitalize } from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import semver from 'semver';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useIntegrations } from '../../../../detections/components/rules/related_integrations/use_integrations';
-import { IntegrationStatusBadge } from './integration_status_badge';
+import type { FieldHook } from '../../../../shared_imports';
 import { DEFAULT_RELATED_INTEGRATION } from './default_related_integration';
+import { IntegrationStatusBadge } from './integration_status_badge';
 import * as i18n from './translations';
 
 interface RelatedIntegrationItemFormProps {
@@ -189,8 +189,8 @@ function transformIntegrationToOption(
   const label = integration.is_enabled
     ? i18n.INTEGRATION_ENABLED(integrationTitle)
     : integration.is_installed
-    ? i18n.INTEGRATION_DISABLED(integrationTitle)
-    : integrationTitle;
+      ? i18n.INTEGRATION_DISABLED(integrationTitle)
+      : integrationTitle;
 
   return {
     key: getKey(integration.package_name, integration.integration_name),

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import React from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
 import { getIndexTemplateState } from '../data_stream_tab';
 import { TabStatus } from './tab_status';

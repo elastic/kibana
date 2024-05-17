@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   ExecuteConnectorRequestBody,

@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { Props, StylePropEditor } from '../style_prop_editor';
-import { DynamicLabelForm } from './dynamic_label_form';
-import { StaticLabelForm } from './static_label_form';
 import { LabelDynamicOptions, LabelStaticOptions } from '../../../../../../common/descriptor_types';
 import { DynamicTextProperty } from '../../properties/dynamic_text_property';
 import { StaticTextProperty } from '../../properties/static_text_property';
+import { Props, StylePropEditor } from '../style_prop_editor';
+import { DynamicLabelForm } from './dynamic_label_form';
+import { StaticLabelForm } from './static_label_form';
 
 type LabelEditorProps = Omit<Props<LabelStaticOptions, LabelDynamicOptions>, 'children'>;
 

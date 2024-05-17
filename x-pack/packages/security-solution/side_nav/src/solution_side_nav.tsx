@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiListGroup,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  useIsWithinBreakpoints,
-  useEuiTheme,
-  EuiListGroupItem,
   EuiHorizontalRule,
-  EuiSpacer,
-  EuiButtonIcon,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSpacer,
+  useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
-import partition from 'lodash/fp/partition';
-import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import classNames from 'classnames';
+import partition from 'lodash/fp/partition';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SolutionSideNavItemStyles } from './solution_side_nav.styles';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
-import { SolutionSideNavItemPosition } from './types';
-import type { SolutionSideNavItem, Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
-import { SolutionSideNavItemStyles } from './solution_side_nav.styles';
+import { SolutionSideNavItemPosition } from './types';
+import type { SolutionSideNavItem, Tracker } from './types';
 
 export const TOGGLE_PANEL_LABEL = i18n.translate('securitySolutionPackages.sideNav.togglePanel', {
   defaultMessage: 'Toggle panel nav',

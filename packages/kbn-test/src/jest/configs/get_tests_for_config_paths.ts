@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { readConfig } from 'jest-config';
-import { SearchSource } from 'jest';
-import Runtime from 'jest-runtime';
 import { asyncMapWithLimit } from '@kbn/std';
+import { SearchSource } from 'jest';
+import { readConfig } from 'jest-config';
+import Runtime from 'jest-runtime';
 
 const EMPTY_ARGV = {
   $0: '',

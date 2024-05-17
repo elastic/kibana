@@ -1,3 +1,4 @@
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +6,19 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import * as i18n from './translations';
-import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { SeverityLevelPanel } from '../severity_level_panel';
-import { AlertsByTypePanel } from '../alerts_by_type_panel';
-import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { AlertsByTypePanel } from '../alerts_by_type_panel';
+import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
+import { KpiPanel } from '../common/components';
 import type { AddFilterProps } from '../common/types';
+import { SeverityLevelPanel } from '../severity_level_panel';
+import * as i18n from './translations';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});

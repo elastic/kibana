@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -13,19 +12,20 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
+import { CustomRequestHandlerContext } from '@kbn/core/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
   TState extends RuleTypeState,
   TParams extends RuleTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {}
+  TAlertInstanceContext extends AlertInstanceContext = {},
 > = RuleType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export type AlertTypeExecutor<
   TState extends RuleTypeState,
   TParams extends RuleTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {}
+  TServices extends Record<string, any> = {},
 > = (
   options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
     services: TServices;
@@ -36,7 +36,7 @@ export type AlertTypeWithExecutor<
   TState extends RuleTypeState = {},
   TParams extends RuleTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
-  TServices extends Record<string, any> = {}
+  TServices extends Record<string, any> = {},
 > = Omit<
   RuleType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
@@ -50,7 +50,7 @@ export type AlertExecutorOptionsWithExtraServices<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  TExtraServices extends {} = never
+  TExtraServices extends {} = never,
 > = Omit<
   RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>,
   'services'

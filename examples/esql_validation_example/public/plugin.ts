@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { mount } from './mount';
 import image from './esql_validation_app.png';
+import { mount } from './mount';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
 
 export interface TopNavMenuItem {
   id: string;

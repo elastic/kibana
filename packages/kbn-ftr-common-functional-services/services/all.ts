@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EsArchiverProvider } from './es_archiver';
 import { EsProvider } from './es';
+import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryService } from './retry';
 

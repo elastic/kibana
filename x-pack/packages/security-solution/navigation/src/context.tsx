@@ -1,3 +1,4 @@
+import type { CoreStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, createContext } from 'react';
-import type { CoreStart } from '@kbn/core/public';
 
 const navigationContext = createContext<CoreStart | null>(null);
 

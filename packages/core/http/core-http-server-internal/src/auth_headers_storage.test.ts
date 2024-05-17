@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AuthHeadersStorage } from './auth_headers_storage';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { AuthHeadersStorage } from './auth_headers_storage';
 
 describe('AuthHeadersStorage', () => {
   describe('stores authorization headers', () => {

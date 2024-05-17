@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { TimelineModalHeader } from '.';
 import { render } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useCreateTimeline } from '../../../hooks/use_create_timeline';
+import React from 'react';
+import { TimelineModalHeader } from '.';
 import { useInspect } from '../../../../common/components/inspect/use_inspect';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
+import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { timelineActions } from '../../../store';
 
 jest.mock('../../../../common/containers/sourcerer');

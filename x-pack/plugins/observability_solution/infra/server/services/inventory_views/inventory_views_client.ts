@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import {
   Logger,
   SavedObject,
@@ -12,16 +13,15 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsUtils,
 } from '@kbn/core/server';
-import Boom from '@hapi/boom';
+import type {
+  CreateInventoryViewAttributesRequestPayload,
+  InventoryViewRequestQuery,
+} from '../../../common/http_api/latest';
 import {
   inventoryViewAttributesRT,
   staticInventoryViewAttributes,
   staticInventoryViewId,
 } from '../../../common/inventory_views';
-import type {
-  CreateInventoryViewAttributesRequestPayload,
-  InventoryViewRequestQuery,
-} from '../../../common/http_api/latest';
 import type { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { IInfraSources } from '../../lib/sources';

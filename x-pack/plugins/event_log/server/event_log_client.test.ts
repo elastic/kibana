@@ -6,13 +6,13 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { EventLogClient } from './event_log_client';
-import { EsContext } from './es';
-import { contextMock } from './es/context.mock';
+import { fromKueryExpression } from '@kbn/es-query';
 import { merge } from 'lodash';
 import moment from 'moment';
+import { EsContext } from './es';
 import { IClusterClientAdapter } from './es/cluster_client_adapter';
-import { fromKueryExpression } from '@kbn/es-query';
+import { contextMock } from './es/context.mock';
+import { EventLogClient } from './event_log_client';
 
 const expectedSavedObject = {
   id: 'saved-object-id',

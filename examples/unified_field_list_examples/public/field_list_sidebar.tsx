@@ -14,17 +14,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import { generateFilters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChildDragDropProvider, useDragDropContext } from '@kbn/dom-drag-drop';
 import {
-  UnifiedFieldListSidebarContainer,
-  type UnifiedFieldListSidebarContainerProps,
-  type UnifiedFieldListSidebarContainerApi,
   type AddFieldFilterHandler,
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
-import { type CoreStart } from '@kbn/core-lifecycle-browser';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { PLUGIN_ID } from '../common';
 import { type AppPluginStartDependencies } from './types';
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { Flyout } from './flyout';
-import { INSTRUCTION_STEP_ENABLE_METRICBEAT } from '../constants';
+import React from 'react';
 import {
+  APM_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
-  APM_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
 } from '../../../../common/constants';
+import { INSTRUCTION_STEP_ENABLE_METRICBEAT } from '../constants';
+import { Flyout } from './flyout';
 
 jest.mock('../../../legacy_shims', () => ({
   Legacy: {

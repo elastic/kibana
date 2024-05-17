@@ -6,10 +6,11 @@
  */
 
 import {
-  ActionConnector as RawActionConnector,
   ActionType,
+  ActionConnector as RawActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { apiService } from '../../../../utils/api_service';
+import { LocationMonitor } from '.';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   DynamicSettings,
   DynamicSettingsCodec,
@@ -18,8 +19,7 @@ import {
   LocationMonitorsResponse,
   LocationMonitorsType,
 } from '../../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { LocationMonitor } from '.';
+import { apiService } from '../../../../utils/api_service';
 
 interface SaveApiRequest {
   settings: DynamicSettings;

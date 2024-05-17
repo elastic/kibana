@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
+import { mockRulesTablePersistedState } from './__mocks__/mock_rules_table_persistent_state';
 import type {
   RulesTableStorageSavedState,
   RulesTableUrlSavedState,
 } from './rules_table_saved_state';
 import { RuleSource } from './rules_table_saved_state';
-import { mockRulesTablePersistedState } from './__mocks__/mock_rules_table_persistent_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 jest.mock('../../../../../common/lib/kibana');

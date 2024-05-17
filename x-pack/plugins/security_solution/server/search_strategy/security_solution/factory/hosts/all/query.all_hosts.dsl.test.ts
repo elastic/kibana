@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { expectedDsl, mockOptions } from './__mocks__';
 import { buildHostsQuery } from './query.all_hosts.dsl';
-import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildHostsQuery', () => {
   test('build query from options correctly', () => {

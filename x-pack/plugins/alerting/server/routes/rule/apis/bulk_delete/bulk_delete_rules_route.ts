@@ -6,17 +6,17 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import {
-  bulkDeleteRulesRequestBodySchemaV1,
   BulkDeleteRulesRequestBodyV1,
   BulkDeleteRulesResponseV1,
+  bulkDeleteRulesRequestBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/bulk_delete';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { Rule } from '../../../../application/rule/types';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
+import { transformRuleToRuleResponseV1 } from '../../transforms';
 
 export const bulkDeleteRulesRoute = ({
   router,

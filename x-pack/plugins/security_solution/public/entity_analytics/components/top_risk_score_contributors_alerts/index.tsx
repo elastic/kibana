@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { TableId } from '@kbn/securitysolution-data-table';
+import React, { useCallback, useMemo } from 'react';
 
 import { HeaderSection } from '../../../common/components/header_section';
 
-import * as i18n from './translations';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
-import { AlertsTableComponent } from '../../../detections/components/alerts_table';
-import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/inputs';
-import { useUserData } from '../../../detections/components/user_info';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { AlertsTableComponent } from '../../../detections/components/alerts_table';
+import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
+import { useUserData } from '../../../detections/components/user_info';
 import { RiskInformationButtonEmpty } from '../risk_information';
+import * as i18n from './translations';
 
 export interface TopRiskScoreContributorsAlertsProps {
   toggleStatus: boolean;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { singleLineScript } from './single_line_script';
 import { COMPARATORS } from '../../../constants';
+import { singleLineScript } from './single_line_script';
 const { BETWEEN } = COMPARATORS;
 /*
 watch.condition.script.inline

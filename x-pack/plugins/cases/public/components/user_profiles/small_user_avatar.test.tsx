@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { SmallUserAvatar } from './small_user_avatar';
+import React from 'react';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { SmallUserAvatar } from './small_user_avatar';
 
 describe('SmallUserAvatar', () => {
   it('renders an avatar with size small', () => {

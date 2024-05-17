@@ -9,8 +9,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType, MLErrorObject } from './types';
 import {
   isBoomError,
-  isErrorString,
   isErrorMessage,
+  isErrorString,
   isEsErrorBody,
   isMLResponseError,
 } from './types';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ObservabilityAlertsPaginationProvider } from './pagination';
-import { ObservabilityAlertsCommonProvider } from './common';
 import { ObservabilityAlertsAddToCaseProvider } from './add_to_case';
+import { ObservabilityAlertsCommonProvider } from './common';
+import { ObservabilityAlertsPaginationProvider } from './pagination';
 import { ObservabilityAlertsRulesProvider } from './rules_page';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';

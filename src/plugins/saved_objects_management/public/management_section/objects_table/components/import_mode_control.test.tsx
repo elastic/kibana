@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { mountWithIntl, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { ImportModeControl, ImportModeControlProps } from './import_mode_control';
 
 describe('ImportModeControl', () => {

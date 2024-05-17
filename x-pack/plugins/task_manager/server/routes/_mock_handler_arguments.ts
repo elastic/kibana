@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MethodKeysOf } from '@kbn/utility-types';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { identity } from 'lodash';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { MethodKeysOf } from '@kbn/utility-types';
+import { identity } from 'lodash';
 
 export function mockHandlerArguments(
   {}: {},

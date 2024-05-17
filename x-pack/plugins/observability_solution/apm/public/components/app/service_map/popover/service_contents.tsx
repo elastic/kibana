@@ -9,17 +9,17 @@
 
 import { EuiButton, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { NodeDataDefinition } from 'cytoscape';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import React from 'react';
 import type { ContentsProps } from '.';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { AnomalyDetection } from './anomaly_detection';
-import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { AnomalyDetection } from './anomaly_detection';
+import { StatsList } from './stats_list';
 
 type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 

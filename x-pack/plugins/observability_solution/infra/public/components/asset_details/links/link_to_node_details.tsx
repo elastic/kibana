@@ -1,3 +1,7 @@
+import { EuiButtonEmpty } from '@elastic/eui';
+import { parse } from '@kbn/datemath';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +9,6 @@
  * 2.0.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { parse } from '@kbn/datemath';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useNodeDetailsRedirect } from '../../../pages/link_to';
 
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';

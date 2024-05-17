@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
+import React, { memo } from 'react';
 
 interface CategoryViewerProps {
   category: string;

@@ -10,39 +10,39 @@ import {
   OKTA_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/public/timelines/components/side_panel/new_user_detail/constants';
 import {
-  expandFirstAlertHostFlyout,
-  expandFirstAlertUserFlyout,
-  selectAssetCriticalityLevel,
-  toggleAssetCriticalityModal,
-} from '../../tasks/asset_criticality/common';
-import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
-import { ALERTS_URL } from '../../urls/navigation';
-import { USER_PANEL_HEADER } from '../../screens/users/flyout_user_panel';
-import { waitForAlerts } from '../../tasks/alerts';
-import { HOST_PANEL_HEADER } from '../../screens/hosts/flyout_host_panel';
-import { RISK_INPUT_PANEL_HEADER, ASSET_CRITICALITY_BADGE } from '../../screens/flyout_risk_panel';
-import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
-import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
-import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
-import {
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL,
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
 } from '../../screens/asset_criticality/flyouts';
-import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
-import { mockFleetIntegrations } from '../../tasks/fleet_integrations';
-import {
-  expandManagedDataEntraPanel,
-  expandManagedDataOktaPanel,
-} from '../../tasks/users/flyout_user_panel';
+import { ASSET_CRITICALITY_BADGE, RISK_INPUT_PANEL_HEADER } from '../../screens/flyout_risk_panel';
+import { HOST_PANEL_HEADER } from '../../screens/hosts/flyout_host_panel';
 import {
   ASSET_TYPE_FIELD,
   ENTRA_DOCUMENT_TAB,
   OKTA_DOCUMENT_TAB,
 } from '../../screens/users/flyout_asset_panel';
+import { USER_PANEL_HEADER } from '../../screens/users/flyout_user_panel';
+import { waitForAlerts } from '../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
+import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
 import { enableAssetCriticality } from '../../tasks/api_calls/kibana_advanced_settings';
+import {
+  expandFirstAlertHostFlyout,
+  expandFirstAlertUserFlyout,
+  selectAssetCriticalityLevel,
+  toggleAssetCriticalityModal,
+} from '../../tasks/asset_criticality/common';
+import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
+import { mockFleetIntegrations } from '../../tasks/fleet_integrations';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
+import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
+import {
+  expandManagedDataEntraPanel,
+  expandManagedDataOktaPanel,
+} from '../../tasks/users/flyout_user_panel';
+import { ALERTS_URL } from '../../urls/navigation';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';

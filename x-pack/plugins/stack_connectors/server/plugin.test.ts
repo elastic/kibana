@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { StackConnectorsPlugin } from './plugin';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 describe('Stack Connectors Plugin', () => {
   describe('setup()', () => {

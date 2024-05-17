@@ -7,12 +7,12 @@
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import type { inputsModel } from '../../../common/store';
-import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 import { HeaderSection } from '../../../common/components/header_section';
+import type { inputsModel } from '../../../common/store';
+import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { RiskScoreEnableButton } from '../risk_score_onboarding/risk_score_enable_button';
+import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 import * as i18n from './translations';
 
 const EnableRiskScoreComponent = ({

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
+import { waitFor } from 'xstate/lib/waitFor';
 import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';

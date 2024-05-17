@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
+import sinon from 'sinon';
 import { getFunctionErrors } from '../../../i18n';
 import { emptyFilter } from './__fixtures__/test_filters';
 import { timefilter } from './timefilter';

@@ -9,8 +9,8 @@ import React, { useContext, useState, useEffect } from 'react';
 
 import type { GetFleetStatusResponse } from '../types';
 
-import { useStartServices } from './use_core';
 import { useConfig } from './use_config';
+import { useStartServices } from './use_core';
 import { useGetFleetStatusQuery } from './use_request';
 
 export interface FleetStatusProviderProps {

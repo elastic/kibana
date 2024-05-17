@@ -9,11 +9,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { settingsRoutesService } from '../../services';
 import type {
-  PutSettingsResponse,
-  PutSettingsRequest,
-  GetSettingsResponse,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
+  GetSettingsResponse,
+  PutSettingsRequest,
+  PutSettingsResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { CasesFindResponseUI } from '@kbn/cases-plugin/common';
 
-import { v4 as uuidv4 } from 'uuid';
 import type { CaseStatuses } from '@kbn/cases-components';
+import { v4 as uuidv4 } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';

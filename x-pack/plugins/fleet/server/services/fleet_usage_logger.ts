@@ -6,8 +6,8 @@
  */
 import type {
   ConcreteTaskInstance,
-  TaskManagerStartContract,
   TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { fetchAgentsUsage } from '../collectors/register';

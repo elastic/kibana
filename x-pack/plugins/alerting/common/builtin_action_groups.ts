@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RecoveredActionGroupId, ActionGroup } from '@kbn/alerting-types';
+import type { ActionGroup, RecoveredActionGroupId } from '@kbn/alerting-types';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 
 export type ReservedActionGroups<RecoveryActionGroupId extends string> =
@@ -14,7 +14,7 @@ export type ReservedActionGroups<RecoveryActionGroupId extends string> =
 
 export type WithoutReservedActionGroups<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > = ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds;
 
 export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(

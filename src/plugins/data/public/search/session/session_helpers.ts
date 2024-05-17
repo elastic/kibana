@@ -7,8 +7,8 @@
  */
 
 import { debounceTime, first, skipUntil } from 'rxjs';
-import { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
+import { ISessionService } from './session_service';
 
 /**
  * Options for {@link waitUntilNextSessionCompletes$}

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { CoreUsageStats } from '@kbn/core-usage-data-server';
+import { cloneDeep } from 'lodash';
 
 export const migrateTo7141 = (doc: SavedObjectUnsanitizedDoc<CoreUsageStats>) => {
   try {

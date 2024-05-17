@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Chart, Settings, BarSeries, LineSeries, Axis, DataGenerator } from '@elastic/charts';
+import { Axis, BarSeries, Chart, DataGenerator, LineSeries, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 const dg = new DataGenerator();
 const data1 = dg.generateGroupedSeries(20, 1);

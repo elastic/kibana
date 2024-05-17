@@ -8,10 +8,10 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import {
   CONNECTORS_INDEX,
+  CURRENT_CONNECTORS_JOB_INDEX,
   SyncJobType,
   SyncStatus,
   TriggerMethod,
-  CURRENT_CONNECTORS_JOB_INDEX,
 } from '@kbn/search-connectors';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';

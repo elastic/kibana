@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
-import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
+import expect from '@kbn/expect';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

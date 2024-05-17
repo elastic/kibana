@@ -8,12 +8,12 @@
 
 import { EuiModalFooter } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FileUpload } from '@kbn/shared-ux-file-upload';
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
-import { FileUpload } from '@kbn/shared-ux-file-upload';
 
-import type { Props as FilePickerProps } from '../file_picker';
 import { useFilePickerContext } from '../context';
+import type { Props as FilePickerProps } from '../file_picker';
 import { i18nTexts } from '../i18n_texts';
 import { Pagination } from './pagination';
 import { SelectButton, Props as SelectButtonProps } from './select_button';

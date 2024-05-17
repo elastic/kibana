@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { Maybe } from '@kbn/apm-plugin/typings/common';
+import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 
 export function roundNumber(num: Maybe<number>) {
   return isFiniteNumber(num) ? Number(num.toPrecision(4)) : null;

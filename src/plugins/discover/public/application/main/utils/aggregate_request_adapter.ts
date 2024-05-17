@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RequestAdapter, Request } from '@kbn/inspector-plugin/public';
+import { Request, RequestAdapter } from '@kbn/inspector-plugin/public';
 
 /**
  * A request adapter that aggregates multiple separate adapters into one to allow inspection

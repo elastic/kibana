@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SlackActionParams, SlackSecrets } from '../types';
+import { lazy } from 'react';
 import { PostMessageParams } from '../../../common/slack_api/types';
+import { SlackActionParams, SlackSecrets } from '../types';
 
 export const subtype = [
   {

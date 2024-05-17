@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { PropsWithChildren } from 'react';
 import { EuiPage, EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
+import React, { PropsWithChildren } from 'react';
 
 export interface ExampleLink {
   title: string;

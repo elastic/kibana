@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React from 'react';
+import { PingError } from '../../../../../../common/runtime_types';
+import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/url_params/stringify_url_params';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
-import { useGetUrlParams } from '../../../../hooks';
-import { PingError } from '../../../../../../common/runtime_types';
 
 interface MostRecentErrorProps {
   /**

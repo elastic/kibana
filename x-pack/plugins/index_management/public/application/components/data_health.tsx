@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiHealth } from '@elastic/eui';
+import React from 'react';
 import { Health } from '../../../common/types';
 
 interface Props {

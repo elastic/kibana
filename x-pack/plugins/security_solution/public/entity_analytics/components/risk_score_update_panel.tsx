@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiCallOut, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiCallOut, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import * as i18n from '../translations';
-import { SecuritySolutionLinkButton } from '../../common/components/links';
 import { SecurityPageName } from '../../../common/constants';
+import { SecuritySolutionLinkButton } from '../../common/components/links';
+import * as i18n from '../translations';
 
 export const RiskScoreUpdatePanel = () => {
   return (

@@ -1,3 +1,5 @@
+import { renderHook } from '@testing-library/react-hooks';
+import { useIsFieldInIndexPattern } from '.';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsFieldInIndexPattern } from '.';
-import { renderHook } from '@testing-library/react-hooks';
 import { getRequiredMapsFields } from '../../network/components/embeddables/map_config';
 
 jest.mock('../../../common/lib/kibana');

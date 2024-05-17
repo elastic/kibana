@@ -13,7 +13,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, TimeRange, type AggregateQuery, type Query } from '@kbn/es-query';
+import { type AggregateQuery, Filter, type Query, TimeRange } from '@kbn/es-query';
 
 import { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';

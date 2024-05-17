@@ -5,20 +5,20 @@
  * 2.0.
  */
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import {
-  generateFilterDSL,
-  hasFilters,
-  statusCheckAlertFactory,
-  getStatusMessage,
-  getUniqueIdsByLoc,
-  getInstanceId,
-} from './status_check';
-import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import moment from 'moment';
 import { makePing } from '../../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import {
+  generateFilterDSL,
+  getInstanceId,
+  getStatusMessage,
+  getUniqueIdsByLoc,
+  hasFilters,
+  statusCheckAlertFactory,
+} from './status_check';
+import { bootstrapDependencies, createRuleTypeMocks } from './test_utils';
 import { DefaultUptimeAlertInstance } from './types';
-import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import moment from 'moment';
 
 const mockMonitors = [
   {

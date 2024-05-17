@@ -7,8 +7,8 @@
  */
 
 import * as t from 'io-ts';
-import { createComment } from '../create_comment';
 import { comment } from '../comment';
+import { createComment } from '../create_comment';
 
 export const importComment = t.union([comment, createComment]);
 

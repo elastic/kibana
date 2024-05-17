@@ -1,3 +1,5 @@
+import * as links from '../links';
+import type { NavigationLink } from '../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { getKibanaLinkProps } from './utils';
-import * as links from '../links';
-import type { NavigationLink } from '../types';
 
 const item: NavigationLink = {
   id: 'internal-id',

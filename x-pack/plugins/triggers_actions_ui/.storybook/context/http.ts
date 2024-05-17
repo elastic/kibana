@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { DecoratorFn } from '@storybook/react';
+import type { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core/public';
 import { action } from '@storybook/addon-actions';
-import type { HttpStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
+import { DecoratorFn } from '@storybook/react';
+import { v4 as uuidv4 } from 'uuid';
 import {
-  mockLogResponse,
   getMockLogResponse,
+  mockLogResponse,
 } from '../../public/application/sections/rule_details/components/test_helpers';
 
 const getMockRule = () => {

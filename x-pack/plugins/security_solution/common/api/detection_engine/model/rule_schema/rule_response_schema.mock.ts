@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../constants';
+import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 import type {
   EqlRule,
   EsqlRule,
@@ -15,7 +16,6 @@ import type {
   SharedResponseProps,
   ThreatMatchRule,
 } from './rule_schemas.gen';
-import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

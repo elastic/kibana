@@ -7,24 +7,24 @@
  */
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
-import { loadAndResolveDataView } from './resolve_data_view';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
-import { DiscoverDataStateContainer } from '../discover_data_state_container';
-import { cleanupUrlState } from './cleanup_url_state';
-import { getValidFilters } from '../../../../utils/get_valid_filters';
-import { DiscoverStateContainer, LoadParams } from '../discover_state';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/add_log';
-import { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
+import { getValidFilters } from '../../../../utils/get_valid_filters';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   getInitialState,
 } from '../discover_app_state_container';
+import { DiscoverDataStateContainer } from '../discover_data_state_container';
 import { DiscoverGlobalStateContainer } from '../discover_global_state_container';
-import { DiscoverServices } from '../../../../build_services';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
+import { DiscoverStateContainer, LoadParams } from '../discover_state';
+import { cleanupUrlState } from './cleanup_url_state';
+import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
+import { loadAndResolveDataView } from './resolve_data_view';
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;

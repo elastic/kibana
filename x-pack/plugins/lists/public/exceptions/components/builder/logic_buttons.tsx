@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';

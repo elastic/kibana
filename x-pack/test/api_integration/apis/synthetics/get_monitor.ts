@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import moment from 'moment';
+import expect from '@kbn/expect';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import expect from '@kbn/expect';
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { omit } from 'lodash';
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
 import { LOCAL_LOCATION } from './get_filters';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('getSyntheticsMonitors', function () {

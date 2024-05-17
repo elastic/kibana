@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 import { isEqual } from 'lodash';
 
 import {
-  flashAPIErrors,
-  setErrorMessage,
-  flashSuccessToast,
   clearFlashMessages,
+  flashAPIErrors,
+  flashSuccessToast,
+  setErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaType, IndexJob } from '../../../shared/schema/types';
+import { IndexJob, Schema, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { ADD_SCHEMA_ERROR, ADD_SCHEMA_SUCCESS, UPDATE_SCHEMA_SUCCESS } from './constants';
-import { SchemaBaseLogic, SchemaBaseValues, SchemaBaseActions } from './schema_base_logic';
+import { SchemaBaseActions, SchemaBaseLogic, SchemaBaseValues } from './schema_base_logic';
 import { SchemaApiResponse } from './types';
 
 interface SchemaValues extends SchemaBaseValues {

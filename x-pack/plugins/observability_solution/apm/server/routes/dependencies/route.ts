@@ -17,23 +17,23 @@ import {
 } from './get_dependency_latency_distribution';
 import { getErrorRateChartsForDependency } from './get_error_rate_charts_for_dependency';
 import {
-  getLatencyChartsForDependency,
   LatencyChartsDependencyResponse,
+  getLatencyChartsForDependency,
 } from './get_latency_charts_for_dependency';
 import {
-  getMetadataForDependency,
   MetadataForDependencyResponse,
+  getMetadataForDependency,
 } from './get_metadata_for_dependency';
 import {
-  getThroughputChartsForDependency,
   ThroughputChartsForDependencyResponse,
+  getThroughputChartsForDependency,
 } from './get_throughput_charts_for_dependency';
-import { getTopDependencies, TopDependenciesResponse } from './get_top_dependencies';
+import { TopDependenciesResponse, getTopDependencies } from './get_top_dependencies';
 import { DependencyOperation, getTopDependencyOperations } from './get_top_dependency_operations';
 import { DependencySpan, getTopDependencySpans } from './get_top_dependency_spans';
 import {
-  getUpstreamServicesForDependency,
   UpstreamServicesForDependencyResponse,
+  getUpstreamServicesForDependency,
 } from './get_upstream_services_for_dependency';
 
 const topDependenciesRoute = createApmServerRoute({

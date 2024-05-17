@@ -10,31 +10,31 @@ import React, { Component } from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageBody,
   EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { ResultsLinks } from '../../../common/components/results_links';
-import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
-import { ImportProgress, IMPORT_STATUS } from '../import_progress';
-import { ImportErrors } from '../import_errors';
-import { ImportSummary } from '../import_summary';
-import { ImportSettings } from '../import_settings';
-import { DocCountChart } from '../doc_count_chart';
 import {
-  addCombinedFieldsToPipeline,
   addCombinedFieldsToMappings,
+  addCombinedFieldsToPipeline,
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
+import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
+import { ResultsLinks } from '../../../common/components/results_links';
+import { DocCountChart } from '../doc_count_chart';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
+import { ImportErrors } from '../import_errors';
+import { IMPORT_STATUS, ImportProgress } from '../import_progress';
+import { ImportSettings } from '../import_settings';
+import { ImportSummary } from '../import_summary';
 
 const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };

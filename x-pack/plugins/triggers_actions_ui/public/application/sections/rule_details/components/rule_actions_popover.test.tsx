@@ -1,3 +1,4 @@
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +7,8 @@
  */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
-import { RuleActionsPopover } from './rule_actions_popover';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Rule } from '../../../..';
+import { RuleActionsPopover } from './rule_actions_popover';
 
 describe('rule_actions_popover', () => {
   const onDeleteMock = jest.fn();

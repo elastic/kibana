@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect } from 'react';
 
-import { AggParamType, IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
-import { useSubAggParamsHandlers } from './utils';
+import { AggGroupNames, AggParamType, IAggConfig } from '@kbn/data-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
+import { useSubAggParamsHandlers } from './utils';
 
 function SubAggParamEditor({
   agg,

@@ -13,22 +13,22 @@ import { Location } from 'history';
 import { useActions } from 'kea';
 
 import {
+  EuiCard,
   EuiEmptyPrompt,
-  EuiText,
-  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiImage,
   EuiLink,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiIcon,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiCardTo } from '../../../shared/react_router_helpers';
-import { INDEXING_DOCS_URL, ENGINE_CRAWLER_PATH } from '../../routes';
+import { ENGINE_CRAWLER_PATH, INDEXING_DOCS_URL } from '../../routes';
 import { generateEnginePath } from '../engine';
 
 import illustration from './illustration.svg';

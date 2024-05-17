@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
-import { NetworkDetails } from './details';
-import { Network } from './network';
-import { getNetworkRoutePath } from './navigation';
-import { NetworkRouteType } from './navigation/types';
-import { MlNetworkConditionalContainer } from '../../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { NETWORK_PATH } from '../../../../common/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+import { MlNetworkConditionalContainer } from '../../../common/components/ml/conditional_links/ml_network_conditional_container';
 import {
   FLOW_TARGET_PARAM,
   NETWORK_DETAILS_PAGE_PATH,
   NETWORK_DETAILS_TAB_PATH,
 } from './constants';
+import { NetworkDetails } from './details';
+import { getNetworkRoutePath } from './navigation';
+import { NetworkRouteType } from './navigation/types';
+import { Network } from './network';
 
 const getPathWithFlowType = (detailName: string, flowTarget?: FlowTargetSourceDest) =>
   `${NETWORK_PATH}/ip/${detailName}/${flowTarget || FlowTargetSourceDest.source}/${

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
-import { i18n } from '@kbn/i18n';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
-import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
 
+import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
-import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import { createStaticDataView } from '../services/rest/data_view';
-import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
+import { useKibanaServices } from '../hooks/use_kibana_services';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
+import { createStaticDataView } from '../services/rest/data_view';
 
 export type BreadcrumbTitle<T = {}> =
   | string

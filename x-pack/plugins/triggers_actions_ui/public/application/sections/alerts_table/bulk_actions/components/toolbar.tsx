@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   ALERT_CASE_IDS,
@@ -16,14 +15,15 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
+import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 import {
   Alerts,
   BulkActionsPanelConfig,
   BulkActionsVerbs,
   RowSelection,
 } from '../../../../../types';
-import * as i18n from '../translations';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';
+import * as i18n from '../translations';
 
 interface BulkActionsProps {
   totalItems: number;

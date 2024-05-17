@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiTextColor, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 
 import { SchemaType } from '../../../../shared/schema/types';
 

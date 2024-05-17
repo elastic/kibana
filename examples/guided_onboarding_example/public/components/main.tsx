@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
 import {
   EuiButton,
   EuiFieldText,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSelect,
+  EuiSelectOption,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSelectOption,
-  EuiFlexGrid,
 } from '@elastic/eui';
-import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
+import { CoreStart } from '@kbn/core/public';
+import type { GuideId, GuideState, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 interface MainProps {
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -92,9 +92,8 @@ export const Main = (props: MainProps) => {
       return;
     }
 
-    const selectedGuideConfig = await guidedOnboarding?.guidedOnboardingApi?.getGuideConfig(
-      selectedGuide
-    );
+    const selectedGuideConfig =
+      await guidedOnboarding?.guidedOnboardingApi?.getGuideConfig(selectedGuide);
 
     if (!selectedGuideConfig) {
       return;

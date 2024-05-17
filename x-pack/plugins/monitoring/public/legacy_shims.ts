@@ -6,26 +6,26 @@
  */
 
 import {
-  CoreStart,
-  HttpSetup,
-  IUiSettingsClient,
   AppMountParameters,
-  NotificationsStart,
   ApplicationStart,
-  DocLinksStart,
   ChromeStart,
+  CoreStart,
+  DocLinksStart,
+  HttpSetup,
   I18nStart,
+  IUiSettingsClient,
+  NotificationsStart,
 } from '@kbn/core/public';
-import { Observable } from 'rxjs';
 import { HttpRequestInit } from '@kbn/core/public';
+import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { Observable } from 'rxjs';
 import {
-  MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
+  MonitoringStartPluginDependencies,
 } from './types';
 
 interface BreadcrumbItem {

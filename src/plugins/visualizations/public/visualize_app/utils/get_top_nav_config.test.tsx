@@ -1,3 +1,6 @@
+import { Capabilities } from '@kbn/core/public';
+import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,16 +9,13 @@
  * Side Public License, v 1.
  */
 import { Observable } from 'rxjs';
-import { Capabilities } from '@kbn/core/public';
-import { showPublicUrlSwitch, getTopNavConfig, TopNavConfigParams } from './get_top_nav_config';
 import type {
-  VisualizeEditorVisInstance,
   VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
   VisualizeServices,
 } from '../types';
+import { TopNavConfigParams, getTopNavConfig, showPublicUrlSwitch } from './get_top_nav_config';
 import { createVisualizeServicesMock } from './mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import { visualizeAppStateStub } from './stubs';
 
 describe('showPublicUrlSwitch', () => {

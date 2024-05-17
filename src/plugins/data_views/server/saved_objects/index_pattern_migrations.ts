@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { flow, omit } from 'lodash';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
+import { flow, omit } from 'lodash';
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<
   { type?: string; typeMeta?: string },
@@ -21,33 +21,31 @@ const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<
   },
 });
 
-const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<
-  { fields?: string },
-  unknown
-> = (doc) => {
-  if (!doc.attributes.fields) return doc;
+const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<{ fields?: string }, unknown> =
+  (doc) => {
+    if (!doc.attributes.fields) return doc;
 
-  const fieldsString = doc.attributes.fields;
-  const fields = JSON.parse(fieldsString) as Array<{ subType?: string; parent?: string }>;
-  const migratedFields = fields.map((field) => {
-    if (field.subType === 'multi') {
-      return {
-        ...omit(field, 'parent'),
-        subType: { multi: { parent: field.parent } },
-      };
-    }
+    const fieldsString = doc.attributes.fields;
+    const fields = JSON.parse(fieldsString) as Array<{ subType?: string; parent?: string }>;
+    const migratedFields = fields.map((field) => {
+      if (field.subType === 'multi') {
+        return {
+          ...omit(field, 'parent'),
+          subType: { multi: { parent: field.parent } },
+        };
+      }
 
-    return field;
-  });
+      return field;
+    });
 
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      fields: JSON.stringify(migratedFields),
-    },
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        fields: JSON.stringify(migratedFields),
+      },
+    };
   };
-};
 
 const addAllowNoIndex: SavedObjectMigrationFn<{}, unknown> = (doc) => ({
   ...doc,

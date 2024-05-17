@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import {
   EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME,
   getSavedObjectReferenceForExceptionsList,
 } from '.';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 
 describe('get_saved_object_reference_for_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof getSavedObjectReferenceForExceptionsList>;

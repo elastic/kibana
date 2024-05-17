@@ -8,13 +8,13 @@
 
 import React from 'react';
 import * as Rx from 'rxjs';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 export const withEmbeddableSubscription = <
   I extends EmbeddableInput,
   O extends EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  ExtraProps = {}
+  ExtraProps = {},
 >(
   WrappedComponent: React.ComponentType<{ input: I; output: O; embeddable: E } & ExtraProps>
 ): React.ComponentType<{ embeddable: E } & ExtraProps> =>

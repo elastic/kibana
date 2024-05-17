@@ -7,8 +7,8 @@
  */
 
 import { copyToClipboard } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ToastsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { ValueToStringConverter } from '../types';
 import { convertNameToString } from './convert_value_to_string';
 

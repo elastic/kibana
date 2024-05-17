@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -13,16 +12,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiToolTip,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { FieldHook } from '../../../../shared_imports';
-import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { HelpText } from './help_text';
 
 import * as i18n from './translations';

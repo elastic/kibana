@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { monaco } from '@kbn/monaco';
 import React, { useEffect, KeyboardEventHandler } from 'react';
 import { type MonacoEditorProps } from 'react-monaco-editor';
-import { monaco } from '@kbn/monaco';
 
 function createEditorInstance() {
   const keyDownListeners: Array<(e?: unknown) => void> = [];

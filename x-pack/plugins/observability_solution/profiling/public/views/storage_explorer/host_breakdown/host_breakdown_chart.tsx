@@ -8,14 +8,14 @@ import {
   AreaSeries,
   Axis,
   Chart,
-  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
+  niceTimeFormatter,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { StorageExplorerHostDetailsTimeseries } from '../../../../common/storage_explorer';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../../hooks/use_profiling_charts_theme';

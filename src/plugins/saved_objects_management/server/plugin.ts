@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Subject } from 'rxjs';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
-import { SavedObjectsManagement } from './services';
-import { registerRoutes } from './routes';
+import { Subject, firstValueFrom } from 'rxjs';
 import { capabilitiesProvider } from './capabilities_provider';
+import { registerRoutes } from './routes';
+import { SavedObjectsManagement } from './services';
+import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 
 export class SavedObjectsManagementPlugin
   implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}>

@@ -1,3 +1,7 @@
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
+import type { IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +9,12 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import type { IRouter, RouteMethod, RequestHandler, KibanaRequest } from '@kbn/core/server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { RouterMock } from '@kbn/core-http-router-server-mocks';
-import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 
-import { requestMock } from './request';
-import { responseMock as responseFactoryMock } from './response';
-import { requestContextMock } from './request_context';
-import { responseAdapter } from './test_adapters';
 import { INTERNAL_API_VERSION } from '../../common/constants';
+import { requestMock } from './request';
+import { requestContextMock } from './request_context';
+import { responseMock as responseFactoryMock } from './response';
+import { responseAdapter } from './test_adapters';
 
 interface Route {
   config: AddVersionOpts<unknown, unknown, unknown>;

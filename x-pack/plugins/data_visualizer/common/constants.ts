@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
 
 export const APP_ID = 'data_visualizer';
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 import moment from 'moment';
 
 const RulesSchema = schema.object({

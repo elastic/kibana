@@ -7,8 +7,8 @@
  */
 
 import { LogMeta } from '@kbn/logging';
-import { GlobalContext } from './types';
 import { mergeGlobalContext } from './merge_global_context';
+import { GlobalContext } from './types';
 
 describe('mergeGlobalContext', () => {
   test('inserts global meta in entry meta', () => {

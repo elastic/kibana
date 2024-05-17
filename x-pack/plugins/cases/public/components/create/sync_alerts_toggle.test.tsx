@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SyncAlertsToggle } from './sync_alerts_toggle';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FormProps } from './schema';
 import { schema } from './schema';
+import { SyncAlertsToggle } from './sync_alerts_toggle';
 
 describe('SyncAlertsToggle', () => {
   let globalForm: FormHook;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getSavedObjectReference } from '.';
 
 describe('get_saved_object_reference', () => {

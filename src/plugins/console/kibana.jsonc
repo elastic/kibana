@@ -6,21 +6,9 @@
     "id": "console",
     "server": true,
     "browser": true,
-    "configPath": [
-      "console"
-    ],
-    "requiredPlugins": [
-      "devTools",
-      "share"
-    ],
-    "optionalPlugins": [
-      "usageCollection",
-      "home",
-      "cloud"
-    ],
-    "requiredBundles": [
-      "esUiShared",
-      "kibanaUtils"
-    ]
+    "configPath": ["console"],
+    "requiredPlugins": ["devTools", "share"],
+    "optionalPlugins": ["usageCollection", "home", "cloud"],
+    "requiredBundles": ["esUiShared", "kibanaUtils"]
   }
 }

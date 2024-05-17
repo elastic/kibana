@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { UseField, TextAreaField } from '../../../shared_imports';
+import { TextAreaField, UseField } from '../../../shared_imports';
 
 export const CustomDescriptionField = () => {
   return <UseField path="customDescription" component={TextAreaField} />;

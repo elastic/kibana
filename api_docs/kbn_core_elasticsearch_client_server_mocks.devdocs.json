@@ -92,9 +92,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "Awaited<T>"
-                ],
+                "signature": ["Awaited<T>"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -145,9 +143,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "Awaited<T>"
-                ],
+                "signature": ["Awaited<T>"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5020,9 +5016,7 @@
                 "tags": [],
                 "label": "res",
                 "description": [],
-                "signature": [
-                  "Promise<unknown> | undefined"
-                ],
+                "signature": ["Promise<unknown> | undefined"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5061,9 +5055,7 @@
                 "tags": [],
                 "label": "res",
                 "description": [],
-                "signature": [
-                  "Promise<unknown> | undefined"
-                ],
+                "signature": ["Promise<unknown> | undefined"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5094,9 +5086,7 @@
                 "tags": [],
                 "label": "body",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5108,9 +5098,7 @@
                 "tags": [],
                 "label": "__1",
                 "description": [],
-                "signature": [
-                  "{ statusCode?: number | undefined; }"
-                ],
+                "signature": ["{ statusCode?: number | undefined; }"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5122,9 +5110,7 @@
                 "tags": [],
                 "label": "headers",
                 "description": [],
-                "signature": [
-                  "{ [x: string]: string | string[]; }"
-                ],
+                "signature": ["{ [x: string]: string | string[]; }"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5138,9 +5124,7 @@
             "tags": [],
             "label": "createErrorTransportRequestPromise",
             "description": [],
-            "signature": [
-              "(err: any) => Promise<never>"
-            ],
+            "signature": ["(err: any) => Promise<never>"],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5153,9 +5137,7 @@
                 "tags": [],
                 "label": "err",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false

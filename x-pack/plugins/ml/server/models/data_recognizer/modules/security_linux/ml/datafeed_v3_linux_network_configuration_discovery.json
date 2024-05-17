@@ -1,8 +1,6 @@
 {
   "job_id": "JOB_ID",
-  "indices": [
-    "INDEX_PATTERN_NAME"
-  ],
+  "indices": ["INDEX_PATTERN_NAME"],
   "max_empty_searches": 10,
   "query": {
     "bool": {
@@ -33,7 +31,7 @@
                   }
                 }
               },
-               {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "redhat",
@@ -41,7 +39,7 @@
                   }
                 }
               },
-                 {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "suse",
@@ -49,7 +47,7 @@
                   }
                 }
               },
-               {
+              {
                 "match": {
                   "host.os.family": {
                     "query": "ubuntu",

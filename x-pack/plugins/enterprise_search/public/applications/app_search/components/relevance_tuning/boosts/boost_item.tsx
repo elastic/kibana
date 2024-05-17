@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexItem, EuiAccordion, EuiFlexGroup, EuiHideFor } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 
 import { BoostIcon, ValueBadge } from '../components';
 import { BOOST_TYPE_TO_DISPLAY_MAP } from '../constants';

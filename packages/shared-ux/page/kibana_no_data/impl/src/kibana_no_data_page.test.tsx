@@ -10,10 +10,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
-import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
+import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
+import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { KibanaNoDataPage } from './kibana_no_data_page';
 import { KibanaNoDataPageProvider } from './services';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { Plugin, PluginSetup, PluginStart } from './plugin';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { SIGNALS_INDEX_KEY } from '../common/constants';
 import type { ConfigSchema, ConfigType } from './config';
 import { configSchema } from './config';
-import { SIGNALS_INDEX_KEY } from '../common/constants';
+import type { Plugin, PluginSetup, PluginStart } from './plugin';
 import { AppClient } from './types';
 
 export const plugin = async (context: PluginInitializerContext) => {

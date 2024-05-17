@@ -1,3 +1,4 @@
+import { kibanaResponseFactory } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import * as t from 'io-ts';
-import { kibanaResponseFactory } from '@kbn/core/server';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from './typings';

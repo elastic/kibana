@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
+import React, { Component } from 'react';
 
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
-import { CalendarsListHeader } from './header';
-import { CalendarsListTable } from './table';
-import { ml } from '../../../services/ml_api_service';
-import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
+import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
+import { ml } from '../../../services/ml_api_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { deleteCalendars } from './delete_calendars';
+import { CalendarsListHeader } from './header';
+import { CalendarsListTable } from './table';
 
 export class CalendarsListUI extends Component {
   static propTypes = {

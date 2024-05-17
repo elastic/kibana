@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
+import { i18n as i18nLib } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError, take, timeout } from 'rxjs';
-import { i18n as i18nLib } from '@kbn/i18n';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { HttpAuth, KibanaRequest } from '@kbn/core-http-server';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import {
-  type UserProvidedValues,
   type DarkModeValue,
+  type UserProvidedValues,
   parseDarkModeValue,
 } from '@kbn/core-ui-settings-common';
-import { Template } from './views';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { bootstrapRendererFactory, registerBootstrapRoute } from './bootstrap';
+import { filterUiPlugins } from './filter_ui_plugins';
+import type { InternalRenderingRequestHandlerContext } from './internal_types';
+import {
+  getBrowserLoggingConfig,
+  getCommonStylesheetPaths,
+  getScriptPaths,
+  getSettingValue,
+  getThemeStylesheetPaths,
+} from './render_utils';
 import {
   IRenderOptions,
-  RenderingPrebootDeps,
-  RenderingSetupDeps,
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingMetadata,
+  RenderingPrebootDeps,
+  RenderingSetupDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import {
-  getSettingValue,
-  getCommonStylesheetPaths,
-  getThemeStylesheetPaths,
-  getScriptPaths,
-  getBrowserLoggingConfig,
-} from './render_utils';
-import { filterUiPlugins } from './filter_ui_plugins';
-import type { InternalRenderingRequestHandlerContext } from './internal_types';
+import { Template } from './views';
 
 type RenderOptions =
   | RenderingSetupDeps

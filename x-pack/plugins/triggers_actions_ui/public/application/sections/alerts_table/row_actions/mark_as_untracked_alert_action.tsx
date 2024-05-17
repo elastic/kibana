@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import type { AlertActionsProps } from '../../../../types';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useBulkUntrackAlerts } from '../../../..';
+import type { AlertActionsProps } from '../../../../types';
 
 /**
  * Alerts table row action to mark the selected alert as untracked

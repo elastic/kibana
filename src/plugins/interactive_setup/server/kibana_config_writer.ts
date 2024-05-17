@@ -8,9 +8,9 @@
 
 import { X509Certificate } from 'crypto';
 import { constants } from 'fs';
+import path from 'path';
 import fs from 'fs/promises';
 import yaml from 'js-yaml';
-import path from 'path';
 
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';

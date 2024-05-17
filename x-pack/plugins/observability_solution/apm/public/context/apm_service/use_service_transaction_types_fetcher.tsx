@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useFetcher } from '../../hooks/use_fetcher';
-import { RollupInterval } from '../../../common/rollup';
 import { ApmTransactionDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
+import { useFetcher } from '../../hooks/use_fetcher';
 
 const INITIAL_DATA = { transactionTypes: [] };
 

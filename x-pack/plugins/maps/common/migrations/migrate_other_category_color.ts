@@ -7,12 +7,12 @@
 
 import _ from 'lodash';
 import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
+import type { MapAttributes } from '../content_management';
 import {
   ColorStylePropertyDescriptor,
   LayerDescriptor,
   VectorStyleDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
 
 const COLOR_STYLES = [
   VECTOR_STYLES.FILL_COLOR,

@@ -9,24 +9,24 @@ import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HostUncommonProcessesRequestOptionsInput } from '../../../../../common/api/search_strategy';
-import type { inputsModel, State } from '../../../../common/store';
+import type { State, inputsModel } from '../../../../common/store';
 
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
-import { createFilter } from '../../../../common/containers/helpers';
-import type { hostsModel } from '../../store';
-import { hostsSelectors } from '../../store';
 import type {
-  SortField,
-  PageInfoPaginated,
   HostsUncommonProcessesEdges,
+  PageInfoPaginated,
+  SortField,
 } from '../../../../../common/search_strategy';
 import { HostsQueries } from '../../../../../common/search_strategy';
+import { createFilter } from '../../../../common/containers/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import type { hostsModel } from '../../store';
+import { hostsSelectors } from '../../store';
 
-import * as i18n from './translations';
 import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { InspectResponse } from '../../../../types';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import type { InspectResponse } from '../../../../types';
+import * as i18n from './translations';
 
 export const ID = 'hostsUncommonProcessesQuery';
 

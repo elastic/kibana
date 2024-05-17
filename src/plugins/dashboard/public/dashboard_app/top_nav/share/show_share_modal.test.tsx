@@ -7,11 +7,11 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
+import { DashboardContainerInput, convertPanelMapToSavedPanels } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
-import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
 
 import { pluginServices } from '../../../services/plugin_services';
-import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
+import { ShowShareModal, ShowShareModalProps, showPublicUrlSwitch } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {

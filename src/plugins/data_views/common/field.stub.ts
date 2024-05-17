@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, DataViewField } from '.';
+import { DataViewField, FieldSpec } from '.';
 
 export const createIndexPatternFieldStub = ({ spec }: { spec: FieldSpec }): DataViewField => {
   return new DataViewField(spec);

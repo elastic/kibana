@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { UserActionActions } from '../../../common/types/domain';
-import { elasticUser, getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
+import { elasticUser, getUserAction } from '../../containers/mock';
 import { createAssigneesUserActionBuilder, shouldAddAnd, shouldAddComma } from './assignees';
 import { getMockBuilderArgs } from './mock';
 

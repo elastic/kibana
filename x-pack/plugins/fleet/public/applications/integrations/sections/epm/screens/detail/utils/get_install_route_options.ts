@@ -1,3 +1,4 @@
+import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
-import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
 // List of packages that shouldn't use the multi-step onboarding UI because they use custom policy interfaces
 // or are otherwise not accounted for by verbiage and elements throughout the multi-step UI

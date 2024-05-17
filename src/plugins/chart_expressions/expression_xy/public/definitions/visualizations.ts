@@ -7,16 +7,16 @@
  */
 
 import {
+  IconChartArea,
+  IconChartAreaPercentage,
+  IconChartAreaStacked,
+  IconChartBar,
+  IconChartBarHorizontal,
   IconChartBarHorizontalPercentage,
   IconChartBarHorizontalStacked,
   IconChartBarPercentage,
-  IconChartBarHorizontal,
-  IconChartAreaStacked,
   IconChartBarStacked,
   IconChartLine,
-  IconChartBar,
-  IconChartArea,
-  IconChartAreaPercentage,
 } from '@kbn/chart-icons';
 import { SeriesTypes } from '../../common/constants';
 

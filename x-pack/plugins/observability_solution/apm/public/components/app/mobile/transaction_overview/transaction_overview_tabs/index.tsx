@@ -1,3 +1,4 @@
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +7,11 @@
  */
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { push } from '../../../../shared/links/url_helpers';
-import { transactionsTab } from './transactions_tab';
-import { osVersionTab } from './os_version_tab';
 import { appVersionTab } from './app_version_tab';
 import { devicesTab } from './devices_tab';
+import { osVersionTab } from './os_version_tab';
+import { transactionsTab } from './transactions_tab';
 
 export interface TabContentProps {
   agentName?: string;

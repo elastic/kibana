@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { isEmpty } from 'lodash';
 import { IAggConfigs } from '../aggs';
 import { tabifyGetColumns } from './get_columns';
 
-import type { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
+import type { TabbedAggColumn, TabbedAggRow, TabbedResponseWriterOptions } from './types';
 
 interface BufferColumn {
   id: string;

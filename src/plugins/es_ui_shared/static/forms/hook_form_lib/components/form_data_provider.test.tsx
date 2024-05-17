@@ -9,12 +9,12 @@
 import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed } from '../shared_imports';
-import { OnUpdateHandler } from '../types';
 import { useForm } from '../hooks/use_form';
+import { TestBed, registerTestBed } from '../shared_imports';
+import { OnUpdateHandler } from '../types';
 import { Form } from './form';
-import { UseField } from './use_field';
 import { FormDataProvider } from './form_data_provider';
+import { UseField } from './use_field';
 
 describe('<FormDataProvider />', () => {
   test('should listen to changes in the form data and re-render the children with the updated data', async () => {

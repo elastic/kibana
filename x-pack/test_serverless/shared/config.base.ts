@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import Fs from 'fs';
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
-import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  esTestConfig,
-  kbnTestConfig,
-  kibanaTestSuperuserServerless,
-  getDockerFileMountPath,
-} from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  esTestConfig,
+  getDockerFileMountPath,
+  kbnTestConfig,
+  kibanaTestSuperuserServerless,
+} from '@kbn/test';
 import { services } from './services';
 
 export default async () => {

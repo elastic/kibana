@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { FilesMetrics, File, FileJSON } from '../../common';
+import type { File, FileJSON, FilesMetrics } from '../../common';
 import type { FileShareServiceStart } from '../file_share_service/types';
 import type {
-  CreateFileArgs,
-  UpdateFileArgs,
-  DeleteFileArgs,
   BulkDeleteFilesArgs,
-  GetByIdArgs,
   BulkGetByIdArgs,
+  CreateFileArgs,
+  DeleteFileArgs,
   FindFileArgs,
+  GetByIdArgs,
+  UpdateFileArgs,
 } from './file_action_types';
 
 /**

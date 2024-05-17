@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { environmentQuery } from '../../../common/utils/environment_query';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   AGENT,
-  CONTAINER,
   CLOUD,
   CLOUD_AVAILABILITY_ZONE,
-  CLOUD_REGION,
   CLOUD_MACHINE_TYPE,
+  CLOUD_REGION,
   CLOUD_SERVICE_NAME,
+  CONTAINER,
   CONTAINER_ID,
+  FAAS_ID,
+  FAAS_TRIGGER_TYPE,
   HOST,
   KUBERNETES,
+  LABEL_TELEMETRY_AUTO_VERSION,
   SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
-  FAAS_ID,
-  FAAS_TRIGGER_TYPE,
-  LABEL_TELEMETRY_AUTO_VERSION,
 } from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
+import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
-import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,

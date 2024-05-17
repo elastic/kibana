@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
-import type { FieldTypeKnown, FieldBase } from '@kbn/field-utils/types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldBase, FieldTypeKnown } from '@kbn/field-utils/types';
 
 export interface BucketedAggregation<KeyType = string> {
   buckets: Array<{

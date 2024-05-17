@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableSloProps } from './types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 import { SloSelector } from '../alerts/slo_selector';
+import type { EmbeddableSloProps } from './types';
 
 interface SloConfigurationProps {
   onCreate: (props: EmbeddableSloProps) => void;

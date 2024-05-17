@@ -8,14 +8,14 @@
 import type {
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { StartDeps, SetupDeps } from './types';
+import type { ConfigSchema } from '../common/app';
 import { registerWithCustomIntegrations } from './register_custom_integration';
 import { routes } from './routes';
-import type { ConfigSchema } from '../common/app';
+import type { SetupDeps, StartDeps } from './types';
 
 export class DataVisualizerPlugin implements Plugin {
   private readonly _logger: Logger;

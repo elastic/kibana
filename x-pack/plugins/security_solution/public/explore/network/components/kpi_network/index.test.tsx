@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { createMockStore } from '../../../../common/mock';
 import { NetworkKpiComponent } from '.';
+import { createMockStore } from '../../../../common/mock';
 
 describe('NetworkKpiComponent', () => {
   const props = {

@@ -7,8 +7,8 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { telemetryEvents } from './events/telemetry_events';
 
-import { TelemetryService } from './telemetry_service';
 import { TelemetryEventTypes } from './constants';
+import { TelemetryService } from './telemetry_service';
 
 describe('TelemetryService', () => {
   let service: TelemetryService;

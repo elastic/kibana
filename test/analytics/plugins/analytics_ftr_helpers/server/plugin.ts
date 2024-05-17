@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ReplaySubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, Event } from '@kbn/core/server';
+import type { CoreSetup, Event, Plugin } from '@kbn/core/server';
+import { ReplaySubject } from 'rxjs';
 import { fetchEvents } from '../common/fetch_events';
 import { CustomShipper } from './custom_shipper';
 

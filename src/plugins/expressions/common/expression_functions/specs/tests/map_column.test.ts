@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { of, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Datatable } from '../../../expression_types';
-import { mapColumn, MapColumnArguments } from '../map_column';
-import { emptyTable, functionWrapper, testTable, tableWithNulls } from './utils';
+import { MapColumnArguments, mapColumn } from '../map_column';
+import { emptyTable, functionWrapper, tableWithNulls, testTable } from './utils';
 
 const pricePlusTwo = jest.fn((datatable: Datatable) =>
   of(typeof datatable.rows[0].price === 'number' ? datatable.rows[0].price + 2 : null)

@@ -17,35 +17,35 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import {
   createExceptionList,
   createExceptionListItem,
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
-import { bulkInsert, updateTimestamps } from './helpers';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
+import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
+import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
 import { TelemetryEventsSender } from '../../lib/telemetry/sender';
+import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
+import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from '../../plugin_contract';
-import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
-import { Plugin as SecuritySolutionPlugin } from '../../plugin';
-import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
-import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
-import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
-import mockedRule from '../__mocks__/rule.json';
-import fleetAgents from '../__mocks__/fleet-agents.json';
-import endpointMetrics from '../__mocks__/endpoint-metrics.json';
 import endpointMetadata from '../__mocks__/endpoint-metadata.json';
+import endpointMetrics from '../__mocks__/endpoint-metrics.json';
 import endpointPolicy from '../__mocks__/endpoint-policy.json';
+import fleetAgents from '../__mocks__/fleet-agents.json';
+import mockedRule from '../__mocks__/rule.json';
+import { bulkInsert, updateTimestamps } from './helpers';
 
 const fleetIndex = '.fleet-agents';
 const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';

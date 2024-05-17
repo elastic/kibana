@@ -1,3 +1,5 @@
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import createContainer from 'constate';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +7,9 @@
  * 2.0.
  */
 import { useCallback, useMemo, useState } from 'react';
-import createContainer from 'constate';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
-import { useUnifiedSearchContext } from './use_unified_search';
-import { useHostsViewContext } from './use_hosts_view';
 import { createAlertsEsQuery } from '../../../../utils/filters/create_alerts_es_query';
+import { useHostsViewContext } from './use_hosts_view';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useAlertsQueryImpl = () => {
   const { hostNodes } = useHostsViewContext();

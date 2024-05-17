@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import React from 'react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { ApplicationStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import React from 'react';
 
 interface VisualizationMissedSavedObjectErrorProps {
   savedObjectMeta: {

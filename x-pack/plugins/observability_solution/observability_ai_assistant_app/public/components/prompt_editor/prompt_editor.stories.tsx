@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { PromptEditor as Component, PromptEditorProps } from './prompt_editor';
+import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { PromptEditor as Component, PromptEditorProps } from './prompt_editor';
 
 /*
   JSON Schema validation in the PromptEditor compponent does not work

@@ -8,22 +8,10 @@
       "allow_no_indices": "__flag__",
       "analyzer": "",
       "analyze_wildcard": "__flag__",
-      "conflicts": [
-        "abort",
-        "proceed"
-      ],
-      "default_operator": [
-        "and",
-        "or"
-      ],
+      "conflicts": ["abort", "proceed"],
+      "default_operator": ["and", "or"],
       "df": "",
-      "expand_wildcards": [
-        "all",
-        "open",
-        "closed",
-        "hidden",
-        "none"
-      ],
+      "expand_wildcards": ["all", "open", "closed", "hidden", "none"],
       "from": "",
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
@@ -34,47 +22,21 @@
       "requests_per_second": "",
       "routing": "",
       "q": "",
-      "scroll": [
-        "-1",
-        "0"
-      ],
-      "scroll_size": [
-        "1000"
-      ],
-      "search_timeout": [
-        "-1",
-        "0"
-      ],
-      "search_type": [
-        "query_then_fetch",
-        "dfs_query_then_fetch"
-      ],
-      "slices": [
-        "1",
-        "auto"
-      ],
+      "scroll": ["-1", "0"],
+      "scroll_size": ["1000"],
+      "search_timeout": ["-1", "0"],
+      "search_type": ["query_then_fetch", "dfs_query_then_fetch"],
+      "slices": ["1", "auto"],
       "sort": "",
       "stats": "",
       "terminate_after": "",
-      "timeout": [
-        "1m",
-        "-1",
-        "0"
-      ],
+      "timeout": ["1m", "-1", "0"],
       "version": "__flag__",
-      "wait_for_active_shards": [
-        "1",
-        "all",
-        "index-setting"
-      ],
+      "wait_for_active_shards": ["1", "all", "index-setting"],
       "wait_for_completion": "__flag__"
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "{index}/_delete_by_query"
-    ],
+    "methods": ["POST"],
+    "patterns": ["{index}/_delete_by_query"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html",
     "availability": {
       "stack": true,

@@ -7,7 +7,7 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import { ContainerInput, Container, ContainerOutput, EmbeddableStart } from '../../..';
+import { Container, ContainerInput, ContainerOutput, EmbeddableStart } from '../../..';
 
 /**
  * interfaces are not allowed to specify a sub-set of the required types until

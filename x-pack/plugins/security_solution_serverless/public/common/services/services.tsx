@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { PropsWithChildren, FC } from 'react';
-import React from 'react';
 import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import type { Services } from './types';
 
 export const ServicesProvider: FC<

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React from 'react';
 
 export const PanelLoader = (props: {
   showShadow?: boolean;

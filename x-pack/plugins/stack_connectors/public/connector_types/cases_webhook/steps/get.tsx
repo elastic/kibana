@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
-import { containsExternalId, containsExternalIdOrTitle } from '../validator';
+import React, { FunctionComponent } from 'react';
 import { urlVars, urlVarsExt } from '../action_variables';
 import * as i18n from '../translations';
+import { containsExternalId, containsExternalIdOrTitle } from '../validator';
 const { emptyField, urlField } = fieldValidators;
 
 interface Props {

@@ -7,8 +7,8 @@
  */
 
 import moment from 'moment';
-import type { IScopedSearchSessionsClient } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
+import type { IScopedSearchSessionsClient } from './types';
 
 export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessionsClient> {
   return {
@@ -28,7 +28,7 @@ export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessi
         ({
           defaultExpiration: moment.duration('1', 'w'),
           enabled: true,
-        } as unknown as SearchSessionsConfigSchema)
+        }) as unknown as SearchSessionsConfigSchema
     ),
   };
 }

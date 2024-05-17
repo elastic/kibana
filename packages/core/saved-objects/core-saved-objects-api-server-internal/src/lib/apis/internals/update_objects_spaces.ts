@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import pMap from 'p-map';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
+import pMap from 'p-map';
 
-import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   SavedObjectsUpdateObjectsSpacesObject,
@@ -18,32 +17,33 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type {
-  SavedObject,
   AuthorizeObjectWithExistingSpaces,
-  ISavedObjectsSecurityExtension,
   ISavedObjectTypeRegistry,
+  ISavedObjectsSecurityExtension,
   ISavedObjectsSerializer,
+  SavedObject,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
+import { type DecoratedError, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  getBulkOperationError,
-  getExpectedVersionProperties,
-  rawDocExistsInNamespace,
-  type Either,
-  isLeft,
-  isRight,
-  left,
-  right,
-} from '../utils';
+import type { Logger } from '@kbn/logging';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import {
-  deleteLegacyUrlAliases,
+  type Either,
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  isLeft,
+  isRight,
+  left,
+  rawDocExistsInNamespace,
+  right,
+} from '../utils';
+import {
   type DeleteLegacyUrlAliasesParams,
+  deleteLegacyUrlAliases,
 } from './delete_legacy_url_aliases';
 
 /**

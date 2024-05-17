@@ -9,8 +9,8 @@
 import type { InternalUiSettingsRouter } from '../../internal_types';
 import { registerInternalDeleteRoute } from './delete';
 import { registerInternalGetRoute } from './get';
-import { registerInternalSetManyRoute } from './set_many';
 import { registerInternalSetRoute } from './set';
+import { registerInternalSetManyRoute } from './set_many';
 import { registerInternalValidateRoute } from './validate';
 
 export function registerInternalRoutes(router: InternalUiSettingsRouter) {

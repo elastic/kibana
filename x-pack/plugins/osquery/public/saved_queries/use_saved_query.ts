@@ -7,13 +7,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { API_VERSIONS } from '../../common/constants';
 import { PLUGIN_ID } from '../../common';
+import { API_VERSIONS } from '../../common/constants';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 import { pagePathGetters } from '../common/page_paths';
-import { useErrorToast } from '../common/hooks/use_error_toast';
-import { SAVED_QUERY_ID } from './constants';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
+import { SAVED_QUERY_ID } from './constants';
 
 interface UseSavedQueryProps {
   savedQueryId: string;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { StatusFilter } from '../../overview/monitor_list/status_filter';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { FilterGroup } from '../../overview/filter_group/filter_group';
+import { StatusFilter } from '../../overview/monitor_list/status_filter';
 
 export const PingListHeader = () => {
   return (

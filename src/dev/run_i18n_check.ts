@@ -9,16 +9,16 @@
 import chalk from 'chalk';
 import { Listr } from 'listr2';
 
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from './i18n';
 import {
-  extractDefaultMessages,
-  extractUntrackedMessages,
   checkCompatibility,
   checkConfigs,
+  extractDefaultMessages,
+  extractUntrackedMessages,
   mergeConfigs,
 } from './i18n/tasks';
 import { I18nCheckTaskContext } from './i18n/types';

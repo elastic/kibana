@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
+import React from 'react';
 
 import { TextField } from '../../../components';
-import { FieldConfig } from '../../types';
 import { useForm } from '../../hooks/use_form';
+import { FieldConfig } from '../../types';
 import { Form } from '../form';
 import { UseField } from '../use_field';
 import { titleConfigBase } from './constants';
-import { FormArgs } from './types';
 import { submitForm } from './form_utils';
+import { FormArgs } from './types';
 
 const titleConfigWithValidation: FieldConfig<string> = {
   ...titleConfigBase,

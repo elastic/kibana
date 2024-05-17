@@ -6,7 +6,6 @@
  */
 
 import dateMath from '@elastic/datemath';
-import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -22,30 +21,31 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FormattedCount } from '../../../../common/components/formatted_number';
-import { useLicense } from '../../../../common/hooks/use_license';
+import React, { useMemo, useState } from 'react';
+import { IS_OPERATOR } from '../../../../../common/types';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
-import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import {
-  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_UPSELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
-} from './test_ids';
-import { useLeftPanelContext } from '../context';
 import {
   getDataProvider,
   getDataProviderAnd,
 } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { IS_OPERATOR } from '../../../../../common/types';
+import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useLicense } from '../../../../common/hooks/use_license';
+import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { useLeftPanelContext } from '../context';
+import {
+  PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
+} from './test_ids';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';

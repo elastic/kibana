@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { get, omit } from 'lodash';
 import { NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
-  SavedObjectSaveModal,
   OnSaveProps,
   SaveResult,
+  SavedObjectSaveModal,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
+import { get, omit } from 'lodash';
+import React from 'react';
 import {
+  EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  EmbeddableFactoryNotFoundError,
-  EmbeddableFactory,
 } from '..';
 
 /**
@@ -37,14 +37,14 @@ export interface GenericAttributes {
 }
 export interface AttributeServiceUnwrapResult<
   SavedObjectAttributes extends GenericAttributes,
-  MetaInfo extends unknown = unknown
+  MetaInfo extends unknown = unknown,
 > {
   attributes: SavedObjectAttributes;
   metaInfo?: MetaInfo;
 }
 export interface AttributeServiceOptions<
   SavedObjectAttributes extends GenericAttributes,
-  MetaInfo extends unknown = unknown
+  MetaInfo extends unknown = unknown,
 > {
   saveMethod: (
     attributes: SavedObjectAttributes,
@@ -62,7 +62,7 @@ export class AttributeService<
     [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
-  MetaInfo extends unknown = unknown
+  MetaInfo extends unknown = unknown,
 > {
   private embeddableFactory;
 

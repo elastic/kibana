@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-import { UseField, TextField, ToggleField } from '../../shared_imports';
+import { TextField, ToggleField, UseField } from '../../shared_imports';
 import { IndexPatternConfig } from '../../types';
 
 import { AdvancedParamsSection } from './advanced_params_section';

@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import { isLeftClickEvent, isModifiedEvent, useKibana } from '../common/lib/kibana';
 import { useAgentPolicy } from './use_agent_policy';
 
 const euiLinkCss = {

@@ -6,9 +6,9 @@
  */
 
 // @ts-ignore this file is too large for TypeScript, so it is excluded from our project config
-import hello from './workpads/hello.json';
-// @ts-ignore this file is too large for TypeScript, so it is excluded from our project config
 import austin from './workpads/austin.json';
+// @ts-ignore this file is too large for TypeScript, so it is excluded from our project config
+import hello from './workpads/hello.json';
 // @ts-ignore this file is too large for TypeScript, so it is excluded from our project config
 import test from './workpads/test.json';
 

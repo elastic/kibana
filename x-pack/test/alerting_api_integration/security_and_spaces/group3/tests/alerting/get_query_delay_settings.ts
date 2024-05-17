@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { DEFAULT_QUERY_DELAY_SETTINGS } from '@kbn/alerting-plugin/common';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function getQueryDelaySettingsTests({ getService }: FtrProviderContext) {

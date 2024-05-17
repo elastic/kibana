@@ -6,16 +6,16 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
-import {
-  connectorTypesQuerySchemaV1,
-  ConnectorTypesRequestQueryV1,
-} from '../../../../common/routes/connector/apis/connector_types';
-import { transformListTypesResponseV1 } from './transforms';
-import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
+import {
+  ConnectorTypesRequestQueryV1,
+  connectorTypesQuerySchemaV1,
+} from '../../../../common/routes/connector/apis/connector_types';
+import { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
 import { ILicenseState } from '../../../lib';
+import { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { transformListTypesResponseV1 } from './transforms';
 
 export const listTypesRoute = (
   router: IRouter<ActionsRequestHandlerContext>,

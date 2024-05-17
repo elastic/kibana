@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { CertSort, CertificateList, CertificateSearch } from '../components/certificates';
+import { useCertSearch } from '../components/certificates/use_cert_search';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
-import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
-import { useCertSearch } from '../components/certificates/use_cert_search';
 import { setCertificatesTotalAction } from '../state/certificates/certificates';
 
 const DEFAULT_PAGE_SIZE = 10;

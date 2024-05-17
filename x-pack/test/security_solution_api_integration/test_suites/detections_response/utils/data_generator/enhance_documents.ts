@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IndexingInterval, Document } from './types';
-import { getTimestamp } from './get_timestamp';
 import { enhanceDocument } from './enhance_document';
+import { getTimestamp } from './get_timestamp';
+import type { Document, IndexingInterval } from './types';
 
 export interface EnhanceDocumentsOptions {
   interval?: IndexingInterval;

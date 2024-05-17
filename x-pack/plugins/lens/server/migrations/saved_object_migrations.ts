@@ -5,65 +5,65 @@
  * 2.0.
  */
 
-import { cloneDeep, flow } from 'lodash';
-import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
 import {
-  SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
+import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { cloneDeep, flow } from 'lodash';
 import { PersistableFilter } from '../../common/types';
 import {
-  LensDocShapePost712,
-  LensDocShapePre712,
-  LensDocShape713,
-  LensDocShape714,
-  LensDocShape715,
-  VisStatePost715,
-  VisStatePre715,
-  VisState716,
-  CustomVisualizationMigrations,
-  LensDocShape810,
-  LensDocShape830,
-  XYVisualizationStatePre830,
-  XYVisualizationState830,
-  VisState810,
-  VisState820,
-  XYVisStatePre850,
-  LensDocShape850,
-  LensDocShape840,
-  VisState850,
-  LensDocShape860,
-} from './types';
-import {
-  commonRenameOperationsForFormula,
-  commonRemoveTimezoneDateHistogramParam,
-  commonUpdateVisLayerType,
-  commonMakeReversePaletteAsCustom,
-  commonRenameFilterReferences,
-  getLensFilterMigrations,
-  getLensCustomVisualizationMigrations,
-  commonRenameRecordsField,
-  fixLensTopValuesCustomFormatting,
-  commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
-  commonSetIncludeEmptyRowsDateHistogram,
+  commonEnrichAnnotationLayer,
   commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
-  commonPreserveOldLegendSizeDefault,
-  commonEnrichAnnotationLayer,
-  getLensDataViewMigrations,
+  commonMakeReversePaletteAsCustom,
+  commonMigrateIndexPatternDatasource,
+  commonMigrateMetricFormatter,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
   commonMigratePartitionMetrics,
-  commonMigrateIndexPatternDatasource,
-  commonMigrateMetricFormatter,
+  commonPreserveOldLegendSizeDefault,
+  commonRemoveTimezoneDateHistogramParam,
+  commonRenameFilterReferences,
+  commonRenameOperationsForFormula,
+  commonRenameRecordsField,
+  commonSetIncludeEmptyRowsDateHistogram,
+  commonSetLastValueShowArrayValues,
+  commonUpdateVisLayerType,
+  fixLensTopValuesCustomFormatting,
+  getLensCustomVisualizationMigrations,
+  getLensDataViewMigrations,
+  getLensFilterMigrations,
 } from './common_migrations';
+import {
+  CustomVisualizationMigrations,
+  LensDocShape713,
+  LensDocShape714,
+  LensDocShape715,
+  LensDocShape810,
+  LensDocShape830,
+  LensDocShape840,
+  LensDocShape850,
+  LensDocShape860,
+  LensDocShapePost712,
+  LensDocShapePre712,
+  VisState716,
+  VisState810,
+  VisState820,
+  VisState850,
+  VisStatePost715,
+  VisStatePre715,
+  XYVisStatePre850,
+  XYVisualizationState830,
+  XYVisualizationStatePre830,
+} from './types';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
   visualizationType: string | null;
@@ -436,16 +436,14 @@ const transformTableState: SavedObjectMigrationFn<
   return newDoc;
 };
 
-const renameOperationsForFormula: SavedObjectMigrationFn<
-  LensDocShapePre712,
-  LensDocShapePost712
-> = (doc) => {
-  const newDoc = cloneDeep(doc);
-  return {
-    ...newDoc,
-    attributes: commonRenameOperationsForFormula(newDoc.attributes),
+const renameOperationsForFormula: SavedObjectMigrationFn<LensDocShapePre712, LensDocShapePost712> =
+  (doc) => {
+    const newDoc = cloneDeep(doc);
+    return {
+      ...newDoc,
+      attributes: commonRenameOperationsForFormula(newDoc.attributes),
+    };
   };
-};
 
 const removeTimezoneDateHistogramParam: SavedObjectMigrationFn<LensDocShape713, LensDocShape714> = (
   doc

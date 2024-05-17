@@ -7,11 +7,11 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
-import { MetricsDataPluginClass } from './types';
-import { MetricsDataClient } from './lib/metrics_client';
 import { createLazyContainerMetricsTable } from './components/infrastructure_node_metrics_tables/container/create_lazy_container_metrics_table';
 import { createLazyHostMetricsTable } from './components/infrastructure_node_metrics_tables/host/create_lazy_host_metrics_table';
 import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
+import { MetricsDataClient } from './lib/metrics_client';
+import { MetricsDataPluginClass } from './types';
 
 export class Plugin implements MetricsDataPluginClass {
   public logger: Logger;

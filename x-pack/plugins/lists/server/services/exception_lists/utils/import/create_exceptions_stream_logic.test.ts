@@ -7,11 +7,11 @@
 
 import { Readable } from 'stream';
 
-import { createPromiseFromStreams } from '@kbn/utils';
 import {
   ImportExceptionListItemSchema,
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
   getImportExceptionsListItemSchemaDecodedMock,

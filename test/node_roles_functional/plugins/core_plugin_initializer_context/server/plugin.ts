@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 export class CorePluginInitializerContextPlugin implements Plugin {
   readonly initializerContext: PluginInitializerContext;

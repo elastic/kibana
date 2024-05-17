@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import {
+  DataViewBase,
+  DataViewFieldBase,
+  FILTERS,
   Filter,
+  FilterStateStore,
+  RangeFilterParams,
+  buildFilter,
+  getFilterField,
+  getPhraseFilterField,
+  getPhraseFilterValue,
   isExistsFilter,
   isPhraseFilter,
-  getPhraseFilterValue,
-  getPhraseFilterField,
-  getFilterField,
   isRangeFilter,
   isScriptedPhraseFilter,
-  buildFilter,
-  FilterStateStore,
-  FILTERS,
-  DataViewFieldBase,
-  DataViewBase,
-  RangeFilterParams,
 } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Serializable } from '@kbn/utility-types';
+import _ from 'lodash';
 
 import { FilterManager } from '../filter_manager';
 

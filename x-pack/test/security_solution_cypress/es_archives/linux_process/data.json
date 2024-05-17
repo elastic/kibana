@@ -26,9 +26,7 @@
       "event": {
         "action": "exec",
         "agent_id_status": "verified",
-        "category": [
-          "process"
-        ],
+        "category": ["process"],
         "created": "2021-09-01T05:52:29.9451497Z",
         "dataset": "endpoint.events.process",
         "id": "MGwI0NpfzFKkX6gW+++++CVd",
@@ -36,9 +34,7 @@
         "kind": "event",
         "module": "endpoint",
         "sequence": 3523,
-        "type": [
-          "start"
-        ]
+        "type": ["start"]
       },
       "group": {
         "Ext": {
@@ -54,13 +50,8 @@
         "architecture": "x86_64",
         "hostname": "localhost",
         "id": "f5c59e5f0c963f828782bc413653d324",
-        "ip": [
-          "127.0.0.1",
-          "::1"
-        ],
-        "mac": [
-          "00:16:3e:10:96:79"
-        ],
+        "ip": ["127.0.0.1", "::1"],
+        "mac": ["00:16:3e:10:96:79"],
         "name": "localhost",
         "os": {
           "Ext": {
@@ -89,11 +80,7 @@
             "Y2ZhNjk5ZGItYzI5My00ODY5LWI2OGMtNWI4MzE0ZGZhYTU2LTEtMTMyNzQ5NDg4NjkuMA=="
           ]
         },
-        "args": [
-          "run-parts",
-          "--lsbsysinit",
-          "/etc/update-motd.d"
-        ],
+        "args": ["run-parts", "--lsbsysinit", "/etc/update-motd.d"],
         "args_count": 3,
         "command_line": "run-parts --lsbsysinit /etc/update-motd.d",
         "entity_id": "Y2ZhNjk5ZGItYzI5My00ODY5LWI2OGMtNWI4MzE0ZGZhYTU2LTEzNTAtMTMyNzQ5NDkxNDkuOTQ1MTQ5NzAw",

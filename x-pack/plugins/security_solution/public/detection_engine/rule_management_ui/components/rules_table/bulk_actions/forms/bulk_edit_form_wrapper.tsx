@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import type { EuiFlyoutSize } from '@elastic/eui';
 import {
-  useGeneratedHtmlId,
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiFlexItem,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiFlyoutBody,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { FormHook } from '../../../../../../shared_imports';
 import { Form } from '../../../../../../shared_imports';

@@ -44,7 +44,7 @@ export type APIReturnType<TEndpoint extends ObservabilityAIAssistantAPIEndpoint>
 >;
 
 export type ObservabilityAIAssistantAPIClientRequestParamsOf<
-  TEndpoint extends ObservabilityAIAssistantAPIEndpoint
+  TEndpoint extends ObservabilityAIAssistantAPIEndpoint,
 > = ClientRequestParamsOf<ObservabilityAIAssistantServerRouteRepository, TEndpoint>;
 
 export function createCallObservabilityAIAssistantAPI(core: CoreStart | CoreSetup) {

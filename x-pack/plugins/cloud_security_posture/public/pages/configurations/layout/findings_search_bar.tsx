@@ -1,3 +1,8 @@
+import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +10,11 @@
  * 2.0.
  */
 import React, { useContext } from 'react';
-import { css } from '@emotion/react';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { Filter } from '@kbn/es-query';
-import { useDataViewContext } from '../../../common/contexts/data_view_context';
+import { PLUGIN_NAME } from '../../../../common';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
 import type { CspClientPluginStartDeps } from '../../../types';
-import { PLUGIN_NAME } from '../../../../common';
 
 type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 

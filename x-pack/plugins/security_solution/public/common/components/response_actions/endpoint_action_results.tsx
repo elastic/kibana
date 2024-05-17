@@ -9,13 +9,13 @@ import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type {
-  LogsEndpointActionWithHosts,
   ActionDetails,
+  LogsEndpointActionWithHosts,
 } from '../../../../common/endpoint/types/actions';
-import { useUserPrivileges } from '../user_privileges';
-import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
+import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ENDPOINT_COMMANDS } from '../event_details/translations';
+import { useUserPrivileges } from '../user_privileges';
 import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {

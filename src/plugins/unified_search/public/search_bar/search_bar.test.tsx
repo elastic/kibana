@@ -9,18 +9,18 @@
 import React from 'react';
 import SearchBar from './search_bar';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
-import { mount } from 'enzyme';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
-import { FilterItems } from '../filter_bar';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { mount } from 'enzyme';
 import { DataViewPicker } from '..';
+import { FilterItems } from '../filter_bar';
 
 const mockTimeHistory = {
   get: () => {

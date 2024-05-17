@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createDataView } from './create_data_view';
 import { dataViewsService } from '../../mocks';
+import { createDataView } from './create_data_view';
 import { getUsageCollection } from './test_utils';
 
 describe('create data view', () => {

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
 import fs from 'fs';
+import { join } from 'path';
 
-import sinon from 'sinon';
 import del from 'del';
+import sinon from 'sinon';
 
-import { existingInstall, assertVersion } from './kibana';
 import { Logger } from '../../cli/logger';
+import { assertVersion, existingInstall } from './kibana';
 
 jest.spyOn(fs, 'statSync');
 

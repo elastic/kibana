@@ -6,8 +6,8 @@
  */
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
-import { isInSecurityApp } from '../../utils';
 import type { StartServices } from '../../../../types';
+import { isInSecurityApp } from '../../utils';
 import { createCopyToClipboardCellActionFactory } from '../cell_action/copy_to_clipboard';
 
 export const createCopyToClipboardDiscoverCellActionFactory = ({

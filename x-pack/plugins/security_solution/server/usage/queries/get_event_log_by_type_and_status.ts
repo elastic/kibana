@@ -11,19 +11,19 @@ import {
   ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type { EventLogTypeStatusAggs, RuleSearchResult } from '../types';
-import type { EventLogStatusMetric } from '../detections/rules/types';
-import { getEventLogAggByStatuses } from './utils/get_event_log_agg_by_statuses';
-import { transformEventLogTypeStatus } from './utils/transform_event_log_type_status';
 import { getInitialEventLogUsage } from '../detections/rules/get_initial_usage';
+import type { EventLogStatusMetric } from '../detections/rules/types';
+import type { EventLogTypeStatusAggs, RuleSearchResult } from '../types';
+import { getEventLogAggByStatuses } from './utils/get_event_log_agg_by_statuses';
 import { getSearchForAllRules } from './utils/get_search_for_all_rules';
-import { getSearchForElasticRules } from './utils/get_search_for_elastic_rules';
 import { getSearchForCustomRules } from './utils/get_search_for_custom_rules';
+import { getSearchForElasticRules } from './utils/get_search_for_elastic_rules';
+import { transformEventLogTypeStatus } from './utils/transform_event_log_type_status';
 
 export interface GetEventLogByTypeAndStatusOptions {
   esClient: ElasticsearchClient;

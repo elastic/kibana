@@ -11,11 +11,11 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
+import type { RouteInitialization } from '../types';
 import {
   dataVisualizerFieldHistogramsSchema,
   indexPatternSchema,
 } from './schemas/data_visualizer_schema';
-import type { RouteInitialization } from '../types';
 
 function getHistogramsForFields(
   client: IScopedClusterClient,

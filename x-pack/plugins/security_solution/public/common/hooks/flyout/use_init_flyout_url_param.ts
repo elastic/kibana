@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import {
+  TableId,
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+} from '@kbn/securitysolution-data-table';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import {
-  dataTableSelectors,
-  TableId,
-  tableDefaults,
-  dataTableActions,
-} from '@kbn/securitysolution-data-table';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../common/constants';
+import { useUiSetting$ } from '../../lib/kibana';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
+import { getQueryStringKeyValue } from '../timeline/use_query_timeline_by_id_on_url_change';
+import { useShallowEqualSelector } from '../use_selector';
 import { URL_PARAM_KEY } from '../use_url_state';
 import type { FlyoutUrlState } from './types';
-import { useShallowEqualSelector } from '../use_selector';
-import { useUiSetting$ } from '../../lib/kibana';
-import { getQueryStringKeyValue } from '../timeline/use_query_timeline_by_id_on_url_change';
 
 /**
  * The state of the old flyout of the table in the Alerts page is stored in local storage.

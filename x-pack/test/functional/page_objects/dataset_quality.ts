@@ -6,14 +6,14 @@
  */
 
 import querystring from 'querystring';
-import rison from '@kbn/rison';
-import expect from '@kbn/expect';
 import { TimeUnitId } from '@elastic/eui';
+import expect from '@kbn/expect';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
 } from '@kbn/observability-logs-explorer-plugin/common';
+import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -411,8 +411,8 @@ async function parseDatasetTable(tableWrapper: WebElementWrapper, columnNamesOrI
     const columnNameOrIndex = columnNamesOrIndexes.includes(columnName)
       ? columnName
       : columnNamesOrIndexes.includes(columnIndex)
-      ? columnIndex
-      : undefined;
+        ? columnIndex
+        : undefined;
 
     if (columnNameOrIndex) {
       const headerElement = thWrapper;

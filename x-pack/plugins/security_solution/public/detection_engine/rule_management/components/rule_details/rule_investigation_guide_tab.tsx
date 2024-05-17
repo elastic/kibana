@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
+import React from 'react';
 import type { InvestigationGuide } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 
 interface RuleInvestigationGuideTabProps {
   note: InvestigationGuide;

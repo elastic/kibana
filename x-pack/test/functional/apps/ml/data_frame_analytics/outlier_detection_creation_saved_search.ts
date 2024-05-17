@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const useAfterLoadedState = <T>(loading: boolean, state: T) => {
   const ref = useRef<boolean | undefined>(undefined);

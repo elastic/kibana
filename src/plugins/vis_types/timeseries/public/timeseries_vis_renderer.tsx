@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
-import { get } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreSetup, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import { get } from 'lodash';
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
-import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
+import { PersistedState, VisualizationContainer } from '@kbn/visualizations-plugin/public';
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { getUsageCollectionStart } from './services';
 import { TIME_RANGE_DATA_MODES } from '../common/enums';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
+import { getUsageCollectionStart } from './services';
 
-import type { TimeseriesVisParams } from './types';
 import type { TimeseriesRenderValue } from './metrics_fn';
+import type { TimeseriesVisParams } from './types';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')

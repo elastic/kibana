@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { act, render } from '@testing-library/react';
 import React from 'react';
-import { render, act } from '@testing-library/react';
 
-import { MlPopover } from './ml_popover';
 import { TestProviders } from '../../mock';
+import { MlPopover } from './ml_popover';
 
 jest.mock('../../lib/kibana');
 

@@ -7,9 +7,9 @@
 
 import {
   DEFAULT_ARROW_HEIGHT,
+  MAX_ARROW_HEIGHT,
   getArrowHeightFromPercent,
   getPercent,
-  MAX_ARROW_HEIGHT,
 } from './helpers';
 
 describe('helpers', () => {

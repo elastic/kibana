@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { IngestionMethod } from '@kbn/search-connectors';
 
@@ -27,8 +27,8 @@ import {
   FetchIndexApiResponse,
 } from '../../api/index/fetch_index_api_logic';
 import {
-  FetchIndicesApiActions,
   FetchIndicesAPILogic,
+  FetchIndicesApiActions,
 } from '../../api/index/fetch_indices_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
 import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';

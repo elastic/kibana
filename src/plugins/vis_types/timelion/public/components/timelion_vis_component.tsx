@@ -6,35 +6,35 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
-import { compact, last, map } from 'lodash';
 import {
-  Chart,
-  Settings,
-  Position,
   Axis,
-  TooltipType,
-  LegendPositionConfig,
+  Chart,
   LayoutDirection,
+  LegendPositionConfig,
   Placement,
+  Position,
+  Settings,
   Tooltip,
+  TooltipType,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
+import { compact, last, map } from 'lodash';
+import React, { useCallback, useMemo, useRef } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
-  extractAllYAxis,
-  withStaticPadding,
-  createTickFormat,
-  validateLegendPositionValue,
   MAIN_GROUP_ID,
+  createTickFormat,
+  extractAllYAxis,
+  validateLegendPositionValue,
+  withStaticPadding,
 } from '../helpers/panel_utils';
 
 import { colors } from '../helpers/chart_constants';

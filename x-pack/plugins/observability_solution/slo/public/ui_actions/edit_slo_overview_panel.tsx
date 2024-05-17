@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasType,
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  CanAccessViewMode,
-  HasType,
 } from '@kbn/presentation-publishing';
 import {
-  type UiActionsActionDefinition,
   IncompatibleActionError,
+  type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { SLO_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { SLO_EMBEDDABLE } from '../embeddable/slo/constants';
 import {
   GroupSloCustomInput,
   HasSloGroupOverviewConfig,

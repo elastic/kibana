@@ -12,18 +12,18 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import {
-  getSecurityTelemetryStats,
-  createExceptionListItem,
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import {
   createExceptionList,
+  createExceptionListItem,
+  getSecurityTelemetryStats,
   removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
-import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

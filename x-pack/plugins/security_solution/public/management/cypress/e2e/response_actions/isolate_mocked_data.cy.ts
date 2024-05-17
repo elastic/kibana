@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { openAlertDetailsView } from '../../screens/alerts';
+import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
+import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { getEndpointListPath } from '../../../common/routing';
+import { openAlertDetailsView } from '../../screens/alerts';
+import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
+import { indexNewCase } from '../../tasks/index_new_case';
 import {
   checkEndpointIsIsolated,
   checkFlyoutEndpointIsolation,
@@ -18,16 +25,9 @@ import {
   sendActionResponse,
   waitForReleaseOption,
 } from '../../tasks/isolate';
-import type { ActionDetails } from '../../../../../common/endpoint/types';
+import { login } from '../../tasks/login';
 import { closeAllToasts } from '../../tasks/toasts';
 import type { ReturnTypeFromChainable } from '../../types';
-import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
-import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
-import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
-import { indexNewCase } from '../../tasks/index_new_case';
-import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
 describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('from Manage', () => {

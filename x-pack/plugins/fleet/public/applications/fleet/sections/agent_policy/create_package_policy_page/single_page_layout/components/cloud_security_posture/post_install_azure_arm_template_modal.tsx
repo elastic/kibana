@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,13 +18,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 
 import { AzureArmTemplateGuide } from '../../../../../../../../components/cloud_security_posture';
-import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 import { useCreateAzureArmTemplateUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
+import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 import { sendGetEnrollmentAPIKeys } from '../../../../../../hooks';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 
 export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
   onConfirm: () => void;

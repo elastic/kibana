@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { store } from '../../../state';
-import { AnomalyAlertComponent } from '../../../components/overview/alerts/anomaly_alert/anomaly_alert';
+import React from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ClientPluginsStart } from '../../../../plugin';
+import { AnomalyAlertComponent } from '../../../components/overview/alerts/anomaly_alert/anomaly_alert';
+import { store } from '../../../state';
 import { kibanaService } from '../../../state/kibana_service';
 
 interface Props {

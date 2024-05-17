@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import React from 'react';
 import { useBasePath } from '../../../../../common/lib/kibana';
 import type { IntegrationDetails } from '../integration_details';
 

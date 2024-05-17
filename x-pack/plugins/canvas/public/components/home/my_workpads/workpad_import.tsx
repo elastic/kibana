@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import type { State } from '../../../../types';
+import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 
 import { useImportWorkpad } from '../hooks';
 import { WorkpadImport as Component, Props as ComponentProps } from './workpad_import.component';

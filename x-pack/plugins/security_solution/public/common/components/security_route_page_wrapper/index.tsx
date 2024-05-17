@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName } from '../../../../common';
-import { useLinkInfo } from '../../links';
-import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
+import { useLinkInfo } from '../../links';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { NoPrivilegesPage } from '../no_privileges';
 
 interface SecurityRoutePageWrapperProps {
   pageName: SecurityPageName;

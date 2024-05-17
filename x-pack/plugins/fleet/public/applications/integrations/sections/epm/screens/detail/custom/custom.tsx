@@ -1,3 +1,4 @@
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +7,11 @@
  */
 import React, { memo, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { useLink, useUIExtension } from '../../../../../hooks';
-import type { PackageInfo } from '../../../../../types';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { ExtensionWrapper } from '../../../../../components';
+import { useLink, useUIExtension } from '../../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
+import type { PackageInfo } from '../../../../../types';
 
 interface Props {
   packageInfo: PackageInfo;

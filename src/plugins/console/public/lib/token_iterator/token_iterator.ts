@@ -20,7 +20,10 @@ export class TokenIterator {
   private currentPosition: Position = { lineNumber: -1, column: -1 };
   private tokensLineCache: Token[];
 
-  constructor(private readonly provider: TokensProvider, startPosition: Position) {
+  constructor(
+    private readonly provider: TokensProvider,
+    startPosition: Position
+  ) {
     this.tokensLineCache = this.provider.getTokens(startPosition.lineNumber) || [];
     const tokenIdx = this.tokensLineCache.findIndex((token) =>
       isColumnInTokenRange(startPosition.column, token)

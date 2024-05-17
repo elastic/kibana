@@ -7,13 +7,13 @@
  */
 
 import {
-  actions,
   ActorRef,
   AnyEventObject,
   EventObject,
   Expr,
   PureAction,
   SendActionOptions,
+  actions,
 } from 'xstate';
 
 export const sendIfDefined =

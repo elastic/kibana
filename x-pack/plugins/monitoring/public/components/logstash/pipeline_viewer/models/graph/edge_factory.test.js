@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { edgeFactory } from './edge_factory';
-import { Edge } from './edge';
 import { BooleanEdge } from './boolean_edge';
+import { Edge } from './edge';
+import { edgeFactory } from './edge_factory';
 
 describe('edgeFactory', () => {
   let graph;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
+import { useGetFeatureIds } from './use_get_feature_ids';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

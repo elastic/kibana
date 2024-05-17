@@ -6,15 +6,15 @@
  */
 import React, { useCallback, useMemo } from 'react';
 
-import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
-import { useDataView } from '../../../hooks/use_data_view';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
+import { useDataView } from '../../../hooks/use_data_view';
 import { buildCombinedAssetFilter } from '../../../utils/filters/build';
-import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
+import { type BrushEndArgs, LensChart, LensChartProps, type OnFilterEvent } from '../../lens';
 import { useDatePickerContext } from '../hooks/use_date_picker';
-import { extractRangeFromChartFilterEvent } from './chart_utils';
 import { useLoadingStateContext } from '../hooks/use_loading_state';
+import { extractRangeFromChartFilterEvent } from './chart_utils';
 
 export type ChartProps = LensConfig &
   Pick<LensChartProps, 'overrides'> & {

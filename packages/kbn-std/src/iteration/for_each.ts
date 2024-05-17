@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { lastValueFrom, defaultIfEmpty } from 'rxjs';
+import { defaultIfEmpty, lastValueFrom } from 'rxjs';
 import { mapWithLimit$ } from './observable';
-import { IterableInput, AsyncMapFn } from './types';
+import { AsyncMapFn, IterableInput } from './types';
 
 /**
  * Creates a promise which resolves with `undefined` after calling `fn` for each

@@ -1,3 +1,12 @@
+import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +16,6 @@
  */
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter } from '@kbn/es-query';
-import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { RecordsFetchResponse } from '../../types';
 
 interface TextBasedErrorResponse {

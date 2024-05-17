@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { Switch, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Switch } from 'react-router-dom';
+import { MANAGEMENT_PATH } from '../../../../common/constants';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
+import { AdministrationSubTab } from '../../types';
 import { PrivilegedRoute } from './privileged_route';
 import type { PrivilegedRouteProps } from './privileged_route';
-import { AdministrationSubTab } from '../../types';
-import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
-import { MANAGEMENT_PATH } from '../../../../common/constants';
 
 describe('PrivilegedRoute', () => {
   const noPrivilegesPageTestId = 'noPrivilegesPage';

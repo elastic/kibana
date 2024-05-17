@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
+import React from 'react';
 
 export const TimeseriesLoading = () => (
   <div className="visChart__spinner">

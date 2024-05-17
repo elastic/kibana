@@ -10,13 +10,13 @@ import type { Dispatch, SetStateAction } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
   EuiDataGridPaginationProps,
   EuiDataGridSorting,
-  EuiDataGridColumn,
 } from '@elastic/eui';
 
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FeatureImportanceBaseline } from '@kbn/ml-data-frame-analytics-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import type { INDEX_STATUS } from './common';
 import type { ChartData } from './field_histograms';

@@ -26,9 +26,7 @@
         "tags": [],
         "label": "formatBytes",
         "description": [],
-        "signature": [
-          "(bytes: number, decimals?: number) => string"
-        ],
+        "signature": ["(bytes: number, decimals?: number) => string"],
         "path": "packages/kbn-formatters/src/bytes_formatter/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,9 +38,7 @@
             "tags": [],
             "label": "bytes",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-formatters/src/bytes_formatter/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,9 +51,7 @@
             "tags": [],
             "label": "decimals",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-formatters/src/bytes_formatter/index.ts",
             "deprecated": false,
             "trackAdoption": false,

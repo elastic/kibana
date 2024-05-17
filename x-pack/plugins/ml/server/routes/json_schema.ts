@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { getJsonSchemaQuerySchema } from '../../common/api_schemas/json_schema_schema';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
 import { JsonSchemaService } from '../models/json_schema_service';
+import type { RouteInitialization } from '../types';
 
 export function jsonSchemaRoutes({ router, routeGuard }: RouteInitialization) {
   /**

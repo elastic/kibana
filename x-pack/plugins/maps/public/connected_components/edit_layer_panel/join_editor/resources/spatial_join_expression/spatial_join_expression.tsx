@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiExpression } from '@elastic/eui';
+import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import {
   ESDistanceSourceDescriptor,
   JoinSourceDescriptor,

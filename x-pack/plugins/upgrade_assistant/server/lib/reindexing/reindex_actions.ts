@@ -8,9 +8,9 @@
 import moment from 'moment';
 
 import {
-  SavedObjectsFindResponse,
-  SavedObjectsClientContract,
   ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import {
   REINDEX_OP_TYPE,

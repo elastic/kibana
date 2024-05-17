@@ -1,8 +1,5 @@
 {
-  "groups": [
-    "hosts",
-    "metrics"
-  ],
+  "groups": ["hosts", "metrics"],
   "description": "Metrics: Hosts - Identify unusual spikes in memory usage across hosts.",
   "analysis_config": {
     "bucket_span": "15m",
@@ -13,9 +10,7 @@
         "field_name": "system.memory.actual.used.pct",
         "custom_rules": [
           {
-            "actions": [
-              "skip_result"
-            ],
+            "actions": ["skip_result"],
             "conditions": [
               {
                 "applies_to": "actual",
@@ -27,9 +22,7 @@
         ]
       }
     ],
-    "influencers": [
-      "host.name"
-    ]
+    "influencers": ["host.name"]
   },
   "data_description": {
     "time_field": "@timestamp"

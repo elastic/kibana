@@ -8,10 +8,10 @@
 import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { createRemoteSloDetailsUrl } from '../../../utils/slo/remote_slo_urls';
+import React from 'react';
 import { useSpace } from '../../../hooks/use_space';
+import { createRemoteSloDetailsUrl } from '../../../utils/slo/remote_slo_urls';
 
 export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const spaceId = useSpace();

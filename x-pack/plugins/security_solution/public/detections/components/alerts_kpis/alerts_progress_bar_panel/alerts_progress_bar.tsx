@@ -5,25 +5,25 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
-  EuiPopoverTitle,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiButtonIcon,
 } from '@elastic/eui';
+import { TableId } from '@kbn/securitysolution-data-table';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { TableId } from '@kbn/securitysolution-data-table';
-import type { AlertsProgressBarData, GroupBySelection } from './types';
+import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { AddFilterProps } from '../common/types';
 import { getAggregateData } from './helpers';
-import { DefaultDraggable } from '../../../../common/components/draggables';
 import * as i18n from './translations';
+import type { AlertsProgressBarData, GroupBySelection } from './types';
 
 const ProgressWrapper = styled.div`
   height: 160px;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   AGENTS_PREFIX,

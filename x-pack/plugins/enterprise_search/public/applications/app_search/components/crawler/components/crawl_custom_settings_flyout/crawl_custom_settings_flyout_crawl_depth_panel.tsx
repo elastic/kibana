@@ -7,7 +7,7 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiFieldNumber,

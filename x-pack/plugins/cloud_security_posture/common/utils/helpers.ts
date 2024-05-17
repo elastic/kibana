@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Truthy } from 'lodash';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -14,25 +13,26 @@ import {
   PackagePolicyInput,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import { Truthy } from 'lodash';
 import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  CLOUDBEAT_VANILLA,
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
-  GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
+  CLOUDBEAT_VANILLA,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+  GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
-import type {
-  BenchmarkId,
-  Score,
-  BaseCspSetupStatus,
-  AwsCredentialsType,
-  GcpCredentialsType,
-  AzureCredentialsType,
-  RuleSection,
-} from '../types_old';
 import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
 import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '../types/rules/v4';
+import type {
+  AwsCredentialsType,
+  AzureCredentialsType,
+  BaseCspSetupStatus,
+  BenchmarkId,
+  GcpCredentialsType,
+  RuleSection,
+  Score,
+} from '../types_old';
 
 /**
  * @example

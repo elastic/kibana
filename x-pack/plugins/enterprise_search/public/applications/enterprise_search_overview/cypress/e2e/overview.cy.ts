@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, checkA11y } from '../../../shared/cypress/commands';
+import { checkA11y, login } from '../../../shared/cypress/commands';
 import { overviewPath } from '../../../shared/cypress/routes';
 
 context('Enterprise Search Overview', () => {

@@ -5,45 +5,45 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
-import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
-import type { SessionViewConfig, ExpandedDetailTimeline } from '../../../common/types';
+import { cloneDeep, getOr, isEmpty, isEqualWith, omit, union, uniq } from 'lodash/fp';
+import { v4 as uuidv4 } from 'uuid';
+import type { RowRendererId, TimelineTypeLiteral } from '../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type { Sort } from '../components/timeline/body/sort';
-import type {
-  DataProvider,
-  QueryOperator,
-  QueryMatch,
-} from '../components/timeline/data_providers/data_provider';
-import {
-  DataProviderType,
-  IS_OPERATOR,
-  EXISTS_OPERATOR,
-} from '../components/timeline/data_providers/data_provider';
+import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
 import type {
   ColumnHeaderOptions,
-  TimelineEventsType,
   SerializedFilterQuery,
+  SortColumnTimeline,
+  TimelineEventsType,
   TimelinePersistInput,
   ToggleDetailPanel,
-  SortColumnTimeline,
 } from '../../../common/types/timeline';
-import type { RowRendererId, TimelineTypeLiteral } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
-import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
-import { getTimelineManageDefaults, timelineDefaults } from './defaults';
-import type { KqlMode, TimelineModel } from './model';
-import type { TimelineById, TimelineModelSettings } from './types';
 import { DEFAULT_FROM_MOMENT, DEFAULT_TO_MOMENT } from '../../common/utils/default_date_settings';
+import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
+import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   RESIZED_COLUMN_MIN_WITH,
 } from '../components/timeline/body/constants';
-import { activeTimeline } from '../containers/active_timeline_context';
-import type { ResolveTimelineConfig } from '../components/open_timeline/types';
+import type { Sort } from '../components/timeline/body/sort';
+import type {
+  DataProvider,
+  QueryMatch,
+  QueryOperator,
+} from '../components/timeline/data_providers/data_provider';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_OPERATOR,
+} from '../components/timeline/data_providers/data_provider';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
+import { activeTimeline } from '../containers/active_timeline_context';
+import { getTimelineManageDefaults, timelineDefaults } from './defaults';
+import type { KqlMode, TimelineModel } from './model';
+import type { TimelineById, TimelineModelSettings } from './types';
 
 interface AddTimelineNoteParams {
   id: string;

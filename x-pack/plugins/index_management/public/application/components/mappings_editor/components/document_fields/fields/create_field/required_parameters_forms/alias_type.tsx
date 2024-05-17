@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { PathParameter } from '../../../field_parameters';
 import { ComponentProps } from '.';
+import { PathParameter } from '../../../field_parameters';
 
 export const AliasTypeRequiredParameters = ({ allFields }: ComponentProps) => {
   return <PathParameter allFields={allFields} />;

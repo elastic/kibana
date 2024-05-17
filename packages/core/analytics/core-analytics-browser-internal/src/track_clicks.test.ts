@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, ReplaySubject, take } from 'rxjs';
+import { ReplaySubject, firstValueFrom, take } from 'rxjs';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { trackClicks } from './track_clicks';
 

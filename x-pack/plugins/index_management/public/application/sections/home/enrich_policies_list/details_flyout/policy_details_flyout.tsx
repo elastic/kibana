@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
+  EuiButtonEmpty,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiFlyoutFooter,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import React, { FunctionComponent } from 'react';
 
 export interface Props {
   policy: SerializedEnrichPolicy;

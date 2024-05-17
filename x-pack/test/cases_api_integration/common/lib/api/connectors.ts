@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import getPort from 'get-port';
 import http from 'http';
+import getPort from 'get-port';
 
-import type SuperTest from 'supertest';
-import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
-import { getCaseConnectorsUrl } from '@kbn/cases-plugin/common/api';
 import {
   ActionResult,
   ActionTypeExecutorResult,
@@ -18,20 +15,23 @@ import {
 } from '@kbn/actions-plugin/server/types';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { getCaseConnectorsUrl } from '@kbn/cases-plugin/common/api';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
+import { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
 import {
   Case,
   CaseConnector,
   Configuration,
   ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
 import { camelCase, mapKeys } from 'lodash';
+import type SuperTest from 'supertest';
+import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';
-import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
-import { createConfiguration, getConfigurationRequest } from './configuration';
 import { createCase } from './case';
+import { createConfiguration, getConfigurationRequest } from './configuration';
 import { getSpaceUrlPrefix } from './helpers';
 
 export const getResilientConnector = () => ({

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { RouteDefinitionParams } from '..';
 import { defineRoleMappingDeleteRoutes } from './delete';
 import { defineRoleMappingGetRoutes } from './get';
 import { defineRoleMappingPostRoutes } from './post';
-import type { RouteDefinitionParams } from '..';
 
 export function defineRoleMappingRoutes(params: RouteDefinitionParams) {
   defineRoleMappingGetRoutes(params);

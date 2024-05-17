@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 import { basicCase } from '../../containers/mock';
 
 import { Description } from '.';
+import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
-import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

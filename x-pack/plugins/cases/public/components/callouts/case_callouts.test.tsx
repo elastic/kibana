@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CaseCallouts } from './case_callouts';

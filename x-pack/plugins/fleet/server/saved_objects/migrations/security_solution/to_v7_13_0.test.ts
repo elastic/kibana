@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { cloneDeepWith, cloneDeep } from 'lodash';
+import { cloneDeep, cloneDeepWith } from 'lodash';
 
 import { migrationMocks } from '@kbn/core/server/mocks';
 

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { clusterUuidRT, ccsRT, timeRangeRT } from '../shared';
+import { ccsRT, clusterUuidRT, timeRangeRT } from '../shared';
 
 export const postLogstashPipelineRequestParamsRT = rt.type({
   clusterUuid: clusterUuidRT,

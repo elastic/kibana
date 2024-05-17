@@ -43,6 +43,7 @@ import {
 } from '@kbn/management-settings-field-definition/is';
 
 import {
+  ArrayInput,
   BooleanInput,
   CodeEditorInput,
   ColorPickerInput,
@@ -50,7 +51,6 @@ import {
   NumberInput,
   SelectInput,
   TextInput,
-  ArrayInput,
 } from './input';
 
 /**

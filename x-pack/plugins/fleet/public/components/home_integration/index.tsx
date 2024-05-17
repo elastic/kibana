@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type {
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from '@kbn/home-plugin/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 
 const TutorialDirectoryHeaderLinkLazy = React.lazy(
   () => import('./tutorial_directory_header_link')

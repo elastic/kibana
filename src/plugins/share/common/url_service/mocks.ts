@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { LocatorDefinition, KibanaLocation } from '.';
+import type { KibanaLocation, LocatorDefinition } from '.';
 import { UrlService } from '.';
 
 export class MockUrlService extends UrlService {

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../../../../common/mock';
 import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type {
+  DiscoverCustomization,
   DiscoverStateContainer,
   UnifiedHistogramCustomization,
-  DiscoverCustomization,
 } from '@kbn/discover-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { WithPreventableEvent } from './use_histogram_customizations';
-import { useHistogramCustomization } from './use_histogram_customizations';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { renderHook } from '@testing-library/react-hooks';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
+import { TestProviders } from '../../../../../../common/mock';
+import { mockApplyFilterTrigger, mockPreventDefault, mockUIActionsGetTrigger } from '../mocks';
+import {
+  getEventDataWithPreventableEvent,
+  getMockCustomizationWithCustomSetFunction,
+} from '../utils/test_utils';
 import {
   mockBrushEndCallbackEventData,
   mockOnMultiValueFilterCallbackEventData,
   mockOnSingleValueFilterCallbackEventData,
 } from './mock.data';
-import {
-  getEventDataWithPreventableEvent,
-  getMockCustomizationWithCustomSetFunction,
-} from '../utils/test_utils';
-import { useKibana } from '../../../../../../common/lib/kibana';
-import { mockApplyFilterTrigger, mockPreventDefault, mockUIActionsGetTrigger } from '../mocks';
+import type { WithPreventableEvent } from './use_histogram_customizations';
+import { useHistogramCustomization } from './use_histogram_customizations';
 
 const mockDataService = dataPluginMock.createStartContract();
 

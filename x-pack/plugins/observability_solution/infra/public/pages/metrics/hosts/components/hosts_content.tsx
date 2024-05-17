@@ -1,3 +1,4 @@
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +6,16 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { AlertsQueryProvider } from '../hooks/use_alerts_query';
+import { HostCountProvider } from '../hooks/use_host_count';
+import { HostsTableProvider } from '../hooks/use_hosts_table';
+import { HostsViewProvider } from '../hooks/use_hosts_view';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { ErrorCallout } from './error_callout';
 import { HostsTable } from './hosts_table';
 import { KPIGrid } from './kpis/kpi_grid';
 import { Tabs } from './tabs/tabs';
-import { AlertsQueryProvider } from '../hooks/use_alerts_query';
-import { HostsViewProvider } from '../hooks/use_hosts_view';
-import { HostsTableProvider } from '../hooks/use_hosts_table';
-import { ErrorCallout } from './error_callout';
-import { useUnifiedSearchContext } from '../hooks/use_unified_search';
-import { HostCountProvider } from '../hooks/use_host_count';
 
 export const HostsContent = () => {
   const { error } = useUnifiedSearchContext();

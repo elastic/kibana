@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { configure, fireEvent, render, screen } from '@testing-library/react';
 import * as React from 'react';
 import { GroupByExpression } from './group_by_over';
-import { render, screen, fireEvent, configure } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 describe('group by expression', () => {
   configure({ testIdAttribute: 'data-test-subj' });

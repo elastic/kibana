@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { AbstractStyleProperty } from './style_property';
 import { LABEL_POSITIONS } from '../../../../../common/constants';
-import { LabelPositionStylePropertyDescriptor } from '../../../../../common/descriptor_types';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
+import { LabelPositionStylePropertyDescriptor } from '../../../../../common/descriptor_types';
+import { getVectorStyleLabel } from '../components/get_vector_style_label';
+import { BY_VALUE_LABEL, FIXED_LABEL } from '../components/style_prop_editor';
 import { DEFAULT_ICON_SIZE, DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
 import { DynamicIconProperty } from './dynamic_icon_property';
-import { StaticIconProperty } from './static_icon_property';
 import { DynamicSizeProperty } from './dynamic_size_property';
+import { StaticIconProperty } from './static_icon_property';
 import { StaticSizeProperty } from './static_size_property';
-import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FIXED_LABEL, BY_VALUE_LABEL } from '../components/style_prop_editor';
+import { AbstractStyleProperty } from './style_property';
 
 export class LabelPositionProperty extends AbstractStyleProperty<
   LabelPositionStylePropertyDescriptor['options']

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
-import NewVisModal from './new_vis_modal';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { VisParams } from '../../common';
+import { BaseVisType, TypesStart, VisGroups } from '../vis_types';
+import NewVisModal from './new_vis_modal';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {

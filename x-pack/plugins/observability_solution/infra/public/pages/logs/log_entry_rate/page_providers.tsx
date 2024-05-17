@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import React, { FC, PropsWithChildren } from 'react';
 import { logEntryCategoriesJobType, logEntryRateJobType } from '../../../../common/log_analysis';
 import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';

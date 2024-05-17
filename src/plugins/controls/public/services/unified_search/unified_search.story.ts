@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { ControlsUnifiedSearchService } from './types';

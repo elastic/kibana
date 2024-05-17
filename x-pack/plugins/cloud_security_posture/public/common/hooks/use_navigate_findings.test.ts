@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { act, renderHook } from '@testing-library/react-hooks/dom';
+import { useHistory } from 'react-router-dom';
 import {
   useNavigateFindings,
   useNavigateFindingsByResource,
   useNavigateVulnerabilities,
 } from './use_navigate_findings';
-import { useHistory } from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({
   useHistory: jest.fn().mockReturnValue({ push: jest.fn() }),

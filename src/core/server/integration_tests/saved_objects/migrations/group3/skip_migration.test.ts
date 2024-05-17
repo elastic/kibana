@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 import Util from 'util';
-import { firstValueFrom } from 'rxjs';
+import { Root } from '@kbn/core-root-server-internal';
 import {
+  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
-  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import { firstValueFrom } from 'rxjs';
 
 const logFilePath = Path.join(__dirname, 'cleanup.log');
 const asyncUnlink = Util.promisify(Fs.unlink);

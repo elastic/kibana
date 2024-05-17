@@ -7,15 +7,15 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/constants';
+import { INTERNAL_API_VERSION, RESULTS_ROUTE_PATH } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { GetResultQuery } from '../../schemas/result';
 import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
-import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 import { checkIndicesPrivileges } from './privileges';
+import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
 export const getQuery = (indexName: string[]) => ({
   size: 0,

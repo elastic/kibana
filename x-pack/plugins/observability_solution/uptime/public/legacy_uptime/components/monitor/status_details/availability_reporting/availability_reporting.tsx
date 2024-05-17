@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiBasicTable, EuiSpacer, Criteria, Pagination } from '@elastic/eui';
+import { Criteria, EuiBasicTable, EuiSpacer, Pagination } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import { AvailabilityLabel, LastCheckLabel, LocationLabel } from '../translations';
 import { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
-import { AvailabilityLabel, LastCheckLabel, LocationLabel } from '../translations';
 
 interface Props {
   allLocations: StatusTag[];

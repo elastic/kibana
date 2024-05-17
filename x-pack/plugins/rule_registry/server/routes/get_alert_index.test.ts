@@ -6,10 +6,10 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { getAlertsIndexRoute } from './get_alert_index';
 import { requestContextMock } from './__mocks__/request_context';
 import { getReadIndexRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
+import { getAlertsIndexRoute } from './get_alert_index';
 
 describe('getAlertsIndexRoute', () => {
   let server: ReturnType<typeof serverMock.create>;

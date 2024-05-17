@@ -10,17 +10,17 @@ import styled from 'styled-components';
 
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiIcon,
-  EuiButtonIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { FleetServerHost } from '../../../../types';
 import { useAuthz, useLink } from '../../../../hooks';
+import type { FleetServerHost } from '../../../../types';
 
 export interface FleetServerHostsTableProps {
   fleetServerHosts: FleetServerHost[];

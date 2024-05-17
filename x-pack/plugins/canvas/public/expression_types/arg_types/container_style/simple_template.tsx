@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { ColorPickerPopover } from '../../../components/color_picker_popover';
-import { CanvasWorkpad } from '../../../../types';
+import React, { FunctionComponent } from 'react';
 import { ArgTypesStrings } from '../../../../i18n';
+import { CanvasWorkpad } from '../../../../types';
+import { ColorPickerPopover } from '../../../components/color_picker_popover';
 
 const { ContainerStyle: strings } = ArgTypesStrings;
 

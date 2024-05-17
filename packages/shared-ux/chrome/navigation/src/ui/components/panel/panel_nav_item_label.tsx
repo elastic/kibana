@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import React from 'react';
 
 import { LabelBadge } from './label_badge';
 

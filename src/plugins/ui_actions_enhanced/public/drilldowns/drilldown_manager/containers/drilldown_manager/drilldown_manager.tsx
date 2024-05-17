@@ -7,12 +7,12 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
 import { FlyoutFrame } from '../../components/flyout_frame';
-import { DrilldownManagerContent } from './drilldown_manager_content';
-import { RenderDrilldownManagerTitle } from '../drilldown_manager_title';
+import { useDrilldownManager } from '../context';
 import { RenderDrilldownManagerFooter } from '../drilldown_manager_footer';
+import { RenderDrilldownManagerTitle } from '../drilldown_manager_title';
 import { HelloBar } from '../hello_bar';
+import { DrilldownManagerContent } from './drilldown_manager_content';
 
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();

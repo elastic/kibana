@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
-import type { RiskEngineMetrics } from '@kbn/security-solution-plugin/server/usage/risk_engine/types';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { RiskEngineMetrics } from '@kbn/security-solution-plugin/server/usage/risk_engine/types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 
 import { getStatsUrl } from '../../detections_response/utils/get_stats_url';
 import { getRiskEngineMetricsFromBody } from './get_risk_engine_metrics_from_body';

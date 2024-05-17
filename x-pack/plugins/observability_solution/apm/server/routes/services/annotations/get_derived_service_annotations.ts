@@ -7,15 +7,15 @@
 
 import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME, SERVICE_VERSION } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getDerivedServiceAnnotations({
   apmEventClient,

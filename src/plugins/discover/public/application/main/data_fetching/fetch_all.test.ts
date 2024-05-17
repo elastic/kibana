@@ -1,3 +1,12 @@
+import { SearchSource } from '@kbn/data-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
+import { reduce } from 'rxjs';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +15,6 @@
  * Side Public License, v 1.
  */
 import { FetchStatus } from '../../types';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { reduce } from 'rxjs';
-import { SearchSource } from '@kbn/data-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import {
   DataAvailableFieldsMsg,
   DataDocumentsMsg,
@@ -21,11 +23,9 @@ import {
   RecordRawType,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
+import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTextBased } from './fetch_text_based';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),

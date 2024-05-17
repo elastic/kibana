@@ -10,15 +10,15 @@ import React from 'react';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
-  apiIsOfType,
-  apiHasUniqueId,
-  apiHasParentApi,
-  apiPublishesSavedObjectId,
-  HasType,
   EmbeddableApiContext,
-  HasUniqueId,
   HasParentApi,
+  HasType,
+  HasUniqueId,
   PublishesSavedObjectId,
+  apiHasParentApi,
+  apiHasUniqueId,
+  apiIsOfType,
+  apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -26,8 +26,8 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { pluginServices } from '../services/plugin_services';
-import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 

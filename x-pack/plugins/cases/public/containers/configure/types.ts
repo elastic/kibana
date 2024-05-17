@@ -6,13 +6,13 @@
  */
 
 import type {
-  ClosureType,
   ActionConnector,
   ActionTypeConnector,
   CaseConnector,
-  ConnectorMappingTarget,
-  ConnectorMappingSource,
+  ClosureType,
   ConnectorMappingActionType,
+  ConnectorMappingSource,
+  ConnectorMappingTarget,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 

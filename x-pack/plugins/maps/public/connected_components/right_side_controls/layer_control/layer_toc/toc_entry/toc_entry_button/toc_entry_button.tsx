@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { type ILayer, INCOMPLETE_RESULTS_WARNING } from '../../../../../../classes/layers/layer';
-import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
+import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 
 interface Footnote {
   icon: ReactNode;

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, type EuiFieldSearchProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 /**
  * Props for FieldNameSearch component

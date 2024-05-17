@@ -50,7 +50,7 @@ export function SloList() {
     const slosByStatus = mapValues(
       _groupBy(sloList.results, (result) => result.summary.status),
       (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
-    ) as Record<typeof results[number]['summary']['status'], string>;
+    ) as Record<(typeof results)[number]['summary']['status'], string>;
 
     return observabilityAIAssistant.service.setScreenContext({
       screenDescription: dedent(`The user is looking at a list of SLOs.

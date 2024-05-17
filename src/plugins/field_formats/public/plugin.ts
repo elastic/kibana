@@ -7,9 +7,9 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
-import { baseFormattersPublic } from './lib';
+import { FORMATS_UI_SETTINGS, FieldFormatsRegistry } from '../common';
 import { FormatFactory } from '../common/types';
+import { baseFormattersPublic } from './lib';
 import './index.scss';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

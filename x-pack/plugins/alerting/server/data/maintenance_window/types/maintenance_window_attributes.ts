@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { AlertsFilterQueryAttributes } from '../../alerts_filter_query/types';
 import { RRuleAttributes } from '../../r_rule/types';
 import type { MaintenanceWindowCategoryIdTypes } from '../constants';
-import { AlertsFilterQueryAttributes } from '../../alerts_filter_query/types';
 
 export interface MaintenanceWindowEventAttributes {
   gte: string;

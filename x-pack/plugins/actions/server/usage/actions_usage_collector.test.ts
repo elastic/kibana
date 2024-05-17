@@ -7,10 +7,10 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { registerActionsUsageCollector } from './actions_usage_collector';
-import { configSchema, ActionsConfig } from '../config';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ActionsConfig, configSchema } from '../config';
+import { registerActionsUsageCollector } from './actions_usage_collector';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 

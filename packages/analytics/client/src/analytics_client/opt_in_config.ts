@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { OptInConfig, ShipperName } from './types';
 import type { EventType } from '../events';
+import type { OptInConfig, ShipperName } from './types';
 
 export class OptInConfigService {
   constructor(private readonly optInConfig: OptInConfig) {}

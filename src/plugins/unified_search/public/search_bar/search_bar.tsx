@@ -6,39 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { compact } from 'lodash';
+import { EuiIconProps, WithEuiThemeProps, withEuiTheme } from '@elastic/eui';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import React, { Component, createRef } from 'react';
-import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import { compact } from 'lodash';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
+import React, { Component, createRef } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es-query';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import type {
-  TimeHistoryContract,
   SavedQuery,
   SavedQueryTimeFilter,
+  TimeHistoryContract,
 } from '@kbn/data-plugin/public';
-import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { AggregateQuery, Filter, Query, TimeRange, isOfQueryType } from '@kbn/es-query';
+import { KibanaReactContextValue, withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
-import type { IUnifiedSearchPluginServices } from '../types';
-import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { SavedQueryManagementList } from '../saved_query_management';
-import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
-import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
+import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
+import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
+import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import { SaveQueryForm, SavedQueryMeta } from '../saved_query_form';
+import { SavedQueryManagementList } from '../saved_query_management';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
+import type { IUnifiedSearchPluginServices } from '../types';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {

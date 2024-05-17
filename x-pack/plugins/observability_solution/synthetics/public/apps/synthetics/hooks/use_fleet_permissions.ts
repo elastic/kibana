@@ -6,12 +6,12 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
 import {
   BrowserFields,
   ConfigKey,
   EncryptedSyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { ClientPluginsStart } from '../../../plugin';
 
 export function useFleetPermissions() {
   const { fleet } = useKibana<ClientPluginsStart>().services;

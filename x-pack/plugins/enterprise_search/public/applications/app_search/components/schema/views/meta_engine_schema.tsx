@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import { DataPanel } from '../../data_panel';
 import { getEngineBreadcrumbs } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
-import { MetaEnginesSchemaTable, MetaEnginesConflictsTable } from '../components';
+import { MetaEnginesConflictsTable, MetaEnginesSchemaTable } from '../components';
 import { SCHEMA_TITLE } from '../constants';
 import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 

@@ -12,12 +12,12 @@ import {
   type Conversion,
 } from '@kbn/core-logging-common-internal';
 import {
-  LoggerConversion,
-  LevelConversion,
-  MetaConversion,
-  MessageConversion,
-  PidConversion,
   DateConversion,
+  LevelConversion,
+  LoggerConversion,
+  MessageConversion,
+  MetaConversion,
+  PidConversion,
 } from './conversions';
 
 const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;

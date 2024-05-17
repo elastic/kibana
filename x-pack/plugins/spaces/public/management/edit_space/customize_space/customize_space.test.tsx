@@ -9,8 +9,8 @@ import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { CustomizeSpace } from './customize_space';
 import { SpaceValidator } from '../../lib';
+import { CustomizeSpace } from './customize_space';
 
 const validator = new SpaceValidator({ shouldValidate: true });
 

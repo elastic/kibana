@@ -7,18 +7,18 @@
  */
 
 import Path from 'path';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsModelVersionMap, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import fs from 'fs/promises';
 import { pick } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsType, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../../migrations/jest_matchers';
+import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 import {
   getKibanaMigratorTestKit,
   startElasticsearch,
 } from '../../migrations/kibana_migrator_test_kit';
 import { delay } from '../../migrations/test_utils';
-import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'bulk_update.test.log');
 

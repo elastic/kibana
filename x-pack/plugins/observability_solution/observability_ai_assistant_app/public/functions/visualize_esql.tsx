@@ -6,14 +6,14 @@
  */
 import {
   EuiButtonIcon,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiDescriptionListDescription,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiText,
-  EuiDescriptionList,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';

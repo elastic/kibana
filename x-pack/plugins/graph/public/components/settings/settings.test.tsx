@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
-import * as Rx from 'rxjs';
+import { EuiAccordion, EuiFieldText, EuiListGroupItem } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { Settings, SettingsWorkspaceProps } from './settings';
 import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
-import { UrlTemplateForm } from './url_template_form';
+import React from 'react';
+import { Provider } from 'react-redux';
+import * as Rx from 'rxjs';
 import {
   GraphStore,
-  updateSettings,
   loadFields,
-  saveTemplate,
   removeTemplate,
+  saveTemplate,
+  updateSettings,
 } from '../../state_management';
 import { createMockGraphStore } from '../../state_management/mocks';
-import { Provider } from 'react-redux';
 import { UrlTemplate } from '../../types';
+import { Settings, SettingsWorkspaceProps } from './settings';
+import { UrlTemplateForm } from './url_template_form';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

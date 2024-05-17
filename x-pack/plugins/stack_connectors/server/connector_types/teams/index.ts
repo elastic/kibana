@@ -6,26 +6,26 @@
  */
 
 import { URL } from 'url';
-import { isString } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { getOrElse, map } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { isString } from 'lodash';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { isOk, promiseResult, Result } from '../lib/result_type';
+import { Result, isOk, promiseResult } from '../lib/result_type';
 
 export type TeamsConnectorType = ConnectorType<
   {},

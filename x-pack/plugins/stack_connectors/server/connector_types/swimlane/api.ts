@@ -6,8 +6,8 @@
  */
 
 import {
-  ExternalServiceIncidentResponse,
   ExternalServiceApi,
+  ExternalServiceIncidentResponse,
   Incident,
   PushToServiceApiHandlerArgs,
   PushToServiceResponse,

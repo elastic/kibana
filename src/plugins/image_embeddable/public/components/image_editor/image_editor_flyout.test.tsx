@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { imageEmbeddableFileKind } from '../../imports';
 import { ImageViewerContext } from '../image_viewer';
 import { ImageEditorFlyout, ImageEditorFlyoutProps } from './image_editor_flyout';
-import { imageEmbeddableFileKind } from '../../imports';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 

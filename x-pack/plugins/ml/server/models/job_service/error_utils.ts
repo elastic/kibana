@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import type { JobAction } from '../../../common/constants/job_actions';
+import { DATAFEED_STATE, JOB_STATE } from '../../../common/constants/states';
 
 const REQUEST_TIMEOUT_NAME = 'RequestTimeout';
 type ACTION_STATE = DATAFEED_STATE | JOB_STATE | JobAction;

@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import * as Option from 'fp-ts/lib/Option';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { DocLinks } from '@kbn/doc-links';
-import type {
-  SavedObjectsRawDoc,
-  SavedObjectTypeExcludeFromUpgradeFilterHook,
-} from '@kbn/core-saved-objects-server';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type {
   IndexMapping,
   IndexTypesMap,
   VirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
-import type { ControlState } from './state_action_machine';
+import type {
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectsRawDoc,
+} from '@kbn/core-saved-objects-server';
+import type { DocLinks } from '@kbn/doc-links';
+import * as Option from 'fp-ts/lib/Option';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
-import type { MigrationLog, Progress } from './types';
 import type { BulkOperation } from './model/create_batches';
 import type { Aliases } from './model/helpers';
+import type { ControlState } from './state_action_machine';
+import type { MigrationLog, Progress } from './types';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */

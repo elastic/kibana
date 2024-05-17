@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { DeepPartial } from '../../../../../../../common/types/common';
-import { Description } from './description';
 import { CustomUrlsWrapper } from '../../../../../components/custom_urls';
-import {
-  getJobConfigFromFormState,
-  type State,
-} from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import type { ActionDispatchers } from '../../../analytics_management/hooks/use_create_analytics_form/actions';
+import {
+  type State,
+  getJobConfigFromFormState,
+} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { Description } from './description';
 
 const buttonContent = i18n.translate(
   'xpack.ml.dataframe.analytics.create.detailsStep.additionalSectionButton',

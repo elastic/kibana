@@ -6,6 +6,12 @@
  */
 
 import type { PropsOf } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import {
+  KibanaReactContextValue,
+  createKibanaReactContext,
+  useKibana,
+} from '@kbn/kibana-react-plugin/public';
 import React, {
   useMemo,
   createElement,
@@ -14,12 +20,6 @@ import React, {
   FC,
   PropsWithChildren,
 } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
 import { InfraClientCoreSetup, InfraClientStartDeps, InfraClientStartExports } from '../types';
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps & InfraClientStartExports;

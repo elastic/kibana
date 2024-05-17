@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment, memo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
   EuiButtonIcon,
@@ -21,10 +16,15 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import type { FC } from 'react';
+import React, { Fragment, memo, useCallback } from 'react';
 import { useCurrentThemeVars } from '../../../contexts/kibana';
-import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
-import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
+import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 
 export interface CalendarEvent {
   start: moment.Moment | null;

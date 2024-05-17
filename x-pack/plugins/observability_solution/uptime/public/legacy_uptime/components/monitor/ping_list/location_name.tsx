@@ -6,8 +6,8 @@
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 interface LocationNameProps {
   location: string | null | undefined;

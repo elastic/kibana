@@ -11,11 +11,11 @@ import moment from 'moment';
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { dataPluginMock } from '../../mocks';
-import { setIndexPatterns, setSearchService } from '../../services';
+import { RangeFilter } from '@kbn/es-query';
 import { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { DateFormat } from '@kbn/field-formats-plugin/public';
-import { RangeFilter } from '@kbn/es-query';
+import { dataPluginMock } from '../../mocks';
+import { setIndexPatterns, setSearchService } from '../../services';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;

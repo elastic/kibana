@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiTextColor, EuiIcon, EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiIcon, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 import type { Instance, SetupMode } from './types';
 

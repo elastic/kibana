@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
 import { ArgumentProps } from '../../../../types/arguments';
 

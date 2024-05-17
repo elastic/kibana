@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server/alert';
+import { v4 as uuidV4 } from 'uuid';
 import type { RuleParams } from '../../../rule_schema';
 
 export const alertInstanceFactoryStub = <
@@ -19,7 +19,7 @@ export const alertInstanceFactoryStub = <
   TState extends RuleTypeState,
   TInstanceState extends AlertInstanceState,
   TInstanceContext extends AlertInstanceContext,
-  TActionGroupIds extends string = ''
+  TActionGroupIds extends string = '',
 >(
   id: string
 ) => ({

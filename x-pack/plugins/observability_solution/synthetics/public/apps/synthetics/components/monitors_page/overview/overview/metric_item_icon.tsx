@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import * as React from 'react';
 import {
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
   EuiButton,
-  useEuiShadow,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiToolTip,
+  useEuiShadow,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import * as React from 'react';
 import { useRef } from 'react';
-import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
-import { useErrorDetailsLink } from '../../../common/links/error_details_link';
+import { useDispatch, useSelector } from 'react-redux';
+import styled from 'styled-components';
 import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
-import { isTestRunning, manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
+import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
+import { isTestRunning, manualTestRunSelector } from '../../../../state/manual_test_runs';
+import { useErrorDetailsLink } from '../../../common/links/error_details_link';
 
 const Container = styled.div`
   display: inline-block;

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   hasEqlSequenceQuery,
   hasNestedEntry,
-  isThreatMatchRule,
-  normalizeMachineLearningJobIds,
-  normalizeThresholdField,
-  isMlRule,
+  isEqlSequenceQuery,
   isEsqlRule,
-  isSuppressionRuleInGA,
+  isMlRule,
   isSuppressibleAlertRule,
   isSuppressionRuleConfiguredWithDuration,
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithMissingFields,
-  isEqlSequenceQuery,
+  isSuppressionRuleInGA,
+  isThreatMatchRule,
+  normalizeMachineLearningJobIds,
+  normalizeThresholdField,
 } from './utils';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 

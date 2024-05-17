@@ -8,7 +8,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 
-import { createEsClientForFtrConfig, ProvidedType } from '@kbn/test';
+import { ProvidedType, createEsClientForFtrConfig } from '@kbn/test';
 import { FtrProviderContext } from './ftr_context_provider';
 
 export function EsProvider({ getService }: FtrProviderContext): Client {

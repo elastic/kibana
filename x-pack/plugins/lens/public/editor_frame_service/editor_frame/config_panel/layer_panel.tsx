@@ -7,38 +7,38 @@
 
 import './layer_panel.scss';
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  EuiPanel,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiText,
   EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { DragDropIdentifier, DropType, ReorderProvider } from '@kbn/dom-drag-drop';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import { LayerActions } from './layer_actions';
-import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
-import { LayerHeader } from './layer_header';
-import { LayerPanelProps } from './types';
-import { DimensionContainer } from './dimension_container';
-import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
-import { useFocusUpdate } from './use_focus_update';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import {
-  useLensSelector,
+  selectDatasourceStates,
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
-  selectDatasourceStates,
+  useLensSelector,
 } from '../../../state_management';
-import { getSharedActions } from './layer_actions/layer_actions';
-import { FlyoutContainer } from '../../../shared_components/flyout_container';
+import { LayerAction, VisualizationDimensionGroupConfig, isOperation } from '../../../types';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
+import { DimensionContainer } from './dimension_container';
+import { LayerActions } from './layer_actions';
+import { getSharedActions } from './layer_actions/layer_actions';
+import { LayerHeader } from './layer_header';
+import { LayerPanelProps } from './types';
+import { useFocusUpdate } from './use_focus_update';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{

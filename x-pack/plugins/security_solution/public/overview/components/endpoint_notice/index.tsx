@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../common/lib/kibana';
+import React, { memo } from 'react';
 import { APP_UI_ID } from '../../../../common/constants';
-import { getEndpointListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { useKibana } from '../../../common/lib/kibana';
+import { getEndpointListPath } from '../../../management/common/routing';
 
 export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) => {
   const { getUrlForApp } = useKibana().services.application;

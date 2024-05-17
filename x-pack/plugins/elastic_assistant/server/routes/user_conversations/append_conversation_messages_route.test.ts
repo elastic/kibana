@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES } from '@kbn/elastic-assistant-common';
-import { getAppendConversationMessageRequest, requestMock } from '../../__mocks__/request';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { serverMock } from '../../__mocks__/server';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   getAppendConversationMessagesSchemaMock,
   getConversationMock,
   getQueryConversationParams,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
+import { getAppendConversationMessageRequest, requestMock } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { serverMock } from '../../__mocks__/server';
 import { appendConversationMessageRoute } from './append_conversation_messages_route';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Append conversation messages route', () => {
   let server: ReturnType<typeof serverMock.create>;

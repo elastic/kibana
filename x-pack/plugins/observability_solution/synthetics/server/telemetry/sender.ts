@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import { Subject, exhaustMap, takeUntil, timer } from 'rxjs';
 
 import { cloneDeep } from 'lodash';
 

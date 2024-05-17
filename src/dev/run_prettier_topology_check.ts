@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import globby from 'globby';
 import path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import globby from 'globby';
 
 function listPaths(filePaths: string[]) {
   return filePaths.map((filePath: string) => ` - ${filePath}`).join('\n');

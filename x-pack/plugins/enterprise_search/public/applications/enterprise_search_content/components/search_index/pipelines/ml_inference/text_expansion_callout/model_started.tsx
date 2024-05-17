@@ -8,12 +8,12 @@
 import React from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,9 +22,9 @@ import { KibanaLogic } from '../../../../../../shared/kibana';
 import { TRAINED_MODELS_PATH } from '../utils';
 
 import {
+  FineTuneModelsButton,
   TextExpansionCallOutState,
   TextExpansionDismissButton,
-  FineTuneModelsButton,
 } from './text_expansion_callout';
 
 export const ModelStarted = ({
@@ -57,14 +57,14 @@ export const ModelStarted = ({
                         { defaultMessage: 'Your ELSER model has started single-threaded.' }
                       )
                   : isCompact
-                  ? i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
-                      { defaultMessage: 'Your ELSER model is running.' }
-                    )
-                  : i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
-                      { defaultMessage: 'Your ELSER model has started.' }
-                    )}
+                    ? i18n.translate(
+                        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
+                        { defaultMessage: 'Your ELSER model is running.' }
+                      )
+                    : i18n.translate(
+                        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
+                        { defaultMessage: 'Your ELSER model has started.' }
+                      )}
               </h3>
             </EuiText>
           </EuiFlexItem>

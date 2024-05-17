@@ -6,20 +6,20 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import unified from 'unified';
-import markdown from 'remark-parse-no-trim';
-import { some, filter } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import deepEqual from 'fast-deep-equal';
+import { filter, some } from 'lodash';
+import markdown from 'remark-parse-no-trim';
+import unified from 'unified';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createActionHandler } from '../../handlers';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { parser as OsqueryParser } from './osquery_parser';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

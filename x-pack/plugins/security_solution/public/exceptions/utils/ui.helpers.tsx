@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiText, EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, EuiText } from '@elastic/eui';
+import React from 'react';
 
 import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import moment from 'moment';
-import * as i18n from './translations';
 import { WithCopyToClipboard } from '../../common/lib/clipboard/with_copy_to_clipboard';
+import * as i18n from './translations';
 
 /**
  * Formats ExceptionItem.comments into EuiCommentList format

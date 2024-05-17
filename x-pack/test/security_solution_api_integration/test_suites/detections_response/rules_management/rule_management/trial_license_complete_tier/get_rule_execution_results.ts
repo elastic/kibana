@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-import dateMath from '@kbn/datemath';
-import expect from '@kbn/expect';
-import moment from 'moment';
-import { set } from '@kbn/safer-lodash-set';
-import { v4 as uuidv4 } from 'uuid';
-import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import dateMath from '@kbn/datemath';
+import expect from '@kbn/expect';
+import { set } from '@kbn/safer-lodash-set';
+import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import { cloneDeep } from 'lodash';
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  createAlertsIndex,
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+  getRuleForAlertTesting,
+  waitForRulePartialFailure,
+  waitForRuleSuccess,
+} from '../../../../../../common/utils/security_solution';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllEventLogExecutionEvents,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
 } from '../../../utils';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
-  waitForRulePartialFailure,
-  waitForRuleSuccess,
-} from '../../../../../../common/utils/security_solution';
-import {
   failedGapExecution,
   failedRanAfterDisabled,
   successfulExecution,
 } from './template_data/execution_events';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

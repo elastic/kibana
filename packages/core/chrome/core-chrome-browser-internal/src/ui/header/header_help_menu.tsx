@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, Fragment } from 'react';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component, Fragment } from 'react';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
-  ChromeHelpExtension,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
 } from '@kbn/core-chrome-browser';
 import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';

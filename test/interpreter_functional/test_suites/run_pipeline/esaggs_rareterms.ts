@@ -8,8 +8,8 @@
 
 import expect from '@kbn/expect';
 import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { ExpectExpression, expectExpressionProvider } from './helpers';
 
 export default function ({
   getService,

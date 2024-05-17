@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
+import * as rt from 'io-ts';
 
 import { MAX_DOCS_PER_PAGE } from '../constants';
 import type { PartialPaginationType } from './types';

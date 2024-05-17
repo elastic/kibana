@@ -1,3 +1,4 @@
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import {
-  AlertConsumers,
   ALERT_CASE_IDS,
-  ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_STATUS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { Dispatch, ReducerAction, ReducerState } from 'react';
 import { Alert, AlertsTableProps } from '../../../types';
 import type { bulkActionsReducer } from './bulk_actions/reducer';
@@ -84,7 +84,7 @@ export interface AlertsTableContextType {
   mutedAlerts: MutedAlerts;
   bulkActions: [
     ReducerState<typeof bulkActionsReducer>,
-    Dispatch<ReducerAction<typeof bulkActionsReducer>>
+    Dispatch<ReducerAction<typeof bulkActionsReducer>>,
   ];
   resolveRulePagePath?: (ruleId: string) => string;
   resolveAlertPagePath?: (alertId: string) => string;

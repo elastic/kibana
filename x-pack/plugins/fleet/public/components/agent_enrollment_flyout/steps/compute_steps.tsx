@@ -7,44 +7,44 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 
-import { EuiSteps, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 import { API_VERSIONS } from '../../../../common/constants';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
+import { agentPolicyRouteService, fullAgentPolicyToYaml } from '../../../services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
-import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
+import { ManualInstructions, StandaloneInstructions } from '../../enrollment_instructions';
 
 import {
-  useGetOneEnrollmentAPIKey,
-  useStartServices,
   sendGetOneAgentPolicyFull,
   useAgentVersion,
+  useGetOneEnrollmentAPIKey,
+  useStartServices,
 } from '../../../hooks';
 
-import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
+import type { InstructionProps } from '../types';
 
 import {
+  InstallAzureArmTemplateManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
   InstallGoogleCloudShellManagedAgentStep,
-  InstallAzureArmTemplateManagedAgentStep,
 } from '../../cloud_security_posture';
 
 import {
-  InstallationModeSelectionStep,
+  AgentEnrollmentConfirmationStep,
   AgentEnrollmentKeySelectionStep,
   AgentPolicySelectionStep,
-  InstallStandaloneAgentStep,
   ConfigureStandaloneAgentStep,
-  AgentEnrollmentConfirmationStep,
-  InstallManagedAgentStep,
   IncomingDataConfirmationStep,
+  InstallManagedAgentStep,
+  InstallStandaloneAgentStep,
+  InstallationModeSelectionStep,
 } from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({

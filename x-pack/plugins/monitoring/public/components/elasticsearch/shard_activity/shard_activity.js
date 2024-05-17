@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiText, EuiTitle, EuiLink, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { EuiMonitoringTable } from '../../table';
-import { RecoveryIndex } from './recovery_index';
-import { TotalTime } from './total_time';
-import { SourceDestination } from './source_destination';
-import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
-import { parseProps } from './parse_props';
+import { EuiLink, EuiSpacer, EuiSwitch, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { Fragment } from 'react';
+import { EuiMonitoringTable } from '../../table';
+import { parseProps } from './parse_props';
+import { BytesProgress, FilesProgress, TranslogProgress } from './progress';
+import { RecoveryIndex } from './recovery_index';
+import { SourceDestination } from './source_destination';
+import { TotalTime } from './total_time';
 
 const columns = [
   {

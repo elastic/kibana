@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
 import { resolve } from 'path';
-import type { ToolingLog } from '@kbn/tooling-log';
-import getPort from 'get-port';
-import { REPO_ROOT } from '@kbn/repo-info';
+import Url from 'url';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
-import type { Config } from '../../functional_test_runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
+import getPort from 'get-port';
 import { createTestEsCluster, esTestConfig } from '../../es';
+import type { Config } from '../../functional_test_runner';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;

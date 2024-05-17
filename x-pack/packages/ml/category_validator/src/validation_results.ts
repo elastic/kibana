@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  VALID_TOKEN_COUNT,
+  CATEGORY_EXAMPLES_ERROR_LIMIT,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+  CATEGORY_EXAMPLES_WARNING_LIMIT,
   MEDIAN_LINE_LENGTH_LIMIT,
   NULL_COUNT_PERCENT_LIMIT,
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
-  CATEGORY_EXAMPLES_ERROR_LIMIT,
-  CATEGORY_EXAMPLES_WARNING_LIMIT,
   VALIDATION_RESULT,
+  VALID_TOKEN_COUNT,
 } from '../common/constants/categorization';
-import type { FieldExampleCheck, CategoryFieldExample } from '../common/types/categories';
+import type { CategoryFieldExample, FieldExampleCheck } from '../common/types/categories';
 import { getMedianStringLength } from './util';
 
 export class ValidationResults {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { readKibanaConfig } from './tasks/read_kibana_config';
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';

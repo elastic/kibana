@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginServices, PluginServiceProviders, PluginServiceProvider } from './create';
-import { PresentationUtilServices } from './types';
-import { registry as stubRegistry } from './plugin_services.story';
 import { PresentationUtilPluginStart, registerExpressionsLanguage } from '..';
+import { PluginServiceProvider, PluginServiceProviders, PluginServices } from './create';
+import { registry as stubRegistry } from './plugin_services.story';
+import { PresentationUtilServices } from './types';
 
 import { capabilitiesServiceFactory } from './capabilities/capabilities.story';
+import { contentManagementServiceFactory } from './content_management/content_management.stub';
 import { dataViewsServiceFactory } from './data_views/data_views.story';
 import { labsServiceFactory } from './labs/labs.story';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions.stub';
-import { contentManagementServiceFactory } from './content_management/content_management.stub';
 
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),

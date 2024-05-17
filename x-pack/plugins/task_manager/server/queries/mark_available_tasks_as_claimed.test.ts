@@ -6,14 +6,14 @@
  */
 
 import sinon from 'sinon';
-import { shouldBeOneOf, mustBeAllOf } from './query_clauses';
+import { mustBeAllOf, shouldBeOneOf } from './query_clauses';
 
 import {
-  updateFieldsAndMarkAsFailed,
+  EnabledTask,
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
-  EnabledTask,
+  updateFieldsAndMarkAsFailed,
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';

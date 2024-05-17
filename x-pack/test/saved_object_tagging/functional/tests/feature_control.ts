@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
 import { USERS, User } from '../../common/lib';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 interface PrivilegeMap {
   view: boolean;

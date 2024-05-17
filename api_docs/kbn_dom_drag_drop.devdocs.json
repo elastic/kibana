@@ -28,11 +28,7 @@
         "description": [
           "\nA React drag / drop provider that derives its state from a RootDragDropProvider. If\npart of a React application is rendered separately from the root, this provider can\nbe used to enable drag / drop functionality within the disconnected part.\n"
         ],
-        "signature": [
-          "({ value, children }: ",
-          "ProviderProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["({ value, children }: ", "ProviderProps", ") => JSX.Element"],
         "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -44,9 +40,7 @@
             "tags": [],
             "label": "{ value, children }",
             "description": [],
-            "signature": [
-              "ProviderProps"
-            ],
+            "signature": ["ProviderProps"],
             "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -60,16 +54,10 @@
         "parentPluginId": "@kbn/dom-drag-drop",
         "id": "def-common.Draggable",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": ["constructor"],
         "label": "Draggable",
-        "description": [
-          "\nDraggable component"
-        ],
-        "signature": [
-          "({ reorderableGroup, ...props }: DraggableProps) => JSX.Element"
-        ],
+        "description": ["\nDraggable component"],
+        "signature": ["({ reorderableGroup, ...props }: DraggableProps) => JSX.Element"],
         "path": "packages/kbn-dom-drag-drop/src/draggable.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -81,9 +69,7 @@
             "tags": [],
             "label": "{ reorderableGroup, ...props }",
             "description": [],
-            "signature": [
-              "DraggableProps"
-            ],
+            "signature": ["DraggableProps"],
             "path": "packages/kbn-dom-drag-drop/src/draggable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -97,9 +83,7 @@
         "parentPluginId": "@kbn/dom-drag-drop",
         "id": "def-common.DropOverlayWrapper",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": ["constructor"],
         "label": "DropOverlayWrapper",
         "description": [
           "\nThis prevents the in-place droppable styles (under children) and allows to rather show an overlay with droppable styles (on top of children)"
@@ -150,18 +134,10 @@
         "parentPluginId": "@kbn/dom-drag-drop",
         "id": "def-common.Droppable",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": ["constructor"],
         "label": "Droppable",
-        "description": [
-          "\nDroppable component"
-        ],
-        "signature": [
-          "(props: ",
-          "DroppableProps",
-          ") => JSX.Element"
-        ],
+        "description": ["\nDroppable component"],
+        "signature": ["(props: ", "DroppableProps", ") => JSX.Element"],
         "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -173,9 +149,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "DroppableProps"
-            ],
+            "signature": ["DroppableProps"],
             "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -231,9 +205,7 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -245,9 +217,7 @@
                 "tags": [],
                 "label": "dataTestSubj",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -314,10 +284,7 @@
                 "tags": [],
                 "label": "customMiddleware",
                 "description": [],
-                "signature": [
-                  "CustomMiddleware",
-                  " | undefined"
-                ],
+                "signature": ["CustomMiddleware", " | undefined"],
                 "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -393,9 +360,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "dragging",
-            "description": [
-              "\nThe item being dragged or undefined."
-            ],
+            "description": ["\nThe item being dragged or undefined."],
             "signature": [
               {
                 "pluginId": "@kbn/dom-drag-drop",
@@ -416,9 +381,7 @@
             "type": "boolean",
             "tags": [],
             "label": "keyboardMode",
-            "description": [
-              "\nkeyboard mode"
-            ],
+            "description": ["\nkeyboard mode"],
             "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -429,13 +392,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hoveredDropTarget",
-            "description": [
-              "\ncurrently selected drop target"
-            ],
-            "signature": [
-              "DropIdentifier",
-              " | undefined"
-            ],
+            "description": ["\ncurrently selected drop target"],
+            "signature": ["DropIdentifier", " | undefined"],
             "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -446,14 +404,8 @@
             "type": "Object",
             "tags": [],
             "label": "dropTargetsByOrder",
-            "description": [
-              "\ncurrently registered drop targets"
-            ],
-            "signature": [
-              "Record<string, ",
-              "DropIdentifier",
-              "> | undefined"
-            ],
+            "description": ["\ncurrently registered drop targets"],
+            "signature": ["Record<string, ", "DropIdentifier", "> | undefined"],
             "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -464,9 +416,7 @@
             "type": "string",
             "tags": [],
             "label": "dataTestSubjPrefix",
-            "description": [
-              "\nCustomizable data-test-subj prefix"
-            ],
+            "description": ["\nCustomizable data-test-subj prefix"],
             "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -480,9 +430,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DropOverlayWrapperProps",
-        "description": [
-          "\nDropOverlayWrapper Props"
-        ],
+        "description": ["\nDropOverlayWrapper Props"],
         "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -505,9 +453,7 @@
             "tags": [],
             "label": "className",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -519,9 +465,7 @@
             "tags": [],
             "label": "overlayProps",
             "description": [],
-            "signature": [
-              "object | undefined"
-            ],
+            "signature": ["object | undefined"],
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -586,14 +530,8 @@
         "type": "Type",
         "tags": [],
         "label": "DragDropIdentifier",
-        "description": [
-          "\nDrag Drop base identifier"
-        ],
-        "signature": [
-          "Record<string, unknown> & { id: string; humanData: ",
-          "HumanData",
-          "; }"
-        ],
+        "description": ["\nDrag Drop base identifier"],
+        "signature": ["Record<string, unknown> & { id: string; humanData: ", "HumanData", "; }"],
         "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -605,9 +543,7 @@
         "type": "Type",
         "tags": [],
         "label": "DraggingIdentifier",
-        "description": [
-          "\nDragging identifier"
-        ],
+        "description": ["\nDragging identifier"],
         "signature": [
           "Record<string, unknown> & { id: string; humanData: ",
           "HumanData",
@@ -626,9 +562,7 @@
         "type": "Type",
         "tags": [],
         "label": "DropType",
-        "description": [
-          "\nTypes of drop action"
-        ],
+        "description": ["\nTypes of drop action"],
         "signature": [
           "\"reorder\" | \"field_add\" | \"field_replace\" | \"move_compatible\" | \"replace_compatible\" | \"move_incompatible\" | \"replace_incompatible\" | \"replace_duplicate_compatible\" | \"duplicate_compatible\" | \"swap_compatible\" | \"replace_duplicate_incompatible\" | \"duplicate_incompatible\" | \"swap_incompatible\" | \"field_combine\" | \"combine_compatible\" | \"combine_incompatible\""
         ],
@@ -645,9 +579,7 @@
         "type": "Object",
         "tags": [],
         "label": "DropTargetSwapDuplicateCombine",
-        "description": [
-          "\nHelpers for swap/duplicate/combine extra drops"
-        ],
+        "description": ["\nHelpers for swap/duplicate/combine extra drops"],
         "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -713,9 +645,7 @@
                 "tags": [],
                 "label": "dropType",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -744,9 +674,7 @@
                 "tags": [],
                 "label": "dropType",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
                 "deprecated": false,
                 "trackAdoption": false

@@ -48,9 +48,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -63,9 +61,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -78,9 +74,7 @@
             "tags": [],
             "label": "request",
             "description": [],
-            "signature": [
-              "Request"
-            ],
+            "signature": ["Request"],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,9 +87,7 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "signature": [
-              "Response | undefined"
-            ],
+            "signature": ["Response | undefined"],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,9 +100,7 @@
             "tags": [],
             "label": "body",
             "description": [],
-            "signature": [
-              "TResponseBody | undefined"
-            ],
+            "signature": ["TResponseBody | undefined"],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -316,9 +306,7 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": [
-                  "{ basePath?: string | undefined; }"
-                ],
+                "signature": ["{ basePath?: string | undefined; }"],
                 "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

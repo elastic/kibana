@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import {
   InfraTimerangeInput,
   MetricsAPIRequest,
   SnapshotRequest,
 } from '../../../../common/http_api';
-import moment from 'moment';
 import { transformMetricsApiResponseToSnapshotResponse } from './transform_metrics_ui_response';
 
 jest.mock('./apply_metadata_to_last_path', () => ({

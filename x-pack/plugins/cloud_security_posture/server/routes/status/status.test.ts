@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { calculateIntegrationStatus } from './status';
-import { CSPM_POLICY_TEMPLATE, VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { Installation } from '@kbn/fleet-plugin/common';
+import { CSPM_POLICY_TEMPLATE, VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
+import { calculateIntegrationStatus } from './status';
 
 const mockInstallation: Installation = {
   installed_kibana: [],

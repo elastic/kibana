@@ -6,8 +6,8 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash';
-import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { OverrideBodyQuery } from '../types';
 
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;

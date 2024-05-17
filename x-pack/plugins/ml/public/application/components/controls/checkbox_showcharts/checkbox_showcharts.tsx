@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import { EuiCheckbox, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 

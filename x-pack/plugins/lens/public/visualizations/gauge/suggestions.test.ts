@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { getSuggestions } from './suggestions';
 import {
-  IconChartVerticalBullet,
-  IconChartHorizontalBullet,
-  IconChartGaugeSemiCircle,
   IconChartGaugeArc,
   IconChartGaugeCircle,
+  IconChartGaugeSemiCircle,
+  IconChartHorizontalBullet,
+  IconChartVerticalBullet,
 } from '@kbn/chart-icons';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeVisualizationState } from './constants';
+import { getSuggestions } from './suggestions';
 
 const metricColumn = {
   columnId: 'metric-column',

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import React from 'react';
 
 const NO_OPTIONS_FOR_EXIST: EuiComboBoxOptionOption[] = [];
 

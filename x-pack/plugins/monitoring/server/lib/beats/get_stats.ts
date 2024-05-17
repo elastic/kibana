@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import type { BeatsElasticsearchResponse } from './types';
 import { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
+import { beatsAggFilterPath, beatsAggResponseHandler, beatsUuidsAgg } from './_beats_stats';
 import { createBeatsQuery } from './create_beats_query';
-import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
+import type { BeatsElasticsearchResponse } from './types';
 
 export function handleResponse(response: BeatsElasticsearchResponse) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);

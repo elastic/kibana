@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import {
   HideExpandConversationListButton as Component,

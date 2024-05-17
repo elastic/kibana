@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT, TutorialSchema, InstructionSetSchema } from '@kbn/home-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { INSTRUCTION_VARIANT, InstructionSetSchema, TutorialSchema } from '@kbn/home-plugin/server';
+import { i18n } from '@kbn/i18n';
 import {
-  createNodeAgentInstructions,
   createDjangoAgentInstructions,
+  createDotNetAgentInstructions,
   createFlaskAgentInstructions,
-  createRailsAgentInstructions,
-  createRackAgentInstructions,
-  createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions,
-  createPhpAgentInstructions,
+  createJsAgentInstructions,
+  createNodeAgentInstructions,
   createOpenTelemetryAgentInstructions,
+  createPhpAgentInstructions,
+  createRackAgentInstructions,
+  createRailsAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 

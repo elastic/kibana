@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { FLEET, INTEGRATIONS } from '../tasks/navigation';
-import { createUsers, BuiltInViewerUser, deleteUsers } from '../tasks/privileges';
 import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { FLEET, INTEGRATIONS } from '../tasks/navigation';
+import { BuiltInViewerUser, createUsers, deleteUsers } from '../tasks/privileges';
 
 import { getIntegrationCard } from '../screens/integrations';
 
 import {
-  MISSING_PRIVILEGES,
-  AGENTS_TAB,
   ADD_AGENT_BUTTON,
-  ADD_FLEET_SERVER_HEADER,
-  AGENT_POLICIES_TAB,
   ADD_AGENT_POLICY_BTN,
-  SETTINGS_TAB,
-  SETTINGS_OUTPUTS,
+  ADD_FLEET_SERVER_HEADER,
+  AGENTS_TAB,
+  AGENT_POLICIES_TAB,
+  MISSING_PRIVILEGES,
   SETTINGS_FLEET_SERVER_HOSTS,
+  SETTINGS_OUTPUTS,
+  SETTINGS_TAB,
 } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
-import { scrollToIntegration } from '../tasks/integrations';
 import { navigateToTab } from '../tasks/fleet';
+import { scrollToIntegration } from '../tasks/integrations';
 
 const usersToCreate = [BuiltInViewerUser];
 

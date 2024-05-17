@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useManagementLink } from './use_management_link';
 import { useKibana } from './use_kibana';
+import { useManagementLink } from './use_management_link';
 
 jest.mock('./use_kibana', () => ({
   useKibana: jest.fn(),

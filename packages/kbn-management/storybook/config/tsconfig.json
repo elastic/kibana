@@ -10,13 +10,7 @@
       "@emotion/react/types/css-prop"
     ]
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/storybook"
-  ]
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/storybook"]
 }

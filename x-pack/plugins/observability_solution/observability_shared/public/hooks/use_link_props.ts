@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { stringify } from 'query-string';
-import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
+import { stringify } from 'query-string';
+import { useMemo } from 'react';
 import { useNavigationWarningPrompt } from '../components/navigation_warning_prompt';
+import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
 
 type Search = Record<string, string | string[]>;
 

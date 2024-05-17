@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 
-import { TagSelector, TagList } from '../mocks';
+import { TagList, TagSelector } from '../mocks';
 import { ContentEditorProvider } from '../services';
 import type { Services } from '../services';
 

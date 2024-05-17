@@ -37,9 +37,7 @@
         "summary": "Rotate the encryption key for encrypted saved objects.",
         "operationId": "rotateEncryptionKey",
         "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "in": "query",
@@ -119,9 +117,7 @@
         "summary": "Create multiple Kibana saved objects.",
         "operationId": "bulkCreateSavedObjects",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -178,9 +174,7 @@
         "operationId": "bulkDeleteSavedObjects",
         "description": "WARNING: When you delete a saved object, it cannot be recovered.\n",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -236,9 +230,7 @@
         "summary": "Retrieve multiple Kibana saved objects by identifier.",
         "operationId": "bulkGetSavedObjects",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -287,9 +279,7 @@
         "operationId": "bulkResolveSavedObjects",
         "deprecated": true,
         "description": "Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.\n",
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -337,9 +327,7 @@
         "summary": "Update the attributes for multiple Kibana saved objects.",
         "operationId": "bulkUpdateSavedObjects",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -387,9 +375,7 @@
         "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
         "operationId": "exportSavedObjects",
         "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -477,9 +463,7 @@
         "summary": "Retrieve a paginated set of Kibana saved objects.",
         "operationId": "findSavedObjects",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "in": "query",
@@ -645,9 +629,7 @@
         "summary": "Create sets of Kibana saved objects from a file created by the export API.",
         "operationId": "importSavedObjects",
         "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -758,9 +740,7 @@
         "summary": "Resolve errors from the Import objects API.",
         "operationId": "resolveImportErrors",
         "description": "To resolve errors, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -790,9 +770,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "retries"
-                ],
+                "required": ["retries"],
                 "properties": {
                   "file": {
                     "description": "The same file given to the import API.",
@@ -804,10 +782,7 @@
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": [
-                        "type",
-                        "id"
-                      ],
+                      "required": ["type", "id"],
                       "properties": {
                         "type": {
                           "description": "The saved object type.",
@@ -918,9 +893,7 @@
         "summary": "Create Kibana saved objects with randomly generated identifiers.",
         "operationId": "createSavedObject",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -943,9 +916,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "attributes"
-                ],
+                "required": ["attributes"],
                 "properties": {
                   "attributes": {
                     "$ref": "#/components/schemas/attributes"
@@ -990,9 +961,7 @@
         "summary": "Retrieve a single Kibana saved object by identifier.",
         "operationId": "getSavedObject",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/saved_object_id"
@@ -1028,9 +997,7 @@
         "summary": "Create Kibana saved objects.",
         "operationId": "createSavedObjectId",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1056,9 +1023,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "attributes"
-                ],
+                "required": ["attributes"],
                 "properties": {
                   "attributes": {
                     "$ref": "#/components/schemas/attributes"
@@ -1101,9 +1066,7 @@
         "summary": "Update the attributes for Kibana saved objects.",
         "operationId": "updateSavedObject",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1165,9 +1128,7 @@
         "operationId": "resolveSavedObject",
         "description": "Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.\n",
         "deprecated": true,
-        "tags": [
-          "saved objects"
-        ],
+        "tags": ["saved objects"],
         "parameters": [
           {
             "$ref": "#/components/parameters/saved_object_id"
@@ -1363,26 +1324,18 @@
       "400_response": {
         "title": "Bad request",
         "type": "object",
-        "required": [
-          "error",
-          "message",
-          "statusCode"
-        ],
+        "required": ["error", "message", "statusCode"],
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "Bad Request"
-            ]
+            "enum": ["Bad Request"]
           },
           "message": {
             "type": "string"
           },
           "statusCode": {
             "type": "integer",
-            "enum": [
-              400
-            ]
+            "enum": [400]
           }
         }
       },

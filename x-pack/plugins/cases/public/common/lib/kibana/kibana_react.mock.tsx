@@ -8,20 +8,20 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
+import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import type { PublicAppInfo } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
-import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { StartServices } from '../../../types';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
+import type { StartServices } from '../../../types';
 import { connectorsMock } from '../../mock/connectors';
+import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 
 interface StartServiceArgs {
   license?: ILicense | null;

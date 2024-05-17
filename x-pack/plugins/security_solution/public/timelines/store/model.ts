@@ -7,26 +7,26 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
+import type {
+  PinnedEvent,
+  RowRendererId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../common/api/timeline';
 import type {
   EqlOptionsSelected,
   TimelineNonEcsData,
 } from '../../../common/search_strategy/timeline';
+import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
 import type {
-  TimelineTabs,
-  ScrollToTopEvent,
-  SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
+  ScrollToTopEvent,
   SerializedFilterQuery,
+  SortColumnTimeline,
   TimelineEventsType,
+  TimelineTabs,
 } from '../../../common/types/timeline';
-import type {
-  RowRendererId,
-  TimelineStatus,
-  TimelineType,
-  PinnedEvent,
-} from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';

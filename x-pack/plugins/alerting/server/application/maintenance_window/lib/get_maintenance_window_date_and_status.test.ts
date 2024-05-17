@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import {
-  getMaintenanceWindowDateAndStatus,
-  findRecentEventWithStatus,
-} from './get_maintenance_window_date_and_status';
 import { DateRange, MaintenanceWindowStatus } from '../../../../common';
+import {
+  findRecentEventWithStatus,
+  getMaintenanceWindowDateAndStatus,
+} from './get_maintenance_window_date_and_status';
 
 const events: DateRange[] = [
   {

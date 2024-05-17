@@ -5,17 +5,10 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, copyToClipboard } from '@elastic/eui';
 import { NewChat } from '@kbn/elastic-assistant';
-import { copyToClipboard, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { MissingTimestampCallout } from '../../callouts/missing_timestamp_callout';
-import { IncompatibleCallout } from '../../callouts/incompatible_callout';
-import { showMissingTimestampCallout } from '../../helpers';
-import { getMarkdownComments } from '../helpers';
-import { showInvalidCallout } from '../../incompatible_tab/helpers';
-import { CopyToClipboardButton } from '../../styles';
-import * as i18n from '../../../index_properties/translations';
 import {
   COPIED_RESULTS_TOAST_TITLE,
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
@@ -23,8 +16,15 @@ import {
   DATA_QUALITY_SUGGESTED_USER_PROMPT,
 } from '../../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../types';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from './translations';
 import { useDataQualityContext } from '../../../data_quality_context';
+import * as i18n from '../../../index_properties/translations';
+import { IncompatibleCallout } from '../../callouts/incompatible_callout';
+import { MissingTimestampCallout } from '../../callouts/missing_timestamp_callout';
+import { showMissingTimestampCallout } from '../../helpers';
+import { showInvalidCallout } from '../../incompatible_tab/helpers';
+import { CopyToClipboardButton } from '../../styles';
+import { getMarkdownComments } from '../helpers';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from './translations';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;

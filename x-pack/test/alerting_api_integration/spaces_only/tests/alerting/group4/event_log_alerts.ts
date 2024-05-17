@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getEventLog, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogAlertTests({ getService }: FtrProviderContext) {

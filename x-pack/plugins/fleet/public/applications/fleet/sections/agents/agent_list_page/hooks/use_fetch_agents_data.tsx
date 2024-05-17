@@ -1,31 +1,31 @@
+import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
 
-import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../../types';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 import {
-  usePagination,
-  useGetAgentPolicies,
-  sendGetAgents,
-  sendGetAgentStatus,
-  useUrlParams,
-  useStartServices,
-  sendGetAgentTags,
-  sendGetAgentPolicies,
-  useAuthz,
   sendGetActionStatus,
+  sendGetAgentPolicies,
+  sendGetAgentStatus,
+  sendGetAgentTags,
+  sendGetAgents,
+  useAuthz,
+  useGetAgentPolicies,
+  usePagination,
+  useStartServices,
+  useUrlParams,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
+import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../../types';
 
 import { getKuery } from '../utils/get_kuery';
 
@@ -301,11 +301,14 @@ export function useFetchAgentsData() {
     [agentPoliciesRequest]
   );
   const agentPoliciesIndexedById = useMemo(() => {
-    return agentPolicies.reduce((acc, agentPolicy) => {
-      acc[agentPolicy.id] = agentPolicy;
+    return agentPolicies.reduce(
+      (acc, agentPolicy) => {
+        acc[agentPolicy.id] = agentPolicy;
 
-      return acc;
-    }, {} as { [k: string]: AgentPolicy });
+        return acc;
+      },
+      {} as { [k: string]: AgentPolicy }
+    );
   }, [agentPolicies]);
 
   return {

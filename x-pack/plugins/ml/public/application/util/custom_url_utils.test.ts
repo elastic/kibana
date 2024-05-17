@@ -13,12 +13,12 @@ import type {
 } from '@kbn/ml-anomaly-utils';
 
 import {
-  replaceTokensInUrlValue,
+  getQueryField,
   getUrlForRecord,
   isValidLabel,
   isValidTimeRange,
   openCustomUrlWindow,
-  getQueryField,
+  replaceTokensInUrlValue,
 } from './custom_url_utils';
 
 describe('ML - custom URL utils', () => {

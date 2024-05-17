@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Markdown } from '@kbn/shared-ux-markdown';
+import React, { FC } from 'react';
 import { ShowDebugging } from './show_debugging';
 
 export interface Props {

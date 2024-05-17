@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import { EmbeddableConsole } from './application/containers/embeddable';
+import {
+  AutocompleteInfo,
+  EmbeddableConsoleInfo,
+  createStorage,
+  setAutocompleteInfo,
+  setStorage,
+} from './services';
 import {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
@@ -20,13 +27,6 @@ import {
   ConsoleUILocatorParams,
   EmbeddedConsoleView,
 } from './types';
-import {
-  AutocompleteInfo,
-  setAutocompleteInfo,
-  EmbeddableConsoleInfo,
-  createStorage,
-  setStorage,
-} from './services';
 
 export class ConsoleUIPlugin
   implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>

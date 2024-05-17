@@ -1,3 +1,11 @@
+import {
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  Rule,
+  RuleTypeParams,
+} from '@kbn/alerting-plugin/common';
+import { RuleTypeState } from '@kbn/alerting-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +13,6 @@
  * 2.0.
  */
 import { GenericFtrProviderContext } from '@kbn/test';
-import {
-  Rule,
-  RuleTypeParams,
-  ActionGroupIdsOf,
-  AlertInstanceState as AlertState,
-  AlertInstanceContext as AlertContext,
-} from '@kbn/alerting-plugin/common';
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { services } from './services';
 
 export type GetService = GenericFtrProviderContext<typeof services, {}>['getService'];

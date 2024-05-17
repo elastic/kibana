@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
 import type {
   SearchMvtRequest,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import rison from '@kbn/rison';
 import { RENDER_AS } from './constants';
 
 export function getAggsTileRequest({

@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   GetInfraMetricsRequestBodyPayload,
   InfraAssetMetricType,
@@ -52,7 +52,7 @@ export const getInventoryModelAggregations = (
     Partial<
       Record<
         InfraAssetMetricType,
-        typeof inventoryModel.metrics.snapshot[keyof typeof inventoryModel.metrics.snapshot]
+        (typeof inventoryModel.metrics.snapshot)[keyof typeof inventoryModel.metrics.snapshot]
       >
     >
   >(

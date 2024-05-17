@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { NORMALIZE_BY_UNIT_ID, NORMALIZE_BY_UNIT_NAME } from '@kbn/lens-formula-docs';
+import type { OperationDefinition } from '..';
+import { FormBasedLayer } from '../../../types';
 import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from '../column_types';
-import { getErrorsForDateReference } from './utils';
-import type { OperationDefinition } from '..';
 import { combineErrorMessages, getFormatFromPreviousColumn } from '../helpers';
-import { FormBasedLayer } from '../../../types';
+import { getErrorsForDateReference } from './utils';
 
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
+import { act } from 'react-dom/test-utils';
 
 import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
-import { kibanaDeprecationsServiceHelpers } from '../service.mock';
 import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
+import { kibanaDeprecationsServiceHelpers } from '../service.mock';
 
 describe('Kibana deprecations - Deprecations table - Error handling', () => {
   let testBed: KibanaTestBed;

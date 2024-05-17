@@ -1,3 +1,4 @@
+import type { ElasticsearchClient } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,24 +6,23 @@
  * 2.0.
  */
 import moment from 'moment';
-import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type {
-  FleetServerAgentAction,
-  ActionStatus,
-  ActionErrorResult,
-  AgentActionType,
-  ActionStatusOptions,
-} from '../../types';
+import { appContextService } from '..';
 import {
+  AGENTS_INDEX,
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
-  AGENTS_INDEX,
   AGENT_POLICY_INDEX,
 } from '../../../common';
-import { appContextService } from '..';
+import type {
+  ActionErrorResult,
+  ActionStatus,
+  ActionStatusOptions,
+  AgentActionType,
+  FleetServerAgentAction,
+} from '../../types';
 
 /**
  * Return current bulk actions.
@@ -168,10 +168,10 @@ async function getActionResults(
       status: cancelledAction
         ? 'CANCELLED'
         : errorCount > 0 && complete
-        ? 'FAILED'
-        : complete
-        ? 'COMPLETE'
-        : action.status,
+          ? 'FAILED'
+          : complete
+            ? 'COMPLETE'
+            : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
@@ -241,43 +241,46 @@ async function getActions(
   });
 
   return Object.values(
-    res.hits.hits.reduce((acc, hit) => {
-      if (!hit._source || !hit._source.action_id) {
+    res.hits.hits.reduce(
+      (acc, hit) => {
+        if (!hit._source || !hit._source.action_id) {
+          return acc;
+        }
+
+        const source = hit._source!;
+
+        if (!acc[source.action_id!]) {
+          const isExpired =
+            source.expiration && source.type !== 'UPGRADE'
+              ? Date.parse(source.expiration) < Date.now()
+              : false;
+          acc[hit._source.action_id] = {
+            actionId: hit._source.action_id,
+            nbAgentsActionCreated: 0,
+            nbAgentsAck: 0,
+            version: hit._source.data?.version as string,
+            startTime: source.start_time,
+            type: source.type as AgentActionType,
+            nbAgentsActioned: source.total ?? 0,
+            status: isExpired
+              ? 'EXPIRED'
+              : hasRolloutPeriodPassed(source)
+                ? 'ROLLOUT_PASSED'
+                : 'IN_PROGRESS',
+            expiration: source.expiration,
+            newPolicyId: source.data?.policy_id as string,
+            creationTime: source['@timestamp']!,
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: !!source.rollout_duration_seconds,
+          };
+        }
+
+        acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
+
         return acc;
-      }
-
-      const source = hit._source!;
-
-      if (!acc[source.action_id!]) {
-        const isExpired =
-          source.expiration && source.type !== 'UPGRADE'
-            ? Date.parse(source.expiration) < Date.now()
-            : false;
-        acc[hit._source.action_id] = {
-          actionId: hit._source.action_id,
-          nbAgentsActionCreated: 0,
-          nbAgentsAck: 0,
-          version: hit._source.data?.version as string,
-          startTime: source.start_time,
-          type: source.type as AgentActionType,
-          nbAgentsActioned: source.total ?? 0,
-          status: isExpired
-            ? 'EXPIRED'
-            : hasRolloutPeriodPassed(source)
-            ? 'ROLLOUT_PASSED'
-            : 'IN_PROGRESS',
-          expiration: source.expiration,
-          newPolicyId: source.data?.policy_id as string,
-          creationTime: source['@timestamp']!,
-          nbAgentsFailed: 0,
-          hasRolloutPeriod: !!source.rollout_duration_seconds,
-        };
-      }
-
-      acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
-
-      return acc;
-    }, {} as { [k: string]: ActionStatus })
+      },
+      {} as { [k: string]: ActionStatus }
+    )
   );
 }
 

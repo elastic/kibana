@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { numberValidator } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
+import { numberValidator } from '@kbn/ml-agg-utils';
 
 import type { Validator } from './types';
 

@@ -10,15 +10,15 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiTitle,
   EuiText,
+  EuiTitle,
   EuiToolTip,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -32,10 +32,10 @@ import { staticCustomSourceData } from '../../source_data';
 
 import { BYOSourcePrompt } from './byo_source_prompt';
 import {
-  AVAILABLE_SOURCE_EMPTY_STATE,
-  AVAILABLE_SOURCE_TITLE,
   AVAILABLE_SOURCE_BODY,
   AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON,
+  AVAILABLE_SOURCE_EMPTY_STATE,
+  AVAILABLE_SOURCE_TITLE,
 } from './constants';
 
 interface AvailableSourcesListProps {

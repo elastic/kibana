@@ -6,12 +6,12 @@
  */
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
-import { findCaseUserActions } from './api';
-import type { ServerError } from '../types';
+import type { CaseUserActionTypeWithAll, FindCaseUserActions } from '../../common/ui/types';
 import { useCasesToast } from '../common/use_cases_toast';
-import { ERROR_TITLE } from './translations';
+import type { ServerError } from '../types';
+import { findCaseUserActions } from './api';
 import { casesQueriesKeys } from './constants';
+import { ERROR_TITLE } from './translations';
 
 export const useInfiniteFindCaseUserActions = (
   caseId: string,

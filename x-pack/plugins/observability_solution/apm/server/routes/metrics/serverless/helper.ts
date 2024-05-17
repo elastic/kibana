@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { AwsLambdaArchitecture, AWSLambdaPriceFactor } from './get_serverless_summary';
+import { AWSLambdaPriceFactor, AwsLambdaArchitecture } from './get_serverless_summary';
 
 export function calcMemoryUsedRate({
   memoryFree,

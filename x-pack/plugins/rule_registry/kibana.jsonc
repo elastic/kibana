@@ -1,26 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/rule-registry-plugin",
-  "owner": [
-    "@elastic/response-ops",
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/response-ops", "@elastic/obs-ux-management-team"],
   "plugin": {
     "id": "ruleRegistry",
     "server": true,
     "browser": false,
-    "configPath": [
-      "xpack",
-      "ruleRegistry"
-    ],
-    "requiredPlugins": [
-      "alerting",
-      "data",
-      "triggersActionsUi"
-    ],
-    "optionalPlugins": [
-      "security",
-      "spaces"
-    ]
+    "configPath": ["xpack", "ruleRegistry"],
+    "requiredPlugins": ["alerting", "data", "triggersActionsUi"],
+    "optionalPlugins": ["security", "spaces"]
   }
 }

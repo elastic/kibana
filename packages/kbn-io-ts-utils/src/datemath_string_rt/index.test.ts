@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { datemathStringRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
+import { datemathStringRt } from '.';
 
 describe('datemathStringRt', () => {
   it('passes if it is a valid dateMath', () => {

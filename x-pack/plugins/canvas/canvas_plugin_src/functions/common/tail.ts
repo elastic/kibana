@@ -6,8 +6,8 @@
  */
 
 import { takeRight } from 'lodash';
-import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 
 interface Arguments {
   count: number;

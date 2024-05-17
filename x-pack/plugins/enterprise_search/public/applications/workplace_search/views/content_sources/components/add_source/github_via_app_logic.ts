@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 import {
-  GITHUB_VIA_APP_SERVICE_TYPE,
   GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+  GITHUB_VIA_APP_SERVICE_TYPE,
 } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { ContentSourceFullData } from '../../../../types';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import React, { Fragment } from 'react';
 import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 
 export const MIGRATION_STATUS_LABEL = i18n.translate(
   'xpack.monitoring.metricbeatMigration.migrationStatus',

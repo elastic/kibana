@@ -6,15 +6,15 @@
  */
 
 import '../../../../__mocks__/enterprise_search_url.mock';
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
-import { EuiCode, EuiCodeBlock, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCode, EuiCodeBlock } from '@elastic/eui';
 
-import { ApiCodeExample, FlyoutHeader, FlyoutBody, FlyoutFooter } from './api_code_example';
+import { ApiCodeExample, FlyoutBody, FlyoutFooter, FlyoutHeader } from './api_code_example';
 
 describe('ApiCodeExample', () => {
   const values = {

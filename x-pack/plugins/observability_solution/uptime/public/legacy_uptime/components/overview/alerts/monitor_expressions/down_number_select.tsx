@@ -7,8 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { AlertExpressionPopover } from '../alert_expression_popover';
-import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
+import * as labels from '../translations';
 
 interface Props {
   isEnabled?: boolean;

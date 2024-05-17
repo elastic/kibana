@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
+import React, { useCallback } from 'react';
+import { useStepContext } from '../context/step_context';
 import {
   AddAndValidateYourDataCardsId,
   AddIntegrationsSteps,
   SectionId,
   ViewDashboardSteps,
 } from '../types';
-import { useStepContext } from '../context/step_context';
 import { AddIntegrationCallout } from './add_integration_callout';
 import { GO_TO_DASHBOARDS, VIEW_DASHBOARDS_CALLOUT_TITLE } from './translations';
 

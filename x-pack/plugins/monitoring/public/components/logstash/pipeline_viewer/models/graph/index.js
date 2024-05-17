@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { vertexFactory } from './vertex_factory';
 import { edgeFactory } from './edge_factory';
-import { QueueVertex } from './queue_vertex';
 import { PluginVertex } from './plugin_vertex';
+import { QueueVertex } from './queue_vertex';
+import { vertexFactory } from './vertex_factory';
 
 export class Graph {
   constructor() {

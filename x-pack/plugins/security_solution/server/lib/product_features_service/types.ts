@@ -7,9 +7,9 @@
 
 import type { ProductFeaturesConfig } from '@kbn/security-solution-features';
 import type {
-  SecuritySubFeatureId,
-  CasesSubFeatureId,
   AssistantSubFeatureId,
+  CasesSubFeatureId,
+  SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 
 export interface ProductFeaturesConfigurator {

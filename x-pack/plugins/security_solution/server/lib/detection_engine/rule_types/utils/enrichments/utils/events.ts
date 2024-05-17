@@ -34,16 +34,19 @@ export function getEventsMapByFieldValue<T extends BaseFieldsLatest>(
   const eventsMapByFieldValue: Record<
     /** values found in mappingField.eventField */ string,
     /** Array of events with the corresponding value */ typeof events
-  > = eventsWithField.reduce((acc, event) => {
-    const eventFieldValue = getEventValue(event, eventField);
+  > = eventsWithField.reduce(
+    (acc, event) => {
+      const eventFieldValue = getEventValue(event, eventField);
 
-    if (!eventFieldValue) return {};
+      if (!eventFieldValue) return {};
 
-    acc[eventFieldValue] ??= [];
-    acc[eventFieldValue].push(event);
+      acc[eventFieldValue] ??= [];
+      acc[eventFieldValue].push(event);
 
-    return acc;
-  }, {} as { [key: string]: typeof events });
+      return acc;
+    },
+    {} as { [key: string]: typeof events }
+  );
 
   return eventsMapByFieldValue;
 }

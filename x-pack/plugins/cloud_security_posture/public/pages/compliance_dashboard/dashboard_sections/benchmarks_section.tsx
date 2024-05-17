@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiIconProps, EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import type {
   BenchmarkData,
   ComplianceDashboardDataV2,
   Evaluation,
   PosturePolicyTemplate,
 } from '../../../../common/types_old';
-import { RisksTable } from '../compliance_charts/risks_table';
-import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
 import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
-import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
+import { RisksTable } from '../compliance_charts/risks_table';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
-import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import { BenchmarkDetailsBox } from './benchmark_details_box';
+import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 const BENCHMARK_DEFAULT_SORT_ORDER = 'asc';
 
 export const getBenchmarkIdQuery = (benchmark: BenchmarkData): NavFilter => {

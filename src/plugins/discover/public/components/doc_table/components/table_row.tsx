@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import classNames from 'classnames';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { formatFieldValue } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
 import type {
   DataTableRecord,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import { TableCell } from './table_row/table_cell';
-import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { TableRowDetails } from './table_row_details';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import classNames from 'classnames';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
+import { TableCell } from './table_row/table_cell';
+import { TableRowDetails } from './table_row_details';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;

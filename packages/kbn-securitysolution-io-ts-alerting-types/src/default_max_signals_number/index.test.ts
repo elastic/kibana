@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { DefaultMaxSignalsNumber } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { DefaultMaxSignalsNumber } from '.';
 import { DEFAULT_MAX_SIGNALS } from '../constants';
 
 describe('default_from_string', () => {

@@ -12,22 +12,22 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
-import { getActionList, getActionListByStatus } from '../../services';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-import type { EndpointAppContext } from '../../types';
-import { errorHandler } from '../error_handler';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
   ResponseActionStatus,
+  ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { getActionList, getActionListByStatus } from '../../services';
+import type { EndpointAppContext } from '../../types';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
+import { errorHandler } from '../error_handler';
 
 const formatRequestParams = <
-  T extends string | ResponseActionsApiCommandNames | ResponseActionAgentType
+  T extends string | ResponseActionsApiCommandNames | ResponseActionAgentType,
 >(
   value: T | T[] | undefined
 ): T[] | undefined => (typeof value === 'string' ? [value] : value);

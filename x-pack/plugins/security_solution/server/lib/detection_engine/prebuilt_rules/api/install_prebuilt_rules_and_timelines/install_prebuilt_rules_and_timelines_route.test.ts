@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  getEmptyFindResult,
-  addPrepackagedRulesRequest,
-  getFindResultWithSingleHit,
-  getRuleMock,
-  getBasicEmptySearchResponse,
-} from '../../../routes/__mocks__/request_responses';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
 import {
-  installPrebuiltRulesAndTimelinesRoute,
-  createPrepackagedRules,
-} from './install_prebuilt_rules_and_timelines_route';
-import { listMock } from '@kbn/lists-plugin/server/mocks';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+  addPrepackagedRulesRequest,
+  getBasicEmptySearchResponse,
+  getEmptyFindResult,
+  getFindResultWithSingleHit,
+  getRuleMock,
+} from '../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
+import {
+  createPrepackagedRules,
+  installPrebuiltRulesAndTimelinesRoute,
+} from './install_prebuilt_rules_and_timelines_route';
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {

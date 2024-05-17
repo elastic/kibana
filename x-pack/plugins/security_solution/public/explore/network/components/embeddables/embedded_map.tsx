@@ -8,28 +8,28 @@
 // embedded map v2
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
+import type { Filter, Query } from '@kbn/es-query';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
+import { isEqual } from 'lodash/fp';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
-import type { Filter, Query } from '@kbn/es-query';
-import { isEqual } from 'lodash/fp';
-import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
-import type { LayerDescriptor } from '@kbn/maps-plugin/common';
-import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
-import { Embeddable } from './embeddable';
-import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
-import { MapToolTip } from './map_tool_tip/map_tool_tip';
-import * as i18n from './translations';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getLayerList } from './map_config';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import type { State } from '../../../../common/store';
+import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
+import { useIsFieldInIndexPattern } from '../../../containers/fields';
+import { Embeddable } from './embeddable';
+import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
+import { getLayerList } from './map_config';
+import { MapToolTip } from './map_tool_tip/map_tool_tip';
+import * as i18n from './translations';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -200,8 +200,9 @@ export const EmbeddedMapComponent = ({
           <EmbeddableMap>
             <services.maps.Map
               // eslint-disable-next-line react/display-name
-              getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
-                <OutPortal node={portalNode} {...tooltipProps} />}
+              getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) => (
+                <OutPortal node={portalNode} {...tooltipProps} />
+              )}
               mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
               layerList={layerList}
               filters={appliedFilters}

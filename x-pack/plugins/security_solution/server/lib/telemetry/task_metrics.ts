@@ -5,17 +5,20 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { newTelemetryLogger } from './helpers';
-import { type TelemetryLogger } from './telemetry_logger';
-import type { TaskMetric, ITaskMetricsService, Trace } from './task_metrics.types';
-import type { ITelemetryEventsSender } from './sender';
-import { TelemetryChannel } from './types';
 import { telemetryConfiguration } from './configuration';
+import { newTelemetryLogger } from './helpers';
+import type { ITelemetryEventsSender } from './sender';
+import type { ITaskMetricsService, TaskMetric, Trace } from './task_metrics.types';
+import { type TelemetryLogger } from './telemetry_logger';
+import { TelemetryChannel } from './types';
 
 export class TaskMetricsService implements ITaskMetricsService {
   private readonly logger: TelemetryLogger;
 
-  constructor(logger: Logger, private readonly sender: ITelemetryEventsSender) {
+  constructor(
+    logger: Logger,
+    private readonly sender: ITelemetryEventsSender
+  ) {
     this.logger = newTelemetryLogger(logger.get('telemetry_events.task_metrics'));
   }
 

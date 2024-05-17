@@ -7,14 +7,14 @@
 
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../../screens/overview';
 
-import { expandHostStats, expandNetworkStats } from '../../../tasks/overview';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
+import { expandHostStats, expandNetworkStats } from '../../../tasks/overview';
 
 import { OVERVIEW_URL } from '../../../urls/navigation';
 
-import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
+import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 
 const mockTimeline = getTimeline();
 

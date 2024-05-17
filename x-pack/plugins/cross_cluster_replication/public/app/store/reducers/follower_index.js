@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from '../action_types';
 import { arrayToObject } from '../../services/utils';
+import * as t from '../action_types';
 
 const initialState = {
   byId: {},

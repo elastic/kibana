@@ -1,3 +1,4 @@
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,32 +6,31 @@
  * 2.0.
  */
 import {
-  PluginInitializerContext,
-  CoreStart,
   CoreSetup,
-  Plugin as PluginType,
+  CoreStart,
   Logger,
+  PluginInitializerContext,
+  Plugin as PluginType,
   SavedObjectsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { uptimeFeature } from './feature';
+import { initSyntheticsServer } from './server';
+import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { TelemetryEventsSender } from './telemetry/sender';
 import {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
   SyntheticsServerSetup,
 } from './types';
-import { TelemetryEventsSender } from './telemetry/sender';
-import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { initSyntheticsServer } from './server';
-import { uptimeFeature } from './feature';
 
-import { registerUptimeSavedObjects, savedObjectsAdapter } from './saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
-import { SyntheticsService } from './synthetics_service/synthetics_service';
-import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { uptimeRuleTypeFieldMap } from './alert_rules/common';
+import { registerUptimeSavedObjects, savedObjectsAdapter } from './saved_objects/saved_objects';
+import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { SyntheticsService } from './synthetics_service/synthetics_service';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;

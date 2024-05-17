@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl';
 import { mockOptions } from './__mocks__';
+import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl';
 
 describe('buildUserDetailsQuery', () => {
   test('build query from options correctly', () => {

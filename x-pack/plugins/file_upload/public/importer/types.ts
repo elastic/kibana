@@ -10,7 +10,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ImportFailure, IngestPipeline, ImportDoc, ImportResponse } from '../../common/types';
+import type { ImportDoc, ImportFailure, ImportResponse, IngestPipeline } from '../../common/types';
 
 export interface ImportConfig {
   settings: IndicesIndexSettings;

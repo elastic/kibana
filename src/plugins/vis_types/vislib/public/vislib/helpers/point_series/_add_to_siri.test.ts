@@ -8,7 +8,7 @@
 
 import type { Dimension } from '@kbn/vis-type-xy-plugin/public';
 
-import { addToSiri, Serie } from './_add_to_siri';
+import { Serie, addToSiri } from './_add_to_siri';
 import { Point } from './_get_point';
 
 describe('addToSiri', function () {

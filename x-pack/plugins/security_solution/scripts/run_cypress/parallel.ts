@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import path from 'path';
+import grep from '@cypress/grep/src/plugin';
 import { run } from '@kbn/dev-cli-runner';
-import yargs from 'yargs';
-import _ from 'lodash';
-import globby from 'globby';
-import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
-import path from 'path';
-import grep from '@cypress/grep/src/plugin';
+import globby from 'globby';
+import _ from 'lodash';
+import pMap from 'p-map';
+import yargs from 'yargs';
 
 import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
@@ -26,14 +26,14 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
-import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
-import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
+import { createKbnClient } from '../endpoint/common/stack_services';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
+import { getFTRConfig } from './get_ftr_config';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
-import { getFTRConfig } from './get_ftr_config';
 
 export const cli = () => {
   run(
@@ -42,15 +42,18 @@ export const cli = () => {
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
-          arg.split(',').reduce((acc, curr) => {
-            const [key, value] = curr.split('=');
-            if (key === 'burn') {
-              acc[key] = parseInt(value, 10);
-            } else {
-              acc[key] = value;
-            }
-            return acc;
-          }, {} as Record<string, string | number>)
+          arg.split(',').reduce(
+            (acc, curr) => {
+              const [key, value] = curr.split('=');
+              if (key === 'burn') {
+                acc[key] = parseInt(value, 10);
+              } else {
+                acc[key] = value;
+              }
+              return acc;
+            },
+            {} as Record<string, string | number>
+          )
         )
         .boolean('inspect');
 

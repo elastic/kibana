@@ -14,27 +14,27 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { omit } from 'lodash';
-import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
-  builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
+  builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import { omit } from 'lodash';
+import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { CUSTOM_EQUATION } from '../i18n_strings';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
-import { CUSTOM_EQUATION } from '../i18n_strings';
 
 const customComparators = {
   ...builtInComparators,

@@ -8,12 +8,12 @@
 import { Logger } from '@kbn/logging';
 import { map } from 'lodash';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import { AlertInstanceContext, AlertInstanceState } from '../types';
 
 interface TrimmedRecoveredAlertsResult<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  RecoveryActionGroupIds extends string
+  RecoveryActionGroupIds extends string,
 > {
   trimmedAlertsRecovered: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
   earlyRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
@@ -27,7 +27,7 @@ export interface TrimRecoveredOpts {
 export function trimRecoveredAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  RecoveryActionGroupIds extends string
+  RecoveryActionGroupIds extends string,
 >(
   logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},

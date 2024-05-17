@@ -16,7 +16,7 @@ const createXhr = (): XMLHttpRequest =>
     readyState: 0,
     responseText: '',
     status: 200,
-  } as unknown as XMLHttpRequest);
+  }) as unknown as XMLHttpRequest;
 
 test('returns observable', () => {
   const xhr = createXhr();

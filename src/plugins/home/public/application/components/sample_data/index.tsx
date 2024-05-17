@@ -12,14 +12,14 @@
  * in Elasticsearch.
  */
 
-import React from 'react';
 import {
-  // @ts-ignore
-  EuiCard,
   EuiButton,
   EuiButtonEmpty,
+  // @ts-ignore
+  EuiCard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { getServices } from '../../kibana_services';
 
 interface Props {

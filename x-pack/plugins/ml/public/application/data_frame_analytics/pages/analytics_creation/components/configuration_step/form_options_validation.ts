@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import {
   ANALYSIS_CONFIG_TYPE,

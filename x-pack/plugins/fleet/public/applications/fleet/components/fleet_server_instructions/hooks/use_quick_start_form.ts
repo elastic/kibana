@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
 import { sendCreateAgentPolicy, sendGetOneAgentPolicy, useStartServices } from '../../../hooks';
@@ -17,8 +17,8 @@ import type { FleetServerHost } from '../../../types';
 
 import { useServiceToken } from '../../../hooks/use_service_token';
 
-import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
 import { useFleetServerHost } from './use_fleet_server_host';
+import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
 
 const QUICK_START_FLEET_SERVER_POLICY_FIELDS: NewAgentPolicy = {
   id: 'fleet-server-policy',

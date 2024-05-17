@@ -12,17 +12,17 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 
+import type { ExportRulesDetails } from './export_rules_details_schema';
+import { exportRulesDetailsWithExceptionsAndConnectorsSchema } from './export_rules_details_schema';
 import {
   getOutputDetailsSample,
   getOutputDetailsSampleWithActionConnectors,
   getOutputDetailsSampleWithExceptions,
 } from './export_rules_details_schema.mock';
-import type { ExportRulesDetails } from './export_rules_details_schema';
-import { exportRulesDetailsWithExceptionsAndConnectorsSchema } from './export_rules_details_schema';
 
 describe('exportRulesDetailsWithExceptionsAndConnectorsSchema', () => {
   test('it should validate export details response', () => {

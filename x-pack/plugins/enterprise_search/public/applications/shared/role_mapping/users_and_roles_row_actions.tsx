@@ -9,15 +9,15 @@ import React, { useState } from 'react';
 
 import { EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 
-import { CANCEL_BUTTON_LABEL, MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../constants';
+import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../constants';
 
 import {
-  REMOVE_ROLE_MAPPING_TITLE,
   REMOVE_ROLE_MAPPING_BUTTON,
+  REMOVE_ROLE_MAPPING_TITLE,
   REMOVE_USER_BUTTON,
   ROLE_MODAL_TEXT,
-  USER_MODAL_TITLE,
   USER_MODAL_TEXT,
+  USER_MODAL_TITLE,
 } from './constants';
 
 interface Props {
@@ -58,11 +58,7 @@ export const UsersAndRolesRowActions: React.FC<Props> = ({
   return (
     <>
       {deleteModalVisible && deleteModal}
-      <EuiButtonIcon
-        onClick={onManageClick}
-        iconType="pencil"
-        aria-label={MANAGE_BUTTON_LABEL}
-      />{' '}
+      <EuiButtonIcon onClick={onManageClick} iconType="pencil" aria-label={MANAGE_BUTTON_LABEL} />{' '}
       <EuiButtonIcon onClick={showDeleteModal} iconType="trash" aria-label={DELETE_BUTTON_LABEL} />
     </>
   );

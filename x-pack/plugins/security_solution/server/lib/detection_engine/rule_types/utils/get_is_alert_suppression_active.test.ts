@@ -1,3 +1,4 @@
+import type { ILicense } from '@kbn/licensing-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import { of } from 'rxjs';
 import { getIsAlertSuppressionActive } from './get_is_alert_suppression_active';
-import type { ILicense } from '@kbn/licensing-plugin/server';
 
 jest.mock('@kbn/licensing-plugin/server', () => ({
   LicensingPluginSetup: jest.fn(),

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import type {
-  IKibanaSearchResponse,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/search-types';
+import { Observable } from 'rxjs';
 import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 
 export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
@@ -22,7 +22,7 @@ export interface DataSearchRequestDescriptor<Request extends IKibanaSearchReques
 
 export interface ParsedDataSearchRequestDescriptor<
   Request extends IKibanaSearchRequest,
-  ResponseData
+  ResponseData,
 > {
   request: Request;
   options: ISearchOptions;
@@ -41,7 +41,7 @@ export interface ParsedKibanaSearchResponse<ResponseData> {
 
 export interface ParsedDataSearchResponseDescriptor<
   Request extends IKibanaSearchRequest,
-  Response
+  Response,
 > {
   request: Request;
   options: ISearchOptions;

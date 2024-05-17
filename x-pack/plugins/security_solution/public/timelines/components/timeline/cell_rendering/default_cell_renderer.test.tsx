@@ -9,15 +9,15 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { columnRenderers } from '../body/renderers';
-import { getColumnRenderer } from '../body/renderers/get_column_renderer';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
+import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../common/mock';
+import { columnRenderers } from '../body/renderers';
+import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
 

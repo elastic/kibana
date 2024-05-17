@@ -7,8 +7,8 @@
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
-import { migrateTo7141 } from './usage_stats_migrations';
 import type { UsageStats } from '../../usage_stats';
+import { migrateTo7141 } from './usage_stats_migrations';
 
 const type = 'obj-type';
 const id = 'obj-id';

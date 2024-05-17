@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { RefObject, useMemo, useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { SidebarItem } from '../../common/network_data/types';
 import { MiddleTruncatedText } from './middle_truncated_text';
 import { SideBarItemHighlighter } from './styles';

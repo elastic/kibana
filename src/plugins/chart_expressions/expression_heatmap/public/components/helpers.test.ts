@@ -11,8 +11,8 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import {
   applyPaletteParams,
   getDataMinMax,
-  remapStopsByNewInterval,
   getSortPredicate,
+  remapStopsByNewInterval,
 } from './helpers';
 
 describe('applyPaletteParams', () => {

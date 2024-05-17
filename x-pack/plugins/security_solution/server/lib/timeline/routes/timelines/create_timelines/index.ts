@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
@@ -18,14 +18,14 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { createTimelineSchema } from '../../../../../../common/api/timeline';
+import type { CreateTimelinesResponse } from '../../../../../../common/api/timeline';
 import {
-  buildFrameworkRequest,
   CompareTimelinesStatus,
   TimelineStatusActions,
+  buildFrameworkRequest,
 } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelines } from './helpers';
-import type { CreateTimelinesResponse } from '../../../../../../common/api/timeline';
 
 export * from './helpers';
 

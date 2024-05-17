@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
-import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import { RiskScoreLevel } from './common';
 import type { SeverityCount } from './types';
 

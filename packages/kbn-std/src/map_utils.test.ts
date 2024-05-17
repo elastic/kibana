@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mapValuesOfMap, groupIntoMap } from './map_utils';
+import { groupIntoMap, mapValuesOfMap } from './map_utils';
 
 describe('groupIntoMap', () => {
   it('returns an empty map when there are no items to map', () => {

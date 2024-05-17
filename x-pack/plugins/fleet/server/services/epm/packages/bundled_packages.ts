@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import fs from 'fs/promises';
 import path from 'path';
+import fs from 'fs/promises';
 
 import { once } from 'lodash';
 
-import type { BundledPackage, Installation } from '../../../types';
 import { BundledPackageLocationNotFoundError } from '../../../errors';
+import type { BundledPackage, Installation } from '../../../types';
 import { appContextService } from '../../app_context';
-import { splitPkgKey, pkgToPkgKey } from '../registry';
+import { pkgToPkgKey, splitPkgKey } from '../registry';
 
 let CACHE_BUNDLED_PACKAGES: BundledPackage[] | undefined;
 

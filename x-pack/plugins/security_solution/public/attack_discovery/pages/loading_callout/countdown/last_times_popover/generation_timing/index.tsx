@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { PreferenceFormattedDate } from '../../../../../../common/components/formatted_date';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import type { GenerationInterval } from '../../../../../types';
 import { MAX_SECONDS_BADGE_WIDTH } from '../helpers';
 import * as i18n from '../translations';
-import type { GenerationInterval } from '../../../../../types';
 
 interface Props {
   interval: GenerationInterval;

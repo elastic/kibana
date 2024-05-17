@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useReducer, Reducer } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useContext, useReducer, Reducer } from 'react';
 
 import { useKibana } from '../../../../shared_imports';
 import {
+  DeserializeResult,
   DeserializedProcessorResult,
   deserializeVerboseTestOutput,
-  DeserializeResult,
 } from '../deserialize';
 import { serialize } from '../serialize';
 import { Document } from '../types';

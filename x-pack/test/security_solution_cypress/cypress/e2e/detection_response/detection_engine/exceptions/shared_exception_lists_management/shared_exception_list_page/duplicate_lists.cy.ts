@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
-import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../../../objects/exception';
+import { getNewRule } from '../../../../../../objects/rule';
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
+import {
+  createExceptionList,
+  createExceptionListItem,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { assertNumberOfExceptionItemsExists } from '../../../../../../tasks/exceptions';
 import {
   assertExceptionListsExists,
@@ -18,12 +24,6 @@ import {
 import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
-import {
-  createExceptionList,
-  createExceptionListItem,
-  deleteExceptionLists,
-} from '../../../../../../tasks/api_calls/exceptions';
-import { getNewRule } from '../../../../../../objects/rule';
 
 const expiredDate = new Date(Date.now() - 1000000).toISOString();
 const futureDate = new Date(Date.now() + 1000000).toISOString();

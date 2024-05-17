@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { ComponentMeta } from '@storybook/react';
+import React from 'react';
 
 import { SampleDataTab } from './sample_data_tab';
 
 import mdx from '../README.mdx';
+import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 import { SampleDataTabProvider } from './services';
-import { getStoryServices, getStoryArgTypes, Params } from './mocks';
 
 export default {
   title: 'Sample Data/Tab Content',

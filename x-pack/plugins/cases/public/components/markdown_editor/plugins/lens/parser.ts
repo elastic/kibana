@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
+import type { Plugin } from 'unified';
 import { ID, PREFIX } from './constants';
 
 export const LensParser: Plugin = function () {

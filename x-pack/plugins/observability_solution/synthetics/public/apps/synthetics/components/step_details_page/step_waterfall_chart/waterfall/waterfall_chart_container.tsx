@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { networkEventsSelector } from '../../../../state/network_events/selectors';
 import { JourneyStep } from '../../../../../../../common/runtime_types';
-import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
+import { networkEventsSelector } from '../../../../state/network_events/selectors';
 import { extractItems } from '../../common/network_data/data_formatting';
 import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
+import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 
 export const NO_DATA_TEXT = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.waterfallNoData',

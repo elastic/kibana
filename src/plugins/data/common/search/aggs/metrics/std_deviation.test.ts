@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IStdDevAggConfig, getStdDeviationMetricAgg } from './std_deviation';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
+import { IStdDevAggConfig, getStdDeviationMetricAgg } from './std_deviation';
 
 describe('AggTypeMetricStandardDeviationProvider class', () => {
   const typesRegistry = mockAggTypesRegistry();

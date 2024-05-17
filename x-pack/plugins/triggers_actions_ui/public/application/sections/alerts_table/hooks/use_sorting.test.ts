@@ -1,3 +1,4 @@
+import { act, renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { useSorting } from './use_sorting';
-import { renderHook, act } from '@testing-library/react-hooks';
 
 describe('useSorting', () => {
   const onSortChange = jest.fn();

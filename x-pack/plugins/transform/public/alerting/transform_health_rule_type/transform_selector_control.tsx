@@ -7,9 +7,9 @@
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { isDefined } from '@kbn/ml-is-defined';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
 export interface TransformSelectorControlProps {

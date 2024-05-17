@@ -7,28 +7,28 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
-  EuiTabs,
   EuiTab,
+  EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocumentCreationLogic, ActiveJsonTab } from '..';
+import { ActiveJsonTab, DocumentCreationLogic } from '..';
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { Errors } from '../creation_response_components';
 
 import {
-  PasteJsonTextTabContent,
-  UploadJsonFileTabContent,
   PasteJsonTextFooterContent,
+  PasteJsonTextTabContent,
   UploadJsonFileFooterContent,
+  UploadJsonFileTabContent,
 } from '.';
 
 import './json_flyout.scss';

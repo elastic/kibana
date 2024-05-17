@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiText } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { FunctionComponent } from 'react';
 
 export interface Props {

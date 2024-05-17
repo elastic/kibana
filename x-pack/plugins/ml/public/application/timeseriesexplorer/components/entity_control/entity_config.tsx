@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
 import type { EuiRadioGroupOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -23,8 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
-import type { Entity } from './entity_control';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { UiPartitionFieldConfig } from '../series_controls/series_controls';
+import type { Entity } from './entity_control';
 
 interface EntityConfigProps {
   entity: Entity;

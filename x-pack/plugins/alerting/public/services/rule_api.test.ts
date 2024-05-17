@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Rule, RuleType } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { Rule, RuleType } from '../../common';
 import { loadRule, loadRuleType, loadRuleTypes } from './rule_api';
 
 const http = httpServiceMock.createStartContract();

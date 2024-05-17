@@ -6,13 +6,13 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { ISearchOptions } from '@kbn/search-types';
 import {
   ISearchSource,
   ISearchStartSearchSource,
   SearchSource,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
+import { ISearchOptions } from '@kbn/search-types';
 import { catchError, tap, throwError } from 'rxjs';
 import { LogSearchMetricsOpts, RuleInfo, SearchMetrics } from './types';
 

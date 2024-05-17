@@ -5,20 +5,35 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge, set } from 'lodash';
-import type { Logger, LogMeta } from '@kbn/core/server';
-import { sha256 } from 'js-sha256';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { copyAllowlistedFields, filterList } from './filterlists';
+import type { LogMeta, Logger } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { sha256 } from 'js-sha256';
+import { merge, set } from 'lodash';
+import moment from 'moment';
+import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
+import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
+import {
+  DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
+  LIST_DETECTION_RULE_EXCEPTION,
+  LIST_ENDPOINT_EVENT_FILTER,
+  LIST_ENDPOINT_EXCEPTION,
+  LIST_TRUSTED_APPLICATION,
+} from './constants';
+import { copyAllowlistedFields, filterList } from './filterlists';
 import type { ITelemetryReceiver } from './receiver';
+import type { TaskExecutionPeriod } from './task';
+import {
+  type TelemetryLogger,
+  TelemetryLoggerImpl,
+  tlog as telemetryLogger,
+} from './telemetry_logger';
 import type {
-  EnhancedAlertEvent,
   ESClusterInfo,
   ESLicense,
+  EnhancedAlertEvent,
   ExceptionListItem,
   ExtraInfo,
   ListTemplate,
@@ -29,21 +44,6 @@ import type {
   TimelineTelemetryEvent,
   ValueListResponse,
 } from './types';
-import type { TaskExecutionPeriod } from './task';
-import {
-  LIST_DETECTION_RULE_EXCEPTION,
-  LIST_ENDPOINT_EXCEPTION,
-  LIST_ENDPOINT_EVENT_FILTER,
-  LIST_TRUSTED_APPLICATION,
-  DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
-} from './constants';
-import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
-import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
-import {
-  type TelemetryLogger,
-  TelemetryLoggerImpl,
-  tlog as telemetryLogger,
-} from './telemetry_logger';
 
 /**
  * Determines the when the last run was in order to execute to.

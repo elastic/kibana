@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useRunOnceErrors } from './hooks/use_run_once_errors';
-import { BrowserTestRunResult } from './browser/browser_test_results';
-import { TestRun } from './test_now_mode_flyout';
-import { SimpleTestResults } from './simple/simple_test_results';
+import React, { useEffect } from 'react';
 import { Locations, ServiceLocationErrors } from '../../../../../common/runtime_types';
+import { BrowserTestRunResult } from './browser/browser_test_results';
+import { useRunOnceErrors } from './hooks/use_run_once_errors';
+import { SimpleTestResults } from './simple/simple_test_results';
+import { TestRun } from './test_now_mode_flyout';
 
 export function TestNowMode({
   testRun,

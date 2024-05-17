@@ -9,16 +9,16 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
-import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type {
-  ColumnHeaderOptions,
   CellValueElementProps,
+  ColumnHeaderOptions,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 
-import { StatefulCell } from './stateful_cell';
 import { useGetMappedNonEcsValue } from '.';
+import { StatefulCell } from './stateful_cell';
 
 /**
  * This (test) component implement's `EuiDataGrid`'s `renderCellValue` interface,

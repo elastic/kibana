@@ -26,9 +26,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { MlPageHeader } from '../../../components/page_header';
 import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
-import { MlPageHeader } from '../../../components/page_header';
 
 export const EditFilterListHeader = ({
   canCreateFilter,

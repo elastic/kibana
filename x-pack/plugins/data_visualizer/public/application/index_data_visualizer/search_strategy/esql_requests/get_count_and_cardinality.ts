@@ -1,3 +1,4 @@
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +6,19 @@
  * 2.0.
  */
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import pLimit from 'p-limit';
-import { chunk } from 'lodash';
-import { isDefined } from '@kbn/ml-is-defined';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
-import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { getSafeESQLName } from '../requests/esql_utils';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
-import type { NonAggregatableField } from '../../types/overall_stats';
+import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
+import { isDefined } from '@kbn/ml-is-defined';
+import { chunk } from 'lodash';
+import pLimit from 'p-limit';
 import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
+import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
+import type { NonAggregatableField } from '../../types/overall_stats';
+import { getSafeESQLName } from '../requests/esql_utils';
 import type { HandleErrorCallback } from './handle_error';
 import { handleError } from './handle_error';
 
@@ -73,8 +73,8 @@ const getESQLOverallStatsInChunk = async ({
               `ne_${field.name}`
             )}),
         ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
-              field.name
-            )})`,
+          field.name
+        )})`,
           };
           // +2 for count, and count_dictinct
           startIndex += 2;

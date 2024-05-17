@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { PipelineState } from './pipeline_state';
 import { Config } from './config';
+import { PipelineState } from './pipeline_state';
 
 describe('PipelineState class', () => {
   let configJson;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SerializerFunc } from '../shared_imports';
 import {
-  PARAMETER_SERIALIZERS,
   PARAMETER_DESERIALIZERS,
+  PARAMETER_SERIALIZERS,
 } from '../components/document_fields/field_parameters';
-import { Field, DataType } from '../types';
 import { INDEX_DEFAULT } from '../constants';
+import { SerializerFunc } from '../shared_imports';
+import { DataType, Field } from '../types';
 import { getTypeMetaFromSource } from './utils';
 
 const sanitizeField = (field: Field): Field =>

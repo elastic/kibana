@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { getBaseTheme } from './theme';
-import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 describe('TSVB theme', () => {
   it('should return the basic themes if no bg color is specified', () => {

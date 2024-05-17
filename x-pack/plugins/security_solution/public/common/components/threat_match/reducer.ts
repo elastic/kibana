@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ThreatMapEntries } from './types';
 import { getDefaultEmptyEntry } from './helpers';
+import type { ThreatMapEntries } from './types';
 
 export interface State {
   andLogicIncluded: boolean;

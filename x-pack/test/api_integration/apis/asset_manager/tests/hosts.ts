@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { Asset } from '@kbn/assetManager-plugin/common/types_api';
-import { ASSETS_ENDPOINT } from './constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../types';
+import { ASSETS_ENDPOINT } from './constants';
 import { generateHostsData } from './helpers';
 
 const HOSTS_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/hosts`;

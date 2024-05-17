@@ -12,10 +12,10 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
-  TEMPLATE_NAME,
-  SETTINGS,
   ALIASES,
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
+  SETTINGS,
+  TEMPLATE_NAME,
 } from './constants';
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';

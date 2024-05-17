@@ -10,27 +10,13 @@
       "fields": [],
       "groups": "__flag__",
       "include_segment_file_sizes": "__flag__",
-      "level": [
-        "cluster",
-        "indices",
-        "shards"
-      ],
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
+      "level": ["cluster", "indices", "shards"],
+      "master_timeout": ["30s", "-1", "0"],
+      "timeout": ["30s", "-1", "0"],
       "types": "",
       "include_unloaded_segments": "__flag__"
     },
-    "methods": [
-      "GET"
-    ],
+    "methods": ["GET"],
     "patterns": [
       "_nodes/stats",
       "_nodes/{node_id}/stats",

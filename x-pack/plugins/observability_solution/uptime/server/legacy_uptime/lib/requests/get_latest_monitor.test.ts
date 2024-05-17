@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getLatestMonitor } from './get_latest_monitor';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { getLatestMonitor } from './get_latest_monitor';
 import { getUptimeESMockClient } from './test_helpers';
 
 describe('getLatestMonitor', () => {

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
-  EuiToolTip,
-  EuiTitle,
   EuiIcon,
   EuiTextColor,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
 
 export interface FlyoutTitleProps {
   /**

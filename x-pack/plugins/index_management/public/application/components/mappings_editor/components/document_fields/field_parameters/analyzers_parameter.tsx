@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { UseField, CheckBoxField, FormDataProvider } from '../../../shared_imports';
-import { NormalizedField } from '../../../types';
+import { documentationService } from '../../../../../services/documentation';
 import { getFieldConfig } from '../../../lib';
+import { CheckBoxField, FormDataProvider, UseField } from '../../../shared_imports';
+import { NormalizedField } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { AnalyzerParameter } from './analyzer_parameter';
-import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   field: NormalizedField;

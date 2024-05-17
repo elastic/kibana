@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import typeDetect from 'type-detect';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
-  SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import typeDetect from 'type-detect';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
 

@@ -8,8 +8,8 @@
 
 import { ESLint } from 'eslint';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import expect from 'expect';
-import { kibanaTestUser } from '@kbn/test';
 import { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
+import { kibanaTestUser } from '@kbn/test';
+import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common';
 import {
-  useAuthorizationContext,
+  NotAuthorizedSection,
   PageError,
   WithPrivileges,
-  NotAuthorizedSection,
+  useAuthorizationContext,
 } from '../shared_imports';
+import { useConfig } from './app_context';
 import { PageLoading } from './components';
 import { DEFAULT_SECTION, Section } from './constants';
 import {
+  PolicyAdd,
+  PolicyEdit,
   RepositoryAdd,
   RepositoryEdit,
   RestoreSnapshot,
   SnapshotRestoreHome,
-  PolicyAdd,
-  PolicyEdit,
 } from './sections';
-import { useConfig } from './app_context';
 
 export const App: React.FunctionComponent = () => {
   const { slm_ui: slmUi } = useConfig();

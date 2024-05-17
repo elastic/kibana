@@ -7,9 +7,9 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getIndexCount } from '@kbn/securitysolution-es-utils';
-import { updateMigrationSavedObject } from './update_migration_saved_object';
-import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { finalizeMigration } from './finalize_migration';
+import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
+import { updateMigrationSavedObject } from './update_migration_saved_object';
 
 jest.mock('./update_migration_saved_object');
 jest.mock('@kbn/securitysolution-es-utils');

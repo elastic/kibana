@@ -5,90 +5,90 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import { i18n } from '@kbn/i18n';
-import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import type {
   ElasticsearchClient,
+  Logger,
   SavedObject,
   SavedObjectsClientContract,
-  Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import pRetry from 'p-retry';
+import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import apm from 'elastic-apm-node';
+import pRetry from 'p-retry';
+import semverLt from 'semver/functions/lt';
 
-import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
-import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
-import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
-import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import type {
-  ArchivePackage,
-  BulkInstallPackageInfo,
-  EpmPackageInstallStatus,
-  InstallablePackage,
-  Installation,
-  InstallResult,
-  InstallSource,
-  InstallType,
-  KibanaAssetType,
-  NewPackagePolicy,
-  PackageInfo,
-  PackageVerificationResult,
-  InstallResultStatus,
-} from '../../../types';
+import { dataStreamService, licenseService } from '../..';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
   DATASET_VAR_NAME,
   GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+import { getNormalizedDataStreams, isPackagePrerelease } from '../../../../common/services';
+import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
+import { MAX_TIME_COMPLETE_INSTALL, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 import {
-  FleetError,
-  PackageOutdatedError,
-  PackagePolicyValidationError,
   ConcurrentInstallOperationError,
+  FleetError,
   FleetUnauthorizedError,
   PackageNotFoundError,
+  PackageOutdatedError,
+  PackagePolicyValidationError,
 } from '../../../errors';
-import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import { dataStreamService, licenseService } from '../..';
+import type {
+  ArchivePackage,
+  BulkInstallPackageInfo,
+  EpmPackageInstallStatus,
+  InstallResult,
+  InstallResultStatus,
+  InstallSource,
+  InstallType,
+  InstallablePackage,
+  Installation,
+  KibanaAssetType,
+  NewPackagePolicy,
+  PackageInfo,
+  PackageVerificationResult,
+} from '../../../types';
 import { appContextService } from '../../app_context';
-import * as Registry from '../registry';
+import { auditLoggingService } from '../../audit_logging';
+import type { PackageUpdateEvent } from '../../upgrade_sender';
+import { UpdateEventType, sendTelemetryEvents } from '../../upgrade_sender';
 import {
-  setPackageInfo,
-  generatePackageInfoFromArchiveBuffer,
   deleteVerificationResult,
+  generatePackageInfoFromArchiveBuffer,
+  setPackageInfo,
   unpackBufferToAssetsMap,
 } from '../archive';
+import { generateESIndexPatterns } from '../elasticsearch/template/template';
+import { getFilteredInstallPackages } from '../filtered_packages';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
-import type { PackageUpdateEvent } from '../../upgrade_sender';
-import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
-import { auditLoggingService } from '../../audit_logging';
-import { getFilteredInstallPackages } from '../filtered_packages';
+import * as Registry from '../registry';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
-import { formatVerificationResultForSO } from './package_verification';
-import { getInstallation, getInstallationObject } from './get';
-import { removeInstallation } from './remove';
-import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
-import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
-import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
-import { INITIAL_VERSION } from './custom_integrations/constants';
+import { removeOldAssets } from './cleanup';
 import { createAssets } from './custom_integrations';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
-import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
+import { INITIAL_VERSION } from './custom_integrations/constants';
+import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
+import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
+import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+import { getInstallation, getInstallationObject } from './get';
+import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
-import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+import { formatVerificationResultForSO } from './package_verification';
+import { removeInstallation } from './remove';
 
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 

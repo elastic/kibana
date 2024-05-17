@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getAllConnectorsIncludingSystemRoute } from './get_all_system';
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { getAllConnectorsIncludingSystemRoute } from './get_all_system';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),

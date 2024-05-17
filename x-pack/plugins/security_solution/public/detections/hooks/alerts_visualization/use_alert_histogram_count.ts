@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import numeral from '@elastic/numeral';
+import { useMemo } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { useVisualizationResponse } from '../../../common/components/visualization_actions/use_visualization_response';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { SHOWING_ALERTS } from '../../components/alerts_kpis/alerts_histogram_panel/translations';
-import { useVisualizationResponse } from '../../../common/components/visualization_actions/use_visualization_response';
 
 export const useAlertHistogramCount = ({
   visualizationId,

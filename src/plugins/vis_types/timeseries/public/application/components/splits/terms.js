@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React, { useCallback } from 'react';
-import { get, find } from 'lodash';
-import { GroupBySelect } from './group_by_select';
-import { createTextHandler } from '../lib/create_text_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { isPercentDisabled } from '../lib/stacked';
-import { FieldSelect } from '../aggs/field_select';
-import { MetricSelect } from '../aggs/metric_select';
 import {
-  htmlIdGenerator,
+  EuiComboBox,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldNumber,
-  EuiComboBox,
-  EuiFieldText,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { STACKED_OPTIONS } from '../../visualizations/constants';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { find, get } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { useCallback } from 'react';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { STACKED_OPTIONS } from '../../visualizations/constants';
+import { FieldSelect } from '../aggs/field_select';
+import { MetricSelect } from '../aggs/metric_select';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { isPercentDisabled } from '../lib/stacked';
+import { GroupBySelect } from './group_by_select';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 const RESET_STATE = {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 
 export const createPackRequestBodySchema = t.type({
   name: t.string,

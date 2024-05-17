@@ -8,7 +8,10 @@
 import _ from 'lodash';
 
 export class KibanaPrivilege {
-  constructor(public readonly id: string, public readonly actions: string[] = []) {}
+  constructor(
+    public readonly id: string,
+    public readonly actions: string[] = []
+  ) {}
 
   public get name() {
     return _.upperFirst(this.id);

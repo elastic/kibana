@@ -10,8 +10,8 @@ import { JsonObject } from '@kbn/utility-types';
 
 import {
   Direction,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
+  TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { getFieldsToRequest, getFilterValue } from '../../../../utils';

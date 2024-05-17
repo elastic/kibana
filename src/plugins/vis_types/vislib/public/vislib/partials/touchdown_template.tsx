@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React from 'react';
+import ReactDOM from 'react-dom/server';
 import { getAnalytics, getI18n, getTheme } from '../../services';
 
 interface Props {

@@ -1,3 +1,11 @@
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,23 +13,15 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
 import styled from 'styled-components';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { SloIncludedCount } from './components/slo_included_count';
+import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
-import type { SloItem } from './types';
+import { SloIncludedCount } from './components/slo_included_count';
 import { SloEmbeddableDeps } from './slo_alerts_embeddable';
+import type { SloItem } from './types';
 import { SloAlertsEmbeddableInput } from './types';
-import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
 
 interface Props {
   deps: SloEmbeddableDeps;

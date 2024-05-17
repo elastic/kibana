@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import { LogRecord, LogLevel } from '@kbn/logging';
 import type { Conversion } from '@kbn/core-logging-common-internal';
+import { LogLevel, LogRecord } from '@kbn/logging';
+import chalk from 'chalk';
 
 const LEVEL_COLORS = new Map([
   [LogLevel.Fatal, chalk.red],

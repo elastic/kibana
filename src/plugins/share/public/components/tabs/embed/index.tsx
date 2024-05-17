@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-import { EmbedContent } from './embed_content';
+import React, { useCallback } from 'react';
 import { useShareTabsContext } from '../../context';
+import { EmbedContent } from './embed_content';
 
 const EMBED_TAB_ACTIONS = {
   SET_EMBED_URL: 'SET_EMBED_URL',

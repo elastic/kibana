@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
 import { NumericField } from '../../../../../../../shared_imports';
-import { UseField } from '../../../../form';
 import { ROLLOVER_FORM_PATHS } from '../../../../constants';
+import { UseField } from '../../../../form';
 
 export const MaxPrimaryShardDocsField: FunctionComponent = () => {
   return (

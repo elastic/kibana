@@ -17,11 +17,11 @@ import { ModalInspectQuery } from '../inspect/modal';
 import { useInspect } from '../inspect/use_inspect';
 import { useLensAttributes } from './use_lens_attributes';
 
-import type { VisualizationActionsProps } from './types';
-import { MORE_ACTIONS } from './translations';
-import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
-import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { MORE_ACTIONS } from './translations';
+import type { VisualizationActionsProps } from './types';
+import { DEFAULT_ACTIONS, VISUALIZATION_CONTEXT_MENU_TRIGGER, useActions } from './use_actions';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 
 const Wrapper = styled.div`
   &.viz-actions {

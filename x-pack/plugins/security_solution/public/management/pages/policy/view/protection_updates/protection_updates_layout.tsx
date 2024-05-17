@@ -22,24 +22,24 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { cloneDeep } from 'lodash';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import type { Moment } from 'moment';
-import moment from 'moment';
-import { cloneDeep } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useGetProtectionUpdatesUnavailableComponent } from './hooks/use_get_protection_updates_unavailable_component';
-import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
-import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
-import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
+import type { MaybeImmutable, PolicyData } from '../../../../../../common/endpoint/types';
+import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoint/utils/controlled_artifact_rollout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
-import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
+import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
 import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
-import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoint/utils/controlled_artifact_rollout';
+import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
+import { useGetProtectionUpdatesUnavailableComponent } from './hooks/use_get_protection_updates_unavailable_component';
+import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;

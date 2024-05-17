@@ -6,9 +6,9 @@
  */
 
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
+import { isFilePickerStep, isValidationStep } from './helpers';
 import { FileUploaderSteps } from './types';
 import type { ValidatedFile } from './types';
-import { isFilePickerStep, isValidationStep } from './helpers';
 
 export interface FilePickerState {
   isLoading: boolean;

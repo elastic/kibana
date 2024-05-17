@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiColorPicker, EuiColorPickerProps } from '@elastic/eui';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { InputProps } from '../types';

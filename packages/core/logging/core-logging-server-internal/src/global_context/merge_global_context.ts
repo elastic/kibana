@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { has } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import { LogMeta } from '@kbn/logging';
+import { set } from '@kbn/safer-lodash-set';
+import { has } from 'lodash';
 import { GlobalContext } from './types';
 
 /**

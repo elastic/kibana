@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 import { ConfigureCases } from '.';
-import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
-import { customFieldsConfigurationMock } from '../../containers/mock';
+import { TestProviders, createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
 import type { AppMockRenderer } from '../../common/mock';
-import { Connectors } from './connectors';
+import { customFieldsConfigurationMock } from '../../containers/mock';
 import { ClosureOptions } from './closure_options';
+import { Connectors } from './connectors';
 
 import { useKibana } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import { useLicense } from '../../common/use_license';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import {
   connectors,
   searchURL,
+  useActionTypesResponse,
   useCaseConfigureResponse,
   useConnectorsResponse,
-  useActionTypesResponse,
   usePersistConfigurationMockResponse,
 } from './__mock__';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { useGetActionTypes } from '../../containers/configure/use_action_types';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { useLicense } from '../../common/use_license';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');

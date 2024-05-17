@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  prepareLogTable,
   Dimension,
+  prepareLogTable,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import { EXPRESSION_NAME, Orientation, ScaleOptions } from '../constants';
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
-import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 const strings = {
   help: i18n.translate('expressionTagcloud.functions.tagcloudHelpText', {

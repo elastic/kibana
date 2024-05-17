@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   // This is necessary to fix a race condition issue.

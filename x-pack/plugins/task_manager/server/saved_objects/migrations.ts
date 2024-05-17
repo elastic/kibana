@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import type {
+  MutableRuleTaskState,
+  RuleTaskState,
+  TrackedLifecycleAlertState,
+  WrappedLifecycleRuleState,
+} from '@kbn/alerting-state-types';
 import {
   LogMeta,
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-  SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
+  SavedObjectsUtils,
 } from '@kbn/core/server';
-import type {
-  RuleTaskState,
-  MutableRuleTaskState,
-  TrackedLifecycleAlertState,
-  WrappedLifecycleRuleState,
-} from '@kbn/alerting-state-types';
+import { v4 as uuidv4 } from 'uuid';
 
-import { REMOVED_TYPES } from '../task_type_dictionary';
 import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
+import { REMOVED_TYPES } from '../task_type_dictionary';
 
 interface TaskInstanceLogMeta extends LogMeta {
   migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> };

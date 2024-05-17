@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EditorFrameSetup } from '../../types';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '../../../common/types';
+import type { EditorFrameSetup } from '../../types';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { AddToExistingCase } from './add_to_existing_case';
-import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { Indicator, generateMockFileIndicator } from '../../../../common/types/indicator';
 import { KibanaContext } from '../../../hooks/use_kibana';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { AddToExistingCase } from './add_to_existing_case';
 
 const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();

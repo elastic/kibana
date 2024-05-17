@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import type { Filter, DataViewBase } from '@kbn/es-query';
-import { isCombinedFilter } from '@kbn/es-query';
 import { EuiTextColor } from '@elastic/eui';
-import { FilterBadgeGroup } from './filter_badge_group';
-import { FilterContent } from './filter_content';
+import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
+import React from 'react';
 import { getBooleanRelationType } from '../utils';
-import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
 import { bracketColorCss } from './filter_badge.styles';
+import { FilterBadgeGroup } from './filter_badge_group';
+import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
+import { FilterContent } from './filter_content';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;

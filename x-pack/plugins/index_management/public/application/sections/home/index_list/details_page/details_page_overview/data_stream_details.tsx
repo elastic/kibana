@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { FunctionComponent, ReactNode } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDataStreamDetailsLink, getTemplateDetailsLink } from '../../../../../services/routing';
-import { useLoadDataStream } from '../../../../../services/api';
 import { useAppContext } from '../../../../../app_context';
+import { useLoadDataStream } from '../../../../../services/api';
+import { getDataStreamDetailsLink, getTemplateDetailsLink } from '../../../../../services/routing';
 import { humanizeTimeStamp } from '../../../data_stream_list/humanize_time_stamp';
 import { OverviewCard } from './overview_card';
 

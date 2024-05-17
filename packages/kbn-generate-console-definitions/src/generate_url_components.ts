@@ -7,8 +7,8 @@
  */
 
 import type { DefinitionUrlParams } from '@kbn/console-plugin/common/types';
-import type { SpecificationTypes } from './types';
 import { convertUrlProperties } from './helpers';
+import type { SpecificationTypes } from './types';
 
 export const generateUrlComponents = (
   request: SpecificationTypes.Request,

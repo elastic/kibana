@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, type Observable } from 'rxjs';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { type Observable, firstValueFrom } from 'rxjs';
 import { CloudDetector } from './detector';
 
 interface Usage {

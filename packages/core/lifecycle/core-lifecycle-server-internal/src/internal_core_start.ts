@@ -8,6 +8,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { InternalDeprecationsServiceStart } from '@kbn/core-deprecations-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
@@ -15,10 +16,9 @@ import type { InternalExecutionContextStart } from '@kbn/core-execution-context-
 import type { InternalHttpServiceStart } from '@kbn/core-http-server-internal';
 import type { InternalMetricsServiceStart } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
-import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-server-internal';
 
 /**

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isBoolFilterBasedSimpleQuery } from './bool_filter_based_simple_query';
 import { simpleQueryMock } from './__mocks__/simple_query';
+import { isBoolFilterBasedSimpleQuery } from './bool_filter_based_simple_query';
 import { matchAllQuery } from './match_all_query';
 import { defaultSimpleQuery } from './simple_query';
 

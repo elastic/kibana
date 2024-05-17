@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import type {
+  Capabilities,
+  CustomRequestHandlerContext,
+  IRouter,
   ISavedObjectTypeRegistry,
+  IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
-  Capabilities,
-  IRouter,
-  CustomRequestHandlerContext,
-  IScopedClusterClient,
 } from '@kbn/core/server';
+import { Observable } from 'rxjs';
 import {
   GlobalSearchBatchedResults,
-  GlobalSearchProviderFindOptions,
-  GlobalSearchProviderResult,
-  GlobalSearchProviderFindParams,
   GlobalSearchFindParams,
+  GlobalSearchProviderFindOptions,
+  GlobalSearchProviderFindParams,
+  GlobalSearchProviderResult,
 } from '../common/types';
 import { SearchServiceSetup, SearchServiceStart } from './services';
 

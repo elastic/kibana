@@ -10,8 +10,8 @@ import { logstashNodeRoute } from './node';
 import { logstashNodesRoute } from './nodes';
 import { logstashOverviewRoute } from './overview';
 import { logstashPipelineRoute } from './pipeline';
-import { logstashClusterPipelinesRoute } from './pipelines/cluster_pipelines';
 import { logstashClusterPipelineIdsRoute } from './pipelines/cluster_pipeline_ids';
+import { logstashClusterPipelinesRoute } from './pipelines/cluster_pipelines';
 import { logstashNodePipelinesRoute } from './pipelines/node_pipelines';
 
 export function registerV1LogstashRoutes(server: MonitoringCore) {

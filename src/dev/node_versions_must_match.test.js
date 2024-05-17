@@ -7,8 +7,8 @@
  */
 
 import fs from 'fs';
-import { engines } from '../../package.json';
 import { promisify } from 'util';
+import { engines } from '../../package.json';
 const readFile = promisify(fs.readFile);
 
 describe('All configs should use a single version of Node', () => {

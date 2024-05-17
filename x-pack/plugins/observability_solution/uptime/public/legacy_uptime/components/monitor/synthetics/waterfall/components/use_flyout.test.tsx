@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useFlyout } from './use_flyout';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { IWaterfallContext } from '../context/waterfall_chart';
+import { useFlyout } from './use_flyout';
 
 import { ProjectedValues, XYChartElementEvent } from '@elastic/charts';
 

@@ -6,10 +6,10 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { HORIZONTAL_LINE } from '../common/constants';
 import { createKbnClient } from '../common/stack_services';
 import { load } from './src/load';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 
 export const cli = () => {
   run(

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption, EuiFieldTextProps } from '@elastic/eui';
-import { EuiInputPopover, EuiFieldText, htmlIdGenerator, keys } from '@elastic/eui';
+import type { EuiFieldTextProps, EuiSelectableOption } from '@elastic/eui';
+import { EuiFieldText, EuiInputPopover, htmlIdGenerator, keys } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import type { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
 
 const StyledEuiInputPopover = styled(EuiInputPopover)`
   .rightArrowIcon {
@@ -142,7 +142,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)
                 ? 'on'
                 : undefined,
-            } as EuiSelectableOption)
+            }) as EuiSelectableOption
         ),
     ],
     [hideUntitled, timelineId, timelineType]

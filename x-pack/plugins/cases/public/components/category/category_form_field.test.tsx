@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
+import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { CategoryFormField } from './category_form_field';
-import { categories } from '../../containers/mock';
-import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
+import { categories } from '../../containers/mock';
+import { CategoryFormField } from './category_form_field';
 
 describe('Category', () => {
   let appMockRender: AppMockRenderer;

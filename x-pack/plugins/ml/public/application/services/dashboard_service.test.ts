@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { dashboardServiceProvider } from './dashboard_service';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { dashboardServiceProvider } from './dashboard_service';
 
 describe('DashboardService', () => {
   const dashboard: DashboardStart = {

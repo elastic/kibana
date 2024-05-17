@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 
 export enum RowHeightMode {
   auto = 'auto',

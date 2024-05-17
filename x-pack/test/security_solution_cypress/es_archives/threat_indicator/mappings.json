@@ -796,8 +796,8 @@
                   "type": "keyword"
                 }
               }
-            }, 
-            "feed":{
+            },
+            "feed": {
               "properties": {
                 "name": {
                   "ignore_above": 1024,

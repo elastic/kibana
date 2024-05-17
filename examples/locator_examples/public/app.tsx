@@ -9,11 +9,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiText } from '@elastic/eui';
-import { Redirect, useLocation } from 'react-router-dom';
-import { Router, Routes as RouterRoutes, Route } from '@kbn/shared-ux-router';
-import { createBrowserHistory } from 'history';
+import { EuiPageBody, EuiPageSection, EuiPageTemplate, EuiText } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
+import { Route, Router, Routes as RouterRoutes } from '@kbn/shared-ux-router';
+import { createBrowserHistory } from 'history';
+import { Redirect, useLocation } from 'react-router-dom';
 
 function useQuery() {
   const { search } = useLocation();

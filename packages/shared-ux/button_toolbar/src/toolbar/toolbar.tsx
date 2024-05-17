@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { ReactElement } from 'react';
 
-import { ToolbarPopover } from '../popover';
 import { IconButtonGroup, ToolbarButton } from '../buttons';
+import { ToolbarPopover } from '../popover';
 
 /** type for cases with both button or a popover could be used */
 export type ToolbarButtonType = typeof ToolbarButton | typeof ToolbarPopover;

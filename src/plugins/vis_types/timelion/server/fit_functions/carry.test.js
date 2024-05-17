@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import fn from './carry';
-import moment from 'moment';
 import expect from '@kbn/expect';
 import _ from 'lodash';
+import moment from 'moment';
+import fn from './carry';
 
 describe('carry.js', function () {
   it('fills holes in the data', function () {

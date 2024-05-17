@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import type { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
 import type { CasesContextProps } from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';

@@ -7,16 +7,16 @@
  */
 
 import {
-  isPathValid,
-  hasSimpleExecutableName,
-  OperatingSystem,
   ConditionEntryField,
+  FILEPATH_WARNING,
+  OperatingSystem,
+  WILDCARD_WARNING,
+  hasSimpleExecutableName,
+  isPathValid,
+  validateFilePathInput,
   validateHasWildcardWithWrongOperator,
   validatePotentialWildcardInput,
-  validateFilePathInput,
   validateWildcardInput,
-  WILDCARD_WARNING,
-  FILEPATH_WARNING,
 } from '.';
 
 describe('validatePotentialWildcardInput', () => {

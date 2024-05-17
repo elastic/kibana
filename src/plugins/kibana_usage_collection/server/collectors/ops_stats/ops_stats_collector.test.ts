@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Subject } from 'rxjs';
 import {
   Collector,
-  createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
+import { Subject, firstValueFrom } from 'rxjs';
 
-import { registerOpsStatsCollector } from '.';
 import { OpsMetrics } from '@kbn/core/server';
 import { loggingSystemMock, metricsServiceMock } from '@kbn/core/server/mocks';
+import { registerOpsStatsCollector } from '.';
 
 const logger = loggingSystemMock.createLogger();
 

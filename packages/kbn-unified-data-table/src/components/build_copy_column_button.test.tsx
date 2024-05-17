@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { servicesMock } from '../../__mocks__/services';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';

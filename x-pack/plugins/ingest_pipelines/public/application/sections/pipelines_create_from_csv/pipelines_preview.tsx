@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiSpacer,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiCopy,
-  EuiCallOut,
+  EuiSpacer,
   EuiText,
-  EuiButton,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { XJsonLang } from '@kbn/monaco';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 
 import { CodeEditorField } from '@kbn/code-editor';
 

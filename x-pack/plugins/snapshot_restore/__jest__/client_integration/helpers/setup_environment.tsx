@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { merge } from 'lodash';
 import { LocationDescriptorObject } from 'history';
+import { merge } from 'lodash';
+import React from 'react';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { setUiMetricService, httpService } from '../../../public/application/services/http';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { AppContextProvider } from '../../../public/application/app_context';
+import { UiMetricService } from '../../../public/application/services';
+import { httpService, setUiMetricService } from '../../../public/application/services/http';
 import {
   breadcrumbService,
   docTitleService,
 } from '../../../public/application/services/navigation';
-import {
-  AuthorizationContext,
-  Authorization,
-  Privileges,
-  GlobalFlyout,
-} from '../../../public/shared_imports';
-import { AppContextProvider } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
+import {
+  Authorization,
+  AuthorizationContext,
+  GlobalFlyout,
+  Privileges,
+} from '../../../public/shared_imports';
 import { init as initHttpRequests } from './http_requests';
-import { UiMetricService } from '../../../public/application/services';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 const history = scopedHistoryMock.create();

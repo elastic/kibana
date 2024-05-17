@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getProp, setProp } from '@kbn/json-ast';
 import { PackageRule } from '@kbn/repo-linter';
-import { setProp, getProp } from '@kbn/json-ast';
 
 export const constantVersionRule = PackageRule.create('constantVersion', {
   async check({ pkg }) {

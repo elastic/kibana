@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { css } from '@emotion/css';
 import { isEmpty, isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { css } from '@emotion/css';
 
 import type {
   EqlOptionsSelected,

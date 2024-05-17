@@ -7,8 +7,8 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
-import type { StartRenderServices } from '../../../types';
 import { INTERNAL_RISK_SCORE_URL } from '../../../../common/constants';
+import type { StartRenderServices } from '../../../types';
 
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {

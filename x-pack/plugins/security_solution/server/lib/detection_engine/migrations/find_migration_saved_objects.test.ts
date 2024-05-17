@@ -6,8 +6,8 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { findMigrationSavedObjects } from './find_migration_saved_objects';
+import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 
 describe('findMigrationSavedObjects', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;

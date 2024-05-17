@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import React, { FC, PropsWithChildren } from 'react';
 
 /**
  * Create a separator with a text on the right side

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type ChangeEvent, type FC } from 'react';
 import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useState, type ChangeEvent, type FC } from 'react';
 
 import {
-  euiYScrollWithShadows,
-  useEuiTheme,
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
@@ -22,6 +20,8 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  euiYScrollWithShadows,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

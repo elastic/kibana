@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import moment from 'moment';
-import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
-import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
+import { FROZEN_TIER_PREFERENCE, FullTimeRangeSelector } from '@kbn/ml-date-picker';
+import { type GetTimeFieldRangeResponse, useTimefilter } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import moment from 'moment';
 import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
-import { WizardNav } from '../wizard_nav';
-import type { StepProps } from '../step_types';
-import { WIZARD_STEPS } from '../step_types';
-import { JobCreatorContext } from '../job_creator_context';
-import { useDataSource } from '../../../../../contexts/ml';
-import { EventRateChart } from '../charts/event_rate_chart';
-import type { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import type { TimeRange } from '../../../common/components';
-import { TimeRangePicker } from '../../../common/components';
-import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   ML_FROZEN_TIER_PREFERENCE,
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../../../common/types/storage';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { useDataSource } from '../../../../../contexts/ml';
+import type { LineChartPoint } from '../../../common/chart_loader';
+import type { TimeRange } from '../../../common/components';
+import { TimeRangePicker } from '../../../common/components';
+import { EventRateChart } from '../charts/event_rate_chart';
+import { JobCreatorContext } from '../job_creator_context';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
+import { WizardNav } from '../wizard_nav';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();

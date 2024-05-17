@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SelectableUrlList, UrlOption } from './selectable_url_list';
-import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
-import { useUrlSearch } from './use_url_search';
-import { useSeriesFilters } from '../../hooks/use_series_filters';
+import { isEqual, map } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';
+import { useSeriesFilters } from '../../hooks/use_series_filters';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
+import { SelectableUrlList, UrlOption } from './selectable_url_list';
+import { useUrlSearch } from './use_url_search';
 
 interface Props {
   seriesId: number;

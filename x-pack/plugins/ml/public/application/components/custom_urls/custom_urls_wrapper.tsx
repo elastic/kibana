@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import { useDashboardService } from '../../services/dashboard_service';
-import { useMlKibana } from '../../contexts/kibana';
+import type { FC } from 'react';
+import React from 'react';
 import type { Job } from '../../../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../../contexts/kibana';
+import { useDashboardService } from '../../services/dashboard_service';
 import { CustomUrls } from './custom_urls';
 
 export interface CustomUrlsWrapperProps {

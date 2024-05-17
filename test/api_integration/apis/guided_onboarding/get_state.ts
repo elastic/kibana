@@ -7,19 +7,19 @@
  */
 
 import expect from '@kbn/expect';
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import {
-  testGuideStep1ActiveState,
-  testGuideNotActiveState,
   mockPluginStateNotStarted,
+  testGuideNotActiveState,
   testGuideParams,
+  testGuideStep1ActiveState,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
   guideStateSavedObjectsType,
   pluginStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { createPluginState, createGuides } from './helpers';
+import { createGuides, createPluginState } from './helpers';
 
 const getDateXDaysAgo = (daysAgo: number): string => {
   const date = new Date();

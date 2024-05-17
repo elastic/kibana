@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { PasswordField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;

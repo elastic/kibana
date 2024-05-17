@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { ComponentStory } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getPartitionVisRenderer } from '../expression_renderers';
+import { ComponentStory } from '@storybook/react';
+import React, { FC, PropsWithChildren } from 'react';
 import { ChartTypes, PartitionChartProps } from '../../common/types';
 import { getStartDeps } from '../__mocks__';
-import { waffleArgTypes, waffleConfig, data } from './shared';
+import { getPartitionVisRenderer } from '../expression_renderers';
+import { data, waffleArgTypes, waffleConfig } from './shared';
 
 const containerSize = {
   width: '700px',

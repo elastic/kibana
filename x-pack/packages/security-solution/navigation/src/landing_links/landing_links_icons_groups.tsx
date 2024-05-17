@@ -1,3 +1,4 @@
+import { EuiFlexGroup } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
 import type { NavigationLink } from '../types';
-import { LandingLinkIcon } from './landing_links_icons';
 import { LandingColumnLinks } from './landing_links';
+import { LandingLinkIcon } from './landing_links_icons';
 
 export interface LandingLinksIconsGroupsProps {
   items: NavigationLink[];

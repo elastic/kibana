@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo } from 'react';
 import { HeaderMenu } from '../../header_menu';
 
 export interface ExceptionItemCardHeaderProps {

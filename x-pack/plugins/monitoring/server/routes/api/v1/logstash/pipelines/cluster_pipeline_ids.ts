@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { handleError } from '../../../../../lib/errors';
-import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
-import { MonitoringCore } from '../../../../../types';
-import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashPipelineClusterIdsRequestParamsRT,
   postLogstashPipelineClusterIdsRequestPayloadRT,
 } from '../../../../../../common/http_api/logstash';
+import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../../lib/errors';
+import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
+import { MonitoringCore } from '../../../../../types';
 
 export function logstashClusterPipelineIdsRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postLogstashPipelineClusterIdsRequestParamsRT);

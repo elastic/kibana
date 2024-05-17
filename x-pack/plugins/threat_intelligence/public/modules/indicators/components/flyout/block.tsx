@@ -6,11 +6,11 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { VFC } from 'react';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { VFC } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
-import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorFieldLabel } from '../common/field_label';
+import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
 
 /**

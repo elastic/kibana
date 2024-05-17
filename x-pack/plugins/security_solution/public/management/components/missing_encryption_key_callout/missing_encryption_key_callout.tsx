@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback } from 'react';
-import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useGetActionState } from '../../hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useState, useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
+import { useGetActionState } from '../../hooks';
 
 export const MissingEncryptionKeyCallout = memo(() => {
   const { data: encryptionKeyState } = useGetActionState();

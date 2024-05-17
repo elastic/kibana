@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { getUpdatableSavedObjectTypesMock } from './assignment_service.test.mocks';
 import {
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { createSavedObject, createReference } from '../../../common/test_utils';
 import { taggableTypes } from '../../../common/constants';
+import { createReference, createSavedObject } from '../../../common/test_utils';
 import { AssignmentService } from './assignment_service';
+import { getUpdatableSavedObjectTypesMock } from './assignment_service.test.mocks';
 
 describe('AssignmentService', () => {
   let service: AssignmentService;
@@ -215,7 +215,7 @@ describe('AssignmentService', () => {
               management: {
                 defaultSearchField: `${name}-search-field`,
               },
-            } as any)
+            }) as any
         );
         savedObjectClient.find.mockResolvedValue({
           saved_objects: [],
@@ -368,7 +368,7 @@ describe('AssignmentService', () => {
               management: {
                 defaultSearchField: `${name}-search-field`,
               },
-            } as any)
+            }) as any
         );
         savedObjectClient.find.mockResolvedValue({
           saved_objects: [],

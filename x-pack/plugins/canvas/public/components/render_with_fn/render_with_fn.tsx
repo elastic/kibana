@@ -9,11 +9,11 @@ import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
 
 import { isEqual } from 'lodash';
 
-import { useNotifyService } from '../../services';
-import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
+import { useNotifyService } from '../../services';
 import { useCanvasApi } from '../hooks/use_canvas_api';
+import { RenderToDom } from '../render_to_dom';
 
 const { RenderWithFn: strings } = ErrorStrings;
 

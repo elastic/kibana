@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiFlyoutBody,
-  EuiTitle,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React from 'react';
 
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { CreateJob } from './create_job';
 

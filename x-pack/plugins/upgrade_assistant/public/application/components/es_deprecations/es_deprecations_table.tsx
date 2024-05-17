@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
-  EuiTable,
-  EuiTableRow,
-  EuiTableHeaderCell,
-  EuiTableHeader,
+  EuiFlexItem,
   EuiSearchBar,
   EuiSpacer,
-  EuiFlexItem,
+  EuiTable,
   EuiTableBody,
+  EuiTableHeader,
+  EuiTableHeaderCell,
   EuiTablePagination,
-  EuiCallOut,
+  EuiTableRow,
   EuiTableRowCell,
   Pager,
   Query,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { sortBy } from 'lodash';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';
-import {
-  MlSnapshotsTableRow,
-  DefaultTableRow,
-  IndexSettingsTableRow,
-  ReindexTableRow,
-  ClusterSettingsTableRow,
-  HealthIndicatorTableRow,
-} from './deprecation_types';
-import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
+import { DeprecationTableColumns } from '../types';
+import {
+  ClusterSettingsTableRow,
+  DefaultTableRow,
+  HealthIndicatorTableRow,
+  IndexSettingsTableRow,
+  MlSnapshotsTableRow,
+  ReindexTableRow,
+} from './deprecation_types';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(

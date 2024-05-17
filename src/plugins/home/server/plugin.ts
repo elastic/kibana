@@ -7,19 +7,19 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { capabilitiesProvider } from './capabilities_provider';
+import { registerRoutes } from './routes';
+import { sampleDataTelemetry } from './saved_objects';
 import {
-  TutorialsRegistry,
-  TutorialsRegistrySetup,
-  TutorialsRegistryStart,
   SampleDataRegistry,
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
 } from './services';
-import { capabilitiesProvider } from './capabilities_provider';
-import { sampleDataTelemetry } from './saved_objects';
-import { registerRoutes } from './routes';
 
 export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 import {
-  FIELD_TYPES,
-  fieldValidators,
-  UseField,
-  Field,
-  ToggleField,
   ComboBoxField,
-  ValidationFunc,
+  FIELD_TYPES,
+  Field,
   SerializerFunc,
+  ToggleField,
+  UseField,
+  ValidationFunc,
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig } from './shared';
-import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { FieldsConfig } from './shared';
 
-import { to, from } from './shared';
+import { from, to } from './shared';
 
 const { minLengthField } = fieldValidators;
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLogTextWriter } from './tooling_log_text_writer';
 import { LogLevel } from './log_levels';
 import { Message } from './message';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
 
 export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   messages: string[] = [];

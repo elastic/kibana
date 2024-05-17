@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
+import type { VersionedRoute, VersionedRouteConfig, VersionedRouter } from '@kbn/core-http-server';
 import { omit } from 'lodash';
+import type { Router } from '../router';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
-import type { Router } from '../router';
 
 /** @internal */
 export interface VersionedRouterArgs {

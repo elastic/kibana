@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
-import { FieldIcon } from '@kbn/field-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   createStubDataView,
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
+import { FieldIcon } from '@kbn/field-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React, { ReactElement } from 'react';
 import { DataTableColumnHeader } from './data_table_column_header';
 
 const stubDataViewWithNested = createStubDataView({

@@ -6,10 +6,7 @@
     "id": "stackAlerts",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "stack_alerts"
-    ],
+    "configPath": ["xpack", "stack_alerts"],
     "requiredPlugins": [
       "unifiedSearch",
       "alerting",
@@ -20,10 +17,7 @@
       "dataViews",
       "kibanaUtils"
     ],
-    "requiredBundles": [
-      "esUiShared",
-      "textBasedLanguages"
-    ],
+    "requiredBundles": ["esUiShared", "textBasedLanguages"],
     "extraPublicDirs": ["common"]
   }
 }

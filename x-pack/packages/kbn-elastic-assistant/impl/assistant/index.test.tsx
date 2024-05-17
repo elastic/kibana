@@ -7,25 +7,25 @@
 
 import React from 'react';
 
+import type { IHttpFetchError } from '@kbn/core/public';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Assistant } from '.';
-import type { IHttpFetchError } from '@kbn/core/public';
 
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
+import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
 import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
+import { omit } from 'lodash';
 import { useLocalStorage, useSessionStorage } from 'react-use';
+import { Conversation } from '../assistant_context/types';
+import { AIConnector } from '../connectorland/connector_selector';
+import { TestProviders, mockAssistantAvailability } from '../mock/test_providers/test_providers';
+import { useFetchCurrentUserConversations } from './api';
+import * as all from './chat_send/use_chat_send';
 import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
-import { useFetchCurrentUserConversations } from './api';
-import { Conversation } from '../assistant_context/types';
-import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import { AIConnector } from '../connectorland/connector_selector';
-import { omit } from 'lodash';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');

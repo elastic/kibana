@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { writeFileSync, mkdirSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import Path, { dirname } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 
+import { createEsClientForFtrConfig } from '../es';
 import { Suite, Test } from './fake_mocha_types';
 import {
+  Config,
+  DedicatedTaskRunner,
+  DockerServersService,
+  EsVersion,
   Lifecycle,
   ProviderCollection,
   Providers,
-  readProviderSpec,
-  setupMocha,
-  runTests,
-  DockerServersService,
-  Config,
   SuiteTracker,
-  EsVersion,
-  DedicatedTaskRunner,
+  readProviderSpec,
+  runTests,
+  setupMocha,
 } from './lib';
-import { createEsClientForFtrConfig } from '../es';
 
 export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;
@@ -38,8 +38,8 @@ export class FunctionalTestRunner {
       esVersion === undefined
         ? EsVersion.getDefault()
         : esVersion instanceof EsVersion
-        ? esVersion
-        : new EsVersion(esVersion);
+          ? esVersion
+          : new EsVersion(esVersion);
   }
 
   async run(abortSignal?: AbortSignal) {

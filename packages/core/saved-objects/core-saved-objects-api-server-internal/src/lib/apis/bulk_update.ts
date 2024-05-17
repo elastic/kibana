@@ -9,38 +9,38 @@
 import { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
-  SavedObjectsErrorHelpers,
-  type SavedObject,
-  DecoratedError,
-  AuthorizeUpdateObject,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  SavedObjectSanitizedDoc,
-} from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
-import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  AuthorizeUpdateObject,
+  DecoratedError,
+  type SavedObject,
+  SavedObjectSanitizedDoc,
+  SavedObjectsErrorHelpers,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
+import { ApiExecutionContext } from './types';
 import {
   type Either,
   errorContent,
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
-  isMgetDoc,
-  left,
-  right,
-  isLeft,
-  isRight,
-  rawDocExistsInNamespace,
   getSavedObjectFromSource,
+  isLeft,
+  isMgetDoc,
+  isRight,
+  left,
   mergeForUpdate,
+  rawDocExistsInNamespace,
+  right,
 } from './utils';
-import { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;

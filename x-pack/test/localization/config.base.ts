@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services, pageObjects } from './ftr_provider_context';
+import { pageObjects, services } from './ftr_provider_context';
 
 export async function withLocale({ readConfigFile }: FtrConfigProviderContext, locale: string) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));

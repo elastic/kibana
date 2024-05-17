@@ -36,14 +36,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getFlag } from '../../../utils/get_flag';
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
+  ClickedTable,
   ExploreTableColumns,
   ExploreTableItem,
   ExploreTables,
-  SearchTermsTable,
-  ClickedTable,
-  ReferrersTable,
-  WorsePerformersTable,
   LocationsTable,
+  ReferrersTable,
+  SearchTermsTable,
+  WorsePerformersTable,
 } from '../analytics_collection_explore_table_types';
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';
@@ -168,12 +168,11 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.page',
           { defaultMessage: 'Page' }
         ),
-        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) =>
-          (
-            <EuiText size="s" color={euiTheme.colors.primaryText}>
-              <p>{value}</p>
-            </EuiText>
-          ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) => (
+          <EuiText size="s" color={euiTheme.colors.primaryText}>
+            <p>{value}</p>
+          </EuiText>
+        ),
         sortable: true,
         truncateText: true,
       },
@@ -203,12 +202,11 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.page',
           { defaultMessage: 'Page' }
         ),
-        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) =>
-          (
-            <EuiText size="s" color={euiTheme.colors.primaryText}>
-              <p>{value}</p>
-            </EuiText>
-          ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) => (
+          <EuiText size="s" color={euiTheme.colors.primaryText}>
+            <p>{value}</p>
+          </EuiText>
+        ),
         sortable: true,
         truncateText: true,
       },
@@ -238,17 +236,16 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.location',
           { defaultMessage: 'Location' }
         ),
-        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) =>
-          (
-            <EuiFlexGroup gutterSize="m" alignItems="center">
-              <EuiText>
-                <h3>{getFlag(data.countryISOCode)}</h3>
-              </EuiText>
-              <EuiText size="s" color={euiTheme.colors.primaryText}>
-                <p>{value}</p>
-              </EuiText>
-            </EuiFlexGroup>
-          ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) => (
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiText>
+              <h3>{getFlag(data.countryISOCode)}</h3>
+            </EuiText>
+            <EuiText size="s" color={euiTheme.colors.primaryText}>
+              <p>{value}</p>
+            </EuiText>
+          </EuiFlexGroup>
+        ),
         sortable: true,
         truncateText: true,
       },

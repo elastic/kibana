@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { ALERTING_FEATURE_ID, AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import { AlertStatusValues, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID, AlertConsumers } from '@kbn/rule-data-utils';
-import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
-import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
+import React, { lazy, useCallback } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
+import { AlertStatus, Rule, RuleSummary, RuleType } from '../../../../types';
+import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
-import type { RuleEventLogListProps } from './rule_event_log_list';
-import { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 import {
   getRuleHealthColor,
   getRuleStatusMessage,
 } from '../../../../common/lib/rule_status_helpers';
-import RuleStatusPanelWithApi from './rule_status_panel';
+import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 import {
   ALERT_STATUS_LICENSE_ERROR,
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
+import type { RuleEventLogListProps } from './rule_event_log_list';
+import RuleStatusPanelWithApi from './rule_status_panel';
+import { AlertListItem, RefreshToken } from './types';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));

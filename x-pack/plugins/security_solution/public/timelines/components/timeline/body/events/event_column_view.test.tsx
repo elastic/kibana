@@ -10,21 +10,21 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 
-import { EventColumnView } from './event_column_view';
-import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../../common/api/timeline';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { getDefaultControlColumn } from '../control_columns';
-import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 import {
   NOTES_DISABLE_TOOLTIP,
   NOTES_TOOLTIP,
 } from '../../../../../common/components/header_actions/translations';
-import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { getDefaultControlColumn } from '../control_columns';
+import { EventColumnView } from './event_column_view';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

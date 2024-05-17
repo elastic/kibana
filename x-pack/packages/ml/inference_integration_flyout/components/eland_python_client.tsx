@@ -5,14 +5,14 @@
  * 2.0.
  */
 import {
+  EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiSteps,
   EuiText,
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

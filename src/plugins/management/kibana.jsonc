@@ -6,16 +6,8 @@
     "id": "management",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "share"
-    ],
-    "optionalPlugins": [
-      "home",
-      "serverless"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils"
-    ]
+    "requiredPlugins": ["share"],
+    "optionalPlugins": ["home", "serverless"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }

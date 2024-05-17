@@ -93,9 +93,7 @@
             "tags": [],
             "label": "WrappedComponent",
             "description": [],
-            "signature": [
-              "React.ComponentType<P>"
-            ],
+            "signature": ["React.ComponentType<P>"],
             "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -115,9 +113,7 @@
         "type": "Type",
         "tags": [],
         "label": "SolutionNavProps",
-        "description": [
-          "\nProps for the `SolutionNav` component."
-        ],
+        "description": ["\nProps for the `SolutionNav` component."],
         "signature": [
           "Omit<",
           "EuiSideNavProps",

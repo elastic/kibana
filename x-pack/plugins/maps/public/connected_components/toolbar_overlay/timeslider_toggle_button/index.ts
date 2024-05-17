@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { TimesliderToggleButton } from './timeslider_toggle_button';
 import { closeTimeslider, openTimeslider } from '../../../actions';
-import { getIsTimesliderOpen } from '../../../selectors/ui_selectors';
 import { MapStoreState } from '../../../reducers/store';
+import { getIsTimesliderOpen } from '../../../selectors/ui_selectors';
+import { TimesliderToggleButton } from './timeslider_toggle_button';
 
 function mapStateToProps(state: MapStoreState) {
   return {

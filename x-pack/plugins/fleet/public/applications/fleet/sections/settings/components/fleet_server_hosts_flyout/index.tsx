@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiText,
-  EuiLink,
-  EuiFlyoutFooter,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSpacer,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
+  EuiSpacer,
   EuiSwitch,
-  EuiComboBox,
-  EuiCallOut,
-  EuiBetaBadge,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 
-import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
+import type { FleetProxy, FleetServerHost } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
-import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
+import { MultiRowInput } from '../multi_row_input';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 

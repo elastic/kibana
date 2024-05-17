@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import React from 'react';
 import { render } from '../../../utils/test_helper';
-import { AlertSummary } from './alert_summary';
 import { alertWithTags } from '../mock/alert';
 import { alertSummaryFieldsMock } from '../mock/alert_summary_fields';
+import { AlertSummary } from './alert_summary';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

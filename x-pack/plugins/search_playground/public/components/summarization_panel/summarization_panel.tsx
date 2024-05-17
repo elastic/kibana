@@ -9,9 +9,9 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { useLLMsModels } from '../../hooks/use_llms_models';
+import { ChatForm, ChatFormFields } from '../../types';
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { ChatForm, ChatFormFields } from '../../types';
 import { SummarizationModel } from './summarization_model';
 
 export const SummarizationPanel: React.FC = () => {

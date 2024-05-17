@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { CaseConnector, ConnectorTypeFields } from '../../common/types/domain';
+import type { ConnectorPersisted, ConnectorPersistedFields } from '../common/types/connectors';
 import { getNoneCaseConnector } from '../common/utils';
-import type { ConnectorPersistedFields, ConnectorPersisted } from '../common/types/connectors';
 
 export function findConnectorIdReference(
   name: string,
@@ -50,10 +50,13 @@ function transformConnectorFieldsToExternalModel(
     type: connector.type,
     fields:
       connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce((fields, { key, value }) => {
-            fields[key] = value;
-            return fields;
-          }, {} as Record<string, unknown>)
+        ? connector.fields.reduce(
+            (fields, { key, value }) => {
+              fields[key] = value;
+              return fields;
+            },
+            {} as Record<string, unknown>
+          )
         : null,
   } as ConnectorTypeFields;
 

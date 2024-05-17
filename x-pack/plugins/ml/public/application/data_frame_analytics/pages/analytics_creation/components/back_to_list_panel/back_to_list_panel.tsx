@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlLink } from '../../../../../contexts/kibana';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { useMlLink } from '../../../../../contexts/kibana';
 
 export const BackToListPanel: FC = () => {
   const analyticsManagementPageLink = useMlLink({

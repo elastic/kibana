@@ -12,16 +12,16 @@
  *
  *************************************************************/
 
-import Path from 'path';
-import Url from 'url';
-import readline from 'readline';
 import Fs from 'fs';
+import Path from 'path';
+import readline from 'readline';
+import Url from 'url';
 
-import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FlagsReader, RunWithCommands } from '@kbn/dev-cli-runner';
-import { createFlagError } from '@kbn/dev-cli-errors';
-import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { FlagsReader, RunWithCommands } from '@kbn/dev-cli-runner';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { EsVersion, KbnClient, readConfigFile } from '@kbn/test';
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);

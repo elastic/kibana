@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import {
-  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
-} from './test_ids';
-import { RelatedAlertsBySession } from './related_alerts_by_session';
-import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import {
+  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
+} from './test_ids';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../hooks/use_paginated_alerts');

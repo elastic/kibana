@@ -7,10 +7,10 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { getFilterRatioFormula } from './filter_ratio_formula';
+import type { Metric } from '../../../../common/types';
 import { AdditionalArgs } from '../../types';
+import { getFilterRatioFormula } from './filter_ratio_formula';
 
 describe('getFilterRatioFormula', () => {
   const metric: Metric = {

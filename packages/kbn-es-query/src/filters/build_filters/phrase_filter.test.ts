@@ -1,3 +1,4 @@
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +7,16 @@
  * Side Public License, v 1.
  */
 import { set } from '@kbn/safer-lodash-set';
+import { DataViewBase } from '../../es_query';
+import { fields, getField } from '../stubs';
 import {
+  PhraseFilter,
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
-  PhraseFilter,
   isPhraseFilter,
   isScriptedPhraseFilter,
 } from './phrase_filter';
-import { fields, getField } from '../stubs';
-import { DataViewBase } from '../../es_query';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Filter } from './types';
 
 describe('Phrase filter builder', () => {

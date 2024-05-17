@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import moment, { unitOfTime } from 'moment';
+import React, { FC } from 'react';
 
 import {
-  TooltipValue,
+  AnnotationTooltipFormatter,
   RectAnnotation,
   RectAnnotationDatum,
   RectAnnotationStyle,
-  AnnotationTooltipFormatter,
+  TooltipValue,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { euiLightVars as lightEuiTheme, euiDarkVars as darkEuiTheme } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { euiDarkVars as darkEuiTheme, euiLightVars as lightEuiTheme } from '@kbn/ui-theme';
 
 interface EndzonesProps {
   isDarkMode: boolean;

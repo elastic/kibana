@@ -6,16 +6,16 @@
  */
 
 import { EuiTextTruncate } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import type { CasesService } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/types';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { useRiskInputActions } from './use_risk_input_actions';
+import type { CasesService } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/types';
+import { get } from 'lodash/fp';
+import React, { useMemo } from 'react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import { useRiskInputActions } from './use_risk_input_actions';
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;

@@ -1,16 +1,5 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { map, uniq } from 'lodash';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type {
-  AgentPolicyServiceInterface,
-  AgentService,
-  PackagePolicyClient,
-} from '@kbn/fleet-plugin/server';
+import { errors } from '@elastic/elasticsearch';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   AgentPolicy,
   GetAgentStatusResponse,
@@ -18,20 +7,31 @@ import type {
   PackagePolicy,
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
-import { errors } from '@elastic/elasticsearch';
-import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types_old';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { map, uniq } from 'lodash';
 import {
-  SUPPORTED_POLICY_TEMPLATES,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  KSPM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  SUPPORTED_POLICY_TEMPLATES,
 } from '../../common/constants';
-import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   BenchmarksQueryParams,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../common/types/benchmarks/v1';
+import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types_old';
+import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 

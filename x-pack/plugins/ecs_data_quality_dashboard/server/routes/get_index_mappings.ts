@@ -7,11 +7,11 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
+import { GET_INDEX_MAPPINGS, INTERNAL_API_VERSION } from '../../common/constants';
 import { fetchMappings } from '../lib';
 import { buildResponse } from '../lib/build_response';
-import { GET_INDEX_MAPPINGS, INTERNAL_API_VERSION } from '../../common/constants';
-import { GetIndexMappingsParams } from '../schemas/get_index_mappings';
 import { buildRouteValidation } from '../schemas/common';
+import { GetIndexMappingsParams } from '../schemas/get_index_mappings';
 import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
 
 export const getIndexMappingsRoute = (router: IRouter, logger: Logger) => {

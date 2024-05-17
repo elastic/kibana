@@ -7,14 +7,14 @@
  */
 
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { ServiceStatusLevelId } from '@kbn/core-status-common';
 import type {
-  StatusResponse,
   StatusInfoServiceStatus as ServiceStatus,
+  StatusResponse,
 } from '@kbn/core-status-common-internal';
+import { i18n } from '@kbn/i18n';
 import type { DataType } from './format_number';
 
 interface MetricMeta {

@@ -6,8 +6,8 @@
  */
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 
 const emptyFilter = {

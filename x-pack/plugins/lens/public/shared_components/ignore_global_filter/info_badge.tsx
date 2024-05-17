@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { InfoBadge } from '../info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
+import { InfoBadge } from '../info_badges/info_badge';
 
 export function IgnoredGlobalFiltersEntries({
   layers,

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
-  EuiTitle,
-  EuiText,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useEffect, useState } from 'react';
 import { useGetCategories } from '../../../containers/use_get_categories';
-import * as i18n from '../../category/translations';
-import { CategoryViewer } from '../../category/category_viewer_component';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CategoryFormField } from '../../category/category_form_field';
+import { CategoryViewer } from '../../category/category_viewer_component';
+import * as i18n from '../../category/translations';
 import { RemovableItem } from '../../removable_item/removable_item';
 
 export interface EditCategoryProps {

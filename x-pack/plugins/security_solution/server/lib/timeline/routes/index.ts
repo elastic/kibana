@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { ConfigType } from '../../..';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import type { ConfigType } from '../../..';
+import { cleanDraftTimelinesRoute } from './draft_timelines/clean_draft_timelines';
+import { getDraftTimelinesRoute } from './draft_timelines/get_draft_timelines';
+import { installPrepackedTimelinesRoute } from './prepackaged_timelines/install_prepackaged_timelines';
 import {
+  copyTimelineRoute,
   createTimelinesRoute,
   deleteTimelinesRoute,
   exportTimelinesRoute,
@@ -18,13 +22,9 @@ import {
   patchTimelinesRoute,
   persistFavoriteRoute,
   resolveTimelineRoute,
-  copyTimelineRoute,
 } from './timelines';
-import { getDraftTimelinesRoute } from './draft_timelines/get_draft_timelines';
-import { cleanDraftTimelinesRoute } from './draft_timelines/clean_draft_timelines';
-import { installPrepackedTimelinesRoute } from './prepackaged_timelines/install_prepackaged_timelines';
 
-import { persistNoteRoute, deleteNoteRoute } from './notes';
+import { deleteNoteRoute, persistNoteRoute } from './notes';
 
 import { persistPinnedEventRoute } from './pinned_events';
 

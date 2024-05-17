@@ -61,17 +61,13 @@
         "type": "boolean",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index1"
-        ]
+        "indices": ["index1"]
       },
       "keyword": {
         "type": "keyword",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index2"
-        ]
+        "indices": ["index2"]
       }
     },
     "_source": {
@@ -107,17 +103,13 @@
         "type": "text",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index1"
-        ]
+        "indices": ["index1"]
       },
       "keyword": {
         "type": "keyword",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index2"
-        ]
+        "indices": ["index2"]
       }
     },
     "resolvable_to_number": {
@@ -125,17 +117,13 @@
         "type": "integer",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index1"
-        ]
+        "indices": ["index1"]
       },
       "long": {
         "type": "long",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index2"
-        ]
+        "indices": ["index2"]
       }
     },
     "mix_searchable": {
@@ -143,17 +131,13 @@
         "type": "text",
         "searchable": false,
         "aggregatable": true,
-        "indices": [
-          "index1"
-        ]
+        "indices": ["index1"]
       },
       "keyword": {
         "type": "keyword",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index2"
-        ]
+        "indices": ["index2"]
       }
     },
     "mix_aggregatable": {
@@ -161,17 +145,13 @@
         "type": "text",
         "searchable": true,
         "aggregatable": false,
-        "indices": [
-          "index1"
-        ]
+        "indices": ["index1"]
       },
       "keyword": {
         "type": "keyword",
         "searchable": true,
         "aggregatable": true,
-        "indices": [
-          "index2"
-        ]
+        "indices": ["index2"]
       }
     },
     "mix_searchable_other": {
@@ -179,9 +159,7 @@
         "type": "integer",
         "searchable": false,
         "aggregatable": false,
-        "non_searchable_indices": [
-          "index1"
-        ]
+        "non_searchable_indices": ["index1"]
       }
     },
     "mix_aggregatable_other": {
@@ -189,9 +167,7 @@
         "type": "integer",
         "searchable": false,
         "aggregatable": false,
-        "non_aggregatable_indices": [
-          "index1"
-        ]
+        "non_aggregatable_indices": ["index1"]
       }
     },
     "multi_parent": {

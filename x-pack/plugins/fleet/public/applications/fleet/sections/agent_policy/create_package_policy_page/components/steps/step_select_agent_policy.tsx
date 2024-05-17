@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiSuperSelect } from '@elastic/eui';
 import {
+  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiTitle,
-  EuiText,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 
-import { Error } from '../../../../../components';
-import type { AgentPolicy, Output, PackageInfo } from '../../../../../types';
-import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
-import {
-  useGetAgentPolicies,
-  useGetOutputs,
-  sendGetOneAgentPolicy,
-  useFleetStatus,
-  useGetPackagePolicies,
-} from '../../../../../hooks';
 import {
   FLEET_APM_PACKAGE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   outputType,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../../../common/constants';
+import { Error } from '../../../../../components';
+import {
+  sendGetOneAgentPolicy,
+  useFleetStatus,
+  useGetAgentPolicies,
+  useGetOutputs,
+  useGetPackagePolicies,
+} from '../../../../../hooks';
+import { doesAgentPolicyAlreadyIncludePackage, isPackageLimited } from '../../../../../services';
+import type { AgentPolicy, Output, PackageInfo } from '../../../../../types';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {

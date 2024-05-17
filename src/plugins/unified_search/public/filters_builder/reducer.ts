@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Reducer } from 'react';
-import type { Filter, BooleanRelation } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { addFilter, moveFilter, removeFilter, updateFilters } from './utils';
+import type { BooleanRelation, Filter } from '@kbn/es-query';
+import type { Reducer } from 'react';
 import type { Operator } from '../filter_bar/filter_editor';
 import { FilterLocation } from './types';
+import { addFilter, moveFilter, removeFilter, updateFilters } from './utils';
 
 /** @internal **/
 export interface FiltersBuilderState {

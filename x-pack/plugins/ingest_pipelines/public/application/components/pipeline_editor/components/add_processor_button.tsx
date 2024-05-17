@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { usePipelineProcessorsContext } from '../context';
 
 export interface Props {

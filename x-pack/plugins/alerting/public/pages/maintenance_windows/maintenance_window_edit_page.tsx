@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
-import * as i18n from './translations';
-import { PageHeader } from './components/page_header';
-import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetMaintenanceWindow } from '../../hooks/use_get_maintenance_window';
+import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
+import { PageHeader } from './components/page_header';
 import { IS_SCOPED_QUERY_ENABLED } from './constants';
+import * as i18n from './translations';
 
 export const MaintenanceWindowsEditPage = React.memo(() => {
   const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();

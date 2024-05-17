@@ -6,11 +6,11 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   JourneyStep,
   SyntheticsJourneyApiResponse,
 } from '../../../../common/runtime_types/ping/synthetics';
+import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 export interface GetJourneyDetails {
   checkGroup: string;

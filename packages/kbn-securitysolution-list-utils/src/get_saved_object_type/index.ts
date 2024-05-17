@@ -9,9 +9,9 @@
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
+  SavedObjectType,
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
-  SavedObjectType,
 } from '../types';
 
 export const getSavedObjectType = ({

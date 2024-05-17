@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { flattenPipelineSection } from './flatten_pipeline_section';
-import { PluginStatement } from '../pipeline/plugin_statement';
 import { IfStatement } from '../pipeline/if_statement';
+import { PluginStatement } from '../pipeline/plugin_statement';
+import { flattenPipelineSection } from './flatten_pipeline_section';
 
 describe('flattenPipelineSection', () => {
   let pipelineSection;

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FilterRatioAgg } from './filter_ratio';
-import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { setDataStart } from '../../../services';
+import { FIELDS, METRIC, PANEL, SERIES } from '../../../test_utils';
+import { FilterRatioAgg } from './filter_ratio';
 
 jest.mock('../query_bar_wrapper', () => ({
   QueryBarWrapper: jest.fn(() => null),

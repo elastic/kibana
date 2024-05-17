@@ -108,10 +108,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => ",
-              "MockedAuditLogger"
-            ],
+            "signature": ["() => ", "MockedAuditLogger"],
             "path": "packages/core/security/core-security-server-mocks/src/audit.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

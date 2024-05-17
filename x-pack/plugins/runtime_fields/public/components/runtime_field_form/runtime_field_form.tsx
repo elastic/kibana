@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiLink,
   EuiCallOut,
   EuiCode,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { PainlessContext, PainlessLang } from '@kbn/monaco';
+import React, { useEffect, useState, useCallback } from 'react';
 
+import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import {
-  useForm,
-  useFormData,
+  CodeEditor,
+  FieldConfig,
   Form,
   FormHook,
-  UseField,
   TextField,
-  CodeEditor,
+  UseField,
   ValidationFunc,
-  FieldConfig,
+  useForm,
+  useFormData,
 } from '../../shared_imports';
 import { RuntimeField, RuntimeType } from '../../types';
-import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
 
 export interface FormState {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
@@ -17,9 +17,9 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { createAppMockRenderer } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import { useGetCase } from '../../containers/use_get_case';
+import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
-import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');

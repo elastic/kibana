@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { clearQuery, enterQuery, navigateToIndicatorsTablePage } from '../tasks/indicators';
 import {
   ADD_INTEGRATIONS_BUTTON,
   BREADCRUMBS,
@@ -23,7 +22,6 @@ import {
   FLYOUT_TABLE,
   FLYOUT_TABS,
   FLYOUT_TITLE,
-  INDICATOR_TYPE_CELL,
   INDICATORS_TABLE,
   INDICATORS_TABLE_FEED_NAME_COLUMN_HEADER,
   INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER,
@@ -33,23 +31,25 @@ import {
   INDICATORS_TABLE_INDICATOR_TYPE_COLUMN_HEADER,
   INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER,
   INDICATORS_TABLE_ROW_CELL,
+  INDICATOR_TYPE_CELL,
   INSPECTOR_BUTTON,
   INSPECTOR_PANEL,
   LEADING_BREADCRUMB,
   QUERY_INPUT,
+  REFRESH_BUTTON,
   TABLE_CONTROLS,
   TIME_RANGE_PICKER,
-  REFRESH_BUTTON,
 } from '../screens/indicators';
-import { login, visit, waitForPageToBeLoaded } from '../tasks/login';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON } from '../screens/timeline';
 import {
   closeFlyout,
   navigateToFlyoutJsonTab,
   navigateToFlyoutTableTab,
   openFlyout,
 } from '../tasks/common';
-import { INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON } from '../screens/timeline';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { clearQuery, enterQuery, navigateToIndicatorsTablePage } from '../tasks/indicators';
+import { login, visit, waitForPageToBeLoaded } from '../tasks/login';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 

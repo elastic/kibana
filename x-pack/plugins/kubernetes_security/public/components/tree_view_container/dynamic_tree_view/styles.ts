@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { useMemo } from 'react';
 import { useEuiTheme } from '../../../hooks';
 
 export const useStyles = (depth: number) => {

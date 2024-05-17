@@ -1,3 +1,15 @@
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  niceTimeFormatter,
+} from '@elastic/charts';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +17,15 @@
  * 2.0.
  */
 import React from 'react';
-import { euiPaletteColorBlind } from '@elastic/eui';
-import {
-  AreaSeries,
-  Axis,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
-import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { asDynamicBytes } from '../../../../common/utils/formatters';
+import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { ChartContainer } from '../../shared/charts/chart_container';
-import { getTimeZone } from '../../shared/charts/helper/timezone';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
-import { asDynamicBytes } from '../../../../common/utils/formatters';
+import { getTimeZone } from '../../shared/charts/helper/timezone';
 
 export function StorageChart() {
   const { core } = useApmPluginContext();

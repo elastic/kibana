@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
 import { useTheme } from '../../../../../../hooks/use_theme';
 

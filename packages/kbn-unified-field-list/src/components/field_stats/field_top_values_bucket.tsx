@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,10 +15,11 @@ import {
   EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { IFieldSubTypeMulti } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
@@ -105,10 +105,10 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                       defaultMessage: 'Other',
                     })
                   : formattedFieldValue === ''
-                  ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                      defaultMessage: '(empty)',
-                    })
-                  : '-'}
+                    ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
+                        defaultMessage: '(empty)',
+                      })
+                    : '-'}
               </EuiText>
             )}
           </EuiFlexItem>

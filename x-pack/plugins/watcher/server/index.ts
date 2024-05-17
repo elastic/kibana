@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   const { WatcherServerPlugin } = await import('./plugin');

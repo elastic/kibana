@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { UsersContainer } from './users/pages';
+import React from 'react';
 import { HostsContainer } from './hosts/pages';
 import { NetworkContainer } from './network/pages';
+import { UsersContainer } from './users/pages';
 
+import { EXPLORE_PATH, HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
-import { EXPLORE_PATH, HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { ExploreLandingPage } from './landing';
 

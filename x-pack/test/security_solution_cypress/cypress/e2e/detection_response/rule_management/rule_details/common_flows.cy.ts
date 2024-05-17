@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { deleteRuleFromDetailsPage } from '../../../../tasks/alerts_detection_rules';
+import { ruleFields } from '../../../../data/detection_engine';
+import { getExistingRule, getNewRule } from '../../../../objects/rule';
 import {
   CUSTOM_RULES_BTN,
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
 } from '../../../../screens/alerts_detection_rules';
+import { deleteRuleFromDetailsPage } from '../../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getDetails } from '../../../../tasks/rule_details';
-import { ruleFields } from '../../../../data/detection_engine';
-import { getExistingRule, getNewRule } from '../../../../objects/rule';
 
 import {
   ABOUT_DETAILS,
@@ -25,10 +25,10 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   INDEX_PATTERNS_DETAILS,
+  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   REFERENCE_URLS_DETAILS,
-  removeExternalLinkText,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
   RULE_SWITCH,
@@ -41,11 +41,11 @@ import {
   THREAT_TACTIC,
   THREAT_TECHNIQUE,
   TIMELINE_TEMPLATE_DETAILS,
-  INTERVAL_ABBR_VALUE,
+  removeExternalLinkText,
 } from '../../../../screens/rule_details';
 
-import { createTimeline } from '../../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/api_calls/common';
+import { createTimeline } from '../../../../tasks/api_calls/timelines';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { memo } from 'react';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import type { FC, PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 import type { Validation } from '../../../../../common/job_validator';
 
 interface Props {

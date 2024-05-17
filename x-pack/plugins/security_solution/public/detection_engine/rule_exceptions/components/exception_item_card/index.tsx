@@ -6,18 +6,18 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { useMemo, useCallback } from 'react';
 
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
 import { getFormattedComments } from '../../utils/helpers';
 import type { ExceptionListItemIdentifiers } from '../../utils/types';
-import * as i18n from './translations';
-import { ExceptionItemCardHeader } from './header';
-import { ExceptionItemCardConditions } from './conditions';
-import { ExceptionItemCardMetaInfo } from './meta';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
 import { ExceptionItemCardComments } from './comments';
+import { ExceptionItemCardConditions } from './conditions';
+import { ExceptionItemCardHeader } from './header';
+import { ExceptionItemCardMetaInfo } from './meta';
+import * as i18n from './translations';
 
 export interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;

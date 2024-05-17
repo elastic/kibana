@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

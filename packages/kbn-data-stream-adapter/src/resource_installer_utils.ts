@@ -7,16 +7,16 @@
  */
 
 import type {
-  IndicesPutIndexTemplateRequest,
-  Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
   ClusterPutComponentTemplateRequest,
   IndicesIndexSettings,
   IndicesPutIndexTemplateIndexTemplateMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldMap } from './field_maps/types';
+import type {
+  IndicesPutIndexTemplateRequest,
+  Metadata,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
+import type { FieldMap } from './field_maps/types';
 
 interface GetComponentTemplateOpts {
   name: string;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
-import { toArray } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { Subject } from 'rxjs';
+import { toArray } from 'rxjs';
+import { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
 
 describe('distinctUntilChangedWithInitialValue', () => {
   it('should skip updates with the same value', async () => {

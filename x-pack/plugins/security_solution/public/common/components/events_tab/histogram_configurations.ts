@@ -6,9 +6,9 @@
  */
 import numeral from '@elastic/numeral';
 
-import { getExternalAlertLensAttributes } from '../visualization_actions/lens_attributes/common/external_alert';
-import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/common/events';
 import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
+import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/common/events';
+import { getExternalAlertLensAttributes } from '../visualization_actions/lens_attributes/common/external_alert';
 import * as i18n from './translations';
 
 const DEFAULT_EVENTS_STACK_BY = 'event.action';

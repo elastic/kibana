@@ -8,8 +8,8 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { VerificationCode } from './verification_code';
 import { VERIFICATION_CODE_LENGTH } from '../common';
+import { VerificationCode } from './verification_code';
 
 const loggerMock = loggingSystemMock.createLogger();
 

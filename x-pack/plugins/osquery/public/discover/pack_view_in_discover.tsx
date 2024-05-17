@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment-timezone';
-import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
+import React from 'react';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
+import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
 import { ViewResultsInDiscoverAction } from './view_results_in_discover';
 
 interface PackViewInActionProps {

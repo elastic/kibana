@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
 import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';

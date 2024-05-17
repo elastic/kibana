@@ -8,38 +8,54 @@
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiButtonGroup,
-  EuiText,
   EuiRadioGroup,
+  EuiSpacer,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
-import styled from 'styled-components';
-import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import usePrevious from 'react-use/lib/usePrevious';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import { i18n as i18nCore } from '@kbn/i18n';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import { isEmpty, isEqual } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
+import styled from 'styled-components';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
-import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
+import {
+  isThresholdRule as getIsThresholdRule,
+  isEqlRule,
+  isEqlSequenceQuery,
+  isEsqlRule,
+  isNewTermsRule,
+  isQueryRule,
+  isSuppressionRuleInGA,
+  isThreatMatchRule,
+} from '../../../../../common/detection_engine/utils';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
-import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
+import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import type { BrowserField } from '../../../../common/containers/source';
+import { useFetchIndex } from '../../../../common/containers/source';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
+import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import type {
   DefineStepRule,
   RuleStepProps,
@@ -48,58 +64,42 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { StepRuleDescription } from '../description_step';
-import type { QueryBarDefineRuleProps } from '../query_bar';
-import { QueryBarDefineRule } from '../query_bar';
-import { SelectRuleType } from '../select_rule_type';
-import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
-import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
-import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
-import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
-import { ThresholdInput } from '../threshold_input';
-import { SuppressionInfoIcon } from '../suppression_info_icon';
-import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
+import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import {
   Field,
   Form,
-  getUseField,
   HiddenField,
   UseField,
-  useFormData,
   UseMultiFields,
+  getUseField,
+  useFormData,
 } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
-import { schema } from './schema';
-import { getTermsAggregationFields } from './utils';
-import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
-import * as i18n from './translations';
-import {
-  isEqlRule,
-  isNewTermsRule,
-  isThreatMatchRule,
-  isThresholdRule as getIsThresholdRule,
-  isQueryRule,
-  isEsqlRule,
-  isEqlSequenceQuery,
-  isSuppressionRuleInGA,
-} from '../../../../../common/detection_engine/utils';
-import { EqlQueryBar } from '../eql_query_bar';
-import { DataViewSelector } from '../data_view_selector';
-import { ThreatMatchInput } from '../threatmatch_input';
-import type { BrowserField } from '../../../../common/containers/source';
-import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFields } from '../new_terms_fields';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
-import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
-import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DurationInput } from '../duration_input';
-import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
-import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
+import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
+import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
+import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
+import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
+import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
+import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
+import { DataViewSelector } from '../data_view_selector';
+import { StepRuleDescription } from '../description_step';
+import { DurationInput } from '../duration_input';
+import { EqlQueryBar } from '../eql_query_bar';
+import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
+import { NewTermsFields } from '../new_terms_fields';
+import type { QueryBarDefineRuleProps } from '../query_bar';
+import { QueryBarDefineRule } from '../query_bar';
+import { SelectRuleType } from '../select_rule_type';
+import { SuppressionInfoIcon } from '../suppression_info_icon';
+import { ThreatMatchInput } from '../threatmatch_input';
+import { ThresholdInput } from '../threshold_input';
+import { schema } from './schema';
+import * as i18n from './translations';
+import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
+import { getTermsAggregationFields } from './utils';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -724,7 +724,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         isLoading,
         dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
         onValidityChange: setIsQueryBarValid,
-      } as QueryBarDefineRuleProps),
+      }) as QueryBarDefineRuleProps,
     [indexPattern, isLoading, setIsQueryBarValid]
   );
 

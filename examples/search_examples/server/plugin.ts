@@ -7,24 +7,24 @@
  */
 
 import type {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
-import {
-  SearchExamplesPluginSetup,
-  SearchExamplesPluginStart,
-  SearchExamplesPluginSetupDeps,
-  SearchExamplesPluginStartDeps,
-} from './types';
+import { fibonacciStrategyProvider } from './fibonacci_strategy';
 import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
-import { fibonacciStrategyProvider } from './fibonacci_strategy';
+import {
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginSetupDeps,
+  SearchExamplesPluginStart,
+  SearchExamplesPluginStartDeps,
+} from './types';
 
 export class SearchExamplesPlugin
   implements

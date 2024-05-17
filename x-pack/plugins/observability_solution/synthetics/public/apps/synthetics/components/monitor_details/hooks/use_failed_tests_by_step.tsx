@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
+import { Ping } from '../../../../../../common/runtime_types';
+import { createEsQuery } from '../../../../../../common/utils/es_search';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useSelectedLocation } from './use_selected_location';
-import { createEsQuery } from '../../../../../../common/utils/es_search';
-import { Ping } from '../../../../../../common/runtime_types';
-import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export function useFailedTestByStep({ to, from }: { to: string; from: string }) {
   const { lastRefresh } = useSyntheticsRefreshContext();

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { sortBy, isNumber } from 'lodash';
 import { Unit } from '@kbn/datemath';
+import { isNumber, sortBy } from 'lodash';
 
 /** @ts-ignore */
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';

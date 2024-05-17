@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { fromKueryExpression } from '@kbn/es-query';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 
-import { useStartServices } from '../hooks';
 import {
-  INDEX_NAME,
-  AGENTS_PREFIX,
-  FLEET_ENROLLMENT_API_PREFIX,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../constants';
-import {
-  AGENT_POLICY_MAPPINGS,
-  PACKAGE_POLICIES_MAPPINGS,
   AGENT_MAPPINGS,
+  AGENT_POLICY_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
+  PACKAGE_POLICIES_MAPPINGS,
 } from '../../../../common/constants';
+import {
+  AGENTS_PREFIX,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  FLEET_ENROLLMENT_API_PREFIX,
+  INDEX_NAME,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
+import { useStartServices } from '../hooks';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
   .kbnQueryBar__textarea {

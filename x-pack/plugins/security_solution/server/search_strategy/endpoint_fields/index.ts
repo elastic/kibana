@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
 import type {
   DataViewsServerPluginStart,
   ISearchStrategy,
   SearchStrategyDependencies,
 } from '@kbn/data-plugin/server';
+import { from } from 'rxjs';
 
 import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
-import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
+import { METADATA_UNITED_INDEX, eventsIndexPattern } from '../../../common/endpoint/constants';
 import type {
   BeatFields,
   IndexFieldsStrategyRequest,

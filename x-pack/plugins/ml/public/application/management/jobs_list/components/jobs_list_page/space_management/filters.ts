@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { SearchFilterConfig } from '@elastic/eui';
-import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
+import { i18n } from '@kbn/i18n';
 import type {
-  ManagementListResponse,
-  ManagementItems,
   AnalyticsManagementItems,
   AnomalyDetectionManagementItems,
+  ManagementItems,
+  ManagementListResponse,
   TrainedModelsManagementItems,
 } from '../../../../../../../common/types/management';
+import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 
 export function getFilters(mlSavedObjectType: MlSavedObjectType, items: ManagementListResponse) {
   switch (mlSavedObjectType) {

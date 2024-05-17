@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
-import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { Story } from '@storybook/react';
+import React, { ComponentType, useState } from 'react';
 import { ErrorRateRuleParams, TransactionErrorRateRuleType } from '.';
-import { AlertMetadata } from '../../utils/helper';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { AlertMetadata } from '../../utils/helper';
 
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },

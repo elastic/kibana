@@ -6,23 +6,23 @@
  */
 
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   ERROR_CULPRIT,
-  ERROR_TYPE,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
+  ERROR_TYPE,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { getErrorName } from '../../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getErrorName } from '../../../../lib/helpers/get_error_name';
 
 export type MobileCrashGroupMainStatisticsResponse = Array<{
   groupId: string;

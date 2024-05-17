@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { JsonValue } from '@kbn/utility-types';
+import React from 'react';
 import { LogColumn } from '../../../../common/log_entry';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
 import {
+  WrapMode,
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
-  WrapMode,
 } from './text_styles';
 
 export interface LogEntryFieldColumnProps {
@@ -61,8 +61,8 @@ const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnConten
     props.wrapMode === 'long'
       ? longWrappedContentStyle
       : props.wrapMode === 'pre-wrapped'
-      ? preWrappedContentStyle
-      : unwrappedContentStyle};
+        ? preWrappedContentStyle
+        : unwrappedContentStyle};
 `;
 
 // eslint-disable-next-line import/no-default-export

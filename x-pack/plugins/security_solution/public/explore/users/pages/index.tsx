@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { USERS_PATH } from '../../../../common/constants';
 import { UsersTableType } from '../store/model';
-import { Users } from './users';
-import { UsersDetails } from './details';
 import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
+import { UsersDetails } from './details';
+import { Users } from './users';
 
 export const UsersContainer = React.memo(() => {
   return (

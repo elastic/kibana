@@ -9,9 +9,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import { useGetCaseUserActionsStats } from './use_get_case_user_actions_stats';
-import { basicCase } from './mock';
 import * as api from './api';
+import { basicCase } from './mock';
+import { useGetCaseUserActionsStats } from './use_get_case_user_actions_stats';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

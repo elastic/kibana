@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
+  TableId,
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  TableId,
 } from '@kbn/securitysolution-data-table';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { ALERTS_PATH, ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../common/constants';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
 import { useShallowEqualSelector } from '../use_selector';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiFieldNumber, EuiFormControlLayoutDelimited, EuiFormRow } from '@elastic/eui';
 import React from 'react';
-import { EuiFormRow, EuiFieldNumber, EuiFormControlLayoutDelimited } from '@elastic/eui';
 
 type RangeInputFieldProps = Partial<{
   isInvalid: boolean;

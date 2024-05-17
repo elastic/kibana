@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getActionRoute } from './get';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../lib/license_state.mock';
-import { verifyApiAccess } from '../../lib';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { actionsClientMock } from '../../actions_client/actions_client.mock';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { actionsClientMock } from '../../actions_client/actions_client.mock';
+import { verifyApiAccess } from '../../lib';
+import { licenseStateMock } from '../../lib/license_state.mock';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { mockHandlerArguments } from './_mock_handler_arguments';
+import { getActionRoute } from './get';
 
 jest.mock('../../lib/verify_api_access', () => ({
   verifyApiAccess: jest.fn(),

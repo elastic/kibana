@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
+import { ContextPills } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
-import { ContextPills } from '.';
 
 const mockPromptContexts: Record<string, PromptContext> = {
   context1: {

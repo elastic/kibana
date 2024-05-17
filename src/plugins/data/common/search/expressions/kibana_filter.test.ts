@@ -7,8 +7,8 @@
  */
 
 import { createMockContext } from '@kbn/expressions-plugin/common';
-import { functionWrapper } from './utils';
 import { kibanaFilterFunction } from './kibana_filter';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#kibanaFilter', () => {
   const fn = functionWrapper(kibanaFilterFunction);

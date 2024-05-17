@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
-import { uiMetricService, apiService } from '../../../../services';
 import { Props } from '../..';
+import { apiService, uiMetricService } from '../../../../services';
 import { initHttpRequests } from '../http_requests.helpers';
 import { ProcessorsEditorWithDeps } from '../processors_editor';
 

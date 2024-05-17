@@ -8,13 +8,13 @@
 import axios from 'axios';
 import { isEmpty } from 'lodash';
 
-import { Logger } from '@kbn/core/server';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
-  request,
   getErrorMessage,
+  request,
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { Logger } from '@kbn/core/server';
 import {
   CreateCommentParams,
   CreateIncidentParams,
@@ -22,8 +22,8 @@ import {
   ExternalServiceCommentResponse,
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
-  Fields,
   FieldSchema,
+  Fields,
   GetCommonFieldsResponse,
   Incident,
   JiraPublicConfigurationType,

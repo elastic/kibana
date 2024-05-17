@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { assign, get, includes, isUndefined } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { visWithSplits } from '../../vis_with_splits';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { getLastValue } from '../../../../../common/last_value_utils';
+import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { Gauge } from '../../../visualizations/views/gauge';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { get, isUndefined, assign, includes } from 'lodash';
-import { Gauge } from '../../../visualizations/views/gauge';
-import { getLastValue } from '../../../../../common/last_value_utils';
-import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { visWithSplits } from '../../vis_with_splits';
 
 function getColors(props) {
   const { model, visData } = props;

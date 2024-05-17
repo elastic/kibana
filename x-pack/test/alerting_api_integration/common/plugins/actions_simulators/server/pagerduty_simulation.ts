@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 
 export function initPlugin(router: IRouter, path: string) {

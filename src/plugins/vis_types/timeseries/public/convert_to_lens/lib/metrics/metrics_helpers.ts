@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { utc } from 'moment';
+import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
-import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { getUISettings } from '../../../services';
-import type { Metric, Panel, Series } from '../../../../common/types';
+import { utc } from 'moment';
 import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
-import { getFilterRatioFormula } from './filter_ratio_formula';
-import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
-import { buildCounterRateFormula } from './counter_rate_formula';
-import { getPipelineSeriesFormula } from './pipeline_formula';
+import type { Metric, Panel, Series } from '../../../../common/types';
+import { getUISettings } from '../../../services';
 import { AdditionalArgs } from '../../types';
+import { buildCounterRateFormula } from './counter_rate_formula';
+import { getFilterRatioFormula } from './filter_ratio_formula';
+import { getPipelineSeriesFormula } from './pipeline_formula';
+import { SUPPORTED_METRICS, getFormulaFromMetric } from './supported_metrics';
 
 const shouldCalculateReducedTimeRange = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;

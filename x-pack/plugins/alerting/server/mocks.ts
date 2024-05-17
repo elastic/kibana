@@ -10,19 +10,19 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { rulesClientMock } from './rules_client.mock';
-import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
+import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { rulesClientMock } from './rules_client.mock';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  PublicRuleResultService,
   PublicRuleMonitoringService,
+  PublicRuleResultService,
 } from './types';
-import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 
 export { rulesClientMock };
 
@@ -71,13 +71,13 @@ const createStartMock = () => {
 
 export type AlertInstanceMock<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
+  Context extends AlertInstanceContext = AlertInstanceContext,
 > = jest.Mocked<Alert<State, Context>>;
 
 export const createAlertFactoryMock = {
   create: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   >() => {
     const mock = {
       hasScheduledActions: jest.fn(),
@@ -103,7 +103,7 @@ export const createAlertFactoryMock = {
   done: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-    ActionGroupIds extends string = string
+    ActionGroupIds extends string = string,
   >() => {
     const mock: jest.Mocked<AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>> =
       {
@@ -154,7 +154,7 @@ const createRuleLastRunServiceMock = () => {
 
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
 >() => {
   const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
   const alertFactoryMockDone = createAlertFactoryMock.done<InstanceState, InstanceContext, never>();

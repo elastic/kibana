@@ -7,10 +7,10 @@
 
 import type { ColumnHeaderOptions } from '../../common/types';
 import {
+  addBuildingBlockStyle,
   hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
-  addBuildingBlockStyle,
 } from './helpers';
 
 import { euiThemeVars } from '@kbn/ui-theme';

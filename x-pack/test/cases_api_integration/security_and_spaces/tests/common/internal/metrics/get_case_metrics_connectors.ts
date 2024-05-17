@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { getPostCaseRequest } from '../../../../../common/lib/mock';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {

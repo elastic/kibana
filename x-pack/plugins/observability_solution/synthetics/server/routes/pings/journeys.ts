@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 import { getJourneyFailedSteps } from '../../legacy_uptime/lib/requests/get_journey_failed_steps';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getJourneyDetails } from '../../queries/get_journey_details';
 import { getJourneySteps } from '../../legacy_uptime/lib/requests/get_journey_steps';
+import { getJourneyDetails } from '../../queries/get_journey_details';
+import { SyntheticsRestApiRouteFactory } from '../types';
 
 export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

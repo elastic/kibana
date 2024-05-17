@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { MonitoringTimeseriesContainer } from '../../chart';
-import { formatMetric } from '../../../lib/format_number';
 import {
+  EuiFlexGrid,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiFlexGrid,
-  EuiSpacer,
   EuiPanel,
   EuiScreenReaderOnly,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SummaryStatus } from '../../summary_status';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { formatMetric } from '../../../lib/format_number';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { SummaryStatus } from '../../summary_status';
 
 export function Beat({ summary, metrics, ...props }) {
   const metricsToShow = [

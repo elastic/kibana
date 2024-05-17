@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { render, act, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { UnifiedHistogramBreakdownContext } from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { UnifiedHistogramBreakdownContext } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 
 describe('BreakdownFieldSelector', () => {

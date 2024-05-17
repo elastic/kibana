@@ -9,7 +9,7 @@
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { fromRoot } from '@kbn/repo-info';
 
-import { parseMilliseconds, parse } from './settings';
+import { parse, parseMilliseconds } from './settings';
 
 const SECOND = 1000;
 const MINUTE = SECOND * 60;

@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs';
 import {
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
+import * as Rx from 'rxjs';
+import * as rxOp from 'rxjs';
 
 import moment from 'moment';
-import { UsageCounter } from './usage_counter';
 import { UsageCounters } from '../../common/types';
 import {
   registerUsageCountersSavedObjectType,
-  storeCounter,
   serializeCounterKey,
+  storeCounter,
 } from './saved_objects';
+import { UsageCounter } from './usage_counter';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -175,20 +175,23 @@ export class UsageCountersService {
     counters: UsageCounters.v1.CounterMetric[]
   ): Record<string, UsageCounters.v1.CounterMetric> => {
     const date = moment.now();
-    return counters.reduce((acc, counter) => {
-      const { counterName, domainId, counterType } = counter;
-      const key = serializeCounterKey({ domainId, counterName, counterType, date });
-      const existingCounter = acc[key];
-      if (!existingCounter) {
-        acc[key] = counter;
+    return counters.reduce(
+      (acc, counter) => {
+        const { counterName, domainId, counterType } = counter;
+        const key = serializeCounterKey({ domainId, counterName, counterType, date });
+        const existingCounter = acc[key];
+        if (!existingCounter) {
+          acc[key] = counter;
+          return acc;
+        }
+        acc[key] = {
+          ...existingCounter,
+          ...counter,
+          incrementBy: existingCounter.incrementBy + counter.incrementBy,
+        };
         return acc;
-      }
-      acc[key] = {
-        ...existingCounter,
-        ...counter,
-        incrementBy: existingCounter.incrementBy + counter.incrementBy,
-      };
-      return acc;
-    }, {} as Record<string, UsageCounters.v1.CounterMetric>);
+      },
+      {} as Record<string, UsageCounters.v1.CounterMetric>
+    );
   };
 }

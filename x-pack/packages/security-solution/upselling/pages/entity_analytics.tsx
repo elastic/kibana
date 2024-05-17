@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import {
+  EuiButton,
   EuiCard,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButton,
-  EuiTextColor,
+  EuiIcon,
   EuiImage,
   EuiPageHeader,
   EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 import styled from '@emotion/styled';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import * as i18n from './translations';
 import paywallPng from '../images/entity_paywall.png';
+import * as i18n from './translations';
 
 const PaywallDiv = styled.div`
   max-width: 75%;

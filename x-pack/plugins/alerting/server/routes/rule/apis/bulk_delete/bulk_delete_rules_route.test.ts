@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { bulkDeleteRulesRoute } from './bulk_delete_rules_route';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { bulkDeleteRulesRoute } from './bulk_delete_rules_route';
 
 const rulesClient = rulesClientMock.create();
 

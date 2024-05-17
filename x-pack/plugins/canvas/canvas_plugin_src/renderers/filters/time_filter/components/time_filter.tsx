@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker, OnTimeChangeProps, EuiSuperDatePickerCommonRange } from '@elastic/eui';
-import React from 'react';
-import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { EuiSuperDatePicker, EuiSuperDatePickerCommonRange, OnTimeChangeProps } from '@elastic/eui';
 import { fromExpression } from '@kbn/interpreter';
+import { get } from 'lodash';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { UnitStrings } from '../../../../../i18n/units';
 
 const { quickRanges: strings } = UnitStrings;

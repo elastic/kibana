@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  EuiFlexItem,
-  EuiInMemoryTable,
   EuiColorPaletteDisplay,
-  EuiSpacer,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiHealth,
+  EuiInMemoryTable,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AlertsTypeData, AlertType } from './types';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertsTypeTableColumns } from './columns';
 import { ALERT_TYPE_COLOR } from './helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { AlertType, AlertsTypeData } from './types';
 
 const Wrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeM};

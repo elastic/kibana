@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { Ast } from '@kbn/interpreter';
-import deepEqual from 'react-fast-compare';
 import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
+import { Ast } from '@kbn/interpreter';
+import React, { useCallback } from 'react';
+import deepEqual from 'react-fast-compare';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { findExpressionType } from '../../lib/find_expression_type';
 
+import { AssetType, CanvasElement, ExpressionContext, State } from '../../../types';
+import { ArgType, ArgTypeDef, Args } from '../../expression_types/types';
+import { createAsset, notifyError } from '../../lib/assets';
+// @ts-expect-error unconverted lib
+import { findExistingAsset } from '../../lib/find_existing_asset';
+import { useNotifyService, useWorkpadService } from '../../services';
 // @ts-expect-error unconverted action function
 import { setAsset } from '../../state/actions/assets';
 import {
-  fetchContext,
-  setArgument as setArgumentValue,
   addArgumentValue,
   deleteArgumentAtIndex,
+  fetchContext,
+  setArgument as setArgumentValue,
   // @ts-expect-error untyped local
 } from '../../state/actions/elements';
+import { getAssets } from '../../state/selectors/assets';
 import {
+  getContextForIndex,
+  getFullWorkpadPersisted,
+  getGlobalFilterGroups,
   getSelectedElement,
   getSelectedPage,
-  getContextForIndex,
-  getGlobalFilterGroups,
-  getFullWorkpadPersisted,
 } from '../../state/selectors/workpad';
-import { getAssets } from '../../state/selectors/assets';
-// @ts-expect-error unconverted lib
-import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
-import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
-import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
-import { useNotifyService, useWorkpadService } from '../../services';
-import { createAsset, notifyError } from '../../lib/assets';
 
 interface FunctionFormProps {
   name: string;

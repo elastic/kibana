@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { DataViewsService } from '../../../../common';
+import {
+  INITIAL_REST_VERSION,
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+} from '../../../constants';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
-import { handleErrors } from '../util/handle_errors';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import {
-  SPECIFIC_RUNTIME_FIELD_PATH,
-  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
-  INITIAL_REST_VERSION,
-} from '../../../constants';
+import { handleErrors } from '../util/handle_errors';
 
 interface DeleteRuntimeFieldArgs {
   dataViewsService: DataViewsService;

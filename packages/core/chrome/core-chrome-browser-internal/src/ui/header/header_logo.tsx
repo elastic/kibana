@@ -7,16 +7,16 @@
  */
 
 import './header_logo.scss';
+import Url from 'url';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import Url from 'url';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { ElasticMark } from './elastic_mark';
 import { LoadingIndicator } from '../loading_indicator';
+import { ElasticMark } from './elastic_mark';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;

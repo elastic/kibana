@@ -8,8 +8,8 @@
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 import { mockTelemetryConstants, mockTelemetryService } from './mocks';
+import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 describe('renderWelcomeTelemetryNotice', () => {
   const telemetryConstants = mockTelemetryConstants();

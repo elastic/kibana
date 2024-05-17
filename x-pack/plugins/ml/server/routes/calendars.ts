@@ -7,11 +7,11 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
-import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
+import type { MlClient } from '../lib/ml_client';
 import type { Calendar, FormCalendar } from '../models/calendar';
 import { CalendarManager } from '../models/calendar';
-import type { MlClient } from '../lib/ml_client';
+import type { RouteInitialization } from '../types';
+import { calendarIdSchema, calendarIdsSchema, calendarSchema } from './schemas/calendars_schema';
 
 function getAllCalendars(mlClient: MlClient) {
   const cal = new CalendarManager(mlClient);

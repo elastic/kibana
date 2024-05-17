@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from '@testing-library/react';
+import * as React from 'react';
+import { useKibana } from '../../../common/lib/kibana';
+import { GenericValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
-import { GenericValidationResult } from '../../../types';
-import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/action_connector_api', () => ({

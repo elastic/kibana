@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../app_context';
 import {
-  getDefaultFleetServerHost,
-  createFleetServerHost,
   bulkGetFleetServerHosts,
+  createFleetServerHost,
+  getDefaultFleetServerHost,
   updateFleetServerHost,
 } from '../fleet_server_host';
 
 import {
   createCloudFleetServerHostIfNeeded,
+  createOrUpdatePreconfiguredFleetServerHosts,
   getCloudFleetServersHosts,
   getPreconfiguredFleetServerHostFromConfig,
-  createOrUpdatePreconfiguredFleetServerHosts,
 } from './fleet_server_host';
 
 import type { FleetServerHost } from '../../../common/types';

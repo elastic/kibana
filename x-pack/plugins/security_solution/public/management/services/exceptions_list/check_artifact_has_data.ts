@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FetchQueryOptions } from '@tanstack/query-core/src/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { FetchQueryOptions } from '@tanstack/query-core/src/types';
 import { securitySolutionQueryClient } from '../../../common/containers/query_client/query_client_provider';
 import type { ExceptionsListApiClient } from './exceptions_list_api_client';
 

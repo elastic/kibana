@@ -48,9 +48,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-sort-predicates/src/sorting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -63,9 +61,7 @@
             "tags": [],
             "label": "sortBy",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-sort-predicates/src/sorting.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -8,8 +8,8 @@
 
 import Path from 'path';
 
-import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import normalizePath from 'normalize-path';
 
 import { Plugins } from './discover_plugins';
 

@@ -12,23 +12,23 @@ import { TimefilterContract } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  apiCanAccessViewMode,
-  apiHasUniqueId,
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasUniqueId,
-  PublishesUnifiedSearch,
   PublishesPanelDescription,
   PublishesPanelTitle,
+  PublishesUnifiedSearch,
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs';
-import { apiHasVisualizeConfig, HasVisualizeConfig } from '../embeddable';
+import { HasVisualizeConfig, apiHasVisualizeConfig } from '../embeddable';
 import {
-  apiHasExpressionVariables,
   HasExpressionVariables,
+  apiHasExpressionVariables,
 } from '../embeddable/interfaces/has_expression_variables';
 import {
   getApplication,

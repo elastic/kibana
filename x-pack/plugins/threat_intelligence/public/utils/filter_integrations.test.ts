@@ -7,9 +7,9 @@
 
 import { Integration } from '../hooks/use_integrations';
 import {
-  filterIntegrations,
   THREAT_INTELLIGENCE_CATEGORY,
   THREAT_INTELLIGENCE_UTILITIES,
+  filterIntegrations,
 } from './filter_integrations';
 
 describe('filterIntegrations', () => {

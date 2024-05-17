@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import { HeaderMenuPortalProps } from '../../types';
 
 const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));

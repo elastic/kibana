@@ -9,11 +9,11 @@
 import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
 import type { PackageInfo } from '@kbn/config';
+import { BasePath, StaticAssets } from '@kbn/core-http-server-internal';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
-import { BasePath, StaticAssets } from '@kbn/core-http-server-internal';
+import { registerBundleRoutes } from './register_bundle_routes';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildNum: 42,

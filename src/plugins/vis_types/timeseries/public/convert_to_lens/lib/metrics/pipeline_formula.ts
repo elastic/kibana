@@ -8,8 +8,8 @@
 
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
-import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { getFormulaEquivalent, getTimeScale } from './metrics_helpers';
+import { SUPPORTED_METRICS, getFormulaFromMetric } from './supported_metrics';
 
 const getAdditionalArgs = (metric: Metric) => {
   if (metric.type === TSVB_METRIC_TYPES.POSITIVE_ONLY) {

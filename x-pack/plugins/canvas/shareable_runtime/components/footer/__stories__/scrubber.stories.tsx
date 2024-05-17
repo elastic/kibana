@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { storiesOf } from '@storybook/react';
+import React from 'react';
 
-import { CanvasRenderedPage } from '../../../types';
-import { ExampleContext } from '../../../test/context_example';
-import { Scrubber, ScrubberComponent } from '../scrubber';
 import { workpads } from '../../../../__fixtures__/workpads';
+import { ExampleContext } from '../../../test/context_example';
+import { CanvasRenderedPage } from '../../../types';
+import { Scrubber, ScrubberComponent } from '../scrubber';
 
 storiesOf('shareables/Footer/Scrubber', module)
   .add('contextual: hello', () => (

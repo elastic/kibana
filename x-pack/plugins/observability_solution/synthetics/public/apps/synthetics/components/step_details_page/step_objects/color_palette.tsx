@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSkeletonRectangle,
   EuiIcon,
+  EuiSkeletonRectangle,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React, { useState, useEffect } from 'react';
 import { colourPalette } from '../common/network_data/data_formatting';
 
 export const ColorPalette = ({
@@ -49,14 +49,14 @@ export const ColorPalette = ({
                 defaultMessage: 'same',
               })
             : delta > 0
-            ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
-                defaultMessage: '{delta}% higher',
-                values: { delta },
-              })
-            : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
-                defaultMessage: '{delta}% lower',
-                values: { delta },
-              }),
+              ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
+                  defaultMessage: '{delta}% higher',
+                  values: { delta },
+                })
+              : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
+                  defaultMessage: '{delta}% lower',
+                  values: { delta },
+                }),
       },
     });
   };

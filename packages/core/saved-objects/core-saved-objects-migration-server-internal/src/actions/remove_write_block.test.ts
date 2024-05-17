@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { removeWriteBlock } from './remove_write_block';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import { removeWriteBlock } from './remove_write_block';
 
 jest.mock('./catch_retryable_es_client_errors');
 

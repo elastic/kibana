@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiCallOut,
   EuiComboBox,
-  EuiForm,
-  EuiFormRow,
+  EuiComboBoxOptionOption,
   EuiConfirmModal,
   EuiFieldText,
+  EuiForm,
+  EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiSwitch,
-  EuiButton,
-  EuiComboBoxOptionOption,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useState } from 'react';
 
 import { PolicyFromES } from '../../../../../common/types';
-import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
-import { toasts } from '../../../services/notification';
-import { showApiError } from '../../../services/api_errors';
-import { LearnMoreLink } from '../../edit_policy/components';
 import { useKibana } from '../../../../shared_imports';
+import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
+import { showApiError } from '../../../services/api_errors';
+import { toasts } from '../../../services/notification';
+import { LearnMoreLink } from '../../edit_policy/components';
 
 interface Props {
   policy: PolicyFromES;

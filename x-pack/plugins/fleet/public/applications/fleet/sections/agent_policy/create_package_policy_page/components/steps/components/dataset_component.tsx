@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
   EuiComboBox,
   EuiFormRow,
@@ -16,14 +15,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { DataStream } from '../../../../../../../../../common/types';
-import { GENERIC_DATASET_NAME } from '../../../../../../../../../common/constants';
 import { isValidDataset } from '../../../../../../../../../common';
+import { GENERIC_DATASET_NAME } from '../../../../../../../../../common/constants';
+import type { DataStream } from '../../../../../../../../../common/types';
 
 const FormRow = styled(EuiFormRow)`
   .euiFormRow__label {

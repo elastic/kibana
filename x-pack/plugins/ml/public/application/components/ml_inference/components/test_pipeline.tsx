@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FC } from 'react';
+import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -21,27 +21,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
-  EuiTitle,
   EuiText,
-  useIsWithinMaxBreakpoint,
-  EuiPanel,
+  EuiTitle,
   htmlIdGenerator,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import type { IngestSimulateDocument } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/code-editor';
+import { isValidJson } from '../../../../../common/util/validation_utils';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { getPipelineConfig } from '../get_pipeline_config';
-import { isValidJson } from '../../../../../common/util/validation_utils';
-import type { MlInferenceState } from '../types';
 import { checkIndexExists } from '../retry_create_data_view';
-import { type TestPipelineMode, TEST_PIPELINE_MODE } from '../types';
+import type { MlInferenceState } from '../types';
+import { TEST_PIPELINE_MODE, type TestPipelineMode } from '../types';
 
 const sourceIndexMissingMessage = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.sourceIndexMissing',
@@ -418,8 +418,8 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
                       {simulatePipelineError
                         ? JSON.stringify(simulatePipelineError, null, 2)
                         : simulatePipelineResult
-                        ? JSON.stringify(simulatePipelineResult, null, 2)
-                        : '{}'}
+                          ? JSON.stringify(simulatePipelineResult, null, 2)
+                          : '{}'}
                     </EuiCodeBlock>
                   </EuiResizablePanel>
                 </>

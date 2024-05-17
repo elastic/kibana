@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiEmptyPrompt,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
   EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Connector } from '@kbn/search-connectors';
+import React from 'react';
 
 import { docLinks } from '../../../../common/doc_links';
 

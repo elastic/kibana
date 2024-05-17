@@ -10,10 +10,10 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
   AvailableReferenceLineIcons,
-  REFERENCE_LINE_DECORATION_CONFIG,
   FillStyles,
   IconPositions,
   LineStyles,
+  REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
 import { strings } from '../i18n';
 import { ReferenceLineDecorationConfigFn } from '../types';

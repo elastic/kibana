@@ -13,8 +13,8 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { CustomIconsPanel } from './custom_icons_panel';
 
 const defaultProps = {

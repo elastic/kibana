@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
+import React, { ChangeEvent } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';

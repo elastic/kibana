@@ -6,9 +6,9 @@
  */
 
 import { CoreKibanaRequest } from '@kbn/core/server';
-import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { ReindexStep, ReindexStatus, ReindexSavedObject } from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus, ReindexStep } from '../../../common/types';
 import { credentialStoreFactory } from './credential_store';
 
 const basicAuthHeader = 'Basic abc';

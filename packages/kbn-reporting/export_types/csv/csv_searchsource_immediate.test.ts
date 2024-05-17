@@ -16,6 +16,7 @@ jest.mock('@kbn/generate-csv', () => {
   };
 });
 
+import type { Writable } from 'stream';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -24,7 +25,6 @@ import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { setFieldFormats } from '@kbn/reporting-server';
-import type { Writable } from 'stream';
 
 import { CsvSearchSourceImmediateExportType } from '.';
 import { ReportingRequestHandlerContext } from './types';

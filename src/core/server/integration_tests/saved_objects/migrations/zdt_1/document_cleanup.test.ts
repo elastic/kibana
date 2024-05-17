@@ -7,21 +7,21 @@
  */
 
 import Path from 'path';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import fs from 'fs/promises';
 import { range } from 'lodash';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
 import {
+  dummyModelVersion,
+  getBarType,
   getBaseMigratorParams,
   getDeletedType,
   getExcludedType,
   getFooType,
-  getBarType,
-  dummyModelVersion,
 } from '../fixtures/zdt_base.fixtures';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { delay } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'document_cleanup.test.log');
 

@@ -5,49 +5,49 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiCallOut,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
   EuiFieldSearch,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
-  EuiDataGridSorting,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
   EuiSwitch,
-  EuiDataGridColumn,
-  EuiCallOut,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import {
-  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   LOCKED_COLUMNS,
+  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
 } from '../../../constants';
+import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
+import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
+import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import {
+  ColumnHeaderWithToolTip,
   EventLogDataGrid,
   type EventLogDataGrid as EventLogDataGridProps,
+  EventLogListStatusFilter,
   getIsColumnSortable,
-  ColumnHeaderWithToolTip,
-  numTriggeredActionsDisplay,
+  numErroredActionsDisplay,
   numGeneratedActionsDisplay,
   numSucceededActionsDisplay,
-  numErroredActionsDisplay,
-  EventLogListStatusFilter,
+  numTriggeredActionsDisplay,
 } from '../../common/components/event_log';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
-import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
+import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
-import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
-import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { RefreshToken } from './types';
 
 const API_FAILED_MESSAGE = i18n.translate(
@@ -103,8 +103,8 @@ export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'defa
   T extends 'default'
     ? RuleEventLogListCommonProps
     : T extends 'stackManagement'
-    ? RuleEventLogListCommonProps
-    : never;
+      ? RuleEventLogListCommonProps
+      : never;
 
 export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   props: RuleEventLogListTableProps<T>

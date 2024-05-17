@@ -11,14 +11,14 @@ import Path from 'path';
 import { promisify } from 'util';
 import stripAnsi from 'strip-ansi';
 
+import { createFailError } from '@kbn/dev-cli-errors';
+import { observeLines } from '@kbn/stdio-dev-helpers';
+import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs';
-import chalk from 'chalk';
+import { filter, ignoreElements, map, mergeMap, share, take, tap } from 'rxjs';
 import treeKill from 'tree-kill';
-import { ToolingLog } from '@kbn/tooling-log';
-import { observeLines } from '@kbn/stdio-dev-helpers';
-import { createFailError } from '@kbn/dev-cli-errors';
 
 const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiIconTip, PropsOf } from '@elastic/eui';
+import PropTypes from 'prop-types';
 /* eslint react/forbid-elements: 0 */
 import React, { FC } from 'react';
-import PropTypes from 'prop-types';
-import { EuiIconTip, PropsOf } from '@elastic/eui';
 
 export enum IconType {
   error = 'error',

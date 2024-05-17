@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { HostsKpiHosts } from './hosts';
-import { HostsKpiUniqueIps } from './unique_ips';
 import type { HostsKpiProps } from './types';
+import { HostsKpiUniqueIps } from './unique_ips';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(({ from, to }) => (
   <EuiFlexGroup wrap>

@@ -7,23 +7,23 @@
 
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
-import useMount from 'react-use/lib/useMount';
+import { PersistedLogViewReference, ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
+import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import { PersistedLogViewReference, ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
+import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import useMount from 'react-use/lib/useMount';
 import {
   Comparator,
-  isOptimizableGroupedThreshold,
-  isRatioRule,
   PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
   PartialRatioRuleParams,
   PartialRuleParams,
   ThresholdType,
+  isOptimizableGroupedThreshold,
+  isRatioRule,
   timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -32,9 +32,9 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
+import { LogViewSwitcher } from './log_view_switcher';
 import { Threshold } from './threshold';
 import { TypeSwitcher } from './type_switcher';
-import { LogViewSwitcher } from './log_view_switcher';
 
 export interface ExpressionCriteria {
   field?: string;

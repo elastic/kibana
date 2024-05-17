@@ -9,8 +9,8 @@ import {
   ChartColorConfiguration,
   PaletteDefinition,
   PaletteRegistry,
-  SeriesLayer,
   RequiredPaletteParamTypes,
+  SeriesLayer,
 } from '@kbn/coloring';
 
 import chroma from 'chroma-js';

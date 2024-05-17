@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
-import { EventLogListStatusFilter } from './event_log_list_status_filter';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
+import { EventLogListStatusFilter } from './event_log_list_status_filter';
 
 jest.mock('../../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),

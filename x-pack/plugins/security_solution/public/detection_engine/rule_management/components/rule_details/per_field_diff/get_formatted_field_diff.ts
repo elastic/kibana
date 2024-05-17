@@ -9,26 +9,26 @@ import type {
   AllFieldsDiff,
   RuleFieldsDiff,
   RuleFieldsDiffWithDataSource,
-  RuleFieldsDiffWithKqlQuery,
   RuleFieldsDiffWithEqlQuery,
-  RuleFieldsDiffWithThreshold,
   RuleFieldsDiffWithEsqlQuery,
+  RuleFieldsDiffWithKqlQuery,
   RuleFieldsDiffWithThreatQuery,
+  RuleFieldsDiffWithThreshold,
 } from '../../../../../../common/api/detection_engine';
 import type { FormattedFieldDiff } from '../../../model/rule_details/rule_field_diff';
 import {
-  getFieldDiffsForDataSource,
-  getFieldDiffsForKqlQuery,
-  getFieldDiffsForEqlQuery,
-  getFieldDiffsForRuleSchedule,
-  getFieldDiffsForRuleNameOverride,
-  getFieldDiffsForTimestampOverride,
-  getFieldDiffsForTimelineTemplate,
   getFieldDiffsForBuildingBlock,
-  sortAndStringifyJson,
-  getFieldDiffsForThreshold,
+  getFieldDiffsForDataSource,
+  getFieldDiffsForEqlQuery,
   getFieldDiffsForEsqlQuery,
+  getFieldDiffsForKqlQuery,
+  getFieldDiffsForRuleNameOverride,
+  getFieldDiffsForRuleSchedule,
   getFieldDiffsForThreatQuery,
+  getFieldDiffsForThreshold,
+  getFieldDiffsForTimelineTemplate,
+  getFieldDiffsForTimestampOverride,
+  sortAndStringifyJson,
 } from './get_field_diffs_for_grouped_fields';
 
 export const getFormattedFieldDiffGroups = (

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { Route, Router } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
-import { Router, Route } from '@kbn/shared-ux-router';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
   EuiPage,
-  EuiPageSidebar,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
+  EuiPageSection,
+  EuiPageSidebar,
   EuiSideNav,
+  EuiTitle,
 } from '@elastic/eui';
 
-import { CoreStart, AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="dlAppHome">

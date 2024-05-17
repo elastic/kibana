@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { FeatureIds, Configuration, Features } from '../../../../types';
+import { Configuration, FeatureIds, Features } from '../../../../types';
 
 import { AddSourceLogic } from './add_source_logic';
 import { DocumentPermissionsCallout } from './document_permissions_callout';

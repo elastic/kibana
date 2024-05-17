@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { DrilldownTable } from './drilldown_table';
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
 import { FlyoutFrame } from '../flyout_frame';
+import { DrilldownTable } from './drilldown_table';
 
 storiesOf('components/ListManageDrilldowns', module)
   .add('Default', () => (

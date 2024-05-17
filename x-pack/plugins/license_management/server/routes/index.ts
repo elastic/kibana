@@ -9,9 +9,9 @@ import { RouteDependencies } from '../types';
 
 import {
   registerLicenseRoute,
-  registerStartTrialRoutes,
-  registerStartBasicRoute,
   registerPermissionsRoute,
+  registerStartBasicRoute,
+  registerStartTrialRoutes,
 } from './api/license';
 
 export class ApiRoutes {

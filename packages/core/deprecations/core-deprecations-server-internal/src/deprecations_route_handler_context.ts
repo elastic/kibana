@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type {
+  DeprecationsClient,
+  DeprecationsRequestHandlerContext,
+} from '@kbn/core-deprecations-server';
 import type { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
-import type {
-  DeprecationsRequestHandlerContext,
-  DeprecationsClient,
-} from '@kbn/core-deprecations-server';
 import type { InternalDeprecationsServiceStart } from './deprecations_service';
 
 /**

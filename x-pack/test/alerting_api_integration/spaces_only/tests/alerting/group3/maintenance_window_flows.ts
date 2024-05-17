@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover } from '../../../../common/lib';
 import {
-  createRule,
   createAction,
   createMaintenanceWindow,
-  getActiveMaintenanceWindows,
-  finishMaintenanceWindow,
-  getRuleEvents,
+  createRule,
   expectNoActionsFired,
+  finishMaintenanceWindow,
+  getActiveMaintenanceWindows,
+  getRuleEvents,
   runSoon,
 } from './test_helpers';
 

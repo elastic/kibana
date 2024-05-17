@@ -9,48 +9,36 @@
 
 import http from 'http';
 
-import expect from '@kbn/expect';
-import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { AttachmentType, CaseStatuses, User } from '@kbn/cases-plugin/common/types/domain';
 import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import expect from '@kbn/expect';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  postCaseReq,
-  defaultUser,
-  postCommentUserReq,
-  getPostCaseRequest,
-  postCommentAlertReq,
-  postCommentActionsReq,
-  postCommentActionsReleaseReq,
-  postCommentAlertMultipleIdsReq,
-  persistableStateAttachment,
-  postExternalReferenceESReq,
-} from '../../../../common/lib/mock';
-import {
-  getConfigurationRequest,
-  createCase,
-  pushCase,
-  createComment,
-  updateCase,
-  deleteAllCaseItems,
-  superUserSpace1Auth,
-  getConnectorMappingsFromES,
-  getCase,
-  createConfiguration,
-  getSignalsWithES,
-  delay,
-  calculateDuration,
-  getComment,
   bulkCreateAttachments,
-  loginUsers,
-  setupSuperUserProfile,
-  getServiceNowConnector,
+  calculateDuration,
+  createCase,
   createCaseWithConnector,
-  getRecordingServiceNowSimulatorServer,
-  getServiceNowSimulationServer,
+  createComment,
+  createConfiguration,
   createConnector,
+  delay,
+  deleteAllCaseItems,
+  getCase,
+  getComment,
+  getConfigurationRequest,
+  getConnectorMappingsFromES,
+  getRecordingServiceNowSimulatorServer,
+  getServiceNowConnector,
+  getServiceNowSimulationServer,
+  getSignalsWithES,
+  loginUsers,
+  pushCase,
+  setupSuperUserProfile,
+  superUserSpace1Auth,
+  updateCase,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -62,6 +50,18 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import {
+  defaultUser,
+  getPostCaseRequest,
+  persistableStateAttachment,
+  postCaseReq,
+  postCommentActionsReleaseReq,
+  postCommentActionsReq,
+  postCommentAlertMultipleIdsReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+  postExternalReferenceESReq,
+} from '../../../../common/lib/mock';
 import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
@@ -522,9 +522,8 @@ export default ({ getService }: FtrProviderContext): void => {
         let superUserInfo: User;
 
         before(async () => {
-          ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
-            getService
-          ));
+          ({ headers, superUserInfo, superUserWithProfile } =
+            await setupSuperUserProfile(getService));
         });
 
         it('sets the closed by profile uid in the case and comment', async () => {

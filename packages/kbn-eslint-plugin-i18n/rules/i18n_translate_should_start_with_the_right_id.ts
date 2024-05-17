@@ -8,8 +8,8 @@
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
-import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
+import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { isTruthy } from '../helpers/utils';
 

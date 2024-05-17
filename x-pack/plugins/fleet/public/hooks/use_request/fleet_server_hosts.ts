@@ -12,8 +12,8 @@ import { API_VERSIONS } from '../../../common/constants';
 import type {
   GetFleetServerHostsResponse,
   PostFleetServerHostsRequest,
-  PutFleetServerHostsRequest,
   PostFleetServerHostsResponse,
+  PutFleetServerHostsRequest,
 } from '../../../common/types/rest_spec/fleet_server_hosts';
 
 import { sendRequest, useRequest } from './use_request';

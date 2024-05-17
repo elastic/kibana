@@ -9,11 +9,11 @@
 import {
   Appender,
   LogLevel,
-  LogRecord,
-  LoggerFactory,
-  LogMeta,
-  Logger,
   LogLevelId,
+  LogMeta,
+  LogRecord,
+  Logger,
+  LoggerFactory,
 } from '@kbn/logging';
 
 /**

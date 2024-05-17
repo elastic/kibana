@@ -7,13 +7,13 @@
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { SECURITY_TAG_NAME } from '../../../common/constants';
 import { getDashboardMetrics, initialDashboardMetrics } from './get_dashboards_metrics';
 import {
   getEmptyTagResponse,
   getMockDashboardSearchResponse,
   getMockTagSearchResponse,
 } from './mocks';
-import { SECURITY_TAG_NAME } from '../../../common/constants';
 
 describe('Dashboards Metrics', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;

@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { EsSorting, UseDataGridReturnType } from '@kbn/ml-data-grid';
-import { getProcessedFields, INDEX_STATUS } from '@kbn/ml-data-grid';
+import { INDEX_STATUS, getProcessedFields } from '@kbn/ml-data-grid';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';

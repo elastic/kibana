@@ -6,13 +6,13 @@
  */
 
 import { takeLeading } from 'redux-saga/effects';
+import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   getServiceLocations,
   getServiceLocationsFailure,
   getServiceLocationsSuccess,
 } from './actions';
 import { fetchServiceLocations } from './api';
-import { fetchEffectFactory } from '../utils/fetch_effect';
 
 export function* fetchServiceLocationsEffect() {
   yield takeLeading(

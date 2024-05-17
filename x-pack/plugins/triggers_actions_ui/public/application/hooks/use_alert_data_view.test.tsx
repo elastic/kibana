@@ -6,13 +6,13 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { renderHook } from '@testing-library/react-hooks/dom';
-import { useAlertDataViews } from './use_alert_data_view';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks/dom';
+import React from 'react';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { useAlertDataViews } from './use_alert_data_view';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 

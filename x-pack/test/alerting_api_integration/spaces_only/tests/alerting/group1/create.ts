@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SavedObject } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { RawRule, RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core/server';
+import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { Spaces } from '../../../scenarios';
-import {
-  checkAAD,
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  getUnauthorizedErrorMessage,
-  TaskManagerDoc,
-} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  ObjectRemover,
+  TaskManagerDoc,
+  checkAAD,
+  getTestRuleData,
+  getUnauthorizedErrorMessage,
+  getUrlPrefix,
+} from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+import { omit } from 'lodash/fp';
 
 import type {
-  ExportedTimelines,
-  ExportedNotes,
   ExportTimelineNotFoundError,
+  ExportedNotes,
+  ExportedTimelines,
   Note,
   PinnedEvent,
 } from '../../../../../../common/api/timeline';

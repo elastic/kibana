@@ -8,24 +8,24 @@
 import {
   Axis,
   BarSeries,
+  BrushEndListener,
   Chart,
+  ElementClickListener,
+  Position,
   ScaleType,
   Settings,
-  Position,
-  timeFormatter,
-  BrushEndListener,
   XYChartElementEvent,
-  ElementClickListener,
+  timeFormatter,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import React, { useContext } from 'react';
 import { HistogramPoint } from '../../../../../common/runtime_types';
-import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
-import { useUrlParams } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
+import { useUrlParams } from '../../../hooks';
+import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { getDateRangeFromChartElement } from './utils';
 
 export interface MonitorBarSeriesProps {

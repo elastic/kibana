@@ -7,9 +7,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../../authorization';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../authorization';
 
 export interface APIKeys {
   /**

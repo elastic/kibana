@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   AnalyticsServiceStart,
   I18nStart,
   OverlayStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';

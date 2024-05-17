@@ -28,12 +28,8 @@
         "type": "string",
         "tags": [],
         "label": "cssDistFilename",
-        "description": [
-          "\nFilename of the main bundle file in the distributable directory"
-        ],
-        "signature": [
-          "\"kbn-ui-shared-deps-src.css\""
-        ],
+        "description": ["\nFilename of the main bundle file in the distributable directory"],
+        "signature": ["\"kbn-ui-shared-deps-src.css\""],
         "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -45,9 +41,7 @@
         "type": "string",
         "tags": [],
         "label": "distDir",
-        "description": [
-          "\nAbsolute path to the distributable directory"
-        ],
+        "description": ["\nAbsolute path to the distributable directory"],
         "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -59,12 +53,8 @@
         "type": "string",
         "tags": [],
         "label": "jsFilename",
-        "description": [
-          "\nFilename of the main bundle file in the distributable directory"
-        ],
-        "signature": [
-          "\"kbn-ui-shared-deps-src.js\""
-        ],
+        "description": ["\nFilename of the main bundle file in the distributable directory"],
+        "signature": ["\"kbn-ui-shared-deps-src.js\""],
         "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -78,9 +68,7 @@
         "type": "Object",
         "tags": [],
         "label": "externals",
-        "description": [
-          "\nExternals mapping inteded to be used in a webpack config"
-        ],
+        "description": ["\nExternals mapping inteded to be used in a webpack config"],
         "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -91,9 +79,7 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/ui-theme'",
-            "description": [
-              "/**\n   * stateful deps\n   */"
-            ],
+            "description": ["/**\n   * stateful deps\n   */"],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
@@ -269,9 +255,7 @@
             "type": "string",
             "tags": [],
             "label": "'monaco-editor/esm/vs/editor/editor.api'",
-            "description": [
-              "// this is how plugins/consumers from npm load monaco"
-            ],
+            "description": ["// this is how plugins/consumers from npm load monaco"],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
@@ -348,9 +332,7 @@
             "type": "string",
             "tags": [],
             "label": "rxjs",
-            "description": [
-              "/**\n   * big deps which are locked to a single version\n   */"
-            ],
+            "description": ["/**\n   * big deps which are locked to a single version\n   */"],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
@@ -460,9 +442,7 @@
             "type": "string",
             "tags": [],
             "label": "'@hello-pangea/dnd'",
-            "description": [
-              "// transient dep of eui"
-            ],
+            "description": ["// transient dep of eui"],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false

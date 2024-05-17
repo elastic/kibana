@@ -12,10 +12,10 @@ import {
   CoreStart,
   I18nStart,
 } from '@kbn/core/public';
-import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
+import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
+import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { useGetUrlParams } from '../hooks';
 
 export interface CommonlyUsedDateRange {

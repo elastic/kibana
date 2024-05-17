@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { OperatorOption } from '@kbn/securitysolution-list-utils';
 import { DataViewFieldBase } from '@kbn/es-query';
+import { OperatorOption } from '@kbn/securitysolution-list-utils';
+import React, { useCallback, useMemo } from 'react';
 
-import { getOperators } from '../get_operators';
 import {
-  getGenericComboBoxProps,
   GetGenericComboBoxPropsReturn,
+  getGenericComboBoxProps,
 } from '../get_generic_combo_box_props';
+import { getOperators } from '../get_operators';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 

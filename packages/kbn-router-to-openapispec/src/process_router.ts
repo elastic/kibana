@@ -7,10 +7,11 @@
  */
 
 import type { Router } from '@kbn/core-http-router-server-internal';
-import { getResponseValidation } from '@kbn/core-http-server';
 import { ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION } from '@kbn/core-http-router-server-internal';
+import { getResponseValidation } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
+import type { OperationIdCounter } from './operation_id_counter';
 import {
   assignToPathsObject,
   extractContentType,
@@ -20,7 +21,6 @@ import {
   getVersionedHeaderParam,
   prepareRoutes,
 } from './util';
-import type { OperationIdCounter } from './operation_id_counter';
 
 export const processRouter = (
   appRouter: Router,

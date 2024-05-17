@@ -6,9 +6,9 @@
  */
 
 import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
+import moment from 'moment';
 
 export const INTERVAL_STRING_RE = new RegExp(`^([\\d\\.]+)\\s*(${dateMath.units.join('|')})$`);
 

@@ -1,3 +1,6 @@
+import { FormattedMessage } from '@kbn/i18n-react';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +10,6 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import type { TestBed } from '@kbn/test-jest-helpers';
 import { getMockServices } from '../__jest__';
 import { ContentEditorFlyoutContent } from './editor_flyout_content';
 import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_content';

@@ -10,48 +10,48 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
-import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
-import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
-import { TypeRegistry } from './application/type_registry';
-import {
-  ActionTypeModel,
-  RuleTypeModel,
-  AlertsTableProps,
-  FieldBrowserProps,
-  RuleTagBadgeOptions,
-  RuleTagBadgeProps,
-  RuleEventLogListOptions,
-  RuleEventLogListProps,
-  RuleUiAction,
-} from './types';
-import { getAlertsTableLazy } from './common/get_alerts_table';
-import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
-import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
-import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
-import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
-import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
-import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
-import { getRulesListLazy } from './common/get_rules_list';
-import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
-import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
-import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
-import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
-import { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
+import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
+import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import { TypeRegistry } from './application/type_registry';
 import { getActionFormLazy } from './common/get_action_form';
-import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
+import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
+import { getAlertsTableLazy } from './common/get_alerts_table';
+import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
+import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
+import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { getFieldBrowserLazy } from './common/get_field_browser';
+import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
-import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
+import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
+import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
+import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
+import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
+import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
+import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
+import { getRulesListLazy } from './common/get_rules_list';
+import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import {
+  ActionTypeModel,
+  AlertsTableProps,
+  FieldBrowserProps,
+  RuleEventLogListOptions,
+  RuleEventLogListProps,
+  RuleTagBadgeOptions,
+  RuleTagBadgeProps,
+  RuleTypeModel,
+  RuleUiAction,
+} from './types';
 import { AlertActionsProps } from './types';
-import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();

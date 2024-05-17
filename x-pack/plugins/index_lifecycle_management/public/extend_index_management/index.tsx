@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { get, every, some } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { every, get, some } from 'lodash';
+import React from 'react';
 
 import { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { Logger } from '@kbn/logging';
 import { initDashboard } from './create_gen_ai_dashboard';
 import { getDashboard } from './gen_ai_dashboard';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { Logger } from '@kbn/logging';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('12345'),

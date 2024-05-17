@@ -5,50 +5,44 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { omit } from 'lodash/fp';
 
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
 import {
-  ExternalReferenceSOAttachmentPayload,
   CaseStatuses,
+  ExternalReferenceSOAttachmentPayload,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  defaultUser,
-  postCaseReq,
-  postCommentUserReq,
-  postCommentAlertReq,
-  getPostCaseRequest,
-  getFilesAttachmentReq,
-  fileAttachmentMetadata,
-  postExternalReferenceSOReq,
-  fileMetadata,
-  postCommentAlertMultipleIdsReq,
-} from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
-  createCase,
-  removeServerGeneratedPropertiesFromSavedObject,
-  superUserSpace1Auth,
-  createCaseAndBulkCreateAttachments,
-  bulkCreateAttachments,
-  updateCase,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromUserAction,
-  createAndUploadFile,
-  deleteAllFiles,
-  getAllComments,
-  createComment,
-} from '../../../../common/lib/api';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  createSecuritySolutionAlerts,
+  getAlertById,
+  getSecuritySolutionAlerts,
+} from '../../../../common/lib/alerts';
+import {
+  bulkCreateAttachments,
+  createAndUploadFile,
+  createCase,
+  createCaseAndBulkCreateAttachments,
+  createComment,
+  deleteAllCaseItems,
+  deleteAllFiles,
+  getAllComments,
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromSavedObject,
+  removeServerGeneratedPropertiesFromUserAction,
+  superUserSpace1Auth,
+  updateCase,
+} from '../../../../common/lib/api';
+import { User } from '../../../../common/lib/authentication/types';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -63,13 +57,19 @@ import {
   secSolutionOnlyReadNoIndexAlerts,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import {
-  getSecuritySolutionAlerts,
-  createSecuritySolutionAlerts,
-  getAlertById,
-} from '../../../../common/lib/alerts';
-import { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
+import {
+  defaultUser,
+  fileAttachmentMetadata,
+  fileMetadata,
+  getFilesAttachmentReq,
+  getPostCaseRequest,
+  postCaseReq,
+  postCommentAlertMultipleIdsReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+  postExternalReferenceSOReq,
+} from '../../../../common/lib/mock';
 import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

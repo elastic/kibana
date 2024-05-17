@@ -7,42 +7,42 @@
  */
 
 import {
-  mockElasticsearchService,
-  mockHttpService,
-  mockPluginsService,
   mockConfigService,
-  mockSavedObjectsService,
   mockContextService,
-  mockEnsureValidConfiguration,
-  mockUiSettingsService,
-  mockRenderingService,
-  mockMetricsService,
-  mockStatusService,
-  mockLoggingService,
-  mockI18nService,
-  mockEnvironmentService,
-  mockNodeService,
-  mockPrebootService,
+  mockCustomBrandingService,
   mockDeprecationService,
   mockDocLinksService,
-  mockCustomBrandingService,
-  mockUserSettingsService,
+  mockElasticsearchService,
+  mockEnsureValidConfiguration,
+  mockEnvironmentService,
+  mockHttpService,
+  mockI18nService,
+  mockLoggingService,
+  mockMetricsService,
+  mockNodeService,
+  mockPluginsService,
+  mockPrebootService,
+  mockRenderingService,
+  mockSavedObjectsService,
   mockSecurityService,
+  mockStatusService,
+  mockUiSettingsService,
   mockUserProfileService,
+  mockUserSettingsService,
 } from './server.test.mocks';
 
-import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
-import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { Server } from './server';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { BehaviorSubject } from 'rxjs';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { Server } from './server';
 
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
-import { CriticalError } from '@kbn/core-base-server-internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();

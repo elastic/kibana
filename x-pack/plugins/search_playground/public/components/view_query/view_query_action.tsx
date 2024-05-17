@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewQueryFlyout } from './view_query_flyout';
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../../types';
+import { ViewQueryFlyout } from './view_query_flyout';
 
 export const ViewQueryAction: React.FC = () => {
   const [showFlyout, setShowFlyout] = useState(false);

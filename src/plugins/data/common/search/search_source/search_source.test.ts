@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { MockedKeys } from '@kbn/utility-types-jest';
+import { Filter } from '@kbn/es-query';
+import { ExpressionAstExpression, buildExpression } from '@kbn/expressions-plugin/common';
+import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
-import { switchMap } from 'rxjs';
-import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { SearchSourceSearchOptions } from './types';
 
 const getComputedFields = () => ({

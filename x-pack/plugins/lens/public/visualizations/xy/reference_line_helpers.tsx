@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { groupBy, partition } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import { groupBy, partition } from 'lodash';
+import { generateId } from '../../id_generator';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
 import { groupAxesByType } from './axes_configuration';
+import { defaultReferenceLineColor } from './color_assignment';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type {
-  XYState,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  XYState,
   YAxisMode,
   YConfig,
 } from './types';
@@ -29,8 +31,6 @@ import {
   isNumericMetric,
   isReferenceLayer,
 } from './visualization_helpers';
-import { generateId } from '../../id_generator';
-import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
@@ -359,8 +359,8 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
       groupId === 'xReferenceLine'
         ? 'bottom'
         : groupId === 'yReferenceLineRight'
-        ? 'right'
-        : 'left';
+          ? 'right'
+          : 'left';
 
     newLayer.yConfig = [
       ...(newLayer.yConfig || []),

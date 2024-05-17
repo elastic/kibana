@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import React, { ReactElement, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { of } from 'rxjs';
+import { Router } from '@kbn/shared-ux-router';
+import { Route } from '@kbn/shared-ux-router';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
-  render as reactTestLibRender,
   MatcherFunction,
   RenderOptions,
   configure,
+  render as reactTestLibRender,
 } from '@testing-library/react';
-import { Router } from '@kbn/shared-ux-router';
-import { Route } from '@kbn/shared-ux-router';
+import React, { ReactElement, ReactNode } from 'react';
+import { of } from 'rxjs';
 
-import { merge, mergeWith } from 'lodash';
-import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { mockState } from './__mocks__/synthetics_store.mock';
-import { MountWithReduxProvider } from './helper_with_redux';
-import { AppState } from '../../state';
-import { stringifyUrlParams } from '../url_params';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { History, createMemoryHistory } from 'history';
+import { merge, mergeWith } from 'lodash';
 import { ClientPluginsStart } from '../../../../plugin';
+import { kibanaService } from '../../../../utils/kibana_service';
 import {
   SyntheticsRefreshContextProvider,
   SyntheticsStartupPluginsContextProvider,
 } from '../../contexts';
-import { kibanaService } from '../../../../utils/kibana_service';
+import { AppState } from '../../state';
+import { stringifyUrlParams } from '../url_params';
+import { mockState } from './__mocks__/synthetics_store.mock';
+import { MountWithReduxProvider } from './helper_with_redux';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;

@@ -7,21 +7,21 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { ReactElement, useCallback, useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { DropOverlayWrapper, type DropType, Droppable } from '@kbn/dom-drag-drop';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
-import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { DiscoverDocuments } from './discover_documents';
 
 const DROP_PROPS = {
   value: {

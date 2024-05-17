@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
-import { waitFor } from '@testing-library/react';
-import type { ConsoleProps, CommandArgDefinition, CommandDefinition } from '../../../types';
+import type { CommandArgDefinition, CommandDefinition, ConsoleProps } from '../../../types';
 import { executionTranslations } from './translations';
 
 describe('When a Console command is entered by the user', () => {

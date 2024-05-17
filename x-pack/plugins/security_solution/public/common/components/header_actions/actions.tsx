@@ -5,41 +5,41 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { TableId, TimelineTabs } from '@kbn/securitysolution-data-table';
+import type { ActionProps, OnPinEvent } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
+import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import { getScopedActions, isTimelineScope } from '../../../helpers';
 import {
   eventHasNotes,
   getEventType,
   getPinOnClick,
 } from '../../../timelines/components/timeline/body/helpers';
-import { getScopedActions, isTimelineScope } from '../../../helpers';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
-import type { ActionProps, OnPinEvent } from '../../../../common/types';
-import { TimelineId } from '../../../../common/types';
-import { AddEventNoteAction } from './add_note_icon_item';
-import { PinEventAction } from './pin_event_action';
-import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { timelineDefaults } from '../../../timelines/store/defaults';
-import { useStartTransaction } from '../../lib/apm/use_start_transaction';
-import { useLicense } from '../../hooks/use_license';
-import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
-import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
-import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { setActiveTabTimeline } from '../../../timelines/store/actions';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import * as i18n from './translations';
+import { useLicense } from '../../hooks/use_license';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { useStartTransaction } from '../../lib/apm/use_start_transaction';
+import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
 import { useTourContext } from '../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { AddEventNoteAction } from './add_note_icon_item';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
+import { PinEventAction } from './pin_event_action';
+import * as i18n from './translations';
 
 const ActionsContainer = styled.div`
   align-items: center;

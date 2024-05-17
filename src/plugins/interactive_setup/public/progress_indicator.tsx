@@ -49,10 +49,10 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
     return isAvailable === true && isPastPreboot
       ? 'complete'
       : isAvailable === false
-      ? 'unavailable'
-      : isAvailable === true && !isPastPreboot
-      ? 'preboot'
-      : 'unknown';
+        ? 'unavailable'
+        : isAvailable === true && !isPastPreboot
+          ? 'preboot'
+          : 'unknown';
   });
 
   const [, cancelPolling, resetPolling] = useTimeoutFn(checkStatus, 1000);

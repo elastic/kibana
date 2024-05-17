@@ -8,23 +8,23 @@
 
 import moment from 'moment';
 
+import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
-import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { type LatestTaskStateSchema, emptyState, stateSchemaByVersion } from './task_state';
 
+import { injectReferences } from '../../common';
+import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
+import { DashboardAttributesAndReferences } from '../../common/types';
 import {
-  controlsCollectorFactory,
   collectPanelsByType,
+  controlsCollectorFactory,
   getEmptyDashboardData,
 } from './dashboard_telemetry';
-import { injectReferences } from '../../common';
-import { DashboardAttributesAndReferences } from '../../common/types';
-import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the

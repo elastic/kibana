@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo, useRef } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
+  EuiColorPicker,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiColorPicker,
-  EuiTextArea,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC, useState, useCallback, useMemo, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { TagBadge } from '..';
 import {
   TagAttributes,
   TagValidation,
-  validateTagColor,
-  tagNameMaxLength,
   tagDescriptionMaxLength,
+  tagNameMaxLength,
+  validateTagColor,
 } from '../../../common';
-import { TagBadge } from '..';
 import { getRandomColor, useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {

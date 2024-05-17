@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import { EuiConfirmModal } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 
 export function confirmModalPromise(
   message = '',

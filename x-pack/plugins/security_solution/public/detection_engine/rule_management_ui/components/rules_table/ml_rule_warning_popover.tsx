@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiButtonIcon,
   EuiPopover,
-  EuiText,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiPopoverFooter,
-  EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
+import React from 'react';
 
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from './translations';
 
-import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecurityPageName } from '../../../../../common/constants';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { isMlRule } from '../../../../../common/detection_engine/utils';
-import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
-import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
 import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import type { Rule } from '../../../rule_management/logic';
 
 const POPOVER_WIDTH = '340px';
 

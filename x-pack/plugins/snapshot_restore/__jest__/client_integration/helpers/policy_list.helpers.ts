@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { HttpSetup } from '@kbn/core/public';
 import {
-  registerTestBed,
   AsyncTestBedConfig,
   TestBed,
   findTestSubject,
+  registerTestBed,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { act } from 'react-dom/test-utils';
 import { PolicyList } from '../../../public/application/sections/home/policy_list';
 import { WithAppDependencies } from './setup_environment';
 

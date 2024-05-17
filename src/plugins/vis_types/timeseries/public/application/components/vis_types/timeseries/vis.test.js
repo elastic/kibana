@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { TimeSeries } from '../../../visualizations/views/timeseries';
-import TimeseriesVisualization from './vis';
-import { setFieldFormats, setCharts, setUISettings } from '../../../../services';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { shallow } from 'enzyme';
+import React from 'react';
+import { setCharts, setFieldFormats, setUISettings } from '../../../../services';
+import { TimeSeries } from '../../../visualizations/views/timeseries';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import TimeseriesVisualization from './vis';
 
 jest.mock('@kbn/data-plugin/public/services', () => ({
   getUiSettings: () => ({ get: jest.fn() }),

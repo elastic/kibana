@@ -9,12 +9,12 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getAllowedOutputTypesForIntegration } from '../../../common/services/output_helpers';
 
-import type { AgentPolicySOAttributes, AgentPolicy } from '../../types';
+import { appContextService } from '..';
 import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
-import { appContextService } from '..';
-import { outputService } from '../output';
 import { OutputInvalidError, OutputLicenceError, OutputNotFoundError } from '../../errors';
+import type { AgentPolicy, AgentPolicySOAttributes } from '../../types';
+import { outputService } from '../output';
 
 /**
  * Get the data output for a given agent policy

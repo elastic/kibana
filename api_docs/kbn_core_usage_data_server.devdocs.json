@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreConfigUsageData",
-        "description": [
-          "\nUsage data on this cluster's configuration of Core features"
-        ],
+        "description": ["\nUsage data on this cluster's configuration of Core features"],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -68,9 +66,7 @@
             "tags": [],
             "label": "logging",
             "description": [],
-            "signature": [
-              "{ appendersTypesUsed: string[]; loggersConfiguredCount: number; }"
-            ],
+            "signature": ["{ appendersTypesUsed: string[]; loggersConfiguredCount: number; }"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -96,9 +92,7 @@
             "tags": [],
             "label": "deprecatedKeys",
             "description": [],
-            "signature": [
-              "{ set: string[]; unset: string[]; }"
-            ],
+            "signature": ["{ set: string[]; unset: string[]; }"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -112,9 +106,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreEnvironmentUsageData",
-        "description": [
-          "\nUsage data on this Kibana node's runtime environment."
-        ],
+        "description": ["\nUsage data on this Kibana node's runtime environment."],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -153,9 +145,7 @@
             "type": "string",
             "tags": [],
             "label": "counterName",
-            "description": [
-              "The name of the counter"
-            ],
+            "description": ["The name of the counter"],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -166,12 +156,8 @@
             "type": "string",
             "tags": [],
             "label": "counterType",
-            "description": [
-              "The counter type (\"count\" by default)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The counter type (\"count\" by default)"],
+            "signature": ["string | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -182,12 +168,8 @@
             "type": "number",
             "tags": [],
             "label": "incrementBy",
-            "description": [
-              "Increment the counter by this number (1 if not specified)"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["Increment the counter by this number (1 if not specified)"],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -201,9 +183,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreServicesUsageData",
-        "description": [
-          "\nUsage data from Core services"
-        ],
+        "description": ["\nUsage data from Core services"],
         "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -244,9 +224,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageData",
-        "description": [
-          "\nType describing Core's usage data payload"
-        ],
+        "description": ["\nType describing Core's usage data payload"],
         "signature": [
           {
             "pluginId": "@kbn/core-usage-data-server",
@@ -335,9 +313,7 @@
         "parentPluginId": "@kbn/core-usage-data-server",
         "id": "def-common.CoreUsageDataSetup",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "CoreUsageDataSetup",
         "description": [
           "\nInternal API for registering the Usage Tracker used for Core's usage data payload.\n"
@@ -401,13 +377,9 @@
         "parentPluginId": "@kbn/core-usage-data-server",
         "id": "def-common.CoreUsageDataStart",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "CoreUsageDataStart",
-        "description": [
-          "\nInternal API for getting Core's usage data payload.\n"
-        ],
+        "description": ["\nInternal API for getting Core's usage data payload.\n"],
         "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -457,9 +429,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -471,9 +441,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -485,9 +453,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -499,9 +465,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -513,9 +477,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -527,9 +489,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -541,9 +501,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -555,9 +513,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -569,9 +525,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -583,9 +537,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -597,9 +549,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -611,9 +561,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -625,9 +573,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -639,9 +585,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -653,9 +597,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -667,9 +609,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -681,9 +621,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -695,9 +633,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -709,9 +645,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -723,9 +657,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -737,9 +669,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -751,9 +681,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -765,9 +693,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -779,9 +705,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -793,9 +717,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -807,9 +729,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -821,9 +741,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -835,9 +753,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -849,9 +765,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -863,9 +777,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -877,9 +789,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -891,9 +801,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -905,9 +813,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -919,9 +825,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -933,9 +837,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -947,9 +849,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -961,9 +861,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -975,9 +873,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -989,9 +885,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1003,9 +897,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1017,9 +909,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1031,9 +921,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1045,9 +933,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1059,9 +945,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1073,9 +957,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1087,9 +969,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1101,9 +981,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1115,9 +993,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1129,9 +1005,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1143,9 +1017,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1157,9 +1029,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1171,9 +1041,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1185,9 +1053,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1199,9 +1065,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1213,9 +1077,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1227,9 +1089,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1241,9 +1101,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1255,9 +1113,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1269,9 +1125,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1283,9 +1137,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1297,9 +1149,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1311,9 +1161,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1325,9 +1173,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1339,9 +1185,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1353,9 +1197,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1367,9 +1209,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1381,9 +1221,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1395,9 +1233,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1409,9 +1245,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1423,9 +1257,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1437,9 +1269,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1451,9 +1281,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1465,9 +1293,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1479,9 +1305,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1493,9 +1317,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1507,9 +1329,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1521,9 +1341,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1535,9 +1353,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1549,9 +1365,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1563,9 +1377,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1577,9 +1389,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1591,9 +1401,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1605,9 +1413,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1619,9 +1425,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1633,9 +1437,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1647,9 +1449,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1661,9 +1461,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.compatibilityModeEnabled.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1675,9 +1473,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.compatibilityModeEnabled.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1689,9 +1485,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.overwriteEnabled.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1703,9 +1497,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.overwriteEnabled.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1717,9 +1509,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1731,9 +1521,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1745,9 +1533,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1759,9 +1545,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1773,9 +1557,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1787,9 +1569,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1801,9 +1581,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1815,9 +1593,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1829,9 +1605,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1843,9 +1617,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1857,9 +1629,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1871,9 +1641,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1885,9 +1653,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1899,9 +1665,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1913,9 +1677,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1927,9 +1689,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1941,9 +1701,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.allTypesSelected.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1955,9 +1713,7 @@
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.allTypesSelected.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1969,9 +1725,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1983,9 +1737,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1997,9 +1749,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2011,9 +1761,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2025,9 +1773,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2039,9 +1785,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2053,9 +1797,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2067,9 +1809,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2081,9 +1821,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2095,9 +1833,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2109,9 +1845,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2123,9 +1857,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2137,9 +1869,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2151,9 +1881,7 @@
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2165,9 +1893,7 @@
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.exactMatch'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2179,9 +1905,7 @@
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.aliasMatch'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2193,9 +1917,7 @@
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.conflict'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2207,9 +1929,7 @@
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.notFound'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2221,9 +1941,7 @@
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.total'",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2240,12 +1958,8 @@
         "type": "Type",
         "tags": [],
         "label": "ConfigUsageData",
-        "description": [
-          "\nType describing Core's usage data payload"
-        ],
-        "signature": [
-          "{ [x: string]: any; }"
-        ],
+        "description": ["\nType describing Core's usage data payload"],
+        "signature": ["{ [x: string]: any; }"],
         "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
         "deprecated": false,
         "trackAdoption": false,

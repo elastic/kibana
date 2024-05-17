@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { screen, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { UserActionPropertyActions } from './property_actions';
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 describe('UserActionPropertyActions', () => {
   let appMock: AppMockRenderer;

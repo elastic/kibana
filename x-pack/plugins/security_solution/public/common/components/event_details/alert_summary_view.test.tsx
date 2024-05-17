@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor, render, act } from '@testing-library/react';
 
-import { AlertSummaryView } from './alert_summary_view';
-import { mockAlertDetailsData } from './__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { mockAlertDetailsData } from './__mocks__';
+import { AlertSummaryView } from './alert_summary_view';
 
-import { TestProviders, TestProvidersComponent } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
+import { TestProviders, TestProvidersComponent } from '../../mock';
 import * as i18n from './translations';
 
 jest.mock('../../lib/kibana');

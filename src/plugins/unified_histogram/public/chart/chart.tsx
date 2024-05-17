@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
-import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender } from '@elastic/eui';
+import { EuiDelayRender, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import { Histogram } from './histogram';
+import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import type { UseRequestParamsResult } from '../hooks/use_request_params';
+import { LensVisService } from '../services/lens_vis_service';
 import type {
-  UnifiedHistogramSuggestionContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
@@ -32,19 +32,19 @@ import type {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramSuggestionContext,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
-import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { TimeIntervalSelector } from './time_interval_selector';
-import { useTotalHits } from './hooks/use_total_hits';
-import { useChartStyles } from './hooks/use_chart_styles';
-import { useChartActions } from './hooks/use_chart_actions';
-import { ChartConfigPanel } from './chart_config_panel';
-import { useRefetch } from './hooks/use_refetch';
-import { useEditVisualization } from './hooks/use_edit_visualization';
-import { LensVisService } from '../services/lens_vis_service';
-import type { UseRequestParamsResult } from '../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
+import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { ChartConfigPanel } from './chart_config_panel';
+import { Histogram } from './histogram';
+import { useChartActions } from './hooks/use_chart_actions';
+import { useChartStyles } from './hooks/use_chart_styles';
+import { useEditVisualization } from './hooks/use_edit_visualization';
+import { useRefetch } from './hooks/use_refetch';
+import { useTotalHits } from './hooks/use_total_hits';
+import { TimeIntervalSelector } from './time_interval_selector';
 
 export interface ChartProps {
   abortController?: AbortController;

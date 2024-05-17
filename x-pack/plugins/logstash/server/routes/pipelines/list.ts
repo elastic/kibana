@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LogstashPluginRouter } from '../../types';
 
-import { PipelineListItem } from '../../models/pipeline_list_item';
 import { checkLicense } from '../../lib/check_license';
+import { PipelineListItem } from '../../models/pipeline_list_item';
 
 async function fetchPipelines(client: ElasticsearchClient) {
   return await client.transport.request(

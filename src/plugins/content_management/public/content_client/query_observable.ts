@@ -7,12 +7,12 @@
  */
 
 import {
-  notifyManager,
+  QueryClient,
+  QueryKey,
   QueryObserver,
   QueryObserverOptions,
   QueryObserverResult,
-  QueryClient,
-  QueryKey,
+  notifyManager,
 } from '@tanstack/react-query';
 import { Observable } from 'rxjs';
 
@@ -21,7 +21,7 @@ export const createQueryObservable = <
   TError = unknown,
   TData = TQueryFnData,
   TQueryData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
+  TQueryKey extends QueryKey = QueryKey,
 >(
   queryClient: QueryClient,
   queryOptions: QueryObserverOptions<TQueryFnData, TError, TData, TQueryData, TQueryKey>

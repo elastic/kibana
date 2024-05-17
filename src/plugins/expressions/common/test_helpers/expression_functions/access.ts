@@ -22,7 +22,7 @@ export const access: ExpressionFunctionDefinition<'access', unknown, { key: stri
     return !input
       ? input
       : typeof input === 'object'
-      ? (input as Record<string, unknown>)[key]
-      : input;
+        ? (input as Record<string, unknown>)[key]
+        : input;
   },
 };

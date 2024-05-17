@@ -7,23 +7,23 @@
 
 import expect from 'expect';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  getSimpleRuleOutput,
-  getCustomQueryRuleParams,
-  removeServerGeneratedProperties,
-  getSimpleRuleOutputWithoutRuleId,
-  removeServerGeneratedPropertiesIncludingRuleId,
-  getSimpleRuleUpdate,
-  getSimpleRule,
-  updateUsername,
-} from '../../../utils';
 import {
   createAlertsIndex,
-  deleteAllRules,
   createRule,
   deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  getCustomQueryRuleParams,
+  getSimpleRule,
+  getSimpleRuleOutput,
+  getSimpleRuleOutputWithoutRuleId,
+  getSimpleRuleUpdate,
+  removeServerGeneratedProperties,
+  removeServerGeneratedPropertiesIncludingRuleId,
+  updateUsername,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

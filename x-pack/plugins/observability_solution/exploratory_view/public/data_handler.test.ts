@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { registerDataHandler, getDataHandler } from './data_handler';
-import moment from 'moment';
 import { ApmIndicesConfig } from '@kbn/observability-shared-plugin/public';
+import moment from 'moment';
+import { getDataHandler, registerDataHandler } from './data_handler';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 

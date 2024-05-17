@@ -15,17 +15,17 @@ import {
   EuiHighlight,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getGenAiConfig } from '../../../connectorland/helpers';
-import { AIConnector } from '../../../connectorland/connector_selector';
 import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
-import * as i18n from './translations';
-import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
-import { useConversation } from '../../use_conversation';
+import { AIConnector } from '../../../connectorland/connector_selector';
+import { getGenAiConfig } from '../../../connectorland/helpers';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
+import { useConversation } from '../../use_conversation';
+import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
+import * as i18n from './translations';
 
 interface Props {
   defaultConnector?: AIConnector;

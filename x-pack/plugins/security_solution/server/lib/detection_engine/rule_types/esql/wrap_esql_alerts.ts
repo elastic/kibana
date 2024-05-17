@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import objectHash from 'object-hash';
-import type { Moment } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { Moment } from 'moment';
+import objectHash from 'object-hash';
 
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
-import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import type { SignalSource } from '../types';
+import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 
 export const wrapEsqlAlerts = ({
   results,

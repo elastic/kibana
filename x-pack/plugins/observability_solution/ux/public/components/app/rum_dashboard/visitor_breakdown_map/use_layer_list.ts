@@ -8,18 +8,18 @@
 import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   AGG_TYPE,
+  LayerDescriptor as BaseLayerDescriptor,
+  VectorLayerDescriptor as BaseVectorLayerDescriptor,
   COLOR_MAP_TYPE,
   EMSFileSourceDescriptor,
   ESTermSourceDescriptor,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
-  LayerDescriptor as BaseLayerDescriptor,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-  VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common';
 

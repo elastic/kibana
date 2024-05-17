@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,9 +48,7 @@
                 "tags": [],
                 "label": "core",
                 "description": [],
-                "signature": [
-                  "CoreContext"
-                ],
+                "signature": ["CoreContext"],
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -91,9 +87,7 @@
                 "tags": [],
                 "label": "{ injectedMetadata }",
                 "description": [],
-                "signature": [
-                  "AnalyticsServiceSetupDeps"
-                ],
+                "signature": ["AnalyticsServiceSetupDeps"],
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -132,9 +126,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,

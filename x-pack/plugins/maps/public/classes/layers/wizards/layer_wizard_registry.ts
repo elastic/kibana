@@ -7,9 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { ReactElement, ReactNode, FunctionComponent } from 'react';
-import type { LayerDescriptor } from '../../../../common/descriptor_types';
+import { FunctionComponent, ReactElement, ReactNode } from 'react';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import type { LayerDescriptor } from '../../../../common/descriptor_types';
 
 export type RenderSecondaryActionButtonProps = {
   isDisabled: boolean;

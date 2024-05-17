@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
-import PropTypes from 'prop-types';
 import {
-  EuiSelect,
-  EuiFieldText,
   EuiButton,
   EuiButtonEmpty,
-  EuiSpacer,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
-import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import PropTypes from 'prop-types';
+import React, { Fragment, useState } from 'react';
 import { ArgumentStrings } from '../../../i18n';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const { FilterGroup: strings } = ArgumentStrings;
 
@@ -53,8 +53,8 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldText
-            autoFocus
-            compressed
+            autoFocus={true}
+            compressed={true}
             type="text"
             value={inputValue}
             onChange={(ev) => setInputValue(ev.target.value)}
@@ -76,7 +76,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const selectForm = (
     <Fragment>
       <EuiSelect
-        compressed
+        compressed={true}
         id={argId}
         value={argValue || ''}
         options={choices}

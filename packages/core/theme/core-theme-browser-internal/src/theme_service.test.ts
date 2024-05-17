@@ -8,14 +8,14 @@
 
 import {
   browsersSupportsSystemThemeMock,
-  onSystemThemeChangeMock,
-  systemThemeIsDarkMock,
   createStyleSheetMock,
+  onSystemThemeChangeMock,
   setDarkModeMock,
+  systemThemeIsDarkMock,
 } from './theme_service.test.mocks';
 
-import { firstValueFrom } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { firstValueFrom } from 'rxjs';
 import { ThemeService } from './theme_service';
 
 declare global {

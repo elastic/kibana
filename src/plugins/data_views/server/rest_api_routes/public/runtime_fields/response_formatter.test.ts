@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { responseFormatter } from './response_formatter';
+import { DataViewField, DataViewLazy } from '../../../../common';
 import { SERVICE_KEY, SERVICE_KEY_LEGACY } from '../../../constants';
-import { DataViewLazy, DataViewField } from '../../../../common';
+import { responseFormatter } from './response_formatter';
 
 const dataView = {
   toSpec: async () => {

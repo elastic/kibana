@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
 import {
   CreateExceptionListItemSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { usePolicies } from '../hooks/use_policies';
-import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
-import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
+import React, { VFC } from 'react';
 import { useSecurityContext } from '../../../hooks/use_security_context';
+import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
+import { usePolicies } from '../hooks/use_policies';
+import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
 
 export interface BlockListFlyoutProps {
   /**

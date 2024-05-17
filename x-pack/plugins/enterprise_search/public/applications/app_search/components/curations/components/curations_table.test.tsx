@@ -11,7 +11,7 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ReactWrapper } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 
 import { EuiBadge, EuiBasicTable } from '@elastic/eui';
 

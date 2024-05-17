@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
-import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
+import * as t from 'io-ts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
+import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
 
 const suggestionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/suggestions',

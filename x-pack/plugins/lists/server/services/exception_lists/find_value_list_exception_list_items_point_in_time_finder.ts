@@ -19,8 +19,8 @@ import {
   exceptionListSavedObjectType,
 } from '@kbn/securitysolution-list-utils';
 
-import { escapeQuotes } from '../utils/escape_query';
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import { escapeQuotes } from '../utils/escape_query';
 
 import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 

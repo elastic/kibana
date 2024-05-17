@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { renderHook } from '@testing-library/react-hooks';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../common/mock';
 import { useCasesBreadcrumbs, useCasesTitleBreadcrumbs } from '.';
+import { TestProviders } from '../../common/mock';
 import { CasesDeepLinkId } from '../../common/navigation';
 
 const mockSetBreadcrumbs = jest.fn();

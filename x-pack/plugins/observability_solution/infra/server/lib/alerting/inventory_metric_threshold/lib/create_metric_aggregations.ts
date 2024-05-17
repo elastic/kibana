@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { get } from 'lodash';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import { isMetricRate, isCustomMetricRate, isInterfaceRateAgg } from './is_rate';
-import { createRateAggs } from './create_rate_aggs';
 import { createLogRateAggs } from './create_log_rate_aggs';
 import { createRateAggsWithInterface } from './create_rate_agg_with_interface';
+import { createRateAggs } from './create_rate_aggs';
+import { isCustomMetricRate, isInterfaceRateAgg, isMetricRate } from './is_rate';
 
 export const createMetricAggregations = (
   timerange: InfraTimerangeInput,

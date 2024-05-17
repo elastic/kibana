@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObject } from '@kbn/core/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
+import type { SavedObject } from '@kbn/core/server';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
@@ -22,7 +22,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 /**
  * Runtime field types
  */
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 /**
  * Runtime field primitive types - excluding composite

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
-import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import React from 'react';
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { escape, groupBy, uniq, uniqBy } from 'lodash';
 
 import {
   type SearchResponseWarning,
@@ -35,35 +35,35 @@ import type {
   VisualizationInfo,
 } from '../../types';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
+import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 
 import {
-  operationDefinitionMap,
-  getReferenceRoot,
-  updateColumnParam,
-  updateDefaultLabels,
-  type GenericIndexPatternColumn,
-  type TermsIndexPatternColumn,
   type CountIndexPatternColumn,
-  type RangeIndexPatternColumn,
-  type FormulaIndexPatternColumn,
   type DateHistogramIndexPatternColumn,
+  type FieldBasedIndexPatternColumn,
+  type FormulaIndexPatternColumn,
+  type GenericIndexPatternColumn,
+  type GenericOperationDefinition,
   type MaxIndexPatternColumn,
   type MinIndexPatternColumn,
-  type GenericOperationDefinition,
-  type FieldBasedIndexPatternColumn,
+  type RangeIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  getReferenceRoot,
+  operationDefinitionMap,
+  updateColumnParam,
+  updateDefaultLabels,
 } from './operations';
 
-import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
+import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
+import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import { ReducedSamplingSectionEntries } from './info_badges';
 import { FiltersIndexPatternColumn } from './operations/definitions/filters';
-import { hasField } from './pure_utils';
-import { mergeLayer } from './state_helpers';
+import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
-import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import { ReducedSamplingSectionEntries } from './info_badges';
-import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import { hasField } from './pure_utils';
+import { mergeLayer } from './state_helpers';
 
 function isMinOrMaxColumn(
   column?: GenericIndexPatternColumn
@@ -299,7 +299,7 @@ export function getSearchWarningMessages(
                       label,
                     },
                   }),
-                } as UserMessage)
+                }) as UserMessage
             )
           )
         : [
@@ -362,7 +362,7 @@ export function getUnsupportedOperationsWarningMessage(
           ([id, fieldColumn]) =>
             [fieldColumn, layer.columns[getReferenceRoot(layer, id)]] as [
               FieldBasedIndexPatternColumn,
-              ReferenceBasedIndexPatternColumn | undefined
+              ReferenceBasedIndexPatternColumn | undefined,
             ]
         );
     });
@@ -444,10 +444,13 @@ export function getPrecisionErrorWarningMessages(
 
   if (state && activeData) {
     Object.entries(activeData)
-      .reduce((acc, [layerId, { columns }]) => {
-        acc.push(...columns.map((column) => ({ layerId, column })));
-        return acc;
-      }, [] as Array<{ layerId: string; column: DatatableColumn }>)
+      .reduce(
+        (acc, [layerId, { columns }]) => {
+          acc.push(...columns.map((column) => ({ layerId, column })));
+          return acc;
+        },
+        [] as Array<{ layerId: string; column: DatatableColumn }>
+      )
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];

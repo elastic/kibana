@@ -24,8 +24,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, PropsWithChildren, ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC, PropsWithChildren, ReactNode, useState } from 'react';
 import type { DocumentDiffMode } from './types';
 
 export interface ComparisonControlsProps {

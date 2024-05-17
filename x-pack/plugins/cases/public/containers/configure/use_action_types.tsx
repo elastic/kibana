@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { useToasts } from '../../common/lib/kibana';
+import type { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
 import * as i18n from '../translations';
 import { fetchActionTypes } from './api';
-import { useToasts } from '../../common/lib/kibana';
-import { casesQueriesKeys } from '../constants';
-import type { ServerError } from '../../types';
 
 export const useGetActionTypes = () => {
   const toasts = useToasts();

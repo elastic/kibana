@@ -7,14 +7,14 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
+import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
 import type { AgentPolicyCreateState } from '../../applications/fleet/sections/agents/components';
 import {
   AgentPolicyCreatedCallOut,
   CREATE_STATUS,
 } from '../../applications/fleet/sections/agents/components';
-import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
-import type { AgentPolicy, EnrollmentSettingsFleetServerPolicy } from '../../types';
 import { incrementPolicyName, policyHasFleetServer } from '../../services';
+import type { AgentPolicy, EnrollmentSettingsFleetServerPolicy } from '../../types';
 
 import { AgentPolicySelection } from '.';
 

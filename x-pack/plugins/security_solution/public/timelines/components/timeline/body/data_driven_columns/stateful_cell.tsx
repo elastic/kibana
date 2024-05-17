@@ -10,8 +10,8 @@ import React, { useState } from 'react';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type {
-  ColumnHeaderOptions,
   CellValueElementProps,
+  ColumnHeaderOptions,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 

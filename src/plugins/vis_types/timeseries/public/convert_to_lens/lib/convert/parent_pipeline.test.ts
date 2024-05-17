@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { createSeries } from '../__mocks__';
-import { Metric, MetricType } from '../../../../common/types';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { Operations } from '@kbn/visualizations-plugin/common';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric, MetricType } from '../../../../common/types';
+import { createSeries } from '../__mocks__';
+import { SUPPORTED_METRICS, SupportedMetric } from '../metrics';
 import {
+  MetricAggregationColumn,
+  ParentPipelineAggColumn,
   computeParentPipelineColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationToColumn,
   convertParentPipelineAggToColumns,
   createParentPipelineAggregationColumn,
-  MetricAggregationColumn,
-  ParentPipelineAggColumn,
 } from './parent_pipeline';
-import { SupportedMetric, SUPPORTED_METRICS } from '../metrics';
 import { ColumnWithMeta, FormulaColumn } from './types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { Operations } from '@kbn/visualizations-plugin/common';
 
 describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
   const dataView = stubLogstashDataView;
@@ -211,7 +211,7 @@ describe('convertMetricAggregationToColumn', () => {
     [
       string,
       Parameters<typeof convertMetricAggregationToColumn>,
-      Partial<MetricAggregationColumn> | null
+      Partial<MetricAggregationColumn> | null,
     ]
   >([
     [
@@ -333,7 +333,7 @@ describe('computeParentPipelineColumns', () => {
         | Partial<FormulaColumn>
         | Array<Partial<MetricAggregationColumn> | Partial<ParentPipelineAggColumn>>
         | null
-      )
+      ),
     ]
   >([
     [
@@ -446,7 +446,7 @@ describe('computeParentPipelineColumns', () => {
 
     const [metricColumn, parentPipelineColumn] = result as [
       MetricAggregationColumn,
-      ParentPipelineAggColumn
+      ParentPipelineAggColumn,
     ];
     expect(parentPipelineColumn.references).toContain(metricColumn.columnId);
   });
@@ -468,7 +468,7 @@ describe('convertParentPipelineAggToColumns', () => {
         | Partial<FormulaColumn>
         | Array<Partial<MetricAggregationColumn> | Partial<ParentPipelineAggColumn>>
         | null
-      )
+      ),
     ]
   >([
     [
@@ -569,7 +569,7 @@ describe('createParentPipelineAggregationColumn', () => {
     [
       string,
       Parameters<typeof createParentPipelineAggregationColumn>,
-      Partial<ParentPipelineAggColumn>
+      Partial<ParentPipelineAggColumn>,
     ]
   >([
     [

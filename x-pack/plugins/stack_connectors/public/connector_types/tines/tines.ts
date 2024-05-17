@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TINES_CONNECTOR_ID, TINES_TITLE, SUB_ACTION } from '../../../common/tines/constants';
+import { lazy } from 'react';
+import { SUB_ACTION, TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
 import type { TinesConfig, TinesSecrets } from '../../../common/tines/types';
 import type { TinesExecuteActionParams } from './types';
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
-import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
+import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
 
 const control: RangeControlClass = {
   id: 'mock-range-control',

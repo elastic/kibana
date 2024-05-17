@@ -7,8 +7,8 @@
 
 import { resolve } from 'path';
 
-import { services } from './services';
 import { pageObjects } from './page_objects';
+import { services } from './services';
 
 // Docker image to use for Fleet API integration tests.
 // This hash comes from the latest successful build of the Production Distribution of the Package Registry, for

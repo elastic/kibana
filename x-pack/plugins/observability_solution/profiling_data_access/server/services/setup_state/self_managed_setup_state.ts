@@ -11,10 +11,10 @@ import {
 } from '../../../common/cluster_settings';
 import { hasProfilingData } from '../../../common/has_profiling_data';
 import {
-  createDefaultSetupState,
-  mergePartialSetupStates,
   ProfilingSetupOptions,
   SetupState,
+  createDefaultSetupState,
+  mergePartialSetupStates,
 } from '../../../common/setup';
 
 export async function selfManagedSetupState(params: ProfilingSetupOptions): Promise<SetupState> {

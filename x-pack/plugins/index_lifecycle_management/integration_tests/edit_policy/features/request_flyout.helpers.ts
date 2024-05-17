@@ -8,10 +8,10 @@
 import { HttpSetup } from '@kbn/core/public';
 import {
   createFormSetValueAction,
-  createMinAgeActions,
-  createTogglePhaseAction,
-  createRequestFlyoutActions,
   createFormToggleAction,
+  createMinAgeActions,
+  createRequestFlyoutActions,
+  createTogglePhaseAction,
 } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
 

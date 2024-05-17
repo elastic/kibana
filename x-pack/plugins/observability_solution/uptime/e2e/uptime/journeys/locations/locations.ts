@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { journey, step, before, Page } from '@elastic/synthetics';
-import { recordVideo } from '../../../helpers/record_video';
+import { Page, before, journey, step } from '@elastic/synthetics';
 import { makeChecksWithStatus } from '../../../helpers/make_checks';
+import { recordVideo } from '../../../helpers/record_video';
 import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
 
 journey('Observer location', async ({ page, params }: { page: Page; params: any }) => {

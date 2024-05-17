@@ -6,16 +6,16 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
+import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../common/constants';
 import {
-  getInitialTransformCapabilities,
   type Privilege,
   type Privileges,
   type PrivilegesAndCapabilities,
+  getInitialTransformCapabilities,
 } from '../common/types/capabilities';
-import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../common/constants';
 
 import type { PluginStartDependencies } from './types';
 

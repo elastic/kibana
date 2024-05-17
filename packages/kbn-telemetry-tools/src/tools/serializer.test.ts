@@ -7,9 +7,9 @@
  */
 
 import ts from 'typescript';
-import { getDescriptor, TelemetryKinds } from './serializer';
-import { traverseNodes } from './ts_parser';
+import { TelemetryKinds, getDescriptor } from './serializer';
 import { loadFixtureProgram } from './test_utils';
+import { traverseNodes } from './ts_parser';
 
 describe('getDescriptor', () => {
   const usageInterfaces = new Map<string, ts.InterfaceDeclaration | ts.TypeAliasDeclaration>();

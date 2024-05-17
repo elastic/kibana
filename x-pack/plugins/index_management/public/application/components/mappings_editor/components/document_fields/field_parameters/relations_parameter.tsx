@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiButtonEmpty,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiCallOut,
-  EuiLink,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import {
-  UseField,
-  UseArray,
   ArrayItem,
+  ComboBoxField,
   FieldConfig,
   TextField,
-  ComboBoxField,
+  UseArray,
+  UseField,
 } from '../../../shared_imports';
 import { Field } from '../../../types';
 

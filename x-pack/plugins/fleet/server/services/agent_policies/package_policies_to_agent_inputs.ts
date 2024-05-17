@@ -1,3 +1,4 @@
+import deepMerge from 'deepmerge';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +6,16 @@
  * 2.0.
  */
 import { merge } from 'lodash';
-import deepMerge from 'deepmerge';
 
 import { isPackageLimited } from '../../../common/services';
+import { DEFAULT_OUTPUT } from '../../constants';
 import type {
-  PackagePolicy,
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
   PackageInfo,
+  PackagePolicy,
   PackagePolicyInput,
 } from '../../types';
-import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
@@ -67,10 +67,13 @@ export const storedPackagePolicyToAgentInputs = (
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
-      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, unknown>)
+      Object.entries(input.config || {}).reduce(
+        (acc, [key, { value }]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, unknown>
+      )
     );
     if (packagePolicy.package) {
       fullInput.meta = {
@@ -118,10 +121,13 @@ export const getFullInputStreams = (
                 id: stream.id,
                 data_stream: stream.data_stream,
                 ...stream.compiled_stream,
-                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [k: string]: any }),
+                ...Object.entries(stream.config || {}).reduce(
+                  (acc, [key, { value }]) => {
+                    acc[key] = value;
+                    return acc;
+                  },
+                  {} as { [k: string]: any }
+                ),
               };
               return fullStream;
             }),

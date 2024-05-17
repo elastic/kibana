@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 export const buttonRenderer: ExpressionRenderDefinition<any> = {
   name: 'button',

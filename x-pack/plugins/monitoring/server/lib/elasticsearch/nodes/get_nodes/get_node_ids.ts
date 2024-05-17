@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { get } from 'lodash';
-import { ElasticsearchMetric } from '../../../metrics';
-import { createQuery } from '../../../create_query';
-import { LegacyRequest, Bucket } from '../../../../types';
-import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
+import moment from 'moment';
 import { Globals } from '../../../../static_globals';
+import { Bucket, LegacyRequest } from '../../../../types';
+import { getElasticsearchDataset, getIndexPatterns } from '../../../cluster/get_index_patterns';
+import { createQuery } from '../../../create_query';
+import { ElasticsearchMetric } from '../../../metrics';
 
 export async function getNodeIds(
   req: LegacyRequest,

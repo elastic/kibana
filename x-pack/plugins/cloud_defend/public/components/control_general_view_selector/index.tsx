@@ -1,3 +1,23 @@
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiComboBox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,43 +25,23 @@
  * 2.0.
  */
 import React, { useState, useMemo, useCallback, FormEvent } from 'react';
-import {
-  EuiBadge,
-  EuiIcon,
-  EuiToolTip,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiComboBox,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiCheckbox,
-} from '@elastic/eui';
-import { useStyles } from './styles';
-import {
-  ControlGeneralViewSelectorDeps,
-  ControlFormErrorMap,
-  SelectorConditionsMap,
-} from '../../types';
 import { Selector, SelectorCondition } from '../../../common';
+import { MAX_SELECTOR_NAME_LENGTH, VALID_SELECTOR_NAME_REGEX } from '../../common/constants';
 import {
-  getSelectorConditions,
   camelToSentenceCase,
-  getSelectorTypeIcon,
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
+  getSelectorConditions,
+  getSelectorTypeIcon,
   validateStringValuesForCondition,
 } from '../../common/utils';
+import {
+  ControlFormErrorMap,
+  ControlGeneralViewSelectorDeps,
+  SelectorConditionsMap,
+} from '../../types';
 import * as i18n from '../control_general_view/translations';
-import { VALID_SELECTOR_NAME_REGEX, MAX_SELECTOR_NAME_LENGTH } from '../../common/constants';
+import { useStyles } from './styles';
 
 interface ConditionProps {
   label: string;

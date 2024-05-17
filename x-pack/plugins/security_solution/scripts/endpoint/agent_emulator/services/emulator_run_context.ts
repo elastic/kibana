@@ -7,14 +7,14 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AgentEmulatorSettings } from '../types';
 import { SettingsStorage } from '../../common/settings_storage';
-import { AgentKeepAliveService } from './agent_keep_alive';
-import { ActionResponderService } from './action_responder';
 import { createRuntimeServices } from '../../common/stack_services';
+import type { AgentEmulatorSettings } from '../types';
+import { ActionResponderService } from './action_responder';
+import { AgentKeepAliveService } from './agent_keep_alive';
 
 export interface EmulatorRunContextConstructorOptions {
   username: string;

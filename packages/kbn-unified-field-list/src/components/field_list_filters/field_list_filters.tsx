@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import React from 'react';
+import { type FieldListItem } from '../../types';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
-import { type FieldListItem } from '../../types';
 
 /**
  * Props for FieldListFilters component

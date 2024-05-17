@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, type EuiSearchBarOnChangeArgs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { Component } from 'react';
 import { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
 import { ClusterHealth, ClustersHealth } from './clusters_health';

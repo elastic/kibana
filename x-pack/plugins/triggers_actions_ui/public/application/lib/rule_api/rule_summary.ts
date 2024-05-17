@@ -1,3 +1,4 @@
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { RewriteRequestCase, AsApiContract } from '@kbn/actions-plugin/common';
+import { ExecutionDuration, RuleSummary } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { RuleSummary, ExecutionDuration } from '../../../types';
 
 const transformExecutionDuration: RewriteRequestCase<ExecutionDuration> = ({
   values_with_timestamp: valuesWithTimestamp,

@@ -13,14 +13,14 @@ import {
   EuiFlyoutResizable,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FieldPath } from 'react-hook-form';
-import { SearchBarProps } from './query_builder';
 import { CreateSLOForm } from '../../types';
 import { DocumentsTable } from './documents_table';
+import { SearchBarProps } from './query_builder';
 
 export function QueryDocumentsFlyout({
   setRange,

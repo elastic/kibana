@@ -9,9 +9,9 @@ import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-
 import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import {
-  RuleActionParams,
-  AlertInstanceState,
   AlertInstanceContext,
+  AlertInstanceState,
+  RuleActionParams,
   RuleTypeParams,
   SanitizedRule,
 } from '../types';

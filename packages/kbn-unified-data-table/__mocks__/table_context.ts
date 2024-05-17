@@ -7,14 +7,14 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { DataTableContext } from '../src/table_context';
+import { convertValueToString } from '../src/utils/convert_value_to_string';
 import { dataViewComplexMock } from './data_view_complex';
 import { esHitsComplex } from './es_hits_complex';
 import { servicesMock } from './services';
-import { DataTableContext } from '../src/table_context';
-import { convertValueToString } from '../src/utils/convert_value_to_string';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableContext => {
   const usedRows = rows.map((row) => {

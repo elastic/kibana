@@ -7,8 +7,8 @@
 
 import { createFlameGraph } from '@kbn/profiling-utils';
 import { sum } from 'lodash';
-import { createColumnarViewModel } from './columnar_view_model';
 import { baseFlamegraph } from './__fixtures__/base_flamegraph';
+import { createColumnarViewModel } from './columnar_view_model';
 
 describe('Columnar view model operations', () => {
   const graph = createFlameGraph(baseFlamegraph, false);

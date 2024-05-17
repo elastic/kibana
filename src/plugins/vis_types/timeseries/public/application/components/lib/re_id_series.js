@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 export const reIdSeries = (source) => {
   const series = _.cloneDeep(source);

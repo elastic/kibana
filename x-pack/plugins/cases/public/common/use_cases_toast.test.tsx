@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { useKibana, useToasts } from './lib/kibana';
-import type { AppMockRenderer } from './mock';
-import { createAppMockRenderer, TestProviders } from './mock';
-import { CaseToastSuccessContent, useCasesToast } from './use_cases_toast';
-import { alertComment, basicComment, mockCase } from '../containers/mock';
-import React from 'react';
-import userEvent from '@testing-library/user-event';
-import type { SupportedCaseAttachment } from '../types';
 import { getByTestId, queryByTestId, screen } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { OWNER_INFO } from '../../common/constants';
+import { alertComment, basicComment, mockCase } from '../containers/mock';
+import type { SupportedCaseAttachment } from '../types';
+import { useKibana, useToasts } from './lib/kibana';
 import { useApplication } from './lib/kibana/use_application';
+import type { AppMockRenderer } from './mock';
+import { TestProviders, createAppMockRenderer } from './mock';
+import { CaseToastSuccessContent, useCasesToast } from './use_cases_toast';
 
 jest.mock('./lib/kibana');
 jest.mock('./lib/kibana/use_application');

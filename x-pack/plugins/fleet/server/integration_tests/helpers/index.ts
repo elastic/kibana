@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { type HttpMethod, type createRoot, getSupertest } from '@kbn/core-test-helpers-kbn-server';
 import { adminTestUser } from '@kbn/test';
-import { getSupertest, type createRoot, type HttpMethod } from '@kbn/core-test-helpers-kbn-server';
 
 import { FleetError } from '../../errors';
 

@@ -7,18 +7,18 @@
 
 import Boom from '@hapi/boom';
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { schema } from '@kbn/config-schema';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { schema } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 import { logEntriesV1 } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
 
 import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
-import { parseFilterQuery } from '../../utils/serialized_query';
 import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
+import { parseFilterQuery } from '../../utils/serialized_query';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

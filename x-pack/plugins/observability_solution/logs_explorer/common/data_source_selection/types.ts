@@ -6,8 +6,8 @@
  */
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import * as rt from 'io-ts';
-import { datasetRT } from '../datasets';
 import { dataViewDescriptorRT } from '../data_views/types';
+import { datasetRT } from '../datasets';
 
 const integrationNameRT = rt.partial({
   name: rt.string,

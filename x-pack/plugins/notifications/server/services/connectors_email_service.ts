@@ -11,7 +11,7 @@ import {
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import type { Logger } from '@kbn/core/server';
-import type { EmailService, PlainTextEmail, HTMLEmail } from './types';
+import type { EmailService, HTMLEmail, PlainTextEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
   constructor(

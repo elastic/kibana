@@ -6,15 +6,15 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import { EuiIconTip } from '@elastic/eui';
 
-import { LogRetentionOptions, LogRetentionMessage } from '..';
+import { LogRetentionMessage, LogRetentionOptions } from '..';
 
 import { LogRetentionTooltip } from '.';
 

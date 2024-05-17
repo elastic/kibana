@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { migrateRawDocsSafelyMock } from './transform_raw_docs.test.mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { createDocumentMigrator, createSavedObjectRawDoc } from '../test_helpers';
 import { createDocumentTransformFn } from './transform_raw_docs';
+import { migrateRawDocsSafelyMock } from './transform_raw_docs.test.mocks';
 
 describe('createDocumentTransformFn', () => {
   let serializer: ReturnType<typeof serializerMock.create>;

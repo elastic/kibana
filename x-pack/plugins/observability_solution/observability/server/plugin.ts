@@ -19,7 +19,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -27,8 +27,8 @@ import { i18n } from '@kbn/i18n';
 import {
   ApmRuleType,
   ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -45,8 +45,8 @@ import {
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import {
   AnnotationsAPI,
-  bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
+  bootstrapAnnotations,
 } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';

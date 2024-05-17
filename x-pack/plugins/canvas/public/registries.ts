@@ -8,9 +8,9 @@
 import { addRegistries, register } from '@kbn/interpreter';
 // @ts-expect-error untyped local
 import { elementsRegistry } from './lib/elements_registry';
+import { tagsRegistry } from './lib/tags_registry';
 // @ts-expect-error untyped local
 import { templatesRegistry } from './lib/templates_registry';
-import { tagsRegistry } from './lib/tags_registry';
 // @ts-expect-error untyped local
 import { transitionsRegistry } from './lib/transitions_registry';
 

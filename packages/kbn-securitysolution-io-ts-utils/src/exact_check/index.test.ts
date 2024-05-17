@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
-import { left, right, Either } from 'fp-ts/lib/Either';
+import { Either, left, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
 import { exactCheck, findDifferencesRecursive } from '.';
 import { foldLeftRight, getPaths } from '../test_utils';
 

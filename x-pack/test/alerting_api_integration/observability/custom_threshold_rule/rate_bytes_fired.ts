@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import { Dataset, PartialConfig, cleanup, generate } from '@kbn/data-forge';
+import expect from '@kbn/expect';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createDataView, deleteDataView } from '../helpers/data_view';
 import { ActionDocument } from './typings';
 
 // eslint-disable-next-line import/no-default-export

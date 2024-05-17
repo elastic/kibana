@@ -30,7 +30,7 @@ import { blurEvent, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
-import { getSuggestions, SearchSuggestion } from '../suggestions';
+import { SearchSuggestion, getSuggestions } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';

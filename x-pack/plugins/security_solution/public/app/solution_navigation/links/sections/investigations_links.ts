@@ -6,12 +6,12 @@
  */
 
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import { INVESTIGATIONS_PATH } from '../../../../../common/constants';
 import { SERVER_APP_ID } from '../../../../../common';
-import type { LinkItem } from '../../../../common/links/types';
+import { INVESTIGATIONS_PATH } from '../../../../../common/constants';
 import type { SolutionNavLink } from '../../../../common/links';
-import { IconOsqueryLazy, IconTimelineLazy } from './lazy_icons';
+import type { LinkItem } from '../../../../common/links/types';
 import * as i18n from './investigations_translations';
+import { IconOsqueryLazy, IconTimelineLazy } from './lazy_icons';
 
 // appLinks configures the Security Solution pages links
 const investigationsAppLink: LinkItem = {

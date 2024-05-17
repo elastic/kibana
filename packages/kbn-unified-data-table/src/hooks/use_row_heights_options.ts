@@ -8,7 +8,7 @@
 
 import type { EuiDataGridRowHeightOption, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { useMemo } from 'react';
-import { defaultRowLineHeight, ROWS_HEIGHT_OPTIONS } from '../constants';
+import { ROWS_HEIGHT_OPTIONS, defaultRowLineHeight } from '../constants';
 
 interface UseRowHeightProps {
   rowHeightLines: number;

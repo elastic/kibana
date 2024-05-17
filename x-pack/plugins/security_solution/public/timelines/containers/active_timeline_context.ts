@@ -6,12 +6,12 @@
  */
 
 import type {
-  TimelineEventsAllOptionsInput,
   TimelineEqlRequestOptionsInput,
+  TimelineEventsAllOptionsInput,
 } from '@kbn/timelines-plugin/common';
+import type { TimelineArgs } from '.';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../common/types';
 import { TimelineTabs } from '../../../common/types/timeline';
-import type { TimelineArgs } from '.';
 
 /*
  * Future Engineer

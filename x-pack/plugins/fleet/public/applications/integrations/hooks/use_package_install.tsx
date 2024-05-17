@@ -9,15 +9,15 @@
 // usage of it across the Fleet codebase
 import createContainer from 'constate';
 
-import React, { useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React, { useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import type { PackageInfo } from '../../../types';
-import type { FleetStartServices } from '../../../plugin';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
+import type { FleetStartServices } from '../../../plugin';
+import type { PackageInfo } from '../../../types';
 
 import { InstallStatus } from '../../../types';
 import { isVerificationError } from '../services';

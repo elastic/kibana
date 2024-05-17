@@ -9,16 +9,16 @@ import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import dateMath from '@kbn/datemath';
-import {
-  getExtendedChangePoint,
-  type DocumentCountStatsChangePoint,
-} from '@kbn/aiops-log-rate-analysis';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { Query } from '@kbn/es-query';
-import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import type { GroupTableItem } from '@kbn/aiops-components';
+import {
+  type DocumentCountStatsChangePoint,
+  getExtendedChangePoint,
+} from '@kbn/aiops-log-rate-analysis';
+import dateMath from '@kbn/datemath';
+import type { Query } from '@kbn/es-query';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
 

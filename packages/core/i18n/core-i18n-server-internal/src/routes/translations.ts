@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
+import { i18n } from '@kbn/i18n';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;

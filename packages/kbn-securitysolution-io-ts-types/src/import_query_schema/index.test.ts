@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { ImportQuerySchema, importQuerySchema } from '.';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('importQuerySchema', () => {
   test('it should validate proper schema', () => {

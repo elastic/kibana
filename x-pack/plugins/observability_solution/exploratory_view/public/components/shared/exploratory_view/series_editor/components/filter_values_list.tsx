@@ -6,15 +6,15 @@
  */
 
 import { EuiFieldSearch, EuiFilterGroup, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
-import { rgba } from 'polished';
-import styled from 'styled-components';
-import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { FilterValueButton } from '../columns/filter_value_btn';
-import { FilterProps, NestedFilterOpen } from '../columns/filter_expanded';
+import { map } from 'lodash';
+import { rgba } from 'polished';
+import React, { Fragment, useState } from 'react';
+import styled from 'styled-components';
 import { UrlFilter } from '../../types';
+import { FilterProps, NestedFilterOpen } from '../columns/filter_expanded';
+import { FilterValueButton } from '../columns/filter_value_btn';
 
 interface Props extends FilterProps {
   values: Array<{

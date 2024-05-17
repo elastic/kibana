@@ -11,12 +11,12 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
-import { missingTransformStats } from '../../../../common/transform_list';
-import type { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import type { TransformState } from '../../../../../../common/constants';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import type { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { missingTransformStats } from '../../../../common/transform_list';
 
 import type { TransformListRow } from '../../../../common';
 

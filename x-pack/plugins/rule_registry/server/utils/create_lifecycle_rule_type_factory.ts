@@ -1,3 +1,9 @@
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +11,9 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleTypeParams,
-  RuleTypeState,
-} from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
-import { createLifecycleExecutor, LifecycleAlertServices } from './create_lifecycle_executor';
+import { LifecycleAlertServices, createLifecycleExecutor } from './create_lifecycle_executor';
 
 export const createLifecycleRuleTypeFactory =
   ({ logger, ruleDataClient }: { logger: Logger; ruleDataClient: IRuleDataClient }) =>
@@ -26,7 +26,7 @@ export const createLifecycleRuleTypeFactory =
       TAlertInstanceState,
       TAlertInstanceContext,
       TActionGroupIds
-    >
+    >,
   >(
     type: AlertTypeWithExecutor<TAlertInstanceState, TParams, TAlertInstanceContext, TServices>
   ): AlertTypeWithExecutor<TAlertInstanceState, TParams, TAlertInstanceContext, any> => {

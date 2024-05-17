@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChoices } from '../lib/servicenow/use_choices';

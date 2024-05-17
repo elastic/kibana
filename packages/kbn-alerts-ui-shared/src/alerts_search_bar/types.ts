@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { HttpStart, ToastsStart } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 

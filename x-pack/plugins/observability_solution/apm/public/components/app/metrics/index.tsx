@@ -7,17 +7,17 @@
 
 import React from 'react';
 import {
-  isJavaAgentName,
-  isJRubyAgentName,
   isAWSLambdaAgentName,
+  isJRubyAgentName,
+  isJavaAgentName,
 } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { JvmMetricsOverview } from './jvm_metrics_overview';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
-import { JvmMetricsOverview } from './jvm_metrics_overview';
 import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboardFile } from './static_dashboard/helper';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();

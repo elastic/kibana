@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import sinon from 'sinon';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import moment from 'moment';
 import { of } from 'rxjs';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import sinon from 'sinon';
 
 type SortHit = {
   [key in string]: number; // timeField name

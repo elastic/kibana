@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { of } from 'rxjs';
 import { TagsCache } from './tags_cache';
 
 type TagsCacheMock = jest.Mocked<PublicMethodsOf<TagsCache>>;

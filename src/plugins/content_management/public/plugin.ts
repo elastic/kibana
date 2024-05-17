@@ -7,15 +7,15 @@
  */
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
-import {
-  ContentManagementPublicStart,
-  ContentManagementPublicSetup,
-  SetupDependencies,
-  StartDependencies,
-} from './types';
 import { ContentClient } from './content_client';
 import { ContentTypeRegistry } from './registry';
 import { RpcClient } from './rpc_client';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+  SetupDependencies,
+  StartDependencies,
+} from './types';
 
 export class ContentManagementPlugin
   implements

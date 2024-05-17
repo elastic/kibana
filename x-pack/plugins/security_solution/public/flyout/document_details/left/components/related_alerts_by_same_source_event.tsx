@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
-import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
+import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
 
 export interface RelatedAlertsBySameSourceEventProps {
   /**

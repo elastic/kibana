@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 

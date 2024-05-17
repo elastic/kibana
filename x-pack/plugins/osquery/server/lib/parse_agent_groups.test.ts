@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { aggregateResults } from './parse_agent_groups';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { OsqueryAppContext } from './osquery_app_context_services';
+import { aggregateResults } from './parse_agent_groups';
 
 const mockOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mockedPitId' });
 const mockClosePointInTime = jest.fn();

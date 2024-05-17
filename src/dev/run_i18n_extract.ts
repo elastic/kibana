@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { resolve } from 'path';
 import chalk from 'chalk';
 import { Listr } from 'listr2';
-import { resolve } from 'path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';

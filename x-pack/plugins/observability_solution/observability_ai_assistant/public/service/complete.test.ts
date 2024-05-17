@@ -7,13 +7,13 @@
 import { filter, last, lastValueFrom, map, of, throwError, toArray } from 'rxjs';
 import { v4 } from 'uuid';
 import {
-  type Message,
-  MessageRole,
-  StreamingChatResponseEventType,
-  type StreamingChatResponseEvent,
-  ChatCompletionErrorCode,
   ChatCompletionError,
+  ChatCompletionErrorCode,
+  type Message,
   MessageAddEvent,
+  MessageRole,
+  type StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
   createInternalServerError,
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';

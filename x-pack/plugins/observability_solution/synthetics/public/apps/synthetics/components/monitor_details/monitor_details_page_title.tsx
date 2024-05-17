@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MonitorSelector } from './monitor_selector/monitor_selector';
+import React from 'react';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
+import { MonitorSelector } from './monitor_selector/monitor_selector';
 
 export const MonitorDetailsPageTitle = () => {
   const { monitor } = useSelectedMonitor();

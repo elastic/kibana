@@ -8,11 +8,11 @@
 import { SemVer } from 'semver';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { getProxyRouteHandlerDeps } from './mocks'; // import need to come first
-import { createResponseStub } from './stubs'; // import needs to come first
 import { MAJOR_VERSION } from '../../../../../common/constants';
 import * as requestModule from '../../../../lib/proxy_request';
 import { createHandler } from './create_handler';
+import { getProxyRouteHandlerDeps } from './mocks'; // import need to come first
+import { createResponseStub } from './stubs'; // import needs to come first
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 

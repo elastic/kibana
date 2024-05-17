@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isoToEpochRt, nonEmptyStringRt, inRangeRt } from '@kbn/io-ts-utils';
-import * as rt from 'io-ts';
+import { inRangeRt, isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
 import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import * as rt from 'io-ts';
 import {
   SnapshotCustomMetricInputRT,
   SnapshotGroupByRT,

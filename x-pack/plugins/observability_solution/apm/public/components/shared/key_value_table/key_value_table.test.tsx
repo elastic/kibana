@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
 import { KeyValueTable } from '.';
-import { render } from '@testing-library/react';
 import { renderWithTheme } from '../../../utils/test_helpers';
 
 function getKeys(output: ReturnType<typeof render>) {

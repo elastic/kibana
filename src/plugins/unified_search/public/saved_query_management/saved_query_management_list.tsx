@@ -7,39 +7,39 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSelectable,
-  EuiPopoverFooter,
   EuiButtonIcon,
   EuiConfirmModal,
-  ShortDate,
-  EuiPagination,
-  EuiBadge,
-  EuiToolTip,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
+  EuiPagination,
+  EuiPanel,
+  EuiPopoverFooter,
   EuiProgress,
+  EuiSelectable,
+  EuiText,
+  EuiToolTip,
   PrettyDuration,
+  ShortDate,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
-import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import './saved_query_management_list.scss';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { IUnifiedSearchPluginServices } from '../types';
-import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
 import { PanelTitle } from '../query_string_input/panel_title';
+import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
+import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface SavedQueryManagementListProps {
   showSaveQuery?: boolean;

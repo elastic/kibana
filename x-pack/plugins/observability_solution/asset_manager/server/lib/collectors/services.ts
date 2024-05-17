@@ -6,9 +6,9 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { debug } from '../../../common/debug_log';
 import { Asset } from '../../../common/types_api';
-import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 
 export async function collectServices({
   client,

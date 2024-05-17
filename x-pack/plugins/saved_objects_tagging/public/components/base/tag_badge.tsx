@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { ReactElement } from 'react';
 import { TagAttributes } from '../../../common/types';
 
 export interface TagBadgeProps<T> {

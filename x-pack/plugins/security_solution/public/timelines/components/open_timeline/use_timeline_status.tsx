@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
 
 import type {
-  TimelineTypeLiteralWithNull,
   TemplateTimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
+  TimelineTypeLiteralWithNull,
 } from '../../../../common/api/timeline';
 import {
+  TemplateTimelineType,
   TimelineStatus,
   TimelineType,
-  TemplateTimelineType,
 } from '../../../../common/api/timeline';
 
+import { installPrepackedTimelines } from '../../containers/api';
 import * as i18n from './translations';
 import type { TemplateTimelineFilter } from './types';
-import { installPrepackedTimelines } from '../../containers/api';
 
 export const useTimelineStatus = ({
   timelineType,
@@ -53,8 +53,8 @@ export const useTimelineStatus = ({
       templateTimelineType == null
         ? null
         : templateTimelineType === TemplateTimelineType.elastic
-        ? TimelineStatus.immutable
-        : TimelineStatus.active,
+          ? TimelineStatus.immutable
+          : TimelineStatus.active,
     [templateTimelineType]
   );
 

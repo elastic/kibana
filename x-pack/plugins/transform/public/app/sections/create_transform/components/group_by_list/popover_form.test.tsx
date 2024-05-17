@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -19,7 +19,7 @@ import type { AggName } from '../../../../../../common/types/aggregations';
 import type { PivotGroupByConfig } from '../../../../common';
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
-import { isIntervalValid, PopoverForm } from './popover_form';
+import { PopoverForm, isIntervalValid } from './popover_form';
 
 describe('isIntervalValid()', () => {
   test('intervalType: histogram', () => {

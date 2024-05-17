@@ -7,16 +7,16 @@
 
 import { QueryState } from '@kbn/data-plugin/public';
 import { DiscoverAppState } from '@kbn/discover-plugin/public';
-import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
+import { ExistsFilter, FILTERS, Filter, PhrasesFilter } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
-import { CONTENT_FIELD, RESOURCE_FIELD, SMART_FALLBACK_FIELDS } from '../../common/constants';
 import {
   ChartDisplayOptions,
   DisplayOptions,
   GridColumnDisplayOptions,
   GridRowsDisplayOptions,
 } from '../../common';
+import { CONTENT_FIELD, RESOURCE_FIELD, SMART_FALLBACK_FIELDS } from '../../common/constants';
 import type { ControlOptions, OptionsListControl } from '../controller';
 
 export const getGridColumnDisplayOptionsFromDiscoverAppState = (

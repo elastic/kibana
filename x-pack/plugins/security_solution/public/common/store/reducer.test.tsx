@@ -1,3 +1,4 @@
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +8,11 @@
 import React from 'react';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { SecuritySubPlugins } from '../../app/types';
-import { createInitialState } from './reducer';
-import { mockIndexPattern, mockSourcererState, TestProviders, createMockStore } from '../mock';
-import { useSourcererDataView } from '../containers/sourcerer';
-import { renderHook } from '@testing-library/react-hooks';
-import { initialGroupingState } from './grouping/reducer';
 import { initialAnalyzerState } from '../../resolver/store/helpers';
+import { useSourcererDataView } from '../containers/sourcerer';
+import { TestProviders, createMockStore, mockIndexPattern, mockSourcererState } from '../mock';
+import { initialGroupingState } from './grouping/reducer';
+import { createInitialState } from './reducer';
 
 jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => {

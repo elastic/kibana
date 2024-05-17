@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { ControlInputTransform } from '@kbn/controls-plugin/common';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import type {
@@ -18,32 +17,33 @@ import type {
   ControlGroupRendererProps,
   DataControlInput,
 } from '@kbn/controls-plugin/public';
-import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { Subscription } from 'rxjs';
-import { debounce, isEqual, isEqualWith } from 'lodash';
 import type {
   ControlGroupCreationOptions,
   FieldFilterPredicate,
 } from '@kbn/controls-plugin/public/control_group/types';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { FilterGroupProps, FilterControlConfig } from './types';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { debounce, isEqual, isEqualWith } from 'lodash';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Subscription } from 'rxjs';
+import type { FilterControlConfig, FilterGroupProps } from './types';
 import './index.scss';
-import { FilterGroupLoading } from './loading';
+import { AddControl, SaveControls } from './buttons';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
+import { FilterGroupContextMenu } from './context_menu';
+import { FilterGroupContext } from './filter_group_context';
+import { FiltersChangedBanner } from './filters_changed_banner';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
-import { FilterGroupContextMenu } from './context_menu';
-import { AddControl, SaveControls } from './buttons';
+import { FilterGroupLoading } from './loading';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 import {
   getFilterControlsComparator,
   getFilterItemObjListFromControlInput,
   mergeControls,
   reorderControlsWithDefaultControls,
 } from './utils';
-import { FiltersChangedBanner } from './filters_changed_banner';
-import { FilterGroupContext } from './filter_group_context';
-import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
-import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
@@ -72,7 +72,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const defaultControlsObj = useMemo(
     () =>
-      defaultControls.reduce<Record<string, typeof defaultControls[0]>>((prev, current) => {
+      defaultControls.reduce<Record<string, (typeof defaultControls)[0]>>((prev, current) => {
         prev[current.fieldName] = current;
         return prev;
       }, {}),

@@ -7,8 +7,8 @@
  */
 
 import Path from 'path';
-import { Package } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { Package } from '@kbn/repo-packages';
 import { TsProject } from '@kbn/ts-projects';
 
 export abstract class LintTarget {

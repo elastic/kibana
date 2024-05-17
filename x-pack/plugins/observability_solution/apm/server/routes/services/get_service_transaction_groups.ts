@@ -19,11 +19,11 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
-import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../lib/helpers/transaction_error_rate';
+import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 
 const txGroupsDroppedBucketName = '_other';
 export const MAX_NUMBER_OF_TX_GROUPS = 1_000;

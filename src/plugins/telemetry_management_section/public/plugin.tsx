@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
+import type { CoreSetup, CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { CoreStart, CoreSetup, DocLinksStart } from '@kbn/core/public';
+import React from 'react';
 
-import { telemetryManagementSectionWrapper } from './components/telemetry_management_section_wrapper';
 import { SEARCH_TERMS } from '../common';
+import { telemetryManagementSectionWrapper } from './components/telemetry_management_section_wrapper';
 
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;

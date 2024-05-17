@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
-  Settings,
-  TooltipType,
-  Heatmap,
   GeometryValue,
-  XYChartSeriesIdentifier,
+  Heatmap,
+  Settings,
   Tooltip,
   TooltipAction,
+  TooltipType,
   TooltipValue,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { act } from 'react-dom/test-utils';
-import { HeatmapRenderProps, HeatmapArguments } from '../../common';
-import HeatmapComponent from './heatmap_component';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { HeatmapArguments, HeatmapRenderProps } from '../../common';
+import HeatmapComponent from './heatmap_component';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(

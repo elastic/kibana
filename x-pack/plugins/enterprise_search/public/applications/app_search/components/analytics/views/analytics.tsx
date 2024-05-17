@@ -12,16 +12,16 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '..';
+import { AnalyticsCards, AnalyticsChart, AnalyticsLogic, convertToChartData } from '..';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { CursorIcon } from '../../../icons';
 
 import {
-  ENGINE_ANALYTICS_TOP_QUERIES_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
   ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
 } from '../../../routes';
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
@@ -31,14 +31,14 @@ import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
 import {
   ANALYTICS_TITLE,
-  TOTAL_QUERIES,
-  TOTAL_QUERIES_NO_RESULTS,
-  TOTAL_CLICKS,
+  RECENT_QUERIES,
   TOP_QUERIES,
+  TOP_QUERIES_NO_CLICKS,
   TOP_QUERIES_NO_RESULTS,
   TOP_QUERIES_WITH_CLICKS,
-  TOP_QUERIES_NO_CLICKS,
-  RECENT_QUERIES,
+  TOTAL_CLICKS,
+  TOTAL_QUERIES,
+  TOTAL_QUERIES_NO_RESULTS,
 } from '../constants';
 
 import './analytics.scss';

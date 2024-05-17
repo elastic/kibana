@@ -7,10 +7,6 @@
  */
 
 import './field_list_sidebar.scss';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import classnames from 'classnames';
 import {
   EuiButton,
   EuiButtonProps,
@@ -21,23 +17,27 @@ import {
   EuiPageSidebarProps,
   useEuiTheme,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { css } from '@emotion/react';
 import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
-import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
+import { i18n } from '@kbn/i18n';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import classnames from 'classnames';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames, type ButtonAddFieldVariant, FieldsGroup } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
+import { type ButtonAddFieldVariant, FieldsGroup, FieldsGroupNames } from '../../types';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
-import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {
+  INITIAL_SELECTED_FIELDS_RESULT,
+  type SelectedFieldsResult,
   getSelectedFields,
   shouldShowField,
-  type SelectedFieldsResult,
-  INITIAL_SELECTED_FIELDS_RESULT,
 } from './group_fields';
+import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 
 export type UnifiedFieldListSidebarCustomizableProps = Pick<
   UnifiedFieldListItemProps,

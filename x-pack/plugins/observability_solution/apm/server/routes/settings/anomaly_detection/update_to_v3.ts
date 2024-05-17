@@ -1,3 +1,6 @@
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +8,9 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
+import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { uniq } from 'lodash';
 import pLimit from 'p-limit';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { JOB_STATE } from '@kbn/ml-plugin/common';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { MlClient } from '../../../lib/helpers/get_ml_client';

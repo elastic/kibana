@@ -11,43 +11,43 @@
 
 import { find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
+import PropTypes from 'prop-types';
+import React, { createRef, Fragment } from 'react';
 import {
   Subject,
   Subscription,
+  debounceTime,
   forkJoin,
   map,
-  debounceTime,
   switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
-import PropTypes from 'prop-types';
-import React, { createRef, Fragment } from 'react';
 
 import {
+  EuiAccordion,
+  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
   EuiPanel,
-  EuiTitle,
-  EuiAccordion,
-  EuiBadge,
+  EuiSpacer,
   EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
-  isModelPlotEnabled,
   isModelPlotChartableForDetector,
+  isModelPlotEnabled,
   isSourceDataChartableForDetector,
   isTimeSeriesViewJob,
   mlFunctionToESAggregation,
@@ -56,38 +56,38 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
-import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
-import { ml } from '../services/ml_api_service';
 import { forecastServiceFactory } from '../services/forecast_service';
-import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
 import { mlJobService } from '../services/job_service';
+import { ml } from '../services/ml_api_service';
 import { mlResultsServiceProvider } from '../services/results_service';
+import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
 
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
+import { ExplorerNoJobsSelected } from '../explorer/components';
+import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
+import { indexServiceFactory } from '../util/index_service';
+import { SeriesControls } from './components/series_controls';
+import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
+import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
+import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
+import { getControlsForDetector } from './get_controls_for_detector';
+import { isMetricDetector } from './get_function_description';
 import {
   APP_STATE_ACTION,
   CHARTS_POINT_TARGET,
   TIME_FIELD_NAME,
 } from './timeseriesexplorer_constants';
-import { timeSeriesSearchServiceFactory } from './timeseriesexplorer_utils/time_series_search_service';
 import { getTimeseriesexplorerDefaultState } from './timeseriesexplorer_utils';
-import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
-import { getControlsForDetector } from './get_controls_for_detector';
-import { SeriesControls } from './components/series_controls';
-import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
-import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
-import { ExplorerNoJobsSelected } from '../explorer/components';
-import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
-import { indexServiceFactory } from '../util/index_service';
-import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
+import { timeSeriesSearchServiceFactory } from './timeseriesexplorer_utils/time_series_search_service';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be

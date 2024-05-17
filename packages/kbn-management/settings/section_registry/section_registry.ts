@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { ComponentType } from 'react';
 
 /**
  * Props provided to a `RegistryComponent`.

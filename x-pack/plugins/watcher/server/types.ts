@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SemVer } from 'semver';
 import type { IRouter } from '@kbn/core/server';
+import { SemVer } from 'semver';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';

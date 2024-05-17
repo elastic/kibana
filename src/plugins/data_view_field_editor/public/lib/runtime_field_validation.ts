@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ScriptError } from '../components/preview/types';
-import { RuntimeFieldPainlessError, PainlessErrorCode } from '../types';
+import { PainlessErrorCode, RuntimeFieldPainlessError } from '../types';
 
 export const getErrorCodeFromErrorReason = (reason: string = ''): PainlessErrorCode => {
   if (reason.includes('Cannot cast from')) {

@@ -7,22 +7,22 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiLink,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiIconTip,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 
 import type { AlertSummaryRow } from './helpers';
-import * as i18n from './translations';
-import { VIEW_ALL_FIELDS } from './translations';
+import { PrevalenceCellRenderer } from './table/prevalence_cell';
 import { SummaryTable } from './table/summary_table';
 import { SummaryValueCell } from './table/summary_value_cell';
-import { PrevalenceCellRenderer } from './table/prevalence_cell';
+import * as i18n from './translations';
+import { VIEW_ALL_FIELDS } from './translations';
 
 const baseColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
   {

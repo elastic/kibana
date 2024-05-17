@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
-import { RuleDetails } from './rule_details';
-import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
+  ALERTING_FEATURE_ID,
   ActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
-  ALERTING_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from '@testing-library/react';
+import { shallow } from 'enzyme';
+import * as React from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ActionType, Rule, RuleType, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { RuleDetails } from './rule_details';
 
 jest.mock('../../../../common/lib/kibana');
 

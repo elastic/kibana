@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { isJSON } from '../../../static/validators/string';
 

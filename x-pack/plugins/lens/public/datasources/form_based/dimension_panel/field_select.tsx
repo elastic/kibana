@@ -6,17 +6,17 @@
  */
 
 import './field_select.scss';
-import { partition } from 'lodash';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { getFieldIconType } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
-import { getFieldIconType } from '@kbn/field-utils';
-import type { OperationType } from '../form_based';
-import type { OperationSupportMatrix } from './operation_support';
+import { partition } from 'lodash';
+import React, { useMemo } from 'react';
 import { fieldContainsData } from '../../../shared_components';
 import type { IndexPattern } from '../../../types';
+import type { OperationType } from '../form_based';
+import type { OperationSupportMatrix } from './operation_support';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;

@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -74,10 +72,7 @@
             "tags": [],
             "label": "classify",
             "description": [],
-            "signature": [
-              "(absolute: string) => ",
-              "ModuleId"
-            ],
+            "signature": ["(absolute: string) => ", "ModuleId"],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -89,9 +84,7 @@
                 "tags": [],
                 "label": "absolute",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
                 "deprecated": false,
                 "trackAdoption": false,

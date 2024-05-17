@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { renderWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
-import { DisabledFooter, Props } from './disabled_footer';
-import { SampleDataCardProvider } from '../services';
 import { getMockServices } from '../mocks';
+import { SampleDataCardProvider } from '../services';
+import { DisabledFooter, Props } from './disabled_footer';
 
 describe('install footer', () => {
   const props: Props = {

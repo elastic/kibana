@@ -6,12 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_connector/{connector_id}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_connector/{connector_id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-connector-api.html",
     "availability": {
       "stack": true,

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 
 import {
+  DEFAULT_EMS_DARKMAP_ID,
+  DEFAULT_EMS_FILE_API_URL,
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
-  DEFAULT_EMS_TILE_API_URL,
-  DEFAULT_EMS_FILE_API_URL,
-  DEFAULT_EMS_ROADMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
-  DEFAULT_EMS_DARKMAP_ID,
+  DEFAULT_EMS_ROADMAP_ID,
+  DEFAULT_EMS_TILE_API_URL,
 } from './common';
 
 const tileMapConfigOptionsSchema = schema.object({

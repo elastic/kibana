@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
-import { ExtendedAnnotationLayerFn } from '../types';
+import { EXTENDED_ANNOTATION_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
+import { ExtendedAnnotationLayerFn } from '../types';
 
 export function extendedAnnotationLayerFunction(): ExtendedAnnotationLayerFn {
   return {

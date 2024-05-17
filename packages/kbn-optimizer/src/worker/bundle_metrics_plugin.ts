@@ -8,9 +8,9 @@
 
 import Path from 'path';
 
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
-import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { Bundle } from '../common';
 

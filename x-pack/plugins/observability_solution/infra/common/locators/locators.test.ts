@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { InfraLogsLocatorDefinition, InfraLogsLocatorDependencies } from './logs_locator';
-import { InfraNodeLogsLocatorDefinition } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import moment from 'moment';
 import {
   DEFAULT_LOG_VIEW,
   LogViewReference,
   LogsLocatorParams,
   NodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+import { InfraLogsLocatorDefinition, InfraLogsLocatorDependencies } from './logs_locator';
+import { InfraNodeLogsLocatorDefinition } from './node_logs_locator';
 
 const setupLogsLocator = async () => {
   const deps: InfraLogsLocatorDependencies = {

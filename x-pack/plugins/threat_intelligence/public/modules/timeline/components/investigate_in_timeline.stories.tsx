@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Story } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
-import { StoryProvidersComponent } from '../../../mocks/story_providers';
+import { Story } from '@storybook/react';
+import React from 'react';
 import { generateMockUrlIndicator } from '../../../../common/types/indicator';
+import { StoryProvidersComponent } from '../../../mocks/story_providers';
 import {
-  InvestigateInTimelineContextMenu,
   InvestigateInTimelineButtonIcon,
+  InvestigateInTimelineContextMenu,
 } from './investigate_in_timeline';
 
 export default {

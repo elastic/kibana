@@ -95,11 +95,7 @@ export function orthographicProjection(
  */
 export function scalingTransformation([x, y]: Vector2): Matrix3 {
   // prettier-ignore
-  return [
-    x, 0, 0,
-    0, y, 0,
-    0, 0, 0
-  ]
+  return [x, 0, 0, 0, y, 0, 0, 0, 0];
 }
 
 /**
@@ -108,9 +104,5 @@ export function scalingTransformation([x, y]: Vector2): Matrix3 {
  */
 export function translationTransformation([x, y]: Vector2): Matrix3 {
   // prettier-ignore
-  return [
-    1, 0, x,
-    0, 1, y,
-    0, 0, 0
-  ]
+  return [1, 0, x, 0, 1, y, 0, 0, 0];
 }

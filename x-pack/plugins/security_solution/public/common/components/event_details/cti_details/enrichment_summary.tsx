@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { partition } from 'lodash';
 import { get } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { partition } from 'lodash';
+import styled from 'styled-components';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../cell_actions';
-import * as i18n from './translations';
-import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpers';
+import * as i18n from './translations';
 
-import type { FieldsData } from '../types';
 import type {
   BrowserField,
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
-import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { getSourcererScopeId } from '../../../../helpers';
+import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
+import type { FieldsData } from '../types';
+import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;

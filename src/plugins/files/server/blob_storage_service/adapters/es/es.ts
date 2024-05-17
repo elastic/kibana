@@ -7,17 +7,17 @@
  */
 
 import assert from 'assert';
+import { Readable, Transform } from 'stream';
+import { promisify } from 'util';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Semaphore } from '@kbn/std';
-import { Readable, Transform } from 'stream';
-import { pipeline } from 'stream/promises';
-import { promisify } from 'util';
-import { lastValueFrom, defer, firstValueFrom } from 'rxjs';
 import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { Semaphore } from '@kbn/std';
 import { memoize } from 'lodash';
-import { FilesPlugin } from '../../../plugin';
+import { defer, firstValueFrom, lastValueFrom } from 'rxjs';
+import { pipeline } from 'stream/promises';
 import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
+import { FilesPlugin } from '../../../plugin';
 import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';

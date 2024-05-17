@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { WritableDraft } from 'immer/dist/types/types-external';
 import { PayloadAction } from '@reduxjs/toolkit';
+import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
-import { RangeSliderReduxState } from './types';
 import { RangeValue } from '../../common/range_slider/types';
+import { RangeSliderReduxState } from './types';
 
 export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
   isInvalid: false,

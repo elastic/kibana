@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from '@kbn/core/public';
-import { RuleDetailsRoute, getRuleData } from './rule_details_route';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { shallow } from 'enzyme';
+import { createLocation, createMemoryHistory } from 'history';
+import * as React from 'react';
+import { act } from 'react-dom/test-utils';
+import { v4 as uuidv4 } from 'uuid';
+import { useKibana } from '../../../../common/lib/kibana';
 import { Rule } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { useKibana } from '../../../../common/lib/kibana';
+import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/lib/config_api', () => ({

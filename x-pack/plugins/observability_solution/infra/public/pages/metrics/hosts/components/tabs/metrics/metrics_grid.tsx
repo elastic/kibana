@@ -1,3 +1,5 @@
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
-import { Chart } from './chart';
-import { Popover } from '../../common/popover';
-import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
 import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
+import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
+import { Popover } from '../../common/popover';
+import { Chart } from './chart';
 
 export const MetricsGrid = () => {
   const { dataView } = useMetricsDataViewContext();

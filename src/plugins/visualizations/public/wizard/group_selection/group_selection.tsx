@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
-import { orderBy } from 'lodash';
 import {
-  EuiFlexGroup,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalHeaderTitle,
-  EuiLink,
-  EuiText,
-  EuiSpacer,
-  EuiBetaBadge,
-  EuiTitle,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiDescriptionList,
   EuiBadge,
+  EuiBetaBadge,
+  EuiCard,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { orderBy } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';

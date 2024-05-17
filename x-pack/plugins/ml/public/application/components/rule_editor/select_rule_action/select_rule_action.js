@@ -14,9 +14,9 @@ import React from 'react';
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DetectorDescriptionList } from '../components/detector_description_list';
 import { RuleActionPanel } from './rule_action_panel';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export function SelectRuleAction({
   job,

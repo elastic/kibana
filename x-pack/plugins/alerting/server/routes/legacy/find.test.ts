@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { findAlertRoute } from './find';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../lib/license_state.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { omit } from 'lodash';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from '../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
+import { licenseStateMock } from '../../lib/license_state.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { rulesClientMock } from '../../rules_client.mock';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { findAlertRoute } from './find';
 
 const rulesClient = rulesClientMock.create();
 

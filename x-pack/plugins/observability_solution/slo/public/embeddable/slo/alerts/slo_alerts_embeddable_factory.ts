@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import {
   EmbeddableFactory,
@@ -13,9 +12,10 @@ import {
   ErrorEmbeddable,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { COMMON_SLO_GROUPING } from '../common/constants';
-import { SLO_ALERTS_EMBEDDABLE, SLOAlertsEmbeddable } from './slo_alerts_embeddable';
+import { i18n } from '@kbn/i18n';
 import { SloPublicPluginsStart, SloPublicStart } from '../../..';
+import { COMMON_SLO_GROUPING } from '../common/constants';
+import { SLOAlertsEmbeddable, SLO_ALERTS_EMBEDDABLE } from './slo_alerts_embeddable';
 import { SloAlertsEmbeddableInput } from './types';
 
 export type SloAlertsEmbeddableFactory = EmbeddableFactory;

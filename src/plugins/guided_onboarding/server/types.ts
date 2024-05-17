@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
+import type { GuideConfig, GuideId } from '@kbn/guided-onboarding';
 
 export interface GuidedOnboardingPluginSetup {
   registerGuideConfig: (guideId: GuideId, guideConfig: GuideConfig) => void;

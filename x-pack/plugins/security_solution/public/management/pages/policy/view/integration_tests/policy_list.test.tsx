@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { act, waitFor } from '@testing-library/react';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
-import { PolicyList, policyListErrorMessage } from '../policy_list';
-import type { GetPolicyListResponse } from '../../types';
-import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
+import type { GetPolicyListResponse } from '../../types';
+import { PolicyList, policyListErrorMessage } from '../policy_list';
 
 jest.mock('../../../../services/policies/policies');
 jest.mock('../../../../../common/components/user_privileges');

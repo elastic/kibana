@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import React, { useEffect } from 'react';
 
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageTemplate,
-  EuiPageSection,
   EuiPageHeader,
-  EuiTitle,
+  EuiPageSection,
+  EuiPageTemplate,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import {
-  ScreenshotModePluginSetup,
   KBN_SCREENSHOT_MODE_HEADER,
+  ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/public';
 
-import { PLUGIN_NAME, BASE_API_ROUTE } from '../../common';
+import { BASE_API_ROUTE, PLUGIN_NAME } from '../../common';
 
 interface ScreenshotModeExampleAppDeps {
   basename: string;

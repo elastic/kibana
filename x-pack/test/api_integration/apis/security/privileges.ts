@@ -6,9 +6,9 @@
  */
 
 import util from 'util';
-import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '@kbn/security-plugin/common/model';
+import { isEqual, isEqualWith } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useContext, useMemo } from 'react';
+import { BulkActionsVerbs, UseActionsColumnRegistry } from '../../../../types';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
-import { UseActionsColumnRegistry, BulkActionsVerbs } from '../../../../types';
 
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 

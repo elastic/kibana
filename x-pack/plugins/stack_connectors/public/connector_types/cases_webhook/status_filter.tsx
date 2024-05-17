@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { CaseStatuses } from '@kbn/cases-components';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -15,6 +14,7 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
 } from '@elastic/eui';
+import { CaseStatuses } from '@kbn/cases-components';
 
 import * as i18n from './translations';
 

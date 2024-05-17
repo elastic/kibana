@@ -8,17 +8,17 @@
 
 import { captureErrorMock } from './versioned_router.test.mocks';
 
-import Supertest from 'supertest';
+import type { CliArgs } from '@kbn/config';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpService, createConfigService } from '@kbn/core-http-server-mocks';
-import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
-import type { IRouter } from '@kbn/core-http-server';
-import type { CliArgs } from '@kbn/config';
 import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import type { IRouter } from '@kbn/core-http-server';
+import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
+import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import Supertest from 'supertest';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { has } from 'lodash';
-import type { AlertType, AlertsByTypeAgg, AlertsTypeData, AlertsByRuleAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
+import type { SummaryChartsAgg, SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import { DETECTION, PREVENTION } from './translations';
+import type { AlertType, AlertsByRuleAgg, AlertsByTypeAgg, AlertsTypeData } from './types';
 
 export const ALERT_TYPE_COLOR = {
   Detection: '#D36086',

@@ -1,3 +1,7 @@
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +11,11 @@
  */
 import React, { useEffect, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { Doc } from './components/doc';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { Doc } from './components/doc';
 import { DocHistoryLocationState } from './locator';
 
 export interface DocUrlParams {

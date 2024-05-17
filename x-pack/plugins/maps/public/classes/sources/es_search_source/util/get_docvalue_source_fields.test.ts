@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 function createMockIndexPattern(fields: DataViewField[]): DataView {
   const indexPattern = {

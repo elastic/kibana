@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { SearchSource } from '@kbn/data-plugin/public';
-import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
+import { SearchSource } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { of } from 'rxjs';
 import type { SavedSearchPublicPluginStart } from './plugin';
 import type { SavedSearchAttributeService } from './services/saved_searches';
 

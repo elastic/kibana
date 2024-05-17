@@ -12,8 +12,8 @@ import { useHistory } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { UserForm } from './user_form';
 import { useCapabilities } from '../../../components/use_capabilities';
+import { UserForm } from './user_form';
 
 export const CreateUserPage: FunctionComponent = () => {
   const history = useHistory();

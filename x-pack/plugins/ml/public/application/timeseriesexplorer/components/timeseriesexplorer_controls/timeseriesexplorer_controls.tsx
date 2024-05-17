@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -24,12 +22,14 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
-import { useMlKibana } from '../../../contexts/kibana';
-import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { MlEntity } from '../../../../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
+import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
+import { useMlKibana } from '../../../contexts/kibana';
 
 interface Props {
   selectedDetectorIndex: number;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { useWaffleFilters, WaffleFiltersState } from './use_waffle_filters';
+import { WaffleFiltersState, useWaffleFilters } from './use_waffle_filters';
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({

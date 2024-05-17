@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
-import { TransformRawDocs } from '../../types';
+import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { migrateRawDocsSafely } from '../../core/migrate_raw_docs';
+import { TransformRawDocs } from '../../types';
 
 export interface CreateDocumentTransformFnOpts {
   serializer: ISavedObjectsSerializer;

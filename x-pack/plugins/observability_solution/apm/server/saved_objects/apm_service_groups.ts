@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { APM_SERVICE_GROUP_SAVED_OBJECT_TYPE } from '../../common/service_groups';
 
 interface ApmServiceGroupsPre850 {
@@ -26,18 +26,16 @@ interface ApmServiceGroups {
   color: string;
 }
 
-const migrateApmServiceGroups850: SavedObjectMigrationFn<
-  ApmServiceGroupsPre850,
-  ApmServiceGroups
-> = (doc) => {
-  const { serviceNames, ...rest } = doc.attributes;
-  return {
-    ...doc,
-    attributes: {
-      ...rest,
-    },
+const migrateApmServiceGroups850: SavedObjectMigrationFn<ApmServiceGroupsPre850, ApmServiceGroups> =
+  (doc) => {
+    const { serviceNames, ...rest } = doc.attributes;
+    return {
+      ...doc,
+      attributes: {
+        ...rest,
+      },
+    };
   };
-};
 
 export const apmServiceGroups: SavedObjectsType = {
   name: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,

@@ -1,3 +1,12 @@
+import {
+  EuiButtonEmpty,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,32 +14,23 @@
  * 2.0.
  */
 import React, { useState, useRef, memo, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiText,
-} from '@elastic/eui';
-import { selectOverviewStatus } from '../../../../state/overview_status';
-import { useInfiniteScroll } from './use_infinite_scroll';
-import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
-import { GroupFields } from './grid_by_group/group_fields';
+import { useDispatch, useSelector } from 'react-redux';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 import {
   quietFetchOverviewAction,
   selectOverviewState,
   setFlyoutConfig,
 } from '../../../../state/overview';
-import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { selectOverviewStatus } from '../../../../state/overview_status';
+import { NoMonitorsFound } from '../../common/no_monitors_found';
+import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
+import { GroupFields } from './grid_by_group/group_fields';
+import { MonitorDetailFlyout } from './monitor_detail_flyout';
+import { FlyoutParamProps, OverviewGridItem } from './overview_grid_item';
 import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
-import { FlyoutParamProps, OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
-import { NoMonitorsFound } from '../../common/no_monitors_found';
-import { MonitorDetailFlyout } from './monitor_detail_flyout';
+import { useInfiniteScroll } from './use_infinite_scroll';
 
 export const OverviewGrid = memo(() => {
   const { status } = useSelector(selectOverviewStatus);

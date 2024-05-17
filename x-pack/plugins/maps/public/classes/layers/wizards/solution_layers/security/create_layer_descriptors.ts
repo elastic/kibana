@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { isAPMDataView } from '@kbn/apm-data-view';
-import {
-  LayerDescriptor,
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
-} from '../../../../../../common/descriptor_types';
+import { i18n } from '@kbn/i18n';
 import {
   AGG_TYPE,
   COUNT_PROP_NAME,
@@ -22,12 +17,17 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
-import { GeoJsonVectorLayer } from '../../../vector_layer';
-import { LayerGroup } from '../../../layer_group';
-import { VectorStyle } from '../../../../styles/vector/vector_style';
-import { ESSearchSource } from '../../../../sources/es_search_source';
+import {
+  LayerDescriptor,
+  SizeDynamicOptions,
+  VectorStylePropertiesDescriptor,
+} from '../../../../../../common/descriptor_types';
 import { ESPewPewSource } from '../../../../sources/es_pew_pew_source';
+import { ESSearchSource } from '../../../../sources/es_search_source';
+import { VectorStyle } from '../../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
+import { LayerGroup } from '../../../layer_group';
+import { GeoJsonVectorLayer } from '../../../vector_layer';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();

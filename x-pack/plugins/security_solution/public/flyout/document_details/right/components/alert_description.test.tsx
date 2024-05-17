@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
-import {
-  ALERT_DESCRIPTION_TITLE_TEST_ID,
-  RULE_SUMMARY_BUTTON_TEST_ID,
-  ALERT_DESCRIPTION_DETAILS_TEST_ID,
-} from './test_ids';
-import { AlertDescription } from './alert_description';
-import { RightPanelContext } from '../context';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { TestProviders } from '../../../../common/mock';
-import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { TestProviders } from '../../../../common/mock';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { RightPanelContext } from '../context';
+import { AlertDescription } from './alert_description';
+import {
+  ALERT_DESCRIPTION_DETAILS_TEST_ID,
+  ALERT_DESCRIPTION_TITLE_TEST_ID,
+  RULE_SUMMARY_BUTTON_TEST_ID,
+} from './test_ids';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -72,7 +72,7 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
     scopeId: 'scopeId',
     dataFormattedForFieldBrowser,
     getFieldsData: mockGetFieldsData,
-  } as unknown as RightPanelContext);
+  }) as unknown as RightPanelContext;
 
 const renderDescription = (panelContext: RightPanelContext) =>
   render(

@@ -5,35 +5,20 @@
  * 2.0.
  */
 
-import { NewChat } from '@kbn/elastic-assistant';
 import {
-  copyToClipboard,
   EuiButton,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
   EuiSpacer,
+  copyToClipboard,
 } from '@elastic/eui';
+import { NewChat } from '@kbn/elastic-assistant';
 import React, { useCallback, useMemo } from 'react';
 
-import { IncompatibleCallout } from '../callouts/incompatible_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getIncompatibleMappingsTableColumns } from '../../../compare_fields_table/get_incompatible_mappings_table_columns';
 import { getIncompatibleValuesTableColumns } from '../../../compare_fields_table/helpers';
-import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
-import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
-import {
-  getAllIncompatibleMarkdownComments,
-  getIncompatibleMappings,
-  getIncompatibleValues,
-  showInvalidCallout,
-} from './helpers';
-import * as i18n from '../../index_properties/translations';
-import { CopyToClipboardButton } from '../styles';
-import {
-  INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
-  INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
-} from './translations';
 import {
   COPIED_RESULTS_TOAST_TITLE,
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
@@ -41,8 +26,23 @@ import {
   DATA_QUALITY_SUGGESTED_USER_PROMPT,
 } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '../summary_tab/callout_summary/translations';
 import { useDataQualityContext } from '../../data_quality_context';
+import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
+import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
+import * as i18n from '../../index_properties/translations';
+import { IncompatibleCallout } from '../callouts/incompatible_callout';
+import { CopyToClipboardButton } from '../styles';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '../summary_tab/callout_summary/translations';
+import {
+  getAllIncompatibleMarkdownComments,
+  getIncompatibleMappings,
+  getIncompatibleValues,
+  showInvalidCallout,
+} from './helpers';
+import {
+  INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
+  INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
+} from './translations';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;

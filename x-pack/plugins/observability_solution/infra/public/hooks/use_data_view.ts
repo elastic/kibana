@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { v5 as uuidv5 } from 'uuid';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import { v5 as uuidv5 } from 'uuid';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export const TIMESTAMP_FIELD = '@timestamp';

@@ -8,16 +8,16 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiTitle, EuiFormRow, EuiCheckbox, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCheckbox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
-import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { Status } from '../../../../../../common/api/detection_engine';
 import { useFetchIndex } from '../../../../../common/containers/source';
-import { entryHasListType, entryHasNonEcsType } from './utils';
-import * as i18n from './translations';
+import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { AlertData } from '../../../utils/types';
+import * as i18n from './translations';
+import { entryHasListType, entryHasNonEcsType } from './utils';
 
 const FlyoutCheckboxesSection = styled.section`
   overflow-y: inherit;

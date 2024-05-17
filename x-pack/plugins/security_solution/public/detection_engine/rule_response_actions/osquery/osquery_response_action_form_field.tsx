@@ -6,9 +6,9 @@
  */
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useCallback, useMemo } from 'react';
-import { isEmpty, map } from 'lodash';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { isEmpty, map } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const ResponseActionFormField = React.memo(({ field }: { field: FieldHook }) => {

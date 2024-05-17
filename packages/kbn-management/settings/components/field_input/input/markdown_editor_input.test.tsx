@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
 
-import { CodeEditorInput, CodeEditorInputProps } from './code_editor_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { CodeEditorProps } from '../code_editor';
 import { wrap } from '../mocks';
+import { CodeEditorInput, CodeEditorInputProps } from './code_editor_input';
 
 const name = 'Some markdown field';
 const id = 'some:markdown:field';

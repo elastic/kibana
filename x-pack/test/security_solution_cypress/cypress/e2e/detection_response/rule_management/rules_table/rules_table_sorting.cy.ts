@@ -7,11 +7,11 @@
 
 import {
   FIRST_RULE,
+  FOURTH_RULE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
   SECOND_RULE,
-  FOURTH_RULE,
-  RULES_MANAGEMENT_TABLE,
 } from '../../../../screens/alerts_detection_rules';
 import {
   enableRule,
@@ -21,21 +21,21 @@ import {
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { createRule } from '../../../../tasks/api_calls/rules';
 import {
   getExistingRule,
   getNewOverrideRule,
   getNewRule,
   getNewThresholdRule,
 } from '../../../../objects/rule';
+import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
 import {
   goToTablePage,
   setRowsPerPageTo,
   sortByTableColumn,
 } from '../../../../tasks/table_pagination';
-import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 describe('Rules table: sorting', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

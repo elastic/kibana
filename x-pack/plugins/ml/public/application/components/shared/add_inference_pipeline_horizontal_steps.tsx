@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiStepsHorizontal, type EuiStepsHorizontalProps } from '@elastic/eui';
-import type { AddInferencePipelineSteps } from '../ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../ml_inference/constants';
+import type { AddInferencePipelineSteps } from '../ml_inference/types';
 
 const steps = Object.values(ADD_INFERENCE_PIPELINE_STEPS);
 

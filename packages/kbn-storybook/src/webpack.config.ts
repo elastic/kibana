@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { resolve } from 'path';
 import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
-import { resolve } from 'path';
 import webpack, { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
-import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
+import { REPO_ROOT } from './lib/constants';
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 

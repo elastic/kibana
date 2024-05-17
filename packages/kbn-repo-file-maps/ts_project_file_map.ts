@@ -8,10 +8,10 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { SetMap } from '@kbn/set-map';
-import { RepoPath } from '@kbn/repo-path';
 import { makeMatcher } from '@kbn/picomatcher';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { RepoPath } from '@kbn/repo-path';
+import { SetMap } from '@kbn/set-map';
 import { TsProject } from '@kbn/ts-projects';
 
 import { PackageFileMap } from './package_file_map';

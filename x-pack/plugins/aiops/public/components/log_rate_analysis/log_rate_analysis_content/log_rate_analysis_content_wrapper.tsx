@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
+import React, { type FC } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
-import { LogRateAnalysisContent } from './log_rate_analysis_content';
 import type { LogRateAnalysisResultsData } from '../log_rate_analysis_results';
+import { LogRateAnalysisContent } from './log_rate_analysis_content';
 
 const localStorage = new Storage(window.localStorage);
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { parse, stringify } from 'query-string';
 import React, {
   createContext,
@@ -17,15 +18,14 @@ import React, {
   type PropsWithChildren,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { isEqual } from 'lodash';
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -177,7 +177,7 @@ export const useUrlState = (
   accessor: Accessor
 ): [
   Record<string, any>,
-  (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void
+  (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void,
 ] => {
   const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);
 
@@ -255,7 +255,7 @@ export const usePageUrlState = <T extends PageUrlState>(
 ): [
   T['pageUrlState'],
   (update: Partial<T['pageUrlState']>, replaceState?: boolean) => void,
-  PageUrlStateService<T['pageUrlState']>
+  PageUrlStateService<T['pageUrlState']>,
 ] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];

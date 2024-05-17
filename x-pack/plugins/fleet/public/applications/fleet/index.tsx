@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
 
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
+import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
 import { licenseService } from './hooks';
 import type { UIExtensionsStorage } from './types';
-import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;

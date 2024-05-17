@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Query, Filter } from '@kbn/es-query';
 import { CoreStart } from '@kbn/core/public';
+import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
+import { Filter, Query } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import type { TimeRange } from '@kbn/es-query';
-import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { CoreProviders } from '../../apps/common_providers';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 import { datemathToEpochMillis } from '../../utils/datemath';

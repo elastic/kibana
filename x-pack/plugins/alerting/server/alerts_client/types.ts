@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Alert } from '@kbn/alerts-as-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -22,21 +21,22 @@ import {
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert as LegacyAlert } from '../alert/alert';
+import type { PublicAlertFactory } from '../alert/create_alert_factory';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsFilter,
-  SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
+  SummarizedAlerts,
   WithoutReservedActionGroups,
 } from '../types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
-import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;
@@ -69,7 +69,7 @@ export interface IAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
@@ -139,7 +139,7 @@ export interface InitializeExecutionOpts {
 
 export interface TrackedAlerts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 > {
   active: Record<string, LegacyAlert<State, Context>>;
   recovered: Record<string, LegacyAlert<State, Context>>;
@@ -149,7 +149,7 @@ export interface PublicAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   report(
     alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
@@ -165,7 +165,7 @@ export interface ReportedAlert<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   id: string; // alert instance id
   actionGroup: ActionGroupIds;
@@ -178,7 +178,7 @@ export interface RecoveredAlertData<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   alert: LegacyAlert<State, Context, ActionGroupIds>;
   hit?: AlertData;
@@ -194,7 +194,7 @@ export type UpdateableAlert<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > = Pick<ReportedAlert<AlertData, State, Context, ActionGroupIds>, 'id' | 'context' | 'payload'>;
 
 export interface SearchResult<AlertData, Aggregation = unknown> {

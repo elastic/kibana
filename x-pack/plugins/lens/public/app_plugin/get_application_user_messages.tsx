@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Dispatch } from '@reduxjs/toolkit';
+import React, { useEffect, useState } from 'react';
+import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 import {
-  updateDatasourceState,
   type DataViewsState,
-  type VisualizationState,
   DatasourceState,
+  type VisualizationState,
+  updateDatasourceState,
 } from '../state_management';
 import type {
   AddUserMessages,
@@ -27,7 +28,6 @@ import type {
   UserMessagesGetter,
   Visualization,
 } from '../types';
-import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 
 /**
  * Provides a place to register general user messages that don't belong in the datasource or visualization objects
@@ -197,8 +197,8 @@ export const filterAndSortUserMessages = (
   const locationIds = Array.isArray(locationId)
     ? locationId
     : typeof locationId === 'string'
-    ? [locationId]
-    : [];
+      ? [locationId]
+      : [];
 
   const filteredMessages = userMessages.filter((message) => {
     if (locationIds.length) {

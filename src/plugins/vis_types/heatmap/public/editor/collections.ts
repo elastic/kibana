@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { ScaleType } from '../types';
 
 export const legendPositions = [

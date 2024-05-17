@@ -15,18 +15,18 @@ import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { config as RawLoggingConfig } from '@kbn/core-logging-server-internal';
 import { config as RawElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
 import { config as RawHttpConfig } from '@kbn/core-http-server-internal';
-import { savedObjectsConfig as RawSavedObjectsConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { config as RawLoggingConfig } from '@kbn/core-logging-server-internal';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { savedObjectsConfig as RawSavedObjectsConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
-import { CoreUsageDataService } from './core_usage_data_service';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { CORE_USAGE_STATS_TYPE } from '@kbn/core-usage-data-base-server-internal';
+import { CoreUsageDataService } from './core_usage_data_service';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {

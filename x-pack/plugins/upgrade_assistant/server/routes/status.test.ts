@@ -7,14 +7,14 @@
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 
-import { handleEsError } from '../shared_imports';
-import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
-import { createRequestMock } from './__mocks__/request.mock';
-import { registerUpgradeStatusRoute } from './status';
-import { getESUpgradeStatus } from '../lib/es_deprecations_status';
-import { getKibanaUpgradeStatus } from '../lib/kibana_status';
-import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import type { FeatureSet } from '../../common/types';
+import { getESUpgradeStatus } from '../lib/es_deprecations_status';
+import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
+import { getKibanaUpgradeStatus } from '../lib/kibana_status';
+import { handleEsError } from '../shared_imports';
+import { createRequestMock } from './__mocks__/request.mock';
+import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import { registerUpgradeStatusRoute } from './status';
 
 jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,

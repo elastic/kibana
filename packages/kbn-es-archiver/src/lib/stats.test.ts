@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
 import { uniq } from 'lodash';
 import sinon from 'sinon';
-import { ToolingLog } from '@kbn/tooling-log';
 
 import { createStats } from './stats';
 

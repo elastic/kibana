@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
-import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
-import { ApmPluginStartDeps } from '../../../../plugin';
-import { useServiceName } from '../../../../hooks/use_service_name';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { AlertMetadata } from '../../utils/helper';
+import React, { useCallback, useMemo } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useServiceName } from '../../../../hooks/use_service_name';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { ApmPluginStartDeps } from '../../../../plugin';
+import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
+import { AlertMetadata } from '../../utils/helper';
 
 interface Props {
   addFlyoutVisible: boolean;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { kebabCase } from 'lodash';
-import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useState, useRef } from 'react';
+import { EuiFilePicker, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { kebabCase } from 'lodash';
+import React, { useCallback, useState, useRef } from 'react';
 
 const SUPPORTED_PACK_EXTENSIONS = ['application/json', 'text/plain'];
 

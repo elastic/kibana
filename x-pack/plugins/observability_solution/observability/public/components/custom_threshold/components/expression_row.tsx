@@ -14,23 +14,23 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState, ReactElement } from 'react';
 import {
   AggregationType,
-  builtInComparators,
   COMPARATORS,
   IErrorObject,
   ThresholdExpression,
+  builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState, ReactElement } from 'react';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
-import { MetricExpression } from '../types';
-import { CustomEquationEditor } from './custom_equation';
-import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 import { isPercent } from '../helpers/threshold_unit';
+import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
+import { MetricExpression } from '../types';
+import { CustomEquationEditor } from './custom_equation';
 
 // Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
 const updatedBuiltInComparators = { ...builtInComparators };

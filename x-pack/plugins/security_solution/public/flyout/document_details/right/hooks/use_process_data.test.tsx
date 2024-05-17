@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getUserDisplayName, useProcessData } from './use_process_data';
 import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
-import { RightPanelContext } from '../context';
 import React from 'react';
+import { RightPanelContext } from '../context';
+import { getUserDisplayName, useProcessData } from './use_process_data';
 
 describe('getUserDisplayName', () => {
   const getFieldsData = jest.fn();

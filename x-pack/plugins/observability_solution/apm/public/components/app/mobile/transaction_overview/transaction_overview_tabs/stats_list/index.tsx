@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ManagedTable } from '../../../../../shared/managed_table';
+import React, { useMemo } from 'react';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
+import { ManagedTable } from '../../../../../shared/managed_table';
 import { getColumns } from './get_columns';
 
 type MobileMainStatisticsByField =

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import type { MountPoint } from '@kbn/core/public';
 import {
   KibanaRenderContextProvider,
   KibanaRenderContextProviderProps,
 } from '@kbn/react-kibana-context-render';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 export type ToMountPointParams = Pick<
   KibanaRenderContextProviderProps,

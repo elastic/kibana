@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { SyncStatus, isSyncCancellable } from '..';
 import { syncStatusToColor, syncStatusToText } from './sync_status_to_text';
-import { isSyncCancellable, SyncStatus } from '..';
 
 describe('syncStatusToText', () => {
   it('should return correct value for completed', () => {

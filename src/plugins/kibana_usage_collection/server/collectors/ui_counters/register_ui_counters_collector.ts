@@ -10,8 +10,8 @@ import moment from 'moment';
 
 import {
   CollectorFetchContext,
-  UsageCollectionSetup,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  UsageCollectionSetup,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';

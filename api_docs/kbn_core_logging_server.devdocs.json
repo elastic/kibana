@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ConsoleAppenderConfig",
-        "description": [
-          "\nConfiguration of a console appender"
-        ],
+        "description": ["\nConfiguration of a console appender"],
         "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,9 +38,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"console\""
-            ],
+            "signature": ["\"console\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -84,9 +80,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileAppenderConfig",
-        "description": [
-          "\nConfiguration of a file appender"
-        ],
+        "description": ["\nConfiguration of a file appender"],
         "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -98,9 +92,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"file\""
-            ],
+            "signature": ["\"file\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -153,9 +145,7 @@
         "type": "Interface",
         "tags": [],
         "label": "JsonLayoutConfigType",
-        "description": [
-          "\nConfiguration of a json layout"
-        ],
+        "description": ["\nConfiguration of a json layout"],
         "path": "packages/core/logging/core-logging-server/src/layout.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -167,9 +157,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"json\""
-            ],
+            "signature": ["\"json\""],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -183,9 +171,7 @@
         "type": "Interface",
         "tags": [],
         "label": "LoggerConfigType",
-        "description": [
-          "\nDescribes the configuration of a given logger.\n"
-        ],
+        "description": ["\nDescribes the configuration of a given logger.\n"],
         "path": "packages/core/logging/core-logging-server/src/logger.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -197,9 +183,7 @@
             "tags": [],
             "label": "appenders",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/core/logging/core-logging-server/src/logger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -305,9 +289,7 @@
         "type": "Interface",
         "tags": [],
         "label": "LoggingServiceSetup",
-        "description": [
-          "\nProvides APIs to plugins for customizing the plugin's logger."
-        ],
+        "description": ["\nProvides APIs to plugins for customizing the plugin's logger."],
         "path": "packages/core/logging/core-logging-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -318,9 +300,7 @@
             "type": "Function",
             "tags": [],
             "label": "configure",
-            "description": [
-              "\nCustomizes the logging config for the plugin's context.\n"
-            ],
+            "description": ["\nCustomizes the logging config for the plugin's context.\n"],
             "signature": [
               "(config$: ",
               "Observable",
@@ -386,9 +366,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"meta\""
-            ],
+            "signature": ["\"meta\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -402,9 +380,7 @@
             "description": [
               "\nThe 'mode' specifies what action to perform on the specified properties.\n  - 'update' updates an existing property at the provided 'path'.\n  - 'remove' removes an existing property at the provided 'path'."
             ],
-            "signature": [
-              "\"update\" | \"remove\""
-            ],
+            "signature": ["\"update\" | \"remove\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -415,9 +391,7 @@
             "type": "Array",
             "tags": [],
             "label": "properties",
-            "description": [
-              "\nThe properties to modify.\n"
-            ],
+            "description": ["\nThe properties to modify.\n"],
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
@@ -464,9 +438,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string | number | boolean | null | undefined"
-            ],
+            "signature": ["string | number | boolean | null | undefined"],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -492,9 +464,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"numeric\""
-            ],
+            "signature": ["\"numeric\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -516,9 +486,7 @@
             "parentPluginId": "@kbn/core-logging-server",
             "id": "def-common.NumericRollingStrategyConfig.max",
             "type": "number",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "max",
             "description": [
               "\nThe maximum number of files to keep. Once this number is reached, oldest\nfiles will be deleted. Defaults to `7`\n"
@@ -566,9 +534,7 @@
         "type": "Interface",
         "tags": [],
         "label": "PatternLayoutConfigType",
-        "description": [
-          "\nConfiguration of a pattern layout"
-        ],
+        "description": ["\nConfiguration of a pattern layout"],
         "path": "packages/core/logging/core-logging-server/src/layout.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -580,9 +546,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"pattern\""
-            ],
+            "signature": ["\"pattern\""],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -594,9 +558,7 @@
             "tags": [],
             "label": "highlight",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -608,9 +570,7 @@
             "tags": [],
             "label": "pattern",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -636,9 +596,7 @@
             "tags": [],
             "label": "maxFiles",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -671,9 +629,7 @@
             "tags": [],
             "label": "removeOlderThan",
             "description": [],
-            "signature": [
-              "moment.Duration | undefined"
-            ],
+            "signature": ["moment.Duration | undefined"],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -687,9 +643,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RewriteAppenderConfig",
-        "description": [
-          "\nConfiguration of a rewrite appender"
-        ],
+        "description": ["\nConfiguration of a rewrite appender"],
         "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -701,9 +655,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"rewrite\""
-            ],
+            "signature": ["\"rewrite\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -717,9 +669,7 @@
             "description": [
               "\nThe {@link Appender | appender(s)} to pass the log event to after\nimplementing the specified rewrite policy."
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -755,9 +705,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RollingFileAppenderConfig",
-        "description": [
-          "\nConfiguration of a rolling-file appender"
-        ],
+        "description": ["\nConfiguration of a rolling-file appender"],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -769,9 +717,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"rolling-file\""
-            ],
+            "signature": ["\"rolling-file\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -782,9 +728,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "layout",
-            "description": [
-              "\nThe layout to use when writing log entries"
-            ],
+            "description": ["\nThe layout to use when writing log entries"],
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
@@ -812,9 +756,7 @@
             "type": "string",
             "tags": [],
             "label": "fileName",
-            "description": [
-              "\nThe absolute path of the file to write to."
-            ],
+            "description": ["\nThe absolute path of the file to write to."],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -855,9 +797,7 @@
             "type": "Object",
             "tags": [],
             "label": "strategy",
-            "description": [
-              "\nThe {@link RollingStrategy | rollout strategy} to use for rolling."
-            ],
+            "description": ["\nThe {@link RollingStrategy | rollout strategy} to use for rolling."],
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
@@ -915,9 +855,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"size-limit\""
-            ],
+            "signature": ["\"size-limit\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -928,9 +866,7 @@
             "type": "Object",
             "tags": [],
             "label": "size",
-            "description": [
-              "\nThe minimum size the file must have to roll over."
-            ],
+            "description": ["\nThe minimum size the file must have to roll over."],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -965,9 +901,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"time-interval\""
-            ],
+            "signature": ["\"time-interval\""],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -978,12 +912,8 @@
             "type": "Object",
             "tags": [],
             "label": "interval",
-            "description": [
-              "\nHow often a rollover should occur.\n"
-            ],
-            "signature": [
-              "moment.Duration"
-            ],
+            "description": ["\nHow often a rollover should occur.\n"],
+            "signature": ["moment.Duration"],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false

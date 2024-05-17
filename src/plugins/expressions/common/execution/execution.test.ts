@@ -9,12 +9,12 @@
 import { lastValueFrom, of } from 'rxjs';
 import { scan } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { Execution } from './execution';
-import { parseExpression, ExpressionAstExpression } from '../ast';
-import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '..';
-import { ExecutionContract } from './execution_contract';
+import { ExpressionAstExpression, parseExpression } from '../ast';
 import { ExpressionValueBoxed } from '../expression_types';
+import { createUnitTestExecutor } from '../test_helpers';
+import { Execution } from './execution';
+import { ExecutionContract } from './execution_contract';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {

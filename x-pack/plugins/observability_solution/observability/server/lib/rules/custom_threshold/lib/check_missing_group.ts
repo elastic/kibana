@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { isString, get, identity } from 'lodash';
+import { get, identity, isString } from 'lodash';
 import {
   CustomMetricExpressionParams,
   SearchConfigurationType,

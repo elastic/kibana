@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { Severity } from './severity';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { FormTestComponent } from '../../common/test_utils';
+import { Severity } from './severity';
 
 const onSubmit = jest.fn();
 

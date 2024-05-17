@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
-import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  ObjectRemover,
-  getTestRuleData,
-  getEventLog,
-  getUnauthorizedErrorMessage,
-} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  ObjectRemover,
+  getEventLog,
+  getTestRuleData,
+  getUnauthorizedErrorMessage,
+  getUrlPrefix,
+} from '../../../../common/lib';
+import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetActionErrorLogTests({ getService }: FtrProviderContext) {

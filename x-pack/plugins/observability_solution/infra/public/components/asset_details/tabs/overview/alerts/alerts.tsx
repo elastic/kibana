@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui';
+import { type EuiAccordionProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useBoolean } from '@kbn/react-hooks';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
+import React, { useState } from 'react';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { AlertsSectionTitle } from '../section_titles';
-import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
-import { Section } from '../../../components/section';
-import { AlertsClosedContent } from './alerts_closed_content';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { type AlertsCount } from '../../../../../hooks/use_alerts_count';
 import { AlertsOverview } from '../../../../shared/alerts/alerts_overview';
 import { CreateAlertRuleButton } from '../../../../shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../shared/alerts/links/link_to_alerts_page';
+import { Section } from '../../../components/section';
+import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
+import { AlertsSectionTitle } from '../section_titles';
+import { AlertsClosedContent } from './alerts_closed_content';
 
 export const AlertsSummaryContent = ({
   assetId,

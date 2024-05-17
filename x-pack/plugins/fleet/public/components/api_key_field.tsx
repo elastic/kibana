@@ -1,3 +1,14 @@
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +16,6 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import { useStartServices } from '../hooks';
 

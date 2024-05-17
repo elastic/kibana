@@ -7,10 +7,10 @@
  */
 
 import {
-  CompilerRunningMsg,
-  CompilerIssueMsg,
-  CompilerSuccessMsg,
   CompilerErrorMsg,
+  CompilerIssueMsg,
+  CompilerRunningMsg,
+  CompilerSuccessMsg,
 } from './compiler_messages';
 
 export type WorkerMsg =

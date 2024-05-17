@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "createAnalytics",
-        "description": [
-          "\nCreates an {@link AnalyticsClient}."
-        ],
+        "description": ["\nCreates an {@link AnalyticsClient}."],
         "signature": [
           "(initContext: ",
           {
@@ -85,9 +83,7 @@
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsClientInitContext",
-        "description": [
-          "\nGeneral settings of the analytics client"
-        ],
+        "description": ["\nGeneral settings of the analytics client"],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -98,9 +94,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isDev",
-            "description": [
-              "\nBoolean indicating if it's running in developer mode."
-            ],
+            "description": ["\nBoolean indicating if it's running in developer mode."],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -114,9 +108,7 @@
             "description": [
               "\nSpecify if the shippers should send their data to the production or staging environments."
             ],
-            "signature": [
-              "\"production\" | \"staging\""
-            ],
+            "signature": ["\"production\" | \"staging\""],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -127,9 +119,7 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [
-              "\nApplication-provided logger."
-            ],
+            "description": ["\nApplication-provided logger."],
             "signature": [
               {
                 "pluginId": "@kbn/logging",
@@ -152,9 +142,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ContextProviderOpts",
-        "description": [
-          "\nDefinition of a context provider"
-        ],
+        "description": ["\nDefinition of a context provider"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -175,9 +163,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nThe name of the provider."
-            ],
+            "description": ["\nThe name of the provider."],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -188,13 +174,8 @@
             "type": "Object",
             "tags": [],
             "label": "context$",
-            "description": [
-              "\nObservable that emits the custom context."
-            ],
-            "signature": [
-              "Observable",
-              "<Context>"
-            ],
+            "description": ["\nObservable that emits the custom context."],
+            "signature": ["Observable", "<Context>"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -232,9 +213,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Event",
-        "description": [
-          "\nDefinition of the full event structure"
-        ],
+        "description": ["\nDefinition of the full event structure"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -255,9 +234,7 @@
             "type": "string",
             "tags": [],
             "label": "timestamp",
-            "description": [
-              "\nThe time the event was generated in ISO format."
-            ],
+            "description": ["\nThe time the event was generated in ISO format."],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -268,9 +245,7 @@
             "type": "string",
             "tags": [],
             "label": "event_type",
-            "description": [
-              "\nThe event type."
-            ],
+            "description": ["\nThe event type."],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -281,12 +256,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "properties",
-            "description": [
-              "\nThe specific properties of the event type."
-            ],
-            "signature": [
-              "Properties"
-            ],
+            "description": ["\nThe specific properties of the event type."],
+            "signature": ["Properties"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -297,9 +268,7 @@
             "type": "Object",
             "tags": [],
             "label": "context",
-            "description": [
-              "\nThe {@link EventContext} enriched during the processing pipeline."
-            ],
+            "description": ["\nThe {@link EventContext} enriched during the processing pipeline."],
             "signature": [
               {
                 "pluginId": "@kbn/analytics-client",
@@ -335,12 +304,8 @@
             "type": "string",
             "tags": [],
             "label": "cluster_uuid",
-            "description": [
-              "\nThe UUID of the cluster"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe UUID of the cluster"],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -351,12 +316,8 @@
             "type": "string",
             "tags": [],
             "label": "cluster_name",
-            "description": [
-              "\nThe name of the cluster."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe name of the cluster."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -367,12 +328,8 @@
             "type": "string",
             "tags": [],
             "label": "license_id",
-            "description": [
-              "\nThe license ID."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe license ID."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -383,12 +340,8 @@
             "type": "string",
             "tags": [],
             "label": "userId",
-            "description": [
-              "\nThe unique user ID."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe unique user ID."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -399,12 +352,8 @@
             "type": "string",
             "tags": [],
             "label": "cloudId",
-            "description": [
-              "\nThe Cloud ID."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe Cloud ID."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -418,9 +367,7 @@
             "description": [
               "\n`true` if the user is logged in via the Elastic Cloud authentication provider."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -431,12 +378,8 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "\nThe product's version."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe product's version."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -447,12 +390,8 @@
             "type": "string",
             "tags": [],
             "label": "pageName",
-            "description": [
-              "\nThe name of the current page."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe name of the current page."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -463,12 +402,8 @@
             "type": "string",
             "tags": [],
             "label": "applicationId",
-            "description": [
-              "\nThe current application ID."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe current application ID."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -479,12 +414,8 @@
             "type": "string",
             "tags": [],
             "label": "entityId",
-            "description": [
-              "\nThe current entity ID (dashboard ID, visualization ID, etc.)."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe current entity ID (dashboard ID, visualization ID, etc.)."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -495,12 +426,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: unknown",
-            "description": [
-              "\nAdditional keys are allowed."
-            ],
-            "signature": [
-              "[key: string]:  unknown"
-            ],
+            "description": ["\nAdditional keys are allowed."],
+            "signature": ["[key: string]:  unknown"],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -514,9 +441,7 @@
         "type": "Interface",
         "tags": [],
         "label": "EventTypeOpts",
-        "description": [
-          "\nDefinition of an Event Type."
-        ],
+        "description": ["\nDefinition of an Event Type."],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -537,9 +462,7 @@
             "type": "string",
             "tags": [],
             "label": "eventType",
-            "description": [
-              "\nThe event type's unique name."
-            ],
+            "description": ["\nThe event type's unique name."],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -577,9 +500,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IAnalyticsClient",
-        "description": [
-          "\nAnalytics client's public APIs"
-        ],
+        "description": ["\nAnalytics client's public APIs"],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -588,13 +509,9 @@
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.IAnalyticsClient.reportEvent",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "reportEvent",
-            "description": [
-              "\nReports a telemetry event."
-            ],
+            "description": ["\nReports a telemetry event."],
             "signature": [
               "<EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void"
             ],
@@ -1198,12 +1115,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "eventType",
-                "description": [
-                  "The event type registered via the `registerEventType` API."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The event type registered via the `registerEventType` API."],
+                "signature": ["string"],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1218,9 +1131,7 @@
                 "description": [
                   "The properties matching the schema declared in the `registerEventType` API."
                 ],
-                "signature": [
-                  "EventTypeData"
-                ],
+                "signature": ["EventTypeData"],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1259,9 +1170,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "eventTypeOps",
-                "description": [
-                  "The definition of the event type {@link EventTypeOpts }."
-                ],
+                "description": ["The definition of the event type {@link EventTypeOpts }."],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -1326,9 +1235,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "Shipper",
-                "description": [
-                  "The {@link IShipper } class to instantiate the shipper."
-                ],
+                "description": ["The {@link IShipper } class to instantiate the shipper."],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -1350,12 +1257,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "shipperConfig",
-                "description": [
-                  "The config specific to the Shipper to instantiate."
-                ],
-                "signature": [
-                  "ShipperConfig"
-                ],
+                "description": ["The config specific to the Shipper to instantiate."],
+                "signature": ["ShipperConfig"],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1418,9 +1321,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "optInConfig",
-                "description": [
-                  "{@link OptInConfig }"
-                ],
+                "description": ["{@link OptInConfig }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -1442,13 +1343,9 @@
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.IAnalyticsClient.registerContextProvider",
             "type": "Function",
-            "tags": [
-              "track-adoption"
-            ],
+            "tags": ["track-adoption"],
             "label": "registerContextProvider",
-            "description": [
-              "\nRegisters the context provider to enrich any reported events."
-            ],
+            "description": ["\nRegisters the context provider to enrich any reported events."],
             "signature": [
               "<Context>(contextProviderOpts: ",
               {
@@ -1728,9 +1625,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "contextProviderOpts",
-                "description": [
-                  "{@link ContextProviderOpts }"
-                ],
+                "description": ["{@link ContextProviderOpts }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -1758,9 +1653,7 @@
             "description": [
               "\nRemoves the context provider and stop enriching the events from its context."
             ],
-            "signature": [
-              "(contextProviderName: string) => void"
-            ],
+            "signature": ["(contextProviderName: string) => void"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1771,12 +1664,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "contextProviderName",
-                "description": [
-                  "The name of the context provider to remove."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The name of the context provider to remove."],
+                "signature": ["string"],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1791,9 +1680,7 @@
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
-            "description": [
-              "\nObservable to emit the stats of the processed events."
-            ],
+            "description": ["\nObservable to emit the stats of the processed events."],
             "signature": [
               "Observable",
               "<",
@@ -1819,9 +1706,7 @@
             "description": [
               "\nForces all shippers to send all their enqueued events and fulfills the returned promise."
             ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1834,12 +1719,8 @@
             "type": "Function",
             "tags": [],
             "label": "shutdown",
-            "description": [
-              "\nStops the client. Flushing any pending events in the process."
-            ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "description": ["\nStops the client. Flushing any pending events in the process."],
+            "signature": ["() => Promise<void>"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1855,9 +1736,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IShipper",
-        "description": [
-          "\nBasic structure of a Shipper"
-        ],
+        "description": ["\nBasic structure of a Shipper"],
         "path": "packages/analytics/client/src/shippers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1868,9 +1747,7 @@
             "type": "Function",
             "tags": [],
             "label": "reportEvents",
-            "description": [
-              "\nAdapts and ships the event to the persisting/analytics solution."
-            ],
+            "description": ["\nAdapts and ships the event to the persisting/analytics solution."],
             "signature": [
               "(events: ",
               {
@@ -1892,9 +1769,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "events",
-                "description": [
-                  "batched events {@link Event }"
-                ],
+                "description": ["batched events {@link Event }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -1922,9 +1797,7 @@
             "description": [
               "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
             ],
-            "signature": [
-              "(isOptedIn: boolean) => void"
-            ],
+            "signature": ["(isOptedIn: boolean) => void"],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1935,12 +1808,8 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
-                "description": [
-                  "`true` for resume sending events. `false` to stop."
-                ],
-                "signature": [
-                  "boolean"
-                ],
+                "description": ["`true` for resume sending events. `false` to stop."],
+                "signature": ["boolean"],
                 "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1979,9 +1848,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
-                "description": [
-                  "The full new context to set {@link EventContext }"
-                ],
+                "description": ["The full new context to set {@link EventContext }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -2005,9 +1872,7 @@
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
-            "description": [
-              "\nObservable to emit the stats of the processed events."
-            ],
+            "description": ["\nObservable to emit the stats of the processed events."],
             "signature": [
               "Observable",
               "<",
@@ -2030,12 +1895,8 @@
             "type": "Function",
             "tags": [],
             "label": "flush",
-            "description": [
-              "\nSends all the enqueued events and fulfills the returned promise."
-            ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "description": ["\nSends all the enqueued events and fulfills the returned promise."],
+            "signature": ["() => Promise<void>"],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2048,12 +1909,8 @@
             "type": "Function",
             "tags": [],
             "label": "shutdown",
-            "description": [
-              "\nShutdown the shipper."
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nShutdown the shipper."],
+            "signature": ["() => void"],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2069,9 +1926,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OptInConfig",
-        "description": [
-          "\nOptions for the optIn API"
-        ],
+        "description": ["\nOptions for the optIn API"],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2144,9 +1999,7 @@
             "type": "boolean",
             "tags": [],
             "label": "enabled",
-            "description": [
-              "\nThe event type is globally enabled."
-            ],
+            "description": ["\nThe event type is globally enabled."],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2160,9 +2013,7 @@
             "description": [
               "\nControls if an event type should be disabled for a specific type of shipper."
             ],
-            "signature": [
-              "Record<string, boolean | undefined> | undefined"
-            ],
+            "signature": ["Record<string, boolean | undefined> | undefined"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2176,9 +2027,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegisterShipperOpts",
-        "description": [
-          "\nOptional options to register a shipper"
-        ],
+        "description": ["\nOptional options to register a shipper"],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2191,9 +2040,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SchemaArray",
-        "description": [
-          "\nSchema to represent an array"
-        ],
+        "description": ["\nSchema to represent an array"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -2222,12 +2069,8 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type must be an array"
-            ],
-            "signature": [
-              "\"array\""
-            ],
+            "description": ["The type must be an array"],
+            "signature": ["\"array\""],
             "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2321,9 +2164,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SchemaChildValue",
-        "description": [
-          "\nSchema to define a primitive value"
-        ],
+        "description": ["\nSchema to define a primitive value"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -2344,9 +2185,7 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the value"
-            ],
+            "description": ["The type of the value"],
             "signature": [
               "NonNullable<Value> extends string | Date ? ",
               {
@@ -2383,9 +2222,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
-            "description": [
-              "Meta properties of the value: description and is optional"
-            ],
+            "description": ["Meta properties of the value: description and is optional"],
             "signature": [
               "{ description: string; } & ",
               {
@@ -2410,9 +2247,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SchemaMeta",
-        "description": [
-          "\nSchema meta with optional description"
-        ],
+        "description": ["\nSchema meta with optional description"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -2433,9 +2268,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
-            "description": [
-              "Meta properties of the pass through: description and is optional"
-            ],
+            "description": ["Meta properties of the pass through: description and is optional"],
             "signature": [
               "({ description?: string | undefined; } & ",
               {
@@ -2460,9 +2293,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SchemaObject",
-        "description": [
-          "\nSchema to represent an object"
-        ],
+        "description": ["\nSchema to represent an object"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -2518,9 +2349,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ShipperClassConstructor",
-        "description": [
-          "\nConstructor of a {@link IShipper}"
-        ],
+        "description": ["\nConstructor of a {@link IShipper}"],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -2541,9 +2370,7 @@
             "type": "string",
             "tags": [],
             "label": "shipperName",
-            "description": [
-              "\nThe shipper's unique name"
-            ],
+            "description": ["\nThe shipper's unique name"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2554,12 +2381,8 @@
             "type": "Function",
             "tags": [],
             "label": "new",
-            "description": [
-              "\nThe constructor"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nThe constructor"],
+            "signature": ["any"],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2570,12 +2393,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
-                "description": [
-                  "The shipper's custom config"
-                ],
-                "signature": [
-                  "Config"
-                ],
+                "description": ["The shipper's custom config"],
+                "signature": ["Config"],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2587,9 +2406,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
-                "description": [
-                  "Common context {@link AnalyticsClientInitContext }"
-                ],
+                "description": ["Common context {@link AnalyticsClientInitContext }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -2616,9 +2433,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TelemetryCounter",
-        "description": [
-          "\nShape of the events emitted by the telemetryCounter$ observable"
-        ],
+        "description": ["\nShape of the events emitted by the telemetryCounter$ observable"],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2629,9 +2444,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [
-              "\n{@link TelemetryCounterType}"
-            ],
+            "description": ["\n{@link TelemetryCounterType}"],
             "signature": [
               "\"succeeded\" | \"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"dropped\""
             ],
@@ -2658,9 +2471,7 @@
             "type": "string",
             "tags": [],
             "label": "event_type",
-            "description": [
-              "\nThe event type the success/failure/drop event refers to."
-            ],
+            "description": ["\nThe event type the success/failure/drop event refers to."],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2684,9 +2495,7 @@
             "type": "number",
             "tags": [],
             "label": "count",
-            "description": [
-              "\nThe number of events that this counter refers to."
-            ],
+            "description": ["\nThe number of events that this counter refers to."],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2703,12 +2512,8 @@
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaBooleanTypes",
-        "description": [
-          "Types matching boolean values"
-        ],
-        "signature": [
-          "\"boolean\""
-        ],
+        "description": ["Types matching boolean values"],
+        "signature": ["\"boolean\""],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2720,9 +2525,7 @@
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaNumberTypes",
-        "description": [
-          "Types matching number values"
-        ],
+        "description": ["Types matching number values"],
         "signature": [
           "\"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
@@ -2737,12 +2540,8 @@
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaStringTypes",
-        "description": [
-          "Types matching string values"
-        ],
-        "signature": [
-          "\"keyword\" | \"text\" | \"date\""
-        ],
+        "description": ["Types matching string values"],
+        "signature": ["\"keyword\" | \"text\" | \"date\""],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2754,9 +2553,7 @@
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaTypes",
-        "description": [
-          "\nPossible type values in the schema"
-        ],
+        "description": ["\nPossible type values in the schema"],
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
@@ -2774,9 +2571,7 @@
         "description": [
           "\nEvent Type used for indexed structures. Only used to improve the readability of the types"
         ],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2788,9 +2583,7 @@
         "type": "Type",
         "tags": [],
         "label": "PossibleSchemaTypes",
-        "description": [
-          "\nHelper to ensure the declared types match the schema types"
-        ],
+        "description": ["\nHelper to ensure the declared types match the schema types"],
         "signature": [
           "Value extends string | Date ? ",
           {
@@ -2828,9 +2621,7 @@
         "type": "Type",
         "tags": [],
         "label": "RootSchema",
-        "description": [
-          "\nSchema definition to match the structure of the properties provided.\n"
-        ],
+        "description": ["\nSchema definition to match the structure of the properties provided.\n"],
         "signature": [
           "{ [Key in keyof Required<Base>]: ",
           {
@@ -2853,9 +2644,7 @@
         "type": "Type",
         "tags": [],
         "label": "SchemaMetaOptional",
-        "description": [
-          "\nEnforces { optional: true } if the value can be undefined"
-        ],
+        "description": ["\nEnforces { optional: true } if the value can be undefined"],
         "signature": [
           "unknown extends Value ? { optional?: boolean | undefined; } : undefined extends Value ? { optional: true; } : { optional?: false | undefined; }"
         ],
@@ -2954,9 +2743,7 @@
         "description": [
           "\nShipper Name used for indexed structures. Only used to improve the readability of the types"
         ],
-        "signature": [
-          "string"
-        ],
+        "signature": ["string"],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,

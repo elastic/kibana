@@ -9,9 +9,9 @@ import React from 'react';
 
 import './report_listing.scss';
 import { useInternalApiClient, useKibana } from '@kbn/reporting-public';
-import { ReportListingStateful } from './stateful/report_listing_stateful';
-import { ReportListingDefault } from './default/report_listing_default';
 import { ListingProps } from '.';
+import { ReportListingDefault } from './default/report_listing_default';
+import { ReportListingStateful } from './stateful/report_listing_stateful';
 
 export const ReportListing = (props: ListingProps) => {
   const { apiClient } = useInternalApiClient();

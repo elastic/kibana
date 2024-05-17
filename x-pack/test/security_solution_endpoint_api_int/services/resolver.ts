@@ -6,10 +6,10 @@
  */
 
 import {
-  TreeOptions,
-  Tree,
   EndpointDocGenerator,
   Event,
+  Tree,
+  TreeOptions,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
 import { FtrProviderContext } from '../ftr_provider_context';

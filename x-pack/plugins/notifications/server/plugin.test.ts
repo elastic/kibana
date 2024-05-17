@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { NotificationsConfigType } from './config';
 import { NotificationsPlugin } from './plugin';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { EmailServiceProvider } from './services/connectors_email_service_provider';
 import { EmailServiceStart } from './services';
+import { EmailServiceProvider } from './services/connectors_email_service_provider';
 
 jest.mock('./services/connectors_email_service_provider');
 

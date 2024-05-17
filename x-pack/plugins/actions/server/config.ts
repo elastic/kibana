@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,

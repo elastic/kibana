@@ -1,3 +1,8 @@
+import { IUiSettingsClient } from '@kbn/core/public';
+import {
+  apmEnableContinuousRollups,
+  apmEnableServiceMetrics,
+} from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +10,6 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
-import {
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-} from '@kbn/observability-plugin/common';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../hooks/use_apm_route_path';

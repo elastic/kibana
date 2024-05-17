@@ -6,23 +6,23 @@
  */
 
 import type {
-  AggregationsSingleMetricAggregateBase,
   AggregationsCardinalityAggregate,
-  AggregationsTermsAggregateBase,
+  AggregationsSingleMetricAggregateBase,
   AggregationsStringTermsBucketKeys,
+  AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
+import { AlertingUsage } from '../types';
 import {
   ConnectorsByConsumersBucket,
   groupConnectorsByConsumers,
 } from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
-import { groupRulesByStatus } from './group_rules_by_status';
-import { AlertingUsage } from '../types';
-import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
-import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
+import { groupRulesByStatus } from './group_rules_by_status';
+import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 
 interface Opts {
   esClient: ElasticsearchClient;

@@ -7,9 +7,9 @@
 
 import * as rt from 'io-ts';
 
+import { unionWithNullType } from '../../../utility_types';
 import type { ResponseTimeline } from '../model/api';
 import { SavedTimelineRuntimeType } from '../model/api';
-import { unionWithNullType } from '../../../utility_types';
 
 export const patchTimelineSchema = rt.type({
   timeline: SavedTimelineRuntimeType,

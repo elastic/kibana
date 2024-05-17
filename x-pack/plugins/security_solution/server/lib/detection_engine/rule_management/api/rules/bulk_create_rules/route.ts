@@ -8,31 +8,31 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
 import {
   BulkCreateRulesRequestBody,
-  validateCreateRuleProps,
   BulkCrudRulesResponse,
+  validateCreateRuleProps,
 } from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
 
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
+import {
+  buildSiemResponse,
+  createBulkErrorObject,
+  transformBulkError,
+} from '../../../../routes/utils';
 import { createRules } from '../../../logic/crud/create_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-import { getDuplicates } from './get_duplicates';
-import { transformValidateBulkError } from '../../../utils/validate';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
-import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
-import {
-  transformBulkError,
-  createBulkErrorObject,
-  buildSiemResponse,
-} from '../../../../routes/utils';
+import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { getDuplicates } from './get_duplicates';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead

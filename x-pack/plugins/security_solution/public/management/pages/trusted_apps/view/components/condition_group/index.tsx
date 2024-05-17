@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { ConditionEntryInputProps } from '../condition_entry_input';
 import { ConditionEntryInput } from '../condition_entry_input';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it

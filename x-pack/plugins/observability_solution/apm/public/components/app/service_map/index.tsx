@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { ReactNode } from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { Environment } from '../../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { SERVICE_MAP_TIMEOUT_ERROR, invalidLicenseMessage } from '../../../../common/service_map';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useAnyOfApmParams, useApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useServiceName } from '../../../hooks/use_service_name';
 import { useTheme } from '../../../hooks/use_theme';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { LicensePrompt } from '../../shared/license_prompt';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Controls } from './controls';
 import { Cytoscape } from './cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
+import { DisabledPrompt } from './disabled_prompt';
 import { EmptyBanner } from './empty_banner';
 import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
-import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { Environment } from '../../../../common/environment_rt';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { DisabledPrompt } from './disabled_prompt';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (

@@ -7,24 +7,24 @@
 
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 
-import { isEqual } from 'lodash';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
-  EuiSpacer,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiSuperSelect,
   EuiText,
-  EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual } from 'lodash';
 
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -34,38 +34,38 @@ import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
 } from '../../../../../../common/endpoint/constants';
-import { useSuggestions } from '../../../../hooks/use_suggestions';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+  getPolicyIdsFromArtifact,
+  isArtifactGlobal,
+} from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import {
-  isArtifactGlobal,
-  getPolicyIdsFromArtifact,
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts';
+import { useSuggestions } from '../../../../hooks/use_suggestions';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
+import { CONFIRM_WARNING_MODAL_LABELS, OS_TITLES } from '../../../../common/translations';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 import {
   ABOUT_EVENT_FILTERS,
-  NAME_LABEL,
-  NAME_ERROR,
   DESCRIPTION_LABEL,
+  NAME_ERROR,
+  NAME_LABEL,
   OS_LABEL,
   RULE_NAME,
 } from '../event_filters_list';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
+import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
+import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
-import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
-import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
+import getopts from 'getopts';
 
 import { BuildOptions } from './build_distributables';
 

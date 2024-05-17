@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { Frame } from '.';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 

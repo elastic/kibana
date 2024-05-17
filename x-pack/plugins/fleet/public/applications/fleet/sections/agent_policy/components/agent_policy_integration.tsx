@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiAccordion,
   EuiDescribedFormGroup,
@@ -14,9 +13,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import styled from 'styled-components';
 
-import type { NewAgentPolicy, AgentPolicy } from '../../../types';
+import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';

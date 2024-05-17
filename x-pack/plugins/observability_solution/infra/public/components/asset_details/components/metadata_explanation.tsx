@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiText, EuiLink } from '@elastic/eui';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { Popover } from '../tabs/common/popover';
+import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import React from 'react';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
+import { Popover } from '../tabs/common/popover';
 
 const HOSTNAME_DOCS_LINK =
   'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildErrors } from './build_errors';
 import assert from 'assert';
+import { buildErrors } from './build_errors';
 
 describe(__filename, () => {
   describe('buildErrors', () => {

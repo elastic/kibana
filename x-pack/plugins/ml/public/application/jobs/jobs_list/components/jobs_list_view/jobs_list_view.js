@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { Component } from 'react';
 
-import { ml } from '../../../../services/ml_api_service';
-import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
-import { JobsList } from '../jobs_list';
-import { JobDetails } from '../job_details';
-import { JobFilterBar } from '../job_filter_bar';
-import { EditJobFlyout } from '../edit_job_flyout';
-import { JobListDatafeedChartFlyout } from '../datafeed_chart_flyout';
-import { DeleteJobModal } from '../delete_job_modal';
-import { ResetJobModal } from '../reset_job_modal';
-import { StartDatafeedModal } from '../start_datafeed_modal';
-import { MultiJobActions } from '../multi_job_actions';
-import { NewJobButton } from '../new_job_button';
-import { JobStatsBar } from '../jobs_stats_bar';
-import { NodeAvailableWarning } from '../../../../components/node_available_warning';
 import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
+import { NodeAvailableWarning } from '../../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
+import { ml } from '../../../../services/ml_api_service';
+import { JobListDatafeedChartFlyout } from '../datafeed_chart_flyout';
+import { DeleteJobModal } from '../delete_job_modal';
+import { EditJobFlyout } from '../edit_job_flyout';
+import { JobDetails } from '../job_details';
+import { JobFilterBar } from '../job_filter_bar';
+import { JobsList } from '../jobs_list';
+import { JobStatsBar } from '../jobs_stats_bar';
+import { MultiJobActions } from '../multi_job_actions';
+import { NewJobButton } from '../new_job_button';
+import { ResetJobModal } from '../reset_job_modal';
+import { StartDatafeedModal } from '../start_datafeed_modal';
+import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 
 import {
   BLOCKED_JOBS_REFRESH_INTERVAL_MS,
   BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS,
   BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
 } from '../../../../../../common/constants/jobs_list';
-import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
-import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
-import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
-import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
+import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
+import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
+import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
+import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 
 let blockingJobsRefreshTimeout = null;
 

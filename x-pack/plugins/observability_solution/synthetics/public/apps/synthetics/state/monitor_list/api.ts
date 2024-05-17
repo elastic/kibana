@@ -6,17 +6,17 @@
  */
 
 import { UpsertMonitorRequest } from '..';
-import { UpsertMonitorResponse } from '../monitor_management/api';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
+  MonitorFiltersResult,
   MonitorManagementListResult,
   MonitorManagementListResultCodec,
   SyntheticsMonitor,
-  MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
+import { UpsertMonitorResponse } from '../monitor_management/api';
 
 import { MonitorListPageState } from './models';
 

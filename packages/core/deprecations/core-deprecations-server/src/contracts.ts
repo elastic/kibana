@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated

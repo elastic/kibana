@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Position } from 'css-box-model';
 import type { FluidDragActions } from '@hello-pangea/dnd';
 import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
+import type { Position } from 'css-box-model';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 

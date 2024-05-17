@@ -1,3 +1,18 @@
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,36 +20,21 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiButton,
-  EuiTitle,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
+import { ClientPluginsStart } from '../../../../../plugin';
 import {
   addNewGlobalParamAction,
   editGlobalParamAction,
   getGlobalParamAction,
   selectGlobalParamState,
 } from '../../../state/global_params';
-import { ClientPluginsStart } from '../../../../../plugin';
-import { ListParamItem } from './params_list';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
-import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
-import { AddParamForm } from './add_param_form';
 import { syncGlobalParamsAction } from '../../../state/settings';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { AddParamForm } from './add_param_form';
+import { ListParamItem } from './params_list';
 
 export const AddParamFlyout = ({
   items,

@@ -7,16 +7,16 @@
 
 import React, { useState } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
+  EuiButton,
   EuiModal,
+  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiText,
   EuiSpacer,
-  EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

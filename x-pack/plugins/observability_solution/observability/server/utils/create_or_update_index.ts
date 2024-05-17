@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
 export type Mappings = Required<estypes.IndicesCreateRequest>['body']['mappings'] &
   Required<estypes.IndicesPutMappingRequest>['body'];

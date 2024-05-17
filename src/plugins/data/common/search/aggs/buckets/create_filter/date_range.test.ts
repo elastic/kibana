@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { RangeFilter } from '@kbn/es-query';
 import moment from 'moment-timezone';
-import { createFilterDateRange } from './date_range';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { RangeFilter } from '@kbn/es-query';
+import { BUCKET_TYPES } from '../bucket_agg_types';
+import { createFilterDateRange } from './date_range';
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {

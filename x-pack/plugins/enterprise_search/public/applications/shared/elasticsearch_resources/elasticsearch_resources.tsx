@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../doc_links';

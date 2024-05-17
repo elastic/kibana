@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-/* This code is based on MultiSelectFilter component from x-pack/plugins/cases/public/components/all_cases/multi_select_filter.tsx */
-import React, { useState, useEffect } from 'react';
-import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiPopoverTitle,
   EuiCallOut,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiSelectable,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
   EuiText,
 } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash/fp';
+/* This code is based on MultiSelectFilter component from x-pack/plugins/cases/public/components/all_cases/multi_select_filter.tsx */
+import React, { useState, useEffect } from 'react';
 
 type FilterOption<T extends string, K extends string = string> = EuiSelectableOption<{
   key: K;

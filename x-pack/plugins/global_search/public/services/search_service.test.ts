@@ -7,17 +7,17 @@
 
 import {
   fetchServerResultsMock,
-  getDefaultPreferenceMock,
   fetchServerSearchableTypesMock,
+  getDefaultPreferenceMock,
 } from './search_service.test.mocks';
 
-import { firstValueFrom, Observable, of } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
-import { duration } from 'moment';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { duration } from 'moment';
+import { Observable, firstValueFrom, of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
+import { GlobalSearchFindError } from '../../common/errors';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
-import { GlobalSearchFindError } from '../../common/errors';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchResultProvider } from '../types';
 import { SearchService } from './search_service';

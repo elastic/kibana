@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import React from 'react';
 
 import { getSecurityModel } from '../../../../../../common/constants';
 import { Cluster } from '../../../../../../common/lib/cluster_serialization';

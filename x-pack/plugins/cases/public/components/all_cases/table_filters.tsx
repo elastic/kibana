@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isEqual, mergeWith } from 'lodash';
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { mergeWith, isEqual } from 'lodash';
-import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
-import type { FilterOptions } from '../../containers/types';
-import * as i18n from './translations';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useGetCategories } from '../../containers/use_get_categories';
-import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
-import { useFilterConfig } from './table_filter_config/use_filter_config';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import type { FilterOptions } from '../../containers/types';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { useGetTags } from '../../containers/use_get_tags';
+import type { CurrentUserProfile } from '../types';
 import { TableSearch } from './search';
+import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
+import { useFilterConfig } from './table_filter_config/use_filter_config';
+import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
+import * as i18n from './translations';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;

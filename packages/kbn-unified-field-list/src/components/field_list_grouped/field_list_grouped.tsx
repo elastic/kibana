@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
-import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { NoFieldsCallout } from './no_fields_callout';
-import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
+import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
+import { NoFieldsCallout } from './no_fields_callout';
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;

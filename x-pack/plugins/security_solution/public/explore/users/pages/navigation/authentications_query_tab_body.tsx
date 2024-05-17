@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';
-import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 export const ID = 'usersAuthenticationsQuery';
 
 const HISTOGRAM_QUERY_ID = 'usersAuthenticationsHistogramQuery';

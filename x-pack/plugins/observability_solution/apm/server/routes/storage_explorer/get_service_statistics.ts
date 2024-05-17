@@ -1,31 +1,31 @@
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  AGENT_NAME,
+  INDEX,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TIER,
+  TRANSACTION_SAMPLED,
+} from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
-import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TIER,
-  TRANSACTION_SAMPLED,
-  AGENT_NAME,
-  INDEX,
-} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { ApmPluginRequestHandlerContext } from '../typings';
+import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
+import { getEstimatedSizeForDocumentsInIndex, getTotalIndicesStats } from './indices_stats_helpers';
 
 async function getMainServiceStatistics({
   apmEventClient,

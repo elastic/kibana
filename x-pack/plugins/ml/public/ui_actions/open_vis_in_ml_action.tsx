@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
-import type { ActionApi } from './types';
+import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { MlCoreSetup } from '../plugin';
+import type { ActionApi } from './types';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
+import { DataPublicPluginStart, createKibanaReactContext } from './shared_imports';
 
-import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
+import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 
 interface Dependencies {
   core: CoreStart;

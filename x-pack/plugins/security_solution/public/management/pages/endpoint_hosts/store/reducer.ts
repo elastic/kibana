@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { Immutable } from '../../../../../common/endpoint/types';
+import type { ImmutableReducer } from '../../../../common/store';
+import type { AppAction } from '../../../../common/store/actions';
+import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
+import type { EndpointState } from '../types';
 import type {
   EndpointPackageInfoStateChanged,
   EndpointPendingActionsStateChanged,
   MetadataTransformStatsChanged,
 } from './action';
+import { initialEndpointPageState } from './builders';
 import {
   getCurrentIsolationRequestState,
   hasSelectedEndpoint,
   isOnEndpointPage,
   uiQueryParams,
 } from './selectors';
-import type { EndpointState } from '../types';
-import { initialEndpointPageState } from './builders';
-import type { AppAction } from '../../../../common/store/actions';
-import type { ImmutableReducer } from '../../../../common/store';
-import type { Immutable } from '../../../../../common/endpoint/types';
-import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
 
 type StateReducer = ImmutableReducer<EndpointState, AppAction>;
 type CaseReducer<T extends AppAction> = (

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { i18n } from '@kbn/i18n';
-import { useMemo } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useMemo } from 'react';
 import { useToasts } from '../../../../common/lib/kibana';
-import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useDeleteArtifact } from '../../../hooks/artifacts';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_DELETE_ACTION_LABELS = Object.freeze({
   /**

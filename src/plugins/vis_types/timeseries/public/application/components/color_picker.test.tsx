@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ColorPicker, ColorPickerProps } from './color_picker';
-import { mount } from 'enzyme';
-import { ReactWrapper } from 'enzyme';
 import { EuiColorPicker, EuiIconTip } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mount } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
+import { ColorPicker, ColorPickerProps } from './color_picker';
 
 describe('ColorPicker', () => {
   const defaultProps: ColorPickerProps = {

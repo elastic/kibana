@@ -62,7 +62,6 @@ export const createParser = () => {
         for (
           string += ch, next(), ('-' === ch || '+' === ch) && ((string += ch), next());
           ch >= '0' && '9' >= ch;
-
         )
           (string += ch), next();
       return (number = +string), isNaN(number) ? (error('Bad number'), void 0) : number;
@@ -96,11 +95,7 @@ export const createParser = () => {
           if ('"' === ch) return next(), string;
           if ('\\' === ch)
             if ((next(), 'u' === ch)) {
-              for (
-                uffff = 0, i = 0;
-                4 > i && ((hex = parseInt(next(), 16)), isFinite(hex));
-                i += 1
-              )
+              for (uffff = 0, i = 0; 4 > i && ((hex = parseInt(next(), 16)), isFinite(hex)); i += 1)
                 uffff = 16 * uffff + hex;
               string += String.fromCharCode(uffff);
             } else {

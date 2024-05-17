@@ -13,24 +13,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiPagination,
   EuiPopover,
   EuiText,
   EuiToolTip,
-  EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import type { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
-import * as i18n from './translations';
-import { timelineActions, timelineSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { FixedWidthLastUpdatedContainer } from './last_updated';
+import * as i18n from './translations';
 
 interface HeightProp {
   height: number;

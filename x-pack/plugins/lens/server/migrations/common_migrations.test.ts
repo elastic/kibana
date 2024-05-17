@@ -8,10 +8,10 @@
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import {
+  commonMigrateMetricFormatter,
+  commonMigratePartitionChartGroups,
   getLensDataViewMigrations,
   getLensFilterMigrations,
-  commonMigratePartitionChartGroups,
-  commonMigrateMetricFormatter,
 } from './common_migrations';
 import { LensDocShape840, LensDocShape860 } from './types';
 

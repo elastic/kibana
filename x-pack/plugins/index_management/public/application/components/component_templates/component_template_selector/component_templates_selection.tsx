@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
 import { EuiDragDropContext, EuiDraggable, EuiDroppable, euiDragDropReorder } from '@elastic/eui';
+import React, { ComponentProps } from 'react';
 
 import { ComponentTemplateListItem } from '../../../../../common';
 import {

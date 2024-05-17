@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { migrateSymbolStyleDescriptor } from './migrate_symbol_style_descriptor';
 import { LAYER_TYPE, STYLE_TYPE } from '../constants';
+import { migrateSymbolStyleDescriptor } from './migrate_symbol_style_descriptor';
 
 describe('migrateSymbolStyleDescriptor', () => {
   test('Should handle missing layerListJSON attribute', () => {

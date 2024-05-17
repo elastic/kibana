@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAdoption } from './types';
 
-import { updateRuleUsage } from './update_usage';
-import { getDetectionRules } from '../../queries/get_detection_rules';
-import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
-import { getInitialEventLogUsage, getInitialRulesUsage } from './get_initial_usage';
+import { getAlerts } from '../../queries/get_alerts';
 import { getCaseComments } from '../../queries/get_case_comments';
-import { getRuleIdToCasesMap } from './transform_utils/get_rule_id_to_cases_map';
+import { getDetectionRules } from '../../queries/get_detection_rules';
+import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
+import { getInitialEventLogUsage, getInitialRulesUsage } from './get_initial_usage';
 import { getAlertIdToCountMap } from './transform_utils/get_alert_id_to_count_map';
+import { getRuleIdToCasesMap } from './transform_utils/get_rule_id_to_cases_map';
 import { getRuleIdToEnabledMap } from './transform_utils/get_rule_id_to_enabled_map';
 import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_correlations';
-import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
+import { updateRuleUsage } from './update_usage';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';

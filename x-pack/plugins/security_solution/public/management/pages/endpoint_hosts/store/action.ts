@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
+import type { Action } from 'redux';
 import type {
   GetHostPolicyResponse,
   HostIsolationRequestBody,

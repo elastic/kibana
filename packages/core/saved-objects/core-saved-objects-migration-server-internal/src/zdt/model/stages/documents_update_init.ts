@@ -7,15 +7,15 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
+import { excludeUnusedTypesQuery } from '../../../core';
 import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
-import { excludeUnusedTypesQuery } from '../../../core';
-import type { ModelStage } from '../types';
 import {
-  getOutdatedDocumentsQuery,
-  createDocumentTransformFn,
   checkVersionCompatibility,
+  createDocumentTransformFn,
+  getOutdatedDocumentsQuery,
 } from '../../utils';
+import type { ModelStage } from '../types';
 
 export const documentsUpdateInit: ModelStage<
   'DOCUMENTS_UPDATE_INIT',

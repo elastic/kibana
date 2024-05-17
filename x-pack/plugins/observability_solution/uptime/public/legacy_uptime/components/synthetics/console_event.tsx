@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext, FC } from 'react';
-import { UptimeThemeContext } from '../../contexts';
 import { JourneyStep } from '../../../../common/runtime_types/ping';
+import { UptimeThemeContext } from '../../contexts';
 
 interface Props {
   event: JourneyStep;

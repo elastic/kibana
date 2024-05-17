@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import React from 'react';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
 import { EmptyConnectorsPrompt } from '../connectors/empty_connectors_prompt';

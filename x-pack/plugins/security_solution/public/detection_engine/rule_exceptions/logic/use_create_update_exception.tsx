@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
+import { useEffect, useRef, useState } from 'react';
 
-import { formatExceptionItemForUpdate } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
+import { formatExceptionItemForUpdate } from '../utils/helpers';
 
 export type CreateOrUpdateExceptionItemsFunc = (
   args: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>

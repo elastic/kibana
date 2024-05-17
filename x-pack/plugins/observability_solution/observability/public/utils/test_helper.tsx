@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { merge } from 'lodash';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render as testLibRender } from '@testing-library/react';
+import { merge } from 'lodash';
+import React from 'react';
 
 import { PluginContext } from '../context/plugin_context/plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { Subset } from '../typings';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;

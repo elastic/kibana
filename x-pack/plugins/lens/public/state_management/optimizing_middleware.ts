@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
+import { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { onActiveDataChange, updateDatasourceState, setExecutionContext } from '.';
+import { onActiveDataChange, setExecutionContext, updateDatasourceState } from '.';
 import { SetExecutionContextPayload } from './lens_slice';
 
 /** cancels updates to the store that don't change the state */

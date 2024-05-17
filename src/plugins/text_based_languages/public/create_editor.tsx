@@ -1,3 +1,6 @@
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +9,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 import { untilPluginStartServicesReady } from './kibana_services';
 
 export const TextBasedLangEditor = (props: TextBasedLanguagesEditorProps) => {

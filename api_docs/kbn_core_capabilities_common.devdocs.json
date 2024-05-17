@@ -39,12 +39,8 @@
             "type": "Object",
             "tags": [],
             "label": "navLinks",
-            "description": [
-              "Navigation link capabilities."
-            ],
-            "signature": [
-              "{ [x: string]: boolean; }"
-            ],
+            "description": ["Navigation link capabilities."],
+            "signature": ["{ [x: string]: boolean; }"],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -55,12 +51,8 @@
             "type": "Object",
             "tags": [],
             "label": "management",
-            "description": [
-              "Management section capabilities."
-            ],
-            "signature": [
-              "{ [sectionId: string]: Record<string, boolean>; }"
-            ],
+            "description": ["Management section capabilities."],
+            "signature": ["{ [sectionId: string]: Record<string, boolean>; }"],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -74,9 +66,7 @@
             "description": [
               "Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options."
             ],
-            "signature": [
-              "{ [x: string]: boolean; }"
-            ],
+            "signature": ["{ [x: string]: boolean; }"],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -87,12 +77,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: Record<string, boolean | Record<string, boolean>>",
-            "description": [
-              "Custom capabilities, registered by plugins."
-            ],
-            "signature": [
-              "[key: string]:  Record<string, boolean | Record<string, boolean>>"
-            ],
+            "description": ["Custom capabilities, registered by plugins."],
+            "signature": ["[key: string]:  Record<string, boolean | Record<string, boolean>>"],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false

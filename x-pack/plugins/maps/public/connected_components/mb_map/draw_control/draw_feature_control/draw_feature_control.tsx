@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { FilterSpecification, MapMouseEvent, Map as MbMap, PointLike } from '@kbn/mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
-import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
-import type { FilterSpecification, Map as MbMap, MapMouseEvent, PointLike } from '@kbn/mapbox-gl';
-import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../draw_control';
+import React, { Component } from 'react';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
 import { ILayer } from '../../../../classes/layers/layer';
 import { EXCLUDE_CENTROID_FEATURES } from '../../../../classes/util/mb_filter_expressions';
+import { getToasts } from '../../../../kibana_services';
+import { DrawControl } from '../draw_control';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 

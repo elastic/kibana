@@ -10,9 +10,9 @@ import type {
   UpdatePackagePolicy,
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
-import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
-import { request } from './common';
+import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { ProtectionModes } from '../../../../common/endpoint/types';
+import { request } from './common';
 
 /**
  * Updates the given Endpoint policy and enables all of the policy protections

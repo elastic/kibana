@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type {
-  SavedObjectsClientContract,
   ElasticsearchClient,
   SavedObject,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -17,11 +17,11 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 
 import type { Installation } from '../../../../../../common';
 
-import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
-import { installILMPolicy } from '../../../elasticsearch/ilm/install';
-import { installIlmForDataStream } from '../../../elasticsearch/datastream_ilm/install';
 import { ElasticsearchAssetType } from '../../../../../types';
+import { appContextService } from '../../../../app_context';
+import { installIlmForDataStream } from '../../../elasticsearch/datastream_ilm/install';
+import { installILMPolicy } from '../../../elasticsearch/ilm/install';
 
 jest.mock('../../../archive/storage');
 jest.mock('../../../elasticsearch/ilm/install');

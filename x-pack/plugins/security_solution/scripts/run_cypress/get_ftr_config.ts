@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
+import _ from 'lodash';
 import { getLocalhostRealIp } from '../endpoint/common/network_services';
 import type { parseTestFileConfig } from './utils';
 

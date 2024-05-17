@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type {
-  CreateRuleExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListType,
+  NamespaceType,
   OsType,
   OsTypeArray,
-  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type {
   DataViewField,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase } from '@kbn/es-query';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { hasEqlSequenceQuery } from '../../../../../../common/detection_engine/utils';
-import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import * as i18n from './translations';
-import * as sharedI18n from '../../../utils/translations';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
+import type { Rule } from '../../../../rule_management/logic/types';
+import * as sharedI18n from '../../../utils/translations';
+import * as i18n from './translations';
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
   {
@@ -187,8 +187,8 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       return currentOs === 'linux'
         ? sharedI18n.OPERATING_SYSTEM_LINUX
         : currentOs === 'macos'
-        ? sharedI18n.OPERATING_SYSTEM_MAC
-        : sharedI18n.OPERATING_SYSTEM_WINDOWS;
+          ? sharedI18n.OPERATING_SYSTEM_MAC
+          : sharedI18n.OPERATING_SYSTEM_WINDOWS;
     };
     return osTypes
       .reduce((osString, currentOs) => {

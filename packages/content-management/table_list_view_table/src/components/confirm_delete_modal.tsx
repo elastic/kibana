@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 
 function getI18nTexts(items: unknown[], entityName: string, entityNamePlural: string) {
   return {

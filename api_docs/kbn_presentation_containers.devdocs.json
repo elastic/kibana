@@ -49,9 +49,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -89,9 +87,7 @@
             "tags": [],
             "label": "unknownApi",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -129,9 +125,7 @@
             "tags": [],
             "label": "unknownApi",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -170,9 +164,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -210,9 +202,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -250,9 +240,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -290,9 +278,7 @@
             "tags": [],
             "label": "root",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -331,9 +317,7 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -380,9 +364,7 @@
             "tags": [],
             "label": "parentApi",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -395,9 +377,7 @@
             "tags": [],
             "label": "childId",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -451,9 +431,7 @@
             "tags": [],
             "label": "parent",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -466,9 +444,7 @@
             "tags": [],
             "label": "isCompatible",
             "description": [],
-            "signature": [
-              "(api: unknown) => api is ApiType"
-            ],
+            "signature": ["(api: unknown) => api is ApiType"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -481,9 +457,7 @@
             "tags": [],
             "label": "apiFound",
             "description": [],
-            "signature": [
-              "(api: ApiType | undefined) => void | (() => void)"
-            ],
+            "signature": ["(api: ApiType | undefined) => void | (() => void)"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -521,9 +495,7 @@
             "tags": [],
             "label": "root",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -541,9 +513,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CanAddNewPanel",
-        "description": [
-          "\nThis API can add a new panel as a child."
-        ],
+        "description": ["\nThis API can add a new panel as a child."],
         "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -599,9 +569,7 @@
                 "tags": [],
                 "label": "displaySuccessMessage",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -631,9 +599,7 @@
             "tags": [],
             "label": "duplicatePanel",
             "description": [],
-            "signature": [
-              "(panelId: string) => void"
-            ],
+            "signature": ["(panelId: string) => void"],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -645,9 +611,7 @@
                 "tags": [],
                 "label": "panelId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -677,9 +641,7 @@
             "tags": [],
             "label": "expandPanel",
             "description": [],
-            "signature": [
-              "(panelId?: string | undefined) => void"
-            ],
+            "signature": ["(panelId?: string | undefined) => void"],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -691,9 +653,7 @@
                 "tags": [],
                 "label": "panelId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -956,9 +916,7 @@
             "tags": [],
             "label": "initialState",
             "description": [],
-            "signature": [
-              "SerializedState | undefined"
-            ],
+            "signature": ["SerializedState | undefined"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1011,9 +969,7 @@
             "tags": [],
             "label": "removePanel",
             "description": [],
-            "signature": [
-              "(panelId: string) => void"
-            ],
+            "signature": ["(panelId: string) => void"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1025,9 +981,7 @@
                 "tags": [],
                 "label": "panelId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1043,9 +997,7 @@
             "tags": [],
             "label": "canRemovePanels",
             "description": [],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
+            "signature": ["(() => boolean) | undefined"],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1081,9 +1033,7 @@
                 "tags": [],
                 "label": "idToRemove",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1299,10 +1249,7 @@
             "tags": [],
             "label": "lastSavedState",
             "description": [],
-            "signature": [
-              "Subject",
-              "<void>"
-            ],
+            "signature": ["Subject", "<void>"],
             "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1336,9 +1283,7 @@
                 "tags": [],
                 "label": "childId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1401,9 +1346,7 @@
             "tags": [],
             "label": "rawState",
             "description": [],
-            "signature": [
-              "RawStateType"
-            ],
+            "signature": ["RawStateType"],
             "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1428,12 +1371,8 @@
             "type": "Function",
             "tags": [],
             "label": "trackContentfulRender",
-            "description": [
-              "\nA way to report that the contentful render has been completed"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["\nA way to report that the contentful render has been completed"],
+            "signature": ["() => void"],
             "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1504,9 +1443,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "TracksOverlaysOptions | undefined"
-                ],
+                "signature": ["TracksOverlaysOptions | undefined"],
                 "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1522,9 +1459,7 @@
             "tags": [],
             "label": "clearOverlays",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,

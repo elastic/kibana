@@ -9,7 +9,7 @@ import React, { useState, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow, EuiFilePicker } from '@elastic/eui';
+import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 
 interface Props {
   onUpload: ({ scriptText, fileName }: { scriptText: string; fileName: string }) => void;

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { NewsfeedPublicPlugin } from './plugin';
-import { NewsfeedApiEndpoint } from './lib/api';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { take } from 'rxjs';
+import { NewsfeedApiEndpoint } from './lib/api';
+import { NewsfeedPublicPlugin } from './plugin';
 
 describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;

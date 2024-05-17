@@ -5,46 +5,45 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
-  EuiText,
-  EuiSpacer,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
   EuiPageSection,
   EuiPanel,
-  EuiCallOut,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
-import useDebounce from 'react-use/lib/useDebounce';
-import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import type {
-  TypedLensByValueInput,
-  PersistedIndexPatternLayer,
-  XYState,
-  LensEmbeddableInput,
-  DateHistogramIndexPatternColumn,
   DatatableVisualizationState,
-  HeatmapVisualizationState,
+  DateHistogramIndexPatternColumn,
   GaugeVisualizationState,
-  TermsIndexPatternColumn,
+  HeatmapVisualizationState,
+  LensEmbeddableInput,
   LensPublicStart,
-  RangeIndexPatternColumn,
-  PieVisualizationState,
   MedianIndexPatternColumn,
   MetricVisualizationState,
+  PersistedIndexPatternLayer,
+  PieVisualizationState,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+  TypedLensByValueInput,
+  XYState,
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CodeEditor, HJsonLang } from '@kbn/code-editor';
-import type { StartDependencies } from './plugin';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   AllOverrides,
   AttributesMenu,
@@ -52,6 +51,7 @@ import {
   OverridesMenu,
   PanelMenu,
 } from './controls';
+import type { StartDependencies } from './plugin';
 
 type RequiredType = 'date' | 'string' | 'number';
 type FieldsMap = Record<RequiredType, string>;

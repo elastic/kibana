@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CaseConfigureRequestParamsRt } from '../../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
-import { createCaseError } from '../../../common/error';
-import { createCasesRoute } from '../create_cases_route';
+import { CaseConfigureRequestParamsRt } from '../../../../common/types/api';
 import type { configureApiV1 } from '../../../../common/types/api';
+import { createCaseError } from '../../../common/error';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { createCasesRoute } from '../create_cases_route';
 
 export const patchCaseConfigureRoute = createCasesRoute({
   method: 'patch',

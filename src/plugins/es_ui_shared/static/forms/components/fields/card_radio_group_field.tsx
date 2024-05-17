@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiCheckableCard, EuiFormRow, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { Fragment, ReactChildren } from 'react';
-import { EuiFormRow, EuiSpacer, EuiCheckableCard, useGeneratedHtmlId } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

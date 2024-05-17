@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Observable, of } from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RawConfigService } from '@kbn/config';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { Observable, of } from 'rxjs';
 
 export type RawConfigServiceMock = jest.Mocked<PublicMethodsOf<RawConfigService>>;
 

@@ -7,26 +7,26 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  GetContainersOptionsPublic,
-  GetHostsOptionsPublic,
-  GetServicesOptionsPublic,
-  GetPodsOptionsPublic,
-  GetAssetsOptionsPublic,
-} from '../../common/types_client';
-import {
-  GetContainerAssetsResponse,
-  GetHostAssetsResponse,
-  GetServiceAssetsResponse,
-  GetPodAssetsResponse,
-  GetAssetsResponse,
-} from '../../common/types_api';
-import {
+  GET_ASSETS,
   GET_CONTAINERS,
   GET_HOSTS,
-  GET_SERVICES,
   GET_PODS,
-  GET_ASSETS,
+  GET_SERVICES,
 } from '../../common/constants_routes';
+import {
+  GetAssetsResponse,
+  GetContainerAssetsResponse,
+  GetHostAssetsResponse,
+  GetPodAssetsResponse,
+  GetServiceAssetsResponse,
+} from '../../common/types_api';
+import {
+  GetAssetsOptionsPublic,
+  GetContainersOptionsPublic,
+  GetHostsOptionsPublic,
+  GetPodsOptionsPublic,
+  GetServicesOptionsPublic,
+} from '../../common/types_client';
 import { IPublicAssetsClient } from '../types';
 
 export class PublicAssetsClient implements IPublicAssetsClient {

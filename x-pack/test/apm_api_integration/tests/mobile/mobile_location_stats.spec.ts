@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type MobileLocationStats =

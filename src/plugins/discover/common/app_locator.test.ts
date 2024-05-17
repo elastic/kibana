@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import {
-  hashedItemStore,
   getStatesFromKbnUrl,
+  hashedItemStore,
   setStateToKbnUrl,
 } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
-import { FilterStateStore } from '@kbn/es-query';
-import { DiscoverAppLocatorDefinition } from './app_locator';
 import { SerializableRecord } from '@kbn/utility-types';
+import { DiscoverAppLocatorDefinition } from './app_locator';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';

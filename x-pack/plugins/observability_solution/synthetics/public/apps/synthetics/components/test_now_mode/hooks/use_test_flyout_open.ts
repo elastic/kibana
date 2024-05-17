@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
-import { useEffect } from 'react';
 import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../../../../../../common/constants';
 import { hideTestNowFlyoutAction, testNowRunsSelector } from '../../../state/manual_test_runs';
 

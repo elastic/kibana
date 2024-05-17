@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { map, mergeMap, from } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
+import { from, map, mergeMap } from 'rxjs';
 import type {
+  EndpointFactoryQueryTypes,
   EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
   EndpointStrategyResponseType,
-  EndpointFactoryQueryTypes,
 } from '../../../common/search_strategy/endpoint';
 import type { EndpointFactory } from './factory/types';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { encode } from 'gpt-tokenizer';
 import { Readable } from 'stream';
-import { finished } from 'stream/promises';
+import { Logger } from '@kbn/logging';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { encode } from 'gpt-tokenizer';
+import { finished } from 'stream/promises';
 
 export interface InvokeBody {
   messages: Array<{

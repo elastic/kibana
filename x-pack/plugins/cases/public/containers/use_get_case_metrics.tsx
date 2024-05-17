@@ -6,12 +6,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { SingleCaseMetricsFeature } from './types';
 import { useToasts } from '../common/lib/kibana';
-import { getSingleCaseMetrics } from './api';
 import type { ServerError } from '../types';
-import { ERROR_TITLE } from './translations';
+import { getSingleCaseMetrics } from './api';
 import { casesQueriesKeys } from './constants';
+import { ERROR_TITLE } from './translations';
+import type { SingleCaseMetricsFeature } from './types';
 
 export const useGetCaseMetrics = (caseId: string, features: SingleCaseMetricsFeature[]) => {
   const toasts = useToasts();

@@ -1,3 +1,14 @@
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_NAME,
+} from '@kbn/securitysolution-list-constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +16,6 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { i18n } from '@kbn/i18n';
-import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_NAME,
-  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-} from '@kbn/securitysolution-list-constants';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { wrapErrorIfNeeded } from '../../endpoint/utils';
 import type { PolicyCreateEventFilters } from '../types';
 

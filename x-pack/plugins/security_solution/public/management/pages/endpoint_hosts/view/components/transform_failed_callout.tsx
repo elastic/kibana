@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '../../../../../common/lib/kibana';
-import type { ImmutableArray } from '../../../../../../common/endpoint/types';
-import type { TransformStats } from '../../types';
 import { WARNING_TRANSFORM_STATES } from '../../../../../../common/constants';
 import { metadataTransformPrefix } from '../../../../../../common/endpoint/constants';
-import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
+import type { ImmutableArray } from '../../../../../../common/endpoint/types';
 import { CallOut } from '../../../../../common/components/callouts';
+import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type { EndpointAction } from '../../store/action';
+import type { TransformStats } from '../../types';
 
 const TRANSFORM_URL = '/data/transform';
 

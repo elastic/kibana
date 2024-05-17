@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { type TestElasticsearchUtils, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 /**
  * Start the traditional ES cluster and return the instance.

@@ -6,8 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { ExternalServiceRt } from '../../domain/external_service/v1';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../../domain/connector/v1';
+import { ExternalServiceRt } from '../../domain/external_service/v1';
 
 const PushDetailsRt = rt.strict({
   latestUserActionPushDate: rt.string,

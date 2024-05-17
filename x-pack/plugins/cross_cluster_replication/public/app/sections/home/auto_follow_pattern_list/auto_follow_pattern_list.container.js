@@ -9,17 +9,17 @@ import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../../constants';
 import {
+  loadAutoFollowPatterns,
+  loadAutoFollowStats,
+  selectDetailAutoFollowPattern,
+} from '../../../store/actions';
+import {
+  getApiError,
+  getApiStatus,
   getListAutoFollowPatterns,
   getSelectedAutoFollowPatternId,
-  getApiStatus,
-  getApiError,
   isApiAuthorized,
 } from '../../../store/selectors';
-import {
-  loadAutoFollowPatterns,
-  selectDetailAutoFollowPattern,
-  loadAutoFollowStats,
-} from '../../../store/actions';
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;

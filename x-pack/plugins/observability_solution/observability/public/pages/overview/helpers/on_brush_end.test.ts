@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { onBrushEnd } from './on_brush_end';
 import { History } from 'history';
+import { onBrushEnd } from './on_brush_end';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {

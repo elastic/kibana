@@ -9,8 +9,8 @@ import type { IRouter } from '@kbn/core/server';
 import type { NotebookDefinition } from '@kbn/ipynb';
 import type { Logger } from '@kbn/logging';
 
-import type { SearchNotebooksConfig } from './config';
 import type { NotebookCatalog, NotebookInformation } from '../common/types';
+import type { SearchNotebooksConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}

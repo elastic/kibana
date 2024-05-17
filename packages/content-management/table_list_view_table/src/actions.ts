@@ -1,3 +1,5 @@
+import type { Query } from '@elastic/eui';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { Query } from '@elastic/eui';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { State } from './table_list_view_table';
 
 /** Action to trigger a fetch of the table items */

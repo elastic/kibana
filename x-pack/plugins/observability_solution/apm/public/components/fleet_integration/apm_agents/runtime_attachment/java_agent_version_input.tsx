@@ -1,3 +1,8 @@
+import { EuiComboBox, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +10,9 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexItem, EuiFormRow, EuiLink, EuiComboBox } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { RuntimeAttachmentSettings } from '.';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface Props {
   isValid: boolean;

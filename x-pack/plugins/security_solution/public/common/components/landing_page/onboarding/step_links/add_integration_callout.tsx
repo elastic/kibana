@@ -1,3 +1,5 @@
+import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +7,15 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 
 import classnames from 'classnames';
+import { useStepContext } from '../context/step_context';
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
-import { ADD_INTEGRATIONS_STEP } from './translations';
 import type { StepId } from '../types';
 import { AddIntegrationsSteps } from '../types';
-import { useStepContext } from '../context/step_context';
+import { ADD_INTEGRATIONS_STEP } from './translations';
 import { AddIntegrationCalloutStepLinkId } from './types';
 
 const AddIntegrationsCalloutComponent = ({

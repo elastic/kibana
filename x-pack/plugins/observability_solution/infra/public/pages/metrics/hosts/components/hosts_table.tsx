@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiBasicTable } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
+import { useHostCountContext } from '../hooks/use_host_count';
 import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
-import { useHostCountContext } from '../hooks/use_host_count';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
-import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
 
 export const HostsTable = () => {

@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { FetchStatus } from '../../../types';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { useDiscoverHistogram, UseDiscoverHistogramProps } from './use_discover_histogram';
-import { setTimeout } from 'timers/promises';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
-import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { InspectorAdapters } from '../../hooks/use_inspector';
-import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
+import { WrapperComponent, act, renderHook } from '@testing-library/react-hooks';
+import React, { ReactElement } from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { setTimeout } from 'timers/promises';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
+import { FetchStatus } from '../../../types';
+import type { InspectorAdapters } from '../../hooks/use_inspector';
+import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { UseDiscoverHistogramProps, useDiscoverHistogram } from './use_discover_histogram';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {

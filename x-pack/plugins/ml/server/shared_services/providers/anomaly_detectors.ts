@@ -6,13 +6,13 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { GetGuards } from '../shared_services';
 import type {
-  Job,
-  JobStats,
   Datafeed,
   DatafeedStats,
+  Job,
+  JobStats,
 } from '../../../common/types/anomaly_detection_jobs';
+import type { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { cloneDeep } from 'lodash';
 import {
-  EmbeddableEditorState,
-  isEmbeddableEditorState,
-  EmbeddablePackageState,
-  isEmbeddablePackageState,
-  EMBEDDABLE_PACKAGE_STATE_KEY,
   EMBEDDABLE_EDITOR_STATE_KEY,
+  EMBEDDABLE_PACKAGE_STATE_KEY,
+  EmbeddableEditorState,
+  EmbeddablePackageState,
+  isEmbeddableEditorState,
+  isEmbeddablePackageState,
 } from './types';
 
 export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER';

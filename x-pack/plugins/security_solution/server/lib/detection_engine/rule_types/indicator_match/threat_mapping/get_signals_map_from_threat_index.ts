@@ -6,15 +6,15 @@
  */
 import { get } from 'lodash';
 
+import { getThreatList } from './get_threat_list';
 import { ThreatMatchQueryType } from './types';
 import type {
   GetThreatListOptions,
+  SignalValuesMap,
+  ThreatListItem,
   ThreatMatchNamedQuery,
   ThreatTermNamedQuery,
-  ThreatListItem,
-  SignalValuesMap,
 } from './types';
-import { getThreatList } from './get_threat_list';
 import { decodeThreatMatchNamedQuery } from './utils';
 
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';

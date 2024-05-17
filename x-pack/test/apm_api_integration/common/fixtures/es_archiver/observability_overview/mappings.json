@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "apm-8.0.0-onboarding-2020.06.29",
     "mappings": {
       "_meta": {

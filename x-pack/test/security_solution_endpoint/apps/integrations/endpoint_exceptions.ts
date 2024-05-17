@@ -1,3 +1,4 @@
+import { promisify } from 'util';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import { unzip } from 'zlib';
-import { promisify } from 'util';
 import expect from '@kbn/expect';
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { targetTags } from '../../target_tags';
 

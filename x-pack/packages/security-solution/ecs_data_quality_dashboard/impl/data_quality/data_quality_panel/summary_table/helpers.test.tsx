@@ -12,9 +12,10 @@ import userEvent from '@testing-library/user-event';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EMPTY_STAT } from '../../helpers';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 import {
+  IndexSummaryTableItem,
   getDocsCountPercent,
   getResultIcon,
   getResultIconColor,
@@ -24,7 +25,6 @@ import {
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
   getToggleButtonId,
-  IndexSummaryTableItem,
 } from './helpers';
 import { COLLAPSE, EXPAND, FAILED, PASSED, THIS_INDEX_HAS_NOT_BEEN_CHECKED } from './translations';
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { FC } from 'react';
 import {
   ApplicationStart,
-  IUiSettingsClient,
-  NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  IUiSettingsClient,
+  NotificationsStart,
   OverlayStart,
 } from '@kbn/core/public';
+import { FC } from 'react';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 

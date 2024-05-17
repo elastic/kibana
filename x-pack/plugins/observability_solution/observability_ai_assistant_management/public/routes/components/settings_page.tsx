@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 import { useAppContext } from '../../hooks/use_app_context';
-import { SettingsTab } from './settings_tab/settings_tab';
-import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 import type { TabsRt } from '../config';
+import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { SearchConnectorTab } from './search_connector_tab';
+import { SettingsTab } from './settings_tab/settings_tab';
 export function SettingsPage() {
   const {
     application: { navigateToApp },

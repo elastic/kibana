@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EnrichSummary, EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+import type { EnrichPolicyType, EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
 
 export const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {

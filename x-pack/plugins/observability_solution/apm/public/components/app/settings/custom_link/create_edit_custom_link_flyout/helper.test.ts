@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getSelectOptions, replaceTemplateVariables } from './helper';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { getSelectOptions, replaceTemplateVariables } from './helper';
 
 describe('Custom link helper', () => {
   describe('getSelectOptions', () => {

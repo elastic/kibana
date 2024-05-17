@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { EcsEvent } from '@elastic/ecs';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
-  vulnerabilitiesLatestMock,
   scoresVulnerabilitiesMock,
+  vulnerabilitiesLatestMock,
 } from './mocks/vulnerabilities_latest_mock';
 
 export interface CnvmStatistics {

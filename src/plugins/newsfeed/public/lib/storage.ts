@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
  * Persistence layer for the newsfeed driver

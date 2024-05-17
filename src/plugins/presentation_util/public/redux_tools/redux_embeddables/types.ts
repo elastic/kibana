@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EnhancedStore } from '@reduxjs/toolkit';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { EnhancedStore } from '@reduxjs/toolkit';
 import { ReduxToolsReducers, ReduxToolsSelect, ReduxToolsSetters } from '../types';
 
 export interface ReduxEmbeddableSyncSettings<
-  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
 > {
   disableSync: boolean;
   isInputEqual?: (
@@ -30,7 +30,8 @@ export interface ReduxEmbeddableSyncSettings<
  */
 export interface ReduxEmbeddableTools<
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>
+  ReducerType extends
+    ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>,
 > {
   cleanup: () => void;
   store: EnhancedStore<ReduxEmbeddableStateType>;
@@ -48,7 +49,7 @@ export interface ReduxEmbeddableTools<
 export interface ReduxEmbeddableState<
   InputType extends EmbeddableInput = EmbeddableInput,
   OutputType extends EmbeddableOutput = EmbeddableOutput,
-  StateType extends unknown = unknown
+  StateType extends unknown = unknown,
 > {
   explicitInput: InputType;
   output: OutputType;

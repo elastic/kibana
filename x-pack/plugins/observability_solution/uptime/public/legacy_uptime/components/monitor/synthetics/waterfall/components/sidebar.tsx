@@ -6,12 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
+import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import {
   WaterfallChartSidebarContainer,
-  WaterfallChartSidebarContainerInnerPanel,
   WaterfallChartSidebarContainerFlexGroup,
+  WaterfallChartSidebarContainerInnerPanel,
   WaterfallChartSidebarFlexItem,
   WaterfallChartSidebarWrapper,
 } from './styles';

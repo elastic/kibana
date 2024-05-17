@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiSwitch, EuiPopover, EuiText, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiPopover, EuiSwitch, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
+import React, { useState } from 'react';
 import { SETTINGS_ROUTE } from '../../../../../../common/constants';
+import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { ENABLE_STATUS_ALERT } from './translations';
 
 export const DefineAlertConnectors = () => {

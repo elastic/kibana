@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import React, { memo, useState, useCallback } from 'react';
 import semverGte from 'semver/functions/gte';
 
-import type { Agent } from '../../../../../types';
 import { sendPostAgentAction, useAuthz, useStartServices } from '../../../../../hooks';
+import type { Agent } from '../../../../../types';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../../../../../../../../common/constants';
 

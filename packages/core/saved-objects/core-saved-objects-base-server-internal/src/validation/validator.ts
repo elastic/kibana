@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import Semver from 'semver';
-import type { Logger } from '@kbn/logging';
 import type {
-  SavedObjectsValidationMap,
   SavedObjectSanitizedDoc,
+  SavedObjectsValidationMap,
 } from '@kbn/core-saved-objects-server';
-import { createSavedObjectSanitizedDocSchema } from './schema';
+import type { Logger } from '@kbn/logging';
+import Semver from 'semver';
 import { isVirtualModelVersion } from '../model_version';
+import { createSavedObjectSanitizedDocSchema } from './schema';
 
 /**
  * Helper class that takes a {@link SavedObjectsValidationMap} and runs validations for a

@@ -8,8 +8,8 @@
 
 import dedent from 'dedent';
 
-import { updateVscodeConfig } from './update_vscode_config';
 import { ManagedConfigKey } from './managed_config_keys';
+import { updateVscodeConfig } from './update_vscode_config';
 
 // avoid excessive escaping in snapshots
 expect.addSnapshotSerializer({ test: (v) => typeof v === 'string', print: (v) => `${v}` });

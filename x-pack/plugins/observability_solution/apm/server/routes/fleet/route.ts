@@ -6,14 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
-import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { createInternalESClientWithResources } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -22,11 +22,11 @@ import { FleetAgentResponse, getFleetAgents } from './get_agents';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
 import {
-  getUnsupportedApmServerSchema,
   UnsupportedApmServerSchema,
+  getUnsupportedApmServerSchema,
 } from './get_unsupported_apm_server_schema';
 import { isSuperuser } from './is_superuser';
-import { runMigrationCheck, RunMigrationCheckResponse } from './run_migration_check';
+import { RunMigrationCheckResponse, runMigrationCheck } from './run_migration_check';
 
 function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.migrationToFleetAvailable) {

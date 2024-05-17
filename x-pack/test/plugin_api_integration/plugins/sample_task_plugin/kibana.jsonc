@@ -6,8 +6,6 @@
     "id": "sampleTaskPlugin",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "taskManager"
-    ]
+    "requiredPlugins": ["taskManager"]
   }
 }

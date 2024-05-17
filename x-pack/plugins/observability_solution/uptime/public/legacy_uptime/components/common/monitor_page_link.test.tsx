@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { MonitorPageLink } from './monitor_page_link';
 
 describe('MonitorPageLink component', () => {

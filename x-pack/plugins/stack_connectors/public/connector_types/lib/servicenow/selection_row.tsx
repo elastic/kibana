@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { EuiIconTip } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { connectorDeprecatedMessage } from '@kbn/triggers-actions-ui-plugin/public';

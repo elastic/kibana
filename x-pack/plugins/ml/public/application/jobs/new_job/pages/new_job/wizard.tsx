@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
-import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 import { WIZARD_STEPS } from '../components/step_types';
 
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import type { JobCreatorContextValue } from '../components/job_creator_context';
 import { JobCreatorContext } from '../components/job_creator_context';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 
-import type { JobCreatorType } from '../../common/job_creator';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { ChartLoader } from '../../common/chart_loader';
+import type { JobCreatorType } from '../../common/job_creator';
+import type { JobValidator } from '../../common/job_validator';
 import type { MapLoader } from '../../common/map_loader';
 import type { ResultsLoader } from '../../common/results_loader';
-import type { JobValidator } from '../../common/job_validator';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { WizardSteps } from './wizard_steps';
 
 interface Props {
   jobCreator: JobCreatorType;

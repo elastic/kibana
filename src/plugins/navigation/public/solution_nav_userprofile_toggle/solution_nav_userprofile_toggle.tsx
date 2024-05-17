@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -15,11 +14,12 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 
 import { useSolutionNavUserProfileToggle } from './use_solution_nav_userprofile_toggle';
 

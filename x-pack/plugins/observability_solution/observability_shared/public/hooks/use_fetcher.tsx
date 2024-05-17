@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',

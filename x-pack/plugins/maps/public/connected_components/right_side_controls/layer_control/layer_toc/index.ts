@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { LayerTOC } from './layer_toc';
 import {
   createLayerGroup,
   moveLayerToBottom,
   moveLayerToLeftOfTarget,
   setLayerParent,
 } from '../../../../actions';
+import { MapStoreState } from '../../../../reducers/store';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../selectors/ui_selectors';
-import { MapStoreState } from '../../../../reducers/store';
+import { LayerTOC } from './layer_toc';
 
 function mapStateToProps(state: MapStoreState) {
   return {

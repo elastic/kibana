@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 
-import { RegistryRuleType } from '../../../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
-import { RecoveredActionGroup } from '../../../../../common';
-import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { RecoveredActionGroup } from '../../../../../common';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
+import { RegistryRuleType } from '../../../../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

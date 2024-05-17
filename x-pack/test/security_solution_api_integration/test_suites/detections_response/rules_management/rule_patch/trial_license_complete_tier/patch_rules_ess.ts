@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
+import expect from '@kbn/expect';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import {
-  removeServerGeneratedProperties,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFields,
-  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  getLegacyActionSO,
-  getSimpleRuleOutput,
-  updateUsername,
-  createLegacyRuleAction,
-  getSimpleRule,
-  checkInvestigationFieldSoValue,
-} from '../../../utils';
-import {
   createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   createRule,
+  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  checkInvestigationFieldSoValue,
+  createLegacyRuleAction,
+  createRuleThroughAlertingEndpoint,
+  getLegacyActionSO,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getSimpleRule,
+  getSimpleRuleOutput,
+  removeServerGeneratedProperties,
+  updateUsername,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

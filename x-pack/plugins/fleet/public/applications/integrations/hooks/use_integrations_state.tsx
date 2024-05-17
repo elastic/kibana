@@ -8,8 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useRef, useCallback } from 'react';
 
-import type { IntegrationsAppBrowseRouteState } from '../../../types';
 import { useIntraAppState } from '../../../hooks';
+import type { IntegrationsAppBrowseRouteState } from '../../../types';
 
 interface IntegrationsStateContextValue {
   getFromIntegrations(): string | undefined;

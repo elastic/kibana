@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
@@ -13,14 +14,13 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
 import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
-import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
-import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 import { getDeferred } from '../../../../../mocks/utils';
+import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
+import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
+import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
 const listType: Array<CreateExceptionListSchema['type']> = [
   'endpoint_events',

@@ -52,9 +52,7 @@
             "tags": [],
             "label": "required",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -237,9 +235,7 @@
                     "tags": [],
                     "label": "enum",
                     "description": [],
-                    "signature": [
-                      "string[]"
-                    ],
+                    "signature": ["string[]"],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -678,9 +674,7 @@
                     "tags": [],
                     "label": "required",
                     "description": [],
-                    "signature": [
-                      "string[]"
-                    ],
+                    "signature": ["string[]"],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v1_schema.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -874,9 +868,7 @@
             "tags": [],
             "label": "required",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -887,9 +879,7 @@
             "type": "boolean",
             "tags": [],
             "label": "allowTrailingCommas",
-            "description": [
-              "// @ts-expect-error VSCode specific JSONSchema extension"
-            ],
+            "description": ["// @ts-expect-error VSCode specific JSONSchema extension"],
             "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1254,9 +1244,7 @@
                     "tags": [],
                     "label": "deprecated",
                     "description": [],
-                    "signature": [
-                      "true"
-                    ],
+                    "signature": ["true"],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                     "deprecated": false,
                     "trackAdoption": false

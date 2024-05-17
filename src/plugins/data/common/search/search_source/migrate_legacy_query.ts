@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { has } from 'lodash';
 
 /**

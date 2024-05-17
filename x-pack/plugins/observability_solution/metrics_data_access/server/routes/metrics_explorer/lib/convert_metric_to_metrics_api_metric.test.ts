@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
 import {
-  MetricsExplorerMetric,
   MetricsAPIMetric,
   MetricsExplorerAggregation,
+  MetricsExplorerMetric,
 } from '../../../../common/http_api';
+import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
 
 describe('convertMetricToMetricsAPIMetric(metric, index)', () => {
   const runTest = (metric: MetricsExplorerMetric, aggregation: MetricsAPIMetric) =>

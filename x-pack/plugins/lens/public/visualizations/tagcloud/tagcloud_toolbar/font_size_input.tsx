@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { EuiDualRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 
 interface Props {
   minFontSize: number;

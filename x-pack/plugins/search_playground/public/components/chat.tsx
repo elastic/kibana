@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -17,6 +15,8 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
@@ -24,16 +24,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
-import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
 import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types';
+import { ChatSidebar } from './chat_sidebar';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
 
-import { TelegramIcon } from './telegram_icon';
-import { transformFromChatMessages } from '../utils/transform_to_messages';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
+import { transformFromChatMessages } from '../utils/transform_to_messages';
+import { TelegramIcon } from './telegram_icon';
 
 const buildFormData = (formData: ChatForm): ChatRequestData => ({
   connector_id: formData[ChatFormFields.summarizationModel].connectorId!,

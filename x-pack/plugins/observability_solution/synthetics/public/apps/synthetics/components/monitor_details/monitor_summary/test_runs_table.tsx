@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -22,33 +18,37 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { i18n } from '@kbn/i18n';
 import { css } from '@kbn/kibana-react-plugin/common';
+import React, { MouseEvent, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useHistory, useParams } from 'react-router-dom';
 import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
+import { THUMBNAIL_SCREENSHOT_SIZE_MOBILE } from '../../common/screenshot/screenshot_size';
 import {
   ExpandRowColumn,
   toggleDetails,
 } from '../../test_now_mode/simple/ping_list/columns/expand_row';
 import { useExpandedPingList } from '../../test_now_mode/simple/ping_list/use_ping_expanded';
-import { THUMBNAIL_SCREENSHOT_SIZE_MOBILE } from '../../common/screenshot/screenshot_size';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 
-import { TestRunsTableHeader } from './test_runs_table_header';
 import { MONITOR_TYPES } from '../../../../../../common/constants';
-import {
-  getTestRunDetailRelativeLink,
-  TestDetailsLink,
-} from '../../common/links/test_details_link';
 import { ConfigKey, MonitorTypeEnum, Ping } from '../../../../../../common/runtime_types';
-import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
-import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
-import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
+import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import {
+  TestDetailsLink,
+  getTestRunDetailRelativeLink,
+} from '../../common/links/test_details_link';
+import { StatusBadge, parseBadgeStatus } from '../../common/monitor_test_result/status_badge';
+import { TestRunsTableHeader } from './test_runs_table_header';
 
-import { useSelectedMonitor } from '../hooks/use_selected_monitor';
-import { useSelectedLocation } from '../hooks/use_selected_location';
-import { useMonitorPings } from '../hooks/use_monitor_pings';
-import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
+import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
+import { useMonitorPings } from '../hooks/use_monitor_pings';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 

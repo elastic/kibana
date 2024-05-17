@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { UserActionAction, ConnectorUserAction } from '../../../common/types/domain';
+import type { ConnectorUserAction, UserActionAction } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
-import { UserActionTimestamp } from './timestamp';
-import type { UserActionBuilder, UserActionBuilderArgs } from './types';
+import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
-import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
+import { UserActionTimestamp } from './timestamp';
+import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { getUserActionAriaLabel } from './user_actions_aria_labels';
 
 interface Props {

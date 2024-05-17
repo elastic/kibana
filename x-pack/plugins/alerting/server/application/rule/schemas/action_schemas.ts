@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { notifyWhenSchema } from './notify_when_schema';
 import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
+import { notifyWhenSchema } from './notify_when_schema';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 

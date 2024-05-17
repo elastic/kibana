@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import Suggestions from './suggestions';
-import ClickOutside from './click_outside';
 import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import ClickOutside from './click_outside';
+import Suggestions from './suggestions';
 
 const KEY_CODES = {
   LEFT: 37,

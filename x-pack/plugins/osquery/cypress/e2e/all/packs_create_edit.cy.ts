@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { recurse } from 'cypress-recurse';
+import { API_VERSIONS } from '../../../common/constants';
+import { DEFAULT_POLICY } from '../../screens/fleet';
+import { LIVE_QUERY_EDITOR, getIdFormField } from '../../screens/live_query';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
-  SAVE_PACK_BUTTON,
-  FLYOUT_SAVED_QUERY_SAVE_BUTTON,
-  customActionEditSavedQuerySelector,
-  POLICY_SELECT_COMBOBOX,
   EDIT_PACK_HEADER_BUTTON,
-  SAVED_QUERY_DROPDOWN_SELECT,
-  UPDATE_PACK_BUTTON,
-  TABLE_ROWS,
-  formFieldInputSelector,
   FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
+  FLYOUT_SAVED_QUERY_SAVE_BUTTON,
+  POLICY_SELECT_COMBOBOX,
+  SAVED_QUERY_DROPDOWN_SELECT,
+  SAVE_PACK_BUTTON,
+  TABLE_ROWS,
+  UPDATE_PACK_BUTTON,
+  customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
+  formFieldInputSelector,
 } from '../../screens/packs';
-import { API_VERSIONS } from '../../../common/constants';
-import { navigateTo } from '../../tasks/navigation';
-import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
-import { changePackActiveStatus, preparePack } from '../../tasks/packs';
+import { ServerlessRoleName } from '../../support/roles';
+import { cleanupPack, cleanupSavedQuery, loadPack, loadSavedQuery } from '../../tasks/api_fixtures';
+import { request } from '../../tasks/common';
 import {
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
   interceptPackId,
 } from '../../tasks/integrations';
-import { DEFAULT_POLICY } from '../../screens/fleet';
-import { getIdFormField, LIVE_QUERY_EDITOR } from '../../screens/live_query';
-import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
-import { request } from '../../tasks/common';
-import { ServerlessRoleName } from '../../support/roles';
+import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
+import { navigateTo } from '../../tasks/navigation';
+import { changePackActiveStatus, preparePack } from '../../tasks/packs';
 
 describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;

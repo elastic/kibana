@@ -7,10 +7,10 @@
 
 import { Rule, RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
-  AlertParamType,
-  AlertMessageTokenType,
-  AlertSeverity,
   AlertClusterHealthType,
+  AlertMessageTokenType,
+  AlertParamType,
+  AlertSeverity,
 } from '../enums';
 
 export type CommonAlert = Rule<RuleTypeParams> | SanitizedRule<RuleTypeParams>;

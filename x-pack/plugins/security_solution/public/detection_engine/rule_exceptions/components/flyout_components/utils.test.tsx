@@ -12,9 +12,9 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import {
+  enrichEndpointItems,
   enrichItemWithComment,
   enrichItemWithName,
-  enrichEndpointItems,
   enrichItemsForDefaultRuleList,
   enrichItemsForSharedLists,
   enrichNewExceptionItems,

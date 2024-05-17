@@ -6,14 +6,14 @@
  */
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
-import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
-import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
+import { RuleTagsAggregationResult, RuleTagsParams, ruleTagsParamsSchema } from '.';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
 import { DEFAULT_TAGS_PER_PAGE } from '../../../../../common/routes/rule/apis/tags/constants/latest';
-import { RulesClientContext } from '../../../../rules_client/types';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
+import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
 
 const MAX_TAGS = 10000;
 

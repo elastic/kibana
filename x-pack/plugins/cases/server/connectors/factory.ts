@@ -6,12 +6,12 @@
  */
 
 import { ConnectorTypes } from '../../common/types/domain';
-import type { ICasesConnector, CasesConnectorsMap } from './types';
+import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webook';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
-import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webook';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
+import type { CasesConnectorsMap, ICasesConnector } from './types';
 
 const mapping: Record<ConnectorTypes, ICasesConnector | null> = {
   [ConnectorTypes.casesWebhook]: getCasesWebhookCaseConnector(),

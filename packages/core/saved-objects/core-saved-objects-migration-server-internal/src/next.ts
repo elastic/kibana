@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as Option from 'fp-ts/lib/Option';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { omit } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import * as Actions from './actions';
+import { createDelayFn } from './common/utils';
+import { REMOVED_TYPES } from './core';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
@@ -54,10 +57,7 @@ import type {
   WaitForMigrationCompletionState,
   WaitForYellowSourceState,
 } from './state';
-import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
-import * as Actions from './actions';
-import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -336,7 +336,7 @@ export const next = (
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<typeof map[AllActionStates]>;
+      ) => ReturnType<(typeof map)[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

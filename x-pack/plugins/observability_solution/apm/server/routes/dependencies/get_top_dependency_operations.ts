@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { Environment } from '../../../common/environment_rt';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -14,11 +15,11 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_NAME,
 } from '../../../common/es_fields/apm';
-import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getDocumentTypeFilterForServiceDestinationStatistics,
@@ -26,7 +27,6 @@ import {
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { calculateImpactBuilder } from '../traces/calculate_impact_builder';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_OPERATIONS = 500;
 

@@ -1,3 +1,13 @@
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,48 +15,38 @@
  * 2.0.
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { loggerMock } from '@kbn/logging-mocks';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import {
   disabledRule1,
   disabledRule2,
+  disabledRuleForBulkDisable1,
   disabledRuleWithAction1,
   disabledRuleWithAction2,
-  savedObjectWith409Error,
-  savedObjectWith500Error,
+  enabledRuleForBulkOps1,
+  enabledRuleForBulkOps2,
   enabledRuleForBulkOpsWithActions1,
   enabledRuleForBulkOpsWithActions2,
   returnedRuleForBulkEnableWithActions1,
   returnedRuleForBulkEnableWithActions2,
-  enabledRuleForBulkOps1,
-  enabledRuleForBulkOps2,
   returnedRuleForBulkOps1,
   returnedRuleForBulkOps2,
-  disabledRuleForBulkDisable1,
+  savedObjectWith409Error,
+  savedObjectWith500Error,
   siemRuleForBulkOps1,
   siemRuleForBulkOps2,
 } from '../../../../rules_client/tests/test_helpers';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -110,7 +110,7 @@ beforeEach(() => {
       ({
         tasks: [],
         errors: [],
-      } as unknown as BulkUpdateTaskResult)
+      }) as unknown as BulkUpdateTaskResult
   );
   (auditLogger.log as jest.Mock).mockClear();
   (migrateLegacyActions as jest.Mock).mockResolvedValue({
@@ -558,7 +558,7 @@ describe('bulkEnableRules', () => {
           ({
             tasks: [{ id: 'id1' }],
             errors: [],
-          } as unknown as BulkUpdateTaskResult)
+          }) as unknown as BulkUpdateTaskResult
       );
 
       await rulesClient.bulkEnableRules({ filter: 'fake_filter' });

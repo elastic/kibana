@@ -7,34 +7,34 @@
  */
 
 import type {
-  PluginInitializerContext,
   CoreSetup,
-  Plugin,
-  Logger,
   CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 
 import { AnalyticsServiceStart } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import {
-  setFileKindsRegistry,
-  getFileKindsRegistry,
   FileKindsRegistryImpl,
+  getFileKindsRegistry,
+  setFileKindsRegistry,
 } from '../common/file_kinds_registry';
 
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
 import type {
-  FilesServerSetupDependencies,
-  FilesServerStartDependencies,
   FilesServerSetup,
+  FilesServerSetupDependencies,
   FilesServerStart,
+  FilesServerStartDependencies,
 } from './types';
 
-import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
-import { registerRoutes, registerFileKindRoutes } from './routes';
-import { Counters, registerUsageCollector } from './usage';
 import * as DefaultImageKind from '../common/default_image_file_kind';
+import { registerFileKindRoutes, registerRoutes } from './routes';
+import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
+import { Counters, registerUsageCollector } from './usage';
 
 export class FilesPlugin
   implements

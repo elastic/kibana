@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import moment from 'moment';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  alertsLocatorID,
   AlertsLocatorParams,
+  alertsLocatorID,
   getAlertUrl,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { formatFilterString } from './status_check';
-import { UptimeAlertTypeFactory } from './types';
+import moment from 'moment';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
+import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
+import { Cert, CertResult } from '../../../../common/runtime_types';
 import {
-  updateState,
+  UptimeRuleTypeAlertDefinition,
   generateAlertMessage,
   setRecoveredAlertsContext,
-  UptimeRuleTypeAlertDefinition,
+  updateState,
 } from './common';
-import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { Cert, CertResult } from '../../../../common/runtime_types';
+import { formatFilterString } from './status_check';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
+import { UptimeAlertTypeFactory } from './types';
 
-import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { UptimeEsClient } from '../lib';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { ACTION_VARIABLES, ALERT_DETAILS_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;

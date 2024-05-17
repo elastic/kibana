@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public';
-import moment, { type Moment } from 'moment';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { IMPORT_STATUS, type Statuses } from '../import_progress';
-import { EventRateChart, type LineChartPoint } from './event_rate_chart';
-import { runDocCountSearch } from './doc_count_search';
+import moment, { type Moment } from 'moment';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { IMPORT_STATUS, type Statuses } from '../import_progress';
+import { runDocCountSearch } from './doc_count_search';
+import { EventRateChart, type LineChartPoint } from './event_rate_chart';
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;

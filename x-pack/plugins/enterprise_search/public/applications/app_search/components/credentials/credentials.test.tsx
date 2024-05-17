@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSkeletonText, EuiCopy } from '@elastic/eui';
+import { EuiCopy, EuiSkeletonText } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { externalUrl } from '../../../shared/enterprise_search_url';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 import type { UiSettingsParams } from '@kbn/core/server';
 import { ENABLE_ESQL } from '@kbn/esql-utils';

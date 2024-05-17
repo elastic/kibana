@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializedAction, SerializedEvent, BaseActionConfig } from '../../common/types';
+import { BaseActionConfig, SerializedAction, SerializedEvent } from '../../common/types';
 
 export type { SerializedAction, SerializedEvent, BaseActionConfig };
 

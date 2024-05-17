@@ -14,8 +14,8 @@ import {
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
-  buildKibanaPath,
   REPORTING_REDIRECT_APP,
+  buildKibanaPath,
 } from '@kbn/reporting-common';
 import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';

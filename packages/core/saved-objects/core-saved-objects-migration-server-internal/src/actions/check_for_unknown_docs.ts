@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { flatten } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,
   Indices,
@@ -17,11 +14,14 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
-import {
-  catchRetryableEsClientErrors,
-  type RetryableEsClientError,
-} from './catch_retryable_es_client_errors';
+import * as Either from 'fp-ts/lib/Either';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { flatten } from 'lodash';
 import { addExcludedTypesToBoolQuery } from '../model/helpers';
+import {
+  type RetryableEsClientError,
+  catchRetryableEsClientErrors,
+} from './catch_retryable_es_client_errors';
 
 /** @internal */
 export interface CheckForUnknownDocsParams {

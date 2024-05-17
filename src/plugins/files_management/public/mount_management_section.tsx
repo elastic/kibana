@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import type { CoreStart } from '@kbn/core/public';
+import { FormattedRelative } from '@kbn/i18n-react';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { StartDependencies } from './types';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { App } from './app';
 import { FilesManagementAppContextProvider } from './context';
+import type { StartDependencies } from './types';
 
 const queryClient = new QueryClient();
 

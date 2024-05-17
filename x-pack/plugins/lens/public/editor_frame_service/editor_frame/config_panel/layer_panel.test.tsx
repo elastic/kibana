@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { screen, fireEvent, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { ChildDragDropProvider, Droppable, Draggable } from '@kbn/dom-drag-drop';
-import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
-import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ChildDragDropProvider, Draggable, Droppable } from '@kbn/dom-drag-drop';
+import type { ProviderProps } from '@kbn/dom-drag-drop/src';
+import { DimensionButton } from '@kbn/visualization-ui-components';
+import { act, fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import faker from 'faker';
+import React from 'react';
 import { generateId } from '../../../id_generator';
 import {
-  createMockVisualization,
-  createMockFramePublicAPI,
   createMockDatasource,
-  mountWithProvider,
+  createMockFramePublicAPI,
+  createMockVisualization,
   createMockedDragDropContext,
+  mountWithProvider,
   renderWithReduxStore,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LensAppState } from '../../../state_management';
-import type { ProviderProps } from '@kbn/dom-drag-drop/src';
+import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
+import { LayerPanel } from './layer_panel';
 import { LayerPanelProps } from './types';
 
 jest.mock('../../../id_generator');

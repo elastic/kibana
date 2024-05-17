@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import {
+  Action,
   History,
-  Path,
+  Href,
+  Location,
   LocationDescriptorObject,
+  LocationListener,
+  Path,
   TransitionPromptHook,
   UnregisterCallback,
-  LocationListener,
-  Location,
-  Href,
-  Action,
 } from 'history';
-import type { ScopedHistory } from '@kbn/core-application-browser';
 
 /**
  * Core's internal implementation of {@link ScopedHistory}

@@ -7,8 +7,8 @@
 
 import {
   SLODefinitionResponse,
-  timeslicesBudgetingMethodSchema,
   durationType,
+  timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
 

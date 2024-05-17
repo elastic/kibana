@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { SchemaType, IgnoreSchemaTypes } from '../types';
+import { IgnoreSchemaTypes, SchemaType } from '../types';
 
 interface Props {
   fieldName: string;

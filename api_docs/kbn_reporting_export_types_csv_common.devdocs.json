@@ -78,9 +78,7 @@
             "tags": [],
             "label": "{ scroll: config }",
             "description": [],
-            "signature": [
-              "CsvConfigType"
-            ],
+            "signature": ["CsvConfigType"],
             "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,9 +91,7 @@
             "tags": [],
             "label": "pitId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -111,9 +107,7 @@
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.JobParamsDownloadCSV",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "JobParamsDownloadCSV",
         "description": [],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
@@ -267,9 +261,7 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -297,9 +289,7 @@
             "tags": [],
             "label": "requestBody",
             "description": [],
-            "signature": [
-              "SearchRequest"
-            ],
+            "signature": ["SearchRequest"],
             "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -336,9 +326,7 @@
             "tags": [],
             "label": "objectType",
             "description": [],
-            "signature": [
-              "\"search\""
-            ],
+            "signature": ["\"search\""],
             "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -350,9 +338,7 @@
             "tags": [],
             "label": "pagingStrategy",
             "description": [],
-            "signature": [
-              "\"scroll\" | \"pit\""
-            ],
+            "signature": ["\"scroll\" | \"pit\""],
             "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -370,9 +356,7 @@
         "tags": [],
         "label": "CSV_JOB_TYPE",
         "description": [],
-        "signature": [
-          "\"csv_searchsource\""
-        ],
+        "signature": ["\"csv_searchsource\""],
         "path": "packages/kbn-reporting/export_types/csv_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -382,14 +366,10 @@
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.CSV_JOB_TYPE_DEPRECATED",
         "type": "string",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "CSV_JOB_TYPE_DEPRECATED",
         "description": [],
-        "signature": [
-          "\"csv\""
-        ],
+        "signature": ["\"csv\""],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": true,
         "trackAdoption": false,
@@ -428,9 +408,7 @@
         "tags": [],
         "label": "CSV_JOB_TYPE_V2",
         "description": [],
-        "signature": [
-          "\"csv_v2\""
-        ],
+        "signature": ["\"csv_v2\""],
         "path": "packages/kbn-reporting/export_types/csv_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -443,9 +421,7 @@
         "tags": [],
         "label": "CSV_REPORT_TYPE",
         "description": [],
-        "signature": [
-          "\"csv_searchsource\""
-        ],
+        "signature": ["\"csv_searchsource\""],
         "path": "packages/kbn-reporting/export_types/csv_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -458,9 +434,7 @@
         "tags": [],
         "label": "CSV_REPORT_TYPE_V2",
         "description": [],
-        "signature": [
-          "\"csv_v2\""
-        ],
+        "signature": ["\"csv_v2\""],
         "path": "packages/kbn-reporting/export_types/csv_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -473,9 +447,7 @@
         "tags": [],
         "label": "CSV_REPORTING_ACTION",
         "description": [],
-        "signature": [
-          "\"generateCsvReport\""
-        ],
+        "signature": ["\"generateCsvReport\""],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -485,14 +457,10 @@
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.CSV_SEARCHSOURCE_IMMEDIATE_TYPE",
         "type": "string",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "CSV_SEARCHSOURCE_IMMEDIATE_TYPE",
         "description": [],
-        "signature": [
-          "\"csv_searchsource_immediate\""
-        ],
+        "signature": ["\"csv_searchsource_immediate\""],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": true,
         "trackAdoption": false,
@@ -572,10 +540,7 @@
         "tags": [],
         "label": "JobParamsCSV",
         "description": [],
-        "signature": [
-          "BaseParamsCSV & ",
-          "BaseParams"
-        ],
+        "signature": ["BaseParamsCSV & ", "BaseParams"],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -607,10 +572,7 @@
         "tags": [],
         "label": "TaskPayloadCSV",
         "description": [],
-        "signature": [
-          "BaseParamsCSV & ",
-          "BasePayload"
-        ],
+        "signature": ["BaseParamsCSV & ", "BasePayload"],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

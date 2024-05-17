@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
@@ -19,15 +16,18 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
-import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
+import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../state';
+import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ToggleFlyoutTranslations } from './hooks/translations';
 import { useSyntheticsAlert } from './hooks/use_synthetics_alert';
-import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../state';
 
 export const ToggleAlertFlyoutButton = () => {
   const dispatch = useDispatch();

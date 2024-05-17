@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import { EmptyViewerState } from '.';
-import { ListTypeText, ViewerStatus } from '../types';
 import * as i18n from '../translations';
+import { ListTypeText, ViewerStatus } from '../types';
 
 describe('EmptyViewerState', () => {
   it('it should render "error" with the default title and body', () => {

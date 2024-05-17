@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { render } from '@testing-library/react';
 import moment from 'moment-timezone';
 import React from 'react';
-import { render } from '@testing-library/react';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
-import { IndicatorsBarChart } from './barchart';
 import { ChartSeries } from '../../services/fetch_aggregated_indicators';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { IndicatorsBarChart } from './barchart';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');

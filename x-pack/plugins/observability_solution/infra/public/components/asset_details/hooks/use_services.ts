@@ -10,11 +10,11 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect, useMemo } from 'react';
 import {
+  ServicesAPIRequest,
   ServicesAPIResponse,
   ServicesAPIResponseRT,
-  ServicesAPIRequest,
 } from '../../../../common/http_api/host_details';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
+import { createPlainError, throwErrors } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useRequestObservable } from './use_request_observable';
 

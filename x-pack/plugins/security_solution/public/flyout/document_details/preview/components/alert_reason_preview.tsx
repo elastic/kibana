@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
-import { usePreviewPanelContext } from '../context';
-import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useMemo } from 'react';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
+import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { FlyoutError } from '../../../shared/components/flyout_error';
+import { usePreviewPanelContext } from '../context';
+import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
 
 const ReasonPreviewContainerWrapper = styled.div`
   overflow-x: auto;

@@ -7,13 +7,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type {
-  TelemetryCollectionManagerPluginSetup,
-  StatsGetterConfig,
-} from '@kbn/telemetry-collection-manager-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RequestHandler } from '@kbn/core-http-server';
+import type { IRouter } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  StatsGetterConfig,
+  TelemetryCollectionManagerPluginSetup,
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { FetchSnapshotTelemetry } from '../../common/routes';
 import { UsageStatsBody, v2 } from '../../common/types';
 
@@ -62,9 +62,8 @@ export function registerTelemetryUsageStatsRoutes(
         refreshCache: unencrypted || refreshCache,
       };
 
-      const body: v2.UnencryptedTelemetryPayload = await telemetryCollectionManager.getStats(
-        statsConfig
-      );
+      const body: v2.UnencryptedTelemetryPayload =
+        await telemetryCollectionManager.getStats(statsConfig);
       return res.ok({ body });
     } catch (err) {
       if (isDev) {

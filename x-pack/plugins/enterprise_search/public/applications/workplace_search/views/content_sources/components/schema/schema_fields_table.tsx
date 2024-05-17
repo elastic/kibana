@@ -24,8 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { SchemaFieldTypeSelect } from '../../../../../shared/schema';
 
 import {
-  SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER,
   SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER,
+  SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER,
 } from './constants';
 import { SchemaLogic } from './schema_logic';
 

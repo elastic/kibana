@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
-import Url from 'url';
 import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,

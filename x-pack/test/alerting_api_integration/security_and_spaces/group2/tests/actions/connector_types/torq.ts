@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import httpProxy from 'http-proxy';
 
-import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers/get_proxy_server';
 import {
-  getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers/get_proxy_server';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

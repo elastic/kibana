@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import mockFs from 'mock-fs';
-import axios from 'axios';
 import { createHash } from 'crypto';
-import { readFile } from 'fs/promises';
 import { resolve as resolvePath } from 'path';
 import { Readable } from 'stream';
+import axios from 'axios';
+import { readFile } from 'fs/promises';
+import mockFs from 'mock-fs';
 import { fetch } from './fetch';
 
 const TEMP_DIR = resolvePath(__dirname, '__tmp__');

@@ -8,13 +8,13 @@
 
 import React from 'react';
 
-import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
 import { KibanaContextProvider as KibanaReactProvider } from '@kbn/kibana-react-plugin/public';
+import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
+import { DecoratorFn } from '@storybook/react';
 import { pluginServices } from '../public/services';
-import { ControlsServices } from '../public/services/types';
 import { providers } from '../public/services/plugin_services.story';
+import { ControlsServices } from '../public/services/types';
 
 const settings = new Map();
 settings.set('darkMode', true);

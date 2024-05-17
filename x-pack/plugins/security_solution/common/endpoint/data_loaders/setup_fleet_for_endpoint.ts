@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
-import type { KbnClient } from '@kbn/test';
 import type {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
@@ -15,16 +13,18 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import {
   AGENTS_SETUP_API_ROUTES,
+  API_VERSIONS,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
-  API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
+import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosResponse } from 'axios';
 import { usageTracker } from './usage_tracker';
 import {
-  createToolingLogger,
   EndpointDataLoadingError,
   RETRYABLE_TRANSIENT_ERRORS,
+  createToolingLogger,
   retryOnError,
   wrapErrorAndRejectPromise,
 } from './utils';

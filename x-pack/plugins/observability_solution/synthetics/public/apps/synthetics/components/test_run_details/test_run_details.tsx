@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { TestRunErrorInfo } from './components/test_run_error_info';
-import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
-import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
+import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { StepNumberNav } from './components/step_number_nav';
+import { TestRunErrorInfo } from './components/test_run_error_info';
+import { useTestRunDetailsBreadcrumbs } from './hooks/use_test_run_details_breadcrumbs';
 import { StepScreenshotDetails } from './step_screenshot_details';
 import { StepTabs } from './step_tabs';
-import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
-import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { TestRunSteps } from './test_run_steps';
-import { useTestRunDetailsBreadcrumbs } from './hooks/use_test_run_details_breadcrumbs';
 
 export const TestRunDetails = () => {
   // Step index from starts at 1 in synthetics

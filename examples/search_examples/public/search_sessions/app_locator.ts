@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { Filter, Query, isFilterPinned, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange, isFilterPinned } from '@kbn/es-query';
 import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';

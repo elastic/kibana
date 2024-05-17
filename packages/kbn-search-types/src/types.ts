@@ -7,8 +7,8 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
@@ -17,7 +17,7 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_typ
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 >(
   request: SearchStrategyRequest,
   options?: ISearchOptions

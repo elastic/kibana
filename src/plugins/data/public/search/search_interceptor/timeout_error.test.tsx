@@ -11,8 +11,8 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
-import { mount } from 'enzyme';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
+import { mount } from 'enzyme';
 
 describe('SearchTimeoutError', () => {
   beforeEach(() => {

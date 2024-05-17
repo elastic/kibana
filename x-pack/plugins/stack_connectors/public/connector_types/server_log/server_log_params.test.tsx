@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { ServerLogLevelOptions } from '../types';
 import ServerLogParamsFields from './server_log_params';
 

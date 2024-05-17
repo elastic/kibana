@@ -7,8 +7,8 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { SearchableSnapshotField } from '../shared_fields';
 import { Phase } from '../phase';
+import { SearchableSnapshotField } from '../shared_fields';
 
 export const FrozenPhase: FunctionComponent = () => {
   return (

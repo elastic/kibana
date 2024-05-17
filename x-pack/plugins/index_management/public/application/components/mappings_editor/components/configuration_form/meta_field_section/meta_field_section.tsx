@@ -7,12 +7,12 @@
 
 import React from 'react';
 
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
-import { getUseField, FormRow, Field, JsonEditorField } from '../../../shared_imports';
+import { Field, FormRow, JsonEditorField, getUseField } from '../../../shared_imports';
 
 const UseField = getUseField({ component: Field });
 

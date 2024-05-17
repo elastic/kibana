@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { Inspect, Maybe } from '../../common';
 import type { RequestOptions, RequestOptionsPaginated } from '../..';
+import type { Inspect, Maybe } from '../../common';
 
 export type ActionEdges = estypes.SearchResponse<object>['hits']['hits'];
 

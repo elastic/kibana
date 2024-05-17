@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { slice } from 'lodash';
-import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuItemIcon,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiContextMenuItemIcon,
-  EuiText,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiPopoverProps,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
-  useResizeObserver,
   useIsWithinBreakpoints,
+  useResizeObserver,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { slice } from 'lodash';
+import React, { useState } from 'react';
 import type { FlyoutActionItem } from '../../customizations';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;

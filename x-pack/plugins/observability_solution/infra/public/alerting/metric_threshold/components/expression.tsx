@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -20,16 +13,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
+import { debounce } from 'lodash';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';

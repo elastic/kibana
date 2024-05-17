@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { CoreAppsService } from '@kbn/core-apps-browser-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 type CoreAppContract = PublicMethodsOf<CoreAppsService>;
 

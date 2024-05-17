@@ -7,23 +7,23 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { dataViewsServiceFactory } from './data_views_service_factory';
-import { registerRoutes } from './routes';
-import { dataViewSavedObjectType } from './saved_objects';
-import { capabilitiesProvider } from './capabilities_provider';
-import { getIndexPatternLoad } from './expressions';
-import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
-import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
 import type { ClientConfigType } from '../common/types';
-import { dataTiersUiSettingsConfig } from './ui_settings';
+import { capabilitiesProvider } from './capabilities_provider';
+import { DataViewsStorage } from './content_management';
+import { dataViewsServiceFactory } from './data_views_service_factory';
+import { createScriptedFieldsDeprecationsConfig } from './deprecations';
+import { getIndexPatternLoad } from './expressions';
+import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
+import { registerRoutes } from './routes';
+import { dataViewSavedObjectType } from './saved_objects';
 import {
   DataViewsServerPluginSetup,
-  DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
+  DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from './types';
-import { DataViewsStorage } from './content_management';
+import { dataTiersUiSettingsConfig } from './ui_settings';
 import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin

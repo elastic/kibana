@@ -7,10 +7,10 @@
 
 import React, { useState, useCallback } from 'react';
 
-import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
-import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import { AlertingExampleComponentParams } from '../application';
 
 export const CreateAlert = ({
   triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },

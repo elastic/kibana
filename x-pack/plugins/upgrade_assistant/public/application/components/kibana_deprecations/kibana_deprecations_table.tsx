@@ -1,3 +1,5 @@
+import { EuiBasicTableColumn, EuiButton, EuiInMemoryTable, EuiLink, Search } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } from '@elastic/eui';
 
 import { PAGINATION_CONFIG } from '../constants';
+import { DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 import { ResolutionTableCell } from './resolution_table_cell';
-import { DeprecationBadge } from '../shared';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(

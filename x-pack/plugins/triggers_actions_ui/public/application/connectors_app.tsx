@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { Redirect } from 'react-router-dom';
+import { Observable } from 'rxjs';
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
-import { ConnectorProvider } from './context/connector_context';
 import { Section } from './constants';
+import { ConnectorProvider } from './context/connector_context';
 import { queryClient } from './query_client';
 
 const ActionsConnectorsHome = lazy(

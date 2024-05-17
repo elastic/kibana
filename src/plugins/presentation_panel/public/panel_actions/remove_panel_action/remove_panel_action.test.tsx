@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { RemovePanelAction, RemovePanelActionApi } from './remove_panel_action';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 
 describe('Remove panel action', () => {
   let action: RemovePanelAction;

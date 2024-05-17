@@ -8,9 +8,9 @@
 
 import { useRef } from 'react';
 
-import { Props as UseFieldProps } from './use_field';
 import { useFieldFromProps } from '../hooks';
 import { FieldHook } from '../types';
+import { Props as UseFieldProps } from './use_field';
 
 interface Props<T> {
   fields: { [K in keyof T]: Exclude<UseFieldProps<T[K]>, 'children'> };
@@ -81,18 +81,21 @@ export function UseMultiFields<T = { [key: string]: unknown }>({ fields, childre
   // the hook order below.
   const fieldIds = useRef(Object.keys(fields).sort() as Array<keyof T>);
 
-  const hookFields = fieldIds.current.reduce((acc, id) => {
-    // We can disable the rules-of-hooks that prevents us to create a hook
-    // from inside a callback as we have the **guarantee** that the field hooks are created
-    // in the same order.
+  const hookFields = fieldIds.current.reduce(
+    (acc, id) => {
+      // We can disable the rules-of-hooks that prevents us to create a hook
+      // from inside a callback as we have the **guarantee** that the field hooks are created
+      // in the same order.
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { field } = useFieldFromProps(fields[id]);
-    return {
-      ...acc,
-      [id]: field,
-    };
-  }, {} as { [K in keyof T]: FieldHook<T[K]> });
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { field } = useFieldFromProps(fields[id]);
+      return {
+        ...acc,
+        [id]: field,
+      };
+    },
+    {} as { [K in keyof T]: FieldHook<T[K]> }
+  );
 
   if (!Boolean(fieldIds.current.length)) {
     return null;

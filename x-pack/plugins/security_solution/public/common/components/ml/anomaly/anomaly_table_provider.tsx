@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
-import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
+import type { Anomalies, CriteriaFields, InfluencerInput } from '../types';
 import { useAnomaliesTableData } from './use_anomalies_table_data';
 
 export interface AnomalyTableProviderChildrenProps {

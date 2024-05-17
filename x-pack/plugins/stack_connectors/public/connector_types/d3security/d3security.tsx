@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { lazy } from 'react';
 import { SUB_ACTION } from '../../../common/d3security/constants';
-import { D3SecurityActionParams, D3SecurityConnector } from './types';
 import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
+import { D3SecurityActionParams, D3SecurityConnector } from './types';
 interface ValidationErrors {
   subAction: string[];
   body: string[];

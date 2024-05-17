@@ -18,8 +18,8 @@ import {
 } from '../../../../common/es_fields/apm';
 import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { calcMemoryUsed } from './helper';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { calcMemoryUsed } from './helper';
 
 export type ServerlessFunctionsOverviewResponse = Array<{
   serverlessId: string;

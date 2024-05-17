@@ -6,17 +6,17 @@
  */
 
 import createContainer from 'constate';
-import { useMemo, useState, useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { useEffect, useMemo, useState } from 'react';
+import { createPlainError, throwErrors } from '../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import {
-  getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
+  getMlCapabilitiesResponsePayloadRT,
 } from './api/ml_api_types';
-import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useInfraMLCapabilities = () => {
   const { services } = useKibanaContextForPlugin();

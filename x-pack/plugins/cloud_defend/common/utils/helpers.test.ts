@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getSelectorsAndResponsesFromYaml, getYamlFromSelectorsAndResponses } from './helpers';
 import { MOCK_YAML_CONFIGURATION, MOCK_YAML_INVALID_CONFIGURATION } from '../../public/test/mocks';
+import { getSelectorsAndResponsesFromYaml, getYamlFromSelectorsAndResponses } from './helpers';
 
 describe('getSelectorsAndResponsesFromYaml', () => {
   it('converts yaml into arrays of selectors and responses', () => {

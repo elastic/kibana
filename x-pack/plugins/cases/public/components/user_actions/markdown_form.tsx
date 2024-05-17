@@ -7,8 +7,8 @@
 
 import React, { forwardRef, useRef } from 'react';
 
+import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import { schema } from './schema';
-import { ScrollableMarkdown, EditableMarkdown } from '../markdown_editor';
 
 interface UserActionMarkdownProps {
   content: string;

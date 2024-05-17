@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { esTestConfig } from '@kbn/test';
+import { ReplaySubject, firstValueFrom } from 'rxjs';
 
+import { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { ServiceStatus } from '@kbn/core-status-common';
 import {
-  createRootWithCorePlugins,
-  createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { ServiceStatus } from '@kbn/core-status-common';
-import { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;

@@ -11,8 +11,8 @@ import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import semver from 'semver';
 import { TransportResult } from '@elastic/elasticsearch';
+import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { tiAbusechMalware } from './pipelines/ti_abusech_malware';

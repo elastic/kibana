@@ -26,7 +26,7 @@ export type StartServices = [
     | 'uiSettings'
   >,
   ReportingPublicPluginStartDependencies,
-  unknown
+  unknown,
 ];
 
 /*

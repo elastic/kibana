@@ -8,9 +8,9 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { STATUS } from '../../../../../../common/constants';
-import { getHealthMessage } from './monitor_status_column';
-import { UptimeThemeContext } from '../../../../contexts';
 import { PingError } from '../../../../../../common/runtime_types';
+import { UptimeThemeContext } from '../../../../contexts';
+import { getHealthMessage } from './monitor_status_column';
 
 export const StatusBadge = ({
   status,

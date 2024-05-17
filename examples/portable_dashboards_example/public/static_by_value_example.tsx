@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import panelsJson from './static_by_value_example_panels.json';
 

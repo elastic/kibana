@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { screen, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { DisplayMoreOptions } from './display_more_options';
 
 describe('DisplayMoreOptions', () => {

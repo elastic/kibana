@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useCallback, useMemo } from 'react';
 
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../user_info';

@@ -1,3 +1,4 @@
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { Tabs, MobileErrorTabIds } from './tabs/tabs';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { push } from '../../../shared/links/url_helpers';
+import { MobileErrorTabIds, Tabs } from './tabs/tabs';
 
 export function MobileErrorCrashesOverview() {
   const {

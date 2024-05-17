@@ -8,17 +8,17 @@
 
 import { SearchQuery } from '@kbn/content-management-plugin/common';
 import type {
-  VisualizationGetIn,
-  VisualizationGetOut,
   VisualizationCreateIn,
   VisualizationCreateOut,
-  VisualizationUpdateIn,
-  VisualizationUpdateOut,
   VisualizationDeleteIn,
   VisualizationDeleteOut,
+  VisualizationGetIn,
+  VisualizationGetOut,
   VisualizationSearchIn,
   VisualizationSearchOut,
   VisualizationSearchQuery,
+  VisualizationUpdateIn,
+  VisualizationUpdateOut,
 } from '../../common/content_management';
 import { getContentManagement } from '../services';
 

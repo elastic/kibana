@@ -6,14 +6,14 @@
  */
 
 import type {
-  SavedObjectsClientContract,
   SavedObject,
-  SavedObjectsUpdateResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
+  SavedObjectsBaseOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
-  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { signalsMigrationType } from './saved_objects';
 import type { SignalsMigrationSOAttributes } from './saved_objects_schema';

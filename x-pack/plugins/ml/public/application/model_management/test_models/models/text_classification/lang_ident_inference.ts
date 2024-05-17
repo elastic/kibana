@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { InferenceBase, INPUT_TYPE } from '../inference_base';
-import type { InferenceType } from '../inference_base';
-import { processInferenceResult, processResponse } from './common';
-import { getGeneralInputComponent } from '../text_input';
-import { getLangIdentOutputComponent } from './lang_ident_output';
-import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
+import { i18n } from '@kbn/i18n';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import { INPUT_TYPE, InferenceBase } from '../inference_base';
+import type { InferenceType } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { processInferenceResult, processResponse } from './common';
+import type { RawTextClassificationResponse, TextClassificationResponse } from './common';
+import { getLangIdentOutputComponent } from './lang_ident_output';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType: InferenceType = 'classification';

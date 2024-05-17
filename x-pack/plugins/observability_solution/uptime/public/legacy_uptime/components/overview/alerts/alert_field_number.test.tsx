@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { AlertFieldNumber, handleAlertFieldNumberChange } from './alert_field_number';
 
 describe('AlertFieldNumber', () => {

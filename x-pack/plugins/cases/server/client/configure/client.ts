@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 
-import type { SavedObject } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
-import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type {
-  Configuration,
-  ConfigurationAttributes,
-  Configurations,
-  ConnectorMappings,
-} from '../../../common/types/domain';
+import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
+import {
+  MAX_CONCURRENT_SEARCHES,
+  MAX_SUPPORTED_CONNECTORS_RETURNED,
+} from '../../../common/constants';
 import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
@@ -28,26 +26,28 @@ import type {
 import {
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
-  GetConfigurationFindRequestRt,
   FindActionConnectorResponseRt,
+  GetConfigurationFindRequestRt,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import {
-  MAX_CONCURRENT_SEARCHES,
-  MAX_SUPPORTED_CONNECTORS_RETURNED,
-} from '../../../common/constants';
+import type {
+  Configuration,
+  ConfigurationAttributes,
+  Configurations,
+  ConnectorMappings,
+} from '../../../common/types/domain';
 import { createCaseError } from '../../common/error';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
+import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
-import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
-import { createMappings } from './create_mappings';
-import { updateMappings } from './update_mappings';
-import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { createMappings } from './create_mappings';
+import type { CreateMappingsArgs, MappingsArgs, UpdateMappingsArgs } from './types';
+import { updateMappings } from './update_mappings';
 import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
@@ -208,10 +208,13 @@ export async function getConnectors({
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
   try {
-    const actionTypes = (await actionsClient.listTypes()).reduce((types, type) => {
-      types[type.id] = type;
-      return types;
-    }, {} as Record<string, ActionType>);
+    const actionTypes = (await actionsClient.listTypes()).reduce(
+      (types, type) => {
+        types[type.id] = type;
+        return types;
+      },
+      {} as Record<string, ActionType>
+    );
 
     const res = (await actionsClient.getAll())
       .filter((action) => isConnectorSupported(action, actionTypes))

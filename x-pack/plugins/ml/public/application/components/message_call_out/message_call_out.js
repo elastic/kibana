@@ -10,8 +10,8 @@
  * setting the icon and color according to a supplied MESSAGE_LEVEL.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
 

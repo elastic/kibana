@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '@kbn/core-lifecycle-server';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
 export const UI_SETTINGS_CUSTOM_LOGO = 'xpackCustomBranding:logo';
 export const UI_SETTINGS_CUSTOMIZED_LOGO = 'xpackCustomBranding:customizedLogo';

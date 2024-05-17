@@ -9,8 +9,8 @@
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type {
-  FieldInputServices,
   FieldInputKibanaDependencies,
+  FieldInputServices,
 } from '@kbn/management-settings-components-field-input';
 
 /**

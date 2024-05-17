@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import {
-  MOVING_AVERAGE_NAME,
   MOVING_AVERAGE_ID,
+  MOVING_AVERAGE_NAME,
   MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
 } from '@kbn/lens-formula-docs';
+import React, { useState } from 'react';
+import type { OperationDefinition, ParamEditorProps } from '..';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { FormBasedLayer } from '../../../types';
+import { updateColumnParam } from '../../layer_helpers';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { getFilter, getFormatFromPreviousColumn, isValidNumber } from '../helpers';
 import {
   buildLabelFunction,
-  checkForDateHistogram,
-  getErrorsForDateReference,
-  dateBasedOperationToExpression,
-  hasDateField,
   checkForDataLayerType,
+  checkForDateHistogram,
+  dateBasedOperationToExpression,
+  getErrorsForDateReference,
+  hasDateField,
 } from './utils';
-import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
-import type { OperationDefinition, ParamEditorProps } from '..';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {

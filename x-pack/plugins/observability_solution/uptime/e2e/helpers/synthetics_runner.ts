@@ -9,8 +9,8 @@
 
 import Url from 'url';
 import { run as syntheticsRun } from '@elastic/synthetics';
-import { PromiseType } from 'utility-types';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
+import { PromiseType } from 'utility-types';
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { esArchiverUnload } from '../tasks/es_archiver';

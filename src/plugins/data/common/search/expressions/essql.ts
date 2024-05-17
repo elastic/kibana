@@ -8,26 +8,26 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEsQuery } from '@kbn/es-query';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
+import type { ISearchGeneric } from '@kbn/search-types';
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { NowProviderPublicContract } from '../../../public';
-import { getEsQueryConfig } from '../../es_query';
-import { getTime } from '../../query';
-import { UiSettingsCommon } from '../..';
 import {
   KibanaContext,
+  SQL_SEARCH_STRATEGY,
   SqlRequestParams,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
-  SQL_SEARCH_STRATEGY,
 } from '..';
+import { UiSettingsCommon } from '../..';
+import type { NowProviderPublicContract } from '../../../public';
+import { getEsQueryConfig } from '../../es_query';
+import { getTime } from '../../query';
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;

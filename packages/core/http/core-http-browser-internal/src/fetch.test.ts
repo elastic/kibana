@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { first } from 'rxjs';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import type { HttpFetchOptionsWithPath, HttpResponse } from '@kbn/core-http-browser';
+// @ts-expect-error
+import fetchMock from 'fetch-mock/es5/client';
+import { first } from 'rxjs';
 
-import { Fetch } from './fetch';
-import { BasePath } from './base_path';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { BasePath } from './base_path';
+import { Fetch } from './fetch';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));

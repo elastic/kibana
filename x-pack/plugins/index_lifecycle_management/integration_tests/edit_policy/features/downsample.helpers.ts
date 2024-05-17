@@ -6,6 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
+import { AppServicesContext } from '../../../public/types';
 import {
   createDownsampleActions,
   createReadonlyActions,
@@ -14,7 +15,6 @@ import {
   createTogglePhaseAction,
 } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
-import { AppServicesContext } from '../../../public/types';
 
 type SetupReturn = ReturnType<typeof setupDownsampleTestBed>;
 

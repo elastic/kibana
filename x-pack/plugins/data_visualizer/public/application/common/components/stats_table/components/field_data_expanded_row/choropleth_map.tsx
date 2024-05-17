@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import {
+  COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
-  COLOR_MAP_TYPE,
 } from '@kbn/maps-plugin/common';
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { useDataVisualizerKibana } from '../../../../../kibana_context';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import type { FieldVisStats } from '../../../../../../../common/types';
+import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { ExpandedRowPanel } from './expanded_row_panel';
 
 export const getChoroplethTopValuesLayer = (

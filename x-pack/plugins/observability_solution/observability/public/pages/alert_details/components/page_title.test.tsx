@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
-  AlertStatus,
   ALERT_RULE_CATEGORY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
+  AlertStatus,
 } from '@kbn/rule-data-utils';
-import { PageTitle, PageTitleProps } from './page_title';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { alert } from '../mock/alert';
+import { PageTitle, PageTitleProps } from './page_title';
 
 describe('Page Title', () => {
   const defaultProps = {

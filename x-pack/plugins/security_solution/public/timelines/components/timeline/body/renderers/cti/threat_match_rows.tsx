@@ -24,16 +24,16 @@ import styled from 'styled-components';
 
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
-import type { RowRenderer } from '../../../../../../../common/types';
 import type { Fields } from '../../../../../../../common/search_strategy';
+import type { RowRenderer } from '../../../../../../../common/types';
 import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
 import { RowRendererContainer } from '../row_renderer';
-import { ThreatMatchRow } from './threat_match_row';
 import {
   ALL_INDICATOR_MATCHES_MODAL_CLOSE,
   ALL_INDICATOR_MATCHES_MODAL_HEADER,
   SHOW_ALL_INDICATOR_MATCHES,
 } from '../translations';
+import { ThreatMatchRow } from './threat_match_row';
 
 const SpacedContainer = styled.div`
   margin: ${({ theme }) => theme.eui.euiSizeS} 0;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { SavedObjectIndexStore } from '..';
 import { DOC_TYPE } from '../../../common/constants';
 import type { StartServices } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
-import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
+import { findObjectByTitle } from './find_object_by_title';
 import type { ConfirmModalSavedObjectMeta } from './types';
-import { SavedObjectIndexStore } from '..';
 
 /**
  * check for an existing saved object with the same title in ES

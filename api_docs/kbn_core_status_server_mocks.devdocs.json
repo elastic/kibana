@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<StatusServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<StatusServiceContract>"],
             "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,11 +79,7 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalStatusServiceSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalStatusServiceSetup", ">"],
             "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getSearch } from './helpers';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { SecurityPageName } from '../../../app/types';
 import type { AppLinkItems } from '../../links';
 import { updateAppLinks } from '../../links';
 import { mockGlobalState } from '../../mock';
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { getSearch } from './helpers';
 
 const defaultAppLinks: AppLinkItems = [
   {

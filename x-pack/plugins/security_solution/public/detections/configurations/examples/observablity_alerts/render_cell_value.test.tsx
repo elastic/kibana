@@ -11,13 +11,13 @@ import React from 'react';
 
 import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
 
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
+import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import type { ColumnHeaderOptions } from '../../../../../common/types';
 
 import { RenderCellValue } from '.';
 

@@ -98,9 +98,7 @@
             "description": [
               "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
             ],
-            "signature": [
-              "[key: string]:  string | number | boolean | string[] | undefined"
-            ],
+            "signature": ["[key: string]:  string | number | boolean | string[] | undefined"],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -127,9 +125,7 @@
             "type": "string",
             "tags": [],
             "label": "apiToken",
-            "description": [
-              "ApiToken necessary for writing build data to ci-stats service"
-            ],
+            "description": ["ApiToken necessary for writing build data to ci-stats service"],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
             "deprecated": false,
             "trackAdoption": false

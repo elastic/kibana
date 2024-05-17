@@ -7,8 +7,8 @@
 
 import React, { type FC } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 

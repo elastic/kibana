@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import { DRAW_MODE } from '../../../../common/constants';
 import { TooltipState } from '../../../../common/descriptor_types';
-import { TooltipControl } from './tooltip_control';
 import {
   closeOnClickTooltip,
-  openOnClickTooltip,
   closeOnHoverTooltip,
+  openOnClickTooltip,
   openOnHoverTooltip,
   updateOpenTooltips,
 } from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
 import {
+  getExecutionContext,
+  getGeoFieldNames,
+  getHasLockedTooltips,
   getLayerList,
   getOpenTooltips,
-  getHasLockedTooltips,
-  getGeoFieldNames,
-  getExecutionContext,
 } from '../../../selectors/map_selectors';
 import { getDrawMode } from '../../../selectors/ui_selectors';
-import { DRAW_MODE } from '../../../../common/constants';
-import { MapStoreState } from '../../../reducers/store';
+import { TooltipControl } from './tooltip_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

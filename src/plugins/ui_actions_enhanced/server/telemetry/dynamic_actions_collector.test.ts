@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { dynamicActionsCollector } from './dynamic_actions_collector';
 import { DynamicActionsState } from '../../common';
+import { dynamicActionsCollector } from './dynamic_actions_collector';
 
 const state: DynamicActionsState = {
   events: [

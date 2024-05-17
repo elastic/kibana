@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
-import { EuiInMemoryTable, EuiButton, EuiSpacer, EuiSearchBar } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getIdentifier } from '../setup_mode/formatting';
-import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
+import React, { Fragment, FunctionComponent } from 'react';
 import { SetupModeFeature } from '../../../common/enums';
+import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
+import { getIdentifier } from '../setup_mode/formatting';
 
 export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
   rows: items,

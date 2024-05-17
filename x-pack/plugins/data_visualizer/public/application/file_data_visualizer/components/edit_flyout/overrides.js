@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import {
-  EuiComboBox,
   EuiCheckbox,
+  EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
   EuiForm,
@@ -19,33 +19,33 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
 
-import {
-  getFormatOptions,
-  getTimestampFormatOptions,
-  getDelimiterOptions,
-  getQuoteOptions,
-  // getCharsetOptions,
-} from './options';
-import { isTimestampFormatValid } from './overrides_validation';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { replaceFieldInGrokPattern } from '../../../common/util/grok_pattern';
 import {
+  getDelimiterOptions,
+  getFormatOptions,
+  getQuoteOptions,
+  getTimestampFormatOptions,
+  // getCharsetOptions,
+} from './options';
+import {
+  LINES_TO_SAMPLE_VALUE_MAX,
+  LINES_TO_SAMPLE_VALUE_MIN,
   convertDelimiter,
   convertDelimiterBack,
   getColumnNames,
   getGrokFieldNames,
   isLinesToSampleValid,
-  LINES_TO_SAMPLE_VALUE_MIN,
-  LINES_TO_SAMPLE_VALUE_MAX,
 } from './overrides_utils';
+import { isTimestampFormatValid } from './overrides_validation';
 
-import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
+import { CUSTOM_DROPDOWN_OPTION, TIMESTAMP_OPTIONS } from './options/option_lists';
 
 const formatOptions = getFormatOptions();
 const timestampFormatOptions = getTimestampFormatOptions();

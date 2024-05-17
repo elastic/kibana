@@ -9,15 +9,15 @@ import { connect } from 'react-redux';
 import { canUserWrite } from '../../state/selectors/app';
 
 import {
+  getSelectedElement,
+  getSelectedPageIndex,
   getWorkpad,
   getWorkpadName,
-  getSelectedPageIndex,
-  getSelectedElement,
   isWriteable,
 } from '../../state/selectors/workpad';
 
-import { Toolbar as ToolbarComponent } from './toolbar.component';
 import { State } from '../../../types';
+import { Toolbar as ToolbarComponent } from './toolbar.component';
 
 export const Toolbar = connect((state: State) => ({
   workpadName: getWorkpadName(state),

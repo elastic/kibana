@@ -9,15 +9,15 @@
 import fs from 'fs';
 import path from 'path';
 
-import chalk from 'chalk';
-import execa from 'execa';
-import del from 'del';
 import { extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
+import del from 'del';
+import execa from 'execa';
 
-import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
-import { parseSettings, SettingsFilter } from '../settings';
+import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
+import { SettingsFilter, parseSettings } from '../settings';
 import { log as defaultLog } from '../utils/log';
 import { InstallArchiveOptions } from './types';
 

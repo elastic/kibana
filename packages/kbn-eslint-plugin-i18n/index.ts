@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { StringsShouldBeTranslatedWithI18n } from './rules/strings_should_be_translated_with_i18n';
-import { StringsShouldBeTranslatedWithFormattedMessage } from './rules/strings_should_be_translated_with_formatted_message';
-import { I18nTranslateShouldStartWithTheRightId } from './rules/i18n_translate_should_start_with_the_right_id';
 import { FormattedMessageShouldStartWithTheRightId } from './rules/formatted_message_should_start_with_the_right_id';
+import { I18nTranslateShouldStartWithTheRightId } from './rules/i18n_translate_should_start_with_the_right_id';
+import { StringsShouldBeTranslatedWithFormattedMessage } from './rules/strings_should_be_translated_with_formatted_message';
+import { StringsShouldBeTranslatedWithI18n } from './rules/strings_should_be_translated_with_i18n';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-i18n'` to your eslint config to use them

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import moment, { type MomentInput } from 'moment';
-import type { Logger, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
-  createTestServers,
   createRootWithCorePlugins,
+  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
+import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
+import moment, { type MomentInput } from 'moment';
 
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
 import {
+  EventLoopDelaysDaily,
   SAVED_OBJECTS_DAILY_TYPE,
   serializeSavedObjectId,
-  EventLoopDelaysDaily,
 } from '../../saved_objects';
 import { rollDailyData } from '../daily';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect } from 'react';
 
 import { DASHBOARD_LOCATORS_IDS } from '../../../../../../../common/constants';
 

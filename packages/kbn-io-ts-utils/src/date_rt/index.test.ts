@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { dateRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
+import { dateRt } from '.';
 
 describe('dateRt', () => {
   it('passes if it is a valid date/time', () => {

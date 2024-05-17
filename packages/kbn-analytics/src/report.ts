@@ -7,14 +7,14 @@
  */
 
 import moment from 'moment-timezone';
-import { wrapArray } from './util';
 import { ApplicationUsageTracker } from './application_usage_tracker';
-import { Metric, METRIC_TYPE } from './metrics';
+import { METRIC_TYPE, Metric } from './metrics';
+import { wrapArray } from './util';
 const REPORT_VERSION = 3;
 
+import type { ApplicationUsageMetric } from './metrics/application_usage';
 import type { UiCounterMetric, UiCounterMetricType } from './metrics/ui_counter';
 import type { UserAgentMetric } from './metrics/user_agent';
-import type { ApplicationUsageMetric } from './metrics/application_usage';
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;

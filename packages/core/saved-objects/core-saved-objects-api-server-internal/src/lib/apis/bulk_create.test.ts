@@ -9,51 +9,51 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
-  pointInTimeFinderMock,
   mockGetBulkOperationError,
   mockGetCurrentTime,
-  mockPreflightCheckForCreate,
   mockGetSearchDsl,
+  mockPreflightCheckForCreate,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type SavedObjectsRawDoc,
-  type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
+  type SavedObjectUnsanitizedDoc,
+  type SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
   CUSTOM_INDEX_TYPE,
-  NAMESPACE_AGNOSTIC_TYPE,
-  MULTI_NAMESPACE_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   HIDDEN_TYPE,
-  mockVersionProps,
-  mockTimestampFields,
-  mockTimestamp,
-  mappings,
-  mockVersion,
-  createRegistry,
-  createDocumentMigrator,
-  createSpySerializer,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  MULTI_NAMESPACE_TYPE,
+  NAMESPACE_AGNOSTIC_TYPE,
   bulkCreateSuccess,
-  getMockBulkCreateResponse,
-  expectErrorResult,
-  expectErrorInvalidType,
-  expectErrorConflict,
-  expectError,
   createBadRequestErrorPayload,
+  createDocumentMigrator,
+  createRegistry,
+  createSpySerializer,
   expectCreateResult,
+  expectError,
+  expectErrorConflict,
+  expectErrorInvalidType,
+  expectErrorResult,
+  getMockBulkCreateResponse,
+  mappings,
+  mockTimestamp,
+  mockTimestampFields,
   mockTimestampFieldsWithCreated,
+  mockVersion,
+  mockVersionProps,
 } from '../../test_helpers/repository.test.common';
 
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

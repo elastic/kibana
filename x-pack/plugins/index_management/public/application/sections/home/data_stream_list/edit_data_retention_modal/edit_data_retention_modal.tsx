@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiButtonEmpty,
-  EuiButton,
   EuiSpacer,
-  EuiLink,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
-import { has } from 'lodash';
 import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { has } from 'lodash';
+import React from 'react';
 import {
+  FIELD_TYPES,
+  Form,
+  FormSchema,
+  NumericField,
+  ToggleField,
+  UseField,
+  fieldFormatters,
   useForm,
   useFormData,
   useFormIsModified,
-  Form,
-  fieldFormatters,
-  FormSchema,
-  FIELD_TYPES,
-  UseField,
-  ToggleField,
-  NumericField,
 } from '../../../../../shared_imports';
 
+import { DataStream, splitSizeAndUnits } from '../../../../../../common';
 import { reactRouterNavigate } from '../../../../../shared_imports';
-import { getIndexListUri } from '../../../../services/routing';
-import { documentationService } from '../../../../services/documentation';
-import { splitSizeAndUnits, DataStream } from '../../../../../../common';
-import { timeUnits } from '../../../../constants/time_units';
-import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from '../../../../components/shared';
+import { timeUnits } from '../../../../constants/time_units';
+import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { updateDataRetention } from '../../../../services/api';
+import { documentationService } from '../../../../services/documentation';
+import { getIndexListUri } from '../../../../services/routing';
 
 interface Props {
   dataStream: DataStream;

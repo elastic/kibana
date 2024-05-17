@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
-import { isActiveTimeline } from '../../../../helpers';
-import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { isActiveTimeline } from '../../../../helpers';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
+import type { BrowserFields } from '../../../containers/source';
+import { getEnrichedFieldInfo } from '../helpers';
+import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
+import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
 import type { InsightAccordionState } from './insight_accordion';
 import { InsightAccordion } from './insight_accordion';
-import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
 import { SimpleAlertTable } from './simple_alert_table';
-import { getEnrichedFieldInfo } from '../helpers';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { SESSION_LOADING, SESSION_EMPTY, SESSION_ERROR, SESSION_COUNT } from './translations';
+import { SESSION_COUNT, SESSION_EMPTY, SESSION_ERROR, SESSION_LOADING } from './translations';
 
 interface Props {
   browserFields: BrowserFields;

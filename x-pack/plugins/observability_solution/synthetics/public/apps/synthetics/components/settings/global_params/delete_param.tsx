@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 
 import { useDispatch } from 'react-redux';
-import { getGlobalParamAction, deleteGlobalParams } from '../../../state/global_params';
-import { syncGlobalParamsAction } from '../../../state/settings';
 import { kibanaService } from '../../../../../utils/kibana_service';
+import { deleteGlobalParams, getGlobalParamAction } from '../../../state/global_params';
+import { syncGlobalParamsAction } from '../../../state/settings';
 import { NO_LABEL, YES_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
 import { ListParamItem } from './params_list';
 

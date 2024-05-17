@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { isSubscriptionAllowed } from './subscription';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 const ON_PREM_ALLOWED_LICENSES: readonly LicenseType[] = ['enterprise', 'trial'];
 const ON_PREM_NOT_ALLOWED_LICENSES: readonly LicenseType[] = ['basic', 'gold', 'platinum'];

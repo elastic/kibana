@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { ApplicationStart } from '@kbn/core/public';
-import { createHashHistory } from 'history';
 import { FilterStateStore } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createHashHistory } from 'history';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
+import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 
 jest.mock('../../services', () => {
   return {

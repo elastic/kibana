@@ -8,7 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { NotFound } from './components/not_found';
 import { Playground } from './components/playground/playground';

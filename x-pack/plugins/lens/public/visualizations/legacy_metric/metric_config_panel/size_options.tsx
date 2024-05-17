@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {

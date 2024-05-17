@@ -14,22 +14,21 @@ import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { useAppSearchNav } from './nav';
 
-export const AppSearchPageTemplate: React.FC<
-  Omit<PageTemplateProps, 'useEndpointHeaderActions'>
-> = ({ children, pageChrome, pageViewTelemetry, ...pageTemplateProps }) => {
-  return (
-    <EnterpriseSearchPageTemplateWrapper
-      {...pageTemplateProps}
-      solutionNav={{
-        name: APP_SEARCH_PLUGIN.NAME,
-        items: useAppSearchNav(),
-      }}
-      setPageChrome={pageChrome && <SetAppSearchChrome trail={pageChrome} />}
-      useEndpointHeaderActions={false}
-      hideEmbeddedConsole
-    >
-      {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}
-      {children}
-    </EnterpriseSearchPageTemplateWrapper>
-  );
-};
+export const AppSearchPageTemplate: React.FC<Omit<PageTemplateProps, 'useEndpointHeaderActions'>> =
+  ({ children, pageChrome, pageViewTelemetry, ...pageTemplateProps }) => {
+    return (
+      <EnterpriseSearchPageTemplateWrapper
+        {...pageTemplateProps}
+        solutionNav={{
+          name: APP_SEARCH_PLUGIN.NAME,
+          items: useAppSearchNav(),
+        }}
+        setPageChrome={pageChrome && <SetAppSearchChrome trail={pageChrome} />}
+        useEndpointHeaderActions={false}
+        hideEmbeddedConsole
+      >
+        {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}
+        {children}
+      </EnterpriseSearchPageTemplateWrapper>
+    );
+  };

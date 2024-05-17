@@ -11,8 +11,8 @@ import React, { CSSProperties } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UseBooleanHandlers } from '@kbn/react-hooks';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 type NodeProps<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T> & {
   'data-test-subj'?: string;

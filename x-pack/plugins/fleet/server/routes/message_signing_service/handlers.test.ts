@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
-import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { AwaitedProperties } from '@kbn/utility-types';
 
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';

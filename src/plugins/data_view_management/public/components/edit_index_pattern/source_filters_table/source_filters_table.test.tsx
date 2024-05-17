@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { SourceFiltersTable } from './source_filters_table';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { SourceFiltersTable } from './source_filters_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -41,7 +41,7 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as DataView);
+  }) as DataView;
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {

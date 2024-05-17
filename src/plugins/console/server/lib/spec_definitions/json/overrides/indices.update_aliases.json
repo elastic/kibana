@@ -2,9 +2,7 @@
   "indices.update_aliases": {
     "data_autocomplete_rules": {
       "actions": {
-        "__template": [
-          { "add": { "index": "test1", "alias": "alias1" } }
-        ],
+        "__template": [{ "add": { "index": "test1", "alias": "alias1" } }],
         "__any_of": [
           {
             "add": {
@@ -25,4 +23,3 @@
     }
   }
 }
-

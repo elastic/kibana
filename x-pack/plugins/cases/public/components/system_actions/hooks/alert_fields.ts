@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { HttpSetup } from '@kbn/core/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 export async function fetchAlertFields({

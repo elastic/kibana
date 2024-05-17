@@ -7,20 +7,20 @@
 
 import React from 'react';
 
-import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { render, screen } from '@testing-library/react';
+import { AttackDiscoveryTour } from '.';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
+import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import {
+  TestProviders,
   createMockStore,
   createSecuritySolutionStorageMock,
-  TestProviders,
 } from '../../common/mock';
-import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { useKibana } from '../../common/lib/kibana';
-import { AttackDiscoveryTour } from '.';
-import { ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS } from './step_config';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
 import type { RouteSpyState } from '../../common/utils/route/types';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
+import { ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS } from './step_config';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,

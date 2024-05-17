@@ -10,8 +10,6 @@ import type from 'type-detect';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -25,6 +23,8 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
+import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes possible OpenID Connect login flows.

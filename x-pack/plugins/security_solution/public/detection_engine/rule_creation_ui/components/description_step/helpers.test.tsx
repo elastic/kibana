@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 
-import * as i18n from './translations';
 import {
-  isNotEmptyArray,
+  buildHighlightedFieldsOverrideDescription,
+  buildNoteDescription,
   buildQueryBarDescription,
+  buildRuleTypeDescription,
+  buildSeverityDescription,
+  buildStringArrayDescription,
   buildThreatDescription,
   buildUnorderedListArrayDescription,
-  buildStringArrayDescription,
-  buildSeverityDescription,
   buildUrlsDescription,
-  buildNoteDescription,
-  buildRuleTypeDescription,
-  buildHighlightedFieldsOverrideDescription,
   getQueryLabel,
+  isNotEmptyArray,
 } from './helpers';
+import * as i18n from './translations';
 import type { ListItems } from './types';
 
 const setupMock = coreMock.createSetup();

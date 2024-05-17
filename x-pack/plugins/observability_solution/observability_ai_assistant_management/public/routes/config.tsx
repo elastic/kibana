@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import * as t from 'io-ts';
 import { createRouter } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
 import { SettingsPage } from './components/settings_page';
 
 const Tabs = t.union([

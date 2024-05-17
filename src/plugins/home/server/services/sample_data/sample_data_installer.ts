@@ -9,17 +9,17 @@
 import { Readable } from 'stream';
 import { isBoom } from '@hapi/boom';
 import type {
-  IScopedClusterClient,
   ISavedObjectsImporter,
+  IScopedClusterClient,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { SampleDatasetSchema, DataIndexSchema } from './lib/sample_dataset_registry_types';
-import { dateToIso8601IgnoringTime } from './lib/translate_timestamp';
-import { createIndexName } from './lib/create_index_name';
-import { insertDataIntoIndex } from './lib/insert_data_into_index';
 import { SampleDataInstallError } from './errors';
+import { createIndexName } from './lib/create_index_name';
 import { findSampleObjects } from './lib/find_sample_objects';
+import { insertDataIntoIndex } from './lib/insert_data_into_index';
+import type { DataIndexSchema, SampleDatasetSchema } from './lib/sample_dataset_registry_types';
+import { dateToIso8601IgnoringTime } from './lib/translate_timestamp';
 
 export interface SampleDataInstallerOptions {
   esClient: IScopedClusterClient;

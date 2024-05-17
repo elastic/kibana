@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { noop } from 'lodash';
 
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
@@ -17,15 +18,14 @@ import {
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
 import { aggTermsFnName } from './terms_fn';
-import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../..';
 
-import {
-  createOtherBucketPostFlightRequest,
-  constructSingleTermOtherFilter,
-} from './_terms_other_bucket_helper';
 import { termsOrderAggParamDefinition } from './_terms_order_helper';
+import {
+  constructSingleTermOtherFilter,
+  createOtherBucketPostFlightRequest,
+} from './_terms_other_bucket_helper';
 
 export { termsAggFilter } from './_terms_order_helper';
 

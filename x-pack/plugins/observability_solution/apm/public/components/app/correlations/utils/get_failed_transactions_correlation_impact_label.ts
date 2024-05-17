@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 import {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsImpactThreshold,
 } from '../../../../../common/correlations/failed_transactions_correlations/types';
-import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: FailedTransactionsCorrelation['pValue'],

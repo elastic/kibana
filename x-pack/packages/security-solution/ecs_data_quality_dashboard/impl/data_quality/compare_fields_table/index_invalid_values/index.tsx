@@ -9,9 +9,9 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EMPTY_PLACEHOLDER } from '../helpers';
 import { CodeDanger } from '../../styles';
 import type { UnallowedValueCount } from '../../types';
+import { EMPTY_PLACEHOLDER } from '../helpers';
 
 const IndexInvalidValueFlexItem = styled(EuiFlexItem)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};

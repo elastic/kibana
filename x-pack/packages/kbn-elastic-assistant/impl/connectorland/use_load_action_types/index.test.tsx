@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useLoadActionTypes, Props } from '.';
+import { Props, useLoadActionTypes } from '.';
 import { mockActionTypes } from '../../mock/connectors';
 
 jest.mock('@tanstack/react-query', () => ({

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { MetricsAPISeriesRT, MetricsAPIRow } from '../metrics_api';
+import { MetricsAPIRow, MetricsAPISeriesRT } from '../metrics_api';
 
 const AggValueRT = rt.type({
   value: rt.number,

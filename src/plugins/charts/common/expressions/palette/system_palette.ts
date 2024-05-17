@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SystemPaletteExpressionFunctionDefinition } from './types';
 import { paletteIds } from '../../constants';
+import type { SystemPaletteExpressionFunctionDefinition } from './types';
 
 export function systemPalette(): SystemPaletteExpressionFunctionDefinition {
   return {

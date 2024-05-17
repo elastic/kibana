@@ -10,7 +10,7 @@ import { Redirect, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -21,19 +21,19 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchHeaderActions } from './components/layout';
 import {
+  API_KEYS_PATH,
   GROUPS_PATH,
-  SETUP_GUIDE_PATH,
+  OAUTH_AUTHORIZE_PATH,
+  ORG_SETTINGS_PATH,
+  PERSONAL_PATH,
+  PERSONAL_SETTINGS_PATH,
+  PRIVATE_SOURCES_PATH,
   SEARCH_AUTHORIZE_PATH,
+  SECURITY_PATH,
+  SETUP_GUIDE_PATH,
   SOURCES_PATH,
   SOURCE_ADDED_PATH,
-  OAUTH_AUTHORIZE_PATH,
-  PRIVATE_SOURCES_PATH,
-  ORG_SETTINGS_PATH,
   USERS_AND_ROLES_PATH,
-  API_KEYS_PATH,
-  SECURITY_PATH,
-  PERSONAL_SETTINGS_PATH,
-  PERSONAL_PATH,
 } from './routes';
 import { AccountSettings } from './views/account_settings';
 import { ApiKeys } from './views/api_keys';

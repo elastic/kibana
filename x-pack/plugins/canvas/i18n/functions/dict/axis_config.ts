@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { axisConfig } from '../../../canvas_plugin_src/functions/common/axisConfig';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
 import { ISO8601 } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   help: i18n.translate('xpack.canvas.functions.axisConfigHelpText', {

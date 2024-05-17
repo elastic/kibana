@@ -7,8 +7,8 @@
  */
 
 import type {
-  DeprecationsServiceSetup,
   DeprecationRegistryProvider,
+  DeprecationsServiceSetup,
 } from '@kbn/core-deprecations-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 

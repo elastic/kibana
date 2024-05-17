@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { MouseEvent } from 'react';
 import React from 'react';
-import {
-  EuiContextMenuItem,
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiText,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
+import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 
 interface ActionIconItemProps {
   ariaLabel?: string;

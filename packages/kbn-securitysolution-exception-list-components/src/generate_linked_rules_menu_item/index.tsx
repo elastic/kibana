@@ -1,3 +1,4 @@
+import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +7,8 @@
  * Side Public License, v 1.
  */
 import React, { ElementType, ReactElement } from 'react';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
 import { Rule } from '../types';
-import { itemContentCss, containerCss } from './menu_link.styles';
+import { containerCss, itemContentCss } from './menu_link.styles';
 
 interface MenuItemLinkedRulesProps {
   leftIcon?: IconType;

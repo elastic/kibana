@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { wrapEsError } from '../../lib';
 import { License } from '../../services';
 import { handleEsError } from '../../shared_imports';
-import { wrapEsError } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
 const license = new License();

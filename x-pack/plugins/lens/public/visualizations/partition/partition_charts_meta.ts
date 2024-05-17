@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { EuiIconProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   IconChartDonut,
+  IconChartMosaic,
   IconChartPie,
   IconChartTreemap,
-  IconChartMosaic,
   IconChartWaffle,
 } from '@kbn/chart-icons';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { SharedPieLayerState, EmptySizeRatios } from '../../../common/types';
 import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
+import { EmptySizeRatios, SharedPieLayerState } from '../../../common/types';
 import type { PieChartType } from '../../../common/types';
 
 interface PartitionChartMeta {

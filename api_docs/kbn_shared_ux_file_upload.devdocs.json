@@ -145,10 +145,7 @@
         "tags": [],
         "label": "FileUploadProps",
         "description": [],
-        "signature": [
-          "Props",
-          "<string> & { lazyLoadFallback?: React.ReactNode; }"
-        ],
+        "signature": ["Props", "<string> & { lazyLoadFallback?: React.ReactNode; }"],
         "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { getField } from '../../shared/utils';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { getField } from '../../shared/utils';
 
 export interface UseSessionPreviewParams {
   /**

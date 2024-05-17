@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getFieldValueLabel } from '../../../../../common/rules/apm_rule_types';
 import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
@@ -14,6 +13,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { getFieldValueLabel } from '../../../../../common/rules/apm_rule_types';
 
 const renameActionVariable = (field: string): string => {
   switch (field) {

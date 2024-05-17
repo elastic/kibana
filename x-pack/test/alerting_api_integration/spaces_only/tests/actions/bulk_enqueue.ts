@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ObjectRemover, getUrlPrefix } from '../../../common/lib';
+import { Spaces } from '../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

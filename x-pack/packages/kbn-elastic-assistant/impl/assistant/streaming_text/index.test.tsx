@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { StreamingText } from '.';
 
 describe('StreamingText', () => {

@@ -10,10 +10,10 @@ import { Datatable } from '@kbn/expressions-plugin/public';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   BucketColumns,
-  PartitionVisParams,
   LabelPositions,
-  ValueFormats,
   LegendDisplay,
+  PartitionVisParams,
+  ValueFormats,
 } from '../common/types';
 
 export const createMockBucketColumns = (): BucketColumns[] => {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
-import type { CoreStart } from '@kbn/core/public';
 
-import type { State } from '../../../common/store/types';
-import {
-  endTimelineSaving,
-  updateIsFavorite,
-  updateTimeline,
-  startTimelineSaving,
-  showCallOutUnauthorizedMsg,
-} from '../actions';
 import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
+import type { State } from '../../../common/store/types';
 import { persistFavorite } from '../../containers/api';
-import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
+import {
+  endTimelineSaving,
+  showCallOutUnauthorizedMsg,
+  startTimelineSaving,
+  updateIsFavorite,
+  updateTimeline,
+} from '../actions';
+import { selectTimelineById } from '../selectors';
 import { refreshTimelines } from './helpers';
 
 type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;

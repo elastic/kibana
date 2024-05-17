@@ -1,3 +1,4 @@
+import { useEuiBackgroundColor } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import { useEuiBackgroundColor } from '@elastic/eui';
 
 interface DonutChartEmptyProps {
   size?: number;
@@ -35,7 +35,10 @@ const SmallRing = styled.div<DonutChartEmptyProps>`
     vertical-align: middle;`}
 `;
 
-const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({ size = 90, donutWidth = 20 }) =>
+const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({
+  size = 90,
+  donutWidth = 20,
+}) =>
   size - donutWidth > 0 ? (
     <BigRing size={size} data-test-subj="empty-donut">
       <SmallRing size={size - donutWidth} data-test-subj="empty-donut-small" />

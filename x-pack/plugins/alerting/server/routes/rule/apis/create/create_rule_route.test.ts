@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { omit, pick } from 'lodash';
-import { createRuleRoute } from './create_rule_route';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/apis/create';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { RuleTypeDisabledError } from '../../../../lib';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { omit, pick } from 'lodash';
+import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/apis/create';
+import { RuleTypeDisabledError } from '../../../../lib';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { createRuleRoute } from './create_rule_route';
 
 const rulesClient = rulesClientMock.create();
 

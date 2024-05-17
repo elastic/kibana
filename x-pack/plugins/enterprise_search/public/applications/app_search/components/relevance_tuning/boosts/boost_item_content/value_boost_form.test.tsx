@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { MultiInputRows } from '../../../multi_input_rows';
 
-import { ValueBoost, BoostType } from '../../types';
+import { BoostType, ValueBoost } from '../../types';
 
 import { ValueBoostForm } from './value_boost_form';
 

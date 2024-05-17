@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { css } from '@emotion/css';
 
-import * as i18n from './translations';
 import { useSetUpSections } from './hooks/use_setup_sections';
+import * as i18n from './translations';
 
-import type { ActiveSections } from './types';
-import { useStepContext } from './context/step_context';
 import type { ProductLine } from './configs';
+import { useStepContext } from './context/step_context';
+import type { ActiveSections } from './types';
 
 const TogglePanelComponent: React.FC<{
   activeProducts: Set<ProductLine>;

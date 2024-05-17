@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiPanel, EuiSkeletonText } from '@elastic/eui';
+import React from 'react';
 import { uncategorizedLabel } from '../constants';
 
 export const DatasetSkeleton = () => (

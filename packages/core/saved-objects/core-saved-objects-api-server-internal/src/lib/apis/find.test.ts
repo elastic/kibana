@@ -7,32 +7,32 @@
  */
 
 import {
-  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 
-import { SavedObjectsRepository } from '../repository';
-import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import * as esKuery from '@kbn/es-query';
+import { loggerMock } from '@kbn/logging-mocks';
+import { kibanaMigratorMock } from '../../mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  NAMESPACE_AGNOSTIC_TYPE,
   HIDDEN_TYPE,
-  mockTimestampFields,
-  mockTimestamp,
-  mappings,
-  mockVersion,
-  createRegistry,
+  NAMESPACE_AGNOSTIC_TYPE,
   createDocumentMigrator,
+  createRegistry,
   createSpySerializer,
-  generateIndexPatternSearchResults,
   findSuccess,
+  generateIndexPatternSearchResults,
+  mappings,
+  mockTimestamp,
+  mockTimestampFields,
+  mockVersion,
 } from '../../test_helpers/repository.test.common';
 
 const { nodeTypes } = esKuery;

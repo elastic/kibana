@@ -14,24 +14,24 @@ import {
   OnlyFalseAllowed,
 } from '@kbn/securitysolution-io-ts-types';
 
-import { exceptionListType } from '../../common/exception_list';
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { Tags } from '../../common/tags';
-import { ListId } from '../../common/list_id';
-import { NamespaceType } from '../../common/default_namespace';
-import { name } from '../../common/name';
-import { description } from '../../common/description';
-import { namespace_type } from '../../common/namespace_type';
-import { tags } from '../../common/tags';
-import { meta } from '../../common/meta';
-import { list_id } from '../../common/list_id';
-import { id } from '../../common/id';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
+import { NamespaceType } from '../../common/default_namespace';
+import { description } from '../../common/description';
+import { exceptionListType } from '../../common/exception_list';
+import { id } from '../../common/id';
+import { ListId } from '../../common/list_id';
+import { list_id } from '../../common/list_id';
+import { meta } from '../../common/meta';
+import { name } from '../../common/name';
+import { namespace_type } from '../../common/namespace_type';
+import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
+import { Tags } from '../../common/tags';
+import { tags } from '../../common/tags';
+import { tie_breaker_id } from '../../common/tie_breaker_id';
+import { _version } from '../../common/underscore_version';
 import { updated_at } from '../../common/updated_at';
 import { updated_by } from '../../common/updated_by';
-import { _version } from '../../common/underscore_version';
-import { tie_breaker_id } from '../../common/tie_breaker_id';
 
 /**
  * Differences from this and the createExceptionsSchema are

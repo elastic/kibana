@@ -6,9 +6,9 @@
  */
 
 import { Readable } from 'stream';
-import { finished } from 'stream/promises';
-import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
 import { Logger } from '@kbn/core/server';
+import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
+import { finished } from 'stream/promises';
 
 type StreamParser = (
   responseStream: Readable,

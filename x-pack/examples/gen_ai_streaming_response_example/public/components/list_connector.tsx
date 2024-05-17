@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiLink, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
 import { LoadConnectorResult } from '../gen_ai_streaming_response_example';
 
 export interface ListConnectorsProps {

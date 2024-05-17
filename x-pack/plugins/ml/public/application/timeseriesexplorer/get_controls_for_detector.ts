@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { CombinedJob, JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { MlEntity } from '../../embeddables';
 import { mlJobService } from '../services/job_service';
 import type { Entity } from './components/entity_control/entity_control';
-import type { JobId, CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlEntity } from '../../embeddables';
 
 /**
  * Extracts entities from the detector configuration

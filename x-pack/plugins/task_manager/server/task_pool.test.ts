@@ -1,3 +1,8 @@
+import { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import moment from 'moment';
+import { Subject, of } from 'rxjs';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +10,11 @@
  * 2.0.
  */
 import sinon from 'sinon';
-import { of, Subject } from 'rxjs';
-import { TaskPool, TaskPoolRunResult } from './task_pool';
-import { resolvable, sleep } from './test_utils';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { asOk } from './lib/result_type';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
+import { asOk } from './lib/result_type';
+import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { TaskRunningStage } from './task_running';
+import { resolvable, sleep } from './test_utils';
 
 describe('TaskPool', () => {
   beforeEach(() => {

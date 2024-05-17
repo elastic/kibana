@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getBucketSize } from '.';
 import moment from 'moment';
+import { getBucketSize } from '.';
 
 describe('getBuckets', () => {
   describe("minInterval 'auto'", () => {

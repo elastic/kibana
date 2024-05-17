@@ -30,13 +30,13 @@ import { FIELD_NAME, FIELD_TYPE } from '../constants';
 import { SchemaType } from '../types';
 
 import {
-  ADD_FIELD_MODAL_TITLE,
-  ADD_FIELD_MODAL_DESCRIPTION,
   ADD_FIELD_BUTTON,
-  FORM_ID,
-  FIELD_NAME_PLACEHOLDER,
-  FIELD_NAME_CORRECT_NOTE,
+  ADD_FIELD_MODAL_DESCRIPTION,
+  ADD_FIELD_MODAL_TITLE,
   FIELD_NAME_CORRECTED_NOTE,
+  FIELD_NAME_CORRECT_NOTE,
+  FIELD_NAME_PLACEHOLDER,
+  FORM_ID,
 } from './constants';
 import { formatFieldName } from './utils';
 

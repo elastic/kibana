@@ -7,8 +7,8 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
-import { PANEL_TYPES, TSVB_METRIC_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 import { isValidMetrics } from './validate_metrics';
 
 describe('isValidMetrics', () => {

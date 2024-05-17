@@ -7,8 +7,8 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { SaveDashboardModal } from './save_dashboard_modal';
 import { MergedServiceDashboard } from '..';
+import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function EditDashboard({
   onRefresh,

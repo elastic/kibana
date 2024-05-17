@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGlyphs, getCanAccessEmsFonts, testOnlyClearCanAccessEmsFontsPromise } from './glyphs';
+import { getCanAccessEmsFonts, getGlyphs, testOnlyClearCanAccessEmsFontsPromise } from './glyphs';
 
 jest.mock('../../kibana_services', () => ({
   getHttp: () => {

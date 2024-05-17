@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
+import execa from 'execa';
 
 export async function fixEslint(path: string) {
   await execa('npx', ['eslint', '--fix', path], {

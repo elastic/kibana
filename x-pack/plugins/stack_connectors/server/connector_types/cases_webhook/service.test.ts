@@ -7,12 +7,12 @@
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
-import { createExternalService } from './service';
-import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalService } from './types';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { createAxiosResponse, request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { createExternalService } from './service';
+import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalService } from './types';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

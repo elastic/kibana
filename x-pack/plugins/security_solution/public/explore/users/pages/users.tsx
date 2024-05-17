@@ -6,22 +6,22 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
-import styled from 'styled-components';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { isTab } from '@kbn/timelines-plugin/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import type { Filter } from '@kbn/es-query';
-import { isTab } from '@kbn/timelines-plugin/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { InputsModelId } from '../../../common/store/inputs/constants';
+import styled from 'styled-components';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
-import { SiemSearchBar } from '../../../common/components/search_bar';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { LastEventTime } from '../../../common/components/last_event_time';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { SiemSearchBar } from '../../../common/components/search_bar';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
@@ -29,27 +29,27 @@ import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { UsersTabs } from './users_tabs';
-import { navTabsUsers } from './nav_tabs';
-import * as i18n from './translations';
-import { usersModel, usersSelectors } from '../store';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { UsersKpiComponent } from '../components/kpi_users';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
+import { UsersKpiComponent } from '../components/kpi_users';
+import { usersModel, usersSelectors } from '../store';
 import { UsersTableType } from '../store/model';
-import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
-import { useHasSecurityCapability } from '../../../helper_hooks';
+import { navTabsUsers } from './nav_tabs';
+import * as i18n from './translations';
+import { UsersTabs } from './users_tabs';
 
 const ID = 'UsersQueryId';
 

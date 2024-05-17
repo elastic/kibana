@@ -7,8 +7,8 @@
 
 import { ConfigKey, HTTPFields } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
-import { tlsFormatters } from './tls';
 import { arrayFormatter, objectFormatter } from './formatting_utils';
+import { tlsFormatters } from './tls';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 export const httpFormatters: HTTPFormatMap = {

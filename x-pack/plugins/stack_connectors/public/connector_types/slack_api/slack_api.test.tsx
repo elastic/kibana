@@ -8,9 +8,9 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registerConnectorTypes } from '..';
-import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 
 let connectorTypeModel: ConnectorTypeModel;
 const testBlock = {

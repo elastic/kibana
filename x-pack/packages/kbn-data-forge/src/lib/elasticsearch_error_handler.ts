@@ -6,8 +6,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { startsWith } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
+import { startsWith } from 'lodash';
 import { ElasticSearchService } from '../types';
 
 const ERROR_MESSAGES = [

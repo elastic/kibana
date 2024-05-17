@@ -1,3 +1,15 @@
+import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ChatState,
+  ObservabilityAIAssistantChatService,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import type { ChatActionClickPayload } from '@kbn/observability-ai-assistant-plugin/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { isEmpty, last, omitBy } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +18,6 @@
  */
 import React from 'react';
 import { v4 } from 'uuid';
-import { isEmpty, last, omitBy } from 'lodash';
-import { useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import {
-  ChatState,
-  ObservabilityAIAssistantChatService,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import type { ChatActionClickPayload } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
 import { safeJsonParse } from './safe_json_parse';

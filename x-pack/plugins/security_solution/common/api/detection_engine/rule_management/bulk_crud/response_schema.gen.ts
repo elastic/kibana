@@ -16,8 +16,8 @@ import { z } from 'zod';
  *   version: 8.9.0
  */
 
-import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { ErrorSchema } from '../../model/error_schema.gen';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 
 export type BulkCrudRulesResponse = z.infer<typeof BulkCrudRulesResponse>;
 export const BulkCrudRulesResponse = z.array(z.union([RuleResponse, ErrorSchema]));

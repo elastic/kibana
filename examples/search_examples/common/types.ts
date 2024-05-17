@@ -7,10 +7,10 @@
  */
 
 import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
 } from '@kbn/search-types';
 
 export interface IMyStrategyRequest extends IEsSearchRequest {

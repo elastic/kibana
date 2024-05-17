@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
 import {
-  serializers,
-  Forms,
-  ComponentTemplateDeserialized,
-  CommonWizardSteps,
-  StepSettingsContainer,
-  StepMappingsContainer,
-  StepAliasesContainer,
-} from '../../shared_imports';
-import {
-  serializeAsESLifecycle,
   deserializeESLifecycle,
+  serializeAsESLifecycle,
 } from '../../../../../../common/lib/data_stream_serialization';
 import { useComponentTemplatesContext } from '../../component_templates_context';
+import {
+  CommonWizardSteps,
+  ComponentTemplateDeserialized,
+  Forms,
+  StepAliasesContainer,
+  StepMappingsContainer,
+  StepSettingsContainer,
+  serializers,
+} from '../../shared_imports';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 
 const { stripEmptyFields } = serializers;

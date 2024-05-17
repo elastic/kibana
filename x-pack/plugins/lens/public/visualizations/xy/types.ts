@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
-import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
-import type {
-  LegendConfig,
-  AxisExtentConfig,
-  XYCurveType,
-  FittingFunction,
-  EndValue,
-  YScaleType,
-  XScaleType,
-  LineStyle,
-  IconPosition,
-  FillStyle,
-  YAxisConfig,
-} from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
   IconChartArea,
-  IconChartLine,
-  IconChartAreaStacked,
-  IconChartBarHorizontalStacked,
-  IconChartBarHorizontalPercentage,
   IconChartAreaPercentage,
+  IconChartAreaStacked,
   IconChartBar,
-  IconChartBarStacked,
-  IconChartBarPercentage,
   IconChartBarHorizontal,
+  IconChartBarHorizontalPercentage,
+  IconChartBarHorizontalStacked,
+  IconChartBarPercentage,
+  IconChartBarStacked,
+  IconChartLine,
 } from '@kbn/chart-icons';
+import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type {
+  AxisExtentConfig,
+  EndValue,
+  FillStyle,
+  FittingFunction,
+  IconPosition,
+  LegendConfig,
+  LineStyle,
+  XScaleType,
+  XYCurveType,
+  YAxisConfig,
+  YScaleType,
+} from '@kbn/expression-xy-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 
 import { CollapseFunction } from '../../../common/expressions';
-import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
+import type { VisualizationType } from '../../types';
 
 export const YAxisModes = {
   AUTO: 'auto',

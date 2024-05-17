@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { OpenShardFailureFlyoutButton } from './open_shard_failure_flyout_button';
 
 interface Props {

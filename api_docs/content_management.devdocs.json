@@ -20,9 +20,7 @@
             "tags": [],
             "label": "queryClient",
             "description": [],
-            "signature": [
-              "QueryClient"
-            ],
+            "signature": ["QueryClient"],
             "path": "src/plugins/content_management/public/content_client/content_client.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -80,9 +78,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/content_management/public/content_client/content_client.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -116,9 +112,7 @@
                 "tags": [],
                 "label": "contentTypeRegistry",
                 "description": [],
-                "signature": [
-                  "ContentTypeRegistry"
-                ],
+                "signature": ["ContentTypeRegistry"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -164,9 +158,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -216,9 +208,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -256,9 +246,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -296,9 +284,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -336,9 +322,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -376,9 +360,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -420,9 +402,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": [
-                  "I"
-                ],
+                "signature": ["I"],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -631,9 +611,7 @@
         "type": "Function",
         "tags": [],
         "label": "useGetContentQuery",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           "<I extends ",
           {
@@ -673,12 +651,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
-            "description": [
-              "- get content identifier like \"id\" and \"contentType\""
-            ],
-            "signature": [
-              "I"
-            ],
+            "description": ["- get content identifier like \"id\" and \"contentType\""],
+            "signature": ["I"],
             "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -690,9 +664,7 @@
             "type": "Object",
             "tags": [],
             "label": "queryOptions",
-            "description": [
-              "- query options"
-            ],
+            "description": ["- query options"],
             "signature": [
               {
                 "pluginId": "contentManagement",
@@ -718,9 +690,7 @@
         "type": "Function",
         "tags": [],
         "label": "useSearchContentQuery",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           "<I extends ",
           {
@@ -760,12 +730,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
-            "description": [
-              "- get content identifier like \"id\" and \"contentType\""
-            ],
-            "signature": [
-              "I"
-            ],
+            "description": ["- get content identifier like \"id\" and \"contentType\""],
+            "signature": ["I"],
             "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -777,9 +743,7 @@
             "type": "Object",
             "tags": [],
             "label": "queryOptions",
-            "description": [
-              "- query options"
-            ],
+            "description": ["- query options"],
             "signature": [
               {
                 "pluginId": "contentManagement",
@@ -1140,12 +1104,8 @@
         "type": "Type",
         "tags": [],
         "label": "QueryOptions",
-        "description": [
-          "\nExposed `useQuery` options"
-        ],
-        "signature": [
-          "{ enabled?: boolean | undefined; }"
-        ],
+        "description": ["\nExposed `useQuery` options"],
+        "signature": ["{ enabled?: boolean | undefined; }"],
         "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1271,9 +1231,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "Get a single item"
-            ],
+            "description": ["Get a single item"],
             "signature": [
               "(ctx: ",
               {
@@ -1317,9 +1275,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1332,9 +1288,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "object | undefined"
-                ],
+                "signature": ["object | undefined"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1349,9 +1303,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
-            "description": [
-              "Get multiple items"
-            ],
+            "description": ["Get multiple items"],
             "signature": [
               "(ctx: ",
               {
@@ -1395,9 +1347,7 @@
                 "tags": [],
                 "label": "ids",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1410,9 +1360,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "object | undefined"
-                ],
+                "signature": ["object | undefined"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1427,9 +1375,7 @@
             "type": "Function",
             "tags": [],
             "label": "create",
-            "description": [
-              "Create an item"
-            ],
+            "description": ["Create an item"],
             "signature": [
               "(ctx: ",
               {
@@ -1473,9 +1419,7 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": [
-                  "object"
-                ],
+                "signature": ["object"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1488,9 +1432,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "object | undefined"
-                ],
+                "signature": ["object | undefined"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1505,9 +1447,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "Update an item"
-            ],
+            "description": ["Update an item"],
             "signature": [
               "(ctx: ",
               {
@@ -1551,9 +1491,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1566,9 +1504,7 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": [
-                  "object"
-                ],
+                "signature": ["object"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1581,9 +1517,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "object | undefined"
-                ],
+                "signature": ["object | undefined"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1598,9 +1532,7 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [
-              "Delete an item"
-            ],
+            "description": ["Delete an item"],
             "signature": [
               "(ctx: ",
               {
@@ -1652,9 +1584,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1667,9 +1597,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "object | undefined"
-                ],
+                "signature": ["object | undefined"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1684,9 +1612,7 @@
             "type": "Function",
             "tags": [],
             "label": "search",
-            "description": [
-              "Search items"
-            ],
+            "description": ["Search items"],
             "signature": [
               "(ctx: ",
               {
@@ -1759,9 +1685,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "object | undefined"
-                ],
+                "signature": ["object | undefined"],
                 "path": "src/plugins/content_management/server/core/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1779,9 +1703,7 @@
             "description": [
               "\nOpt-in to multi-type search.\nCan only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API."
             ],
-            "signature": [
-              "TMSearchConfig | undefined"
-            ],
+            "signature": ["TMSearchConfig | undefined"],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1818,9 +1740,7 @@
             "type": "string",
             "tags": [],
             "label": "savedObjectType",
-            "description": [
-              "\nThe saved object type that corresponds to this content type."
-            ],
+            "description": ["\nThe saved object type that corresponds to this content type."],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1912,9 +1832,7 @@
             "description": [
               "\nAdditional fields to search on. These fields will be added to the search query.\nBy default, only `title` and `description` are searched."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1928,9 +1846,7 @@
         "type": "Interface",
         "tags": [],
         "label": "StorageContext",
-        "description": [
-          "Context that is sent to all storage instance methods"
-        ],
+        "description": ["Context that is sent to all storage instance methods"],
         "path": "src/plugins/content_management/server/core/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1941,9 +1857,7 @@
             "type": "Object",
             "tags": [],
             "label": "requestHandlerContext",
-            "description": [
-              "The Core HTTP request handler context"
-            ],
+            "description": ["The Core HTTP request handler context"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
@@ -1964,9 +1878,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "{ request: number; latest: number; }"
-            ],
+            "signature": ["{ request: number; latest: number; }"],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1978,11 +1890,7 @@
             "tags": [],
             "label": "utils",
             "description": [],
-            "signature": [
-              "{ getTransforms: ",
-              "StorageContextGetTransformFn",
-              "; }"
-            ],
+            "signature": ["{ getTransforms: ", "StorageContextGetTransformFn", "; }"],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2066,9 +1974,7 @@
             "tags": [],
             "label": "contentTypeId",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2080,9 +1986,7 @@
             "tags": [],
             "label": "ids",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2094,9 +1998,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2108,9 +2010,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options | undefined"
-            ],
+            "signature": ["Options | undefined"],
             "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2146,9 +2046,7 @@
             "tags": [],
             "label": "contentTypeId",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/content_management/common/rpc/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2160,9 +2058,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "Data"
-            ],
+            "signature": ["Data"],
             "path": "src/plugins/content_management/common/rpc/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2174,9 +2070,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2188,9 +2082,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options | undefined"
-            ],
+            "signature": ["Options | undefined"],
             "path": "src/plugins/content_management/common/rpc/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2226,9 +2118,7 @@
             "tags": [],
             "label": "contentTypeId",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/content_management/common/rpc/delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2251,9 +2141,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2265,9 +2153,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options | undefined"
-            ],
+            "signature": ["Options | undefined"],
             "path": "src/plugins/content_management/common/rpc/delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2339,9 +2225,7 @@
             "tags": [],
             "label": "contentTypeId",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/content_management/common/rpc/get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2353,9 +2237,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2367,9 +2249,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options | undefined"
-            ],
+            "signature": ["Options | undefined"],
             "path": "src/plugins/content_management/common/rpc/get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2395,9 +2275,7 @@
             "tags": [],
             "label": "contentTypes",
             "description": [],
-            "signature": [
-              "{ contentTypeId: string; version?: number | undefined; }[]"
-            ],
+            "signature": ["{ contentTypeId: string; version?: number | undefined; }[]"],
             "path": "src/plugins/content_management/common/rpc/msearch.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2453,9 +2331,7 @@
             "tags": [],
             "label": "contentTypes",
             "description": [],
-            "signature": [
-              "{ contentTypeId: string; version?: number | undefined; }[]"
-            ],
+            "signature": ["{ contentTypeId: string; version?: number | undefined; }[]"],
             "path": "src/plugins/content_management/common/rpc/msearch.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2563,9 +2439,7 @@
             "tags": [],
             "label": "contentTypeId",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2597,9 +2471,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2611,9 +2483,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options | undefined"
-            ],
+            "signature": ["Options | undefined"],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2638,12 +2508,8 @@
             "type": "string",
             "tags": [],
             "label": "text",
-            "description": [
-              "The text to search for"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The text to search for"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2654,9 +2520,7 @@
             "type": "Object",
             "tags": [],
             "label": "tags",
-            "description": [
-              "List of tags id to include and exclude"
-            ],
+            "description": ["List of tags id to include and exclude"],
             "signature": [
               "{ included?: string[] | undefined; excluded?: string[] | undefined; } | undefined"
             ],
@@ -2670,12 +2534,8 @@
             "type": "number",
             "tags": [],
             "label": "limit",
-            "description": [
-              "The number of result to return"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["The number of result to return"],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2686,12 +2546,8 @@
             "type": "string",
             "tags": [],
             "label": "cursor",
-            "description": [
-              "The cursor for this query. Can be a page number or a cursor"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The cursor for this query. Can be a page number or a cursor"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2727,9 +2583,7 @@
             "tags": [],
             "label": "contentTypeId",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "src/plugins/content_management/common/rpc/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2752,9 +2606,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "Data"
-            ],
+            "signature": ["Data"],
             "path": "src/plugins/content_management/common/rpc/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2766,9 +2618,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/content_management/common/rpc/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2780,9 +2630,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "Options | undefined"
-            ],
+            "signature": ["Options | undefined"],
             "path": "src/plugins/content_management/common/rpc/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2800,9 +2648,7 @@
         "tags": [],
         "label": "API_ENDPOINT",
         "description": [],
-        "signature": [
-          "\"/api/content_management/rpc\""
-        ],
+        "signature": ["\"/api/content_management/rpc\""],
         "path": "src/plugins/content_management/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2834,9 +2680,7 @@
         "tags": [],
         "label": "CreateResult",
         "description": [],
-        "signature": [
-          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
-        ],
+        "signature": ["M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"],
         "path": "src/plugins/content_management/common/rpc/create.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2849,9 +2693,7 @@
         "tags": [],
         "label": "GetResult",
         "description": [],
-        "signature": [
-          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
-        ],
+        "signature": ["M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"],
         "path": "src/plugins/content_management/common/rpc/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2900,9 +2742,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"contentManagement\""
-        ],
+        "signature": ["\"contentManagement\""],
         "path": "src/plugins/content_management/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2945,9 +2785,7 @@
         "tags": [],
         "label": "UpdateResult",
         "description": [],
-        "signature": [
-          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
-        ],
+        "signature": ["M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"],
         "path": "src/plugins/content_management/common/rpc/update.ts",
         "deprecated": false,
         "trackAdoption": false,

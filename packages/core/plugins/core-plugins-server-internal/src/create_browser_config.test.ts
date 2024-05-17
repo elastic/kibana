@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { createBrowserConfig } from './create_browser_config';
-import { schema, TypeOf } from '@kbn/config-schema';
 
 describe('createBrowserConfig', () => {
   it('picks nothing by default', () => {

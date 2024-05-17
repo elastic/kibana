@@ -118,7 +118,12 @@
           "privileges": ["read", "write"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*",
+            ".fleet-actions*",
+            "risk-score.risk-score-*"
+          ],
           "privileges": ["read"]
         }
       ],

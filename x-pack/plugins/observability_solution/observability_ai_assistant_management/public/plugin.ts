@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { EnterpriseSearchPublicStart } from '@kbn/enterprise-search-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import type {
   ObservabilityAIAssistantPublicSetup,

@@ -6,16 +6,16 @@
  */
 import { RESULTS_ROUTE_PATH } from '../../../common/constants';
 
-import { serverMock } from '../../__mocks__/server';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
-import type { LatestAggResponseBucket } from './get_results';
-import { getResultsRoute, getQuery } from './get_results';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { resultDocument } from './results.mock';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { serverMock } from '../../__mocks__/server';
 import type { ResultDocument } from '../../schemas/result';
+import type { LatestAggResponseBucket } from './get_results';
+import { getQuery, getResultsRoute } from './get_results';
 import type { CheckIndicesPrivilegesParam } from './privileges';
+import { resultDocument } from './results.mock';
 
 const searchResponse = {
   aggregations: {

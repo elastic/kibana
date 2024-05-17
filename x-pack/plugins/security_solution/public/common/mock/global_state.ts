@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
-import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopTablesFields,
   NetworkTlsFields,
+  NetworkTopTablesFields,
   NetworkUsersFields,
   RiskScoreFields,
 } from '../../../common/search_strategy';
 import type { State } from '../store';
+import { InputsModelId } from '../store/inputs/constants';
 
-import { defaultHeaders } from './header';
+import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
 import {
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_FROM,
-  DEFAULT_TO,
+  DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
+  DEFAULT_TO,
   VIEW_SELECTION,
 } from '../../../common/constants';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import { networkModel } from '../../explore/network/store';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { usersModel } from '../../explore/users/store';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
-import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
-import { usersModel } from '../../explore/users/store';
-import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../store/sourcerer';
-import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
+import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import { SourcererScopeName, initialSourcererState } from '../store/sourcerer/model';
+import { defaultHeaders } from './header';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(

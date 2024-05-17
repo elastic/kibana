@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
 import { addXJsonToRules } from '@kbn/ace';
+import ace from 'brace';
 
 type Token =
   | string

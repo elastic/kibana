@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { call, put } from 'redux-saga/effects';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
-import { fetchEffectFactory } from './fetch_effect';
-import { indexStatusAction } from '../actions';
+import { call, put } from 'redux-saga/effects';
 import type { StatesIndexStatus } from '../../../../common/runtime_types';
+import { indexStatusAction } from '../actions';
 import { fetchIndexStatus } from '../api';
+import { fetchEffectFactory } from './fetch_effect';
 
 describe('fetch saga effect factory', () => {
   const asyncAction = indexStatusAction;

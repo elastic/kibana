@@ -129,9 +129,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaEuiProviderProps",
-        "description": [
-          "\nProps for the KibanaEuiProvider."
-        ],
+        "description": ["\nProps for the KibanaEuiProvider."],
         "signature": [
           {
             "pluginId": "@kbn/react-kibana-context-root",
@@ -175,9 +173,7 @@
             "tags": [],
             "label": "globalStyles",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -191,9 +187,7 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaRootContextProviderProps",
-        "description": [
-          "Props for the KibanaRootContextProvider"
-        ],
+        "description": ["Props for the KibanaRootContextProvider"],
         "signature": [
           {
             "pluginId": "@kbn/react-kibana-context-root",
@@ -221,9 +215,7 @@
             "type": "Object",
             "tags": [],
             "label": "i18n",
-            "description": [
-              "The `I18nStart` API from `CoreStart`."
-            ],
+            "description": ["The `I18nStart` API from `CoreStart`."],
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -243,9 +235,7 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": [
-              "The `AnalyticsServiceStart` API from `CoreStart`."
-            ],
+            "description": ["The `AnalyticsServiceStart` API from `CoreStart`."],
             "signature": [
               "Pick<",
               {

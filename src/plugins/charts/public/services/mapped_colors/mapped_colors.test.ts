@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import Color from 'color';
+import _ from 'lodash';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';

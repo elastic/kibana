@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, VFC } from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import React, { useEffect, VFC } from 'react';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 
 interface QueryBarProps {

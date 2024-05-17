@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TsProjectRule } from '@kbn/repo-linter';
 import { snip } from '@kbn/json-ast';
+import { TsProjectRule } from '@kbn/repo-linter';
 
 const INDENT = '  ';
 

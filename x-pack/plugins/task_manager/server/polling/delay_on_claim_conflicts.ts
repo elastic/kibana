@@ -9,17 +9,17 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
-import stats from 'stats-lite';
+import { Option, Some, isSome, none, some } from 'fp-ts/lib/Option';
 import { isNumber, random } from 'lodash';
-import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, combineLatest, merge, of } from 'rxjs';
 import { filter, map } from 'rxjs';
-import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
-import { isOk } from '../lib/result_type';
+import stats from 'stats-lite';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { ClaimAndFillPoolResult } from '../lib/fill_pool';
+import { isOk } from '../lib/result_type';
+import { createRunningAveragedStat } from '../monitoring/task_run_calcultors';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
-import { ClaimAndFillPoolResult } from '../lib/fill_pool';
-import { createRunningAveragedStat } from '../monitoring/task_run_calcultors';
 
 /**
  * Emits a delay amount in ms to apply to polling whenever the task store exceeds a threshold of claim claimClashes

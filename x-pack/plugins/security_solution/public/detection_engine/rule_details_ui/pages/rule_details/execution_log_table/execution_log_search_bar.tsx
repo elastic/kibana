@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { replace } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { replace } from 'lodash';
+import React, { useCallback } from 'react';
 
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';

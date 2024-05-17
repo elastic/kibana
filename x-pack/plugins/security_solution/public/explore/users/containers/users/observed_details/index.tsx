@@ -6,14 +6,14 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import type { inputsModel } from '../../../../../common/store';
-import * as i18n from './translations';
-import type { InspectResponse } from '../../../../../types';
 import { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { inputsModel } from '../../../../../common/store';
+import type { InspectResponse } from '../../../../../types';
+import * as i18n from './translations';
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 

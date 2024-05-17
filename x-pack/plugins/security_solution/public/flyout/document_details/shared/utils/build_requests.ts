@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest } from '@kbn/search-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IEsSearchRequest } from '@kbn/search-types';
 
 /**
  * Builds a search request for an aggregation.

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OnlyEsQueryRuleParams } from './types';
 import { EsQueryRuleParams } from './rule_type_params';
+import { OnlyEsQueryRuleParams } from './types';
 
 export function isEsQueryRule(searchType: EsQueryRuleParams['searchType']) {
   return searchType === 'esQuery';

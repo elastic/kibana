@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { resolve } from 'path';
+import Url from 'url';
 import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import { resolve } from 'path';
-import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { readCloudUsersFromFile } from './helper';
-import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
+import { Session, createCloudSAMLSession, createLocalSAMLSession } from './saml_auth';
 import { Role, User } from './types';
 
 export interface HostOptions {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PaginationBuilder } from './pagination';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import type { SafeEndpointEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,
   timestampSafeVersion,
 } from '../../../../../common/endpoint/models/event';
+import type { SafeEndpointEvent } from '../../../../../common/endpoint/types';
+import { PaginationBuilder } from './pagination';
 
 describe('Pagination', () => {
   const generator = new EndpointDocGenerator();

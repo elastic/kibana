@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RenderErrorHandlerFnType, ExpressionRenderError } from './types';
-import { getNotifications } from './services';
 import { IInterpreterRenderHandlers } from '../common';
+import { getNotifications } from './services';
+import { ExpressionRenderError, RenderErrorHandlerFnType } from './types';
 
 export const renderErrorHandler: RenderErrorHandlerFnType = (
   element: HTMLElement,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-import ts from 'typescript';
-import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
-import { parsedIndexedInterfaceWithNoMatchingSchema } from './__fixture__/parsed_indexed_interface_with_not_matching_schema';
-import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
 import * as path from 'path';
 import { readFile } from 'fs/promises';
+import { cloneDeep } from 'lodash';
+import ts from 'typescript';
+import { parsedIndexedInterfaceWithNoMatchingSchema } from './__fixture__/parsed_indexed_interface_with_not_matching_schema';
+import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
+import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
 
 async function parseJsonFile(relativePath: string) {
   const schemaPath = path.resolve(__dirname, '__fixture__', relativePath);

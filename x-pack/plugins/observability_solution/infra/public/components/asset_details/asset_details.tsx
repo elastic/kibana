@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { AssetDetailsProps, ContentTemplateProps, RenderMode } from './types';
+import { ContextProviders } from './context_providers';
+import { DataViewsProvider } from './hooks/use_data_views';
+import { TabSwitcherProvider } from './hooks/use_tab_switcher';
 import { Flyout } from './template/flyout';
 import { Page } from './template/page';
-import { ContextProviders } from './context_providers';
-import { TabSwitcherProvider } from './hooks/use_tab_switcher';
-import { DataViewsProvider } from './hooks/use_data_views';
+import type { AssetDetailsProps, ContentTemplateProps, RenderMode } from './types';
 
 const ContentTemplate = ({
   tabs,

@@ -7,20 +7,20 @@
 
 import React, { type FC } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import {
-  DocumentCountChartWithAutoAnalysisStart,
   type BrushSelectionUpdateHandler,
+  DocumentCountChartWithAutoAnalysisStart,
 } from '@kbn/aiops-components';
+import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import type { DocumentCountStats } from '../../../get_document_stats';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { TotalCountHeader } from '../total_count_header';
 

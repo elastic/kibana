@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
-import { get } from 'lodash';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import {
   encode,
   getElasticOutline,
   isValidHttpUrl,
   resolveFromArgs,
 } from '@kbn/presentation-util-plugin/common';
-import { AssetPicker } from '../../../../public/components/asset_picker';
-import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { get } from 'lodash';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { ArgumentStrings } from '../../../../i18n';
+import { AssetPicker } from '../../../../public/components/asset_picker';
+import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { FileForm, LinkForm } from './forms';
 
 const { ImageUpload: strings } = ArgumentStrings;
@@ -132,7 +132,7 @@ class ImageUpload extends React.Component {
           options={urlTypeOptions}
           idSelected={urlType}
           onChange={this.changeUrlType}
-          isFullWidth
+          isFullWidth={true}
           className="canvasSidebar__buttonGroup"
           legend={strings.getUrlTypeChangeLegend()}
         />

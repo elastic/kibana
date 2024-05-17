@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 
 import {
+  LabelWithCountValue,
+  SyntheticsMonitorFilterChangeHandler,
   SyntheticsMonitorFilterItem,
   getSyntheticsFilterDisplayValues,
-  SyntheticsMonitorFilterChangeHandler,
-  LabelWithCountValue,
 } from '../../../../utils/filters/filter_fields';
-import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
+import { useFilters } from './use_filters';
 
 const mixUrlValues = (
   values?: LabelWithCountValue[],

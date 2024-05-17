@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Os from 'os';
-import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
+import Path from 'path';
+import { type PluginSelector, getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 
 import {
   Bundle,
-  WorkerConfig,
   CacheableWorkerConfig,
   ThemeTag,
   ThemeTags,
-  parseThemeTags,
+  WorkerConfig,
   omit,
+  parseThemeTags,
 } from '../common';
 
-import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
-import { getPluginBundles } from './get_plugin_bundles';
+import { readLimits } from '../limits';
 import { filterById } from './filter_by_id';
 import { focusBundles } from './focus_bundles';
-import { readLimits } from '../limits';
+import { getPluginBundles } from './get_plugin_bundles';
+import { KibanaPlatformPlugin, toKibanaPlatformPlugin } from './kibana_platform_plugins';
 
 export interface Limits {
   pageLoadAssetSize?: {

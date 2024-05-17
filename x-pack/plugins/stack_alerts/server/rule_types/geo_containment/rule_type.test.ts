@@ -6,9 +6,9 @@
  */
 
 import {
+  extractEntityAndBoundaryReferences,
   getRuleType,
   injectEntityAndBoundaryIds,
-  extractEntityAndBoundaryReferences,
 } from './rule_type';
 import type { GeoContainmentRuleParams } from './types';
 

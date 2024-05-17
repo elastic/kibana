@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { makeDecorator } from '@storybook/addons';
-import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PluginContext } from '../../context/plugin_context/plugin_context';
-import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
+import { makeDecorator } from '@storybook/addons';
+import { storiesOf } from '@storybook/react';
+import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { ApmIndicesConfig } from '../../../common/typings';
 import {
   registerDataHandler,
   unregisterDataHandler,
 } from '../../context/has_data_context/data_handler';
-import { OverviewPage } from './overview';
+import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
+import { PluginContext } from '../../context/plugin_context/plugin_context';
+import { ConfigSchema } from '../../plugin';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
 import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { ApmIndicesConfig } from '../../../common/typings';
-import { ConfigSchema } from '../../plugin';
+import { OverviewPage } from './overview';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });

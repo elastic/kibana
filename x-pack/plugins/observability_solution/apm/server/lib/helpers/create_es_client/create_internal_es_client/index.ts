@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';

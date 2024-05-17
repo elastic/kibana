@@ -7,7 +7,7 @@
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
-import { getDefaultAiOpsListState, type AiOpsFullIndexBasedAppState } from './common';
+import { type AiOpsFullIndexBasedAppState, getDefaultAiOpsListState } from './common';
 
 export interface LogRateAnalysisPageUrlState {
   pageKey: 'logRateAnalysis';

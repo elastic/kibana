@@ -8,17 +8,17 @@
 
 import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { partitionActions } from '../hooks/actions';
+import { useLoadActionsFn } from '../hooks/use_load_actions';
+import type { CellActionExecutionContext } from '../types';
 import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
-import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
-import { partitionActions } from '../hooks/actions';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
-import type { CellActionExecutionContext } from '../types';
-import { useLoadActionsFn } from '../hooks/use_load_actions';
+import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';

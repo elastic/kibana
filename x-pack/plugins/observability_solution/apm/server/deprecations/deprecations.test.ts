@@ -7,10 +7,10 @@
 
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { GetDeprecationsContext } from '@kbn/core/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { getDeprecations } from '.';
+import { GetDeprecationsContext } from '@kbn/core/server';
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { getDeprecations } from '.';
 import { APMRouteHandlerResources } from '../routes/apm_routes/register_apm_server_routes';
 
 const deprecationContext = {
@@ -55,7 +55,7 @@ describe('getDeprecations', () => {
                 ({
                   id: 'foo',
                   package_policies: [{ package: { name: 'system' } }],
-                } as AgentPolicy),
+                }) as AgentPolicy,
             },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],
@@ -84,7 +84,7 @@ describe('getDeprecations', () => {
                 ({
                   id: 'foo',
                   package_policies: [{ package: { name: 'apm' } }],
-                } as AgentPolicy),
+                }) as AgentPolicy,
             },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],

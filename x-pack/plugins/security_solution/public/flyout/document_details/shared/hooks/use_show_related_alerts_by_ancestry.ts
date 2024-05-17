@@ -6,10 +6,10 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { ANCESTOR_ID } from '../constants/field_names';
 import { getField } from '../utils';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLeftPanelContext } from '../context';
+import React from 'react';
 import { getField } from '../../shared/utils';
-import { UserDetails } from './user_details';
+import { useLeftPanelContext } from '../context';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
+import { UserDetails } from './user_details';
 
 export const ENTITIES_TAB_ID = 'entity';
 

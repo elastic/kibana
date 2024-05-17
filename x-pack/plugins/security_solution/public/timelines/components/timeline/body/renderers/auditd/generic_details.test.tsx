@@ -8,9 +8,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
-import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
+import { TestProviders, mockTimelineData } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
 
 jest.mock('../../../../../../common/lib/kibana');
 

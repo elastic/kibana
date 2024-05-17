@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { DetailedHTMLProps, HTMLAttributes } from 'react';
+import { Observable } from 'rxjs';
 
 export type NavigateToUrl = (url: string) => Promise<void> | void;
 

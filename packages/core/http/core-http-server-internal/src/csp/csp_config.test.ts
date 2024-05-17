@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { CspConfigType, cspConfig } from './config';
 import { CspConfig } from './csp_config';
-import { cspConfig, CspConfigType } from './config';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,

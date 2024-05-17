@@ -6,23 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-} from '@kbn/search-types';
-import type { ISearchStart } from '@kbn/data-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { isDefined } from '@kbn/ml-is-defined';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { processTopValues } from './utils';
-import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import { MAX_PERCENT, PERCENTILE_SPACING } from './constants';
 import type {
   Aggs,
   Bucket,
@@ -30,14 +27,17 @@ import type {
 } from '../../../../../common/types/field_stats';
 import type {
   Field,
-  NumericFieldStats,
   FieldStatsError,
+  NumericFieldStats,
 } from '../../../../../common/types/field_stats';
-import { processDistributionData } from '../../utils/process_distribution_data';
 import {
   isIKibanaSearchResponse,
   isNormalSamplingOption,
 } from '../../../../../common/types/field_stats';
+import { processDistributionData } from '../../utils/process_distribution_data';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
+import { MAX_PERCENT, PERCENTILE_SPACING } from './constants';
+import { processTopValues } from './utils';
 
 export const getNumericFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,

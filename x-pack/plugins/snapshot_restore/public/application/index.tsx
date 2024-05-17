@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Router } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
 import { App } from './app';
-import { AppProviders } from './app_providers';
 import { AppDependencies } from './app_context';
+import { AppProviders } from './app_providers';
 
 interface AppWithRouterProps {
   history: ScopedHistory;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subject } from 'rxjs';
 import { BfetchRequestError } from '@kbn/bfetch-error';
+import { Observable, Subject } from 'rxjs';
 
 /**
  * Creates observable from streaming XMLHttpRequest, where each event

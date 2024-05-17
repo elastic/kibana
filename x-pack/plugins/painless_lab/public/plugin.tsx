@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import { firstValueFrom } from 'rxjs';
 
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../common/constants';
 
-import { PluginDependencies } from './types';
 import { getLinks } from './links';
+import { PluginDependencies } from './types';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);

@@ -60,7 +60,5 @@
       "job_id": "packetbeat_rare_user_agent"
     }
   ],
-  "tags": [
-    "security"
-  ]
+  "tags": ["security"]
 }

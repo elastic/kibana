@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
+import { ALERTING_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { coreMock } from '@kbn/core/public/mocks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
+import React, { FunctionComponent } from 'react';
 import { act } from 'react-dom/test-utils';
+import { useKibana } from '../../../common/lib/kibana';
+import {
+  GenericValidationResult,
+  Rule,
+  RuleCreationValidConsumer,
+  RuleType,
+  RuleTypeModel,
+  ValidationResult,
+} from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ActionForm } from '../action_connector_form';
-import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
-import {
-  ValidationResult,
-  Rule,
-  RuleType,
-  RuleTypeModel,
-  GenericValidationResult,
-  RuleCreationValidConsumer,
-} from '../../../types';
 import { RuleForm } from './rule_form';
-import { coreMock } from '@kbn/core/public/mocks';
-import { ALERTING_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { useKibana } from '../../../common/lib/kibana';
+import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 
 const toMapById = [
   (acc: Map<unknown, unknown>, val: { id: unknown }) => acc.set(val.id, val),

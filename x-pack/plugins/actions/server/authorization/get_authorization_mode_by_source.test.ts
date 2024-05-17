@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
-  getAuthorizationModeBySource,
-  bulkGetAuthorizationModeBySource,
-  AuthorizationMode,
-} from './get_authorization_mode_by_source';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { v4 as uuidv4 } from 'uuid';
 import { asHttpRequestExecutionSource, asSavedObjectExecutionSource } from '../lib';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  AuthorizationMode,
+  bulkGetAuthorizationModeBySource,
+  getAuthorizationModeBySource,
+} from './get_authorization_mode_by_source';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

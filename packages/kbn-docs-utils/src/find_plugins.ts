@@ -8,8 +8,8 @@
 
 import Path from 'path';
 
-import { getPackages, getPluginPackagesFilter, type Package } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { type Package, getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { ApiScope, PluginOrPackage } from './types';
 
 function toApiScope(pkg: Package): ApiScope {
@@ -27,8 +27,8 @@ function toApiScope(pkg: Package): ApiScope {
       return pkg.manifest.plugin.server && !pkg.manifest.plugin.browser
         ? ApiScope.SERVER
         : !pkg.manifest.plugin.server && pkg.manifest.plugin.browser
-        ? ApiScope.CLIENT
-        : ApiScope.COMMON;
+          ? ApiScope.CLIENT
+          : ApiScope.COMMON;
   }
 }
 

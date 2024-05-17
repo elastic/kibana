@@ -11,17 +11,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { inputsModel } from '../../../store';
-import { useKibana } from '../../../lib/kibana';
 import type {
-  TimelineEventsLastEventTimeStrategyResponse,
-  LastTimeDetails,
   LastEventIndexKey,
+  LastTimeDetails,
   TimelineEventsLastEventTimeRequestOptionsInput,
+  TimelineEventsLastEventTimeStrategyResponse,
 } from '../../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../../common/search_strategy/timeline';
-import * as i18n from './translations';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useKibana } from '../../../lib/kibana';
+import type { inputsModel } from '../../../store';
+import * as i18n from './translations';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
 import type { Logger } from '@kbn/logging';
+import { isArray } from 'lodash';
 
 const DELIMITER_TOKENS = ['`', "'", '"', ['(', ')']];
 const ESCAPE_TOKEN = '\\\\';

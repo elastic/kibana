@@ -7,10 +7,10 @@
 
 import { sampleDocWithSortId } from '../../__mocks__/es_results';
 
-import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
-import { createSetToFilterAgainst } from './create_set_to_filter_against';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
+import { createSetToFilterAgainst } from './create_set_to_filter_against';
 
 describe('createSetToFilterAgainst', () => {
   let listClient = listMock.getListClient();

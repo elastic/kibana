@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useMemo } from 'react';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import React, { ChangeEvent, useMemo } from 'react';
 import {
+  FieldConfig,
   UseField,
   ValidationConfig,
-  FieldConfig,
   getFieldValidityAndErrorMessage,
 } from '../../shared_imports';
 import { IndexPatternConfig } from '../../types';

@@ -6,14 +6,14 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { getSessionViewLazy } from './methods';
 import {
-  SessionViewPluginStart,
-  SessionViewPluginStartDeps,
+  SessionViewDeps,
   SessionViewPluginSetup,
   SessionViewPluginSetupDeps,
-  SessionViewDeps,
+  SessionViewPluginStart,
+  SessionViewPluginStartDeps,
 } from './types';
-import { getSessionViewLazy } from './methods';
 
 export class SessionViewPlugin implements Plugin<SessionViewPluginStart, SessionViewPluginSetup> {
   public setup(core: CoreSetup<SessionViewPluginSetupDeps, SessionViewPluginSetup>) {

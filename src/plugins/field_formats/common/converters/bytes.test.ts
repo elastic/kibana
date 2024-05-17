@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BytesFormat } from './bytes';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { FieldFormatsGetConfigFn } from '../types';
+import { BytesFormat } from './bytes';
 
 describe('BytesFormat', () => {
   const config: { [key: string]: string } = {

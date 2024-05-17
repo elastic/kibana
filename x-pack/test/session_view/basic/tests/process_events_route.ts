@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import {
-  PROCESS_EVENTS_ROUTE,
   CURRENT_API_VERSION,
+  PROCESS_EVENTS_ROUTE,
 } from '@kbn/session-view-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;
@@ -22,11 +22,11 @@ const ALERTS_IN_FIRST_PAGE = 8;
 const MOCK_TOTAL_PROCESS_EVENTS = 419;
 
 import {
-  superUser,
   globalRead,
-  secOnlyReadSpacesAll,
-  obsOnlySpacesAll,
   noKibanaPrivileges,
+  obsOnlySpacesAll,
+  secOnlyReadSpacesAll,
+  superUser,
 } from '../../../rule_registry/common/lib/authentication/users';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';

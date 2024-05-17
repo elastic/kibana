@@ -1,3 +1,6 @@
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { PayloadAction } from '@reduxjs/toolkit';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +8,9 @@
  * 2.0.
  */
 import React from 'react';
-import type { PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 
 import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
 import { SortMenu } from './sort_menu';

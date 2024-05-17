@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { FormEvent, useEffect, useState } from 'react';
 import {
-  EuiText,
   EuiButton,
-  EuiSwitch,
-  EuiSpacer,
   EuiFilterButton,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
-  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import { isEqual, map } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { isEqual, map } from 'lodash';
+import React, { FormEvent, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { FieldValueSelectionProps, ListItem } from './types';
 
 const Counter = euiStyled.div`

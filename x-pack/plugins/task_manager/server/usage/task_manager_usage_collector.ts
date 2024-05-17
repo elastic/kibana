@@ -1,16 +1,16 @@
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { combineLatest, Observable } from 'rxjs';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { MonitoredHealth } from '../routes/health';
-import { TaskManagerUsage } from './types';
-import { MonitoredUtilization } from '../routes/background_task_utilization';
+import { Observable, combineLatest } from 'rxjs';
 import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
 import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import { MonitoredUtilization } from '../routes/background_task_utilization';
+import { MonitoredHealth } from '../routes/health';
+import { TaskManagerUsage } from './types';
 
 export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,

@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { VegaParser } from './data_model/vega_parser';
-import { VegaVisualizationDependencies } from './plugin';
-import { getNotifications, getData } from './services';
-import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
+import { VegaVisualizationDependencies } from './plugin';
+import { getData, getNotifications } from './services';
+import type { VegaView } from './vega_view/vega_view';
 
-type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
+type VegaVisType = new (
+  el: HTMLDivElement,
+  fireEvent: IInterpreterRenderHandlers['event']
+) => {
   render(visData: VegaParser): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;

@@ -1,3 +1,7 @@
+import { EuiInMemoryTable } from '@elastic/eui';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { render } from '@testing-library/react';
+import { omit } from 'lodash/fp';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +9,8 @@
  * 2.0.
  */
 import React from 'react';
-import { omit } from 'lodash/fp';
-import { render } from '@testing-library/react';
-import { EuiInMemoryTable } from '@elastic/eui';
 import { mockBrowserFields } from '../../mock';
 import { getFieldColumns, getFieldItemsData } from './field_items';
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 
 const timestampFieldId = '@timestamp';
 const columnIds = [timestampFieldId];

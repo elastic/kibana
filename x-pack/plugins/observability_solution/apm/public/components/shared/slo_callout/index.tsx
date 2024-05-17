@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { sloEditLocatorID } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { sloEditLocatorID } from '@kbn/observability-plugin/common';
+import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   dismissCallout: () => void;

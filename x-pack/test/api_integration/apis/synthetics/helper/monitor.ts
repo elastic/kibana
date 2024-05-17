@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { omit, omitBy } from 'lodash';
 import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { omit, omitBy } from 'lodash';
 
 export function omitResponseTimestamps(monitor: object) {
   return omitBy(omit(monitor, ['created_at', 'updated_at']), removeMonitorEmptyValues);

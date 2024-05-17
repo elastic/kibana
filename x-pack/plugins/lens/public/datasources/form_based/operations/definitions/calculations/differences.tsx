@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { DIFFERENCES_ID, DIFFERENCES_NAME } from '@kbn/lens-formula-docs';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { OperationDefinition } from '..';
 import { FormBasedLayer } from '../../../types';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { getFilter, getFormatFromPreviousColumn } from '../helpers';
 import {
   buildLabelFunction,
-  checkForDateHistogram,
-  getErrorsForDateReference,
-  dateBasedOperationToExpression,
-  hasDateField,
   checkForDataLayerType,
+  checkForDateHistogram,
+  dateBasedOperationToExpression,
+  getErrorsForDateReference,
+  hasDateField,
 } from './utils';
-import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {

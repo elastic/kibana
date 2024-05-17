@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
-import { APP_ID, FEATURE_ID } from '../common/constants';
 import { createUICapabilities, getApiTags } from '../common';
+import { APP_ID, FEATURE_ID } from '../common/constants';
 
 /**
  * The order of appearance in the feature privilege page

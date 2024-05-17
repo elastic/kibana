@@ -11,7 +11,7 @@ import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal'
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';
+import { logWarnOnExternalRequest, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;

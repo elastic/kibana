@@ -6,25 +6,6 @@
  * Side Public License, v 1.
  */
 
-import fetch from 'node-fetch';
-import {
-  filter,
-  Subject,
-  ReplaySubject,
-  interval,
-  merge,
-  timer,
-  retryWhen,
-  tap,
-  delayWhen,
-  takeUntil,
-  map,
-  BehaviorSubject,
-  exhaustMap,
-  mergeMap,
-  skip,
-  firstValueFrom,
-} from 'rxjs';
 import type {
   AnalyticsClientInitContext,
   Event,
@@ -34,12 +15,31 @@ import type {
 } from '@kbn/analytics-client';
 import {
   type ElasticV3ShipperOptions,
+  ErrorWithCode,
   buildHeaders,
   buildUrl,
   createTelemetryCounterHelper,
   eventsToNDJSON,
-  ErrorWithCode,
 } from '@kbn/analytics-shippers-elastic-v3-common';
+import fetch from 'node-fetch';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Subject,
+  delayWhen,
+  exhaustMap,
+  filter,
+  firstValueFrom,
+  interval,
+  map,
+  merge,
+  mergeMap,
+  retryWhen,
+  skip,
+  takeUntil,
+  tap,
+  timer,
+} from 'rxjs';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;

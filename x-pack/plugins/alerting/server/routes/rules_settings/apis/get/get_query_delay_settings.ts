@@ -6,12 +6,12 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { API_PRIVILEGES } from '../../../../../common';
+import { GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/apis/get';
 import { ILicenseState } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
-import { API_PRIVILEGES } from '../../../../../common';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
-import { GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/apis/get';
 
 export const getQueryDelaySettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { ServerlessRoleName } from '../../support/roles';
+import { cleanupCase, cleanupPack, loadCase, loadPack } from '../../tasks/api_fixtures';
 import {
   addToCase,
   checkActionItemsInResults,
@@ -14,9 +16,7 @@ import {
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
-import { loadPack, cleanupPack, cleanupCase, loadCase } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
+import { navigateTo } from '../../tasks/navigation';
 
 describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
   let packName: string;

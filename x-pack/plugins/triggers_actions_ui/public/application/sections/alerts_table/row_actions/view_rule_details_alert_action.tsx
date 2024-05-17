@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import React, { memo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { AlertActionsProps } from '../../../../types';
 

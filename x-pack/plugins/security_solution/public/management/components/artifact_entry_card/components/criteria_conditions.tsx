@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiBadge, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import type { ArtifactInfo, ArtifactInfoEntry } from '../types';
 import {
+  CONDITION_AND,
+  CONDITION_OPERATOR_TYPE_DOES_NOT_MATCH,
+  CONDITION_OPERATOR_TYPE_EXISTS,
+  CONDITION_OPERATOR_TYPE_LIST,
+  CONDITION_OPERATOR_TYPE_MATCH,
+  CONDITION_OPERATOR_TYPE_MATCH_ANY,
+  CONDITION_OPERATOR_TYPE_NESTED,
+  CONDITION_OPERATOR_TYPE_NOT_MATCH,
+  CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
+  CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES,
   CONDITION_OS,
   OS_LINUX,
   OS_MAC,
   OS_WINDOWS,
-  CONDITION_AND,
-  CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES,
-  CONDITION_OPERATOR_TYPE_DOES_NOT_MATCH,
-  CONDITION_OPERATOR_TYPE_NESTED,
-  CONDITION_OPERATOR_TYPE_MATCH,
-  CONDITION_OPERATOR_TYPE_MATCH_ANY,
-  CONDITION_OPERATOR_TYPE_EXISTS,
-  CONDITION_OPERATOR_TYPE_LIST,
-  CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
-  CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
-import type { ArtifactInfo, ArtifactInfoEntry } from '../types';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,

@@ -7,11 +7,11 @@
 
 import React from 'react';
 
-import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { FleetServerHost } from '../../../../types';
 import { useAuthz, useLink, useStartServices } from '../../../../hooks';
+import type { FleetServerHost } from '../../../../types';
 import { FleetServerHostsTable } from '../fleet_server_hosts_table';
 
 export interface FleetServerHostsSectionProps {

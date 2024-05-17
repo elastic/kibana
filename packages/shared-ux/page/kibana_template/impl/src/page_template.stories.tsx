@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
+  InnerPageTemplateStorybookMock,
   KibanaPageTemplateStorybookMock,
   NoDataConfigStorybookMock,
   SolutionNavStorybookMock,
-  InnerPageTemplateStorybookMock,
 } from '@kbn/shared-ux-page-kibana-template-mocks';
 import type {
+  InnerPageTemplateStorybookParams,
   KibanaPageTemplateStorybookParams,
   NoDataConfigStorybookParams,
   SolutionNavStorybookParams,
-  InnerPageTemplateStorybookParams,
 } from '@kbn/shared-ux-page-kibana-template-mocks';
+import React from 'react';
 
 import { KibanaPageTemplateProvider } from './services';
 
-import { KibanaPageTemplate as Component } from './page_template';
 import mdx from '../README.mdx';
+import { KibanaPageTemplate as Component } from './page_template';
 
 export default {
   title: 'Page/Page Template',

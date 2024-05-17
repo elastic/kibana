@@ -12,9 +12,9 @@ import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import type { INPUT_TYPE } from '../inference_base';
-import { InferenceBase, type InferResponse } from '../inference_base';
-import { getTextExpansionOutputComponent } from './text_expansion_output';
+import { type InferResponse, InferenceBase } from '../inference_base';
 import { getTextExpansionInput } from './text_expansion_input';
+import { getTextExpansionOutputComponent } from './text_expansion_output';
 
 export interface TextExpansionPair {
   token: string;

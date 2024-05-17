@@ -6,16 +6,16 @@
  */
 
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_DURATION } from '@kbn/rule-data-utils';
-import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
+  SLO_ALERTS_TABLE_CONFIG_ID,
   casesFeatureId,
   observabilityFeatureId,
-  SLO_ALERTS_TABLE_CONFIG_ID,
 } from '@kbn/observability-shared-plugin/public';
-import { getRenderCellValue } from '../common/render_cell_value';
+import { ALERT_DURATION } from '@kbn/rule-data-utils';
+import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
+import { getRenderCellValue } from '../common/render_cell_value';
 import { columns } from './default_columns';
 
 export const getSloAlertsTableConfiguration = (

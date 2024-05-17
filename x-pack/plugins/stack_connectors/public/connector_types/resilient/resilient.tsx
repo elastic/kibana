@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
-  GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
+  GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ResilientConfig, ResilientSecrets, ResilientActionParams } from './types';
+import { lazy } from 'react';
+import { ResilientActionParams, ResilientConfig, ResilientSecrets } from './types';
 
 export const DESC = i18n.translate('xpack.stackConnectors.components.resilient.selectMessageText', {
   defaultMessage: 'Create an incident in IBM Resilient.',

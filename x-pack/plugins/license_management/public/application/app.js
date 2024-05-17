@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import { EuiEmptyPrompt, EuiPageBody, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LicenseDashboard, UploadLicense } from './sections';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React, { useEffect } from 'react';
 import { APP_PERMISSION } from '../../common/constants';
-import { SectionLoading, useExecutionContext } from '../shared_imports';
-import { EuiPageSection, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
 import { UPLOAD_LICENSE_ROUTE } from '../locator';
+import { SectionLoading, useExecutionContext } from '../shared_imports';
+import { LicenseDashboard, UploadLicense } from './sections';
 
 export const App = ({
   hasPermission,

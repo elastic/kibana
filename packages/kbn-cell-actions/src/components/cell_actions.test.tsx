@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { CellActions } from './cell_actions';
 import { CellActionsMode } from '../constants';
 import { CellActionsProvider } from '../context/cell_actions_context';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { CellActions } from './cell_actions';
 
 const TRIGGER_ID = 'test-trigger-id';
 const VALUE = '123';

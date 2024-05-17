@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import type { DraggableLocation } from '@hello-pangea/dnd';
+import { omit } from 'lodash/fp';
 import type { Dispatch } from 'redux';
 
-import { updateProviders } from '../../../store/actions';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
+import { updateProviders } from '../../../store/actions';
 import { isPrimitiveArray } from '../helpers';
 
 import type { DataProvider, DataProvidersAnd } from './data_provider';
@@ -185,8 +185,8 @@ export const moveProvidersBetweenGroups = ({
         i === sourceGroupIndex
           ? [...updatedSourcererScope]
           : i === destinationGroupIndex
-          ? [...updatedDestinationGroup]
-          : [...group],
+            ? [...updatedDestinationGroup]
+            : [...group],
       ],
       []
     );

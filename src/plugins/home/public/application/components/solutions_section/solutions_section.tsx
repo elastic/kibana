@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SolutionPanel } from './solution_panel';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React, { FC } from 'react';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
+import { SolutionPanel } from './solution_panel';
 
 const sortByOrder = (
   { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,

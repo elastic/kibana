@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { difference } from 'lodash';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { isNestedFieldParent } from '@kbn/discover-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
-import { isNestedFieldParent } from '@kbn/discover-utils';
+import { difference } from 'lodash';
 
 export function getDataViewFieldList(
   dataView: DataView | undefined | null,

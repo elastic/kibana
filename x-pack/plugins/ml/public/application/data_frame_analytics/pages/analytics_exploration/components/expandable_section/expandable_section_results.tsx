@@ -8,9 +8,9 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { escapeKuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { escapeKuery } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
@@ -27,32 +27,32 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
-import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
-import type { RowCountRelation, UseIndexDataReturnType } from '@kbn/ml-data-grid';
-import { type DataGridItem, DataGrid, INDEX_STATUS } from '@kbn/ml-data-grid';
 import {
+  type DataFrameAnalyticsConfig,
   getAnalysisType,
   isClassificationAnalysis,
   isRegressionAnalysis,
-  type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { RowCountRelation, UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import { DataGrid, type DataGridItem, INDEX_STATUS } from '@kbn/ml-data-grid';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 import type { useColorRange } from '../../../../../components/color_range_legend';
 import { ColorRangeLegend } from '../../../../../components/color_range_legend';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
-import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
+import { SEARCH_SIZE, defaultSearchQuery, renderCellPopoverFactory } from '../../../../common';
 
+import { parseInterval } from '../../../../../../../common/util/parse_interval';
 import {
-  replaceTokensInDFAUrlValue,
   openCustomUrlWindow,
+  replaceTokensInDFAUrlValue,
 } from '../../../../../util/custom_url_utils';
 import { replaceStringTokens } from '../../../../../util/string_utils';
-import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
 import type { ExpandableSectionProps } from '.';
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '.';

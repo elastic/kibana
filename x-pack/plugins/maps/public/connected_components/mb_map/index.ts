@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { MbMap } from './mb_map';
+import { DRAW_MODE } from '../../../common/constants';
 import {
   clearGoto,
   clearMouseCoordinates,
@@ -18,6 +18,9 @@ import {
   setMapInitError,
   setMouseCoordinates,
 } from '../../actions';
+import type { MapExtentState } from '../../reducers/map/types';
+import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../reducers/store';
 import {
   getCustomIcons,
   getGoto,
@@ -28,10 +31,7 @@ import {
   getTimeslice,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
-import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../reducers/store';
-import { DRAW_MODE } from '../../../common/constants';
-import type { MapExtentState } from '../../reducers/map/types';
+import { MbMap } from './mb_map';
 
 function mapStateToProps(state: MapStoreState) {
   return {

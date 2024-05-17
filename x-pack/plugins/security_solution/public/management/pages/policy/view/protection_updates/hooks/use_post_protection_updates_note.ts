@@ -6,10 +6,10 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProtectionUpdatesNoteQueryKey } from './use_get_protection_updates_note';
+import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';
-import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
+import { getProtectionUpdatesNoteQueryKey } from './use_get_protection_updates_note';
 
 interface ProtectionUpdatesNoteParams {
   packagePolicyId: string;

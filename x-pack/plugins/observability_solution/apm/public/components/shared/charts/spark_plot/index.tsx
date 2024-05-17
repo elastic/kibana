@@ -17,9 +17,9 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart } from '@elastic/eui';
-import React from 'react';
-import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';

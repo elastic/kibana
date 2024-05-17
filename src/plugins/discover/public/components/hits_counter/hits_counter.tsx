@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+import React from 'react';
+import { useDataState } from '../../application/main/hooks/use_data_state';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { FetchStatus } from '../../application/types';
-import { useDataState } from '../../application/main/hooks/use_data_state';
 
 export enum HitsCounterMode {
   standalone = 'standalone',

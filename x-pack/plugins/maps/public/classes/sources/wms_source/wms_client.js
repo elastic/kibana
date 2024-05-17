@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { format, parse } from 'url';
 import _ from 'lodash';
-import { parseXmlString } from '../../../../common/parse_xml_string';
 import fetch from 'node-fetch';
-import { parse, format } from 'url';
+import { parseXmlString } from '../../../../common/parse_xml_string';
 
 export class WmsClient {
   constructor({ serviceUrl }) {

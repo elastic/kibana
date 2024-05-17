@@ -6,12 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
-import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import { i18n } from '@kbn/i18n';
+import { DATAFEED_STATE, JOB_STATE } from '../../../common/constants/states';
 import type { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
+import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
@@ -36,10 +36,13 @@ export type DatafeedsService = ReturnType<typeof datafeedsProvider>;
 export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
-    const doStartsCalled = datafeedIds.reduce((acc, cur) => {
-      acc[cur] = false;
-      return acc;
-    }, {} as { [id: string]: boolean });
+    const doStartsCalled = datafeedIds.reduce(
+      (acc, cur) => {
+        acc[cur] = false;
+        return acc;
+      },
+      {} as { [id: string]: boolean }
+    );
 
     const results: Results = {};
 
@@ -148,19 +151,25 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   async function getDatafeedIdsByJobId() {
     const { datafeeds } = await mlClient.getDatafeeds();
 
-    return datafeeds.reduce((acc, cur) => {
-      acc[cur.job_id] = cur.datafeed_id;
-      return acc;
-    }, {} as { [id: string]: string });
+    return datafeeds.reduce(
+      (acc, cur) => {
+        acc[cur.job_id] = cur.datafeed_id;
+        return acc;
+      },
+      {} as { [id: string]: string }
+    );
   }
 
   async function getJobIdsByDatafeedId() {
     const { datafeeds } = await mlClient.getDatafeeds();
 
-    return datafeeds.reduce((acc, cur) => {
-      acc[cur.datafeed_id] = cur.job_id;
-      return acc;
-    }, {} as { [id: string]: string });
+    return datafeeds.reduce(
+      (acc, cur) => {
+        acc[cur.datafeed_id] = cur.job_id;
+        return acc;
+      },
+      {} as { [id: string]: string }
+    );
   }
 
   async function getDatafeedByJobId(

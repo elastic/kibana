@@ -9,13 +9,13 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { TestElasticsearchUtils, createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
-  getSupertest,
   createRootWithCorePlugins,
   createTestServers,
+  getSupertest,
 } from '@kbn/core-test-helpers-kbn-server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 
 import type {
   AgentPolicySOAttributes,

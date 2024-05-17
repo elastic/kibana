@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { get } from 'lodash/fp';
 import React from 'react';
 
-import { AlertField } from './alert_field';
-import type { RowRenderer } from '../../../../../../../common/types';
 import { RowRendererId } from '../../../../../../../common/api/timeline';
+import type { RowRenderer } from '../../../../../../../common/types';
+import { Details } from '../helpers';
+import { RowRendererContainer } from '../row_renderer';
+import { AlertField } from './alert_field';
 import {
-  ID,
   DESTINATION_IP,
   DESTINATION_PORT,
   EVENT_CATEGORY,
   FILE_NAME,
   HOST_NAME,
+  ID,
   KIBANA_ALERT_RULE_NAME,
   KIBANA_ALERT_SEVERITY,
   PROCESS_NAME,
@@ -30,8 +32,6 @@ import {
   eventKindMatches,
   showWith,
 } from './helpers';
-import { Details } from '../helpers';
-import { RowRendererContainer } from '../row_renderer';
 import * as i18n from './translations';
 
 export const DEFAULT_CONTEXT_ID = 'alert-renderer';

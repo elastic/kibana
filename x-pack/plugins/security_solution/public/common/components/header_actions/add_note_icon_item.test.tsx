@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/api/timeline';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { TimelineType } from '../../../../common/api/timeline';
 import { TestProviders } from '../../mock';
 import { useUserPrivileges } from '../user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';

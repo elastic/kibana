@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import React, {
   type FC,
   type PropsWithChildren,
@@ -15,7 +16,6 @@ import React, {
   useState,
   ReactNode,
 } from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
 import { ContentProvider, PanelNavNode } from './types';

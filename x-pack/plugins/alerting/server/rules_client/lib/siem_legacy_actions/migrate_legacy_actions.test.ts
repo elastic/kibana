@@ -8,16 +8,16 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObjectReference } from '@kbn/core/server';
 
+import { injectReferencesIntoActions } from '../../common';
 import { migrateLegacyActions } from './migrate_legacy_actions';
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
-import { injectReferencesIntoActions } from '../../common';
 
-import { validateActions } from '../validate_actions';
 import { RulesClientContext } from '../..';
-import { RawRuleAction, RawRule } from '../../../types';
+import { RawRule, RawRuleAction } from '../../../types';
+import { validateActions } from '../validate_actions';
 
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../../common';
+import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 
 jest.mock('./retrieve_migrated_legacy_actions', () => ({
   retrieveMigratedLegacyActions: jest.fn(),

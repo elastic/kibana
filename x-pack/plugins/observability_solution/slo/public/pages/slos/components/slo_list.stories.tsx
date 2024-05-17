@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { SloList as Component } from './slo_list';

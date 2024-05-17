@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
-  EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import type { PackageInfo } from '../../../../types';
-import { useStartServices, useGetPipeline } from '../../../../hooks';
 import {
-  getPipelineNameForDatastream,
   getCustomPipelineNameForDatastream,
+  getPipelineNameForDatastream,
 } from '../../../../../../../common/services';
+import { useGetPipeline, useStartServices } from '../../../../hooks';
+import type { PackageInfo } from '../../../../types';
 
 import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 

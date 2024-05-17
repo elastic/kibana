@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { GeoFileImporter } from './types';
-import { GeoJsonImporter, GEOJSON_FILE_TYPES } from './geojson_importer';
-import { ShapefileImporter, SHAPEFILE_TYPES } from './shapefile_importer';
 import { getFileExtension, validateFile } from '../validate_file';
+import { GEOJSON_FILE_TYPES, GeoJsonImporter } from './geojson_importer';
+import { SHAPEFILE_TYPES, ShapefileImporter } from './shapefile_importer';
+import type { GeoFileImporter } from './types';
 
 export const GEO_FILE_TYPES = [...GEOJSON_FILE_TYPES, ...SHAPEFILE_TYPES];
 const OPTIONS = { checkSizeLimit: false };

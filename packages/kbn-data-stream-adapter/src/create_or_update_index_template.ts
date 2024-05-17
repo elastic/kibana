@@ -10,7 +10,7 @@ import type {
   IndicesPutIndexTemplateRequest,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash/fp';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

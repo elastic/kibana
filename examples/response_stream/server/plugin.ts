@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import { defineReducerStreamRoute, defineSimpleStringStreamRoute } from './routes';

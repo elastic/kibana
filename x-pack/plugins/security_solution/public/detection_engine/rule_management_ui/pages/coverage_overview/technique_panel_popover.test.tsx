@@ -8,12 +8,12 @@
 import { act, fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 
-import { getMockCoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/__mocks__';
 import { TestProviders } from '../../../../common/mock';
-import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
-import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { useUserData } from '../../../../detections/components/user_info';
+import { getMockCoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/__mocks__';
+import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
 
 jest.mock('./coverage_overview_dashboard_context');
 jest.mock('../../../../detections/components/user_info');

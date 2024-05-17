@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { transformHealthServiceProvider } from './transform_health_service';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type {
   TransformGetTransformResponse,
   TransformGetTransformStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { transformHealthServiceProvider } from './transform_health_service';
 
 describe('transformHealthServiceProvider', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;

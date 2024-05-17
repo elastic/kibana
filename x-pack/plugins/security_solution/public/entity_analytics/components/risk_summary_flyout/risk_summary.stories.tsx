@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Story } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { RiskSummary } from './risk_summary';

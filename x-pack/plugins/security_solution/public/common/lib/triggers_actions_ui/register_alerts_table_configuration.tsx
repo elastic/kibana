@@ -8,22 +8,22 @@
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
-import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { getUseTriggersActionsFieldBrowserOptions } from '../../../detections/hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
-import { getUseCellActionsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_cell_actions';
-import { getBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
-import { getUseActionColumnHook } from '../../../detections/hooks/trigger_actions_alert_table/use_actions_column';
-import { getPersistentControlsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_persistent_controls';
+import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   ALERTS_TABLE_REGISTRY_CONFIG_IDS,
   APP_ID,
   CASES_FEATURE_ID,
 } from '../../../../common/constants';
-import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
-import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useFetchPageContext } from '../../../detections/configurations/security_solution_detections/fetch_page_context';
+import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
+import { getUseActionColumnHook } from '../../../detections/hooks/trigger_actions_alert_table/use_actions_column';
+import { getBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
+import { getUseCellActionsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_cell_actions';
+import { getPersistentControlsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_persistent_controls';
+import { getUseTriggersActionsFieldBrowserOptions } from '../../../detections/hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
+import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const registerAlertsTableConfiguration = (

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useRef } from 'react';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { memo, useRef } from 'react';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 

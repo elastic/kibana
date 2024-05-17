@@ -1,3 +1,4 @@
+import { LayerValue } from '@elastic/charts';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,16 +8,15 @@
  */
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import faker from 'faker';
+import { consolidateMetricColumns } from '../../common/utils';
+import { createMockBucketColumns, createMockPieParams, createMockVisData } from '../mocks';
 import {
+  getAccessor,
   getFilterClickData,
   getFilterEventData,
   getFilterPopoverTitle,
-  getAccessor,
 } from './filter_helpers';
-import { createMockBucketColumns, createMockVisData, createMockPieParams } from '../mocks';
-import { consolidateMetricColumns } from '../../common/utils';
-import { LayerValue } from '@elastic/charts';
-import faker from 'faker';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();

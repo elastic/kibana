@@ -6,10 +6,10 @@
  */
 
 import {
-  mergePartialSetupStates,
   PartialSetupState,
   areResourcesSetup,
   createDefaultSetupState,
+  mergePartialSetupStates,
 } from './setup';
 
 const createDataState = (available: boolean): PartialSetupState => ({ data: { available } });

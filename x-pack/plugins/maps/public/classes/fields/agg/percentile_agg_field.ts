@@ -8,11 +8,11 @@
 import { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AGG_TYPE } from '../../../../common/constants';
-import { IESAggField, CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
-import { ESDocField } from '../es_doc_field';
 import { getOrdinalSuffix } from '../../util/ordinal_suffix';
+import { ESDocField } from '../es_doc_field';
 import { AggField } from './agg_field';
+import { CountAggFieldParams, IESAggField } from './agg_field_types';
 
 interface PercentileAggParams extends CountAggFieldParams {
   esDocField?: ESDocField;

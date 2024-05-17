@@ -7,7 +7,7 @@
  */
 
 import type { Metric } from '../../../../common/types';
-import { getFormulaEquivalent, SUPPORTED_METRICS } from '../metrics';
+import { SUPPORTED_METRICS, getFormulaEquivalent } from '../metrics';
 import { createFormulaColumn } from './formula';
 import { convertMetricAggregationColumnWithoutSpecialParams } from './parent_pipeline';
 import { CommonColumnConverterArgs, CommonColumnsConverterArgs } from './types';

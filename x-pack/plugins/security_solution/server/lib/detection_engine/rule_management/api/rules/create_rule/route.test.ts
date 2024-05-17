@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { buildMlAuthz } from '../../../../../machine_learning/authz';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
+import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import {
-  getEmptyFindResult,
-  getRuleMock,
-  getCreateRequest,
-  getFindResultWithSingleHit,
   createMlRuleRequest,
   getBasicEmptySearchResponse,
+  getCreateRequest,
+  getEmptyFindResult,
+  getFindResultWithSingleHit,
+  getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { createRuleRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
+import { createRuleRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz');
 

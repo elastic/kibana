@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
-  Chart,
-  Position,
-  timeFormatter,
-  Settings,
   BrushEndListener,
+  Chart,
   LegendItemListener,
+  Position,
+  Settings,
+  timeFormatter,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import React, { useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getChartDateLabel } from '../../../lib/helper';
-import { LocationDurationLine } from '../../../../../common/types';
-import { DurationLineSeriesList } from './duration_line_series_list';
-import { ChartWrapper } from './chart_wrapper';
-import { useUrlParams } from '../../../hooks';
-import { getTickFormat } from './get_tick_format';
-import { ChartEmptyState } from './chart_empty_state';
-import { DurationAnomaliesBar } from './duration_line_bar_list';
-import { AnomalyRecords } from '../../../state/actions';
-import { UptimeThemeContext } from '../../../contexts';
-import { MONITOR_CHART_HEIGHT } from '../../monitor';
-import { monitorStatusSelector } from '../../../state/selectors';
-import { microToMilli, microToSec } from '../../../lib/formatting';
 import { MS_LABEL, SECONDS_LABEL } from '../../../../../common/translations/translations';
+import { LocationDurationLine } from '../../../../../common/types';
+import { UptimeThemeContext } from '../../../contexts';
+import { useUrlParams } from '../../../hooks';
+import { microToMilli, microToSec } from '../../../lib/formatting';
+import { getChartDateLabel } from '../../../lib/helper';
+import { AnomalyRecords } from '../../../state/actions';
+import { monitorStatusSelector } from '../../../state/selectors';
+import { MONITOR_CHART_HEIGHT } from '../../monitor';
+import { ChartEmptyState } from './chart_empty_state';
+import { ChartWrapper } from './chart_wrapper';
+import { DurationAnomaliesBar } from './duration_line_bar_list';
+import { DurationLineSeriesList } from './duration_line_series_list';
+import { getTickFormat } from './get_tick_format';
 
 interface DurationChartProps {
   /**

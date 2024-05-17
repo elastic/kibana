@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import type { Either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 
 /**
  * Creates a schema that sets a default value if the input value is not specified.

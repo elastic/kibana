@@ -8,8 +8,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../test/context_jest';
-import { PagePreview } from './page_preview';
 import { getRenderedElement as element } from '../../test/selectors';
+import { PagePreview } from './page_preview';
 
 jest.mock('../../supported_renderers');
 

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
-  EuiTitle,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiTabbedContent,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiText,
-  EuiCallOut,
-  EuiLink,
-  EuiCodeBlock,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
+import { Aliases, TemplateDeserialized, getTemplateParameter } from '../../../../../common';
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
-import { TemplateDeserialized, getTemplateParameter, Aliases } from '../../../../../common';
-import { SimulateTemplate } from '../../index_templates';
 import { getLifecycleValue } from '../../../lib/data_streams';
+import { SimulateTemplate } from '../../index_templates';
 import { WizardSection } from '../template_form';
 
 const { stripEmptyFields } = serializers;

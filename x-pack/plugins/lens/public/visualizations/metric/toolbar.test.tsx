@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { createMockFramePublicAPI } from '../../mocks';
 import { Toolbar } from './toolbar';
 import { MetricVisualizationState } from './visualization';
-import { createMockFramePublicAPI } from '../../mocks';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 describe('metric toolbar', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
 import { MlJobSelect } from '.';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';

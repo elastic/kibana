@@ -12,10 +12,10 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
-import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 
 jest.mock('../../common/use_cases_features');
 jest.mock('../../containers/configure/use_get_case_configuration');

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { JoinEditor } from './join_editor';
-import { getSelectedLayerJoinDescriptors } from '../../../selectors/map_selectors';
-import { setJoinsForLayer } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
-import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
+import { setJoinsForLayer } from '../../../actions';
+import { ILayer } from '../../../classes/layers/layer';
+import { MapStoreState } from '../../../reducers/store';
+import { getSelectedLayerJoinDescriptors } from '../../../selectors/map_selectors';
+import { JoinEditor } from './join_editor';
 
 function mapStateToProps(state: MapStoreState) {
   return {

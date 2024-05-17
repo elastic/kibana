@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
 import { css } from '@emotion/react';
+import { ComponentStory } from '@storybook/react';
+import React, { FC, useState } from 'react';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
-import { AVAILABLE_PALETTES, getPalette, NeutralPalette } from '../palettes';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
-import { ColorMapping } from '../config';
 import { getColorFactory } from '../color/color_handling';
-import { ruleMatch } from '../color/rule_matching';
 import { getValidColor } from '../color/color_math';
+import { ruleMatch } from '../color/rule_matching';
+import { ColorMapping } from '../config';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
+import { AVAILABLE_PALETTES, NeutralPalette, getPalette } from '../palettes';
 
 export default {
   title: 'Color Mapping',

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiCodeBlock, EuiFlexItem } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { IfElement } from '../models/list/if_element';
 import { PluginStatement as PluginStatementModel } from '../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
-import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
 import './statement.scss';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import type { GuideId } from '@kbn/guided-onboarding';
 import { API_BASE_PATH } from '../../common';
 import type { GuidesConfig } from '../../common';

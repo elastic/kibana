@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { AlertFieldsTable, AlertFieldsTableProps } from '.';
-import { mount, ReactWrapper } from 'enzyme';
 
 describe('AlertFieldsTable', () => {
   const defaultProps = {

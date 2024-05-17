@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import { format, parse } from 'url';
+import fetch from 'node-fetch';
 import { KIBANA_DEFAULT_URL } from './constants';
 
 let kibanaUrl: string;

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import { add, type Duration } from 'date-fns';
+import { type Duration, add } from 'date-fns';
+import * as Rx from 'rxjs';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -18,13 +18,13 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { CancellationToken } from '@kbn/reporting-common';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ESQLSearchReponse as ESQLSearchResponse } from '@kbn/es-types';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { CancellationToken } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,

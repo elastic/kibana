@@ -1,3 +1,11 @@
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,24 +14,16 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
-import { DataViewsContract } from '@kbn/data-plugin/public';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { FetchStatus } from '../../types';
-import { RecordRawType } from '../state_management/discover_data_state_container';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../state_management/discover_state_provider';
-import { DiscoverAppState } from '../state_management/discover_app_state_container';
-import { DiscoverStateContainer } from '../state_management/discover_state';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { FetchStatus } from '../../types';
+import { DiscoverAppState } from '../state_management/discover_app_state_container';
+import { RecordRawType } from '../state_management/discover_data_state_container';
+import { DiscoverStateContainer } from '../state_management/discover_state';
+import { DiscoverMainProvider } from '../state_management/discover_state_provider';
+import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,

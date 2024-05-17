@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { memo } from 'react';
 const CommonUseField = getUseField({ component: Field });
 
 interface Props {

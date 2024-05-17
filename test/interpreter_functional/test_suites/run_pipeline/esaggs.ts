@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { ExpectExpression, expectExpressionProvider } from './helpers';
 
 function getCell(esaggsResult: any, column: number, row: number): unknown | undefined {
   const columnId = esaggsResult?.columns[column]?.id;

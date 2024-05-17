@@ -23,7 +23,7 @@ import { UserActionTypes } from '../types/domain';
 type SnakeCaseOrCamelCaseUserAction<
   T extends 'snakeCase' | 'camelCase',
   S,
-  C
+  C,
 > = T extends 'snakeCase' ? S : C;
 
 export const isConnectorUserAction = (userAction: unknown): userAction is ConnectorUserAction =>

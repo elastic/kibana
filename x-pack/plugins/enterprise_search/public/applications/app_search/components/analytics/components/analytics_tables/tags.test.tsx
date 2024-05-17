@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import { TagsList, TagsCount } from './tags';
+import { TagsCount, TagsList } from './tags';
 
 describe('TagsList', () => {
   it('renders', () => {

@@ -7,11 +7,11 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { TestProviders, mockGlobalState, createMockStore } from '../../../../common/mock';
+import { TestProviders, createMockStore, mockGlobalState } from '../../../../common/mock';
 
+import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { EmbeddedMapComponent } from './embedded_map';
 import { getLayerList } from './map_config';
-import { useIsFieldInIndexPattern } from '../../../containers/fields';
 
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 

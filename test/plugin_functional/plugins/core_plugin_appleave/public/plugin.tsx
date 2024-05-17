@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/public';
 
 export class CoreAppLeavePlugin
   implements Plugin<CoreAppLeavePluginSetup, CoreAppLeavePluginStart>

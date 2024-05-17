@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { KueryNode } from '@kbn/es-query';
 import type { CoreSetup } from '@kbn/core/public';
+import type { KueryNode } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
 import type { QuerySuggestionBasic, QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 

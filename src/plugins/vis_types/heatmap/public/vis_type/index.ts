@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getHeatmapVisTypeDefinition } from './heatmap';
 import type { HeatmapTypeProps } from '../types';
+import { getHeatmapVisTypeDefinition } from './heatmap';
 
 export const heatmapVisType = (props: HeatmapTypeProps) => {
   return getHeatmapVisTypeDefinition(props);

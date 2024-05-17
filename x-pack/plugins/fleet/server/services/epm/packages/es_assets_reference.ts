@@ -7,8 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import pRetry from 'p-retry';
 import { uniqBy } from 'lodash';
+import pRetry from 'p-retry';
 
 import type { EsAssetReference, Installation } from '../../../types';
 

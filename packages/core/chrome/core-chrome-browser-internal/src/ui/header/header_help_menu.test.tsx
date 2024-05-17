@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { HeaderHelpMenu } from './header_help_menu';
 

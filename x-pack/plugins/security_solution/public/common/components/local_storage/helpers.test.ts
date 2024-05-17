@@ -6,9 +6,9 @@
  */
 
 import {
-  TREEMAP_CATEGORY,
   ALERTS_PAGE,
   STACK_BY_SETTING_NAME,
+  TREEMAP_CATEGORY,
 } from '../../../detections/pages/detection_engine/chart_panels/alerts_local_storage/constants';
 import { getSettingKey, isDefaultWhenEmptyString } from './helpers';
 

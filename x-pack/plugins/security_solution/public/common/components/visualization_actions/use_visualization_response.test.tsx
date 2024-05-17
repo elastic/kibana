@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { useVisualizationResponse } from './use_visualization_response';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
+import { useVisualizationResponse } from './use_visualization_response';
 import { parseVisualizationData } from './utils';
 
 describe('useVisualizationResponse', () => {

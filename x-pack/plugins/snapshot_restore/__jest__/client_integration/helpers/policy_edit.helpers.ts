@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { AsyncTestBedConfig, registerTestBed } from '@kbn/test-jest-helpers';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
-import { WithAppDependencies } from './setup_environment';
 import { POLICY_NAME } from './constant';
-import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
+import { PolicyFormTestSubjects, formSetup } from './policy_form.helpers';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {

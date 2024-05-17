@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEqual, uniq } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { isEqual, uniq } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiButton,
@@ -22,30 +22,30 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/ml-response-stream/client';
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
-import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 
 import {
-  getGroupTableItems,
-  LogRateAnalysisResultsTable,
   LogRateAnalysisResultsGroupsTable,
+  LogRateAnalysisResultsTable,
+  getGroupTableItems,
 } from '../log_rate_analysis_results_table';
 
 import { FieldFilterPopover } from './field_filter_popover';

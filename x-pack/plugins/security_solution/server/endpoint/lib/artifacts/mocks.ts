@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
 import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { mapValues } from 'lodash';
 import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import {
+  getEmptyInternalArtifactMock,
   getInternalArtifactMock,
   getInternalArtifactMockWithDiffs,
-  getEmptyInternalArtifactMock,
 } from '../../schemas/artifacts/saved_objects.mock';
 import { ArtifactConstants } from './common';
 import { Manifest } from './manifest';

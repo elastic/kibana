@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
+import { useGetCategoriesQuery, useGetPackagesQuery } from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
+import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 
 import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
 
-import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
+import { ExperimentalFeaturesService, doesPackageHaveIntegrations } from '../../../../../services';
 
 import {
   isInputOnlyPolicyTemplate,

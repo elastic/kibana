@@ -9,14 +9,14 @@ import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
-import { TestProviders } from '../../../../common/mock';
-import { hostsModel } from '../../store';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import { TestProviders } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { hostsModel } from '../../store';
 
-import { getArgs, UncommonProcessTable, getUncommonColumnsCurated } from '.';
-import { mockData } from './mock';
+import { UncommonProcessTable, getArgs, getUncommonColumnsCurated } from '.';
 import { HostsType } from '../../store/model';
+import { mockData } from './mock';
 import * as i18n from './translations';
 
 jest.mock('../../../../common/lib/kibana');

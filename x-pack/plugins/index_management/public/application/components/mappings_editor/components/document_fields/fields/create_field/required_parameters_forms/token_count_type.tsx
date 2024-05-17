@@ -9,9 +9,9 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyzerParameter } from '../../../field_parameters';
 import { STANDARD } from '../../../../../constants';
 import { FormRow } from '../../../../../shared_imports';
+import { AnalyzerParameter } from '../../../field_parameters';
 
 export const TokenCountTypeRequiredParameters = () => {
   return (

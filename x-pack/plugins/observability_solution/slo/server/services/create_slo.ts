@@ -9,13 +9,12 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 import {
+  SLO_MODEL_VERSION,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_MODEL_VERSION,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
@@ -24,6 +23,7 @@ import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
+import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 
 export class CreateSLO {
   constructor(

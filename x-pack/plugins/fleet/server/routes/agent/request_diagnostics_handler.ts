@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../common/services';
 
+import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
+import { getAgentById } from '../../services/agents';
 import type {
   PostBulkRequestDiagnosticsActionRequestSchema,
   PostRequestDiagnosticsActionRequestSchema,
 } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
-import { getAgentById } from '../../services/agents';
 
 export const requestDiagnosticsHandler: RequestHandler<
   TypeOf<typeof PostRequestDiagnosticsActionRequestSchema.params>,

@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 
 import {
   EuiFlexGroup,
-  EuiPanel,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiHealth,
   EuiIconTip,
+  EuiPanel,
   EuiSkeletonTitle,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { InfoIndicators } from '../../../../common/types';
-import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelQualityDegradedText,
   summaryPanelQualityGoodText,
@@ -28,6 +26,8 @@ import {
   summaryPanelQualityText,
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
+import { InfoIndicators } from '../../../../common/types';
+import { useSummaryPanelContext } from '../../../hooks';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 
 export function DatasetsQualityIndicators() {

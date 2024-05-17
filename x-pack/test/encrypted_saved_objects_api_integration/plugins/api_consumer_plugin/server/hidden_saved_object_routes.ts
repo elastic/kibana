@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, CoreSetup, SavedObject } from '@kbn/core/server';
+import { CoreSetup, IRouter, SavedObject } from '@kbn/core/server';
 import { PluginsSetup, PluginsStart } from '.';
 
 export function registerHiddenSORoutes(

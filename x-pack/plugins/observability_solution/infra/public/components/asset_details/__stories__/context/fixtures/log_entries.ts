@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import type {
-  IKibanaSearchResponse,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/search-types';
-import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
+import { of } from 'rxjs';
 import {
-  type LogEntriesSearchResponsePayload,
   LOG_ENTRIES_SEARCH_STRATEGY,
+  type LogEntriesSearchResponsePayload,
 } from '../../../../../../common/search_strategies/log_entries/log_entries';
 import { generateFakeEntries } from '../../../../../test_utils/entries';
 

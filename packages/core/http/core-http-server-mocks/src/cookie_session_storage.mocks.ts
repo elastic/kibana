@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SessionStorageFactory, SessionStorage } from '@kbn/core-http-server';
+import type { SessionStorage, SessionStorageFactory } from '@kbn/core-http-server';
 
 const createSessionStorageMock = <T>(): jest.Mocked<SessionStorage<T>> => ({
   get: jest.fn().mockResolvedValue({}),

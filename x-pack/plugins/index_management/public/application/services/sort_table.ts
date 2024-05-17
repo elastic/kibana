@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy, get } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { Index } from '../../../common';
 import type { ExtensionsService } from '../../services';
 

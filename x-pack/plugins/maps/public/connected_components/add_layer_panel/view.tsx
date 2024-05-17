@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutBody } from './flyout_body';
+import React, { Component } from 'react';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
 import {
@@ -25,6 +24,7 @@ import {
   type RenderSecondaryActionButtonProps,
   getWizardById,
 } from '../../classes/layers/wizards/layer_wizard_registry';
+import { FlyoutBody } from './flyout_body';
 
 export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';

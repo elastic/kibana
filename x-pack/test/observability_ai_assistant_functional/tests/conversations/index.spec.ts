@@ -11,8 +11,8 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import {
-  createLlmProxy,
   LlmProxy,
+  createLlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';

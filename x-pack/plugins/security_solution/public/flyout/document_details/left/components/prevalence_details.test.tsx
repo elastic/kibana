@@ -7,6 +7,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { licenseService } from '../../../../common/hooks/use_license';
+import { TestProviders } from '../../../../common/mock';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { LeftPanelContext } from '../context';
 import { PrevalenceDetails } from './prevalence_details';
 import {
@@ -15,14 +18,11 @@ import {
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_UPSELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from './test_ids';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { TestProviders } from '../../../../common/mock';
-import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('../../shared/hooks/use_prevalence');
 

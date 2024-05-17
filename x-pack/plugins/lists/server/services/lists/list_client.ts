@@ -53,11 +53,10 @@ import {
   searchListItemByValues,
   updateListItem,
 } from '../items';
-import listsItemsPolicy from '../items/list_item_policy.json';
 import listItemMappings from '../items/list_item_mappings.json';
+import listsItemsPolicy from '../items/list_item_policy.json';
 
-import listPolicy from './list_policy.json';
-import listMappings from './list_mappings.json';
+import { createListIfItDoesNotExist } from './create_list_if_it_does_not_exist';
 import type {
   ConstructorOptions,
   CreateListIfItDoesNotExistOptions,
@@ -80,7 +79,8 @@ import type {
   UpdateListItemOptions,
   UpdateListOptions,
 } from './list_client_types';
-import { createListIfItDoesNotExist } from './create_list_if_it_does_not_exist';
+import listMappings from './list_mappings.json';
+import listPolicy from './list_policy.json';
 
 import {
   createList,

@@ -7,22 +7,22 @@
  */
 
 import type { IncomingHttpHeaders } from 'http';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
-import type { DiagnosticResult } from '@elastic/transport';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DiagnosticResult } from '@elastic/transport';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { getKbnSearchError } from '../../report_search_error';
-import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
+import { catchError, tap } from 'rxjs';
 import type {
   IAsyncSearchOptions,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
 } from '../../../../common';
 import { pollSearch } from '../../../../common';
+import { SearchConfigSchema } from '../../../../config';
+import { getKbnSearchError } from '../../report_search_error';
+import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchConfigSchema } from '../../../../config';
 
 export const sqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,

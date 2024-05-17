@@ -6,7 +6,7 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
+import { MapsUsage, getMapsTelemetry } from '../maps_telemetry';
 
 export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetup): void {
   if (!usageCollection) {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { APIReturnType, callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { APIReturnType, callApmApi } from '../../../../../services/rest/create_call_apm_api';
 
 type Config =
   APIReturnType<'GET /api/apm/settings/agent-configuration 2023-10-31'>['configurations'][0];

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getTelemetrySavedObject } from './get_telemetry_saved_object';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { getTelemetrySavedObject } from './get_telemetry_saved_object';
 
 describe('getTelemetrySavedObject', () => {
   it('returns {} when saved object not found', async () => {

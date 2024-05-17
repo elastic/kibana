@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { InternalOverlayBannersStart, OverlayBannersService } from './banners_service';
-import { take } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { take } from 'rxjs';
+import { InternalOverlayBannersStart, OverlayBannersService } from './banners_service';
 
 describe('OverlayBannersService', () => {
   let service: InternalOverlayBannersStart;

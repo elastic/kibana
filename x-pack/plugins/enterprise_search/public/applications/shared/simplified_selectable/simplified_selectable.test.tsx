@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiSelectable, EuiSelectableList, EuiSelectableSearch } from '@elastic/eui';
 

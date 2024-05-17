@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from './translations';
-import { CredentialsApiUrl } from './credentials_api_url';
+import React, { memo } from 'react';
 import { CredentialsAuth, OAuth } from './auth_types';
+import { CredentialsApiUrl } from './credentials_api_url';
+import * as i18n from './translations';
 
 interface Props {
   isOAuth: boolean;

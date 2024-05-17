@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
+  createCase,
   createComment,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
-  getSpaceUrlPrefix,
-  createCase,
   getAuthWithSuperUser,
+  getSpaceUrlPrefix,
 } from '../../../../common/lib/api';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

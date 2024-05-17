@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { get } from 'lodash';
 
 import { ToastInputFields } from '@kbn/core/public';
 import { formatMsg } from '../../lib/format_msg';

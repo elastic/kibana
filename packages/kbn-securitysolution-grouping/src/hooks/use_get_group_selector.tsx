@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { groupActions, groupByIdSelector } from './state';
-import type { GroupOption } from './types';
-import { Action, defaultGroup, GroupMap } from './types';
 import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';
+import { groupActions, groupByIdSelector } from './state';
+import type { GroupOption } from './types';
+import { Action, GroupMap, defaultGroup } from './types';
 
 export interface UseGetGroupSelectorArgs {
   defaultGroupingOptions: GroupOption[];

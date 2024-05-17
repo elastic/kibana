@@ -6,13 +6,13 @@
  */
 import React, { useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { useKibana } from '../../utils/kibana_react';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
+import { useHistory } from 'react-router-dom';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { useKibana } from '../../utils/kibana_react';
 
 interface RulesTabProps {
   setRefresh: React.Dispatch<React.SetStateAction<Date>>;

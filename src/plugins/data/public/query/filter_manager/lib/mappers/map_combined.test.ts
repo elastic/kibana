@@ -9,10 +9,10 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
   BooleanRelation,
-  buildEmptyFilter,
-  buildCombinedFilter,
   FilterMeta,
   RangeFilter,
+  buildCombinedFilter,
+  buildEmptyFilter,
 } from '@kbn/es-query';
 import { mapCombined } from './map_combined';
 

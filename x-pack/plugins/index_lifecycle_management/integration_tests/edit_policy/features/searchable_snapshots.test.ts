@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { act } from 'react-dom/test-utils';
+import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
-import { API_BASE_PATH } from '../../../common/constants';
 import {
   SearchableSnapshotsTestBed,
   setupSearchableSnapshotsTestBed,
 } from './searchable_snapshots.helpers';
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> searchable snapshots', () => {
   let testBed: SearchableSnapshotsTestBed;

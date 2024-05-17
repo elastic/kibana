@@ -9,7 +9,10 @@
 export type UrlServiceErrorCode = 'SLUG_EXISTS' | 'NOT_FOUND' | '';
 
 export class UrlServiceError extends Error {
-  constructor(message: string, public readonly code: UrlServiceErrorCode = '') {
+  constructor(
+    message: string,
+    public readonly code: UrlServiceErrorCode = ''
+  ) {
     super(message);
   }
 }

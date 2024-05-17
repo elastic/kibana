@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import type {
-  SavedObjectsModelChange,
-  SavedObjectModelTransformationDoc,
-  SavedObjectModelTransformationContext,
   SavedObjectModelDataBackfillFn,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationDoc,
+  SavedObjectsModelChange,
 } from '@kbn/core-saved-objects-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { buildModelVersionTransformFn } from './build_transform_fn';
 
 describe('buildModelVersionTransformFn', () => {

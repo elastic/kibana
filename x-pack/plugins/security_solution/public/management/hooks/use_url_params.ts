@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { parse, stringify } from 'query-string';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**

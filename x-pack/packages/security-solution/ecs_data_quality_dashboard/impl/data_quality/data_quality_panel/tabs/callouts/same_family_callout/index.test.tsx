@@ -9,10 +9,10 @@ import { EcsVersion } from '@elastic/ecs';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { FIELDS_WITH_MAPPINGS_SAME_FAMILY } from '../../../index_properties/translations';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { SameFamilyCallout } from '.';
 import { mockPartitionedFieldMetadataWithSameFamily } from '../../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
+import { TestProviders } from '../../../../mock/test_providers/test_providers';
+import { FIELDS_WITH_MAPPINGS_SAME_FAMILY } from '../../../index_properties/translations';
 
 const content = 'you are reviewing a pull request';
 

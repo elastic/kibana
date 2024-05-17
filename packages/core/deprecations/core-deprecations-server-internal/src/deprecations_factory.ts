@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { DeprecationsDetails, DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import type { DomainDeprecationDetails, DeprecationsDetails } from '@kbn/core-deprecations-common';
-import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { DeprecationsRegistry } from './deprecations_registry';
 
 export interface DeprecationsFactoryDeps {

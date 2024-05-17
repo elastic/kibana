@@ -10,24 +10,24 @@ import './management_app.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
-import { AppContextProvider } from './management_context';
+import { NavigationCardsSubject, SectionsServiceStart } from '../../types';
 import {
-  ManagementSection,
   MANAGEMENT_BREADCRUMB,
   MANAGEMENT_BREADCRUMB_NO_HREF,
+  ManagementSection,
 } from '../../utils';
-import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { SectionsServiceStart, NavigationCardsSubject } from '../../types';
+import { AppContextProvider } from './management_context';
+import { ManagementRouter } from './management_router';
 
 interface ManagementAppProps {
   appBasePath: string;

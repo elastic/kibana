@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BucketAggs, convertBucketToColumns } from '.';
-import { DateHistogramColumn, FiltersColumn, RangeColumn, TermsColumn } from '../../types';
 import { AggBasedColumn, SchemaConfig } from '../../..';
+import { DateHistogramColumn, FiltersColumn, RangeColumn, TermsColumn } from '../../types';
 
 const mockConvertToDateHistogramColumn = jest.fn();
 const mockConvertToFiltersColumn = jest.fn();
@@ -163,7 +163,7 @@ describe('convertBucketToColumns', () => {
       string,
       Parameters<typeof convertBucketToColumns>,
       () => void,
-      Partial<TermsColumn | DateHistogramColumn | FiltersColumn | RangeColumn> | null
+      Partial<TermsColumn | DateHistogramColumn | FiltersColumn | RangeColumn> | null,
     ]
   >([
     [

@@ -23,7 +23,7 @@
  *   unmount();
  * });
  */
-import { resetContext, LogicWrapper } from 'kea';
+import { LogicWrapper, resetContext } from 'kea';
 
 type LogicFile = LogicWrapper<any>;
 

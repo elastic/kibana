@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { once } from 'lodash';
 import type {
   AddVersionOpts,
   RouteValidationSpec,
-  VersionedRouteCustomResponseBodyValidation,
   VersionedResponseBodyValidation,
+  VersionedRouteCustomResponseBodyValidation,
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
+import { once } from 'lodash';
 
 export function isCustomValidation(
   v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation

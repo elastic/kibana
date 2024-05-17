@@ -8,32 +8,32 @@
 
 import './_dashboard_app.scss';
 
-import React from 'react';
-import { parse, ParsedQuery } from 'query-string';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import { ParsedQuery, parse } from 'query-string';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import {
-  createDashboardListingFilterUrl,
   CREATE_NEW_DASHBOARD_URL,
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   VIEW_DASHBOARD_URL,
+  createDashboardListingFilterUrl,
 } from '../dashboard_constants';
-import { DashboardApp } from './dashboard_app';
-import { pluginServices } from '../services/plugin_services';
-import { RedirectToProps } from '../dashboard_container/types';
 import { createDashboardEditUrl } from '../dashboard_constants';
-import { DashboardNoMatch } from './listing_page/dashboard_no_match';
-import { DashboardMountContext } from './hooks/dashboard_mount_context';
-import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
-import { DashboardListingPage } from './listing_page/dashboard_listing_page';
+import { RedirectToProps } from '../dashboard_container/types';
+import { pluginServices } from '../services/plugin_services';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
+import { DashboardApp } from './dashboard_app';
+import { DashboardMountContext } from './hooks/dashboard_mount_context';
+import { DashboardListingPage } from './listing_page/dashboard_listing_page';
+import { DashboardNoMatch } from './listing_page/dashboard_no_match';
+import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',

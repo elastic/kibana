@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiTitle,
-  EuiSpacer,
-  EuiFlexItem,
   EuiFlexGroup,
-  EuiTabs,
-  EuiTab,
-  useEuiTheme,
-  useEuiMinBreakpoint,
+  EuiFlexItem,
   type EuiPageHeaderProps,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  useEuiMinBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React from 'react';
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'>;
 
 export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) => {

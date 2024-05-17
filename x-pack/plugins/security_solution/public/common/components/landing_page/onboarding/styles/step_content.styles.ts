@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiShadow, useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import { useEuiFontSize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
 

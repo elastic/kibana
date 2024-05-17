@@ -8,8 +8,8 @@
 import {
   IEvent,
   IEventLogger,
-  millisToNanos,
   SAVED_OBJECT_REL_PRIMARY,
+  millisToNanos,
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
@@ -46,7 +46,7 @@ export const executionType = {
   STANDARD: 'standard',
   BACKFILL: 'backfill',
 } as const;
-export type ExecutionType = typeof executionType[keyof typeof executionType];
+export type ExecutionType = (typeof executionType)[keyof typeof executionType];
 
 interface BackfillOpts {
   id: string;

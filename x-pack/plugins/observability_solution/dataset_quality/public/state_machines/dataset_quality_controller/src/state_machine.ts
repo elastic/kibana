@@ -7,34 +7,34 @@
 
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DoneInvokeEvent, InterpreterFrom, assign, createMachine } from 'xstate';
 import { DataStreamStat } from '../../../../common/api_types';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
   DashboardType,
-  DataStreamSettings,
   DataStreamDetails,
+  DataStreamSettings,
   GetDataStreamsStatsQuery,
   GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
   GetNonAggregatableDataStreamsResponse,
 } from '../../../../common/data_streams_stats';
+import { Integration } from '../../../../common/data_streams_stats/integration';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
+import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { generateDatasets } from '../../../utils';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
-  fetchDatasetSettingsFailedNotifier,
   fetchDatasetDetailsFailedNotifier,
+  fetchDatasetSettingsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
   fetchIntegrationDashboardsFailedNotifier,
   fetchIntegrationsFailedNotifier,
-  noDatasetSelected,
   fetchNonAggregatableDatasetsFailedNotifier,
+  noDatasetSelected,
 } from './notifications';
 import {
   DatasetQualityControllerContext,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Dispatch } from 'react';
+import { EuiButtonIcon, EuiToolTip, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiButtonIcon, useEuiTheme, euiCanAnimate } from '@elastic/eui';
+import React, { Dispatch } from 'react';
 import type { Field } from './utils';
 
 interface AddMetadataPinToRowProps {

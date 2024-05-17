@@ -9,8 +9,8 @@ import { Reducer } from 'react';
 import { State } from './store';
 
 import { OnHighlightChangeArgs } from '../components/profile_tree';
+import { hasAggregations, hasSearch } from '../lib';
 import { ShardSerialized, Targets } from '../types';
-import { hasSearch, hasAggregations } from '../lib';
 
 export type Action =
   | { type: 'setProfiling'; value: boolean }
@@ -40,7 +40,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
         indexName: value.indexName,
         operation: Object.freeze(restOfOperation),
         // prettier-ignore
-        shardName: `[${/* shard id */value.shard.id[0]}][${/* shard number */value.shard.id[2] }]`,
+        shardName: `[${/* shard id */ value.shard.id[0]}][${/* shard number */ value.shard.id[2]}]`,
       };
     } else {
       nextState.highlightDetails = null;

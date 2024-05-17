@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import { Client, ClusterConnectionPool, HttpConnection } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { parseClientOptions } from './client_config';
-import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
-import { createTransport } from './create_transport';
+import type { Logger } from '@kbn/logging';
 import type { AgentFactoryProvider } from './agent_manager';
+import { parseClientOptions } from './client_config';
+import { createTransport } from './create_transport';
+import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { patchElasticsearchClient } from './patch_client';
 
 const noop = () => undefined;

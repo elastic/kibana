@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import * as URL from '../../../../hooks/use_url_params';
-import { fireEvent } from '@testing-library/react';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { SyntheticsUrlParams } from '../../../../utils/url_params/get_supported_url_params';
 import { QuickFilters } from './quick_filters';

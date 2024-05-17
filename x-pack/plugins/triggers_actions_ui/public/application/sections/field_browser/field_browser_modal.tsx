@@ -5,29 +5,29 @@
  * 2.0.
  */
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
-  EuiButton,
-  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import type { FieldBrowserProps } from './types';
 import { Search } from './components/search';
+import type { FieldBrowserProps } from './types';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
 
-import * as i18n from './translations';
-import { CategoriesSelector } from './components/categories_selector';
 import { CategoriesBadges } from './components/categories_badges';
+import { CategoriesSelector } from './components/categories_selector';
 import { FieldTable } from './components/field_table';
+import * as i18n from './translations';
 
 export type FieldBrowserModalProps = Pick<
   FieldBrowserProps,

@@ -8,29 +8,29 @@
 import React, { useCallback, useContext, useState } from 'react';
 
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
-import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
+import { UptimeSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
+import { useMonitorId } from '../../../hooks';
+import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
+import {
+  deleteAnomalyAlertAction,
+  getAnomalyAlertAction,
+  isAnomalyAlertDeleting,
+} from '../../../state/alerts/alerts';
 import {
   canDeleteMLJobSelector,
   hasMLJobSelector,
   isMLJobCreatingSelector,
   mlCapabilitiesSelector,
 } from '../../../state/selectors';
-import { UptimeSettingsContext } from '../../../contexts';
-import * as labels from './translations';
-import { getMLJobLinkHref } from './ml_job_link';
-import { useGetUrlParams } from '../../../hooks';
-import { useMonitorId } from '../../../hooks';
-import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
-import { useAnomalyAlert } from './use_anomaly_alert';
-import { ConfirmAlertDeletion } from './confirm_alert_delete';
-import {
-  deleteAnomalyAlertAction,
-  getAnomalyAlertAction,
-  isAnomalyAlertDeleting,
-} from '../../../state/alerts/alerts';
 import { UptimeEditAlertFlyoutComponent } from '../../common/alerts/uptime_edit_alert_flyout';
+import { ConfirmAlertDeletion } from './confirm_alert_delete';
+import { getMLJobLinkHref } from './ml_job_link';
+import * as labels from './translations';
+import { useAnomalyAlert } from './use_anomaly_alert';
 
 interface Props {
   hasMLJob: boolean;

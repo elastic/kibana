@@ -42,7 +42,11 @@ describe('ascending/descending', () => {
   ].sort(() => 0.5 - Math.random());
 
   it('sorts items using getters', () => {
-    expect(Array.from(values).sort(ascending(a, b, c)).map(print)).toMatchInlineSnapshot(`
+    expect(
+      Array.from(values)
+        .sort(ascending(a, b, c))
+        .map(print)
+    ).toMatchInlineSnapshot(`
       Array [
         "1/2/3",
         "3/2/1",
@@ -66,7 +70,11 @@ describe('ascending/descending', () => {
       ]
     `);
 
-    expect(Array.from(values).sort(descending(a, b, c)).map(print)).toMatchInlineSnapshot(`
+    expect(
+      Array.from(values)
+        .sort(descending(a, b, c))
+        .map(print)
+    ).toMatchInlineSnapshot(`
       Array [
         "9/9/9",
         "8/foo/8",

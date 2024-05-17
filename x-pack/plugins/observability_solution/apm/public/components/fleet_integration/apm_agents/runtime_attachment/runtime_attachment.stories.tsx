@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
-import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { Meta, Story } from '@storybook/react';
+import React, { useState } from 'react';
 import { RuntimeAttachment } from '.';
-import { JavaRuntimeAttachment } from './supported_agents/java_runtime_attachment';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { JavaRuntimeAttachment } from './supported_agents/java_runtime_attachment';
 
 const coreMock = {
   http: {

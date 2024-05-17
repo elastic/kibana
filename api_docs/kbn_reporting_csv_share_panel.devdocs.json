@@ -40,9 +40,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"\""
-            ],
+            "signature": ["\"\""],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -54,9 +52,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "\"generateCsvReport\""
-            ],
+            "signature": ["\"generateCsvReport\""],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -68,9 +64,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -82,9 +76,7 @@
                 "tags": [],
                 "label": "{ core, csvConfig, apiClient, startServices$, usesUiCapabilities }",
                 "description": [],
-                "signature": [
-                  "Params"
-                ],
+                "signature": ["Params"],
                 "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -100,9 +92,7 @@
             "tags": [],
             "label": "getIconType",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -116,9 +106,7 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -186,11 +174,7 @@
             "tags": [],
             "label": "isCompatible",
             "description": [],
-            "signature": [
-              "(context: ",
-              "ActionContext",
-              ") => Promise<boolean>"
-            ],
+            "signature": ["(context: ", "ActionContext", ") => Promise<boolean>"],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -202,9 +186,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "ActionContext"
-                ],
+                "signature": ["ActionContext"],
                 "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -220,11 +202,7 @@
             "tags": [],
             "label": "execute",
             "description": [],
-            "signature": [
-              "(context: ",
-              "ActionContext",
-              ") => Promise<void>"
-            ],
+            "signature": ["(context: ", "ActionContext", ") => Promise<void>"],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -236,9 +214,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "ActionContext"
-                ],
+                "signature": ["ActionContext"],
                 "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
                 "trackAdoption": false,

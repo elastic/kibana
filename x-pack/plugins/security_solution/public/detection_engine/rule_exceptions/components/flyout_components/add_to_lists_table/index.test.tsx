@@ -7,12 +7,12 @@
 
 import React from 'react';
 
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { mount } from 'enzyme';
 import { ExceptionsAddToListsTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { mount } from 'enzyme';
-import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 jest.mock('../../../logic/use_find_references');
 

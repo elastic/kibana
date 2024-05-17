@@ -1,3 +1,4 @@
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
+  PROCESSOR_EVENT,
   SPAN_ID,
   SPAN_LINKS,
   TRACE_ID,
   TRANSACTION_ID,
-  PROCESSOR_EVENT,
 } from '../../../common/es_fields/apm';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';

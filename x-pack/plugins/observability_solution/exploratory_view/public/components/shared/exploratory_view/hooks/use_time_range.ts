@@ -13,9 +13,9 @@ import {
   useSeriesStorage,
 } from './use_series_storage';
 
-import { ReportViewType, SeriesUrl } from '../types';
-import { ReportTypes } from '../configurations/constants';
 import { parseRelativeDate } from '../components/date_range_picker';
+import { ReportTypes } from '../configurations/constants';
+import { ReportViewType, SeriesUrl } from '../types';
 
 export const combineTimeRanges = (
   reportType: ReportViewType,

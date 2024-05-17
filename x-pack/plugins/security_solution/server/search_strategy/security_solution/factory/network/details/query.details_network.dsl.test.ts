@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { expectedDsl, mockOptions } from './__mocks__';
 import { buildNetworkDetailsQuery } from './query.details_network.dsl';
-import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildNetworkDetailsQuery', () => {
   test('build query from options correctly', () => {

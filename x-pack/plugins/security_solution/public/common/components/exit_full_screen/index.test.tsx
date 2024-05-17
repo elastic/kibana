@@ -8,9 +8,9 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { EXIT_FULL_SCREEN_CLASS_NAME, ExitFullScreen } from '.';
 import { TestProviders } from '../../mock/test_providers';
 import * as i18n from './translations';
-import { ExitFullScreen, EXIT_FULL_SCREEN_CLASS_NAME } from '.';
 
 describe('ExitFullScreen', () => {
   test('it returns null when fullScreen is false', () => {

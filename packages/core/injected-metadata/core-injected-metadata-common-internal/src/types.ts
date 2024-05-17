@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
+import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 /** @internal */
 export interface InjectedMetadataClusterInfo {

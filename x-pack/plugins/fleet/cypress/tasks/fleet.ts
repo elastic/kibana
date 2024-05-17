@@ -6,15 +6,15 @@
  */
 
 import {
+  ADD_AGENT_BUTTON_TOP,
   AGENT_FLYOUT,
   AGENT_POLICIES_TAB,
-  ENROLLMENT_TOKENS_TAB,
-  ADD_AGENT_BUTTON_TOP,
-  PACKAGE_POLICY_TABLE_LINK,
   API_KEYS,
+  ENROLLMENT_TOKENS_TAB,
+  PACKAGE_POLICY_TABLE_LINK,
 } from '../screens/fleet';
-import { LOADING_SPINNER } from '../screens/navigation';
 import { getIntegrationCard } from '../screens/integrations';
+import { LOADING_SPINNER } from '../screens/navigation';
 
 export function createAgentPolicy() {
   cy.intercept({

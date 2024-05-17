@@ -8,16 +8,16 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
-  FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
+  FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
 } from '../../../../common/correlations/constants';
+import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { hasPrefixToInclude } from '../../../../common/correlations/utils';
-import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,

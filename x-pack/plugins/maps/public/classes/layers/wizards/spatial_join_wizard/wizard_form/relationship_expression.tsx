@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
-import { KM_ABBREVIATION, DistanceForm } from './distance_form';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { DistanceForm, KM_ABBREVIATION } from './distance_form';
 
 interface Props {
   distance: number;

@@ -7,19 +7,19 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { TransformAlertingProvider } from './alerting';
 import { TransformAPIProvider } from './api';
-import { TransformEditFlyoutProvider } from './edit_flyout';
 import { TransformDatePickerProvider } from './date_picker';
 import { TransformDiscoverProvider } from './discover';
+import { TransformEditFlyoutProvider } from './edit_flyout';
 import { TransformManagementProvider } from './management';
 import { TransformNavigationProvider } from './navigation';
 import { TransformSecurityCommonProvider } from './security_common';
 import { TransformSecurityUIProvider } from './security_ui';
 import { TransformSourceSelectionProvider } from './source_selection';
-import { TransformTableProvider } from './transform_table';
 import { TransformTestExecutionProvider } from './test_execution';
+import { TransformTableProvider } from './transform_table';
 import { TransformWizardProvider } from './wizard';
-import { TransformAlertingProvider } from './alerting';
 
 import { MachineLearningAPIProvider } from '../ml/api';
 import { MachineLearningTestResourcesProvider } from '../ml/test_resources';

@@ -11,18 +11,18 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 
-import { mockEventViewerResponse } from './mock';
-import { StatefulEventsViewer, type EventsViewerProps } from '.';
-import { eventsDefaultModel } from './default_model';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { useTimelineEvents } from './use_timelines_events';
+import { mount } from 'enzyme';
+import { type EventsViewerProps, StatefulEventsViewer } from '.';
+import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
-import { TableId } from '@kbn/securitysolution-data-table';
-import { mount } from 'enzyme';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { eventsDefaultModel } from './default_model';
+import { mockEventViewerResponse } from './mock';
+import { useTimelineEvents } from './use_timelines_events';
 
 jest.mock('../../lib/kibana');
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
-import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
+import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
 import { loadPage } from './common';
+import { closeAllToasts } from './toasts';
 import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
@@ -51,8 +51,8 @@ export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommand
     command === 'execute'
       ? 'Command execution was successful'
       : command === 'get-file'
-      ? 'File retrieved from the host.'
-      : 'Action completed.';
+        ? 'File retrieved from the host.'
+        : 'Action completed.';
   const actionPendingMessage =
     command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
   cy.contains(actionPendingMessage).should('exist');

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import type { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import moment from 'moment';
+import type { SuperTest, Test } from 'supertest';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
+import { ObjectRemover, getEventLog, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
 export const createRule = async ({

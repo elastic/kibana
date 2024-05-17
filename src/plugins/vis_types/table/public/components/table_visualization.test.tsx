@@ -20,14 +20,14 @@ jest.mock('../utils', () => ({
   usePagination: () => undefined,
 }));
 
-import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 import { FormattedColumns, TableVisConfig, TableVisData } from '../types';
-import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';
 import { TableVisSplit } from './table_vis_split';
+import TableVisualizationComponent from './table_visualization';
 
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();

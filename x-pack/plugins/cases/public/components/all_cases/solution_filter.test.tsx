@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@testing-library/react';
+import React from 'react';
 
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 
-import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';
+import { SolutionFilter } from './solution_filter';
 
 describe('SolutionFilter ', () => {
   let appMockRender: AppMockRenderer;

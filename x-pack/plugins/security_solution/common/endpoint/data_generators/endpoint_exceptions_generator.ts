@@ -12,11 +12,11 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { GLOBAL_ARTIFACT_TAG } from '../service/artifacts';
+import { BaseDataGenerator } from './base_data_generator';
+import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { exceptionItemToCreateExceptionItem } from './exceptions_list_item_generator';
-import { BaseDataGenerator } from './base_data_generator';
-import { GLOBAL_ARTIFACT_TAG } from '../service/artifacts';
-import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
 
 export class EndpointExceptionsGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {

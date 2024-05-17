@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { BarSeries, ScaleType } from '@elastic/charts';
 import React from 'react';
-import { ScaleType, BarSeries } from '@elastic/charts';
-import { getBarStyles } from '../utils/series_styles';
+import { X_ACCESSOR_INDEX, Y0_ACCESSOR_INDEXES, Y_ACCESSOR_INDEXES } from '../../../constants';
 import { ChartsEntities } from '../model/charts';
-import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES, Y0_ACCESSOR_INDEXES } from '../../../constants';
+import { getBarStyles } from '../utils/series_styles';
 
 export function BarSeriesDecorator({
   seriesId,

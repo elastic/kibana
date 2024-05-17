@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { EsQueryRuleParams } from './rule_type_params';
-import { Comparator } from '../../../common/comparator_types';
+import { i18n } from '@kbn/i18n';
 import { getHumanReadableComparator } from '../../../common';
+import { Comparator } from '../../../common/comparator_types';
+import { EsQueryRuleParams } from './rule_type_params';
 import { isEsqlQueryRule } from './util';
 import { isSearchSourceRule } from './util';
 
@@ -75,8 +75,8 @@ export function addMessages({
             isSearchSourceRule(params.searchType)
               ? 'data view'
               : index.length === 1
-              ? 'index'
-              : 'indices'
+                ? 'index'
+                : 'indices'
           }`
         : '',
     },

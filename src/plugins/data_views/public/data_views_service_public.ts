@@ -9,11 +9,11 @@
 import { HttpStart } from '@kbn/core/public';
 import { DataViewsService, MatchedItem } from '.';
 
-import { DataViewsServiceDeps } from '../common/data_views/data_views';
 import { HasDataService } from '../common';
+import { DataViewsServiceDeps } from '../common/data_views/data_views';
 
-import { ExistingIndicesResponse } from '../common/types';
 import { EXISTING_INDICES_PATH } from '../common/constants';
+import { ExistingIndicesResponse } from '../common/types';
 
 /**
  * Data Views public service dependencies

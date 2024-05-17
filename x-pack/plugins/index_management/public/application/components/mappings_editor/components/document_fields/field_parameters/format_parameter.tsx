@@ -7,16 +7,16 @@
 
 import React, { useState } from 'react';
 
-import { EuiComboBox, EuiFormRow, EuiCode } from '@elastic/eui';
+import { EuiCode, EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EditFieldFormRow } from '../fields/edit_field';
-import { UseField } from '../../../shared_imports';
-import { ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
-import { ComboBoxOption } from '../../../types';
-import { getFieldConfig } from '../../../lib';
 import { documentationService } from '../../../../../services/documentation';
+import { ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
+import { getFieldConfig } from '../../../lib';
+import { UseField } from '../../../shared_imports';
+import { ComboBoxOption } from '../../../types';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {
   defaultValue: string;

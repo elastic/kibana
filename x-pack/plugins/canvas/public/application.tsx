@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Store } from 'redux';
-import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 
 import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
-import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
+import { AppMountParameters, AppUpdater, CoreSetup, CoreStart } from '@kbn/core/public';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { SetupRegistries } from './plugin_api';
-import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { HelpMenu } from './components/help_menu/help_menu';
+import { CanvasSetupDeps, CanvasStartDeps } from './plugin';
+import { SetupRegistries } from './plugin_api';
+import { destroyRegistries, initRegistries, populateRegistries } from './registries';
 import { createStore } from './store';
 
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import {
-  startLegacyServices,
-  services,
-  LegacyServicesProvider,
-  CanvasPluginServices,
-} from './services';
 import { initFunctions } from './functions';
+import {
+  CanvasPluginServices,
+  LegacyServicesProvider,
+  services,
+  startLegacyServices,
+} from './services';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
 

@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,9 +48,7 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": [
-                  "CoreContext"
-                ],
+                "signature": ["CoreContext"],
                 "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -68,10 +64,7 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": [
-              "() => ",
-              "InternalCustomBrandingSetup"
-            ],
+            "signature": ["() => ", "InternalCustomBrandingSetup"],
             "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,9 +101,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/custom-branding/core-custom-branding-server-internal/custom_branding_service.ts",
             "deprecated": false,
             "trackAdoption": false,

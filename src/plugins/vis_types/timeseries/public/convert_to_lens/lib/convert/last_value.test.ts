@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createSeries } from '../__mocks__';
-import { convertToLastValueParams, convertToLastValueColumn } from './last_value';
-import { Metric } from '../../../../common/types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { LastValueColumn } from './types';
 import { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
+import { createSeries } from '../__mocks__';
+import { convertToLastValueColumn, convertToLastValueParams } from './last_value';
+import { LastValueColumn } from './types';
 
 describe('convertToLastValueParams', () => {
   const commonMetric: Metric = {

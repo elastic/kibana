@@ -8,15 +8,15 @@
 
 import React, { PureComponent, ComponentType } from 'react';
 
+import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
-import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
-import { FieldSelect } from './field_select';
+import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
 import { InputControlVisDependencies } from '../../plugin';
+import { FieldSelect } from './field_select';
+import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 
 interface ListControlEditorState {
   isLoadingFieldType: boolean;

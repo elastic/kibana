@@ -6,14 +6,14 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { riskEngineEnableRoute } from './enable';
 import { RISK_ENGINE_ENABLE_URL } from '../../../../../common/constants';
 import {
-  serverMock,
   requestContextMock,
   requestMock,
+  serverMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
+import { riskEngineEnableRoute } from './enable';
 import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
 
 describe('risk score enable route', () => {

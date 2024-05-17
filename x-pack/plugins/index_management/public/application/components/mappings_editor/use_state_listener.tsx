@@ -8,6 +8,17 @@
 import { useEffect, useMemo } from 'react';
 
 import { EuiSelectableOption } from '@elastic/eui';
+import { TYPE_DEFINITION } from './constants';
+import {
+  deNormalize,
+  deNormalizeRuntimeFields,
+  getAllFieldTypesFromState,
+  getFieldsFromState,
+  normalize,
+  normalizeRuntimeFields,
+  stripUndefinedValues,
+} from './lib';
+import { useDispatch, useMappingsState } from './mappings_state_context';
 import {
   DocumentFieldsStatus,
   Field,
@@ -17,17 +28,6 @@ import {
   OnUpdateHandler,
   RuntimeFields,
 } from './types';
-import {
-  normalize,
-  deNormalize,
-  stripUndefinedValues,
-  normalizeRuntimeFields,
-  deNormalizeRuntimeFields,
-  getAllFieldTypesFromState,
-  getFieldsFromState,
-} from './lib';
-import { useMappingsState, useDispatch } from './mappings_state_context';
-import { TYPE_DEFINITION } from './constants';
 
 interface Args {
   onChange?: OnUpdateHandler;

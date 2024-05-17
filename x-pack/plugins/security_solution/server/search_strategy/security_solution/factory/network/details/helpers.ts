@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import type { GeoEcs } from '@kbn/securitysolution-ecs';
-import {
-  unflattenObject,
-  transformLocationFields,
-} from '../../../../helpers/format_response_object_values';
+import { getOr } from 'lodash/fp';
 import type {
   AutonomousSystem,
   NetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
+import {
+  transformLocationFields,
+  unflattenObject,
+} from '../../../../helpers/format_response_object_values';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
   const autonomousSystem: AutonomousSystem | {} = getOr(

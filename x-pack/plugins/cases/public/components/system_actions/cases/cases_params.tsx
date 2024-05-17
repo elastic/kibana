@@ -7,25 +7,25 @@
 
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckbox,
+  EuiComboBox,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiComboBox,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
+import { useAlertDataViews } from '../hooks/use_alert_data_view';
+import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
-import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
-import { useAlertDataViews } from '../hooks/use_alert_data_view';
 
 export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>

@@ -49,12 +49,8 @@
             "type": "Array",
             "tags": [],
             "label": "items",
-            "description": [
-              "- data to show in the table"
-            ],
-            "signature": [
-              "T[]"
-            ],
+            "description": ["- data to show in the table"],
+            "signature": ["T[]"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -66,12 +62,8 @@
             "type": "string",
             "tags": [],
             "label": "initialSortField",
-            "description": [
-              "- field name to sort by default"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["- field name to sort by default"],
+            "signature": ["string"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -83,12 +75,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "initialSortDirection",
-            "description": [
-              "- default to 'asc'"
-            ],
-            "signature": [
-              "\"asc\" | \"desc\""
-            ],
+            "description": ["- default to 'asc'"],
+            "signature": ["\"asc\" | \"desc\""],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -101,11 +89,7 @@
             "tags": [],
             "label": "initialPagionation",
             "description": [],
-            "signature": [
-              "Partial<",
-              "Pagination",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "Pagination", "> | undefined"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -123,9 +107,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UseTableState",
-        "description": [
-          "\nReturned type for useTableState hook"
-        ],
+        "description": ["\nReturned type for useTableState hook"],
         "signature": [
           {
             "pluginId": "@kbn/ml-in-memory-table",
@@ -149,11 +131,7 @@
             "description": [
               "\nCallback function which gets called whenever the pagination or sorting state of the table changed"
             ],
-            "signature": [
-              "({ page, sort }: ",
-              "Criteria",
-              "<T>) => void"
-            ],
+            "signature": ["({ page, sort }: ", "Criteria", "<T>) => void"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,10 +144,7 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": [
-                  "Criteria",
-                  "<T>"
-                ],
+                "signature": ["Criteria", "<T>"],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -182,12 +157,8 @@
             "type": "Object",
             "tags": [],
             "label": "pagination",
-            "description": [
-              "\nPagination object which contains pageIndex, pageSize"
-            ],
-            "signature": [
-              "Pagination"
-            ],
+            "description": ["\nPagination object which contains pageIndex, pageSize"],
+            "signature": ["Pagination"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -198,14 +169,8 @@
             "type": "Object",
             "tags": [],
             "label": "sorting",
-            "description": [
-              "\nSort field and sort direction"
-            ],
-            "signature": [
-              "{ sort: { field: string; direction: ",
-              "Direction",
-              "; }; }"
-            ],
+            "description": ["\nSort field and sort direction"],
+            "signature": ["{ sort: { field: string; direction: ", "Direction", "; }; }"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -216,12 +181,8 @@
             "type": "Function",
             "tags": [],
             "label": "setPageIndex",
-            "description": [
-              "\nsetPageIndex setter function which updates page index"
-            ],
-            "signature": [
-              "(value: React.SetStateAction<number>) => void"
-            ],
+            "description": ["\nsetPageIndex setter function which updates page index"],
+            "signature": ["(value: React.SetStateAction<number>) => void"],
             "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -234,9 +195,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "A"
-                ],
+                "signature": ["A"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false

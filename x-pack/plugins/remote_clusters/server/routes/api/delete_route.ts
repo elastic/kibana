@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { RequestHandler } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
-import { RouteDependencies } from '../../types';
-import { serializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
+import { serializeCluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
+import { RouteDependencies } from '../../types';
 
 const paramsValidation = schema.object({
   nameOrNames: schema.string(),

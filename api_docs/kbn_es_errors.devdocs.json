@@ -28,9 +28,7 @@
         "description": [
           "\nChecks if the provided `error` is an {@link errors.ResponseError | elasticsearch response error}"
         ],
-        "signature": [
-          "(error: unknown) => boolean"
-        ],
+        "signature": ["(error: unknown) => boolean"],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +40,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-es-errors/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -63,9 +59,7 @@
         "description": [
           "\nChecks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}"
         ],
-        "signature": [
-          "(error: unknown) => boolean"
-        ],
+        "signature": ["(error: unknown) => boolean"],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -77,9 +71,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-es-errors/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -97,9 +89,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchErrorDetails",
-        "description": [
-          "\nDetail information about an elasticsearch error."
-        ],
+        "description": ["\nDetail information about an elasticsearch error."],
         "path": "packages/kbn-es-errors/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -111,9 +101,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "{ type: string; reason?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ type: string; reason?: string | undefined; } | undefined"],
             "path": "packages/kbn-es-errors/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -130,13 +118,8 @@
         "type": "Type",
         "tags": [],
         "label": "UnauthorizedError",
-        "description": [
-          "\nAn unauthorized (401) error returned by elasticsearch"
-        ],
-        "signature": [
-          "ResponseError",
-          " & { statusCode: 401; }"
-        ],
+        "description": ["\nAn unauthorized (401) error returned by elasticsearch"],
+        "signature": ["ResponseError", " & { statusCode: 401; }"],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,

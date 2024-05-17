@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsDeleteByNamespaceOptions } from '@kbn/core-saved-objects-api-server';
 import {
-  getRootPropertiesObjects,
   LEGACY_URL_ALIAS_TYPE,
+  getRootPropertiesObjects,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import * as esKuery from '@kbn/es-query';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 

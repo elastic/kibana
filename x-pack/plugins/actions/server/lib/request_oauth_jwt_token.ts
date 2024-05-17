@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
+import { RewriteResponseCase } from '../../common';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { OAuthTokenResponse, requestOAuthToken } from './request_oauth_token';
-import { RewriteResponseCase } from '../../common';
 
 // This is a standard for JSON Web Token (JWT) Profile
 // for OAuth 2.0 Client Authentication and Authorization Grants https://datatracker.ietf.org/doc/html/rfc7523#section-8.1

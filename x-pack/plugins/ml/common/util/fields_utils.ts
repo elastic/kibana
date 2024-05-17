@@ -7,13 +7,13 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
-  type Field,
   type Aggregation,
-  type NewJobCaps,
-  type RollupFields,
   EVENT_RATE_FIELD_ID,
+  type Field,
   METRIC_AGG_TYPE,
   ML_JOB_AGGREGATION,
+  type NewJobCaps,
+  type RollupFields,
 } from '@kbn/ml-anomaly-utils';
 
 export const categoryFieldTypes = [

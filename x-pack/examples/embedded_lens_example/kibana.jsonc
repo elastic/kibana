@@ -6,14 +6,7 @@
     "id": "embeddedLensExample",
     "server": false,
     "browser": true,
-    "configPath": [
-      "embedded_lens_example"
-    ],
-    "requiredPlugins": [
-      "lens",
-      "data",
-      "embeddable",
-      "developerExamples"
-    ]
+    "configPath": ["embedded_lens_example"],
+    "requiredPlugins": ["lens", "data", "embeddable", "developerExamples"]
   }
 }

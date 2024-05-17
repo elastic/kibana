@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import {
-  EuiCallOut,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 

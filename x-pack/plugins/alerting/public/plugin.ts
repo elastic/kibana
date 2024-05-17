@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
+import { ENABLE_MAINTENANCE_WINDOWS, MAINTENANCE_WINDOWS_APP_ID, Rule } from '../common';
+import { AlertNavigationHandler, AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
-import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -123,7 +123,7 @@ export class AlertingPublicPlugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             AlertingPluginStart,
-            unknown
+            unknown,
           ];
 
           return renderApp({

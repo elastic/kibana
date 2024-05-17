@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import { IdFormatByJobType } from '../../../../common/http_api/latest';
-import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
-import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
-import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api';
+import { IdFormatByJobType } from '../../../../common/http_api/latest';
 import {
   AnomaliesSort,
+  LogEntryAnomaly,
   Pagination,
   PaginationCursor,
-  LogEntryAnomaly,
 } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { CanceledPromiseError, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
+import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
 
 export type SortOptions = AnomaliesSort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;

@@ -18,7 +18,7 @@ export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
 export type ComparatorDefinition<StateType, KeyType extends keyof StateType> = [
   PublishingSubject<StateType[KeyType]>,
   (value: StateType[KeyType]) => void,
-  ComparatorFunction<StateType, KeyType>?
+  ComparatorFunction<StateType, KeyType>?,
 ];
 
 export type StateComparators<StateType> = {

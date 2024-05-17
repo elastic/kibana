@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
-import type { KibanaRequest, ICspConfig } from '@kbn/core-http-server';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
+import type { ICspConfig, KibanaRequest } from '@kbn/core-http-server';
 import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
+import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
+import { i18n } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 /** @internal */
 export interface RenderingMetadata {

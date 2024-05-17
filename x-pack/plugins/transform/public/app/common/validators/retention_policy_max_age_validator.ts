@@ -7,8 +7,8 @@
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from './messages';
 
-import { parseDurationAboveZero } from './parse_duration_above_zero';
 import { isRetentionPolicyMaxAge } from './is_retention_policy_max_age';
+import { parseDurationAboveZero } from './parse_duration_above_zero';
 import type { Validator } from './types';
 
 /**

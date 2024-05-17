@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+import { render } from '../../../../../utils/testing';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 import { TestWrapper } from './waterfall_marker_test_helper';
-import { render } from '../../../../../utils/testing';
 
 describe('<WaterfallMarkerIcon />', () => {
   it('renders a dot icon when `field` is an empty string', () => {

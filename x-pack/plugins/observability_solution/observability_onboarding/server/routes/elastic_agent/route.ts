@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { v4 as uuidv4 } from 'uuid';
-import { generateSystemLogsYml, generateCustomLogsYml } from '../../../common/elastic_agent_logs';
+import { generateCustomLogsYml, generateSystemLogsYml } from '../../../common/elastic_agent_logs';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getObservabilityOnboardingFlow } from '../../lib/state';

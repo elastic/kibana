@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { handleCustomError, isCustomError, MonitoringLicenseError } from './custom_errors';
+import { MonitoringLicenseError, handleCustomError, isCustomError } from './custom_errors';
 
 describe('Error handling for custom monitoring errors', () => {
   it('handles the custom MonitoringLicenseError error', () => {

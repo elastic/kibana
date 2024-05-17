@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BaseParams } from './types';
+import { API_URLS } from '../../../../common/constants';
 import { MonitorDetailsType, MonitorLocationsType } from '../../../../common/runtime_types';
 import { QueryParams } from '../actions/types';
+import { BaseParams } from './types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../../common/constants';
 
 interface ApiRequest {
   monitorId: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 
@@ -32,11 +32,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { routing } from '../../../../../services/routing';
 import {
-  AutoFollowPatternIndicesPreview,
   AutoFollowPatternActionMenu,
+  AutoFollowPatternIndicesPreview,
 } from '../../../../../components';
+import { routing } from '../../../../../services/routing';
 
 export class DetailPanel extends Component {
   static propTypes = {

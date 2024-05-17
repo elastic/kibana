@@ -1,3 +1,4 @@
+import { EuiIcon, EuiSpacer, EuiSuperSelect } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiSpacer, EuiSuperSelect } from '@elastic/eui';
 
 import { EuiText } from '@elastic/eui';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from 'styled-components';
 
 import type { FleetServerHost } from '../../../types';

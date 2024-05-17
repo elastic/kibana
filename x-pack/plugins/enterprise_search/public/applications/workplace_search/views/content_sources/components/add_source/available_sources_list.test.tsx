@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiToolTip, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiToolTip } from '@elastic/eui';
 
 import { AvailableSourcesList } from './available_sources_list';
 

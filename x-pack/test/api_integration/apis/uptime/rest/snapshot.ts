@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import expect from '@kbn/expect';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
+import { getChecksDateRange, makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

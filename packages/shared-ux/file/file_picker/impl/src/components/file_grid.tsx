@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
-import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 import { FileCard } from './file_card';
 
 export const FileGrid: FunctionComponent = () => {

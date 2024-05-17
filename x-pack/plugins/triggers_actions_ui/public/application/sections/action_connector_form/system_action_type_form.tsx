@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiText,
-  EuiBadge,
-  EuiErrorBoundary,
-  EuiToolTip,
-  EuiBetaBadge,
   EuiSplitPanel,
-  EuiCallOut,
+  EuiText,
+  EuiToolTip,
   IconType,
 } from '@elastic/eui';
-import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty, partition, some } from 'lodash';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '../../../common/lib/kibana';
 import {
+  ActionConnector,
+  ActionConnectorMode,
+  ActionTypeIndex,
+  ActionTypeRegistryContract,
+  ActionVariables,
   IErrorObject,
   RuleSystemAction,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
-  ActionConnectorMode,
 } from '../../../types';
-import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
-import { transformActionVariables } from '../../lib/action_variables';
-import { useKibana } from '../../../common/lib/kibana';
-import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { transformActionVariables } from '../../lib/action_variables';
+import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 
 export type SystemActionTypeFormProps = {
   actionItem: RuleSystemAction;

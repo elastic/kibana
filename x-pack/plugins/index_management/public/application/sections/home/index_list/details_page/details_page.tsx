@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { EuiCode, EuiPageTemplate, EuiText } from '@elastic/eui';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
-import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
-import { resetIndexUrlParams } from './reset_index_url_params';
+import { Index } from '../../../../../../common';
 import {
   IndexDetailsSection,
   IndexDetailsTabId,
   Section,
 } from '../../../../../../common/constants';
-import { Index } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
-import { DetailsPageError } from './details_page_error';
 import { DetailsPageContent } from './details_page_content';
+import { DetailsPageError } from './details_page_error';
+import { resetIndexUrlParams } from './reset_index_url_params';
 
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>

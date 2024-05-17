@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { MANAGE_PROJECTS } from './translations';
-import { useProjectsUrl } from '../hooks/use_projects_url';
+import React, { useCallback } from 'react';
 import { LinkButton } from '../../../links';
 import { useStepContext } from '../context/step_context';
+import { useProjectsUrl } from '../hooks/use_projects_url';
 import { CreateProjectSteps } from '../types';
+import { MANAGE_PROJECTS } from './translations';
 import { ManageProjectsStepLinkId } from './types';
 
 const ManageProjectsButtonComponent = () => {

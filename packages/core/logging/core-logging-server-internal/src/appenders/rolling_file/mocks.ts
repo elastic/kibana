@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import type { Layout } from '@kbn/logging';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { TriggeringPolicy } from './policies/policy';
+import type { RetentionPolicy } from './retention/retention_policy';
 import type { RollingFileContext } from './rolling_file_context';
 import type { RollingFileManager } from './rolling_file_manager';
-import type { TriggeringPolicy } from './policies/policy';
 import type { RollingStrategy } from './strategies/strategy';
-import type { RetentionPolicy } from './retention/retention_policy';
 
 const createContextMock = (filePath: string = 'kibana.log') => {
   const mock: jest.Mocked<RollingFileContext> = {

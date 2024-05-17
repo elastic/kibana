@@ -6,19 +6,19 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { serverMock } from '../../__mocks__/server';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { getPromptsBulkActionRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
-import { getEmptyFindResult, getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import { bulkPromptsRoute } from './bulk_actions_route';
 import {
   getCreatePromptSchemaMock,
   getPerformBulkActionSchemaMock,
   getPromptMock,
   getUpdatePromptSchemaMock,
 } from '../../__mocks__/prompts_schema.mock';
+import { getPromptsBulkActionRequest, requestMock } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { getEmptyFindResult, getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
+import { serverMock } from '../../__mocks__/server';
+import { bulkPromptsRoute } from './bulk_actions_route';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;

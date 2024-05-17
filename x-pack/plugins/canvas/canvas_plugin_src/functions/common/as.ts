@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { getFunctionHelp } from '../../../i18n';
 import {
   Datatable,
   DatatableColumnType,
   ExpressionFunctionDefinition,
   getType,
 } from '../../../types';
-import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   name: string;

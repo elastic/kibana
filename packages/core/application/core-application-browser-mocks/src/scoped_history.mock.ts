@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Location } from 'history';
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { Location } from 'history';
 
 export type ScopedHistoryMock = jest.Mocked<ScopedHistory>;
 

@@ -9,8 +9,8 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams } from './core_query_types';
 import { MAX_GROUPS } from '..';
+import { CoreQueryParams } from './core_query_types';
 
 const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   index: 'index-name',

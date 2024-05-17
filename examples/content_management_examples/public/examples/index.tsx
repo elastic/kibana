@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { StartDeps } from '../types';
-import { TodoApp } from './todos';
-import { MSearchApp } from './msearch';
 import { FinderApp } from './finder';
+import { MSearchApp } from './msearch';
+import { TodoApp } from './todos';
 
 export const renderApp = (
   core: CoreStart,

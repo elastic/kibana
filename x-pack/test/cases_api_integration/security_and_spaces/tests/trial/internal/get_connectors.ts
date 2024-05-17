@@ -9,11 +9,27 @@ import http from 'http';
 import expect from '@kbn/expect';
 
 import {
-  ConnectorTypes,
-  UserActionTypes,
   CaseSeverity,
   CaseStatuses,
+  ConnectorTypes,
+  UserActionTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  createCase,
+  createCaseWithConnector,
+  createComment,
+  createConnector,
+  deleteAllCaseItems,
+  getConnectors,
+  getJiraConnector,
+  getServiceNowConnector,
+  getServiceNowSimulationServer,
+  pushCase,
+  updateCase,
+} from '../../../../common/lib/api';
+import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -25,22 +41,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  createCase,
-  createComment,
-  deleteAllCaseItems,
-  pushCase,
-  updateCase,
-  createCaseWithConnector,
-  createConnector,
-  getConnectors,
-  getJiraConnector,
-  getServiceNowConnector,
-  getServiceNowSimulationServer,
-} from '../../../../common/lib/api';
-import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

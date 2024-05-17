@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { HttpApiTestSetupMock } from '../../mocks';
-import { createHttpApiTestSetupMock } from '../../mocks';
 import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
-import { getActionFileInfoRouteHandler, registerActionFileInfoRoute } from './file_info_handler';
 import {
   ACTION_AGENT_FILE_INFO_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import { EndpointAuthorizationError } from '../../errors';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { createActionRequestsEsSearchResultsMock } from '../../services/actions/mocks';
+import { EndpointAuthorizationError } from '../../errors';
+import type { HttpApiTestSetupMock } from '../../mocks';
+import { createHttpApiTestSetupMock } from '../../mocks';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
+import { createActionRequestsEsSearchResultsMock } from '../../services/actions/mocks';
+import { getActionFileInfoRouteHandler, registerActionFileInfoRoute } from './file_info_handler';
 
 jest.mock('../../services', () => {
   const actual = jest.requireActual('../../services');

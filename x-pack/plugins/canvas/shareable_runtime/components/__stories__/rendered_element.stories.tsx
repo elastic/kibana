@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
 import { ExampleContext } from '../../test/context_example';
 
 import { sharedWorkpads } from '../../test';

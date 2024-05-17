@@ -7,70 +7,70 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { CaseCustomField, User } from '../../common/types/domain';
-import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
+import {
+  getCaseCommentDeleteUrl,
+  getCaseCommentsUrl,
+  getCaseConnectorsUrl,
+  getCaseDetailsMetricsUrl,
+  getCaseDetailsUrl,
+  getCaseFindUserActionsUrl,
+  getCasePushUrl,
+  getCaseUserActionStatsUrl,
+  getCaseUsersUrl,
+  getCasesDeleteFileAttachmentsUrl,
+  getCustomFieldReplaceUrl,
+} from '../../common/api';
+import {
+  CASES_INTERNAL_URL,
+  CASES_URL,
+  CASE_REPORTERS_URL,
+  CASE_TAGS_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
+} from '../../common/constants';
 import type {
   AttachmentRequest,
   BulkCreateAttachmentsRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
-  CasesFindResponse,
   CaseUserActionStatsResponse,
-  GetCaseConnectorsResponse,
-  UserActionFindResponse,
-  SingleCaseMetricsResponse,
+  CasesFindResponse,
   CustomFieldPutRequest,
+  GetCaseConnectorsResponse,
+  SingleCaseMetricsResponse,
+  UserActionFindResponse,
 } from '../../common/types/api';
+import type { CaseCustomField, User } from '../../common/types/domain';
+import { AttachmentType } from '../../common/types/domain';
 import type {
   CaseConnectors,
+  CaseUICustomField,
   CaseUpdateRequest,
-  FetchCasesProps,
-  ResolvedCase,
-  FindCaseUserActions,
   CaseUserActionTypeWithAll,
   CaseUserActionsStats,
   CaseUsers,
   CasesFindResponseUI,
   CasesUI,
+  FetchCasesProps,
   FilterOptions,
-  CaseUICustomField,
+  FindCaseUserActions,
+  ResolvedCase,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
-import {
-  getCaseCommentsUrl,
-  getCasesDeleteFileAttachmentsUrl,
-  getCaseDetailsUrl,
-  getCaseDetailsMetricsUrl,
-  getCasePushUrl,
-  getCaseFindUserActionsUrl,
-  getCaseCommentDeleteUrl,
-  getCaseConnectorsUrl,
-  getCaseUsersUrl,
-  getCaseUserActionStatsUrl,
-  getCustomFieldReplaceUrl,
-} from '../../common/api';
-import {
-  CASE_REPORTERS_URL,
-  CASE_TAGS_URL,
-  CASES_URL,
-  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  INTERNAL_GET_CASE_CATEGORIES_URL,
-  CASES_INTERNAL_URL,
-} from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
 
 import {
   convertAllCasesToCamel,
-  convertToCamelCase,
   convertArrayToCamelCase,
-  convertUserActionsToCamelCase,
+  convertCaseResolveToCamelCase,
   convertCaseToCamelCase,
   convertCasesToCamelCase,
-  convertCaseResolveToCamelCase,
+  convertToCamelCase,
+  convertUserActionsToCamelCase,
 } from '../api/utils';
 
 import type {
@@ -82,18 +82,18 @@ import type {
   UserActionUI,
 } from './types';
 
-import {
-  decodeCaseResponse,
-  decodeCasesResponse,
-  decodeCaseUserActionsResponse,
-  decodeCaseResolveResponse,
-  decodeSingleCaseMetricsResponse,
-  constructAssigneesFilter,
-  constructReportersFilter,
-  decodeCaseUserActionStatsResponse,
-  constructCustomFieldsFilter,
-} from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
+import {
+  constructAssigneesFilter,
+  constructCustomFieldsFilter,
+  constructReportersFilter,
+  decodeCaseResolveResponse,
+  decodeCaseResponse,
+  decodeCaseUserActionStatsResponse,
+  decodeCaseUserActionsResponse,
+  decodeCasesResponse,
+  decodeSingleCaseMetricsResponse,
+} from './utils';
 
 export const getCase = async (
   caseId: string,

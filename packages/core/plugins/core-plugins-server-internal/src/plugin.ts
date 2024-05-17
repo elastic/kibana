@@ -7,12 +7,9 @@
  */
 
 import { join } from 'path';
-import typeDetect from 'type-detect';
-import { firstValueFrom, Subject } from 'rxjs';
-import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
 import { type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
+import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type {
   AsyncPlugin,
   Plugin,
@@ -22,7 +19,10 @@ import type {
   PluginManifest,
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
-import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { Logger } from '@kbn/logging';
+import { isPromise } from '@kbn/std';
+import { Subject, firstValueFrom } from 'rxjs';
+import typeDetect from 'type-detect';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -37,7 +37,7 @@ export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   public readonly path: string;
   public readonly source: 'oss' | 'x-pack' | 'external';

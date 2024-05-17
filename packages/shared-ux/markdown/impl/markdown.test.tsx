@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Markdown } from './markdown';
-import { render, screen } from '@testing-library/react';
 
 describe('shared ux markdown component', () => {
   it('renders markdown editor by default', () => {

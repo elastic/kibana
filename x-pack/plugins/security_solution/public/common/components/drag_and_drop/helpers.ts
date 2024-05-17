@@ -1,3 +1,4 @@
+import type { DropResult } from '@hello-pangea/dnd';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +6,19 @@
  * 2.0.
  */
 import { isString, keyBy } from 'lodash/fp';
-import type { DropResult } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 
-import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getScopedActions } from '../../../helpers';
-import type { ColumnHeaderOptions } from '../../../../common/types';
+import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import type { BrowserField, BrowserFields } from '../../../../common/search_strategy';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import { getScopedActions } from '../../../helpers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
 import { dragAndDropActions } from '../../store/actions';
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
-import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
-import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export {
   draggableIdPrefix,

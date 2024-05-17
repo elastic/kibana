@@ -7,14 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { stopAnalytics } from '../../services/analytics_service';
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 import { isDataFrameAnalyticsFailed, isDataFrameAnalyticsRunning } from '../analytics_list/common';
-import { stopAnalytics } from '../../services/analytics_service';
 
-import { stopActionNameText, StopActionName } from './stop_action_name';
+import { StopActionName, stopActionNameText } from './stop_action_name';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {

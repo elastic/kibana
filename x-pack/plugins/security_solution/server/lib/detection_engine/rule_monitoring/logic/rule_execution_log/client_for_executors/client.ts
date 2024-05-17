@@ -14,15 +14,15 @@ import type {
   PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
 import type {
+  LogLevel,
   RuleExecutionSettings,
   RuleExecutionStatus,
-  LogLevel,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  logLevelFromExecutionStatus,
   LogLevelSetting,
-  logLevelToNumber,
   RuleExecutionStatusEnum,
+  logLevelFromExecutionStatus,
+  logLevelToNumber,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
@@ -31,14 +31,14 @@ import type { ExtMeta } from '../../utils/console_logging';
 import { truncateValue } from '../../utils/normalization';
 import { getCorrelationIds } from './correlation_ids';
 
+import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import type { IEventLogWriter } from '../event_log/event_log_writer';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
-import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,

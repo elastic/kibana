@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { omit } from 'lodash/fp';
-import { waitFor, screen, fireEvent, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { omit } from 'lodash/fp';
+import React from 'react';
 
-import { connector, issues } from '../mock';
-import { useGetIssueTypes } from './use_get_issue_types';
-import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
-import Fields from './case_fields';
-import { useGetIssues } from './use_get_issues';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { connector, issues } from '../mock';
 import { MockFormWrapperComponent } from '../test_utils';
+import Fields from './case_fields';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssueTypes } from './use_get_issue_types';
+import { useGetIssues } from './use_get_issues';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');

@@ -12,7 +12,7 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
 import { createFleetTestRendererMock } from '../../../../../mock';
-import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
+import { sendGetAgentStatus, sendGetAgents } from '../../../hooks';
 
 import { AgentListPage } from '.';
 

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
-import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Filter, compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
+import { IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
+import { COMPARE_ALL_OPTIONS, Filter, FilterStateStore, compareFilters } from '@kbn/es-query';
 import {
-  createStateContainer,
+  ReduxLikeStateContainer,
   createKbnUrlStateStorage,
+  createStateContainer,
   syncStates,
   withNotifyOnErrors,
-  ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
+import { History } from 'history';
+import { isEqual } from 'lodash';
 
-import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, FilterManager, connectToQueryState } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';

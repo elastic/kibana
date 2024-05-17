@@ -35,9 +35,7 @@
                 "tags": [],
                 "label": "showShadow",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-panel-loader/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -49,9 +47,7 @@
                 "tags": [],
                 "label": "showBorder",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/kbn-panel-loader/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -63,9 +59,7 @@
                 "tags": [],
                 "label": "dataTestSubj",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-panel-loader/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false

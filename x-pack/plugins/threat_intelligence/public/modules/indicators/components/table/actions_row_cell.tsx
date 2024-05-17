@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { VFC } from 'react';
+import { Indicator } from '../../../../../common/types/indicator';
+import { InvestigateInTimelineButtonIcon } from '../../../timeline/components/investigate_in_timeline';
 import { useIndicatorsTableContext } from '../../hooks/use_table_context';
 import { MoreActions } from './more_actions';
-import { InvestigateInTimelineButtonIcon } from '../../../timeline/components/investigate_in_timeline';
-import { Indicator } from '../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { INVESTIGATE_IN_TIMELINE_TEST_ID } from './test_ids';
 

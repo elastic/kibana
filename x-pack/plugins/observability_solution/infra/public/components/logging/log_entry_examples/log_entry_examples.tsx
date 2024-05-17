@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { FC, PropsWithChildren } from 'react';
 import { LogEntryExampleMessagesEmptyIndicator } from './log_entry_examples_empty_indicator';
 import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_failure_indicator';
 import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_loading_indicator';

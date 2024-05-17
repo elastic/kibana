@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { IsoDateString } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { IsoDateString } from '.';
 
 describe('ios_date_string', () => {
   test('it should validate a iso string', () => {

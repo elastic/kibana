@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { getESCapabilities } from '../../../lib/helpers/get_es_capabilities';
-import { isActivePlatinumLicense } from '../../../../common/license_check';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
+import * as t from 'io-ts';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
-import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
-import { getMlClient } from '../../../lib/helpers/get_ml_client';
-import { getAllEnvironments } from '../../environments/get_all_environments';
-import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
-import { notifyFeatureUsage } from '../../../feature';
-import { updateToV3 } from './update_to_v3';
+import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 import { environmentStringRt } from '../../../../common/environment_rt';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
+import { notifyFeatureUsage } from '../../../feature';
+import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
+import { getESCapabilities } from '../../../lib/helpers/get_es_capabilities';
+import { getMlClient } from '../../../lib/helpers/get_ml_client';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
+import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
+import { getAllEnvironments } from '../../environments/get_all_environments';
+import { updateToV3 } from './update_to_v3';
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',

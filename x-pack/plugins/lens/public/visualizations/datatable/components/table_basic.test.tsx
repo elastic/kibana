@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { IAggType } from '@kbn/data-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { I18nProvider } from '@kbn/i18n-react';
 import faker from 'faker';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { IAggType } from '@kbn/data-plugin/public';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { coreMock } from '@kbn/core/public/mocks';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
+import { DatatableComponent } from './table_basic';
 import { DatatableRenderProps } from './types';
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
@@ -101,9 +101,9 @@ describe('DatatableComponent', () => {
     const props = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convert: (x) => x }) as IFieldFormat,
       dispatchEvent: onDispatchEvent,
-      getType: jest.fn(() => ({ type: 'buckets' } as IAggType)),
+      getType: jest.fn(() => ({ type: 'buckets' }) as IAggType),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
       renderMode: 'edit' as const,

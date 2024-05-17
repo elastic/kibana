@@ -7,11 +7,11 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
-  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { MetricCustomIndicator, SLODefinition } from '../../domain/models';

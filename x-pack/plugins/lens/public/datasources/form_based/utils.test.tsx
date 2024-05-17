@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import { EuiLink } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { shallow } from 'enzyme';
+import React from 'react';
+import type { FramePublicAPI, IndexPattern } from '../../types';
+import { createMockedIndexPatternWithAdditionalFields } from './mocks';
+import { TermsIndexPatternColumn } from './operations';
+import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
+import { FormBasedLayer } from './types';
 import {
-  getPrecisionErrorWarningMessages,
   cloneLayer,
+  getPrecisionErrorWarningMessages,
   getUnsupportedOperationsWarningMessage,
 } from './utils';
-import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
-import type { FramePublicAPI, IndexPattern } from '../../types';
-import type { DocLinksStart } from '@kbn/core/public';
-import { EuiLink } from '@elastic/eui';
-import { TermsIndexPatternColumn } from './operations';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FormBasedLayer } from './types';
-import { createMockedIndexPatternWithAdditionalFields } from './mocks';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {

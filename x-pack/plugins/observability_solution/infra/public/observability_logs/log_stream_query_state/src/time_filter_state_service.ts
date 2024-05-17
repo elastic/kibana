@@ -8,7 +8,7 @@
 import { RefreshInterval, TimefilterContract } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { map, merge } from 'rxjs';
-import { actions, InvokeCreator } from 'xstate';
+import { InvokeCreator, actions } from 'xstate';
 import { datemathToEpochMillis } from '../../../utils/datemath';
 import { DEFAULT_REFRESH_TIME_RANGE } from './defaults';
 import { LogStreamQueryContext, LogStreamQueryEvent } from './types';

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { UseMutationResult } from '@tanstack/react-query';
+import React, { useEffect, useMemo } from 'react';
 import type { BaseActionRequestBody } from '../../../../../common/api/endpoint/actions/common/base';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { ActionSuccess } from '../components/action_success';
-import { ActionError } from '../components/action_error';
-import { FormattedError } from '../../formatted_error';
-import { useGetActionDetails } from '../../../hooks/response_actions/use_get_action_details';
-import { ACTION_DETAILS_REFRESH_INTERVAL } from '../lib/constants';
 import type {
   ActionDetails,
-  Immutable,
-  ResponseActionApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  Immutable,
+  ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
+import { useGetActionDetails } from '../../../hooks/response_actions/use_get_action_details';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { CommandExecutionComponentProps } from '../../console';
+import { FormattedError } from '../../formatted_error';
+import { ActionError } from '../components/action_error';
+import { ActionSuccess } from '../components/action_success';
+import { ACTION_DETAILS_REFRESH_INTERVAL } from '../lib/constants';
 
 export interface ConsoleActionSubmitter<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   /**
    * The ui to be returned to the console. This UI will display different states of the action,
@@ -43,7 +43,7 @@ export interface ConsoleActionSubmitter<
  */
 export interface CommandResponseActionApiState<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   actionApiState?: {
     request: {
@@ -59,7 +59,7 @@ export interface CommandResponseActionApiState<
 export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > extends Pick<
     CommandExecutionComponentProps<
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +101,7 @@ export interface UseConsoleActionSubmitterOptions<
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 >({
   actionCreator,
   actionRequestBody,

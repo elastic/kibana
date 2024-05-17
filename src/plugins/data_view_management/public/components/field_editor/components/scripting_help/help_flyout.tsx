@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
+import React from 'react';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { ScriptingSyntax } from './scripting_syntax';

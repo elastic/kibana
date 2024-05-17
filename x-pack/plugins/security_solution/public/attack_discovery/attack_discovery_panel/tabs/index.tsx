@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { EuiTabs, EuiTab } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { getTabs } from './get_tabs';
 import type { AttackDiscovery } from '../../types';
+import { getTabs } from './get_tabs';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

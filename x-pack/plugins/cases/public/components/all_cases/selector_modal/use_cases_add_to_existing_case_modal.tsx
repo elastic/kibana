@@ -6,17 +6,17 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useApplication } from '../../../common/lib/kibana/use_application';
-import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
+import { CaseStatuses } from '../../../../common/types/domain';
+import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
+import { useApplication } from '../../../common/lib/kibana/use_application';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
+import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
-import type { CaseAttachmentsWithoutOwner } from '../../../types';
-import { useCreateAttachments } from '../../../containers/use_create_attachments';
-import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 import { NO_ATTACHMENTS_ADDED } from '../translations';
 
 export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {

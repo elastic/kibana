@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getAnomaliesFields } from './common';
 import { emptyMlCapabilities } from '../../../../common/machine_learning/empty_ml_capabilities';
+import { getAnomaliesFields } from './common';
 
 const emptyMlCapabilitiesProvider = {
   ...emptyMlCapabilities,

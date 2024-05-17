@@ -7,9 +7,9 @@
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import {
-  createMlInferencePipeline,
   CreateMlInferencePipelineApiLogicArgs,
   CreateMlInferencePipelineResponse,
+  createMlInferencePipeline,
 } from './create_ml_inference_pipeline';
 
 describe('CreateMlInferencePipelineApiLogic', () => {

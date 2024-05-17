@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
+import React, { useCallback, useState } from 'react';
 
 import {
   EuiCard,
@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { GuideState } from '../../../types';
-import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
+import { GuideCardConstants } from './guide_cards.constants';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {

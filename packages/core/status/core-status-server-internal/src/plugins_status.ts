@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { isDeepStrictEqual } from 'util';
+import type { PluginName } from '@kbn/core-base-common';
+import { type CoreStatus, type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import {
   BehaviorSubject,
-  merge,
   Observable,
   ReplaySubject,
   Subject,
   type Subscription,
+  merge,
 } from 'rxjs';
-import { map, distinctUntilChanged, filter, tap, debounceTime, takeUntil, delay } from 'rxjs';
-import { isDeepStrictEqual } from 'util';
-import type { PluginName } from '@kbn/core-base-common';
-import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';
+import { debounceTime, delay, distinctUntilChanged, filter, map, takeUntil, tap } from 'rxjs';
 import { getSummaryStatus } from './get_summary_status';
 import type { PluginStatus } from './types';
 
@@ -68,7 +68,10 @@ export class PluginsStatusService {
   private newRegistrationsAllowed = true;
   private coreSubscription: Subscription;
 
-  constructor(deps: Deps, private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS) {
+  constructor(
+    deps: Deps,
+    private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS
+  ) {
     this.pluginData = this.initPluginData(deps.pluginDependencies);
     this.rootPlugins = this.getRootPlugins();
     // plugin dependencies keys are already sorted

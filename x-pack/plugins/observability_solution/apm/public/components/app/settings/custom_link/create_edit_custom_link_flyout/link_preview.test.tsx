@@ -6,7 +6,7 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, getNodeText, getByTestId, act, waitFor } from '@testing-library/react';
+import { act, getByTestId, getNodeText, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as stories from './link_preview.stories';
 

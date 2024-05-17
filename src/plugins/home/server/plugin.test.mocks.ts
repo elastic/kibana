@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { tutorialsRegistryMock } from './services/tutorials/tutorials_registry.mock';
 import { sampleDataRegistryMock } from './services/sample_data/sample_data_registry.mock';
+import { tutorialsRegistryMock } from './services/tutorials/tutorials_registry.mock';
 
 export const registryForTutorialsMock = tutorialsRegistryMock.create();
 export const registryForSampleDataMock = sampleDataRegistryMock.create();

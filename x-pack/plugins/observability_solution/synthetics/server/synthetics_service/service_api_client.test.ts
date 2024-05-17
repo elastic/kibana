@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
-import { CoreStart } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { ServiceAPIClient } from './service_api_client';
-import { ServiceConfig } from '../../common/config';
-import axios from 'axios';
-import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { CoreStart } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import axios from 'axios';
+import { ServiceConfig } from '../../common/config';
+import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 import { SyntheticsServerSetup } from '../types';
+import { ServiceAPIClient } from './service_api_client';
 
 const licenseMock: LicenseGetResponse = {
   license: {

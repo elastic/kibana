@@ -1,3 +1,4 @@
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../types';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;

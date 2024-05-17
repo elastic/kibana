@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { AggConfigs } from '../agg_configs';
 import { FieldFormatsGetConfigFn, NumberFormat } from '@kbn/field-formats-plugin/common';
-import { getShardDelayBucketAgg, SHARD_DELAY_AGG_NAME } from './shard_delay';
+import { AggConfigs } from '../agg_configs';
+import { SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg } from './shard_delay';
 
 describe('Shard Delay Agg', () => {
   const getConfig = (() => {}) as FieldFormatsGetConfigFn;

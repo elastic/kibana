@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromEvent, Observable } from 'rxjs';
+import { Observable, fromEvent } from 'rxjs';
 import { map, shareReplay, startWith } from 'rxjs';
 
 export function createPageVisibility$(): Observable<DocumentVisibilityState> {

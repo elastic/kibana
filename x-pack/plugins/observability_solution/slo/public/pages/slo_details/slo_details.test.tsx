@@ -8,6 +8,7 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
@@ -31,7 +32,6 @@ import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
-import { TagsList, HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

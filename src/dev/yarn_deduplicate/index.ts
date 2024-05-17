@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { writeFileSync, readFileSync } from 'fs';
-import { fixDuplicates } from 'yarn-deduplicate';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { fixDuplicates } from 'yarn-deduplicate';
 
 const yarnLockFile = resolve(REPO_ROOT, 'yarn.lock');
 const yarnLock = readFileSync(yarnLockFile, 'utf-8');

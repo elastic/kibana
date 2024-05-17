@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { IUiSettingsClient, OverlayStart } from '@kbn/core/public';
-import { asyncForEach } from '@kbn/std';
 import { EuiConfirmModalProps } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { IUiSettingsClient, OverlayStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { asyncForEach } from '@kbn/std';
 import type { StartServices } from '../../types';
 
 const confirmModalOptionsDelete = {

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '../../../utils/testing';
-import { getLast48Intervals, StepFieldTrend } from './step_field_trend';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { render } from '../../../utils/testing';
+import { StepFieldTrend, getLast48Intervals } from './step_field_trend';
 
 const step: JourneyStep = {
   _id: 'docID',

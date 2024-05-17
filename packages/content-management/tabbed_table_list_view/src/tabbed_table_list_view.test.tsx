@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ReactWrapper, mount, shallow } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import {
   TabbedTableListView,
-  TableListTabParentProps,
   TableListTab,
+  TableListTabParentProps,
 } from './tabbed_table_list_view';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiPageTemplate } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 
 // Mock the necessary props for the component
 const title = 'Test Title';

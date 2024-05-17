@@ -1,3 +1,8 @@
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
+import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
+import type { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +10,6 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { Filter } from '@kbn/es-query';
-import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { useKibana } from '../../../utils/kibana_react';
 

@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiSpacer,
   EuiButton,
-  EuiText,
+  EuiButtonEmpty,
+  EuiInMemoryTable,
   EuiSearchBarProps,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import {
-  txtNameColumnTitle,
-  txtSelectableMessage,
-  txtCopyButtonLabel,
-  txtSingleItemCopyActionLabel,
-  txtActionColumnTitle,
-  txtTriggerColumnTitle,
-} from './i18n';
+import React, { useState } from 'react';
 import { TextWithIcon } from '../text_with_icon';
 import { TriggerLineItem } from '../trigger_line_item';
+import {
+  txtActionColumnTitle,
+  txtCopyButtonLabel,
+  txtNameColumnTitle,
+  txtSelectableMessage,
+  txtSingleItemCopyActionLabel,
+  txtTriggerColumnTitle,
+} from './i18n';
 
 export interface DrilldownTemplateTableItem {
   id: string;

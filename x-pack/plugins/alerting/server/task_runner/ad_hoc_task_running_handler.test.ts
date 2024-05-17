@@ -6,9 +6,9 @@
  */
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 
-import { partiallyUpdateAdHocRun } from './lib';
-import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
 import { adHocRunStatus } from '../../common/constants';
+import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
+import { partiallyUpdateAdHocRun } from './lib';
 
 jest.mock('./lib', () => ({
   partiallyUpdateAdHocRun: jest.fn(),

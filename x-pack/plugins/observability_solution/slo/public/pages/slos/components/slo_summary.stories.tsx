@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
 import { buildSlo } from '../../../data/slo/slo';
-import { Props, SloSummary as Component } from './slo_summary';
+import { SloSummary as Component, Props } from './slo_summary';
 
 export default {
   component: Component,

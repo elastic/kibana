@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import pMap from 'p-map';
 import type { Logger } from '@kbn/logging';
+import pMap from 'p-map';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../constants/fleet_es_assets';

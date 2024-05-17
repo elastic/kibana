@@ -6,12 +6,12 @@
  */
 
 import Path from 'path';
-import { castArray, groupBy } from 'lodash';
-import callsites from 'callsites';
-import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
+import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { kbnTestConfig } from '@kbn/test';
+import callsites from 'callsites';
+import { castArray, groupBy } from 'lodash';
 import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
 

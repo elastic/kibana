@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { setupConsoleErrorsProvider } from './console_errors_provider';
-import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { monaco } from '../monaco_imports';
-import { CONSOLE_LANG_ID } from './constants';
+import { setupConsoleErrorsProvider } from './console_errors_provider';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
+import { ConsoleWorkerProxyService } from './console_worker_proxy';
+import { CONSOLE_LANG_ID } from './constants';
 
 const workerProxyService = new ConsoleWorkerProxyService();
 

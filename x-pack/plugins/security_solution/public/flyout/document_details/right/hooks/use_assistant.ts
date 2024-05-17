@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useCallback } from 'react';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import {
+  PROMPT_CONTEXTS,
+  PROMPT_CONTEXT_ALERT_CATEGORY,
+  PROMPT_CONTEXT_EVENT_CATEGORY,
+} from '../../../../assistant/content/prompt_contexts';
 import { getRawData } from '../../../../assistant/helpers';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import {
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
   ALERT_SUMMARY_CONVERSATION_ID,
@@ -19,11 +24,6 @@ import {
   EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   SUMMARY_VIEW,
 } from '../../../../common/components/event_details/translations';
-import {
-  PROMPT_CONTEXT_ALERT_CATEGORY,
-  PROMPT_CONTEXT_EVENT_CATEGORY,
-  PROMPT_CONTEXTS,
-} from '../../../../assistant/content/prompt_contexts';
 
 const useAssistantNoop = () => ({ promptContextId: undefined });
 

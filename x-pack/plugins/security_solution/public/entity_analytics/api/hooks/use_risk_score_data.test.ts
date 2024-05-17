@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../common/mock';
-import { ONLY_FIRST_ITEM_PAGINATION, useRiskScoreData } from './use_risk_score_data';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../common/mock';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useRiskScore } from './use_risk_score';
+import { ONLY_FIRST_ITEM_PAGINATION, useRiskScoreData } from './use_risk_score_data';
 
 jest.mock('./use_risk_score');
 jest.mock('../../../timelines/components/side_panel/event_details/helpers');

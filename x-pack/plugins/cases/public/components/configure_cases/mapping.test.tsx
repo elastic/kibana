@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
+import { ConnectorTypes } from '../../../common/types/domain';
 import { TestProviders } from '../../common/mock';
+import { mappings } from './__mock__';
 import type { MappingProps } from './mapping';
 import { Mapping } from './mapping';
-import { mappings } from './__mock__';
-import { ConnectorTypes } from '../../../common/types/domain';
 
 describe('Mapping', () => {
   const props: MappingProps = {

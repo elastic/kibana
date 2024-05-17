@@ -9,12 +9,12 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { AnomalyScoreComponent } from './anomaly_score';
-import { mockAnomalies } from '../mock';
+import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../mock/test_providers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
+import { mockAnomalies } from '../mock';
 import type { Anomalies } from '../types';
-import { waitFor } from '@testing-library/react';
+import { AnomalyScoreComponent } from './anomaly_score';
 
 jest.mock('../../../lib/kibana');
 

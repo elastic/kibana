@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { RULES_PATH } from '../../common/locators/paths';
 import { ACTIVE_ALERTS } from '../components/alert_search_bar/constants';
 import {
-  RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_EXECUTION_TAB,
 } from '../pages/rule_details/constants';
-import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
-import { RULES_PATH } from '../../common/locators/paths';
+import { RuleDetailsLocatorDefinition, getRuleDetailsPath } from './rule_details';
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useSignalHelpers } from './use_signal_helpers';
+import React from 'react';
+import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
 import type { State } from '../../store';
 import { createSourcererDataView } from './create_sourcerer_data_view';
+import { useSignalHelpers } from './use_signal_helpers';
 
 const mockCreateSourcererDataView = jest.fn(() => {
   const errToReturn = new Error('fake error');

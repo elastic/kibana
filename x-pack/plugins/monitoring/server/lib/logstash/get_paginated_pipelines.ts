@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { get, cloneDeep, last } from 'lodash';
-import { filter } from '../pagination/filter';
-import { getLogstashPipelineIds } from './get_pipeline_ids';
-import { sortPipelines } from './sort_pipelines';
-import { paginate } from '../pagination/paginate';
-import { getMetrics } from '../details/get_metrics';
-import { getLogstashDataset } from '../cluster/get_index_patterns';
+import { cloneDeep, get, last } from 'lodash';
 import {
   LegacyRequest,
   Pipeline,
   PipelineMetricKey,
   PipelineMetricsRes,
   PipelineNodeCountMetricKey,
-  PipelinesResponse,
   PipelineThroughputMetricKey,
   PipelineWithMetrics,
+  PipelinesResponse,
 } from '../../types';
+import { getLogstashDataset } from '../cluster/get_index_patterns';
+import { getMetrics } from '../details/get_metrics';
+import { filter } from '../pagination/filter';
+import { paginate } from '../pagination/paginate';
+import { getLogstashPipelineIds } from './get_pipeline_ids';
+import { sortPipelines } from './sort_pipelines';
 
 /**
  * This function performs an optimization around the pipeline listing tables in the UI. To avoid

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 

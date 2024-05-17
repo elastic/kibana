@@ -14,8 +14,8 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { jobsQueryFactory } from './jobs_query';
 import { jobManagementPreRouting } from './job_management_pre_routing';
+import { jobsQueryFactory } from './jobs_query';
 
 jest.mock('../../../lib/content_stream');
 jest.mock('./jobs_query');

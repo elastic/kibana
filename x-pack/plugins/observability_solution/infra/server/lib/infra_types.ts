@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
+import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
+import type { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
-import type { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
+import { InfraSources } from './sources';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;

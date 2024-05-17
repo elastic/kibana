@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useEffect, useContext, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { WorkpadRoutingContext } from '../workpad_routing_context';
-import { getInFlight } from '../../../state/selectors/resolved_args';
 // @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
+import { getInFlight } from '../../../state/selectors/resolved_args';
+import { WorkpadRoutingContext } from '../workpad_routing_context';
 
 export const useRefreshHelper = () => {
   const dispatch = useDispatch();

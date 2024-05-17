@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import $ from 'jquery';
+import _ from 'lodash';
 
 import { pointSeriesTooltipFormatter } from './_pointseries_tooltip_formatter';
 

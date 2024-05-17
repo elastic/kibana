@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Response } from 'superagent';
-import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
+import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
 import moment from 'moment';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { Response } from 'superagent';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class TimelineTestService extends FtrService {

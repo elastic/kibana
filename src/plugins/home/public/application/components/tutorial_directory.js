@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Synopsis } from './synopsis';
-import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
+import { Synopsis } from './synopsis';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 

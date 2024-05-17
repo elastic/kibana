@@ -15,10 +15,10 @@ import {
   isMemberExpression,
 } from '@babel/types';
 
-import { extractI18nCallMessages } from './i18n_call';
-import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
-import { extractIntlMessages, extractFormattedMessages } from './react';
 import { createFailError, isFailError } from '@kbn/dev-cli-errors';
+import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
+import { extractI18nCallMessages } from './i18n_call';
+import { extractFormattedMessages, extractIntlMessages } from './react';
 
 /**
  * Detect Intl.formatMessage() function call (React).

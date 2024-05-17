@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, ReactNode } from 'react';
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import React, { useState, Fragment, ReactNode } from 'react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { FailedImportConflict } from '../../../lib/resolve_import_errors';
 import { getDefaultTitle } from '../../../lib';
+import { FailedImportConflict } from '../../../lib/resolve_import_errors';
 
 export interface OverwriteModalProps {
   conflict: FailedImportConflict;

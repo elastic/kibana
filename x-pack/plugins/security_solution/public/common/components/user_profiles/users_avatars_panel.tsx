@@ -12,12 +12,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiToolTip } from '@el
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 
-import { UNKNOWN_USER_PROFILE_NAME } from './translations';
 import {
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
 } from './test_ids';
+import { UNKNOWN_USER_PROFILE_NAME } from './translations';
 
 export type UserProfileOrUknown = UserProfileWithAvatar | undefined;
 

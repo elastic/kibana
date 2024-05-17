@@ -1,3 +1,15 @@
+import type {
+  SolutionNavigationDefinition,
+  SolutionNavigationDefinitions,
+} from '@kbn/core-chrome-browser';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
+import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
+import { definition as esDefinition } from '@kbn/solution-nav-es';
+import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { UserProfileData } from '@kbn/user-profile-components';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,47 +19,35 @@
  */
 import React from 'react';
 import {
+  Observable,
+  ReplaySubject,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
   firstValueFrom,
   from,
   map,
-  Observable,
   of,
-  ReplaySubject,
   shareReplay,
   skipWhile,
   switchMap,
   take,
   takeUntil,
 } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
-import type {
-  SolutionNavigationDefinition,
-  SolutionNavigationDefinitions,
-} from '@kbn/core-chrome-browser';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { definition as esDefinition } from '@kbn/solution-nav-es';
-import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
-import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
-import { UserProfileData } from '@kbn/user-profile-components';
 import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
-import type {
-  NavigationPublicSetup,
-  NavigationPublicStart,
-  NavigationPublicSetupDependencies,
-  NavigationPublicStartDependencies,
-  ConfigSchema,
-  AddSolutionNavigationArg,
-  SolutionType,
-} from './types';
-import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { SideNavComponent } from './side_navigation';
 import { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
+import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import type {
+  AddSolutionNavigationArg,
+  ConfigSchema,
+  NavigationPublicSetup,
+  NavigationPublicSetupDependencies,
+  NavigationPublicStart,
+  NavigationPublicStartDependencies,
+  SolutionType,
+} from './types';
 
 const DEFAULT_OPT_OUT_NEW_NAV = false;
 

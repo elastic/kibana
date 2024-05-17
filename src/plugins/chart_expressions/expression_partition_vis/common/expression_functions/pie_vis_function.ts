@@ -7,21 +7,21 @@
  */
 
 import { Position } from '@elastic/charts';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import {
+  PARTITION_LABELS_FUNCTION,
+  PARTITION_LABELS_VALUE,
+  PARTITION_VIS_RENDERER_NAME,
+  PIE_VIS_EXPRESSION_NAME,
+} from '../constants';
+import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   EmptySizeRatios,
   LegendDisplay,
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
-import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
-import {
-  PARTITION_LABELS_FUNCTION,
-  PARTITION_LABELS_VALUE,
-  PIE_VIS_EXPRESSION_NAME,
-  PARTITION_VIS_RENDERER_NAME,
-} from '../constants';
 import { errors, strings } from './i18n';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({

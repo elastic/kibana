@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
-import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
+import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
 import { ResponseActionsListPage } from './view/response_actions_list_page';
 
 export const ResponseActionsContainer = memo(() => {

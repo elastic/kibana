@@ -83,11 +83,7 @@
             "tags": [],
             "label": "{\n  children,\n  navigateToUrl,\n  currentAppId,\n  ...containerProps\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "RedirectAppLinksComponentProps",
-              ">"
-            ],
+            "signature": ["React.PropsWithChildren<", "RedirectAppLinksComponentProps", ">"],
             "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.component.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -122,11 +118,7 @@
             "tags": [],
             "label": "{ children, ...props }",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "RedirectAppLinksProps",
-              ">"
-            ],
+            "signature": ["React.PropsWithChildren<", "RedirectAppLinksProps", ">"],
             "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -142,9 +134,7 @@
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinksKibanaProvider",
-        "description": [
-          "\nKibana-specific contextual services Provider."
-        ],
+        "description": ["\nKibana-specific contextual services Provider."],
         "signature": [
           "({ children, coreStart }: React.PropsWithChildren<React.PropsWithChildren<",
           "RedirectAppLinksKibanaDependencies",
@@ -181,9 +171,7 @@
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinksProvider",
-        "description": [
-          "\nContextual services Provider."
-        ],
+        "description": ["\nContextual services Provider."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "RedirectAppLinksServices",
@@ -222,9 +210,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RedirectAppLinksKibanaDependencies",
-        "description": [
-          "\nKibana-specific contextual services to be adapted for this component."
-        ],
+        "description": ["\nKibana-specific contextual services to be adapted for this component."],
         "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -256,9 +242,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RedirectAppLinksServices",
-        "description": [
-          "\nContextual services for this component."
-        ],
+        "description": ["\nContextual services for this component."],
         "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -270,9 +254,7 @@
             "tags": [],
             "label": "navigateToUrl",
             "description": [],
-            "signature": [
-              "(url: string) => void | Promise<void>"
-            ],
+            "signature": ["(url: string) => void | Promise<void>"],
             "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -298,9 +280,7 @@
             "tags": [],
             "label": "currentAppId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -317,9 +297,7 @@
         "type": "Type",
         "tags": [],
         "label": "RedirectAppLinksProps",
-        "description": [
-          "Props for the `RedirectAppLinks` component."
-        ],
+        "description": ["Props for the `RedirectAppLinks` component."],
         "signature": [
           "(",
           "RedirectAppLinksKibanaDependencies",

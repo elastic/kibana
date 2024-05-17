@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { chunk, cloneDeep, flatten } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   MappingRuntimeFields,
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
-import type { IKibanaSearchRequest } from '@kbn/search-types';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { type Histogram, computeChi2PValue } from '@kbn/ml-chi2test';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 
 import type { AggregationsMultiTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
@@ -37,24 +37,24 @@ import { useDataVisualizerKibana } from '../kibana_context';
 import { useDataDriftStateManagerContext } from './use_state_manager';
 
 import {
-  REFERENCE_LABEL,
   COMPARISON_LABEL,
-  DRIFT_P_VALUE_THRESHOLD,
   DATA_COMPARISON_TYPE,
+  DRIFT_P_VALUE_THRESHOLD,
+  REFERENCE_LABEL,
 } from './constants';
 
+import { isFulfilled, isRejected } from '../common/util/promise_all_settled_utils';
 import type {
-  NumericDriftData,
   CategoricalDriftData,
+  ComparisonHistogram,
+  DataDriftField,
+  Feature,
+  NumericDriftData,
   Range,
   Result,
-  Feature,
-  DataDriftField,
   TimeRange,
-  ComparisonHistogram,
 } from './types';
 import { FETCH_STATUS, isNumericDriftData } from './types';
-import { isFulfilled, isRejected } from '../common/util/promise_all_settled_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {
   switch (kibanaType) {
@@ -613,7 +613,7 @@ function isReturnedError(arg: unknown): arg is ReturnedError {
  * @param asyncFetchFn - callback function with the divided fields
  */
 export const fetchInParallelChunks = async <
-  ReturnedRespFromFetchFn extends { aggregations: Record<string, AggregationsAggregate> }
+  ReturnedRespFromFetchFn extends { aggregations: Record<string, AggregationsAggregate> },
 >({
   fields,
   randomSamplerWrapper,

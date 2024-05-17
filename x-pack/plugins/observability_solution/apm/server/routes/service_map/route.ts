@@ -6,27 +6,27 @@
  */
 
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import * as t from 'io-ts';
+import { offsetRt } from '../../../common/comparison_rt';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
-import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceMap } from './get_service_map';
 import {
-  getServiceMapDependencyNodeInfo,
   ServiceMapServiceDependencyInfoResponse,
+  getServiceMapDependencyNodeInfo,
 } from './get_service_map_dependency_node_info';
 import {
-  getServiceMapServiceNodeInfo,
   ServiceMapServiceNodeInfoResponse,
+  getServiceMapServiceNodeInfo,
 } from './get_service_map_service_node_info';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
-import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/comparison_rt';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { TransformServiceMapResponse } from './transform_service_map_responses';
 
 const serviceMapRoute = createApmServerRoute({

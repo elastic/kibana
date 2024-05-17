@@ -10,17 +10,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 
 import classnames from 'classnames';
+import { CardStep } from './card_step';
+import { getCard } from './helpers';
+import { useCardItemStyles } from './styles/card_item.styles';
 import type {
   CardId,
   ExpandedCardSteps,
-  ToggleTaskCompleteStatus,
   OnStepClicked,
   SectionId,
   StepId,
+  ToggleTaskCompleteStatus,
 } from './types';
-import { getCard } from './helpers';
-import { CardStep } from './card_step';
-import { useCardItemStyles } from './styles/card_item.styles';
 
 export const SHADOW_ANIMATION_DURATION = 350;
 

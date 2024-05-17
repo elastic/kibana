@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { FilterGroup } from './filter_group';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import {
+  ControlGroupContainer,
+  ControlGroupInput,
+  ControlGroupOutput,
+} from '@kbn/controls-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { FC } from 'react';
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
-import {
-  ControlGroupOutput,
-  ControlGroupInput,
-  ControlGroupContainer,
-} from '@kbn/controls-plugin/public';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
-import { initialInputData, sampleOutputData } from './mocks/data';
 import {
   COMMON_OPTIONS_LIST_CONTROL_INPUTS,
   DEFAULT_CONTROLS,
   TEST_IDS,
   URL_PARAM_KEY,
 } from './constants';
+import { FilterGroup } from './filter_group';
 import {
   controlGroupFilterInputMock$,
   controlGroupFilterOutputMock$,
   getControlGroupMock,
 } from './mocks/control_group';
 import { getMockedControlGroupRenderer } from './mocks/control_group_renderer';
+import { initialInputData, sampleOutputData } from './mocks/data';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FilterGroupProps } from './types';
 
 const featureIds = [AlertConsumers.STACK_ALERTS];

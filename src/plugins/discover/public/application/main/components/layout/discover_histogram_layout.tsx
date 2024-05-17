@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { useDiscoverHistogram } from './use_discover_histogram';
-import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
+import React, { useCallback, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { FetchStatus } from '../../../types';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { DiscoverMainContent, type DiscoverMainContentProps } from './discover_main_content';
+import { useDiscoverHistogram } from './use_discover_histogram';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;

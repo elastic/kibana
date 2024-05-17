@@ -10,17 +10,17 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import { SecurityPageName } from '../app/types';
 
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
-import type { StartPlugins } from '../types';
-import { getManagementFilteredLinks, links } from './links';
-import { allowedExperimentalValues } from '../../common/experimental_features';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
-import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
-import { licenseService as _licenseService } from '../common/hooks/use_license';
-import type { LicenseService } from '../../common/license';
-import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
+import { allowedExperimentalValues } from '../../common/experimental_features';
+import type { LicenseService } from '../../common/license';
+import { createLicenseServiceMock } from '../../common/license/mocks';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
+import { licenseService as _licenseService } from '../common/hooks/use_license';
+import type { StartPlugins } from '../types';
+import { getManagementFilteredLinks, links } from './links';
 
 jest.mock('../common/hooks/use_license');
 

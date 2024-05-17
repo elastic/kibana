@@ -1,3 +1,6 @@
+import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { createAgentPolicyMock, createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +8,12 @@
  * 2.0.
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import {
-  CLOUDBEAT_GCP,
+  CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
   CLOUDBEAT_VANILLA,
-  CLOUDBEAT_AWS,
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types_old';

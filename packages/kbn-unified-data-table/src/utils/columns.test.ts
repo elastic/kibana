@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getDisplayedColumns } from './columns';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('getDisplayedColumns', () => {
   test('returns default columns given a data view without timefield', async () => {

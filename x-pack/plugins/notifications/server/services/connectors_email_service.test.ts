@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
-import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
-import { ConnectorsEmailService } from './connectors_email_service';
-import type { PlainTextEmail, HTMLEmail } from './types';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
+import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
+import { loggerMock } from '@kbn/logging-mocks';
+import { ConnectorsEmailService } from './connectors_email_service';
+import type { HTMLEmail, PlainTextEmail } from './types';
 
 const REQUESTER_ID = 'requesterId';
 const CONNECTOR_ID = 'connectorId';

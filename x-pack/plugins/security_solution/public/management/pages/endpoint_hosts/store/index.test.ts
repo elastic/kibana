@@ -7,17 +7,17 @@
 
 import type { Dispatch, Store } from 'redux';
 import { createStore } from 'redux';
-import type { EndpointState } from '../types';
-import { listData } from './selectors';
-import { mockEndpointResultList } from './mock_endpoint_result_list';
-import type { EndpointAction } from './action';
-import { endpointListReducer } from './reducer';
-import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
-import { createUninitialisedResourceState } from '../../../state';
 import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
 } from '../../../../../common/endpoint/constants';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { createUninitialisedResourceState } from '../../../state';
+import type { EndpointState } from '../types';
+import type { EndpointAction } from './action';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
+import { endpointListReducer } from './reducer';
+import { listData } from './selectors';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;

@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { Version } from '@kbn/object-versioning';
 import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
 
 import type { MSearchIn, MSearchOut } from '../../common';
 import {
+  IContentClient,
   getContentClientFactory,
   getMSearchClientFactory,
-  IContentClient,
 } from '../content_client';
 import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
-import { ContentRegistry } from './registry';
 import { MSearchService } from './msearch';
+import { ContentRegistry } from './registry';
 
 export interface GetContentClientForRequestDependencies {
   requestHandlerContext: RequestHandlerContext;

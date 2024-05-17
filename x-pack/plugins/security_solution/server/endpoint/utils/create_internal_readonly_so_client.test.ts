@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { savedObjectsServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import {
-  createInternalReadonlySoClient,
   InternalReadonlySoClientMethodNotAllowedError,
+  createInternalReadonlySoClient,
 } from './create_internal_readonly_so_client';
 
 describe('When using the `createInternalReadonlySoClient`', () => {

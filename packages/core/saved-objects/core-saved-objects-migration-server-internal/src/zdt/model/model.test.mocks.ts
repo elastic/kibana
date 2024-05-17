@@ -8,10 +8,13 @@
 
 const realStages = jest.requireActual('./stages');
 
-export const StageMocks = Object.keys(realStages).reduce((mocks, key) => {
-  mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
-  return mocks;
-}, {} as Record<string, jest.MockedFunction<any>>);
+export const StageMocks = Object.keys(realStages).reduce(
+  (mocks, key) => {
+    mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
+    return mocks;
+  },
+  {} as Record<string, jest.MockedFunction<any>>
+);
 
 jest.doMock('./stages', () => {
   return StageMocks;

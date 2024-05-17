@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { mockTimelineModel, TestProviders } from '../../../common/mock';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
-import {
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
-  addTimeline as dispatchAddTimeline,
-  addNote as dispatchAddGlobalTimelineNote,
-} from '../../store/actions';
-import {
-  addNotes as dispatchAddNotes,
-  updateNote as dispatchUpdateNote,
-} from '../../../common/store/app/actions';
-import { useUpdateTimeline } from './use_update_timeline';
-import type { Note } from '../../../common/lib/note';
+import { act, renderHook } from '@testing-library/react-hooks';
 import moment from 'moment';
 import sinon from 'sinon';
 import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
+import type { Note } from '../../../common/lib/note';
+import { TestProviders, mockTimelineModel } from '../../../common/mock';
+import {
+  addNotes as dispatchAddNotes,
+  updateNote as dispatchUpdateNote,
+} from '../../../common/store/app/actions';
+import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
+import {
+  addNote as dispatchAddGlobalTimelineNote,
+  addTimeline as dispatchAddTimeline,
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
+} from '../../store/actions';
+import { useUpdateTimeline } from './use_update_timeline';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');

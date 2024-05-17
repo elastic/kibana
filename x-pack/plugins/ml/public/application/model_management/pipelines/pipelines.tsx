@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import {
+  EuiAccordion,
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiTitle,
   EuiPanel,
-  EuiAccordion,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React from 'react';
 import { useMlKibana } from '../../contexts/kibana';
 import type { ModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface AiopsPluginSetupDeps {

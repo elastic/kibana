@@ -1,3 +1,4 @@
+import { Position } from '@elastic/charts';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +7,13 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '@kbn/data-plugin/public';
 import { ColorSchemas } from '@kbn/charts-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
-import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
+import { toExpressionAst } from '../to_ast';
+import { AxisType, HeatmapTypeProps, HeatmapVisParams, ScaleType } from '../types';
 
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,

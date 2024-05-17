@@ -7,7 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { integrateLocaleFiles, I18nConfig } from '..';
+import { I18nConfig, integrateLocaleFiles } from '..';
 import { I18nCheckTaskContext } from '../types';
 
 export interface I18nFlags {

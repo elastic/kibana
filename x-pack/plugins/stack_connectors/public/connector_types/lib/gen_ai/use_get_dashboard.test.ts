@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { useGetDashboard } from './use_get_dashboard';
-import { getDashboard } from './api';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
+import { getDashboard } from './api';
+import { useGetDashboard } from './use_get_dashboard';
 
 jest.mock('./api');
 const mockToasts = { addDanger: jest.fn() };

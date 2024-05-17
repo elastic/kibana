@@ -6,18 +6,18 @@
  */
 
 import type {
+  CasesMetricsRequest,
+  CasesMetricsResponse,
   CasesStatusRequest,
   CasesStatusResponse,
   SingleCaseMetricsResponse,
-  CasesMetricsRequest,
-  CasesMetricsResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
 import type { CasesClientArgs } from '../types';
-import { getStatusTotalsByType } from './get_status_totals';
 import { getCaseMetrics } from './get_case_metrics';
 import { getCasesMetrics } from './get_cases_metrics';
+import { getStatusTotalsByType } from './get_status_totals';
 import type { GetCaseMetricsParams } from './types';
 
 /**

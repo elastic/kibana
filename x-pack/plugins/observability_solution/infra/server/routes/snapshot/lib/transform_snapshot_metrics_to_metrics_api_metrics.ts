@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { identity } from 'lodash';
 import {
   MetricsUIAggregationRT,
-  networkTraffic,
   findInventoryModel,
+  networkTraffic,
 } from '@kbn/metrics-data-access-plugin/common';
+import { identity } from 'lodash';
 import {
   MetricsAPIMetric,
-  SnapshotRequest,
   SnapshotCustomMetricInputRT,
+  SnapshotRequest,
 } from '../../../../common/http_api';
 
 export const transformSnapshotMetricsToMetricsAPIMetrics = (

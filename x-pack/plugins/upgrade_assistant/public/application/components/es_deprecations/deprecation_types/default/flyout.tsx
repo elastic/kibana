@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
+import { DeprecationBadge, DeprecationFlyoutLearnMoreLink } from '../../../shared';
 
 export interface DefaultDeprecationFlyoutProps {
   deprecation: EnrichedDeprecationInfo;

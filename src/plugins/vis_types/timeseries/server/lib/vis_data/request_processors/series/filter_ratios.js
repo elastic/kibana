@@ -7,8 +7,8 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
+import { bucketTransform } from '../../helpers/bucket_transform';
 
 const filter = (metric) => metric.type === 'filter_ratio';
 

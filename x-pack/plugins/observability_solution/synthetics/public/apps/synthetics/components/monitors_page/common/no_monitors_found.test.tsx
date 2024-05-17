@@ -1,3 +1,4 @@
+import { fireEvent, waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import React from 'react';
 import * as URL from '../../../hooks/use_url_params';
-import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { NoMonitorsFound } from './no_monitors_found';
 

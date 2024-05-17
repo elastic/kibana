@@ -5,20 +5,20 @@
  * 2.0.
  */
 import {
+  AnnotationDomainType,
   BarSeries,
   Chart,
   CurveType,
+  LineAnnotation,
   LineSeries,
   PartialTheme,
+  Position,
   ScaleType,
   Settings,
   Tooltip,
-  LineAnnotation,
-  AnnotationDomainType,
-  Position,
 } from '@elastic/charts';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useChartTheme } from '../../hooks/use_chart_theme';
 
 export function SparkPlot({

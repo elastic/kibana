@@ -7,10 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { isString, get, identity } from 'lodash';
+import { get, identity, isString } from 'lodash';
+import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import type { BucketKey } from './get_data';
 import { calculateCurrentTimeframe, createBaseFilters } from './metric_query';
-import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 
 export interface MissingGroupsRecord {
   key: string;

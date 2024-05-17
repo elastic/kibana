@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isActiveTimeline } from '../../../helpers';
-import { useResponderActionItem } from '../endpoint_responder';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
 import { useAlertExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useResponderActionItem } from '../endpoint_responder';
 
-import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
-import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { getFieldValue } from '../host_isolation/helpers';
 import type { Status } from '../../../../common/api/detection_engine';
-import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
-import { getOsqueryActionItem } from '../osquery/osquery_action_item';
-import type { AlertTableContextMenuItem } from '../alerts_table/types';
-import { useAlertTagsActions } from '../alerts_table/timeline_actions/use_alert_tags_actions';
+import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
+import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertAssigneesActions } from '../alerts_table/timeline_actions/use_alert_assignees_actions';
+import { useAlertTagsActions } from '../alerts_table/timeline_actions/use_alert_tags_actions';
+import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
+import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import { getFieldValue } from '../host_isolation/helpers';
+import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
+import { getOsqueryActionItem } from '../osquery/osquery_action_item';
 
 interface ActionsData {
   alertStatus: Status;
@@ -236,8 +236,8 @@ export const TakeActionDropdown = React.memo(
               ...exceptionActionItems,
             ]
           : isEndpointEvent && canCreateEndpointEventFilters
-          ? eventFilterActionItems
-          : [],
+            ? eventFilterActionItems
+            : [],
       [
         eventFilterActionItems,
         isEndpointEvent,

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import React from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 
 const Label = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};

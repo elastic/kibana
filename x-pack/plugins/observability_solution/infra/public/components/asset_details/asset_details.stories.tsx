@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react/types-6-0';
-import { MemoryRouter } from 'react-router-dom';
 import { useArgs } from '@storybook/addons';
-import { AssetDetails } from './asset_details';
+import type { Meta, Story } from '@storybook/react/types-6-0';
+import React, { useState } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-import { type TabIds, type AssetDetailsProps } from './types';
-import { DecorateWithKibanaContext } from './__stories__/decorator';
 import { assetDetailsProps } from './__stories__/context/fixtures';
+import { DecorateWithKibanaContext } from './__stories__/decorator';
+import { AssetDetails } from './asset_details';
+import { type AssetDetailsProps, type TabIds } from './types';
 
 interface AssetDetailsStoryArgs extends AssetDetailsProps {
   tabId: TabIds;

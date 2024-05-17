@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  EmptyListContent,
+  ExtensionsSetup,
   IndexBadge,
+  IndexContent,
   IndexToggle,
   IndicesListColumn,
-  EmptyListContent,
-  IndexContent,
-  ExtensionsSetup,
 } from '@kbn/index-management';
 import { IndexDetailsTab } from '../../common/constants';
 

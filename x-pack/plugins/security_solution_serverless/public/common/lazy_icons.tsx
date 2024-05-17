@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { Suspense } from 'react';
 
 const withSuspenseIcon = <T extends object = {}>(Component: React.ComponentType<T>): React.FC<T> =>
   function WithSuspenseIcon(props) {

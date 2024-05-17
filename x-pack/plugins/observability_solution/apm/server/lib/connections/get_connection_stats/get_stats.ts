@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { sum } from 'lodash';
-import objectHash from 'object-hash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { sum } from 'lodash';
+import objectHash from 'object-hash';
+import { NodeType } from '../../../../common/connections';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -24,14 +23,15 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/es_fields/apm';
-import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { NodeType } from '../../../../common/connections';
-import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
+import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
 const MAX_ITEMS = 1500;
 export const getStats = async ({

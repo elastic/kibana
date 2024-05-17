@@ -8,10 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { ERROR, INDEX, PATTERN } from './translations';
-import { ErrorSummary } from '../../../types';
 import { ErrorsViewer } from '.';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { ErrorSummary } from '../../../types';
+import { ERROR, INDEX, PATTERN } from './translations';
 
 interface ExpectedColumns {
   id: string;

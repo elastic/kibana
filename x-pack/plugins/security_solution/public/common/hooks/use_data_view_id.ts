@@ -6,9 +6,9 @@
  */
 
 import { useSelector } from 'react-redux';
-import { sourcererScopeSelectedDataViewId } from '../store/sourcerer/selectors';
-import type { SourcererScopeName } from '../store/sourcerer/model';
 import type { State } from '../store';
+import type { SourcererScopeName } from '../store/sourcerer/model';
+import { sourcererScopeSelectedDataViewId } from '../store/sourcerer/selectors';
 
 export const useDataViewId = (scopeId: SourcererScopeName): string | undefined => {
   const dataViewId = useSelector((state: State) =>

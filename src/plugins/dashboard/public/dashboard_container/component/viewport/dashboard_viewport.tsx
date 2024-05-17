@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { debounce } from 'lodash';
 import classNames from 'classnames';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { EuiPortal } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { DashboardGrid } from '../grid';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+import { DashboardGrid } from '../grid';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);

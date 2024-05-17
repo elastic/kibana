@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
-import { noDeleteCasesPermissions, TestProviders } from '../../common/mock';
-import { basicCase, basicPush } from '../../containers/mock';
-import { Actions } from './actions';
-import * as i18n from '../case_view/translations';
-import * as api from '../../containers/api';
 import { waitFor } from '@testing-library/react';
+import { TestProviders, noDeleteCasesPermissions } from '../../common/mock';
+import * as api from '../../containers/api';
+import { basicCase, basicPush } from '../../containers/mock';
+import * as i18n from '../case_view/translations';
+import { Actions } from './actions';
 
 jest.mock('../../containers/api');
 

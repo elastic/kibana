@@ -6,52 +6,52 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { getTimeZone } from '@kbn/visualization-utils';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import DateMath from '@kbn/datemath';
-import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
   Chart,
   HistogramBarSeries,
-  niceTimeFormatter,
+  PartialTheme,
   Position,
   ScaleType,
   Settings,
-  TooltipType,
   Tooltip,
-  PartialTheme,
+  TooltipType,
+  niceTimeFormatter,
 } from '@elastic/charts';
+import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import DateMath from '@kbn/datemath';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, buildEsQuery } from '@kbn/es-query';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
-import type { BucketedAggregation, NumberSummary } from '../../types';
-import {
-  canProvideStatsForField,
-  canProvideNumberSummaryForField,
-} from '../../utils/can_provide_stats';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimeZone } from '@kbn/visualization-utils';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { loadFieldStats } from '../../services/field_stats';
 import { loadFieldStatsTextBased } from '../../services/field_stats_text_based';
+import type { BucketedAggregation, NumberSummary } from '../../types';
 import type { AddFieldFilterHandler } from '../../types';
 import {
+  canProvideNumberSummaryForField,
+  canProvideStatsForField,
+} from '../../utils/can_provide_stats';
+import { ErrorBoundary } from '../error_boundary';
+import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
+import { FieldSummaryMessage } from './field_summary_message';
+import {
   FieldTopValues,
-  getOtherCount,
   getBucketsValuesCount,
   getDefaultColor,
+  getOtherCount,
 } from './field_top_values';
-import { FieldSummaryMessage } from './field_summary_message';
-import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
-import { ErrorBoundary } from '../error_boundary';
+import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
 export interface FieldStatsState {
   isLoading: boolean;

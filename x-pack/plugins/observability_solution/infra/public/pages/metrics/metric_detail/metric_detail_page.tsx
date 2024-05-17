@@ -6,19 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import React, { useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
+import { InfraLoadingPanel } from '../../../components/loading';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
-import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
-import { useSourceContext } from '../../../containers/metrics_source';
-import { InfraLoadingPanel } from '../../../components/loading';
-import type { NavItem } from './lib/side_nav_context';
+import { MetricsPageTemplate } from '../page_template';
 import { NodeDetailsPage } from './components/node_details_page';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { MetricsPageTemplate } from '../page_template';
+import type { NavItem } from './lib/side_nav_context';
 
 export const MetricDetailPage = () => {
   const {

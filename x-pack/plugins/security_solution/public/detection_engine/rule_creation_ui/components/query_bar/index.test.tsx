@@ -7,17 +7,17 @@
 
 import React from 'react';
 
+import { act, fireEvent, render } from '@testing-library/react';
 import { QueryBarDefineRule } from '.';
+import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import {
   TestProviders,
-  useFormFieldMock,
   mockOpenTimelineQueryResults,
+  useFormFieldMock,
 } from '../../../../common/mock';
-import { useGetAllTimeline, getAllTimeline } from '../../../../timelines/containers/all';
-import { mockHistory, Router } from '../../../../common/mock/router';
-import { render, act, fireEvent } from '@testing-library/react';
+import { Router, mockHistory } from '../../../../common/mock/router';
+import { getAllTimeline, useGetAllTimeline } from '../../../../timelines/containers/all';
 import { resolveTimeline } from '../../../../timelines/containers/api';
-import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/kibana', () => {

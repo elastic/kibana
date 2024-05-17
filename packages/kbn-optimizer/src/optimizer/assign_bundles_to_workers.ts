@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Bundle, descending, ascending } from '../common';
+import { Bundle, ascending, descending } from '../common';
 
 // helper types used inside getWorkerConfigs so we don't have
 // to calculate workUnits over and over

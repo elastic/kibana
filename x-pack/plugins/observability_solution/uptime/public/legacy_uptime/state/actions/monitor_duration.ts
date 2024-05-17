@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { QueryParams } from './types';
+import { createAction } from 'redux-actions';
 import type { MonitorDurationResult } from '../../../../common/types';
+import type { QueryParams } from './types';
 
 type MonitorQueryParams = QueryParams & { monitorId: string };
 

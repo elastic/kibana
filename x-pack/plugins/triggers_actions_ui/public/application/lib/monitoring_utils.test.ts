@@ -5,9 +5,9 @@
  * 2.0.
  */
 import {
-  getFormattedSuccessRatio,
   getFormattedDuration,
   getFormattedMilliseconds,
+  getFormattedSuccessRatio,
 } from './monitoring_utils';
 
 describe('monitoring_utils', () => {

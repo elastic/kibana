@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useLocation } from 'react-router-dom';
 import { renderHook } from '@testing-library/react-hooks';
-import { useDeepEqualSelector } from './use_selector';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../lib/kibana';
 import { useResolveRedirect } from './use_resolve_redirect';
+import { useDeepEqualSelector } from './use_selector';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

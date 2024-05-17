@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TimeseriesVisData, TableData, SeriesData } from './types';
 import { PANEL_TYPES } from './enums';
+import { SeriesData, TableData, TimeseriesVisData } from './types';
 
 export const isVisTableData = (data: TimeseriesVisData): data is TableData =>
   data.type === PANEL_TYPES.TABLE;

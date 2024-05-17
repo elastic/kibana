@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,13 +20,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ModuleJobUI } from '../page';
-import { usePartialState } from '../../../../components/custom_hooks';
-import { composeValidators, maxLengthValidator } from '../../../../../../common/util/validators';
-import { isJobIdValid } from '../../../../../../common/util/job_utils';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
-import { JobGroupsInput } from '../../common/components';
 import type { JobOverride } from '../../../../../../common/types/modules';
+import { isJobIdValid } from '../../../../../../common/util/job_utils';
+import { composeValidators, maxLengthValidator } from '../../../../../../common/util/validators';
+import { usePartialState } from '../../../../components/custom_hooks';
+import { JobGroupsInput } from '../../common/components';
+import type { ModuleJobUI } from '../page';
 
 interface EditJobProps {
   job: ModuleJobUI;

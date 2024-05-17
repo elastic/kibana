@@ -8,10 +8,10 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { API_VERSIONS } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import { SAVED_QUERIES_ID } from './constants';
+import { useKibana } from '../common/lib/kibana';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
+import { SAVED_QUERIES_ID } from './constants';
 
 export const useSavedQueries = ({
   isLive = false,

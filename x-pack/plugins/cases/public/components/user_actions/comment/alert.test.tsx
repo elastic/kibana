@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { omit, merge } from 'lodash';
+import { merge, omit } from 'lodash';
 import type { SnakeToCamelCase } from '../../../../common/types';
-import { getRuleId, getRuleInfo, getRuleName } from './alert';
-import type { Ecs } from '../../../containers/types';
 import type { AlertAttachment } from '../../../../common/types/domain';
+import type { Ecs } from '../../../containers/types';
+import { getRuleId, getRuleInfo, getRuleName } from './alert';
 
 describe('rule getters', () => {
   describe.each([

@@ -5,8 +5,25 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../../../tasks/navigation';
 import { getNewRule } from '../../../../../objects/rule';
+import { ALERTS_COUNT } from '../../../../../screens/alerts';
+import {
+  NO_ASSIGNEES,
+  alertDetailsFlyoutShowsAssignees,
+  alertsTableShowsAssigneesForAlert,
+  alertsTableShowsAssigneesForAllAlerts,
+  bulkRemoveAllAssignees,
+  bulkUpdateAssignees,
+  checkEmptyAssigneesStateInAlertDetailsFlyout,
+  checkEmptyAssigneesStateInAlertsTable,
+  clearAssigneesFilter,
+  filterByAssignees,
+  removeAllAssigneesForFirstAlert,
+  removeAllAssigneesViaTakeActionButtonInFlyout,
+  updateAssigneesForFirstAlert,
+  updateAssigneesViaAddButtonInFlyout,
+  updateAssigneesViaTakeActionButtonInFlyout,
+} from '../../../../../tasks/alert_assignments';
 import {
   closeAlertFlyout,
   closeAlerts,
@@ -15,30 +32,13 @@ import {
   selectNumberOfAlerts,
   selectPageFilterValue,
 } from '../../../../../tasks/alerts';
-import { createRule } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { login } from '../../../../../tasks/login';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import { getDefaultUsername } from '../../../../../tasks/common/users';
-import { ALERTS_URL } from '../../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
-import {
-  alertDetailsFlyoutShowsAssignees,
-  alertsTableShowsAssigneesForAlert,
-  updateAssigneesForFirstAlert,
-  checkEmptyAssigneesStateInAlertDetailsFlyout,
-  checkEmptyAssigneesStateInAlertsTable,
-  removeAllAssigneesForFirstAlert,
-  bulkUpdateAssignees,
-  alertsTableShowsAssigneesForAllAlerts,
-  bulkRemoveAllAssignees,
-  filterByAssignees,
-  NO_ASSIGNEES,
-  clearAssigneesFilter,
-  updateAssigneesViaAddButtonInFlyout,
-  updateAssigneesViaTakeActionButtonInFlyout,
-  removeAllAssigneesViaTakeActionButtonInFlyout,
-} from '../../../../../tasks/alert_assignments';
-import { ALERTS_COUNT } from '../../../../../screens/alerts';
+import { login } from '../../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../../tasks/navigation';
+import { ALERTS_URL } from '../../../../../urls/navigation';
 
 describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

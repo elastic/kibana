@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
 import { cpu } from './cpu';
 import { disk } from './disk';
+import { logs } from './logs';
 import { memory } from './memory';
 import { network } from './network';
-import { logs } from './logs';
-import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
 
 export const charts = {
   cpu,

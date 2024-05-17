@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import {
-  EuiLink,
   EuiCheckbox,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiPopover,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LazyOptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
+import React, { Fragment } from 'react';
 import { TelemetryPluginStart } from '../../lib/telemetry';
 
 interface State {

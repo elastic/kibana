@@ -14,7 +14,7 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { AssetsAndObjects } from './assets_and_objects';
 import { Frequency } from './frequency';

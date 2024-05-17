@@ -7,9 +7,9 @@
 
 import { kebabCase } from 'lodash';
 import type {
+  MitreSubTechnique,
   MitreTactic,
   MitreTechnique,
-  MitreSubTechnique,
 } from '../../../../detections/mitre/types';
 import type { CoverageOverviewMitreSubTechnique } from '../../model/coverage_overview/mitre_subtechnique';
 import type { CoverageOverviewMitreTactic } from '../../model/coverage_overview/mitre_tactic';

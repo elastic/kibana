@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { registerRoutes } from './routes';
 

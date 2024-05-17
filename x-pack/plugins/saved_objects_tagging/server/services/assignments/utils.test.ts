@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { createSavedObject, createReference } from '../../../common/test_utils';
+import { createReference, createSavedObject } from '../../../common/test_utils';
 import { toAssignableObject } from './utils';
 
 export const createType = (parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({

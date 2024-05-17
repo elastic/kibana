@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { LogLevelId } from './log_level';
 import type { LogMeta } from './log_meta';
 import type { LogRecord } from './log_record';
-import type { LogLevelId } from './log_level';
 
 /**
  * Logger exposes all the necessary methods to log any type of information and

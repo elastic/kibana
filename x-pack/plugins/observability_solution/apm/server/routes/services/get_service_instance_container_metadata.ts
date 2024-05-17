@@ -15,12 +15,12 @@ import {
 } from '../../../common/es_fields/apm';
 import {
   KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
   KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
-  KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../common/es_fields/infra_metrics';
-import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
+import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 export type ServiceInstanceContainerMetadataDetails =

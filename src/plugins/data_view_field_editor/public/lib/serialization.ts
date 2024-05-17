@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import { DataViewField, DataView, RuntimeType } from '../shared_imports';
+import { DataView, DataViewField, RuntimeType } from '../shared_imports';
 import type { Field, RuntimeFieldPainlessError } from '../types';
 
 export const deserializeField = (dataView: DataView, field?: DataViewField): Field | undefined => {

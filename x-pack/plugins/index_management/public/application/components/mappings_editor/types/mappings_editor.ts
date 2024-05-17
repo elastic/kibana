@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactNode, OptionHTMLAttributes } from 'react';
+import { OptionHTMLAttributes, ReactNode } from 'react';
 
 import { NormalizedField } from './document_fields';
 import { Mappings } from './state';

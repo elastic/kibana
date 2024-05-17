@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { get } from 'lodash';
 
 export const graphMigrations = {
   '7.0.0': (doc: SavedObjectUnsanitizedDoc<any>) => {

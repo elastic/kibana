@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { BehaviorSubject } from 'rxjs';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import {
-  MockUiSettingsClientConstructor,
-  MockUiSettingsGlobalClientConstructor,
-  MockUiSettingsDefaultsClientConstructor,
-  getCoreSettingsMock,
-} from './ui_settings_service.test.mock';
-import { UiSettingsService, SetupDeps } from './ui_settings_service';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
+import { uiSettingsGlobalType, uiSettingsType } from './saved_objects';
+import { SetupDeps, UiSettingsService } from './ui_settings_service';
+import {
+  MockUiSettingsClientConstructor,
+  MockUiSettingsDefaultsClientConstructor,
+  MockUiSettingsGlobalClientConstructor,
+  getCoreSettingsMock,
+} from './ui_settings_service.test.mock';
 
 const overrides = {
   overrideBaz: 'baz',

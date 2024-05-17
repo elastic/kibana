@@ -9,8 +9,8 @@
 // Extra IO-TS type to not allow more keys than the defined ones.
 // Extracted from https://github.com/gcanti/io-ts/issues/322
 
+import { Either, Right, either, isRight, left, right } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { either, Either, isRight, left, right, Right } from 'fp-ts/lib/Either';
 
 const getIsCodec =
   <T extends t.Any>(tag: string) =>

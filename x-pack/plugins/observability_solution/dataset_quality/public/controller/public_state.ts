@@ -7,8 +7,8 @@
 
 import { SortField } from '../hooks';
 import {
-  DatasetQualityControllerContext,
   DEFAULT_CONTEXT,
+  DatasetQualityControllerContext,
 } from '../state_machines/dataset_quality_controller';
 import { DatasetQualityPublicState, DatasetQualityPublicStateUpdate } from './types';
 

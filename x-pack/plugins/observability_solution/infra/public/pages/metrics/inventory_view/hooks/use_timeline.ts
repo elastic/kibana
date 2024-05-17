@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { useSnapshot } from './use_snaphot';
 
 const ONE_MINUTE = 60;
@@ -34,10 +34,10 @@ const getTimeLengthFromInterval = (interval: string | undefined) => {
       intervalInSeconds <= ONE_MINUTE * 15
         ? ONE_DAY
         : intervalInSeconds <= ONE_MINUTE * 35
-        ? ONE_DAY * 3
-        : intervalInSeconds <= ONE_HOUR * 2.5
-        ? ONE_WEEK
-        : ONE_MONTH;
+          ? ONE_DAY * 3
+          : intervalInSeconds <= ONE_HOUR * 2.5
+            ? ONE_WEEK
+            : ONE_MONTH;
     return { timeLength, intervalInSeconds };
   } else {
     return { timeLength: 0, intervalInSeconds: 0 };

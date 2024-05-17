@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromExpression, toExpression } from '@kbn/interpreter';
+import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
 
 const strings = {
   getApplyButtonLabel: () =>
@@ -73,7 +73,7 @@ export const AdvancedFailure = (props) => {
           id={argId}
           isInvalid={!valid}
           value={argExpression}
-          compressed
+          compressed={true}
           onChange={(ev) => setArgExpression(ev.target.value)}
           rows={3}
         />

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButtonGroup, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import type {
+  CustomPaletteParams,
+  DataBounds,
   PaletteOutput,
   PaletteRegistry,
-  DataBounds,
-  CustomPaletteParams,
 } from '../../palettes';
-import { CustomizablePalette } from './palette_configuration';
 import { getPaletteRegistry } from './mocks/palettes_registry';
-import { act } from 'react-dom/test-utils';
+import { CustomizablePalette } from './palette_configuration';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

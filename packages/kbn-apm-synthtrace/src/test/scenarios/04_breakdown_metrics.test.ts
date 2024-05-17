@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+import { ApmFields, apm, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +8,8 @@
  * Side Public License, v 1.
  */
 import { sumBy } from 'lodash';
-import { Readable } from 'stream';
-import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { createBreakdownMetricsAggregator } from '../../lib/apm/aggregators/create_breakdown_metrics_aggregator';
-import { apm, ApmFields, timerange } from '@kbn/apm-synthtrace-client';
+import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 describe('breakdown metrics', () => {
   let events: ApmFields[];

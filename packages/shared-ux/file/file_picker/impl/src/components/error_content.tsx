@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { FunctionComponent } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
-import { i18nTexts } from '../i18n_texts';
+import React from 'react';
+import type { FunctionComponent } from 'react';
 import { useFilePickerContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 
 interface Props {
   error: Error;

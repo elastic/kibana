@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { useEuiTheme, EuiIconTip } from '@elastic/eui';
-import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { IconChartBarAnnotations, IconChartBarReferenceLine } from '@kbn/chart-icons';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
+import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
 } from '../../../types';
-import { State, XYAnnotationLayerConfig } from '../types';
 import { annotationLayerHasUnsavedChanges } from '../state_helpers';
-import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
+import { State, XYAnnotationLayerConfig } from '../types';
 import {
   getAnnotationLayerTitle,
   isAnnotationsLayer,

@@ -14,8 +14,8 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getFormatService, setFormatService] =
   createGetterSetter<FieldFormatsStart>('fieldFormats');

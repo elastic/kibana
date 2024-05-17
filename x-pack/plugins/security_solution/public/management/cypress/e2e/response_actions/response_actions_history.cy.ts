@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ReturnTypeFromChainable } from '../../types';
+import { loadPage } from '../../tasks/common';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
+import type { ReturnTypeFromChainable } from '../../types';
 
 describe(
   'Response actions history page',

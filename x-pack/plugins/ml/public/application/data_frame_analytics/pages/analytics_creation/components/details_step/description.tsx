@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) => {

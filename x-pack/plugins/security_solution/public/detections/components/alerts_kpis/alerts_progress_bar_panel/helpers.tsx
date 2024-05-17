@@ -6,11 +6,11 @@
  */
 
 import { has } from 'lodash';
-import type { AlertsByGroupingAgg, AlertsProgressBarData, GroupBySelection } from './types';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
-import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { SummaryChartsAgg, SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import * as i18n from './translations';
+import type { AlertsByGroupingAgg, AlertsProgressBarData, GroupBySelection } from './types';
 
 export const formatPercentage = (percent: number): string => {
   return percent > 0 && percent < 0.01 ? '<1%' : `${(Math.round(percent * 1000) / 10).toString()}%`;

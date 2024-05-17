@@ -7,41 +7,41 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { groupBy, omit, pick, isEqual } from 'lodash';
+import { groupBy, isEqual, omit, pick } from 'lodash';
 
 import apm from 'elastic-apm-node';
 
-import type {
-  NewPackagePolicy,
-  AgentPolicy,
-  Installation,
-  Output,
-  DownloadSource,
-  PreconfiguredAgentPolicy,
-  PreconfiguredPackage,
-  PackagePolicy,
-  PackageInfo,
-} from '../../common/types';
 import type { PreconfigurationError } from '../../common/constants';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
-import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 import {
   type SimplifiedPackagePolicy,
   simplifiedPackagePolicytoNewPackagePolicy,
 } from '../../common/services/simplified_package_policy_helper';
+import type {
+  AgentPolicy,
+  DownloadSource,
+  Installation,
+  NewPackagePolicy,
+  Output,
+  PackageInfo,
+  PackagePolicy,
+  PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
+} from '../../common/types';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { FleetError } from '../errors';
 
-import { escapeSearchQueryPhrase } from './saved_object';
-import { pkgToPkgKey } from './epm/registry';
+import { addPackageToAgentPolicy, agentPolicyService } from './agent_policy';
+import { appContextService } from './app_context';
 import { getInstallation, getPackageInfo } from './epm/packages';
-import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
-import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
+import { ensurePackagesCompletedInstall } from './epm/packages/install';
+import { pkgToPkgKey } from './epm/registry';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { type InputsOverride, packagePolicyService } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
-import { appContextService } from './app_context';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import { escapeSearchQueryPhrase } from './saved_object';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs';
 import * as https from 'https';
-import { SslConfig } from '@kbn/server-http-tools';
-import { Logger } from '@kbn/core/server';
 import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsServerSetup } from '../types';
-import {
-  convertToDataStreamFormat,
-  DataStreamConfig,
-} from './formatters/public_formatters/convert_to_data_stream';
-import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
+import { Logger } from '@kbn/core/server';
+import { SslConfig } from '@kbn/server-http-tools';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { Observable, forkJoin, of, from as rxjsFrom } from 'rxjs';
+import { catchError, tap } from 'rxjs';
+import { ServiceConfig } from '../../common/config';
 import {
   MonitorFields,
   PublicLocations,
   ServiceLocation,
   ServiceLocationErrors,
 } from '../../common/runtime_types';
-import { ServiceConfig } from '../../common/config';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
+import { SyntheticsServerSetup } from '../types';
+import {
+  DataStreamConfig,
+  convertToDataStreamFormat,
+} from './formatters/public_formatters/convert_to_data_stream';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 

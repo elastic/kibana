@@ -1,3 +1,5 @@
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +7,13 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { CIS_AWS, CIS_AZURE, CIS_EKS, CIS_GCP, CIS_K8S } from '../../common/constants';
+import { BenchmarkData } from '../../common/types_old';
 import { CLOUD_PROVIDERS, getBenchmarkApplicableTo } from '../../common/utils/helpers';
-import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/constants';
+import { FINDINGS_GROUPING_OPTIONS } from '../common/constants';
+import { useNavigateFindings } from '../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
-import { useNavigateFindings } from '../common/hooks/use_navigate_findings';
-import { BenchmarkData } from '../../common/types_old';
-import { FINDINGS_GROUPING_OPTIONS } from '../common/constants';
 
 // order in array will determine order of appearance in the dashboard
 const benchmarks = [

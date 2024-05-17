@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { navCss } from './layouts/default';
 import { useRouterNavigate } from '../common/lib/kibana';
+import { navCss } from './layouts/default';
 import { ManageIntegrationLink } from './manage_integration_link';
 
 enum Section {

@@ -48,9 +48,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,9 +103,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "ComponentTemplateName"
-                ],
+                "signature": ["ComponentTemplateName"],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -168,9 +164,7 @@
                     "tags": [],
                     "label": "includeSerialization",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -182,9 +176,7 @@
                     "tags": [],
                     "label": "versionOverride",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -215,9 +207,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -240,9 +230,7 @@
                     "tags": [],
                     "label": "logger",
                     "description": [],
-                    "signature": [
-                      "Logger"
-                    ],
+                    "signature": ["Logger"],
                     "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -270,9 +258,7 @@
             "tags": [],
             "label": "getFleetApmPackagePath",
             "description": [],
-            "signature": [
-              "(packageVersion?: string | undefined) => string"
-            ],
+            "signature": ["(packageVersion?: string | undefined) => string"],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -284,9 +270,7 @@
                 "tags": [],
                 "label": "packageVersion",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -302,9 +286,7 @@
             "tags": [],
             "label": "fetchLatestApmPackageVersion",
             "description": [],
-            "signature": [
-              "() => Promise<string>"
-            ],
+            "signature": ["() => Promise<string>"],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -318,9 +300,7 @@
             "tags": [],
             "label": "installApmPackage",
             "description": [],
-            "signature": [
-              "(packageVersion?: string | undefined) => Promise<{ version: string; }>"
-            ],
+            "signature": ["(packageVersion?: string | undefined) => Promise<{ version: string; }>"],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -332,9 +312,7 @@
                 "tags": [],
                 "label": "packageVersion",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -350,9 +328,7 @@
             "tags": [],
             "label": "uninstallApmPackage",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -394,9 +370,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/assets/assets_synthtrace_es_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -465,9 +439,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_es_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -516,9 +488,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -541,9 +511,7 @@
                     "tags": [],
                     "label": "logger",
                     "description": [],
-                    "signature": [
-                      "Logger"
-                    ],
+                    "signature": ["Logger"],
                     "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -593,9 +561,7 @@
             "tags": [],
             "label": "fetchLatestSystemPackageVersion",
             "description": [],
-            "signature": [
-              "() => Promise<string>"
-            ],
+            "signature": ["() => Promise<string>"],
             "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -609,9 +575,7 @@
             "tags": [],
             "label": "installSystemPackage",
             "description": [],
-            "signature": [
-              "(packageVersion: string) => Promise<void>"
-            ],
+            "signature": ["(packageVersion: string) => Promise<void>"],
             "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -623,9 +587,7 @@
                 "tags": [],
                 "label": "packageVersion",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-apm-synthtrace/src/lib/infra/infra_synthtrace_kibana_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -675,9 +637,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/logs/logs_synthtrace_es_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -746,9 +706,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-apm-synthtrace/src/lib/monitoring/monitoring_synthtrace_es_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -788,10 +746,7 @@
         "tags": [],
         "label": "addObserverVersionTransform",
         "description": [],
-        "signature": [
-          "(observerVersion: string) => ",
-          "Transform"
-        ],
+        "signature": ["(observerVersion: string) => ", "Transform"],
         "path": "packages/kbn-apm-synthtrace/src/lib/utils/transform_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -803,9 +758,7 @@
             "tags": [],
             "label": "observerVersion",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-apm-synthtrace/src/lib/utils/transform_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -870,10 +823,7 @@
         "tags": [],
         "label": "deleteSummaryFieldTransform",
         "description": [],
-        "signature": [
-          "() => ",
-          "Transform"
-        ],
+        "signature": ["() => ", "Transform"],
         "path": "packages/kbn-apm-synthtrace/src/lib/utils/transform_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,

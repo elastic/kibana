@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
-import { useExpressionsService } from '../../services';
-import { ElementContent as Component, Props as ComponentProps } from './element_content';
 import { State } from '../../../types';
+import { useExpressionsService } from '../../services';
+import { getPageById, getSelectedPage } from '../../state/selectors/workpad';
+import { ElementContent as Component, Props as ComponentProps } from './element_content';
 
 export type Props = Omit<ComponentProps, 'renderFunction' | 'backgroundColor'>;
 

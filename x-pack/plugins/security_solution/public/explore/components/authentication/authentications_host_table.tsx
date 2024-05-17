@@ -11,19 +11,19 @@ import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { PaginatedTable } from '../paginated_table';
 
-import * as i18n from './translations';
+import { AuthStackByField } from '../../../../common/search_strategy';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useAuthentications } from '../../containers/authentications';
+import type { HostsComponentsQueryProps } from '../../hosts/pages/navigation/types';
+import { hostsActions, hostsModel, hostsSelectors } from '../../hosts/store';
 import {
   getHostDetailsAuthenticationColumns,
   getHostsPageAuthenticationColumns,
   rowItems,
 } from './helpers';
-import { useAuthentications } from '../../containers/authentications';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import type { HostsComponentsQueryProps } from '../../hosts/pages/navigation/types';
-import { hostsActions, hostsModel, hostsSelectors } from '../../hosts/store';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { AuthStackByField } from '../../../../common/search_strategy';
+import * as i18n from './translations';
 
 const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 

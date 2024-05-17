@@ -8,9 +8,9 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 import {
-  contentSources,
-  configuredSources,
   availableSources,
+  configuredSources,
+  contentSources,
 } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -21,8 +21,8 @@ import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
 import { getPageDescription } from '../../../../../test_helpers';
 import {
-  WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
+  WorkplaceSearchPageTemplate,
 } from '../../../../components/layout';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 

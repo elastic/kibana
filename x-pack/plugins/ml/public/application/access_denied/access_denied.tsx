@@ -10,8 +10,8 @@ import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
 import type { MlCapabilitiesKey } from '../../../common/types/capabilities';
+import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 

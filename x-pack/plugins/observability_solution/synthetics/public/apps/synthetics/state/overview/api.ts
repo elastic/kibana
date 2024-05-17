@@ -7,9 +7,9 @@
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
+  FetchMonitorOverviewQueryArgs,
   MonitorOverviewResult,
   MonitorOverviewResultCodec,
-  FetchMonitorOverviewQueryArgs,
   OverviewStatus,
   OverviewStatusCodec,
 } from '../../../../../common/runtime_types';

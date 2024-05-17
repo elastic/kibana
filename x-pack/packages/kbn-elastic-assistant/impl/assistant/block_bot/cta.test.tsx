@@ -1,3 +1,5 @@
+import { HttpSetup } from '@kbn/core-http-browser';
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +7,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
 import { BlockBotCallToAction } from './cta';
-import { HttpSetup } from '@kbn/core-http-browser';
 
 const testProps = {
   connectorPrompt: <div>{'Connector Prompt'}</div>,

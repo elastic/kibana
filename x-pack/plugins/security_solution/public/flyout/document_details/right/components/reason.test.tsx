@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
-import { Reason } from './reason';
-import { RightPanelContext } from '../context';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { TestProviders } from '../../../../common/mock';
-import { i18n } from '@kbn/i18n';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { TestProviders } from '../../../../common/mock';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { RightPanelContext } from '../context';
+import { Reason } from './reason';
+import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),

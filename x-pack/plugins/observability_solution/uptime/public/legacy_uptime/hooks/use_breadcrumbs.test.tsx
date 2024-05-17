@@ -6,12 +6,12 @@
  */
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
-import React from 'react';
-import { Route } from '@kbn/shared-ux-router';
-import { mountWithRouter } from '../lib';
-import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { UptimeUrlParams, getSupportedUrlParams, MountWithReduxProvider } from '../lib/helper';
+import { Route } from '@kbn/shared-ux-router';
+import React from 'react';
+import { OVERVIEW_ROUTE } from '../../../common/constants';
+import { mountWithRouter } from '../lib';
+import { MountWithReduxProvider, UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 
 describe('useBreadcrumbs', () => {

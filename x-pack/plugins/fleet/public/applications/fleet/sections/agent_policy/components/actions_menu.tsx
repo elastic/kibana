@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 
-import type { AgentPolicy } from '../../../types';
-import { useAuthz } from '../../../hooks';
 import {
   AgentEnrollmentFlyout,
   ContextMenuActions,
   UninstallCommandFlyout,
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
+import { useAuthz } from '../../../hooks';
+import type { AgentPolicy } from '../../../types';
 
-import { policyHasFleetServer, ExperimentalFeaturesService } from '../../../services';
+import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../services';
 
-import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
+import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;

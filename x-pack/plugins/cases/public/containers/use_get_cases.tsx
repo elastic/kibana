@@ -7,15 +7,15 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { casesQueriesKeys, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
-import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
 import { useToasts } from '../common/lib/kibana';
-import * as i18n from './translations';
-import { getCases } from './api';
-import type { ServerError } from '../types';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../components/app/use_available_owners';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
+import type { ServerError } from '../types';
 import { getAllPermissionsExceptFrom } from '../utils/permissions';
+import { getCases } from './api';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS, casesQueriesKeys } from './constants';
+import * as i18n from './translations';
+import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
 
 export const initialData: CasesFindResponseUI = {
   cases: [],

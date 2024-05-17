@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { booleanRt } from './boolean_rt';
 import { isRight } from 'fp-ts/lib/Either';
+import { booleanRt } from './boolean_rt';
 
 describe('booleanRt', () => {
   describe('it should not accept', () => {

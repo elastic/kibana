@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { MapStoreState } from '../../../../../../reducers/store';
+import { DRAW_MODE } from '../../../../../../../common/constants';
 import {
   cloneLayer,
   fitToLayerExtent,
@@ -19,10 +19,10 @@ import {
   ungroupLayer,
   updateEditLayer,
 } from '../../../../../../actions';
+import { MapStoreState } from '../../../../../../reducers/store';
 import { getLayerListRaw } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
-import { DRAW_MODE } from '../../../../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {
   return {

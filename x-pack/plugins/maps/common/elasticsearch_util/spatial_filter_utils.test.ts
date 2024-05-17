@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Polygon } from 'geojson';
 import { DataViewBase } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
+import { Polygon } from 'geojson';
 import {
-  createDistanceFilterWithMeta,
-  createExtentFilter,
   buildGeoGridFilter,
   buildGeoShapeFilter,
+  createDistanceFilterWithMeta,
+  createExtentFilter,
   extractFeaturesFromFilters,
 } from './spatial_filter_utils';
-import { buildQueryFromFilters } from '@kbn/es-query';
 
 const geoFieldName = 'location';
 

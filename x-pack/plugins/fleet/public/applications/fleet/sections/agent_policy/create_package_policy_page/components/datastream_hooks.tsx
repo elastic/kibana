@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useRouteMatch } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useRouteMatch } from 'react-router-dom';
 
 import { sendRequestForRq, useLink } from '../../../../hooks';
 

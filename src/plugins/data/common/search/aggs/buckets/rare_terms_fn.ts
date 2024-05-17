@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
+import { i18n } from '@kbn/i18n';
+import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '..';
 
 export const aggRareTermsFnName = 'aggRareTerms';
 

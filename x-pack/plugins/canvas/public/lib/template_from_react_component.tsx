@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { I18nProvider } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
 import React, {
   ComponentType,
   forwardRef,
@@ -12,11 +14,9 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
-import { unmountComponentAtNode, createPortal } from 'react-dom';
-import PropTypes from 'prop-types';
-import { I18nProvider } from '@kbn/i18n-react';
-import { ErrorBoundary } from '../components/enhance/error_boundary';
+import { createPortal, unmountComponentAtNode } from 'react-dom';
 import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
+import { ErrorBoundary } from '../components/enhance/error_boundary';
 
 export interface Props {
   renderError: Function;

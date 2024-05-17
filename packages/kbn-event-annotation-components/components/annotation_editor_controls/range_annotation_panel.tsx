@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
+  EuiDatePicker,
+  EuiFormControlLayout,
+  EuiFormLabel,
   EuiFormRow,
   EuiSwitch,
   EuiText,
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiDatePicker,
 } from '@elastic/eui';
-import moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React from 'react';
 import { isRangeAnnotationConfig } from '../..';
-import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from './helpers';
+import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from './helpers';
 import { toLineAnnotationColor, toRangeAnnotationColor } from './helpers';
 import type { ManualEventAnnotationType } from './types';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { Cluster } from '../../../../../../common/lib';
 import { isAddressValid } from './validate_address';
 

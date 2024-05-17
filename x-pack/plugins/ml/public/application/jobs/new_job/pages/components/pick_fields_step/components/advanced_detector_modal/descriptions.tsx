@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { memo } from 'react';
+import { EuiDescribedFormGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { FC, PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 
 import { FunctionHelpPopover } from './function_help';
 

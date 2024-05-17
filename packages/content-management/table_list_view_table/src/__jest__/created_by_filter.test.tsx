@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { I18nProvider } from '@kbn/i18n-react';
+import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { WithServices } from './tests.helpers';
 import { TableListViewTable, type TableListViewTableProps } from '../table_list_view_table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import userEvent from '@testing-library/user-event';
+import { WithServices } from './tests.helpers';
 
 const hits: UserContentCommonSchema[] = [
   {

@@ -9,8 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LogstashPluginRouter } from '../../types';
 
-import { Pipeline } from '../../models/pipeline';
 import { checkLicense } from '../../lib/check_license';
+import { Pipeline } from '../../models/pipeline';
 
 export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
   router.get(

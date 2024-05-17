@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StatementList } from './statement_list';
-import { Statement } from './statement';
 import { shallow } from 'enzyme';
+import React from 'react';
+import { Statement } from './statement';
+import { StatementList } from './statement_list';
 
 describe('StatementList', () => {
   let props;

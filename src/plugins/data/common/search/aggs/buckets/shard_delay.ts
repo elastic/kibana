@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BucketAggType } from './bucket_agg_type';
 import { BaseAggParams } from '../types';
+import { BucketAggType } from './bucket_agg_type';
 import { aggShardDelayFnName } from './shard_delay_fn';
 
 export const SHARD_DELAY_AGG_NAME = 'shard_delay';

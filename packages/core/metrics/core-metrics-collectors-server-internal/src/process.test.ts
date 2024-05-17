@@ -7,8 +7,8 @@
  */
 
 import v8, { HeapInfo } from 'v8';
-import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 import { ProcessMetricsCollector } from './process';
+import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 
 describe('ProcessMetricsCollector', () => {
   let collector: ProcessMetricsCollector;
@@ -76,7 +76,7 @@ describe('ProcessMetricsCollector', () => {
         () =>
           ({
             heap_size_limit: heapSizeLimit,
-          } as HeapInfo)
+          }) as HeapInfo
       );
 
       const metrics = collector.collect();

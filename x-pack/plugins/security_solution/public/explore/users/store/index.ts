@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Reducer, AnyAction } from 'redux';
+import type { AnyAction, Reducer } from 'redux';
 import * as usersActions from './actions';
 import * as usersModel from './model';
 import * as usersSelectors from './selectors';

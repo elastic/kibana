@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { useConfig, sendGetAgents } from '../../../../hooks';
+import { sendGetAgents, useConfig } from '../../../../hooks';
 
 async function fetchTotalOnlineAgents() {
   const response = await sendGetAgents({

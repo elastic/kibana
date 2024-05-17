@@ -7,15 +7,15 @@
 
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useMemo, useState } from 'react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { useMemo, useState } from 'react';
 import { isRatioRule } from '../../../../../../common/alerting/logs/log_threshold';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
-  getLogAlertsChartPreviewDataRequestPayloadRT,
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
-  getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
+  getLogAlertsChartPreviewDataRequestPayloadRT,
+  getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
 } from '../../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { ExecutionTimeRange } from '../../../../../types';

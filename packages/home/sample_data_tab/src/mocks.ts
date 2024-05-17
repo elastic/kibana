@@ -14,9 +14,9 @@
  */
 
 import {
+  getSampleDataCardMockDataSet,
   getSampleDataCardStoryArgTypes,
   getSampleDataCardStoryServices,
-  getSampleDataCardMockDataSet,
 } from '@kbn/home-sample-data-card';
 
 import { SampleDataTabServices } from './services';

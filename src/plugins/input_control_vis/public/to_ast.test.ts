@@ -7,8 +7,8 @@
  */
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { InputControlVisParams } from './types';
 import { toExpressionAst } from './to_ast';
+import { InputControlVisParams } from './types';
 
 describe('input_control_vis toExpressionAst', () => {
   const vis = {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { timeShift } from './time_shift';
 import { stdMetric } from './std_metric';
+import { timeShift } from './time_shift';
 
 describe('timeShift(resp, panel, series)', () => {
   let panel;

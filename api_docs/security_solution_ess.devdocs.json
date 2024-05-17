@@ -85,9 +85,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"securitySolutionEss\""
-        ],
+        "signature": ["\"securitySolutionEss\""],
         "path": "x-pack/plugins/security_solution_ess/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -100,9 +98,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"securitySolutionEss\""
-        ],
+        "signature": ["\"securitySolutionEss\""],
         "path": "x-pack/plugins/security_solution_ess/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

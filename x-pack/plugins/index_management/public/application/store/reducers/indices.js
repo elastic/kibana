@@ -9,10 +9,10 @@ import { combineReducers } from 'redux';
 import { handleActions } from 'redux-actions';
 import {
   deleteIndicesSuccess,
+  loadIndicesError,
+  loadIndicesStart,
   loadIndicesSuccess,
   reloadIndicesSuccess,
-  loadIndicesStart,
-  loadIndicesError,
 } from '../actions';
 
 const byId = handleActions(

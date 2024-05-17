@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { shareReplay } from 'rxjs';
-import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { NodeInfo } from '@kbn/core-node-server';
-import type { IContextProvider, IRouter } from '@kbn/core-http-server';
-import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
-import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IContextProvider, IRouter } from '@kbn/core-http-server';
+import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { NodeInfo } from '@kbn/core-node-server';
+import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
+import { shareReplay } from 'rxjs';
+import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { PluginWrapper } from './plugin';
+import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 import {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
-import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
-import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 
 /** @internal */
 export interface InstanceInfo {
@@ -221,7 +221,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Omit<Context, 'resolve'>
+        ContextName extends keyof Omit<Context, 'resolve'>,
       >(
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>

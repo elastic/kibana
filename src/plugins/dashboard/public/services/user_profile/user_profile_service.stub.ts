@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardUserProfileService } from './types';
 
 export type UserProfileServiceFactory = PluginServiceFactory<DashboardUserProfileService>;

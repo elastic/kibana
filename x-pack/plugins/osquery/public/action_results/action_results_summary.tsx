@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiCodeBlock, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { AgentIdToName } from '../agents/agent_id_to_name';
-import { useActionResults } from './use_action_results';
 import { Direction } from '../../common/search_strategy';
+import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResultsPrivileges } from './use_action_privileges';
+import { useActionResults } from './use_action_results';
 
 interface ActionResultsSummaryProps {
   actionId: string;

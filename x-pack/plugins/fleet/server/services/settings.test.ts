@@ -15,9 +15,9 @@ import { GLOBAL_SETTINGS_ID, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../com
 import type { Settings } from '../types';
 
 import { appContextService } from './app_context';
-import { getSettings, saveSettings, settingsSetup } from './settings';
 import { auditLoggingService } from './audit_logging';
 import { listFleetServerHosts } from './fleet_server_host';
+import { getSettings, saveSettings, settingsSetup } from './settings';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');

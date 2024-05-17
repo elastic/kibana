@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { WaffleTimeControls } from './waffle/waffle_time_controls';
 import { SearchBar } from './search_bar';
+import { WaffleTimeControls } from './waffle/waffle_time_controls';
 
 export const FilterBar = ({ interval }: { interval: string }) => (
   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" style={{ flexGrow: 0 }}>

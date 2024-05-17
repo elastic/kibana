@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
 import { paths } from '../../common/locators/paths';
+import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;

@@ -11,12 +11,11 @@ import {
   LABEL_FIELDS_BREAKDOWN,
   LABEL_FIELDS_FILTER,
   OPERATION_COLUMN,
+  PERCENTILE,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
-  PERCENTILE,
   ReportTypes,
 } from '../constants';
-import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
@@ -28,13 +27,13 @@ import {
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
+  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
-  TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
 import {
   BACKEND_TIME_LABEL,
@@ -47,6 +46,7 @@ import {
   TBT_LABEL,
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
+import { buildPhraseFilter } from '../utils';
 
 export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig {
   return {

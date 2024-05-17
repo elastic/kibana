@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { cloneDeep, omit } from 'lodash';
-import moment from 'moment';
 import { OpsMetrics } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { cloneDeep, omit } from 'lodash';
+import moment from 'moment';
+import { Observable } from 'rxjs';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
   timestamp: string;

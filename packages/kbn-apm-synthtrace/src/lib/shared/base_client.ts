@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Readable, Transform } from 'stream';
 import { Client } from '@elastic/elasticsearch';
 import {
   ESDocumentWithOperation,
@@ -14,7 +15,6 @@ import {
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
 import { castArray, isFunction } from 'lodash';
-import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';

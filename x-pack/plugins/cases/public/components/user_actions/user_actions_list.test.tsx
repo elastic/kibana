@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
-import { UserActionsList } from './user_actions_list';
+import { UserActionActions } from '../../../common/types/domain';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { UserActionActions } from '../../../common/types/domain';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
+import { UserActionsList } from './user_actions_list';
 
 const builderArgs = getMockBuilderArgs();
 

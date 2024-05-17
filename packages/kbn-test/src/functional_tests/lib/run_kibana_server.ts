@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Os from 'os';
+import Path from 'path';
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Config } from '../../functional_test_runner';
 import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
-import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args';
+import { getArgValue, parseRawFlags, remapPluginPaths } from './kibana_cli_args';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;

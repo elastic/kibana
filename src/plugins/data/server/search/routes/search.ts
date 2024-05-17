@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { reportSearchError } from '../report_search_error';
+import { first } from 'rxjs';
 import { getRequestAbortedSignal } from '../../lib';
+import { reportSearchError } from '../report_search_error';
 import type { DataPluginRouter } from '../types';
 
 export const SEARCH_API_BASE_URL = '/internal/search';

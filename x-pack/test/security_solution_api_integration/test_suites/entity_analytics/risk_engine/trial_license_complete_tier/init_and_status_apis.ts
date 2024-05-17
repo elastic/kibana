@@ -8,17 +8,17 @@
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 
-import {
-  legacyTransformIds,
-  createLegacyTransforms,
-  clearLegacyTransforms,
-  riskEngineRouteHelpersFactory,
-  installLegacyRiskScore,
-  getLegacyRiskScoreDashboards,
-  clearLegacyDashboards,
-  cleanRiskEngine,
-} from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import {
+  cleanRiskEngine,
+  clearLegacyDashboards,
+  clearLegacyTransforms,
+  createLegacyTransforms,
+  getLegacyRiskScoreDashboards,
+  installLegacyRiskScore,
+  legacyTransformIds,
+  riskEngineRouteHelpersFactory,
+} from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

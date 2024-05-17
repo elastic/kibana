@@ -6,9 +6,9 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 

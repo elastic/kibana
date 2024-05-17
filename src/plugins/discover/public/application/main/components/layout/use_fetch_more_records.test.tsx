@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { useFetchMoreRecords } from './use_fetch_more_records';
+import { renderHook } from '@testing-library/react-hooks';
+import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { FetchStatus } from '../../../types';
 import {
   DataDocuments$,
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
-import { FetchStatus } from '../../../types';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 
 describe('useFetchMoreRecords', () => {
   const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));

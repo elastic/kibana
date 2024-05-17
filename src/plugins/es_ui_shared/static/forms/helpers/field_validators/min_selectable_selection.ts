@@ -8,8 +8,8 @@
 
 import { EuiSelectableOption } from '@elastic/eui';
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { hasMinLengthArray } from '../../../validators/array';
+import { ValidationError, ValidationFunc } from '../../hook_form_lib';
 import { multiSelectComponent } from '../serializers';
 import { ERROR_CODE } from './types';
 

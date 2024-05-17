@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import OpenAI from 'openai';
 import {
-  createLlmProxy,
   LlmProxy,
+  createLlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

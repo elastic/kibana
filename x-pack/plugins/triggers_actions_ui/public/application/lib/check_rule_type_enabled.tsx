@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { upperFirst } from 'lodash';
 import { RuleType } from '../../types';
 
 export interface IsEnabledResult {

@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { MaintenanceWindowResponseV1 } from '../../../response';
 import { bulkGetBodySchemaV1 } from '..';
+import { MaintenanceWindowResponseV1 } from '../../../response';
 
 export type BulkGetMaintenanceWindowsRequestBody = TypeOf<typeof bulkGetBodySchemaV1>;
 

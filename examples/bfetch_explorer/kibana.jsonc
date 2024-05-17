@@ -6,12 +6,7 @@
     "id": "bfetchExplorer",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "bfetch",
-      "developerExamples"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredPlugins": ["bfetch", "developerExamples"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { uiActions } from '../kibana_services';
-import { CustomizePanelAction, CustomTimeRangeBadge } from './customize_panel_action';
+import { CustomTimeRangeBadge, CustomizePanelAction } from './customize_panel_action';
 import { EditPanelAction } from './edit_panel_action/edit_panel_action';
 import { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';
 import { RemovePanelAction } from './remove_panel_action/remove_panel_action';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { SkipBottomButton, SkipBottomButtonProps } from './skip_bottom_button';
 
 describe('Skip to Bottom Button', function () {

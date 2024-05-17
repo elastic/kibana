@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 import {
   OnSaveProps,
-  SavedObjectSaveModal,
   type SaveModalState,
+  SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 
 import { pluginServices } from '../services';
-import { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
+import { SaveModalDashboardProps } from './types';
 
 function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;

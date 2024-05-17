@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 export interface GenAiStreamingResponseExamplePublicSetupDeps {
   alerting: AlertingSetup;

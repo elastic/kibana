@@ -8,8 +8,8 @@
 
 import { RuleTester } from 'eslint';
 import {
-  StringsShouldBeTranslatedWithFormattedMessage,
   RULE_WARNING_MESSAGE,
+  StringsShouldBeTranslatedWithFormattedMessage,
 } from './strings_should_be_translated_with_formatted_message';
 
 const tsTester = [

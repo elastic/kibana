@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { StartServicesAccessor } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { getSavedSearchObjectType } from './saved_objects';
-import { SavedSearchType, LATEST_VERSION } from '../common';
-import { SavedSearchStorage } from './content_management';
+import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import { getKibanaContext } from './expressions/kibana_context';
 import { getSavedSearch } from '../common/service/get_saved_searches';
+import { SavedSearchStorage } from './content_management';
+import { getKibanaContext } from './expressions/kibana_context';
+import { getSavedSearchObjectType } from './saved_objects';
 
 /**
  * Saved search plugin server Setup contract

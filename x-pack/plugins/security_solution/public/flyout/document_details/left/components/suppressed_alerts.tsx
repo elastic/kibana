@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash';
 import React from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../../common/components/event_details/insights/translations';
+import { InvestigateInTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
-import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../../common/components/event_details/insights/translations';
-import { InvestigateInTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 export interface SuppressedAlertsProps {
   /**

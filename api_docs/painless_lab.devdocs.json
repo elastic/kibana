@@ -21,9 +21,7 @@
         "tags": [],
         "label": "ConfigType",
         "description": [],
-        "signature": [
-          "{ readonly enabled: boolean; }"
-        ],
+        "signature": ["{ readonly enabled: boolean; }"],
         "path": "x-pack/plugins/painless_lab/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,

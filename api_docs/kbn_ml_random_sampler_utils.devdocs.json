@@ -37,12 +37,8 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": [
-              "\nInitial values"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nInitial values"],
+            "signature": ["any"],
             "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -53,9 +49,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "randomSamplerMode",
-                "description": [
-                  "- random sampler mode"
-                ],
+                "description": ["- random sampler mode"],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-random-sampler-utils",
@@ -77,9 +71,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "setRandomSamplerMode",
-                "description": [
-                  "- callback to be called when random sampler mode is set"
-                ],
+                "description": ["- callback to be called when random sampler mode is set"],
                 "signature": [
                   "((mode: ",
                   {
@@ -102,9 +94,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "randomSamplerProbability",
-                "description": [
-                  "- initial value for random sampler probability"
-                ],
+                "description": ["- initial value for random sampler probability"],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-random-sampler-utils",
@@ -126,9 +116,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "setRandomSamplerProbability",
-                "description": [
-                  "- initial setter for random sampler probability"
-                ],
+                "description": ["- initial setter for random sampler probability"],
                 "signature": [
                   "((prob: ",
                   {
@@ -157,9 +145,7 @@
             "description": [
               "\nSet total doc count\nIf probability is not explicitly set, this doc count is used for calculating the suggested probability for sampling"
             ],
-            "signature": [
-              "(docCount: number) => void"
-            ],
+            "signature": ["(docCount: number) => void"],
             "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -170,12 +156,8 @@
                 "type": "number",
                 "tags": [],
                 "label": "docCount",
-                "description": [
-                  "- total document count"
-                ],
-                "signature": [
-                  "number"
-                ],
+                "description": ["- total document count"],
+                "signature": ["number"],
                 "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -190,12 +172,8 @@
             "type": "Function",
             "tags": [],
             "label": "getDocCount",
-            "description": [
-              "\nGet doc count"
-            ],
-            "signature": [
-              "() => number"
-            ],
+            "description": ["\nGet doc count"],
+            "signature": ["() => number"],
             "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -208,9 +186,7 @@
             "type": "Function",
             "tags": [],
             "label": "setMode",
-            "description": [
-              "\nSet and save in storage what mode of random sampling to use"
-            ],
+            "description": ["\nSet and save in storage what mode of random sampling to use"],
             "signature": [
               "(mode: ",
               {
@@ -232,9 +208,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "mode",
-                "description": [
-                  "- mode to use when wrapping/unwrapping random sampling aggs"
-                ],
+                "description": ["- mode to use when wrapping/unwrapping random sampling aggs"],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-random-sampler-utils",
@@ -258,9 +232,7 @@
             "type": "Function",
             "tags": [],
             "label": "getMode$",
-            "description": [
-              "\nObservable to get currently set mode of random sampling"
-            ],
+            "description": ["\nObservable to get currently set mode of random sampling"],
             "signature": [
               "() => ",
               "Observable",
@@ -286,9 +258,7 @@
             "type": "Function",
             "tags": [],
             "label": "getMode",
-            "description": [
-              "\nHelper to get currently set mode of random sampling"
-            ],
+            "description": ["\nHelper to get currently set mode of random sampling"],
             "signature": [
               "() => ",
               {
@@ -311,9 +281,7 @@
             "type": "Function",
             "tags": [],
             "label": "setProbability",
-            "description": [
-              "\nHelper to set the probability to use for random sampling requests"
-            ],
+            "description": ["\nHelper to set the probability to use for random sampling requests"],
             "signature": [
               "(probability: ",
               {
@@ -335,9 +303,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "probability",
-                "description": [
-                  "- numeric value 0 < probability < 1 to use for random sampling"
-                ],
+                "description": ["- numeric value 0 < probability < 1 to use for random sampling"],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-random-sampler-utils",
@@ -443,9 +409,7 @@
         "type": "Function",
         "tags": [],
         "label": "createRandomSamplerWrapper",
-        "description": [
-          "\nFactory to create the random sampler wrapper utility."
-        ],
+        "description": ["\nFactory to create the random sampler wrapper utility."],
         "signature": [
           "(options: RandomSamplerOptions) => { wrap: <T extends Record<string, ",
           "AggregationsAggregationContainer",
@@ -465,21 +429,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "options",
-            "description": [
-              "RandomSamplerOptions"
-            ],
-            "signature": [
-              "RandomSamplerOptions"
-            ],
+            "description": ["RandomSamplerOptions"],
+            "signature": ["RandomSamplerOptions"],
             "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "random sampler wrapper utility"
-        ],
+        "returnComment": ["random sampler wrapper utility"],
         "initialIsOpen": false
       },
       {
@@ -491,9 +449,7 @@
         "description": [
           "\nReturns a dynamic sample probability to be used with the `random_sampler` aggregation."
         ],
-        "signature": [
-          "(totalDocCount: number) => number"
-        ],
+        "signature": ["(totalDocCount: number) => number"],
         "path": "x-pack/packages/ml/random_sampler_utils/src/get_sample_probability.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -504,21 +460,15 @@
             "type": "number",
             "tags": [],
             "label": "totalDocCount",
-            "description": [
-              "The total document count to derive the sample probability from."
-            ],
-            "signature": [
-              "number"
-            ],
+            "description": ["The total document count to derive the sample probability from."],
+            "signature": ["number"],
             "path": "x-pack/packages/ml/random_sampler_utils/src/get_sample_probability.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "sample probability"
-        ],
+        "returnComment": ["sample probability"],
         "initialIsOpen": false
       }
     ],
@@ -531,12 +481,8 @@
         "type": "number",
         "tags": [],
         "label": "DEFAULT_PROBABILITY",
-        "description": [
-          "\nDefault probability to use"
-        ],
-        "signature": [
-          "0.001"
-        ],
+        "description": ["\nDefault probability to use"],
+        "signature": ["0.001"],
         "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -548,12 +494,8 @@
         "type": "number",
         "tags": [],
         "label": "MIN_SAMPLER_PROBABILITY",
-        "description": [
-          "\nDefault recommended minimum probability for default sampling"
-        ],
-        "signature": [
-          "0.00001"
-        ],
+        "description": ["\nDefault recommended minimum probability for default sampling"],
+        "signature": ["0.00001"],
         "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -565,12 +507,8 @@
         "type": "Array",
         "tags": [],
         "label": "RANDOM_SAMPLER_PROBABILITIES",
-        "description": [
-          "\nList of default probabilities to use for random sampler"
-        ],
-        "signature": [
-          "number[]"
-        ],
+        "description": ["\nList of default probabilities to use for random sampler"],
+        "signature": ["number[]"],
         "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -582,9 +520,7 @@
         "type": "number",
         "tags": [],
         "label": "RANDOM_SAMPLER_STEP",
-        "description": [
-          "\nDefault step minimum probability for default sampling"
-        ],
+        "description": ["\nDefault step minimum probability for default sampling"],
         "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -596,12 +532,8 @@
         "type": "Type",
         "tags": [],
         "label": "RandomSamplerOption",
-        "description": [
-          "\nDefault option for random sampler type"
-        ],
-        "signature": [
-          "\"off\" | \"on_automatic\" | \"on_manual\""
-        ],
+        "description": ["\nDefault option for random sampler type"],
+        "signature": ["\"off\" | \"on_automatic\" | \"on_manual\""],
         "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -613,12 +545,8 @@
         "type": "Type",
         "tags": [],
         "label": "RandomSamplerProbability",
-        "description": [
-          "\nType for the random sampler probability"
-        ],
-        "signature": [
-          "number | null"
-        ],
+        "description": ["\nType for the random sampler probability"],
+        "signature": ["number | null"],
         "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -630,9 +558,7 @@
         "type": "Type",
         "tags": [],
         "label": "RandomSamplerWrapper",
-        "description": [
-          "\nThe return type of the `createRandomSamplerWrapper` factory."
-        ],
+        "description": ["\nThe return type of the `createRandomSamplerWrapper` factory."],
         "signature": [
           "{ wrap: <T extends Record<string, ",
           "AggregationsAggregationContainer",
@@ -655,9 +581,7 @@
         "type": "Object",
         "tags": [],
         "label": "RANDOM_SAMPLER_OPTION",
-        "description": [
-          "\nDefault options for random sampler"
-        ],
+        "description": ["\nDefault options for random sampler"],
         "signature": [
           "{ readonly ON_AUTOMATIC: \"on_automatic\"; readonly ON_MANUAL: \"on_manual\"; readonly OFF: \"off\"; }"
         ],

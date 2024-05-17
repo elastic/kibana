@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiConfirmModal, useGeneratedHtmlId, EuiHealth } from '@elastic/eui';
+import { EuiConfirmModal, EuiHealth, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import { useEffect, useState } from 'react';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { useEffect, useState } from 'react';
 
 interface SemanticTextProps {
   isSemanticTextEnabled: boolean;

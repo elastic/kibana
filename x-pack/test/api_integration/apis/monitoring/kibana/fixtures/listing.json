@@ -1,8 +1,6 @@
 {
   "clusterStatus": {
-    "uuids": [
-      "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"
-    ],
+    "uuids": ["de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"],
     "status": "green",
     "some_status_is_stale": true,
     "requests_total": 174,

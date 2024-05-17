@@ -8,9 +8,9 @@
 import type { CasesColumnSelection } from './types';
 
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from './utils/merge_selected_columns_with_configuration';
-import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 export function useCasesColumnsSelection() {
   const casesColumnsConfig = useCasesColumnsConfiguration();

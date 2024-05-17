@@ -19,6 +19,7 @@ import {
   TOASTER_BODY,
 } from '../screens/alerts_detection_rules';
 import { EUI_SELECTABLE_LIST_ITEM, TIMELINE_SEARCHBOX } from '../screens/common/controls';
+import { SCHEDULE_DETAILS } from '../screens/rule_details';
 import {
   ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
@@ -55,7 +56,6 @@ import {
   UPDATE_SCHEDULE_MENU_ITEM,
   UPDATE_SCHEDULE_TIME_UNIT_SELECT,
 } from '../screens/rules_bulk_actions';
-import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
 // DELETE
 export const deleteSelectedRules = () => {

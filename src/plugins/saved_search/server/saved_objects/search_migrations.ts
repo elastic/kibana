@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-// TODO: This needs to be removed and properly typed
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { flow, get, mapValues } from 'lodash';
 import type {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { SerializedSearchSourceFields, isSerializedSearchSource } from '@kbn/data-plugin/common';
 import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/server';
-import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+// TODO: This needs to be removed and properly typed
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { flow, get, mapValues } from 'lodash';
 
 export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
   kibanaSavedObjectMeta: {

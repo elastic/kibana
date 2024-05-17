@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { UrlObject, format } from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
 import { ProfilingFtrConfigName } from '../configs';
 import { createProfilingApiClient } from './api_supertest';
 import { createProfilingUsers } from './create_profiling_users';

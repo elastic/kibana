@@ -1,3 +1,16 @@
+import { EcsFlat } from '@elastic/ecs';
+import {
+  EuiBadge,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { uniqBy } from 'lodash/fp';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,25 +18,8 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiCheckbox,
-  EuiIcon,
-  EuiToolTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
-import { uniqBy } from 'lodash/fp';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { EcsFlat } from '@elastic/ecs';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
-import { FieldName } from '../field_name';
-import * as i18n from '../../translations';
-import { styles } from './field_items.style';
 import {
   getCategory,
   getDescription,
@@ -31,6 +27,10 @@ import {
   getExampleText,
   getIconFromType,
 } from '../../helpers';
+import * as i18n from '../../translations';
+import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
+import { FieldName } from '../field_name';
+import { styles } from './field_items.style';
 
 /**
  * For the Cases field we want to change the

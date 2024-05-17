@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { History, createBrowserHistory } from 'history';
+import { Observable, Subject } from 'rxjs';
 import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
-  defaultState,
-  pureTransitions,
   TodoActions,
   TodoState,
+  defaultState,
+  pureTransitions,
 } from '../../demos/state_containers/todomvc';
 import { syncState, syncStates } from './state_sync';
-import { IStateStorage } from './state_sync_state_storage/types';
-import { Observable, Subject } from 'rxjs';
 import {
-  createSessionStorageStateStorage,
-  createKbnUrlStateStorage,
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
 } from './state_sync_state_storage';
-import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { createBrowserHistory, History } from 'history';
+import { IStateStorage } from './state_sync_state_storage/types';
 import { INullableBaseStateContainer } from './types';
 
 describe('state_sync', () => {

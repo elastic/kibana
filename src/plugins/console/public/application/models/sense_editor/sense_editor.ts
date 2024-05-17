@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { parse } from 'hjson';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { parse } from 'hjson';
+import _ from 'lodash';
 
+import { constructUrl } from '../../../lib/es/es';
 import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';
-import { constructUrl } from '../../../lib/es/es';
 
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import createAutocompleter from '../../../lib/autocomplete/autocomplete';
+import { StorageKeys, getStorage } from '../../../services';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
-import createAutocompleter from '../../../lib/autocomplete/autocomplete';
-import { getStorage, StorageKeys } from '../../../services';
-import { DEFAULT_VARIABLES } from '../../../../common/constants';
 
 const { collapseLiteralStrings } = XJson;
 

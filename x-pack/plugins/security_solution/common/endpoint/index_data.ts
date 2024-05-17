@@ -6,13 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import seedrandom from 'seedrandom';
-import type { KbnClient } from '@kbn/test';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { usageTracker } from './data_loaders/usage_tracker';
-import type { TreeOptions } from './generate_data';
-import { EndpointDocGenerator } from './generate_data';
+import seedrandom from 'seedrandom';
+import { indexAlerts } from './data_loaders/index_alerts';
 import type {
   DeleteIndexedEndpointHostsResponse,
   IndexedHostsResponse,
@@ -22,15 +20,17 @@ import {
   indexEndpointHostDocs,
 } from './data_loaders/index_endpoint_hosts';
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
-import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
+import { usageTracker } from './data_loaders/usage_tracker';
 import { createToolingLogger, mergeAndAppendArrays } from './data_loaders/utils';
-import {
-  waitForMetadataTransformsReady,
-  stopMetadataTransforms,
-  startMetadataTransforms,
-} from './utils/transforms';
+import type { TreeOptions } from './generate_data';
+import { EndpointDocGenerator } from './generate_data';
 import { getEndpointPackageInfo } from './utils/package';
+import {
+  startMetadataTransforms,
+  stopMetadataTransforms,
+  waitForMetadataTransformsReady,
+} from './utils/transforms';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 

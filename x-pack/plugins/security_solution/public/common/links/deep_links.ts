@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { AppDeepLink, AppDeepLinkLocations, AppUpdater } from '@kbn/core/public';
 import type { Subject, Subscription } from 'rxjs';
 import { combineLatestWith } from 'rxjs';
-import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import { appLinks$ } from './links';
 import type { AppLinkItems } from './types';
 

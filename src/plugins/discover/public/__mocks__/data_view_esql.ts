@@ -1,3 +1,4 @@
+import { DataView } from '@kbn/data-views-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DataView } from '@kbn/data-views-plugin/common';
 
 const fields = [
   {

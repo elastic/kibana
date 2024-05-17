@@ -8,12 +8,12 @@
 
 import SimpleGit from 'simple-git';
 
+import { combineErrors, createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
+import { checkFileCasing, getFilesForCommit } from './precommit_hook';
 import * as Stylelint from './stylelint';
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {

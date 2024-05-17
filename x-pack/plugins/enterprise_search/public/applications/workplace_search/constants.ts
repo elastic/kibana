@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { UPDATE_BUTTON_LABEL, SAVE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../shared/constants';
+import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL, UPDATE_BUTTON_LABEL } from '../shared/constants';
 
 export const WORKPLACE_SEARCH_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.title',

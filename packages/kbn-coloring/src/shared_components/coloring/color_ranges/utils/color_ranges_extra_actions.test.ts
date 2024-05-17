@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { distributeEqually, reversePalette } from './color_ranges_extra_actions';
 import type { ColorRange } from '../types';
+import { distributeEqually, reversePalette } from './color_ranges_extra_actions';
 
 describe('distributeEqually', () => {
   let colorRanges: ColorRange[];

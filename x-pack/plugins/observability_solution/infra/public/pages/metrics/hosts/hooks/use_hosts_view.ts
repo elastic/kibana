@@ -12,18 +12,18 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
+import createContainer from 'constate';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { useUnifiedSearchContext } from './use_unified_search';
 import {
   GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsResponsePayload,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
+import { useSourceContext } from '../../../../containers/metrics_source';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { useUnifiedSearchContext } from './use_unified_search';
 import { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [

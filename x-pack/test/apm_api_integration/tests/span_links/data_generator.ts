@@ -1,3 +1,4 @@
+import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { v4 as uuidv4 } from 'uuid';
 
 function getProducerInternalOnly() {

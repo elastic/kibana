@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { ImageConfig } from '../../types';
 import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer_context';
-import { ImageConfig } from '../../types';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 

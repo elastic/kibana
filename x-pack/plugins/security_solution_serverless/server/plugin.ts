@@ -6,35 +6,35 @@
  */
 
 import type {
-  PluginInitializerContext,
-  Plugin,
   CoreSetup,
   CoreStart,
   Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { getProductProductFeatures } from '../common/pli/pli_features';
 
+import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
-import type {
-  SecuritySolutionServerlessPluginSetup,
-  SecuritySolutionServerlessPluginStart,
-  SecuritySolutionServerlessPluginSetupDeps,
-  SecuritySolutionServerlessPluginStartDeps,
-} from './types';
-import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
-import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { getProductProductFeaturesConfigurator, getSecurityProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
   setEndpointPackagePolicyServerlessFlag,
 } from './endpoint/services';
+import { getProductProductFeaturesConfigurator, getSecurityProductTier } from './product_features';
 import { enableRuleActions } from './rules/enable_rule_actions';
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
+import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { telemetryEvents } from './telemetry/event_based_telemetry';
+import type {
+  SecuritySolutionServerlessPluginSetup,
+  SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStart,
+  SecuritySolutionServerlessPluginStartDeps,
+} from './types';
 
 export class SecuritySolutionServerlessPlugin
   implements

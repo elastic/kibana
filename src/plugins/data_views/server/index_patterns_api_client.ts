@@ -8,11 +8,11 @@
 
 import {
   ElasticsearchClient,
-  SavedObjectsClientContract,
   IUiSettingsClient,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
+import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserDataView } from './has_user_data_view';
 

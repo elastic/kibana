@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { TimelineTourProps } from '.';
 import { TimelineTour } from '.';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from './step_config';
-import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTabs } from '../../../../../common/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import {
+  TestProviders,
   createMockStore,
   createSecuritySolutionStorageMock,
-  TestProviders,
 } from '../../../../common/mock';
-import { TimelineTabs } from '../../../../../common/types';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from './step_config';
 
 jest.mock(
   '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted'

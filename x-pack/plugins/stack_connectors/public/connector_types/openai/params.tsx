@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE } from './constants';
-import { OpenAIActionConnector, ActionParams } from './types';
+import { ActionParams, OpenAIActionConnector } from './types';
 
 const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = ({
   actionConnector,

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
-import styled from '@emotion/styled';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
-import { AddConnectorModal } from '../add_connector_modal';
-import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation, ClientMessage } from '../../..';
-import { useLoadActionTypes } from '../use_load_action_types';
-import { StreamingText } from '../../assistant/streaming_text';
-import { ConnectorButton } from '../connector_button';
-import { useConversation } from '../../assistant/use_conversation';
-import { conversationHasNoPresentationData } from './helpers';
-import * as i18n from '../translations';
-import { useAssistantContext } from '../../assistant_context';
-import { useLoadConnectors } from '../use_load_connectors';
+import { ClientMessage, Conversation } from '../../..';
 import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
+import { StreamingText } from '../../assistant/streaming_text';
+import { useConversation } from '../../assistant/use_conversation';
+import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
+import { useAssistantContext } from '../../assistant_context';
+import { AddConnectorModal } from '../add_connector_modal';
+import { ConnectorButton } from '../connector_button';
 import { getGenAiConfig } from '../helpers';
+import * as i18n from '../translations';
+import { useLoadActionTypes } from '../use_load_action_types';
+import { useLoadConnectors } from '../use_load_connectors';
+import { conversationHasNoPresentationData } from './helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;

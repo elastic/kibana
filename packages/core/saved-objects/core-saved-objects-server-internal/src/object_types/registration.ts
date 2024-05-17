@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
-  SavedObjectTypeRegistry,
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
+  SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,

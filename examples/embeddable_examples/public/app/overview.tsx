@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
-import { EuiMarkdownFormat } from '@elastic/eui';
 // @ts-ignore
 import overviewMarkdown from '!!raw-loader!@kbn/embeddable-plugin/README.md';
+import { EuiMarkdownFormat } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 
 export const Overview = () => {
   return (

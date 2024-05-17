@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiPageSection,
   EuiTitle,
 } from '@elastic/eui';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
 import { AppMountParameters } from '@kbn/core/public';
 

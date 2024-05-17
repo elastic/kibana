@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
 import isEqual from 'react-fast-compare';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { branch, compose, shouldUpdate, withProps } from 'react-recompose';
-import { canUserWrite } from '../../state/selectors/app';
-import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
+import { connect } from 'react-redux';
 import { not } from '../../lib/aeroelastic/functional';
 import { WorkpadRoutingContext } from '../../routes/workpad';
-import { StaticPage } from './workpad_static_page';
+import { canUserWrite } from '../../state/selectors/app';
+import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
 import { InteractivePage } from './workpad_interactive_page';
+import { StaticPage } from './workpad_static_page';
 
 const animationProps = ({ animation, isSelected }) =>
   animation

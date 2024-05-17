@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
-import { WorkpadSchema } from './workpad_schema';
-import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
+import { okResponse } from '../ok_response';
+import { WorkpadSchema } from './workpad_schema';
 
 interface TemplateAttributes {
   template: CanvasWorkpad;

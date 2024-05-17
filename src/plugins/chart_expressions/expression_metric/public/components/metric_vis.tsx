@@ -8,42 +8,42 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Metric,
   MetricSpec,
+  MetricWNumber,
   MetricWProgress,
-  isMetricElementEvent,
+  MetricWText,
+  MetricWTrend,
   RenderChangeListener,
   Settings,
-  MetricWTrend,
-  MetricWNumber,
   SettingsProps,
-  MetricWText,
+  isMetricElementEvent,
 } from '@elastic/charts';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { EuiIcon, useEuiScrollBar, useResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
+import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
 import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import {
   FieldFormatConvertFunction,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
-import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
-import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { VisParams } from '../../common';
-import { getPaletteService, getThemeService, getFormatService } from '../services';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { getFormatService, getPaletteService, getThemeService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorEmptyShade;
@@ -131,8 +131,9 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 
 const getIcon =
   (type: string) =>
-  ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} width={width} height={height} fill={color} style={{ width, height }} />;
+  ({ width, height, color }: { width: number; height: number; color: string }) => (
+    <EuiIcon type={type} width={width} height={height} fill={color} style={{ width, height }} />
+  );
 
 export interface MetricVisComponentProps {
   data: Datatable;

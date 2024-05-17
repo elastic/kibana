@@ -7,15 +7,15 @@
 
 import datemath from '@elastic/datemath';
 import { Logger } from '@kbn/core/server';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { RollupInterval } from '../../../../common/rollup';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
-import { getServicesItems } from '../../services/get_services/get_services_items';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getServicesItems } from '../../services/get_services/get_services_items';
 
 export interface ApmServicesListItem {
   'service.name': string;

@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+} from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { formatHit } from '@kbn/discover-utils';
 import type {
   DataTableRecord,
   EsHitRecord,
   FormattedHit,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-} from '@elastic/eui';
 import classnames from 'classnames';
+import React, { Fragment } from 'react';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';

@@ -8,11 +8,11 @@
 
 import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
 import { list_id } from '../../common/list_id';
-import { valueOrUndefined } from '../../common/value';
 import { refresh } from '../../common/refresh';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { valueOrUndefined } from '../../common/value';
 
 export const deleteListItemSchema = t.intersection([
   t.exact(

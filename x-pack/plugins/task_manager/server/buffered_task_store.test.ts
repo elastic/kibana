@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { taskStoreMock } from './task_store.mock';
 import { BufferedTaskStore } from './buffered_task_store';
 import { asErr, asOk } from './lib/result_type';
 import { taskManagerMock } from './mocks';
+import { taskStoreMock } from './task_store.mock';
 
 describe('Buffered Task Store', () => {
   describe('remove', () => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useState } from 'react';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { deletePackagePolicy } from '../../state/monitor_management/api';
 import { MonitorNotFoundPage } from '../monitor_details/monitor_not_found_page';

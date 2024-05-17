@@ -7,30 +7,30 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
-import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
+import { useDispatch } from 'react-redux';
 import { HeaderSection } from '../../header_section';
+import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import * as i18n from './translations';
 
 import { Loader } from '../../loader';
-import type { AnomaliesUserTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
+import type { AnomaliesUserTableProps } from '../types';
 import { BasicTable } from './basic_table';
 
-import { getCriteriaFromUsersType } from '../criteria/get_criteria_from_users_type';
+import { usersActions, usersSelectors } from '../../../../explore/users/store';
+import { useQueryToggle } from '../../../containers/query_toggle';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { State } from '../../../store/types';
 import { Panel } from '../../panel';
+import { getCriteriaFromUsersType } from '../criteria/get_criteria_from_users_type';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { convertAnomaliesToUsers } from './convert_anomalies_to_users';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
-import { useQueryToggle } from '../../../containers/query_toggle';
 import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { usersActions, usersSelectors } from '../../../../explore/users/store';
-import type { State } from '../../../store/types';
-import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 
 const sorting = {
   sort: {

@@ -157,9 +157,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "QueryDslQueryContainer"
-            ],
+            "signature": ["QueryDslQueryContainer"],
             "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -191,9 +189,7 @@
         "tags": [],
         "label": "ACTION_CATEGORIZE_FIELD",
         "description": [],
-        "signature": [
-          "\"ACTION_CATEGORIZE_FIELD\""
-        ],
+        "signature": ["\"ACTION_CATEGORIZE_FIELD\""],
         "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -206,9 +202,7 @@
         "tags": [],
         "label": "CATEGORIZE_FIELD_TRIGGER",
         "description": [],
-        "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
-        ],
+        "signature": ["\"CATEGORIZE_FIELD_TRIGGER\""],
         "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -221,9 +215,7 @@
         "tags": [],
         "label": "CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION",
         "description": [],
-        "signature": [
-          "\"createMLADCategorizationJobAction\""
-        ],
+        "signature": ["\"createMLADCategorizationJobAction\""],
         "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -236,9 +228,7 @@
         "tags": [],
         "label": "CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
         "description": [],
-        "signature": [
-          "\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""
-        ],
+        "signature": ["\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""],
         "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,

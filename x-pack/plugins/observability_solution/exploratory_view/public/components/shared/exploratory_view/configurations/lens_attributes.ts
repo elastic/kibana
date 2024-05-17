@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
@@ -18,9 +20,11 @@ import {
   FiltersIndexPatternColumn,
   FormulaIndexPatternColumn,
   FormulaPublicApi,
+  HeatmapVisualizationState,
   LastValueIndexPatternColumn,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
+  MetricState,
   MinIndexPatternColumn,
   OperationMetadata,
   OperationType,
@@ -34,13 +38,20 @@ import {
   XYCurveType,
   XYState,
   YAxisMode,
-  HeatmapVisualizationState,
-  MetricState,
 } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { capitalize } from 'lodash';
+import { parseRelativeDate } from '../components/date_range_picker';
+import {
+  ColumnFilter,
+  MetricOption,
+  ParamFilter,
+  SeriesConfig,
+  SupportedOperations,
+  TermColumnParamsOrderBy,
+  URLReportDefinition,
+  UrlFilter,
+} from '../types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -55,17 +66,6 @@ import {
   TERMS_COLUMN,
   USE_BREAK_DOWN_COLUMN,
 } from './constants';
-import {
-  ColumnFilter,
-  MetricOption,
-  ParamFilter,
-  SeriesConfig,
-  SupportedOperations,
-  TermColumnParamsOrderBy,
-  UrlFilter,
-  URLReportDefinition,
-} from '../types';
-import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
 export function getLayerReferenceName(layerId: string) {

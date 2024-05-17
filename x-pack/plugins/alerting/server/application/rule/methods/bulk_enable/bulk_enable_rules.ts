@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { withSpan } from '@kbn/apm-utils';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import pMap from 'p-map';
+import { SanitizedRule, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import { RawRule, RawRuleAction } from '../../../../types';
-import { RuleDomain, RuleParams } from '../../types';
+import { RuleAttributes } from '../../../../data/rule/types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
-  retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
+  retryIfBulkOperationConflicts,
 } from '../../../../rules_client/common';
-import { getRuleCircuitBreakerErrorMessage, SanitizedRule } from '../../../../../common';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import {
-  getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   createNewAPIKeySet,
+  getAuthorizationFilter,
   migrateLegacyActions,
   updateMetaAttributes,
 } from '../../../../rules_client/lib';
-import { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
-import { validateScheduleLimit } from '../get_schedule_frequency';
-import { RuleAttributes } from '../../../../data/rule/types';
+import { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
-import { bulkEnableRulesParamsSchema } from './schemas';
-import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { RawRule, RawRuleAction } from '../../../../types';
 import { ruleDomainSchema } from '../../schemas';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { RuleDomain, RuleParams } from '../../types';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+import { bulkEnableRulesParamsSchema } from './schemas';
+import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the

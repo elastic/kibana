@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EUI_BASIC_TABLE_LOADING, EUI_ICON_IS_LOADING } from '../../screens/common/controls';
 import { DASHBOARD_INVESTIGATE_IN_TIMELINE_CELL_ACTION } from '../../screens/dashboards/common';
-import { EUI_ICON_IS_LOADING, EUI_BASIC_TABLE_LOADING } from '../../screens/common/controls';
 
 export const investigateDashboardItemInTimeline = (selector: string, itemIndex: number = 0) => {
   // wait for any outstanding queries to complete

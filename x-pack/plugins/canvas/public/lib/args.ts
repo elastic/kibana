@@ -7,12 +7,12 @@
 
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import {
-  modelRegistry,
-  viewRegistry,
-  transformRegistry,
   Model,
-  View,
   Transform,
+  View,
+  modelRegistry,
+  transformRegistry,
+  viewRegistry,
 } from '../expression_types';
 import { ArgUiConfig } from '../expression_types/arg';
 

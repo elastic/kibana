@@ -7,31 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
-import { CreateSourceEditor } from './create_source_editor';
-import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import {
-  ESGeoGridSourceDescriptor,
-  ColorDynamicOptions,
-  SizeDynamicOptions,
-} from '../../../../common/descriptor_types';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import {
-  COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
+  COUNT_PROP_NAME,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   LAYER_WIZARD_CATEGORY,
   RENDER_AS,
-  VECTOR_STYLES,
   STYLE_TYPE,
+  VECTOR_STYLES,
   WIZARD_ID,
 } from '../../../../common/constants';
-import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+import {
+  ColorDynamicOptions,
+  ESGeoGridSourceDescriptor,
+  SizeDynamicOptions,
+} from '../../../../common/descriptor_types';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import { ClustersLayerIcon } from '../../layers/wizards/icons/clusters_layer_icon';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+// @ts-ignore
+import { CreateSourceEditor } from './create_source_editor';
+import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
 import { getIconSize } from './get_icon_size';
 
 const DEFAULT_RESOLUTION = GRID_RESOLUTION.FINE;

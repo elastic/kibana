@@ -7,10 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import pMap from 'p-map';
-import { validatePermissions } from './edit_monitor';
-import { SyntheticsServerSetup } from '../../types';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   ConfigKey,
   DeleteParamsResponse,
@@ -19,13 +16,16 @@ import {
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { SyntheticsServerSetup } from '../../types';
 import {
   formatTelemetryDeleteEvent,
   sendErrorTelemetryEvents,
   sendTelemetryEvents,
 } from '../telemetry/monitor_upgrade_sender';
-import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import { validatePermissions } from './edit_monitor';
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],

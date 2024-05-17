@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
-import * as selectors from '../store/selectors';
-import { EdgeLine } from './edge_line';
-import { GraphControls } from './controls';
-import { ProcessEventDot } from './process_event_dot';
-import { useCamera } from './use_camera';
-import { SymbolDefinitions } from './symbol_definitions';
-import { useStateSyncingActions } from './use_state_syncing_actions';
-import { StyledMapContainer, GraphContainer } from './styles';
+import React, { useContext, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import * as nodeModel from '../../../common/endpoint/models/node';
-import { SideEffectContext } from './side_effect_context';
-import type { ResolverProps } from '../types';
-import { PanelRouter } from './panels';
-import { useColors } from './use_colors';
-import { useSyncSelectedNode } from './use_sync_selected_node';
-import { ResolverNoProcessEvents } from './resolver_no_process_events';
-import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
+import * as selectors from '../store/selectors';
+import type { ResolverProps } from '../types';
+import { GraphControls } from './controls';
+import { EdgeLine } from './edge_line';
+import { PanelRouter } from './panels';
+import { ProcessEventDot } from './process_event_dot';
+import { ResolverNoProcessEvents } from './resolver_no_process_events';
+import { SideEffectContext } from './side_effect_context';
+import { GraphContainer, StyledMapContainer } from './styles';
+import { SymbolDefinitions } from './symbol_definitions';
+import { useAutotuneTimerange } from './use_autotune_timerange';
+import { useCamera } from './use_camera';
+import { useColors } from './use_colors';
+import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
+import { useStateSyncingActions } from './use_state_syncing_actions';
+import { useSyncSelectedNode } from './use_sync_selected_node';
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
  */

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
+import { ResponseToolkit as HapiResponseToolkit, Lifecycle, Request } from '@hapi/hapi';
+import {
+  CoreKibanaRequest,
+  HapiResponseAdapter,
+  lifecycleResponseFactory,
+} from '@kbn/core-http-router-server-internal';
 import type {
-  OnPostAuthNextResult,
-  OnPostAuthToolkit,
-  OnPostAuthResult,
   OnPostAuthHandler,
+  OnPostAuthNextResult,
+  OnPostAuthResult,
+  OnPostAuthToolkit,
 } from '@kbn/core-http-server';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { OnPostAuthResultType } from '@kbn/core-http-server';
-import {
-  HapiResponseAdapter,
-  CoreKibanaRequest,
-  lifecycleResponseFactory,
-} from '@kbn/core-http-router-server-internal';
+import type { Logger } from '@kbn/logging';
 
 const postAuthResult = {
   next(): OnPostAuthResult {

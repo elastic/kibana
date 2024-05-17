@@ -6,25 +6,25 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { fieldsServiceProvider } from '../fields_service';
-import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JobValidationMessage, MessageId } from '../../../common/constants/messages';
 import { getMessages } from '../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
+import { fieldsServiceProvider } from '../fields_service';
 
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
+import type { MlClient } from '../../lib/ml_client';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
+import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
-import { validateInfluencers } from './validate_influencers';
 import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview';
+import { validateInfluencers } from './validate_influencers';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
-import { validateTimeRange, isValidTimeField } from './validate_time_range';
-import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
+import { isValidTimeField, validateTimeRange } from './validate_time_range';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { DashboardsTable } from './dashboards_table';
+import React from 'react';
 import { TestProviders } from '../../common/mock';
+import { DashboardsTable } from './dashboards_table';
 
 // mock lodash debounce to speed up the test
 jest.mock('lodash', () => ({ ...jest.requireActual('lodash'), debounce: (fn: () => void) => fn }));

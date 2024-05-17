@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo, useReducer } from 'react';
 import styled, { css } from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutFooter,
-  EuiFlyoutBody,
   EuiButton,
   EuiButtonEmpty,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiSkeletonText,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiSkeletonText,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
@@ -37,27 +37,27 @@ import type {
 
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
-import * as i18n from './translations';
-import { ExceptionItemComments } from '../item_comments';
+import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
+import type { Rule } from '../../../rule_management/logic/types';
+import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
+import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
+import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import {
   defaultEndpointExceptionItems,
-  retrieveAlertOsTypes,
   getPrepopulatedRuleExceptionWithHighlightFields,
+  retrieveAlertOsTypes,
 } from '../../utils/helpers';
 import type { AlertData } from '../../utils/types';
-import { initialState, createExceptionItemsReducer } from './reducer';
-import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
-import { ExceptionsConditions } from '../flyout_components/item_conditions';
-import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
-import type { Rule } from '../../../rule_management/logic/types';
-import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
-import { useAddNewExceptionItems } from './use_add_new_exceptions';
-import { enrichNewExceptionItems } from '../flyout_components/utils';
-import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
-import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
-import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
+import { ExceptionsConditions } from '../flyout_components/item_conditions';
+import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
+import { enrichNewExceptionItems } from '../flyout_components/utils';
+import { ExceptionItemComments } from '../item_comments';
+import { createExceptionItemsReducer, initialState } from './reducer';
+import * as i18n from './translations';
+import { useAddNewExceptionItems } from './use_add_new_exceptions';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`

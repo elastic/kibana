@@ -18,14 +18,14 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import styled from 'styled-components';
 
-import { useCheckEndpointPermissions } from './endpoint/check_permissions';
-import { EndpointResponseAction } from './endpoint/endpoint_response_action';
 import type { RuleResponseAction } from '../../../common/api/detection_engine/model/rule_response_actions';
 import { ResponseActionTypesEnum } from '../../../common/api/detection_engine/model/rule_response_actions';
-import { OsqueryResponseAction } from './osquery/osquery_response_action';
-import { getActionDetails } from './constants';
 import { useFormData } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
+import { getActionDetails } from './constants';
+import { useCheckEndpointPermissions } from './endpoint/check_permissions';
+import { EndpointResponseAction } from './endpoint/endpoint_response_action';
+import { OsqueryResponseAction } from './osquery/osquery_response_action';
 
 interface ResponseActionTypeFormProps {
   item: ArrayItem;

@@ -13,4 +13,4 @@ export const getFormatService = () =>
     deserialize: (target: any) => ({
       convert: (text: string, format: string) => text,
     }),
-  } as FieldFormatsStart);
+  }) as FieldFormatsStart;

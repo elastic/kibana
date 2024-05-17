@@ -6,7 +6,7 @@
  */
 
 import { Pipeline } from '../../../../../common/types';
-import { VerboseTestOutput, Document } from '../types';
+import { Document, VerboseTestOutput } from '../types';
 
 export const PROCESSORS: Pick<Pipeline, 'processors'> = {
   processors: [

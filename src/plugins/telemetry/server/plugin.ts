@@ -9,54 +9,54 @@
 import { URL } from 'url';
 import {
   type Observable,
-  startWith,
-  firstValueFrom,
   ReplaySubject,
-  exhaustMap,
-  timer,
   distinctUntilChanged,
+  exhaustMap,
   filter,
+  firstValueFrom,
+  map,
+  shareReplay,
+  startWith,
   takeUntil,
   tap,
-  shareReplay,
-  map,
+  timer,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  ISavedObjectsRepository,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
 } from '@kbn/telemetry-collection-manager-plugin/server';
-import type {
-  CoreSetup,
-  PluginInitializerContext,
-  ISavedObjectsRepository,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import apm from 'elastic-apm-node';
+import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
+import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
 import {
-  type TelemetrySavedObject,
-  getTelemetrySavedObject,
-  registerTelemetrySavedObject,
-  TELEMETRY_SAVED_OBJECT_TYPE,
-} from './saved_objects';
-import { registerRoutes } from './routes';
-import { registerCollection } from './telemetry_collection';
-import {
-  registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
+  registerTelemetryUsageCollector,
 } from './collectors';
 import type { TelemetryConfigLabels, TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
-import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
-import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
+import { registerRoutes } from './routes';
+import {
+  TELEMETRY_SAVED_OBJECT_TYPE,
+  type TelemetrySavedObject,
+  getTelemetrySavedObject,
+  registerTelemetrySavedObject,
+} from './saved_objects';
+import { registerCollection } from './telemetry_collection';
 import { getTelemetryOptIn } from './telemetry_config';
 
 interface TelemetryPluginsDepsSetup {

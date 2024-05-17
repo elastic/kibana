@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Story } from '@storybook/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { FlyoutNavigation } from './flyout_navigation';
 
 const expandDetails = () => window.alert('expand left panel');

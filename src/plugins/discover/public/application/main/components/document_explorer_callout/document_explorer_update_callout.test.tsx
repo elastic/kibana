@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import { discoverServiceMock } from '../../../../__mocks__/services';
+import { DiscoverServices } from '../../../../build_services';
+import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import {
   CALLOUT_STATE_KEY,
   DocumentExplorerUpdateCallout,
 } from './document_explorer_update_callout';
-import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
-import { DiscoverServices } from '../../../../build_services';
-import { discoverServiceMock } from '../../../../__mocks__/services';
-import { DiscoverTourProvider } from '../../../../components/discover_tour';
 
 const defaultServices = {
   ...discoverServiceMock,

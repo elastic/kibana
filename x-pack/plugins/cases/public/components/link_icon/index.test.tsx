@@ -8,8 +8,8 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../common/mock';
 import { LinkIcon } from '.';
+import { TestProviders } from '../../common/mock';
 
 describe('LinkIcon', () => {
   const onClick = jest.fn;

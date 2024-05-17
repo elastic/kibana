@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Tls, X509Expiry } from '../../../../../../common/runtime_types';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { CERTIFICATES_ROUTE } from '../../../../../../common/constants';
+import { Tls, X509Expiry } from '../../../../../../common/runtime_types';
 import { CertStatusColumn } from '../../../overview/monitor_list/columns/cert_status_column';
 
 interface Props {

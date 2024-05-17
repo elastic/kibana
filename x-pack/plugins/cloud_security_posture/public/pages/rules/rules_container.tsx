@@ -1,3 +1,5 @@
+import { EuiSpacer } from '@elastic/eui';
+import compareVersions from 'compare-versions';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,26 +7,24 @@
  * 2.0.
  */
 import React, { useState, useMemo, useEffect } from 'react';
-import compareVersions from 'compare-versions';
-import { EuiSpacer } from '@elastic/eui';
-import { useParams, useHistory, generatePath } from 'react-router-dom';
-import { benchmarksNavigation } from '../../common/navigation/constants';
-import { buildRuleKey } from '../../../common/utils/rules_states';
-import { extractErrorMessage } from '../../../common/utils/helpers';
-import { RulesTable } from './rules_table';
-import { RulesTableHeader } from './rules_table_header';
-import { useFindCspBenchmarkRule, type RulesQuery } from './use_csp_benchmark_rules';
-import * as TEST_SUBJECTS from './test_subjects';
-import { RuleFlyout } from './rules_flyout';
-import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
-import { usePageSize } from '../../common/hooks/use_page_size';
+import { generatePath, useHistory, useParams } from 'react-router-dom';
 import type {
   CspBenchmarkRule,
   PageUrlParams,
   RuleStateAttributes,
 } from '../../../common/types/latest';
-import { useCspGetRulesStates } from './use_csp_rules_state';
+import { extractErrorMessage } from '../../../common/utils/helpers';
+import { buildRuleKey } from '../../../common/utils/rules_states';
+import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 import { RulesCounters } from './rules_counters';
+import { RuleFlyout } from './rules_flyout';
+import { RulesTable } from './rules_table';
+import { RulesTableHeader } from './rules_table_header';
+import * as TEST_SUBJECTS from './test_subjects';
+import { type RulesQuery, useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
+import { useCspGetRulesStates } from './use_csp_rules_state';
 
 export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];

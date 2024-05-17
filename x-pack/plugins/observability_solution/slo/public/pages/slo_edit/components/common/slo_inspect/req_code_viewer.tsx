@@ -8,11 +8,11 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React, { ReactNode, useCallback } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
 import { compressToEncodedURIComponent } from 'lz-string';
+import React, { ReactNode, useCallback } from 'react';
 import { useKibana } from '../../../../../utils/kibana_react';
 
 interface RequestCodeViewerProps {

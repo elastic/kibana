@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -24,8 +24,8 @@ import {
 } from '../../api/search_applications/delete_search_application_api_logic';
 
 import {
-  SearchApplicationsListAPIArguments,
   FetchSearchApplicationsAPILogic,
+  SearchApplicationsListAPIArguments,
 } from '../../api/search_applications/fetch_search_applications_api_logic';
 
 import { DEFAULT_META, updateMetaPageIndex, updateMetaTotalState } from './types';

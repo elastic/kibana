@@ -8,9 +8,9 @@
 import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { fromQuery, toQuery } from '../links/url_helpers';
-import { EnvironmentSelect } from '../environment_select';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { EnvironmentSelect } from '../environment_select';
+import { fromQuery, toQuery } from '../links/url_helpers';
 
 function updateEnvironmentUrl(
   history: History,

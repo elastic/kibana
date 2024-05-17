@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import { IClusterClient, PluginInitializerContext } from '@kbn/core/server';
+import { Observable } from 'rxjs';
 
-import { Plugin } from './plugin';
 import { EsContext } from './es';
-import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
+import { Plugin } from './plugin';
 import { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { IEvent, IEventLogConfig, IEventLogService, IEventLogger } from './types';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

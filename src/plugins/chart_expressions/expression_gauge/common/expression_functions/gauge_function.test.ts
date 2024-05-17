@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { gaugeFunction } from './gauge_function';
-import { GaugeArguments, GaugeShapes } from '..';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { GaugeArguments, GaugeShapes } from '..';
 import {
   EXPRESSION_GAUGE_NAME,
   GaugeCentralMajorModes,
@@ -17,7 +17,7 @@ import {
   GaugeLabelMajorModes,
   GaugeTicksPositions,
 } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { gaugeFunction } from './gauge_function';
 
 describe('interpreter/functions#gauge', () => {
   const fn = functionWrapper(gaugeFunction());

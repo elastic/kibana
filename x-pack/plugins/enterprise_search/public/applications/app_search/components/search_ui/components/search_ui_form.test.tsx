@@ -9,11 +9,11 @@ jest.mock('../utils', () => ({
   generatePreviewUrl: jest.fn(),
 }));
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiForm } from '@elastic/eui';
 

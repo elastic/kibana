@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
-import { AddFilterButton } from './add_filter_btn';
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { AddFilterButton } from './add_filter_btn';
 
 describe('AddFilterButton component', () => {
   it('provides all filter choices', () => {

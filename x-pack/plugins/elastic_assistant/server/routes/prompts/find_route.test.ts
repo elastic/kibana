@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getCurrentUserPromptsRequest, requestMock } from '../../__mocks__/request';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
-import { serverMock } from '../../__mocks__/server';
+import { getCurrentUserPromptsRequest, requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
+import { serverMock } from '../../__mocks__/server';
 import { findPromptsRoute } from './find_route';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('Find user prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;

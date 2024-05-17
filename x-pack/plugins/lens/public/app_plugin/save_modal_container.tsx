@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { isFilterPinned } from '@kbn/es-query';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { SaveModal } from './save_modal';
-import type { LensAppProps, LensAppServices } from './types';
-import type { SaveProps } from './app';
-import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
-import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
+import type { SavedObjectReference } from '@kbn/core/public';
+import { isFilterPinned } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import React, { useEffect, useState } from 'react';
 import { APP_ID, getFullPath } from '../../common/constants';
+import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
+import { Document, SavedObjectIndexStore, checkForDuplicateTitle } from '../persistence';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 import { VisualizeEditorContext } from '../types';
+import type { SaveProps } from './app';
+import { SaveModal } from './save_modal';
 import { redirectToDashboard } from './save_modal_container_helpers';
+import type { LensAppProps, LensAppServices } from './types';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import assert from 'assert';
-import axios from 'axios';
 import path from 'path';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import axios from 'axios';
 import { PackageInfo } from '..';
 import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';

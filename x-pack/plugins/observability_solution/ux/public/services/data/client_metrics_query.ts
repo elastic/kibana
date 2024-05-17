@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import {
+  TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+} from '../../../common/elasticsearch_fieldnames';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
-import {
-  TRANSACTION_TIME_TO_FIRST_BYTE,
-  TRANSACTION_DURATION,
-} from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from './projections';
 
 export function clientMetricsQuery(

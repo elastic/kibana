@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -19,7 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActor, useSelector } from '@xstate/react';
-import { ErrorCallout } from './error_callout';
+import React, { useCallback } from 'react';
+import {
+  datasetNameWillBePrefixed,
+  getDatasetNamePrefix,
+  prefixDatasetName,
+} from '../../state_machines/create/pipelines/fields';
+import { hasFailedSelector } from '../../state_machines/create/selectors';
 import { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
 import {
   CreateCustomIntegrationOptions,
@@ -27,12 +32,7 @@ import {
   WithTouchedFields,
 } from '../../state_machines/create/types';
 import { Dataset, IntegrationError } from '../../types';
-import { hasFailedSelector } from '../../state_machines/create/selectors';
-import {
-  datasetNameWillBePrefixed,
-  getDatasetNamePrefix,
-  prefixDatasetName,
-} from '../../state_machines/create/pipelines/fields';
+import { ErrorCallout } from './error_callout';
 
 // NOTE: Hardcoded for now. We will likely extend the functionality here to allow the selection of the type.
 // And also to allow adding multiple datasets.

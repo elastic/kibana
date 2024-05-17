@@ -6,7 +6,7 @@
  */
 import { omit } from 'lodash';
 
-import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
+import { RuleLastRun, RuleTypeParams, SanitizedRule } from '../../types';
 
 export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
   const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;

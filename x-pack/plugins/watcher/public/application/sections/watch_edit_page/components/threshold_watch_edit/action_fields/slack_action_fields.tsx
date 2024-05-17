@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiComboBox, EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { SlackAction } from '../../../../../../../common/types/action_types';
 
 interface Props {

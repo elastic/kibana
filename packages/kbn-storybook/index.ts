@@ -7,10 +7,10 @@
  */
 
 import {
+  StorybookConfig,
   defaultConfig,
   defaultConfigWebFinal,
   mergeWebpackFinal,
-  StorybookConfig,
 } from './src/lib/default_config';
 export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal };
 export type { StorybookConfig };

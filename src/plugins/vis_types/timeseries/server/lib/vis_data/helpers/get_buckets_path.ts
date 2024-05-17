@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { startsWith } from 'lodash';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { toPercentileNumber } from '../../../../common/to_percentile_number';
+import { startsWith } from 'lodash';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import type { Metric } from '../../../../common/types';
 
 const percentileTest = /\[[0-9\.]+\]$/;

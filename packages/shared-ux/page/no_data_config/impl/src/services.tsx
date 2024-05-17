@@ -8,10 +8,10 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 
-import { NoDataPageProvider, NoDataPageKibanaProvider } from '@kbn/shared-ux-page-no-data';
+import { NoDataPageKibanaProvider, NoDataPageProvider } from '@kbn/shared-ux-page-no-data';
 import type {
-  NoDataConfigPageServices,
   NoDataConfigPageKibanaDependencies,
+  NoDataConfigPageServices,
 } from '@kbn/shared-ux-page-no-data-config-types';
 
 /**

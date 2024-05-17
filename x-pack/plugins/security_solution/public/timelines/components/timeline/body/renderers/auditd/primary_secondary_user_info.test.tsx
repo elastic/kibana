@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
-import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';
 
 jest.mock('../../../../../../common/lib/kibana');
 

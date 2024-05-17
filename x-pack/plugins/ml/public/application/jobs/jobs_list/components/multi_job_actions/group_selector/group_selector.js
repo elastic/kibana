@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
-  EuiToolTip,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiButtonIcon,
-  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
 
-import { ml } from '../../../../../services/ml_api_service';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { ml } from '../../../../../services/ml_api_service';
+import { getToastNotificationService } from '../../../../../services/toast_notification_service';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { getToastNotificationService } from '../../../../../services/toast_notification_service';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map((j) => j.id);

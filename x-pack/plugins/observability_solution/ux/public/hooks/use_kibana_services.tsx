@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart, DocLinksStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import { ApplicationStart, DocLinksStart, HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../plugin';
 

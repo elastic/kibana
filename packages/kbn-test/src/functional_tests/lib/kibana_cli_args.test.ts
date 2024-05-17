@@ -32,8 +32,9 @@ describe('parseRawFlags()', () => {
   });
 
   it('deduplciates --base-path, --no-base-path, and --server.basePath', () => {
-    expect(parseRawFlags(['--no-base-path', '--server.basePath=foo', '--base-path=bar']))
-      .toMatchInlineSnapshot(`
+    expect(
+      parseRawFlags(['--no-base-path', '--server.basePath=foo', '--base-path=bar'])
+    ).toMatchInlineSnapshot(`
       Array [
         "--base-path=bar",
       ]

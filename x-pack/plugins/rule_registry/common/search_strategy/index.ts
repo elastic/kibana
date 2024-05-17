@@ -1,3 +1,9 @@
+import type {
+  MappingRuntimeFields,
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +12,6 @@
  */
 import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import type {
-  MappingRuntimeFields,
-  QueryDslFieldAndFormat,
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];

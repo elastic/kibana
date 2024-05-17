@@ -1,3 +1,8 @@
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Pagination } from '@elastic/eui';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsHitRecord } from '@kbn/discover-utils/types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,24 +12,19 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { Pagination } from '@elastic/eui';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { EsHitRecord } from '@kbn/discover-utils/types';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../../../common/types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import {
   CSP_LATEST_FINDINGS_DATA_VIEW,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspBenchmarkRulesStates } from '../../../../common/types/latest';
 import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import type { FindingsBaseEsQuery } from '../../../common/types';
+import { showErrorToast } from '../../../common/utils/show_error_toast';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
+import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];

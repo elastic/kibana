@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
-import type { ParsedCommandInterface } from '../../../service/types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
+import type { ParsedCommandInterface } from '../../../service/types';
 import type {
   ConsoleDataAction,
   ConsoleDataState,

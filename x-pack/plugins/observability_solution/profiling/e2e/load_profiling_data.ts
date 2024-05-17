@@ -1,3 +1,4 @@
+import fs from 'fs';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import path from 'path';
-import fs from 'fs';
 import { createEsClientForTesting } from '@kbn/test';
 
 const esArchiversPath = path.posix.join(__dirname, 'es_archivers');

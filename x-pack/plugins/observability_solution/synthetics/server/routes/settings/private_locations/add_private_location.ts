@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { PrivateLocation } from '../../../../common/runtime_types';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { SyntheticsRestApiRouteFactory } from '../../types';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { toClientContract, toSavedObjectContract } from './helpers';
-import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),

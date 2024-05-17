@@ -9,15 +9,15 @@
 import Path from 'path';
 import * as Fsp from 'fs/promises';
 
+import { TransformConfig, withFastAsyncTransform } from '@kbn/babel-transform';
 import { runBazel } from '@kbn/bazel-runner';
+import { getRepoFiles } from '@kbn/get-repo-files';
 import * as Peggy from '@kbn/peggy';
-import { asyncForEach } from '@kbn/std';
-import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
-import { getRepoFiles } from '@kbn/get-repo-files';
+import { asyncForEach } from '@kbn/std';
 
-import { Task, scanCopy, write, deleteAll } from '../lib';
+import { Task, deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
 

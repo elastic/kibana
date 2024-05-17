@@ -8,11 +8,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../test/context_jest';
-import { Scrubber } from './scrubber';
 import {
   getScrubberSlideContainer as container,
   getRenderedElement as element,
 } from '../../test/selectors';
+import { Scrubber } from './scrubber';
 
 jest.mock('../../supported_renderers');
 

@@ -8,11 +8,11 @@
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { createCopyToClipboardLensAction } from './copy_to_clipboard';
-import { KibanaServices } from '../../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../../common/constants';
-import { Subject } from 'rxjs';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { Subject } from 'rxjs';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { KibanaServices } from '../../../../common/lib/kibana';
+import { createCopyToClipboardLensAction } from './copy_to_clipboard';
 
 jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();

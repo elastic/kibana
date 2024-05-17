@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiSpacer } from '@elastic/eui';
-import { UNNAMED_LOCATION, STATUS } from '../../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { STATUS, UNNAMED_LOCATION } from '../../../../../../common/constants';
 import { getHealthMessage } from '../columns/monitor_status_column';
 
 interface MonitorStatusRowProps {

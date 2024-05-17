@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import Boom from '@hapi/boom';
-import {
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TAGS_PER_CASE,
-  MAX_LENGTH_PER_TAG,
-  MAX_TITLE_LENGTH,
-  MAX_ASSIGNEES_PER_CASE,
-  MAX_CUSTOM_FIELDS_PER_CASE,
-} from '../../../common/constants';
+import { omit } from 'lodash';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import {
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { bulkCreate } from './bulk_create';
-import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 
@@ -212,8 +212,9 @@ describe('bulkCreate', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0])
-        .toMatchInlineSnapshot(`
+      expect(
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0]
+      ).toMatchInlineSnapshot(`
         Object {
           "cases": Array [
             Object {

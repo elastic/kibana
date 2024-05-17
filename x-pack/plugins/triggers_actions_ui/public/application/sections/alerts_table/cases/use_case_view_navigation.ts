@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { generatePath } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { useCallback } from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 

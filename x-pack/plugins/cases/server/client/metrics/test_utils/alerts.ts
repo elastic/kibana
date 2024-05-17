@@ -6,8 +6,8 @@
  */
 
 import { createAlertServiceMock } from '../../../services/mocks';
-import type { AggregationBuilder } from '../types';
 import { AlertHosts, AlertUsers } from '../alerts/aggregations';
+import type { AggregationBuilder } from '../types';
 
 export function mockAlertsService() {
   const alertsService = createAlertServiceMock();

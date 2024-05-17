@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {

@@ -1,3 +1,4 @@
+import type { Client } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_ID,
   PARENT_ID,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  TRACE_ID,
+  TRANSACTION_ID,
 } from '@kbn/apm-plugin/common/es_fields/apm';
-import type { Client } from '@elastic/elasticsearch';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
 import { ApmApiClient } from '../../../common/config';

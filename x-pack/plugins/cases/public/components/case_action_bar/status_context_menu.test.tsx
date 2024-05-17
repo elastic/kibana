@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusContextMenu } from './status_context_menu';

@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
-import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import {
-  CreateEndpointListSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  FoundExceptionListItemSchema,
-  FoundExceptionListSchema,
-  createEndpointListSchema,
-  exceptionListItemSchema,
-  exceptionListSchema,
-  foundExceptionListItemSchema,
-  foundExceptionListSchema,
   AddEndpointExceptionListProps,
   AddExceptionListItemProps,
   AddExceptionListProps,
   ApiCallByIdProps,
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
+  CreateEndpointListSchema,
+  DuplicateExceptionListProps,
+  ExceptionFilterResponse,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
   ExportExceptionListProps,
-  UpdateExceptionListItemProps,
-  UpdateExceptionListProps,
+  FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
   GetExceptionFilterFromExceptionListIdsProps,
   GetExceptionFilterFromExceptionsProps,
-  ExceptionFilterResponse,
-  DuplicateExceptionListProps,
+  UpdateExceptionListItemProps,
+  UpdateExceptionListProps,
+  createEndpointListSchema,
+  exceptionListItemSchema,
+  exceptionListSchema,
+  foundExceptionListItemSchema,
+  foundExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { validateEither } from '@kbn/securitysolution-io-ts-utils';
+import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
 
 import {
   ENDPOINT_LIST_URL,
-  INTERNAL_EXCEPTION_FILTER,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTION_FILTER,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 

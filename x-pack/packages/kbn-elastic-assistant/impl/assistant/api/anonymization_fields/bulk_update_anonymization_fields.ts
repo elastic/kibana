@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
-  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 import {
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { i18n } from '@kbn/i18n';
 
 export const bulkUpdateAnonymizationFields = async (
   http: HttpSetup,

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import React, { useCallback } from 'react';
+import { AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import moment from 'moment';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useExpViewAttributes } from './use_exp_view_attrs';
 

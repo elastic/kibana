@@ -113,17 +113,26 @@ export type UndefinedUnsavedFieldChange = UnsavedFieldChange<'undefined'>;
  * given {@link SettingType}.
  * @public
  */
-export type KnownTypeToUnsavedChange<T extends SettingType> =
-  T extends 'array' ? ArrayUnsavedFieldChange :
-  T extends 'boolean' ? BooleanUnsavedFieldChange :
-  T extends 'color' ? ColorUnsavedFieldChange :
-  T extends 'image' ? ImageUnsavedFieldChange :
-  T extends 'json' ? JsonUnsavedFieldChange :
-  T extends 'markdown' ? MarkdownUnsavedFieldChange :
-  T extends 'number' | 'bigint' ? NumberUnsavedFieldChange :
-  T extends 'select' ? SelectUnsavedFieldChange :
-  T extends 'string' ? StringUnsavedFieldChange:
-  T extends 'undefined' ? UndefinedUnsavedFieldChange :
-  never;
+export type KnownTypeToUnsavedChange<T extends SettingType> = T extends 'array'
+  ? ArrayUnsavedFieldChange
+  : T extends 'boolean'
+    ? BooleanUnsavedFieldChange
+    : T extends 'color'
+      ? ColorUnsavedFieldChange
+      : T extends 'image'
+        ? ImageUnsavedFieldChange
+        : T extends 'json'
+          ? JsonUnsavedFieldChange
+          : T extends 'markdown'
+            ? MarkdownUnsavedFieldChange
+            : T extends 'number' | 'bigint'
+              ? NumberUnsavedFieldChange
+              : T extends 'select'
+                ? SelectUnsavedFieldChange
+                : T extends 'string'
+                  ? StringUnsavedFieldChange
+                  : T extends 'undefined'
+                    ? UndefinedUnsavedFieldChange
+                    : never;
 
 export type UnsavedFieldChanges = Record<string, UnsavedFieldChange>;

@@ -12,9 +12,9 @@ import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
 
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
+import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
 import type { ExplorerState } from './state';
 import { getExplorerDefaultState } from './state';
-import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
 
 export const explorerReducer = (state: ExplorerState, nextAction: Action): ExplorerState => {
   const { type, payload } = nextAction;

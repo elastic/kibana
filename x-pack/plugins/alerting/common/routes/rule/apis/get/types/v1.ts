@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 import { getRuleRequestParamsSchemaV1 } from '..';
+import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 export type GetRuleRequestParams = TypeOf<typeof getRuleRequestParamsSchemaV1>;
 

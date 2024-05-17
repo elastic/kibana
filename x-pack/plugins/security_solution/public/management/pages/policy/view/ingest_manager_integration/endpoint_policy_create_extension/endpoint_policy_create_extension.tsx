@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   EuiCallOut,
   EuiCode,
@@ -18,13 +17,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { useLicense } from '../../../../../../common/hooks/use_license';
+import { useGetProtectionsUnavailableComponent } from '../../policy_settings_form/hooks/use_get_protections_unavailable_component';
+import { EndpointEventCollectionPreset } from './components/endpoint_event_collection_preset';
+import { HelpTextWithPadding } from './components/help_text_with_padding';
 import type { EndpointPreset } from './constants';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY, endpointPresetsMapping } from './constants';
-import { HelpTextWithPadding } from './components/help_text_with_padding';
-import { EndpointEventCollectionPreset } from './components/endpoint_event_collection_preset';
-import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
@@ -32,7 +33,6 @@ import {
   ENDPOINT,
   INTERACTIVE_ONLY,
 } from './translations';
-import { useGetProtectionsUnavailableComponent } from '../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 
 const PREFIX = 'endpoint_policy_create_extension';
 

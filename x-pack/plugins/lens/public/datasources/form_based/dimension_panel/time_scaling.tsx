@@ -6,22 +6,22 @@
  */
 
 import {
-  EuiToolTip,
-  EuiIcon,
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import { unitSuffixesLong } from '../../../../common/suffix_formatter';
+import {
+  GenericIndexPatternColumn,
+  adjustTimeScaleLabelSuffix,
+  operationDefinitionMap,
+} from '../operations';
 import type { FormBasedLayer } from '../types';
 
 export function setTimeScaling(

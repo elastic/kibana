@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { ALERTS, DISCOVERIES, LAST_GENERATED } from './translations';
 

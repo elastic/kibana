@@ -6,12 +6,12 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { SecuritySolutionFactory } from '../../types';
 import type {
   CtiDataSourceStrategyResponse,
   CtiQueries,
 } from '../../../../../../common/search_strategy/security_solution/cti';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 
 export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {

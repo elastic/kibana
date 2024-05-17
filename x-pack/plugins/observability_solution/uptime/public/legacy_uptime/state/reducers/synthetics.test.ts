@@ -7,13 +7,13 @@
 
 import { isPendingBlock } from '../../../../common/runtime_types';
 import {
+  SyntheticsReducerState,
   fetchBlocksAction,
   pruneCacheAction,
-  setBlockLoadingAction,
   putBlocksAction,
   putCacheSize,
+  setBlockLoadingAction,
   syntheticsReducer,
-  SyntheticsReducerState,
   updateHitCountsAction,
 } from './synthetics';
 

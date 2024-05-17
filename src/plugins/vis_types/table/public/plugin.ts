@@ -7,14 +7,14 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { TablePublicConfig } from '../config';
-import { setDataViewsStart, setFormatService } from './services';
 import { registerTableVis } from './register_vis';
+import { setDataViewsStart, setFormatService } from './services';
 
 /** @internal */
 export interface TablePluginSetupDependencies {

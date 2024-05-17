@@ -11,16 +11,16 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ErrorRendererConfig } from '../../common/types';
 import { LazyErrorRenderComponent } from '../components';
 

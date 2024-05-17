@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { ProjectType } from '@kbn/serverless-types';
+import React from 'react';
 import { ProjectSwitcher as Component } from './switcher.component';
 
 import { useServices } from './services';

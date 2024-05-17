@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import SlackParamsFields from './slack_params';
 
 describe('SlackParamsFields renders', () => {

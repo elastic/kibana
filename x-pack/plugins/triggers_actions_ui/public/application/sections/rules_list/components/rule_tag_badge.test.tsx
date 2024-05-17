@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import { RuleTagBadge } from './rule_tag_badge';
 
 const onClickMock = jest.fn();

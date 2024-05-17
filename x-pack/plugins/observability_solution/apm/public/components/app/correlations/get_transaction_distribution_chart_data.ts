@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import type { HistogramItem } from '../../../../common/correlations/types';
 import { DurationDistributionChartData } from '../../shared/charts/duration_distribution_chart';
-import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
-import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
 export function getTransactionDistributionChartData({
   euiTheme,

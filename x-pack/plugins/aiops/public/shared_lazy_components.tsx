@@ -9,10 +9,10 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
+import type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
+import type { LogCategorizationAppStateProps } from './components/log_categorization';
 import type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
 import type { LogRateAnalysisContentWrapperProps } from './components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper';
-import type { LogCategorizationAppStateProps } from './components/log_categorization';
-import type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
 
 const LogRateAnalysisAppStateLazy = React.lazy(() => import('./components/log_rate_analysis'));
 

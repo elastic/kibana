@@ -8,8 +8,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   SavedObjectFinder,
@@ -18,24 +18,24 @@ import {
 } from '@kbn/saved-objects-finder-plugin/public';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { apiHasType } from '@kbn/presentation-publishing';
 import { Toast } from '@kbn/core/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { apiHasType } from '@kbn/presentation-publishing';
 import {
+  contentManagement,
   core,
   embeddableStart,
   savedObjectsTaggingOss,
-  contentManagement,
   usageCollection,
 } from '../kibana_services';
-import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
 import {
-  ReactEmbeddableSavedObject,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
-  getReactEmbeddableSavedObjects,
   PanelIncompatibleError,
+  ReactEmbeddableSavedObject,
+  getReactEmbeddableSavedObjects,
 } from '../lib';
+import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
 
 type LegacyFactoryMap = { [key: string]: EmbeddableFactory };
 type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {

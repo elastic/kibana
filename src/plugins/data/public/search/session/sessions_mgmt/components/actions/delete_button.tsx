@@ -7,15 +7,15 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
+import React, { useState } from 'react';
 import { IClickActionDescriptor } from '..';
-import { OnActionDismiss } from './types';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
+import { OnActionDismiss } from './types';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;

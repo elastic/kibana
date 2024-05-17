@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
+import { LeftPanelContext } from '../context';
 import { AnalyzeGraph } from './analyze_graph';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 

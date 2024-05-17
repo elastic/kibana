@@ -7,15 +7,15 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { usePrevalence } from './use_prevalence';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
-import { useHighlightedFields } from './use_highlighted_fields';
 import {
   FIELD_NAMES_AGG_KEY,
   HOSTS_AGG_KEY,
-  useFetchPrevalence,
   USERS_AGG_KEY,
+  useFetchPrevalence,
 } from './use_fetch_prevalence';
+import { useHighlightedFields } from './use_highlighted_fields';
+import { usePrevalence } from './use_prevalence';
 
 jest.mock('./use_highlighted_fields');
 jest.mock('./use_fetch_prevalence');

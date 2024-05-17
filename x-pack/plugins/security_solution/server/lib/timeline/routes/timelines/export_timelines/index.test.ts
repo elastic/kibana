@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import {
-  mockTimelines,
-  mockNotes,
-  mockTimelinesSavedObjects,
-  mockPinnedEvents,
-  getExportTimelinesRequest,
-} from '../../../__mocks__/request_responses';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { exportTimelinesRoute } from '.';
+import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import {
-  serverMock,
+  createMockConfig,
   requestContextMock,
   requestMock,
-  createMockConfig,
+  serverMock,
 } from '../../../../detection_engine/routes/__mocks__';
-import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
+import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
+import {
+  getExportTimelinesRequest,
+  mockNotes,
+  mockPinnedEvents,
+  mockTimelines,
+  mockTimelinesSavedObjects,
+} from '../../../__mocks__/request_responses';
 import { convertSavedObjectToSavedNote } from '../../../saved_object/notes/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../../saved_object/pinned_events';
 import { convertSavedObjectToSavedTimeline } from '../../../saved_object/timelines/convert_saved_object_to_savedtimeline';
-import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 jest.mock('../../../saved_object/timelines/convert_saved_object_to_savedtimeline', () => {
   return {

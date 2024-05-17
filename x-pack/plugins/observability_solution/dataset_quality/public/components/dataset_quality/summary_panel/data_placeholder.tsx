@@ -9,12 +9,12 @@ import React from 'react';
 
 import {
   EuiFlexGroup,
-  EuiPanel,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiIconTip,
+  EuiPanel,
   EuiSkeletonTitle,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 interface DataPlaceholderParams {
   title: string;

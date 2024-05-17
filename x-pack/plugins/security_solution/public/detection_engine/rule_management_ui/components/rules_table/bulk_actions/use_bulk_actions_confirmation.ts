@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
-import type { DryRunResult, BulkActionForConfirmation } from './types';
+import type { BulkActionForConfirmation, DryRunResult } from './types';
 
 interface BulkActionsConfirmation {
   bulkActionsDryRunResult: DryRunResult | undefined;

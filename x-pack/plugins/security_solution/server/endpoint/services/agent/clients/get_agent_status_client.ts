@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SentinelOneAgentStatusClient } from './sentinel_one/sentinel_one_agent_status_client';
-import type { AgentStatusClientInterface } from './lib/types';
-import type { AgentStatusClientOptions } from './lib/base_agent_status_client';
-import { EndpointAgentStatusClient } from './endpoint/endpoint_agent_status_client';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { EndpointAgentStatusClient } from './endpoint/endpoint_agent_status_client';
 import { UnsupportedAgentTypeError } from './errors';
+import type { AgentStatusClientOptions } from './lib/base_agent_status_client';
+import type { AgentStatusClientInterface } from './lib/types';
+import { SentinelOneAgentStatusClient } from './sentinel_one/sentinel_one_agent_status_client';
 
 /**
  * Retrieve a agent status  client for an agent type

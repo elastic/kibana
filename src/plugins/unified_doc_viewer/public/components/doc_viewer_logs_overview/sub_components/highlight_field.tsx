@@ -8,9 +8,9 @@
 
 import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { ReactNode } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { ReactNode } from 'react';
 import { HoverActionPopover } from './hover_popover_action';
 
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));

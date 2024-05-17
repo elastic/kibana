@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { Observable } from 'rxjs';
 import type { TimeseriesVisData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { VisFields } from '../../lib/fetch_fields';

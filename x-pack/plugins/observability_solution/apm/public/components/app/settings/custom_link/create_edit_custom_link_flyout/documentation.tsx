@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import React from 'react';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {

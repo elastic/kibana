@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TestScheduler } from 'rxjs/testing';
 import { NEVER } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 
 import { coreMock } from '@kbn/core/public/mocks';
 

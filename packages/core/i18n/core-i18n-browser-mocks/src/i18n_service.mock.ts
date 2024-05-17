@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { I18nService } from '@kbn/core-i18n-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { I18nService } from '@kbn/core-i18n-browser-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { I18nProviderMock } from './i18n_context_mock';
 
 const createStartContractMock = () => {

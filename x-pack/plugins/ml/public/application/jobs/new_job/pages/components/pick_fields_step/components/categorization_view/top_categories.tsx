@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/new_job';
-import { JobCreatorContext } from '../../../job_creator_context';
-import type { CategorizationJobCreator } from '../../../../../common/job_creator';
-import type { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { Results } from '../../../../../common/results_loader';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 export const TopCategories: FC = () => {
   const { displayErrorToast } = useToastNotificationService();

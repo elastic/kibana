@@ -12,10 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTitle,
-  EuiText,
-  IconType,
   EuiPanel,
+  EuiText,
+  EuiTitle,
+  IconType,
 } from '@elastic/eui';
 
 export interface AISearchGuideAccordionProps {

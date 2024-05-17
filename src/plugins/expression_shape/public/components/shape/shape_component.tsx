@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, RefCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
+import React, { useState, useEffect, useCallback, RefCallback } from 'react';
+import { ShapeDrawerComponent } from '../..';
+import { getViewBox } from '../../../common/lib';
 import {
-  ShapeRef,
   ShapeAttributes,
   ShapeContentAttributes,
+  ShapeRef,
   SvgConfig,
   getDefaultShapeData,
 } from '../reusable';
 import { Dimensions, ShapeComponentProps } from './types';
-import { getViewBox } from '../../../common/lib';
-import { ShapeDrawerComponent } from '../..';
 
 export function ShapeComponent({
   onLoaded,

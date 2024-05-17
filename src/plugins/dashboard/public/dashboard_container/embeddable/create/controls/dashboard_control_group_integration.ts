@@ -8,11 +8,11 @@
 
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { apiPublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
+import { COMPARE_ALL_OPTIONS, type Filter, compareFilters } from '@kbn/es-query';
+import { PublishingSubject, apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
-import { combineLatest, distinctUntilChanged, map, Observable, skip, switchMap } from 'rxjs';
+import { Observable, combineLatest, distinctUntilChanged, map, skip, switchMap } from 'rxjs';
 import { DashboardContainerInput } from '../../../../../common';
 import { DashboardContainer } from '../../dashboard_container';
 

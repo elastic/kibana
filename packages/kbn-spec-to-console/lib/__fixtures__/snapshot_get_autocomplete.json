@@ -16,22 +16,15 @@
         "failed_shard_count"
       ],
       "size": 0,
-      "order": [
-        "asc",
-        "desc"
-      ],
+      "order": ["asc", "desc"],
       "from_sort_value": "",
       "after": "",
       "offset": 0,
       "slm_policy_filter": "",
       "verbose": "__flag__"
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_snapshot/{repository}/{snapshot}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_snapshot/{repository}/{snapshot}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
   }
 }

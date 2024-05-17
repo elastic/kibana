@@ -8,8 +8,8 @@
 
 import fn from './color';
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
+import _ from 'lodash';
 import invoke from './test_helpers/invoke_series_fn';
 
 describe('color.js', () => {

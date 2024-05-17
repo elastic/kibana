@@ -6,9 +6,6 @@
     "id": "licenseApiGuard",
     "server": true,
     "browser": false,
-    "configPath": [
-      "xpack",
-      "licenseApiGuard"
-    ]
+    "configPath": ["xpack", "licenseApiGuard"]
   }
 }

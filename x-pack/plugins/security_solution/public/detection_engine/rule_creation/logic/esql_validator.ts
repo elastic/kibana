@@ -9,15 +9,15 @@ import { isEmpty } from 'lodash';
 
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
-import { KibanaServices } from '../../../common/lib/kibana';
 import { securitySolutionQueryClient } from '../../../common/containers/query_client/query_client_provider';
+import { KibanaServices } from '../../../common/lib/kibana';
 
-import type { ValidationError, ValidationFunc } from '../../../shared_imports';
 import { isEsqlRule } from '../../../../common/detection_engine/utils';
 import type { DefineStepRule } from '../../../detections/pages/detection_engine/rules/types';
+import type { ValidationError, ValidationFunc } from '../../../shared_imports';
 import type { FieldValueQueryBar } from '../../rule_creation_ui/components/query_bar';
-import * as i18n from './translations';
 import { getEsqlQueryConfig } from './get_esql_query_config';
+import * as i18n from './translations';
 export type FieldType = 'string';
 
 export enum ERROR_CODES {

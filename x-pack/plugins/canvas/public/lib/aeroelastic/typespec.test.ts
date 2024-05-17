@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { select } from './select';
-import { Json, Selector, Vector2d, Vector3d, TransformMatrix2d, TransformMatrix3d } from '.';
+import { Json, Selector, TransformMatrix2d, TransformMatrix3d, Vector2d, Vector3d } from '.';
 import {
-  mvMultiply as mult2d,
+  NANMATRIX as NANMATRIX3D,
+  ORIGIN as UNIT3D,
+  add as add3d,
+  mvMultiply as mult3d,
+} from './matrix';
+import {
   ORIGIN as UNIT2D,
   UNITMATRIX as UNITMATRIX2D,
   add as add2d,
+  mvMultiply as mult2d,
 } from './matrix2d';
-import {
-  mvMultiply as mult3d,
-  ORIGIN as UNIT3D,
-  NANMATRIX as NANMATRIX3D,
-  add as add3d,
-} from './matrix';
+import { select } from './select';
 
 // helper to mark variables as "used" so they don't trigger errors
 const use = (...vars: any[]) => vars.includes(null);

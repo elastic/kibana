@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { EuiPageSection } from '@elastic/eui';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
-import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
+import { type HtmlPortalNode, createHtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
-import { EuiPageSection } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { type AppMountParameters } from '@kbn/core/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { i18n } from '@kbn/i18n';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import * as routes from '../../routing/routes';
-import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import type { MlRoute, PageDependencies } from '../../routing/router';
+import * as routes from '../../routing/routes';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
 
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
-import { useSideNavItems } from './side_nav';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { useSideNavItems } from './side_nav';
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 

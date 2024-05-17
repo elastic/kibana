@@ -9,10 +9,10 @@ import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
-  isDetailPanelOpen,
-  getDetailPanelType,
   getDetailPanelJob,
   getDetailPanelJobId,
+  getDetailPanelType,
+  isDetailPanelOpen,
   isLoading,
 } from '../../../store/selectors';
 

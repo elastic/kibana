@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getFeatureCollectionBounds } from './get_feature_collection_bounds';
-import { FeatureCollection, Feature, Point } from 'geojson';
+import { Feature, FeatureCollection, Point } from 'geojson';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
+import { getFeatureCollectionBounds } from './get_feature_collection_bounds';
 
 const visibleFeature: Feature = {
   type: 'Feature',

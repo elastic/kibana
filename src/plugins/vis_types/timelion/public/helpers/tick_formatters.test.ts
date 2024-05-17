@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { tickFormatters } from './tick_formatters';
 import type { IAxis } from './panel_utils';
+import { tickFormatters } from './tick_formatters';
 
 describe('Tick Formatters', () => {
   let formatters: any;

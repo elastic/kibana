@@ -10,17 +10,17 @@ import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plu
 import { IdFormat, IdFormatByJobType } from '../../../common/http_api/latest';
 import {
   AnomaliesSort,
+  LogEntryAnomalyDatasets,
+  Pagination,
   getJobId,
   isCategoryAnomaly,
   jobCustomSettingsRT,
-  LogEntryAnomalyDatasets,
   logEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   logEntryRateJobType,
   logEntryRateJobTypes,
-  Pagination,
 } from '../../../common/log_analysis';
-import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
   InfraPluginRequestHandlerContext,
@@ -33,8 +33,8 @@ import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
-  isMlPrivilegesError,
   UnknownCategoryError,
+  isMlPrivilegesError,
 } from './errors';
 import { fetchLogEntryCategories } from './log_entry_categories_analysis';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';

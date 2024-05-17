@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { callOutWithId, CALLOUT_DISMISS_BTN } from '../../screens/common/callouts';
+import { CALLOUT_DISMISS_BTN, callOutWithId } from '../../screens/common/callouts';
 
 export const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
 export const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';

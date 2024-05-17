@@ -17,16 +17,16 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types';
-import rocketLaunchGraphic from './blog_rocket_720x420.png';
-import { MigrationInProgressPanel } from './migration_in_progress_panel';
-import { UpgradeAvailableCard } from './migrated/upgrade_available_card';
-import { SuccessfulMigrationCard } from './migrated/successful_migration_card';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import rocketLaunchGraphic from './blog_rocket_720x420.png';
+import { SuccessfulMigrationCard } from './migrated/successful_migration_card';
+import { UpgradeAvailableCard } from './migrated/upgrade_available_card';
+import { MigrationInProgressPanel } from './migration_in_progress_panel';
 
 interface Props {
   onSwitch: () => void;

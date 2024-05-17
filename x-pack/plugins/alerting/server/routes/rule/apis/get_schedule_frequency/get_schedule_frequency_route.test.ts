@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getScheduleFrequencyRoute } from './get_schedule_frequency_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { getScheduleFrequencyRoute } from './get_schedule_frequency_route';
 
 const rulesClient = rulesClientMock.create();
 

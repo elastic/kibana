@@ -7,23 +7,22 @@
  */
 
 import buffer from 'buffer';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   type MigrationResult,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { runV2Migration, RunV2MigrationOpts } from './run_v2_migration';
+import { buildTypesMappings, createIndexMap } from './core';
 import { DocumentMigrator } from './document_migrator';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
-import { buildTypesMappings, createIndexMap } from './core';
 import {
+  createWaitGroupMap,
   getIndicesInvolvedInRelocation,
   indexMapToIndexTypesMap,
-  createWaitGroupMap,
   waitGroup,
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
@@ -32,6 +31,7 @@ import {
   indexTypesMapMock,
   savedObjectTypeRegistryMock,
 } from './run_resilient_migrator.fixtures';
+import { RunV2MigrationOpts, runV2Migration } from './run_v2_migration';
 
 jest.mock('./core', () => {
   const actual = jest.requireActual('./core');

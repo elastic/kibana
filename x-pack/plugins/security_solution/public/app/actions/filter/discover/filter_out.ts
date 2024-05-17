@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CellActionFactory, CellAction } from '@kbn/cell-actions';
-import { isInSecurityApp } from '../../utils';
+import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
 import type { SecurityAppStore } from '../../../../common/store';
 import type { StartServices } from '../../../../types';
+import { isInSecurityApp } from '../../utils';
 import { createFilterOutCellActionFactory } from '../cell_action/filter_out';
 
 export const createFilterOutDiscoverCellActionFactory = ({

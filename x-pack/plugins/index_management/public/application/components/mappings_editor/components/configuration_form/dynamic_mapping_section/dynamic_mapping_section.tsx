@@ -7,20 +7,20 @@
 
 import React from 'react';
 
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
+import { ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
 import {
-  getUseField,
+  CheckBoxField,
+  Field,
   FormDataProvider,
   FormRow,
-  Field,
   ToggleField,
-  CheckBoxField,
+  getUseField,
 } from '../../../shared_imports';
-import { ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
 
 const UseField = getUseField({ component: Field });
 

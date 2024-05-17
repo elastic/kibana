@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import moment from 'moment';
+import { act } from 'react-dom/test-utils';
 import { getWatchHistory } from '../../__fixtures__';
-import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
-import { setupEnvironment, pageHelpers } from './helpers';
-import type { WatchStatusTestBed } from './helpers/watch_status_page.helpers';
-import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import { ACTION_STATES, WATCH_STATES } from '../../common/constants';
 import { API_BASE_PATH } from '../../common/constants';
+import { pageHelpers, setupEnvironment } from './helpers';
+import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import type { WatchStatusTestBed } from './helpers/watch_status_page.helpers';
 
 const { setup } = pageHelpers.watchStatusPage;
 

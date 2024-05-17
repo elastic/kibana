@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { calculateAuto } from './calculate_auto';
 import moment, { isDuration } from 'moment';
+import { calculateAuto } from './calculate_auto';
 
 describe('calculateAuto.near(bucket, duration)', () => {
   it('should calculate the bucket size for 15 minutes', () => {

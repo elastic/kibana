@@ -1,3 +1,7 @@
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
+import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { useEffect, useState } from 'react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,21 +10,17 @@
  */
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
-import { useEffect, useState } from 'react';
-import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isRunningResponse } from '@kbn/data-plugin/public';
 import type { ThreatIntelSourceRequestOptionsInput } from '../../../../common/api/search_strategy';
-import { useKibana } from '../../../common/lib/kibana';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
+import { OTHER_TI_DATASET_KEY } from '../../../../common/cti/constants';
 import type {
   Bucket,
   CtiDataSourceStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/cti';
 import { CtiQueries } from '../../../../common/search_strategy/security_solution/cti';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useKibana } from '../../../common/lib/kibana';
 import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';
-import { OTHER_TI_DATASET_KEY } from '../../../../common/cti/constants';
 
 type GetThreatIntelSourceProps = Omit<ThreatIntelSourceRequestOptionsInput, 'factoryQueryType'> & {
   data: DataPublicPluginStart;

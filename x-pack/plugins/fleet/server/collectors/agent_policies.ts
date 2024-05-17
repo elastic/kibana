@@ -13,7 +13,7 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../common';
-import type { OutputSOAttributes, AgentPolicy } from '../types';
+import type { AgentPolicy, OutputSOAttributes } from '../types';
 
 export interface AgentPoliciesUsage {
   count: number;

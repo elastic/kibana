@@ -7,8 +7,8 @@
  */
 
 import { sumBy } from 'lodash';
-import { collectorsStatsSchema } from './schema';
 import type { CollectorSet } from '../collector_set';
+import { collectorsStatsSchema } from './schema';
 
 export interface CollectorsStats {
   not_ready: { count: number; names: string[] };

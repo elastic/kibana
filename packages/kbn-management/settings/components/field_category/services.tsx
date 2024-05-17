@@ -9,8 +9,8 @@
 import React from 'react';
 
 import {
-  FieldRowProvider,
   FieldRowKibanaProvider,
+  FieldRowProvider,
 } from '@kbn/management-settings-components-field-row';
 
 import type { FieldCategoryServices } from './types';

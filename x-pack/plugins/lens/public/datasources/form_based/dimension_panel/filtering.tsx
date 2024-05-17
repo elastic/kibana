@@ -1,3 +1,7 @@
+import type { Query } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FilterQueryInput, validateQuery } from '@kbn/visualization-ui-components';
+import { isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +9,11 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { isEqual } from 'lodash';
-import type { Query } from '@kbn/es-query';
-import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LENS_APP_NAME } from '../../../../common/constants';
+import { LensAppServices } from '../../../app_plugin/types';
+import type { IndexPattern } from '../../../types';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';
-import type { IndexPattern } from '../../../types';
-import { LensAppServices } from '../../../app_plugin/types';
 
 export function setFilter(columnId: string, layer: FormBasedLayer, query: Query | undefined) {
   return {

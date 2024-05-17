@@ -12,8 +12,8 @@ import type { EuiCallOutProps } from '@elastic/eui';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  TRIAL_MAX_RAM_FOR_ML_NODES,
   PLATINUM_MAX_RAM_FOR_ML_NODES,
+  TRIAL_MAX_RAM_FOR_ML_NODES,
 } from '../../../../common/constants/cloud';
 
 interface Props {

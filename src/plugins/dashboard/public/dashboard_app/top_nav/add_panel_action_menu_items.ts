@@ -1,3 +1,8 @@
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import { PresentationContainer } from '@kbn/presentation-containers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +10,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { addPanelMenuTrigger } from '../../triggers';
 
 const onAddPanelActionClick =

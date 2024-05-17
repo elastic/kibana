@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
-import { getRuleRoute } from './get_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { pick } from 'lodash';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { getRuleRoute } from './get_rule_route';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

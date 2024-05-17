@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
 import { toExpressionAst } from './to_ast';
-import { MapTypes, TileMapVisParams, TILE_MAP_VIS_TYPE } from './types';
+import { MapTypes, TILE_MAP_VIS_TYPE, TileMapVisParams } from './types';
 
 export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
   defaultMessage: 'Coordinate Map',

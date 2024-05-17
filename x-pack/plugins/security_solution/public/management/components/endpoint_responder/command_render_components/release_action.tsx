@@ -7,9 +7,9 @@
 
 import { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ActionRequestComponentProps } from '../types';
 import { useSendReleaseEndpointRequest } from '../../../hooks/response_actions/use_send_release_endpoint_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
+import type { ActionRequestComponentProps } from '../types';
 
 export const ReleaseActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {

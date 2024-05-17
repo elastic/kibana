@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { IKibanaResponse } from '@kbn/core-http-server';
+import { RefResult, isRefResult } from '../../common/runtime_types';
 import {
-  getJourneyScreenshot,
   ScreenshotReturnTypesUnion,
+  getJourneyScreenshot,
 } from '../legacy_uptime/lib/requests/get_journey_screenshot';
-import { isRefResult, RefResult } from '../../common/runtime_types';
 import { RouteContext, UptimeRouteContext } from '../routes/types';
 
 export interface ClientContract {

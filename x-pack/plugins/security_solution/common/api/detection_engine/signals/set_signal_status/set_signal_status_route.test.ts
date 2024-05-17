@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import type { SetSignalsStatusSchema } from './set_signal_status_route';
 import { setSignalsStatusSchema } from './set_signal_status_route';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
 
 describe('set signal status schema', () => {
   test('signal_ids and status is valid', () => {

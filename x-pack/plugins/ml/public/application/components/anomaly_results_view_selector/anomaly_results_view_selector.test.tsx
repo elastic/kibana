@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
+import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 

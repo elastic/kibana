@@ -8,8 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 
 const logger = loggingSystemMock.create().get();

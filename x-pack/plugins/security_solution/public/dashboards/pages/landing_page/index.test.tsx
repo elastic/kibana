@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { SecurityPageName } from '../../../app/types';
-import { TestProviders } from '../../../common/mock';
+import { act } from 'react-dom/test-utils';
 import { DashboardsLandingPage } from '.';
+import { SecurityPageName } from '../../../app/types';
+import { MOCK_TAG_NAME } from '../../../common/containers/tags/__mocks__/api';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT } from '../../../common/lib/telemetry/constants';
 import * as telemetry from '../../../common/lib/telemetry/track';
-import { MOCK_TAG_NAME } from '../../../common/containers/tags/__mocks__/api';
-import { DashboardContextProvider } from '../../context/dashboard_context';
-import { act } from 'react-dom/test-utils';
 import type { NavigationLink } from '../../../common/links/types';
-import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
+import { TestProviders } from '../../../common/mock';
+import { DashboardContextProvider } from '../../context/dashboard_context';
 import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
 
 jest.mock('../../../common/containers/tags/api');

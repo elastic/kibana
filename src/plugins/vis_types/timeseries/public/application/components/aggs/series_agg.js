@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
 import {
-  htmlIdGenerator,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
-  EuiTitle,
   EuiFormRow,
   EuiSpacer,
+  EuiTitle,
+  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { AggSelect } from './agg_select';
-import { AggRow } from './agg_row';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { titleStyles } from '../../styles/common.styles';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { titleStyles } from '../../styles/common.styles';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
 
 function SeriesAggUi(props) {
   const { panel, model, intl } = props;

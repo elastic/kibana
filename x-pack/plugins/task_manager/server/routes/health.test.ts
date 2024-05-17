@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { firstValueFrom, of, Subject } from 'rxjs';
-import { merge } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
-import { healthRoute } from './health';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { sleep } from '../test_utils';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import { docLinksServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { MonitoringStats, RawMonitoringStats } from '../monitoring';
-import { ServiceStatusLevels } from '@kbn/core/server';
-import { configSchema, TaskManagerConfig } from '../config';
+import { merge } from 'lodash';
+import { Subject, firstValueFrom, of } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { TaskManagerConfig, configSchema } from '../config';
 import { FillPoolResult } from '../lib/fill_pool';
+import { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import { sleep } from '../test_utils';
+import { mockHandlerArguments } from './_mock_handler_arguments';
+import { healthRoute } from './health';
 
 jest.mock('../monitoring', () => {
   const monitoring = jest.requireActual('../monitoring');

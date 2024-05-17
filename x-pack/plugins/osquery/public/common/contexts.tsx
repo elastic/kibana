@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import React from 'react';
 
 export const AlertAttachmentContext = React.createContext<Ecs | undefined | null>(null);

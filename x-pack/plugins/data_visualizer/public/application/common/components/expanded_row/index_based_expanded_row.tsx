@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { useExpandedRowCss } from './use_expanded_row_css';
-import { GeoPointContentWithMap } from './geo_point_content_with_map';
+import React from 'react';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
+import type { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
+import { LoadingIndicator } from '../loading_indicator';
+import { NotInDocsContent } from '../not_in_docs_content';
 import {
   BooleanContent,
   DateContent,
@@ -19,11 +20,10 @@ import {
   OtherContent,
   TextContent,
 } from '../stats_table/components/field_data_expanded_row';
-import { NotInDocsContent } from '../not_in_docs_content';
-import type { FieldVisConfig } from '../stats_table/types';
-import type { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
-import { LoadingIndicator } from '../loading_indicator';
 import { ErrorMessageContent } from '../stats_table/components/field_data_expanded_row/error_message';
+import type { FieldVisConfig } from '../stats_table/types';
+import { GeoPointContentWithMap } from './geo_point_content_with_map';
+import { useExpandedRowCss } from './use_expanded_row_css';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
   item,

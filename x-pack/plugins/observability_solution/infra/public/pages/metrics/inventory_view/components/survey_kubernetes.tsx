@@ -6,10 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';

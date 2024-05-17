@@ -1,3 +1,7 @@
+import { EuiHealth, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,23 +9,19 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiHealth, EuiText } from '@elastic/eui';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { TableId } from '@kbn/securitysolution-data-table';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
-import type { AlertsTypeData, AlertType } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
-import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
-import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
-import * as i18n from './translations';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
+import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
+import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
+import * as i18n from './translations';
+import type { AlertType, AlertsTypeData } from './types';
 
 export const getAlertsTypeTableColumns = (
   isAlertTypeEnabled: boolean

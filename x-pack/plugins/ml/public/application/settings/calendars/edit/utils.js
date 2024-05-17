@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ml } from '../../../services/ml_api_service';
-import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { i18n } from '@kbn/i18n';
+import { isJobIdValid } from '../../../../../common/util/job_utils';
+import { ml } from '../../../services/ml_api_service';
 
 function getJobIds() {
   return new Promise((resolve, reject) => {

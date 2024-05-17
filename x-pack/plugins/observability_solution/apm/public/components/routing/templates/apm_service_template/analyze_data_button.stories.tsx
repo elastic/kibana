@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Story, DecoratorFn } from '@storybook/react';
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import type { DecoratorFn, Story } from '@storybook/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
-import { AnalyzeDataButton } from './analyze_data_button';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { AnalyzeDataButton } from './analyze_data_button';
 
 interface Args {
   agentName: string;

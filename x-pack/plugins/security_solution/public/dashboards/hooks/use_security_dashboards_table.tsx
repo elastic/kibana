@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback } from 'react';
+import type { MouseEventHandler } from 'react';
+import { SecurityPageName } from '../../../common/constants';
+import { getEmptyValue } from '../../common/components/empty_value';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { LinkAnchor } from '../../common/components/links';
 import { useKibana, useNavigateTo } from '../../common/lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
-import { SecurityPageName } from '../../../common/constants';
-import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useFetchSecurityDashboards } from '../containers/use_fetch_security_dashboards';
-import { getEmptyValue } from '../../common/components/empty_value';
 import type { DashboardTableItem } from '../types';
 
 export const useSecurityDashboardsTableItems = () => {

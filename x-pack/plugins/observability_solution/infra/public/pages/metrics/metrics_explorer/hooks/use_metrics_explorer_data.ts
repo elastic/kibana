@@ -9,14 +9,14 @@ import { DataViewBase } from '@kbn/es-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
 } from '../../../../../common/http_api/metrics_explorer';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,

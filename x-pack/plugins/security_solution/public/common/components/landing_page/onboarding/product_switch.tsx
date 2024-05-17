@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSwitch, EuiText, EuiTitle, type EuiThemeComputed } from '@elastic/eui';
+import { EuiPanel, EuiSwitch, EuiText, type EuiThemeComputed, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React, { useMemo } from 'react';
 import { ProductLine } from './configs';

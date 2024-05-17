@@ -10,10 +10,10 @@ import React from 'react';
 
 import {
   EuiPageBody,
-  EuiPageTemplate,
-  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiPageSection,
+  EuiPageTemplate,
   EuiTitle,
 } from '@elastic/eui';
 

@@ -5,20 +5,19 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import { get } from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { catchError, map } from 'rxjs';
-import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-} from '@kbn/search-types';
-import type { ISearchStart } from '@kbn/data-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import type {
   Field,
   FieldExamples,
@@ -26,6 +25,7 @@ import type {
   FieldStatsError,
 } from '../../../../../common/types/field_stats';
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {

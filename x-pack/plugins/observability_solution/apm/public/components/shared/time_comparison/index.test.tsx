@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { render } from '@testing-library/react';
+import { merge } from 'lodash';
+import moment from 'moment';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
 import { TimeComparison } from '.';
-import * as urlHelpers from '../links/url_helpers';
-import moment from 'moment';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import * as useAnomalyDetectionJobsContextModule from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import * as useEnvironmentContextModule from '../../../context/environments_context/use_environments_context';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { merge } from 'lodash';
-import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
+import {
+  MockApmPluginContextWrapper,
+  mockApmPluginContextValue,
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import * as useEnvironmentContextModule from '../../../context/environments_context/use_environments_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
+import * as urlHelpers from '../links/url_helpers';
 
 const ML_AD_JOBS = {
   jobs: [

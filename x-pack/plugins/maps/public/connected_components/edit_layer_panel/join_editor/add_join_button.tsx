@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 
 export interface Props {
   disabledReason: string;

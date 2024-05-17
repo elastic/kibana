@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState, useEffect } from 'react';
 import { EuiFieldSearch, EuiFormControlLayout } from '@elastic/eui';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { FILTER_NAMES } from '../translations';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';

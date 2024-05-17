@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 
 import { LicensingCallout } from '../../../../../shared/licensing_callout/licensing_callout';
 

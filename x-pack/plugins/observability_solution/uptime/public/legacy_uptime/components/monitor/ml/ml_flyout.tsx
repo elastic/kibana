@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,14 +19,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';
-import { ShowLicenseInfo } from './license_info';
 import { hasMLFeatureSelector } from '../../../state/selectors';
+import { ShowLicenseInfo } from './license_info';
+import * as labels from './translations';
 
 interface Props {
   isCreatingJob: boolean;

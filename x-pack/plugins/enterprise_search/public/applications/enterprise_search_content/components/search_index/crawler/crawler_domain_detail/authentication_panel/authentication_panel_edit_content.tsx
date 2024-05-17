@@ -10,20 +10,20 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiForm,
-  EuiFieldText,
-  EuiFieldPassword,
-  EuiFormRow,
-  EuiTitle,
   EuiCheckableCard,
-  EuiFormFieldset,
+  EuiFieldPassword,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormFieldset,
+  EuiFormRow,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { USERNAME_LABEL, PASSWORD_LABEL } from '../../../../../../shared/constants';
+import { PASSWORD_LABEL, USERNAME_LABEL } from '../../../../../../shared/constants';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AUTHENTICATION_LABELS } from './constants';

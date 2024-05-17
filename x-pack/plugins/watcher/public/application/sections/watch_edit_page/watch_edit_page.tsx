@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
+import React, { useEffect, useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,14 +14,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
-import { getPageErrorCode, PageError, SectionLoading } from '../../components';
-import { loadWatch } from '../../lib/api';
-import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../lib/breadcrumbs';
 import { useAppContext } from '../../app_context';
+import { PageError, SectionLoading, getPageErrorCode } from '../../components';
+import { loadWatch } from '../../lib/api';
+import { createBreadcrumb, editBreadcrumb, listBreadcrumb } from '../../lib/breadcrumbs';
 import { Watch } from '../../models/watch';
 import { PageError as GenericPageError } from '../../shared_imports';
+import { JsonWatchEdit, MonitoringWatchEdit, ThresholdWatchEdit } from './components';
 import { WatchContext } from './watch_context';
-import { JsonWatchEdit, ThresholdWatchEdit, MonitoringWatchEdit } from './components';
 
 const getTitle = (watch: BaseWatch) => {
   if (watch.isNew) {

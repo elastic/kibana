@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import styled from 'styled-components';
 import { useKibana } from '../../lib/kibana';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
 import type { EmptyPageActionsProps } from '../empty_page';
 import { EmptyPage } from '../empty_page';
+import { SecuritySolutionPageWrapper } from '../page_wrapper';
 import * as i18n from './translations';
 
 interface NoPrivilegesPageProps {

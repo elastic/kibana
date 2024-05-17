@@ -13,7 +13,7 @@ import type {
   PersistedIndexPatternLayer,
   XYReferenceLineLayerConfig,
 } from '@kbn/lens-plugin/public';
-import type { ChartLayer, StaticValueConfig, StaticChartColumn } from '../../types';
+import type { ChartLayer, StaticChartColumn, StaticValueConfig } from '../../types';
 import { getDefaultReferences } from '../../utils';
 import { XY_REFERENCE_LINE_ID } from '../constants';
 import { StaticColumn } from './columns/static';

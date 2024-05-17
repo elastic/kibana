@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { CSSProperties } from 'react';
-import xml2js from 'xml2js';
-import { v4 as uuidv4 } from 'uuid';
-import { Canvg } from 'canvg';
 // @ts-expect-error
 import calcSDF from 'bitmap-sdf';
+import { Canvg } from 'canvg';
+import React, { CSSProperties } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import xml2js from 'xml2js';
 import {
-  CUSTOM_ICON_SIZE,
   CUSTOM_ICON_PREFIX_SDF,
+  CUSTOM_ICON_SIZE,
   MAKI_ICON_SIZE,
 } from '../../../../common/constants';
 import { parseXmlString } from '../../../../common/parse_xml_string';
-import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
+import { SymbolIcon } from './components/legend/symbol_icon';
 import { MAKI_ICONS } from './maki_icons';
 
 export const CUSTOM_ICON_PIXEL_RATIO = Math.floor(

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { v4 as uuidv4 } from 'uuid';
 import type { ConfigType } from '../../../../..';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
+import { TimelineType, cleanDraftTimelineSchema } from '../../../../../../common/api/timeline';
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
-import { buildFrameworkRequest } from '../../../utils/common';
 import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import {
   getDraftTimeline,
-  resetTimeline,
   getTimeline,
   persistTimeline,
+  resetTimeline,
 } from '../../../saved_object/timelines';
+import { buildFrameworkRequest } from '../../../utils/common';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { cleanDraftTimelineSchema, TimelineType } from '../../../../../../common/api/timeline';
 
 export const cleanDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

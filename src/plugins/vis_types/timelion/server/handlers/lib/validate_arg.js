@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import argType from './arg_type';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import argType from './arg_type';
 
 export default function validateArgFn(functionDef) {
   return function validateArg(value, name, argDef) {

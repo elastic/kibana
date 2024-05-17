@@ -17,7 +17,7 @@ import { appContextService } from '../app_context';
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 export type InactivityTimeouts = Awaited<
-  ReturnType<typeof agentPolicyService['getInactivityTimeouts']>
+  ReturnType<(typeof agentPolicyService)['getInactivityTimeouts']>
 >;
 
 let inactivityTimeoutsDisabled = false;

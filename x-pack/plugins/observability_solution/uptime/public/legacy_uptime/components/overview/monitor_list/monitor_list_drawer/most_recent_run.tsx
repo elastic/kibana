@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiText,
 } from '@elastic/eui';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React from 'react';
 import { MonitorSummary } from '../../../../../../common/runtime_types';
 
 interface Props {

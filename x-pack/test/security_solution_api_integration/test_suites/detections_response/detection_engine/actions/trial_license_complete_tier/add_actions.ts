@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import expect from 'expect';
 import {
+  deleteAllAlerts,
   deleteAllRules,
   waitForRuleSuccess,
-  deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createWebHookRuleAction, fetchRule, getCustomQueryRuleParams } from '../../../utils';

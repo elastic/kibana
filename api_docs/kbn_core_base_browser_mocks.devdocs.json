@@ -66,9 +66,7 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": [
-                  "{ production?: boolean | undefined; }"
-                ],
+                "signature": ["{ production?: boolean | undefined; }"],
                 "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

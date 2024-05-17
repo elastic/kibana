@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import React from 'react';
-import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 
 export interface BadgeListProps {
   badges: React.ReactNode[];

@@ -9,26 +9,26 @@ import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
 import type {
   ActionTimelineToShow,
   DeleteTimelines,
+  EnableExportTimelineDownloader,
   OnCreateRuleFromTimeline,
+  OnOpenDeleteTimelineModal,
   OnOpenTimeline,
   OnSelectionChange,
   OnTableChange,
   OnToggleShowNotes,
   OpenTimelineResult,
-  EnableExportTimelineDownloader,
-  OnOpenDeleteTimelineModal,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -223,8 +223,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       isLoading || searchResults == null
         ? i18n.LOADING
         : timelineType === TimelineType.template
-        ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
-        : i18n.ZERO_TIMELINES_MATCH;
+          ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
+          : i18n.ZERO_TIMELINES_MATCH;
 
     return (
       <BasicTable

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { ChangeEvent, ReactNode } from 'react';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { LabelStaticOptions } from '../../../../../../common/descriptor_types';
 import { StaticTextProperty } from '../../properties/static_text_property';

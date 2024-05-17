@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosHeaders } from 'axios';
-import type { Logger } from '@kbn/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { QueueConfig } from './async_sender.types';
+import { tlog } from './helpers';
+import type { ITelemetryReceiver } from './receiver';
 import type { ITelemetryEventsSender } from './sender';
 import { TelemetryChannel, type TelemetryEvent } from './types';
-import type { ITelemetryReceiver } from './receiver';
-import { tlog } from './helpers';
-import type { QueueConfig } from './async_sender.types';
 
 /**
  * Preview telemetry events sender for the telemetry route.

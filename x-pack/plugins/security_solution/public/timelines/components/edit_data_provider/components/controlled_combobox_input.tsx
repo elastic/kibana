@@ -10,8 +10,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
-import { isPrimitiveArray } from '../../timeline/helpers';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
+import { isPrimitiveArray } from '../../timeline/helpers';
 import * as i18n from '../translations';
 
 interface ControlledDataProviderInput {

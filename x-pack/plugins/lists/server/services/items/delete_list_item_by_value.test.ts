@@ -7,9 +7,9 @@
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
-import { getListItemByValues } from './get_list_item_by_values';
 import { deleteListItemByValue } from './delete_list_item_by_value';
 import { getDeleteListItemByValueOptionsMock } from './delete_list_item_by_value.mock';
+import { getListItemByValues } from './get_list_item_by_values';
 
 jest.mock('./get_list_item_by_values', () => ({
   getListItemByValues: jest.fn(),

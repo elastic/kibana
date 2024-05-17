@@ -6,16 +6,16 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
   FleetStartContract,
-  PackagePolicyClient,
   PackageClient,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { createInternalSoClient } from '../../utils/create_internal_so_client';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
+import { createInternalSoClient } from '../../utils/create_internal_so_client';
 
 export interface EndpointFleetServicesFactoryInterface {
   asInternalUser(): EndpointInternalFleetServicesInterface;

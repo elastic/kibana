@@ -8,10 +8,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
-import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculateAndPersistScoresParams } from '../types';
+import { calculateRiskScores } from './calculate_risk_scores';
+import type { RiskScoreDataClient } from './risk_score_data_client';
 
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {

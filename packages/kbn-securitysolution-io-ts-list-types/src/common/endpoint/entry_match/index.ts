@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { NonEmptyString, operatorIncluded } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const endpointEntryMatch = t.exact(
   t.type({

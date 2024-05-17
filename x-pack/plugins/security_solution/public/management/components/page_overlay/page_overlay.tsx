@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { ReactNode, CSSProperties } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
-import classnames from 'classnames';
-import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
+import classnames from 'classnames';
+import type { CSSProperties, ReactNode } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import styled, { createGlobalStyle } from 'styled-components';
 import { FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
+import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -31,9 +31,7 @@ const OverlayRootContainer = styled.div`
   height: calc(100% - var(--euiFixedHeadersOffset, 0));
   width: 100%;
 
-  z-index: ${({ theme: { eui } }) =>
-    eui.euiZFlyout +
-    3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
+  z-index: ${({ theme: { eui } }) => eui.euiZFlyout + 3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
 
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
 

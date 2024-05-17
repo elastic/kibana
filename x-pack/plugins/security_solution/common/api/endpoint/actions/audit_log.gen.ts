@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { Page, PageSize, StartDate, EndDate, AgentId } from '../model/schema/common.gen';
+import { AgentId, EndDate, Page, PageSize, StartDate } from '../model/schema/common.gen';
 
 export type AuditLogRequestQuery = z.infer<typeof AuditLogRequestQuery>;
 export const AuditLogRequestQuery = z.object({

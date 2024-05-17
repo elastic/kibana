@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import * as rt from 'io-ts';
-import { isNumber, isFinite } from 'lodash';
 import { IErrorObject, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import * as rt from 'io-ts';
+import { isFinite, isNumber } from 'lodash';
 import {
   PartialCountCriteria,
-  isRatioRule,
-  getNumerator,
-  getDenominator,
-  PartialRequiredRuleParams,
   PartialCriteria,
+  PartialRequiredRuleParams,
+  getDenominator,
+  getNumerator,
+  isRatioRule,
 } from '../../../common/alerting/logs/log_threshold/types';
 
 export const criterionErrorRT = rt.type({

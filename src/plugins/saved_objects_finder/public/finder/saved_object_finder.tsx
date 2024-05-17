@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { ReactElement, ReactNode } from 'react';
-import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
-import type { ContentClient } from '@kbn/content-management-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 
 import {
   EuiFlexGroup,
@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
+import { FinderAttributes, LISTING_LIMIT_SETTING, SavedObjectCommon } from '../../common';
 
 export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttributes> {
   type: string;

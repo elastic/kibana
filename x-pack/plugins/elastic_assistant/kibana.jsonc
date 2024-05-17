@@ -7,14 +7,6 @@
     "id": "elasticAssistant",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "actions",
-      "data",
-      "ml",
-      "taskManager",
-      "licensing",
-      "spaces",
-      "security"
-    ]
+    "requiredPlugins": ["actions", "data", "ml", "taskManager", "licensing", "spaces", "security"]
   }
 }

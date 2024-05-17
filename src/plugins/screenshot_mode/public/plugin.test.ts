@@ -7,8 +7,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { setScreenshotModeDisabled, setScreenshotModeEnabled } from '../common';
 import { ScreenshotModePlugin } from './plugin';
-import { setScreenshotModeEnabled, setScreenshotModeDisabled } from '../common';
 
 describe('Screenshot mode public', () => {
   let plugin: ScreenshotModePlugin;

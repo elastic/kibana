@@ -8,17 +8,17 @@
 import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import type { Status } from '../../../../../common/api/detection_engine';
+import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,
 } from '../../../../detections/components/alerts_table/translations';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import type { EnrichedFieldInfoWithValues } from '../types';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { inputsModel } from '../../../store';
 import { inputsSelectors } from '../../../store';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { EnrichedFieldInfoWithValues } from '../types';
 
 interface StatusPopoverButtonProps {
   eventId: string;

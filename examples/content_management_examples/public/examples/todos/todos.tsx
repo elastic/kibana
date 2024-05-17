@@ -1,3 +1,17 @@
+import {
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFieldText,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
+import {
+  useCreateContentMutation,
+  useDeleteContentMutation,
+  useSearchContentQuery,
+  useUpdateContentMutation,
+} from '@kbn/content-management-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,32 +20,18 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import {
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiFieldText,
-  EuiSpacer,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import {
-  useCreateContentMutation,
-  useDeleteContentMutation,
-  useSearchContentQuery,
-  useUpdateContentMutation,
-} from '@kbn/content-management-plugin/public';
 
 import {
   TODO_CONTENT_ID,
   Todo,
   TodoCreateIn,
+  TodoCreateOut,
   TodoDeleteIn,
+  TodoDeleteOut,
   TodoSearchIn,
+  TodoSearchOut,
   TodoUpdateIn,
   TodoUpdateOut,
-  TodoCreateOut,
-  TodoSearchOut,
-  TodoDeleteOut,
 } from '../../../common/examples/todos';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();

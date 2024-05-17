@@ -7,11 +7,11 @@
  */
 
 import { DashboardContainerInput } from '../../../../common';
-import { DashboardStartDependencies } from '../../../plugin';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
-import { findDashboardsByIds } from './find_dashboards';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DashboardStartDependencies } from '../../../plugin';
 import { DashboardContentManagementRequiredServices } from '../types';
+import { findDashboardsByIds } from './find_dashboards';
 
 type UpdateDashboardMetaProps = Pick<
   DashboardContainerInput,

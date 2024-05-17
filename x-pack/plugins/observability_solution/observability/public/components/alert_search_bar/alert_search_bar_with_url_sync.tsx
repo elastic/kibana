@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
+import { useToasts } from '../../hooks/use_toast';
+import { useKibana } from '../../utils/kibana_react';
+import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import {
-  alertSearchBarStateContainer,
   Provider,
+  alertSearchBarStateContainer,
   useAlertSearchBarStateContainer,
 } from './containers';
-import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { AlertSearchBarWithUrlSyncProps } from './types';
-import { useKibana } from '../../utils/kibana_react';
-import { useToasts } from '../../hooks/use_toast';
 
 function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   const { urlStorageKey, ...searchBarProps } = props;

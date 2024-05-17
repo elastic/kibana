@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountHook } from '@kbn/test-jest-helpers';
-import { useCreateAnalyticsForm } from './use_create_analytics_form';
-import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountHook } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
+import { useCreateAnalyticsForm } from './use_create_analytics_form';
 
 const getMountedHook = () =>
   mountHook(

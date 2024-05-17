@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
+import { ResizeChecker } from './resize_checker';
 
 // If you want to know why these mocks are created,
 // please check: https://github.com/elastic/kibana/pull/44750

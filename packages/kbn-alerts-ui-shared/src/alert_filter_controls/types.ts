@@ -11,8 +11,8 @@ import type {
   AddOptionsListControlProps,
   ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
-import type { Filter } from '@kbn/es-query';
 import type { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 

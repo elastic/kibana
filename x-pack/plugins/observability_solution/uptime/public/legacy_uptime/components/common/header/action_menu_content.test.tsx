@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ActionMenuContent } from './action_menu_content';
 

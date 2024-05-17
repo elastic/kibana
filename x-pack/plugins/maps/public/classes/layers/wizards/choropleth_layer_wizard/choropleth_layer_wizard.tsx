@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../common/constants';
+import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { LayerTemplate } from './layer_template';
-import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
 
 export const choroplethLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.CHOROPLETH,

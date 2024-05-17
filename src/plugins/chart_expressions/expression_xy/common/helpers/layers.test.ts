@@ -7,7 +7,7 @@
  */
 
 import { XYExtendedLayerConfigResult } from '../types';
-import { generateLayerId, appendLayerIds, getDataLayers } from './layers';
+import { appendLayerIds, generateLayerId, getDataLayers } from './layers';
 
 describe('#generateLayerId', () => {
   it('should return the combination of keyword and index', () => {

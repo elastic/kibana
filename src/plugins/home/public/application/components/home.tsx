@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React, { Component } from 'react';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
+  FeatureCatalogueCategory,
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
-  FeatureCatalogueCategory,
 } from '../../services';
 import { getServices } from '../kibana_services';
 import { AddData } from './add_data';

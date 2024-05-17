@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import _ from 'lodash';
 
 import Command from '../cli/command';
-import { getKeystore } from '../cli/keystore/get_keystore';
 import { Keystore } from '../cli/keystore';
+import { getKeystore } from '../cli/keystore/get_keystore';
 
-import { createCli } from './create';
-import { listCli } from './list';
 import { addCli } from './add';
+import { createCli } from './create';
+import { hasPasswdCli } from './has_passwd';
+import { listCli } from './list';
+import { passwdCli } from './passwd';
 import { removeCli } from './remove';
 import { showCli } from './show';
-import { passwdCli } from './passwd';
-import { hasPasswdCli } from './has_passwd';
 
 const argv = process.argv.slice();
 

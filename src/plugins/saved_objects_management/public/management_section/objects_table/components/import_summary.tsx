@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import React, { Fragment, FC, useMemo } from 'react';
 import {
-  EuiText,
+  EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
-  EuiButton,
-  EuiToolTip,
+  EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
-  EuiHorizontalRule,
-  EuiTitle,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
+  IBasePath,
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
-  IBasePath,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import _ from 'lodash';
+import React, { Fragment, FC, useMemo } from 'react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
+import { FailedImport, getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import './import_summary.scss';
 
 const DEFAULT_ICON = 'apps';

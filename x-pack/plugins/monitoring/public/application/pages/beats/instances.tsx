@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useTable } from '../../hooks/use_table';
-import { BeatsTemplate } from './beats_template';
-import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { find } from 'lodash';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { Listing } from '../../../components/beats/listing';
+import { SetupModeProps, SetupModeRenderer } from '../../../components/renderers/setup_mode';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useTable } from '../../hooks/use_table';
+import { ComponentProps } from '../../route_init';
+import { BeatsTemplate } from './beats_template';
 
 export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

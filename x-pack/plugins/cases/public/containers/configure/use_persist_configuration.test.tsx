@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { usePersistConfiguration } from './use_persist_configuration';
-import * as api from './api';
+import { ConnectorTypes } from '../../../common';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { ConnectorTypes } from '../../../common';
 import { casesQueriesKeys } from '../constants';
+import * as api from './api';
+import { usePersistConfiguration } from './use_persist_configuration';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');

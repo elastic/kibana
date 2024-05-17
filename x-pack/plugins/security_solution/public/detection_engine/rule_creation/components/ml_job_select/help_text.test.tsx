@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { HelpText } from './help_text';
 
 describe('MlJobSelect help text', () => {

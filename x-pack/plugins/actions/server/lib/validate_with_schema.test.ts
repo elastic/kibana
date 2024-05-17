@@ -7,12 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import {
-  validateParams,
-  validateConfig,
-  validateSecrets,
-  validateConnector,
-} from './validate_with_schema';
+import { actionsConfigMock } from '../actions_config.mock';
 import {
   ActionType,
   ActionTypeConfig,
@@ -21,7 +16,12 @@ import {
   ExecutorType,
   ValidatorServices,
 } from '../types';
-import { actionsConfigMock } from '../actions_config.mock';
+import {
+  validateConfig,
+  validateConnector,
+  validateParams,
+  validateSecrets,
+} from './validate_with_schema';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };

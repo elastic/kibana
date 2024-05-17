@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { IUnifiedSearchPluginServices } from '../types';
-import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
+import { Filter, buildEmptyFilter } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useState, useEffect, useRef } from 'react';
 import { FilterEditor } from '../filter_bar/filter_editor';
-import { fetchIndexPatterns } from './fetch_index_patterns';
+import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import type { IUnifiedSearchPluginServices } from '../types';
+import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface QueryDslFilter {
   queryDsl: string;

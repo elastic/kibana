@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import initStoryshots from '@storybook/addon-storyshots';
 import { mount } from 'enzyme';
 import { createElement } from 'react';
 import { act } from 'react-dom/test-utils';
-import initStoryshots from '@storybook/addon-storyshots';
 
 describe('Fleet Storybook Smoke', () => {
   test('Init', async () => {

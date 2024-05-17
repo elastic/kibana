@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRule } from './rule';
 import type { CoverageOverviewMitreTechnique } from './mitre_technique';
+import type { CoverageOverviewRule } from './rule';
 
 export interface CoverageOverviewMitreTactic {
   id: string;

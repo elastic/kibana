@@ -10,8 +10,8 @@ import React, { useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getColor, getTooltipContent } from './helpers';
 import { TITLE_SIZE } from '../constants';
+import { getColor, getTooltipContent } from './helpers';
 import * as i18n from './translations';
 
 interface Props {

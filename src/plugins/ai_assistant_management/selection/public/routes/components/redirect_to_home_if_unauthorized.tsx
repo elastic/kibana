@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import React, { ReactNode } from 'react';
 export function RedirectToHomeIfUnauthorized({
   coreStart,
   children,

@@ -7,8 +7,8 @@
 
 import { connect } from 'react-redux';
 
-import { RequestTrialExtension as PresentationComponent } from './request_trial_extension';
 import { shouldShowRequestTrialExtension } from '../../../store/reducers/license_management';
+import { RequestTrialExtension as PresentationComponent } from './request_trial_extension';
 
 const mapStateToProps = (state) => {
   return {

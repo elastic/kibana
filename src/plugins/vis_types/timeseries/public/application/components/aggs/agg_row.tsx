@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { last } from 'lodash';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AddDeleteButtons } from '../add_delete_buttons';
-import { SeriesDragHandler } from '../series_drag_handler';
-import { tsvbEditorRowStyles, aggRowChildrenStyles } from '../../styles/common.styles';
+import { last } from 'lodash';
+import React from 'react';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
+import { aggRowChildrenStyles, tsvbEditorRowStyles } from '../../styles/common.styles';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { SeriesDragHandler } from '../series_drag_handler';
 
 interface AggRowProps {
   disableDelete: boolean;

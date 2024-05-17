@@ -6,8 +6,9 @@
  */
 
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
-import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { interceptActionRequests, sendActionResponse } from '../../../tasks/isolate';
+import { login } from '../../../tasks/login';
 import {
   checkReturnedProcessesTable,
   openResponseConsoleFromEndpointList,
@@ -15,8 +16,7 @@ import {
   submitCommand,
   waitForEndpointListPageToBeLoaded,
 } from '../../../tasks/response_console';
-import { interceptActionRequests, sendActionResponse } from '../../../tasks/isolate';
-import { login } from '../../../tasks/login';
+import type { ReturnTypeFromChainable } from '../../../types';
 
 describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {

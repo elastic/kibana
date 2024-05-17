@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { UI_SETTINGS, search } from '@kbn/data-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import _ from 'lodash';
 import moment from 'moment';
-import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,

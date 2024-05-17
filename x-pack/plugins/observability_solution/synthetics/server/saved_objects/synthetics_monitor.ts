@@ -1,3 +1,4 @@
+import { SavedObjectsType } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { SyntheticsMonitorWithSecretsAttributes } from '../../common/runtime_types';
-import { SyntheticsServerSetup } from '../types';
-import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import { ConfigKey, LegacyConfigKey, secretKeys } from '../../common/constants/monitor_management';
+import { SyntheticsMonitorWithSecretsAttributes } from '../../common/runtime_types';
+import { syntheticsMonitorType } from '../../common/types/saved_objects';
+import { SyntheticsServerSetup } from '../types';
 import { monitorMigrations } from './migrations/monitors';
 
 const attributesToIncludeInAAD = new Set([

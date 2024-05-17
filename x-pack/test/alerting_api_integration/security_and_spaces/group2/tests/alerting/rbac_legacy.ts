@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SavedObjectsUtils } from '@kbn/core/server';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
+import { SavedObjectsUtils } from '@kbn/core/server';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';
+import { AlertUtils, ObjectRemover, getUrlPrefix } from '../../../../common/lib';
+import { Superuser, UserAtSpaceScenarios } from '../../../scenarios';
 import { setupSpacesAndUsers } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export

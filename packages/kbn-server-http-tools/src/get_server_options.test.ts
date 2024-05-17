@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import moment from 'moment';
 import { getServerOptions } from './get_server_options';
 import { IHttpConfig } from './types';
 

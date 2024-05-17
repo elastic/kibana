@@ -10,19 +10,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import {
-  EuiFormRow,
-  EuiPopover,
-  EuiContextMenu,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
 } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import type { CombinedField } from './types';
-import { GeoPointForm } from './geo_point';
 import { CombinedFieldLabel } from './combined_field_label';
+import { GeoPointForm } from './geo_point';
+import type { CombinedField } from './types';
 import {
   addCombinedFieldsToMappings,
   addCombinedFieldsToPipeline,

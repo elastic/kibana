@@ -1,3 +1,4 @@
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
 import { WelcomeHeader } from '.';
 import { useCurrentUser } from '../../../../lib/kibana';
-import { CurrentPlan } from './current_plan';
 import { ProductTier } from '../configs';
 import { useProjectFeaturesUrl } from '../hooks/use_project_features_url';
+import { CurrentPlan } from './current_plan';
 
 jest.mock('../../../../lib/kibana', () => ({
   useCurrentUser: jest.fn(),

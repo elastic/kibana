@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME,
@@ -13,6 +12,7 @@ import {
   NOTE_CONTENT_CLASS_NAME,
   ROW_RENDERER_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
+import React from 'react';
 /**
  * The name of the ARIA attribute representing a column, used in conjunction with
  * the ARIA: grid role https://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html

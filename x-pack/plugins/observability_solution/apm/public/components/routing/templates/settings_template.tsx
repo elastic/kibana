@@ -10,15 +10,15 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
 import React from 'react';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Environment } from '../../../../common/environment_rt';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmRouter } from '../apm_route_config';
 import { ApmMainTemplate } from './apm_main_template';
-import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
-import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:

@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "getNextRollingTime",
-        "description": [
-          "\nReturn the next rollout time, given current time and rollout interval"
-        ],
+        "description": ["\nReturn the next rollout time, given current time and rollout interval"],
         "signature": [
           "(currentTime: number, interval: moment.Duration, modulate: boolean) => number"
         ],
@@ -42,9 +40,7 @@
             "tags": [],
             "label": "currentTime",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,9 +53,7 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "signature": [
-              "moment.Duration"
-            ],
+            "signature": ["moment.Duration"],
             "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -72,9 +66,7 @@
             "tags": [],
             "label": "modulate",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -104,9 +96,7 @@
             "tags": [],
             "label": "loggingSystem",
             "description": [],
-            "signature": [
-              "ILoggingSystem"
-            ],
+            "signature": ["ILoggingSystem"],
             "path": "packages/core/logging/core-logging-server-internal/src/logging_service.ts",
             "deprecated": false,
             "trackAdoption": false

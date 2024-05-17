@@ -9,13 +9,13 @@
 import { API_BASE_PATH } from '../../../common/constants';
 
 import {
-  IndexAutocompleteComponent,
-  FieldAutocompleteComponent,
-  ListComponent,
-  LegacyTemplateAutocompleteComponent,
-  IndexTemplateAutocompleteComponent,
   ComponentTemplateAutocompleteComponent,
   DataStreamAutocompleteComponent,
+  FieldAutocompleteComponent,
+  IndexAutocompleteComponent,
+  IndexTemplateAutocompleteComponent,
+  LegacyTemplateAutocompleteComponent,
+  ListComponent,
 } from '../autocomplete/components';
 
 import _ from 'lodash';

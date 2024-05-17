@@ -7,8 +7,8 @@
  */
 
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchConfig, configSchema } from './elasticsearch_config';
 import { mergeConfig } from './merge_config';
-import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 
 const partialToConfig = (parts: Partial<ElasticsearchClientConfig>): ElasticsearchClientConfig => {
   return parts as ElasticsearchClientConfig;

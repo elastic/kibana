@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { EUI_ICON_IS_LOADING } from '../../screens/common/controls';
 import {
   ADD_TO_TIMELINE,
   COPY,
+  EXPAND_OVERFLOW_ITEMS,
   FILTER_IN,
   FILTER_OUT,
   IPS_TABLE_LOADED,
-  SHOW_TOP_FIELD,
-  EXPAND_OVERFLOW_ITEMS,
   OVERFLOW_ITEM,
+  SHOW_TOP_FIELD,
 } from '../../screens/network/flows';
-import { EUI_ICON_IS_LOADING } from '../../screens/common/controls';
 
 export const waitForIpsTableToBeLoaded = () => {
   cy.get(IPS_TABLE_LOADED).should('exist');

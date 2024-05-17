@@ -6,9 +6,7 @@
     "id": "inlineEditingLensExample",
     "server": false,
     "browser": true,
-    "configPath": [
-      "lens_embeddable_inline_editing_example"
-    ],
+    "configPath": ["lens_embeddable_inline_editing_example"],
     "requiredPlugins": [
       "uiActions",
       "lens",

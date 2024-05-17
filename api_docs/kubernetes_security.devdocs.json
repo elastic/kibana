@@ -38,9 +38,7 @@
                 "tags": [],
                 "label": "kubernetesSecurityDeps",
                 "description": [],
-                "signature": [
-                  "KubernetesSecurityDeps"
-                ],
+                "signature": ["KubernetesSecurityDeps"],
                 "path": "x-pack/plugins/kubernetes_security/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -62,9 +60,7 @@
         "tags": [],
         "label": "KUBERNETES_PATH",
         "description": [],
-        "signature": [
-          "\"/kubernetes\""
-        ],
+        "signature": ["\"/kubernetes\""],
         "path": "x-pack/plugins/kubernetes_security/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -77,9 +73,7 @@
         "tags": [],
         "label": "KUBERNETES_TITLE",
         "description": [],
-        "signature": [
-          "\"Kubernetes\""
-        ],
+        "signature": ["\"Kubernetes\""],
         "path": "x-pack/plugins/kubernetes_security/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

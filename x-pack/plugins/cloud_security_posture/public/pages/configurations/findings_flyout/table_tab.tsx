@@ -12,9 +12,9 @@ import {
   EuiInMemoryTableProps,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
-import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { getFlattenedObject } from '@kbn/std';
+import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 interface FlattenedItem {

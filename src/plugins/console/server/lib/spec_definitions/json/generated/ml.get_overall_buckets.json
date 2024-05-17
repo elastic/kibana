@@ -6,25 +6,15 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "bucket_span": [
-        "-1",
-        "0"
-      ],
+      "bucket_span": ["-1", "0"],
       "end": [],
       "exclude_interim": "__flag__",
       "overall_score": [],
       "start": [],
-      "top_n": [
-        "1"
-      ]
+      "top_n": ["1"]
     },
-    "methods": [
-      "GET",
-      "POST"
-    ],
-    "patterns": [
-      "_ml/anomaly_detectors/{job_id}/results/overall_buckets"
-    ],
+    "methods": ["GET", "POST"],
+    "patterns": ["_ml/anomaly_detectors/{job_id}/results/overall_buckets"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-overall-buckets.html",
     "availability": {
       "stack": true,

@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import type { TrustedAppConditionEntry } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/artifacts/validations';
+import type { TrustedAppConditionEntry } from '../types';
 
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({

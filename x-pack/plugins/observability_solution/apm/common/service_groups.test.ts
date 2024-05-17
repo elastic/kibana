@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SERVICE_FRAMEWORK_VERSION, TRANSACTION_DURATION, TRANSACTION_TYPE } from './es_fields/apm';
 import {
+  SERVICE_GROUP_SUPPORTED_FIELDS,
   isSupportedField,
   validateServiceGroupKuery,
-  SERVICE_GROUP_SUPPORTED_FIELDS,
 } from './service_groups';
-import { TRANSACTION_TYPE, TRANSACTION_DURATION, SERVICE_FRAMEWORK_VERSION } from './es_fields/apm';
 
 describe('service_groups common utils', () => {
   describe('isSupportedField', () => {

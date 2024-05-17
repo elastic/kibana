@@ -11,14 +11,14 @@ import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
 import { DEFAULT_LOG_VIEW, LogViewAttributes, LogViewReference } from '../../common/log_views';
 import {
-  InitializeFromUrl,
-  UpdateContextInUrl,
-  ListenForUrlChanges,
-} from '../observability_logs/log_view_state/src/url_state_storage_service';
-import {
   createLogViewNotificationChannel,
   createLogViewStateMachine,
 } from '../observability_logs/log_view_state';
+import {
+  InitializeFromUrl,
+  ListenForUrlChanges,
+  UpdateContextInUrl,
+} from '../observability_logs/log_view_state/src/url_state_storage_service';
 import type { ILogViewsClient } from '../services/log_views';
 import { isDevMode } from '../utils/dev_mode';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { get } from 'lodash';
-import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { ConfigDeprecation } from '@kbn/config';
+import { TypeOf, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { get } from 'lodash';
 
 const configSchema = schema.object({
   newProperty: schema.maybe(schema.string({ defaultValue: 'Some string' })),

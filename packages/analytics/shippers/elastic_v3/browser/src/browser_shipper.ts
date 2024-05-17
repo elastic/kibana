@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-import {
-  BehaviorSubject,
-  interval,
-  Subject,
-  bufferWhen,
-  concatMap,
-  skipWhile,
-  firstValueFrom,
-  map,
-  merge,
-} from 'rxjs';
 import type {
   AnalyticsClientInitContext,
   Event,
@@ -31,6 +20,17 @@ import {
   createTelemetryCounterHelper,
   eventsToNDJSON,
 } from '@kbn/analytics-shippers-elastic-v3-common';
+import {
+  BehaviorSubject,
+  Subject,
+  bufferWhen,
+  concatMap,
+  firstValueFrom,
+  interval,
+  map,
+  merge,
+  skipWhile,
+} from 'rxjs';
 
 /**
  * Elastic V3 shipper to use in the browser.

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { IAggConfig } from '../../aggs';
 
 const getOtherBucketFilterTerms = (table: Datatable, columnIndex: number, rowIndex: number) => {

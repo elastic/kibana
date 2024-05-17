@@ -7,9 +7,9 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { revealImageRendererFactory } from './expression_renderers';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { revealImageFunction } from '../common/expression_functions';
+import { revealImageRendererFactory } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -24,12 +24,7 @@ export type ExpressionRevealImagePluginStart = void;
 
 export class ExpressionRevealImagePlugin
   implements
-    Plugin<
-      ExpressionRevealImagePluginSetup,
-      ExpressionRevealImagePluginStart,
-      SetupDeps,
-      StartDeps
-    >
+    Plugin<ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart, SetupDeps, StartDeps>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);

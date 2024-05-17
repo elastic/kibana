@@ -309,8 +309,9 @@ describe('filtering user messages', () => {
         },
       ]
     `);
-    expect(filterAndSortUserMessages(userMessages, ['visualization', 'visualizationInEditor'], {}))
-      .toMatchInlineSnapshot(`
+    expect(
+      filterAndSortUserMessages(userMessages, ['visualization', 'visualizationInEditor'], {})
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "displayLocations": Array [

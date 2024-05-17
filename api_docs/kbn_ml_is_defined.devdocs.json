@@ -28,9 +28,7 @@
         "description": [
           "\nChecks whether the supplied argument is not `undefined` and not `null`.\n"
         ],
-        "signature": [
-          "(argument: T | null | undefined) => boolean"
-        ],
+        "signature": ["(argument: T | null | undefined) => boolean"],
         "path": "x-pack/packages/ml/is_defined/src/is_defined.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -41,21 +39,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "argument",
-            "description": [
-              "- argument to check whether it is defined."
-            ],
-            "signature": [
-              "T | null | undefined"
-            ],
+            "description": ["- argument to check whether it is defined."],
+            "signature": ["T | null | undefined"],
             "path": "x-pack/packages/ml/is_defined/src/is_defined.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "boolean"
-        ],
+        "returnComment": ["boolean"],
         "initialIsOpen": false
       }
     ],

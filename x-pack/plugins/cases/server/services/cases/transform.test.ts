@@ -7,6 +7,14 @@
 
 import { omit } from 'lodash';
 
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '../../common/constants';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { getNoneCaseConnector } from '../../common/utils';
 import {
   createCaseSavedObjectResponse,
   createESJiraConnector,
@@ -18,14 +26,6 @@ import {
   transformSavedObjectToExternalModel,
   transformUpdateResponseToExternalModel,
 } from './transform';
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import {
-  CONNECTOR_ID_REFERENCE_NAME,
-  PUSH_CONNECTOR_ID_REFERENCE_NAME,
-} from '../../common/constants';
-import { getNoneCaseConnector } from '../../common/utils';
-import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {

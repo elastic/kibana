@@ -6,20 +6,20 @@
  */
 
 import { readFileSync as fsReadFileSync } from 'fs';
-import { resolve as pathResolve, join as pathJoin } from 'path';
+import { join as pathJoin, resolve as pathResolve } from 'path';
 import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
-import { ActionsConfig } from '../config';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ActionsConfig } from '../config';
 
-import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
 import {
-  DEFAULT_MICROSOFT_GRAPH_API_URL,
-  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../../common';
+import { getCanonicalCustomHostUrl, resolveCustomHosts } from './custom_host_settings';
 
 const CA_DIR = '../../../../../../packages/kbn-dev-utils/certs';
 const CA_FILE1 = pathResolve(__filename, pathJoin(CA_DIR, 'ca.crt'));

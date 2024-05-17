@@ -7,8 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
 import { useGroupTakeActionsItems } from '.';
+import { TestProviders } from '../../../../common/mock';
 
 describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useState } from 'react';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
 import { ClientPluginsStart } from '../../../../plugin';
 

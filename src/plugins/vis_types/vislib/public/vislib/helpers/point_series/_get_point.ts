@@ -7,8 +7,8 @@
  */
 
 import { getFormatService } from '../../../services';
+import { Row, Table } from '../../types';
 import { Aspect } from './point_series';
-import { Table, Row } from '../../types';
 
 type RowValue = number | string | object | 'NaN';
 interface Raw {

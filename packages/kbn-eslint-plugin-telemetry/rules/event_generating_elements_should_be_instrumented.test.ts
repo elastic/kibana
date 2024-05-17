@@ -8,8 +8,8 @@
 
 import { RuleTester } from 'eslint';
 import {
-  EventGeneratingElementsShouldBeInstrumented,
   EVENT_GENERATING_ELEMENTS,
+  EventGeneratingElementsShouldBeInstrumented,
 } from './event_generating_elements_should_be_instrumented';
 
 const tsTester = [

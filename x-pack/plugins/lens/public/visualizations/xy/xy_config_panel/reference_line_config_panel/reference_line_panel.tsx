@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
-  useDebouncedValue,
-  IconSelectSetting,
   ColorPicker,
+  IconSelectSetting,
   LineStyleSettings,
   TextDecorationSetting,
+  useDebouncedValue,
 } from '@kbn/visualization-ui-components';
-import type { VisualizationDimensionEditorProps } from '../../../../types';
-import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
+import React, { useCallback } from 'react';
 import { FormatFactory } from '../../../../../common/types';
+import type { VisualizationDimensionEditorProps } from '../../../../types';
+import { State, XYReferenceLineLayerConfig, XYState, YConfig } from '../../types';
 
 import { updateLayer } from '..';
-import { idPrefix } from '../dimension_editor';
+import { defaultReferenceLineColor } from '../../color_assignment';
 import { isHorizontalChart } from '../../state_helpers';
+import { idPrefix } from '../dimension_editor';
 import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';
 import { referenceLineIconsSet } from './icon_set';
-import { defaultReferenceLineColor } from '../../color_assignment';
 
 export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {

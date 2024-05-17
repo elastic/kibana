@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { StatusBadge } from './status_badge';
 import { render } from '../../lib/helper/rtl_helpers';
+import { StatusBadge } from './status_badge';
 
 describe('StatusBadge', () => {
   it('displays success message', () => {

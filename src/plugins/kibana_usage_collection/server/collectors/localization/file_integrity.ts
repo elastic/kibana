@@ -8,9 +8,9 @@
 
 import { createHash } from 'crypto';
 import * as fs from 'fs';
-import { zipObject } from 'lodash';
 import * as stream from 'stream';
 import * as util from 'util';
+import { zipObject } from 'lodash';
 
 const pipeline = util.promisify(stream.pipeline);
 

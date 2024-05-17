@@ -243,10 +243,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "CreateTagOptions",
-                  " | undefined"
-                ],
+                "signature": ["CreateTagOptions", " | undefined"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -284,9 +281,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -379,9 +374,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -405,9 +398,7 @@
                     "tags": [],
                     "label": "exact",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -424,9 +415,7 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
+            "signature": ["(id: string) => Promise<void>"],
             "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -438,9 +427,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -486,9 +473,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -564,9 +549,7 @@
           "type": "Function",
           "tags": [],
           "label": "createTagClient",
-          "description": [
-            "\nCreates a TagClient bound to the provided SavedObject client."
-          ],
+          "description": ["\nCreates a TagClient bound to the provided SavedObject client."],
           "signature": [
             "(options: ",
             {
@@ -737,9 +720,7 @@
         "tags": [],
         "label": "validateTagColor",
         "description": [],
-        "signature": [
-          "(color: string) => string | undefined"
-        ],
+        "signature": ["(color: string) => string | undefined"],
         "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -751,9 +732,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -770,9 +749,7 @@
         "tags": [],
         "label": "validateTagDescription",
         "description": [],
-        "signature": [
-          "(description: string) => string | undefined"
-        ],
+        "signature": ["(description: string) => string | undefined"],
         "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -784,9 +761,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -803,9 +778,7 @@
         "tags": [],
         "label": "validateTagName",
         "description": [],
-        "signature": [
-          "(name: string) => string | undefined"
-        ],
+        "signature": ["(name: string) => string | undefined"],
         "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -817,9 +790,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -902,10 +873,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "CreateTagOptions",
-                  " | undefined"
-                ],
+                "signature": ["CreateTagOptions", " | undefined"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -943,9 +911,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1038,9 +1004,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1064,9 +1028,7 @@
                     "tags": [],
                     "label": "exact",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1083,9 +1045,7 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
+            "signature": ["(id: string) => Promise<void>"],
             "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1097,9 +1057,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1145,9 +1103,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1407,9 +1363,7 @@
             "tags": [],
             "label": "warnings",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1441,9 +1395,7 @@
         "tags": [],
         "label": "tagDescriptionMaxLength",
         "description": [],
-        "signature": [
-          "100"
-        ],
+        "signature": ["100"],
         "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1455,12 +1407,8 @@
         "type": "string",
         "tags": [],
         "label": "tagFeatureId",
-        "description": [
-          "\nThe id of the tagging feature as registered to `features` plugin"
-        ],
-        "signature": [
-          "\"savedObjectsTagging\""
-        ],
+        "description": ["\nThe id of the tagging feature as registered to `features` plugin"],
+        "signature": ["\"savedObjectsTagging\""],
         "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1472,12 +1420,8 @@
         "type": "string",
         "tags": [],
         "label": "tagManagementSectionId",
-        "description": [
-          "\nThe management section id as registered to the `management` plugin"
-        ],
-        "signature": [
-          "\"tags\""
-        ],
+        "description": ["\nThe management section id as registered to the `management` plugin"],
+        "signature": ["\"tags\""],
         "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1490,9 +1434,7 @@
         "tags": [],
         "label": "tagNameMaxLength",
         "description": [],
-        "signature": [
-          "50"
-        ],
+        "signature": ["50"],
         "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1505,9 +1447,7 @@
         "tags": [],
         "label": "tagNameMinLength",
         "description": [],
-        "signature": [
-          "2"
-        ],
+        "signature": ["2"],
         "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1549,12 +1489,8 @@
         "type": "string",
         "tags": [],
         "label": "tagSavedObjectTypeName",
-        "description": [
-          "\nThe saved object type for `tag` objects"
-        ],
-        "signature": [
-          "\"tag\""
-        ],
+        "description": ["\nThe saved object type for `tag` objects"],
+        "signature": ["\"tag\""],
         "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

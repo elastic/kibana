@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type { UserCommentAttachmentPayload } from '../../../common/types/domain';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import type { UserCommentAttachmentPayload } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 

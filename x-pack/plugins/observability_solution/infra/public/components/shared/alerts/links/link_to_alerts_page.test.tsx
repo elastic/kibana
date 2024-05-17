@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { LinkToAlertsPage, LinkToAlertsPageProps } from './link_to_alerts_page';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { LinkToAlertsPage, LinkToAlertsPageProps } from './link_to_alerts_page';
 
 const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
   typeof useKibanaContextForPlugin

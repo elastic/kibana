@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
+import { decodeRison, isRegularString, isRisonObject } from './rison_helpers';
 
 describe('rison_helpers', () => {
   // Suppress warnings about invalid RISON as this is what we are testing

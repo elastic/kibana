@@ -8,11 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../common/types';
+import { ESUpgradeStatus, EnrichedDeprecationInfo, FeatureSet } from '../../common/types';
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
-  getESSystemIndicesMigrationStatus,
   convertFeaturesToIndicesArray,
+  getESSystemIndicesMigrationStatus,
 } from './es_system_indices_migration';
 
 export function getShardCapacityDeprecationInfo({
@@ -241,7 +241,7 @@ const getCombinedIndexInfos = async (
               isCritical: level === 'critical',
               correctiveAction: getCorrectiveAction(message, metadata, indexName),
               resolveDuringUpgrade,
-            } as EnrichedDeprecationInfo)
+            }) as EnrichedDeprecationInfo
         )
       );
     },

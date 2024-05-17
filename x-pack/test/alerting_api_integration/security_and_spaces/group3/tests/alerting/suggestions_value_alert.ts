@@ -6,9 +6,9 @@
  */
 
 import expect from 'expect';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createRuleSuggestionValuesTests({ getService }: FtrProviderContext) {

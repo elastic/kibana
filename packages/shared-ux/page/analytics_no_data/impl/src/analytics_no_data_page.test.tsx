@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   getAnalyticsNoDataPageServicesMock,
   getAnalyticsNoDataPageServicesMockWithCustomBranding,
 } from '@kbn/shared-ux-page-analytics-no-data-mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 
-import { AnalyticsNoDataPageProvider } from './services';
-import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPage } from './analytics_no_data_page';
+import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
+import { AnalyticsNoDataPageProvider } from './services';
 
 describe('AnalyticsNoDataPage', () => {
   const onDataViewCreated = jest.fn();

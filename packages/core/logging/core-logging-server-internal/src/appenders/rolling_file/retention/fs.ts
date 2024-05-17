@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { unlink, stat } from 'fs/promises';
+import { stat, unlink } from 'fs/promises';
 
 export const deleteFiles = async ({ filesToDelete }: { filesToDelete: string[] }) => {
   await Promise.all(filesToDelete.map((fileToDelete) => unlink(fileToDelete)));

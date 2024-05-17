@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROUTES, MONITORING } from '../../../common/constants';
+import { MONITORING, ROUTES } from '../../../common/constants';
 import { PipelineListItem } from '../../models/pipeline_list_item';
 
 const RECENTLY_DELETED_PIPELINE_IDS_STORAGE_KEY = 'xpack.logstash.recentlyDeletedPipelines';

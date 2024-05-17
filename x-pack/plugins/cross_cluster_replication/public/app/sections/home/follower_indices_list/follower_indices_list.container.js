@@ -8,14 +8,14 @@
 import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../../constants';
+import { loadFollowerIndices, selectDetailFollowerIndex } from '../../../store/actions';
 import {
+  getApiError,
+  getApiStatus,
   getListFollowerIndices,
   getSelectedFollowerIndexId,
-  getApiStatus,
-  getApiError,
   isApiAuthorized,
 } from '../../../store/selectors';
-import { loadFollowerIndices, selectDetailFollowerIndex } from '../../../store/actions';
 import { FollowerIndicesList as FollowerIndicesListView } from './follower_indices_list';
 
 const scope = SECTIONS.FOLLOWER_INDEX;

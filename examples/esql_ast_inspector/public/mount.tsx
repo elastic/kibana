@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import type { StartDependencies } from './plugin';
 
 export const mount =

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
-import { firstValueFrom, map, type Observable, ReplaySubject, type Subject } from 'rxjs';
-import type { EmailService, HTMLEmail, PlainTextEmail } from './types';
+import type { Logger } from '@kbn/logging';
+import { type Observable, ReplaySubject, type Subject, firstValueFrom, map } from 'rxjs';
 import { PLUGIN_ID } from '../../common';
+import type { EmailService, HTMLEmail, PlainTextEmail } from './types';
 
 export class LicensedEmailService implements EmailService {
   private validLicense$: Subject<boolean> = new ReplaySubject(1);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
+import { takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { getCertsList } from './api';
 import { getCertsListAction } from './actions';
+import { getCertsList } from './api';
 
 export function* getCertsListEffect() {
   yield takeLeading(

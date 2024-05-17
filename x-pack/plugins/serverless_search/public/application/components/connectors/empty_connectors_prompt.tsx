@@ -6,19 +6,19 @@
  */
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiIcon,
-  EuiTitle,
-  EuiText,
   EuiLink,
-  EuiButton,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';

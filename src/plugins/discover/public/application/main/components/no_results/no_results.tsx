@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings';
-import { NoResultsSuggestions } from './no_results_suggestions';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import React from 'react';
 import { useDataState } from '../../hooks/use_data_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
 
 export interface DiscoverNoResultsProps {

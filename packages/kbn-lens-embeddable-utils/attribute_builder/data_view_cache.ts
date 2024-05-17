@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewSpec, DataView } from '@kbn/data-plugin/common';
+import { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'lens_ad_hoc_default';
 

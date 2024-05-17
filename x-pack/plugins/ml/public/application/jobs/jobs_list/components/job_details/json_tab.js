@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { ML_EDITOR_MODE, MLJobEditor } from '../ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../ml_job_editor';
 
 export function JsonPane({ job }) {
   const json = JSON.stringify(job, null, 2);

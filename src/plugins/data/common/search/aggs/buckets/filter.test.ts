@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
+import moment from 'moment';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import moment from 'moment';
-import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Filter Agg', () => {
   let aggConfigs: AggConfigs;
 
   const depMocks = {
-    getConfig: <T>() => ({} as T),
+    getConfig: <T>() => ({}) as T,
     calculateBounds: () => {
       return {
         max: moment('2022-05-05T00:00:00.000Z'),

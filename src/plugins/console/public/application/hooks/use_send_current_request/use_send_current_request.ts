@@ -9,16 +9,16 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 
-import { toMountPoint } from '../../../shared_imports';
-import { isQuotaExceededError } from '../../../services/history';
-import { instance as registry } from '../../contexts/editor_context/editor_registry';
-import { useRequestActionContext, useServicesContext } from '../../contexts';
-import { StorageQuotaError } from '../../components/storage_quota_error';
-import { sendRequest } from './send_request';
-import { track } from './track';
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
 import { replaceVariables } from '../../../lib/utils';
 import { StorageKeys } from '../../../services';
-import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { isQuotaExceededError } from '../../../services/history';
+import { toMountPoint } from '../../../shared_imports';
+import { StorageQuotaError } from '../../components/storage_quota_error';
+import { useRequestActionContext, useServicesContext } from '../../contexts';
+import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { sendRequest } from './send_request';
+import { track } from './track';
 
 export const useSendCurrentRequest = () => {
   const {

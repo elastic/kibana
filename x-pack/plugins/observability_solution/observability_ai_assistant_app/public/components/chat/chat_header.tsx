@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,15 +7,22 @@ import {
   EuiPanel,
   EuiPopover,
   EuiToolTip,
-  useEuiTheme,
   useCurrentEuiBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
-import { ChatActionsMenu } from './chat_actions_menu';
-import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useEffect, useState } from 'react';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+import { ChatActionsMenu } from './chat_actions_menu';
 import { FlyoutPositionMode } from './chat_flyout';
 
 // needed to prevent InlineTextEdit component from expanding container

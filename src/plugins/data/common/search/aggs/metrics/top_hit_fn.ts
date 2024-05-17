@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
+import { i18n } from '@kbn/i18n';
+import { AggExpressionFunctionArgs, AggExpressionType, METRIC_TYPES } from '..';
 
 export const aggTopHitFnName = 'aggTopHit';
 

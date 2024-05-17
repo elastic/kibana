@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
-import { RuleResponse } from './rule_schemas.gen';
 import {
-  getRulesSchemaMock,
+  getEsqlRuleSchemaMock,
+  getRulesEqlSchemaMock,
   getRulesMlSchemaMock,
+  getRulesSchemaMock,
   getSavedQuerySchemaMock,
   getThreatMatchingSchemaMock,
-  getRulesEqlSchemaMock,
-  getEsqlRuleSchemaMock,
 } from './rule_response_schema.mock';
+import { RuleResponse } from './rule_schemas.gen';
 
 describe('Rule response schema', () => {
   test('it should validate a type of "query" without anything extra', () => {

@@ -12,9 +12,7 @@
       "kibana.alert.rule.producer": "siem",
       "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "kibana.alert.rule.uuid": "532e0020-4a0c-11ed-9aa3-574e520c127d",
-      "kibana.space_ids": [
-        "default"
-      ],
+      "kibana.space_ids": ["default"],
       "kibana.alert.rule.tags": [],
       "@timestamp": 1666873459714,
       "agent": {
@@ -101,17 +99,10 @@
           "platform": "windows",
           "full": "Windows Server 2019 Datacenter 1809 (10.0.17763.3406)"
         },
-        "ip": [
-          "10.200.0.223",
-          "fe80::eda9:848c:24ae:431d",
-          "127.0.0.1",
-          "::1"
-        ],
+        "ip": ["10.200.0.223", "fe80::eda9:848c:24ae:431d", "127.0.0.1", "::1"],
         "name": "siem-windows-endpoint",
         "id": "526e76a2-1c82-4245-a179-4fcde1e608fc",
-        "mac": [
-          "42:01:0a:c8:00:df"
-        ],
+        "mac": ["42:01:0a:c8:00:df"],
         "architecture": "x86_64",
         "risk": {
           "calculated_level": "Low",
@@ -136,12 +127,8 @@
       "event.module": "endpoint",
       "event.action": "exec",
       "event.id": "MnfiZLkz1DywMGBf++++9ApE",
-      "event.category": [
-        "file"
-      ],
-      "event.type": [
-        "change"
-      ],
+      "event.category": ["file"],
+      "event.type": ["change"],
       "event.dataset": "endpoint.events.file",
       "kibana.alert.original_time": "2022-10-14T14:00:27.264Z",
       "kibana.alert.ancestors": [
@@ -263,12 +250,8 @@
       "kibana.alert.original_event.module": "endpoint",
       "kibana.alert.original_event.action": "rename",
       "kibana.alert.original_event.id": "MnfiZLkz1DywMGBf++++9ApE",
-      "kibana.alert.original_event.category": [
-        "file"
-      ],
-      "kibana.alert.original_event.type": [
-        "change"
-      ],
+      "kibana.alert.original_event.category": ["file"],
+      "kibana.alert.original_event.type": ["change"],
       "kibana.alert.original_event.dataset": "endpoint.events.file",
       "kibana.alert.uuid": "26d2d9935c51f506b7b236984491999f3f6847f2e29fc7147745bdd6de2d775a",
       "timestamp": 1666873459714

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { SlmPolicyPayload } from '../../../../common/types';
-import { SectionError, Error, PageError } from '../../../shared_imports';
-import { useDecodedParams } from '../../lib';
+import { EuiCallOut, EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { TIME_UNITS } from '../../../../common/constants';
+import { SlmPolicyPayload } from '../../../../common/types';
+import { Error, PageError, SectionError } from '../../../shared_imports';
+import { useServices } from '../../app_context';
 import { PageLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
-import { useServices } from '../../app_context';
+import { useDecodedParams } from '../../lib';
+import { editPolicy, useLoadIndices, useLoadPolicy } from '../../services/http';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { editPolicy, useLoadPolicy, useLoadIndices } from '../../services/http';
 
 interface MatchParams {
   name: string;

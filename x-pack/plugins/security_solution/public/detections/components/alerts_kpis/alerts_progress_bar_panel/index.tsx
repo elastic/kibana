@@ -1,3 +1,4 @@
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +6,19 @@
  * 2.0.
  */
 import { EuiPanel } from '@elastic/eui';
+import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { Filter, Query } from '@kbn/es-query';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-import { StackByComboBox } from '../common/components';
-import { AlertsProgressBar } from './alerts_progress_bar';
-import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggregations';
+import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
+import { StackByComboBox } from '../common/components';
+import type { AddFilterProps } from '../common/types';
+import { AlertsProgressBar } from './alerts_progress_bar';
 import { getIsAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
 import type { GroupBySelection } from './types';
-import type { AddFilterProps } from '../common/types';
 
 const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
 const DEFAULT_COMBOBOX_WIDTH = 150;

@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
+  Case,
   ExternalReferenceAttachmentAttributes,
   ExternalReferenceSOAttachmentAttributes,
-  Case,
   PersistableStateAttachment,
 } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  postCaseReq,
-  getPostCaseRequest,
-  postCommentUserReq,
-  postCommentAlertReq,
-  persistableStateAttachment,
-  postExternalReferenceSOReq,
-  postExternalReferenceESReq,
-} from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
+  bulkCreateAttachments,
+  bulkGetAttachments,
   createCase,
   createComment,
-  bulkCreateAttachments,
+  deleteAllCaseItems,
   ensureSavedObjectIsAuthorized,
-  bulkGetAttachments,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -42,6 +33,15 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import {
+  getPostCaseRequest,
+  persistableStateAttachment,
+  postCaseReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+  postExternalReferenceESReq,
+  postExternalReferenceSOReq,
+} from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

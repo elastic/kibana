@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
-import { networkActions, networkModel, networkSelectors } from '../../store';
 import type {
   Direction,
-  SortField,
   NetworkDnsEdges,
   NetworkDnsFields,
+  SortField,
 } from '../../../../../common/search_strategy';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { networkActions, networkModel, networkSelectors } from '../../store';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';

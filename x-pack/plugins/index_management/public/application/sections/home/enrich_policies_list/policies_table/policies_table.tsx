@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
-  EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiSearchBarProps,
   EuiButton,
+  EuiInMemoryTable,
   EuiLink,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import React, { FunctionComponent } from 'react';
 import { useAppContext } from '../../../../app_context';
 
 export interface Props {

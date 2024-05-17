@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { LoadingCountSetup, LoadingCountService } from './loading_count_service';
+import { BehaviorSubject } from 'rxjs';
+import type { LoadingCountService, LoadingCountSetup } from './loading_count_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<LoadingCountSetup> = {

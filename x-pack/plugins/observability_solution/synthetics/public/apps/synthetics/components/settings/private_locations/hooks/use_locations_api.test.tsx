@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { WrappedHelper } from '../../../../utils/testing';
-import { getServiceLocations } from '../../../../state/service_locations';
-import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
-import { usePrivateLocationsAPI } from './use_locations_api';
-import * as locationAPI from '../../../../state/private_locations/api';
+import { act, renderHook } from '@testing-library/react-hooks';
 import * as reduxHooks from 'react-redux';
+import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
+import * as locationAPI from '../../../../state/private_locations/api';
+import { getServiceLocations } from '../../../../state/service_locations';
+import { WrappedHelper } from '../../../../utils/testing';
+import { usePrivateLocationsAPI } from './use_locations_api';
 
 describe('usePrivateLocationsAPI', () => {
   const dispatch = jest.fn();

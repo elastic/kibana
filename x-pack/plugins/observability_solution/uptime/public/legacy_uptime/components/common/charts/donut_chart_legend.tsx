@@ -8,12 +8,12 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
-import { DonutChartLegendRow } from './donut_chart_legend_row';
-import { UptimeThemeContext } from '../../../contexts';
 import {
   STATUS_DOWN_LABEL,
   STATUS_UP_LABEL,
 } from '../../../../../common/translations/translations';
+import { UptimeThemeContext } from '../../../contexts';
+import { DonutChartLegendRow } from './donut_chart_legend_row';
 
 const LegendContainer = styled.div`
   max-width: 150px;

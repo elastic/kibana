@@ -8,17 +8,17 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   ALERT_INSTANCE_ID,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
-  ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 
 import {
-  suppressAlertsInMemory,
-  isExistingDateGtEqThanAlert,
-  getUpdatedSuppressionBoundaries,
   BackendAlertWithSuppressionFields870,
+  getUpdatedSuppressionBoundaries,
+  isExistingDateGtEqThanAlert,
+  suppressAlertsInMemory,
 } from './create_persistence_rule_type_wrapper';
 
 describe('suppressAlertsInMemory', () => {

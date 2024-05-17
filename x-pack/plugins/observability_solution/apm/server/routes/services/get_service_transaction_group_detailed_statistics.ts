@@ -10,18 +10,18 @@ import { keyBy } from 'lodash';
 import { ApmTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
-import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../lib/helpers/transaction_error_rate';
-import { RollupInterval } from '../../../common/rollup';
+import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 
 interface ServiceTransactionGroupDetailedStat {
   transactionName: string;

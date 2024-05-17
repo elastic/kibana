@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import type { ListItems } from './types';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description';
+import type { ListItems } from './types';
 
 export const buildMlJobsDescription = (jobIds: string[], label: string): ListItems => ({
   title: label,

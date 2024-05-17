@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiCode,
+  EuiIcon,
+  EuiIconTip,
+  EuiInMemoryTable,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { OverlayModalStart } from '@kbn/core/public';
 import { FieldDescription } from '@kbn/field-utils';
-import {
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiIconTip,
-  EuiBasicTableColumn,
-  EuiBadge,
-  EuiToolTip,
-  EuiModalHeader,
-  EuiModalFooter,
-  EuiModalBody,
-  EuiButton,
-  EuiModalHeaderTitle,
-  EuiText,
-  EuiBasicTable,
-  EuiCode,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { PureComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -231,9 +231,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
           type="questionInCircle"
           color="primary"
           aria-label={additionalInfoAriaLabel}
-          content={field.info.map((info: string, i: number) => (
-            <div key={i}>{info}</div>
-          ))}
+          content={field.info.map((info: string, i: number) => <div key={i}>{info}</div>)}
         />
       </span>
     ) : null}

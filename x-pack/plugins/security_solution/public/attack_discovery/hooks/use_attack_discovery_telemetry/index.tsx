@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ReportAttackDiscoveriesGeneratedParams } from '../../../common/lib/telemetry/events/attack_discovery/types';
 import { useKibana } from '../../../common/lib/kibana';
+import type { ReportAttackDiscoveriesGeneratedParams } from '../../../common/lib/telemetry/events/attack_discovery/types';
 
 interface AttackDiscoveryTelemetry {
   reportAttackDiscoveriesGenerated: (params: ReportAttackDiscoveriesGeneratedParams) => void;

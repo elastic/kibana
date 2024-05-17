@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiCardProps } from '@elastic/eui';
+import type { MouseEventHandler, ReactNode } from 'react';
 
 import type {
-  RedirectAppLinksServices,
   RedirectAppLinksKibanaDependencies,
+  RedirectAppLinksServices,
 } from '@kbn/shared-ux-link-redirect-app-types';
 
 /**

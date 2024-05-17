@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import {
   EuiButton,
-  EuiLink,
   EuiEmptyPrompt,
-  EuiFlexItem,
   EuiFlexGroup,
-  EuiText,
+  EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import React, { useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import { subj as testSubjectToCss } from '@kbn/test-subj-selector';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { subj as testSubjectToCss } from '@kbn/test-subj-selector';
+import chalk from 'chalk';
 
 import { FtrService } from '../../ftr_provider_context';
-import { AxeReport, printResult } from './axe_report';
 import { analyzeWithAxe, analyzeWithAxeWithClient } from './analyze_with_axe';
+import { AxeReport, printResult } from './axe_report';
 
 interface AxeContext {
   include?: string[];

@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
+  DataViewBase,
+  DataViewFieldBase,
   Filter,
+  getFilterField,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
-  getFilterField,
-  DataViewBase,
-  DataViewFieldBase,
 } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 import { getPhraseDisplayValue } from './mappers/map_phrase';
 import { getPhrasesDisplayValue } from './mappers/map_phrases';
 import { getRangeDisplayValue } from './mappers/map_range';
-import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: DataViewBase | DataView, key?: string) {
   // checking getFormatterForField exists because there is at least once case where an index pattern

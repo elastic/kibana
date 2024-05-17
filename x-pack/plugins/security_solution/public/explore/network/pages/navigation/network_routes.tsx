@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -20,6 +20,7 @@ import {
   IPsQueryTabBody,
   TlsQueryTabBody,
 } from '.';
+import { NETWORK_PATH } from '../../../../../common/constants';
 import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { sourceOrDestinationIpExistsFilter } from '../../../../common/components/visualization_actions/utils';
@@ -27,7 +28,6 @@ import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/a
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import type { NetworkRoutesProps } from './types';
 import { NetworkRouteType } from './types';
-import { NETWORK_PATH } from '../../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
   ({ type, to, filterQuery, isInitializing, from, indexPattern, indexNames, setQuery }) => {

@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,8 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 
 import {
-  useEuiTheme,
   EuiAccordion,
   EuiBadge,
   EuiButton,
@@ -27,6 +26,7 @@ import {
   EuiSwitchEvent,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -38,10 +38,10 @@ import {
   REQUIRED_LABEL,
 } from '../../../../common/i18n_string';
 import { isApiError } from '../../../utils/api';
+import { CreateApiKeyResponse, useCreateApiKey } from '../../hooks/api/use_create_api_key';
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
-import { CreateApiKeyResponse, useCreateApiKey } from '../../hooks/api/use_create_api_key';
 
 const DEFAULT_ROLE_DESCRIPTORS = `{
   "serverless_search": {

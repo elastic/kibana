@@ -7,14 +7,14 @@
 
 import { Action } from 'redux-actions';
 import { call, put, takeEvery } from 'redux-saga/effects';
+import type { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 import {
-  getJourneySteps,
-  getJourneyStepsSuccess,
-  getJourneyStepsFail,
   FetchJourneyStepsParams,
+  getJourneySteps,
+  getJourneyStepsFail,
+  getJourneyStepsSuccess,
 } from '../actions/journey';
 import { fetchJourneySteps } from '../api/journey';
-import type { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 
 const inFlightStepRequests: Record<FetchJourneyStepsParams['checkGroup'], boolean> = {};
 

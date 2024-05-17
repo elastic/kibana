@@ -6,16 +6,16 @@
  */
 
 import type { EuiBasicTable } from '@elastic/eui';
-import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { TimelineType } from '../../../../common/api/timeline';
 
+import { getRequestIds, getSelectedTimelineIdsAndSearchIds } from '.';
+import { useEditTimelineActions } from './edit_timeline_actions';
+import { EditTimelineActions } from './export_timeline';
 import * as i18n from './translations';
 import type { DeleteTimelines, OpenTimelineResult } from './types';
-import { EditTimelineActions } from './export_timeline';
-import { useEditTimelineActions } from './edit_timeline_actions';
-import { getSelectedTimelineIdsAndSearchIds, getRequestIds } from '.';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,

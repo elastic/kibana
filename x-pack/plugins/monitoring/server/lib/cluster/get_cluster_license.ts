@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
-import { getIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
-import { Globals } from '../../static_globals';
+import { getElasticsearchDataset, getIndexPatterns } from './get_index_patterns';
 
 // is this being used anywhere?  not called within the app
 export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {

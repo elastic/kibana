@@ -6,8 +6,8 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
-import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
+import { LegacyTemplateSerialized, TemplateDeserialized } from '../../../../common';
+import { serializeLegacyTemplate, serializeTemplate } from '../../../../common/lib';
 
 export const doesTemplateExist = async ({
   name,

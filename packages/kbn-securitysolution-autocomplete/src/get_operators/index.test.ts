@@ -7,9 +7,9 @@
  */
 
 import {
-  doesNotExistOperator,
-  EVENT_FILTERS_OPERATORS,
   ALL_OPERATORS,
+  EVENT_FILTERS_OPERATORS,
+  doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOperator,

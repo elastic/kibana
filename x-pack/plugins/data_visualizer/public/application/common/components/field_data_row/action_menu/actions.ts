@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import type { MutableRefObject } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type VisualizeFieldContext,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { Refresh } from '@kbn/ml-date-picker';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
-import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
-import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
-import type { FieldVisConfig } from '../../stats_table/types';
-import type { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
+import {
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  type VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
+import type { MutableRefObject } from 'react';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { APP_ID } from '../../../../../../common/constants';
+import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
+import type { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
+import type { FieldVisConfig } from '../../stats_table/types';
+import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 
 export function getActions(
   dataView: DataView,

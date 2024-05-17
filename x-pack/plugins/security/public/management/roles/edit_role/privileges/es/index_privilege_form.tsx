@@ -26,10 +26,10 @@ import type { monaco } from '@kbn/monaco';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 import type { RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
+import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 
 const fromOption = (option: EuiComboBoxOptionOption) => option.label;
 const toOption = (value: string): EuiComboBoxOptionOption => ({ label: value });

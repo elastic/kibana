@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment';
+import React from 'react';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import type { DataViewBase } from '@kbn/es-query';
 import { render } from '@testing-library/react';
 
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { TestProviders, createMockStore, mockGlobalState } from '../../../../common/mock';
 
-import { PreviewHistogram } from './preview_histogram';
-import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
-import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
+import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
+import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
+import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
+import { PreviewHistogram } from './preview_histogram';
 
 jest.mock('../../../../common/components/control_columns', () => ({
   transformControlColumns: (props: TransformColumnsProps) => [],

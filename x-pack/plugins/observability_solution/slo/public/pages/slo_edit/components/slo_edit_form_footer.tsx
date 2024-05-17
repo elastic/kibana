@@ -7,22 +7,22 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useCreateRule } from '@kbn/observability-plugin/public';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { useCreateRule } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../utils/kibana_react';
-import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/use_update_slo';
 import { BurnRateRuleParams } from '../../../typings';
+import { useKibana } from '../../../utils/kibana_react';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import {
   transformCreateSLOFormToCreateSLOInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
+import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { SLOInspectWrapper } from './common/slo_inspect/slo_inspect';

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import * as api from '@kbn/securitysolution-list-api';
-import { ExceptionsApi, useApi } from '@kbn/securitysolution-list-hooks';
+import { HttpStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type {
   AddExceptionListItemProps,
   ApiCallByIdProps,
@@ -15,15 +14,16 @@ import type {
   DuplicateExceptionListProps,
   UpdateExceptionListItemProps,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { coreMock } from '@kbn/core/public/mocks';
-import { HttpStart } from '@kbn/core/public';
+import * as api from '@kbn/securitysolution-list-api';
+import { ExceptionsApi, useApi } from '@kbn/securitysolution-list-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 
 jest.mock('@kbn/securitysolution-list-api');
 

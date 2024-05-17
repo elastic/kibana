@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as vector2 from './vector2';
 import type { AABB } from '../types';
+import * as vector2 from './vector2';
 
 /**
  * Return a boolean indicating if 2 vector objects are equal.

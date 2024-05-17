@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { pipe, forEach } from 'lodash/fp';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { forEach, pipe } from 'lodash/fp';
 
 import { getFlattenedObject } from '@kbn/std';
 

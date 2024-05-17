@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getCrowdstrikeEmulator } from './emulator_plugins/crowdstrike';
 import { handleProcessInterruptions } from '../common/nodejs_utils';
-import { EmulatorServer } from './lib/emulator_server';
-import type { ExternalEdrServerEmulatorCoreServices } from './external_edr_server_emulator.types';
+import { getCrowdstrikeEmulator } from './emulator_plugins/crowdstrike';
 import { getSentinelOneEmulator } from './emulator_plugins/sentinelone';
+import type { ExternalEdrServerEmulatorCoreServices } from './external_edr_server_emulator.types';
+import { EmulatorServer } from './lib/emulator_server';
 
 export interface StartExternalEdrServerEmulatorOptions {
   coreServices: ExternalEdrServerEmulatorCoreServices;

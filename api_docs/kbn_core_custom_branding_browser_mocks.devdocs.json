@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => any"
-            ],
+            "signature": ["() => any"],
             "path": "packages/core/custom-branding/core-custom-branding-browser-mocks/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

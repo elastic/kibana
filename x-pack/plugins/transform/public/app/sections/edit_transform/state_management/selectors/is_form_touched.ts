@@ -13,10 +13,10 @@ import { useSelector } from 'react-redux';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
+import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
 import type { FormFieldsState } from '../form_field';
 import type { FormSectionsState } from '../form_section';
 import { getDefaultState } from '../get_default_state';
-import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
 
 import { selectFormFields } from './form_field';
 import { selectFormSections } from './form_sections';

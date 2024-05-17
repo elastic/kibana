@@ -20,15 +20,15 @@ import { buildRouteValidation } from '../../../../../utils/build_validation/rout
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
 import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
+import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
-import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

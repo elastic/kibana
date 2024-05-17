@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiComboBox, EuiFieldText, EuiFormRow, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
+import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import React, { useCallback } from 'react';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 

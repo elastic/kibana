@@ -1,3 +1,7 @@
+import type { TelemetryEvent } from '../types';
+import { endpointAllowlistFields } from './endpoint_alerts';
+import { exceptionListAllowlistFields } from './exception_lists';
+import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +9,6 @@
  * 2.0.
  */
 import type { AllowlistFields } from './types';
-import type { TelemetryEvent } from '../types';
-import { endpointAllowlistFields } from './endpoint_alerts';
-import { exceptionListAllowlistFields } from './exception_lists';
-import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
 
 /**
  * Filters out Key/Values not required for downstream analysis

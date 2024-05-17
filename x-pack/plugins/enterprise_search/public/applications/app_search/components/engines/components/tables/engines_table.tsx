@@ -22,9 +22,9 @@ import { renderEngineLink, renderLastChangeLink } from './engine_link_helpers';
 import {
   ACTIONS_COLUMN,
   CREATED_AT_COLUMN,
-  LAST_UPDATED_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
+  LAST_UPDATED_COLUMN,
   NAME_COLUMN,
 } from './shared_columns';
 import { EnginesTableProps } from './types';

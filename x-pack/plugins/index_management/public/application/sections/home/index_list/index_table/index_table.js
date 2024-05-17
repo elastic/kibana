@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
   EuiCallOut,
-  EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPageSection,
   EuiScreenReaderOnly,
-  EuiSpacer,
   EuiSearchBar,
+  EuiSpacer,
   EuiSwitch,
   EuiTable,
   EuiTableBody,
@@ -37,18 +37,18 @@ import {
 import { get } from 'lodash';
 
 import {
-  PageLoading,
   PageError,
-  reactRouterNavigate,
+  PageLoading,
   attemptToURIDecode,
+  reactRouterNavigate,
 } from '../../../../../shared_imports';
-import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
-import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
+import { DataHealth, NoMatch } from '../../../../components';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch, DataHealth } from '../../../../components';
-import { IndexActionsContextMenu } from '../index_actions_context_menu';
+import { documentationService } from '../../../../services/documentation';
+import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
 import { CreateIndexButton } from '../create_index/create_index_button';
+import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
 

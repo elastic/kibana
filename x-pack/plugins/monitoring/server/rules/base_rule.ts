@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import {
-  RuleType,
-  RuleNotifyWhen,
-  RuleExecutorOptions,
-  RulesClient,
-  RuleExecutorServices,
-  DEFAULT_AAD_CONFIG,
-  AlertsClientError,
-} from '@kbn/alerting-plugin/server';
-import {
+  AlertInstanceContext,
+  RawAlertInstance,
   Rule,
   RuleTypeParams,
-  RawAlertInstance,
   SanitizedRule,
-  AlertInstanceContext,
 } from '@kbn/alerting-plugin/common';
-import { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
-  AlertState,
-  AlertNodeState,
+  AlertsClientError,
+  DEFAULT_AAD_CONFIG,
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleNotifyWhen,
+  RuleType,
+  RulesClient,
+} from '@kbn/alerting-plugin/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { DEFAULT_APP_CATEGORIES, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { AlertSeverity } from '../../common/enums';
+import {
   AlertCluster,
-  AlertMessage,
   AlertData,
-  AlertInstanceState,
   AlertEnableAction,
+  AlertInstanceState,
+  AlertMessage,
+  AlertNodeState,
+  AlertState,
   CommonAlertFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { AlertSeverity } from '../../common/enums';
 import { Globals } from '../static_globals';
 
 type ExecutedState =

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { SidebarHeader } from '../../sidebar_header';
-import { MultiElementSettings } from '../multi_element_settings';
-import { GroupSettings } from '../group_settings';
-import { GlobalConfig } from '../global_config';
 import { ElementSettings } from '../element_settings';
+import { GlobalConfig } from '../global_config';
+import { GroupSettings } from '../group_settings';
+import { MultiElementSettings } from '../multi_element_settings';
 
 interface SidebarContentProps {
   commit?: Function;

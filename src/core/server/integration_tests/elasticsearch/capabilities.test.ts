@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createTestServers, TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
+import { TestElasticsearchUtils, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 describe('ES capabilities for traditional ES', () => {
   let esServer: TestElasticsearchUtils;

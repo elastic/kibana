@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment-timezone';
+import React from 'react';
 
-import { init } from '../integration_tests/helpers/http_requests';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { Index } from '@kbn/index-management-plugin/common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { init } from '../integration_tests/helpers/http_requests';
+import { init as initHttp } from '../public/application/services/http';
+import { init as initUiMetric } from '../public/application/services/ui_metric';
 import {
-  retryLifecycleActionExtension,
-  removeLifecyclePolicyActionExtension,
   addLifecyclePolicyActionExtension,
   ilmBannerExtension,
   ilmFilterExtension,
+  removeLifecyclePolicyActionExtension,
+  retryLifecycleActionExtension,
 } from '../public/extend_index_management';
-import { init as initHttp } from '../public/application/services/http';
-import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
-import { Index } from '@kbn/index-management-plugin/common';
-import { findTestSubject } from '@elastic/eui/lib/test';
 
 const { httpSetup } = init();
 

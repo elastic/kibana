@@ -8,7 +8,7 @@
 import React, { ChangeEvent } from 'react';
 
 import { css } from '@emotion/react';
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,

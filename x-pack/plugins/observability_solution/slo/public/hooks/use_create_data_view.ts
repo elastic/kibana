@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { useEffect, useState } from 'react';
 import { useKibana } from '../utils/kibana_react';
 
 interface UseCreateDataViewProps {

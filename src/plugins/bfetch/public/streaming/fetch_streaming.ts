@@ -8,9 +8,9 @@
 
 import { map, share } from 'rxjs';
 import { inflateResponse } from '.';
+import { appendQueryParam } from '../../common';
 import { fromStreamingXhr } from './from_streaming_xhr';
 import { split } from './split';
-import { appendQueryParam } from '../../common';
 
 export interface FetchStreamingParams {
   url: string;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { CreateTagModal } from './create_modal';
 import { IToasts, NotificationsStart } from '@kbn/core-notifications-browser';
-import { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { CreateTagModal } from './create_modal';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils';
 
 describe('create modal', () => {
@@ -25,7 +25,7 @@ describe('create modal', () => {
         color: 'blue',
         managed: false,
       }),
-    } as Partial<ITagsClient> as ITagsClient);
+    }) as Partial<ITagsClient> as ITagsClient;
 
   const defaultProps: React.ComponentProps<typeof CreateTagModal> = {
     onClose: jest.fn(),

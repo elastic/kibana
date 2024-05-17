@@ -6,23 +6,23 @@
  */
 import React from 'react';
 
-import { Chart, Partition, PartitionLayout, Datum, PartialTheme, Settings } from '@elastic/charts';
+import { Chart, Datum, PartialTheme, Partition, PartitionLayout, Settings } from '@elastic/charts';
 
 import {
   EuiFlexItem,
-  euiPaletteColorBlindBehindText,
-  EuiTitle,
   EuiIcon,
-  EuiText,
-  EuiSpacer,
   EuiProgress,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  euiPaletteColorBlindBehindText,
   useEuiFontSize,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { IconChartDonut } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { ChartContainer } from '../../../../shared/charts/chart_container';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { ChartContainer } from '../../../../shared/charts/chart_container';
 
 const theme: PartialTheme = {
   chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },

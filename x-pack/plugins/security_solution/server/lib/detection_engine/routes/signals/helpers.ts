@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertTags, AlertAssignees } from '../../../../../common/api/detection_engine';
+import type { AlertAssignees, AlertTags } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
 export const validateAlertTagsArrays = (tags: AlertTags, ids: string[]) => {

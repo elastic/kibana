@@ -7,7 +7,7 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { fetchProvider, TelemetryResponse } from './collector_fetch';
+import { TelemetryResponse, fetchProvider } from './collector_fetch';
 
 export function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,

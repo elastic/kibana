@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { EuiInputPopover, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import React, { useState } from 'react';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent, MouseEvent } from 'react';
 
 const strings = {
   getDeleteAriaLabel: () =>

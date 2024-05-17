@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { padStart } from 'lodash';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { padStart } from 'lodash';
+import moment from 'moment';
 import { RuleType } from '../../types';
 
 export function formatMillisForDisplay(value: number | undefined) {

@@ -10,19 +10,19 @@ import expect from 'expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  fetchRule,
-  checkInvestigationFieldSoValue,
-  combineToNdJson,
-  getCustomQueryRuleParams,
-} from '../../../utils';
-import { deleteAllRules, createRule } from '../../../../../../common/utils/security_solution';
-import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  checkInvestigationFieldSoValue,
+  combineToNdJson,
+  createLegacyRuleAction,
+  fetchRule,
+  getCustomQueryRuleParams,
+  getLegacyActionSO,
+} from '../../../utils';
 import { createConnector } from '../../../utils/connectors';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 

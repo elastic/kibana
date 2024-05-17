@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiSpacer,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { isEqual, merge } from 'lodash';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
-import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { useDataSource } from '../../../contexts/ml';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { isEqual, merge } from 'lodash';
+import moment from 'moment';
+import type { FC } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import type {
   DatafeedResponse,
   JobOverride,
   JobResponse,
   KibanaObject,
-  KibanaObjects,
   KibanaObjectResponse,
+  KibanaObjects,
   ModuleJob,
 } from '../../../../../common/types/modules';
-import { CreateResultCallout } from './components/create_result_callout';
-import { KibanaObjectList } from './components/kibana_objects';
-import { ModuleJobs } from './components/module_jobs';
-import type { JobSettingsFormValues } from './components/job_settings_form';
-import { JobSettingsForm } from './components/job_settings_form';
-import type { TimeRange } from '../common/components';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { useDataSource } from '../../../contexts/ml';
+import type { TimeRange } from '../common/components';
+import { CreateResultCallout } from './components/create_result_callout';
+import type { JobSettingsFormValues } from './components/job_settings_form';
+import { JobSettingsForm } from './components/job_settings_form';
+import { KibanaObjectList } from './components/kibana_objects';
+import { ModuleJobs } from './components/module_jobs';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -231,8 +231,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           failedJobsCount === 0
             ? SAVE_STATE.SAVED
             : failedJobsCount === jobs.length
-            ? SAVE_STATE.FAILED
-            : SAVE_STATE.PARTIAL_FAILURE
+              ? SAVE_STATE.FAILED
+              : SAVE_STATE.PARTIAL_FAILURE
         );
       } catch (e) {
         setSaveState(SAVE_STATE.FAILED);

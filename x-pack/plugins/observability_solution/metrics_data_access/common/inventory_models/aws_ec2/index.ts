@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { metrics } from './metrics';
 import { InventoryModel } from '../types';
+import { metrics } from './metrics';
 
 export { awsEC2SnapshotMetricTypes } from './metrics';
 

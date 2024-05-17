@@ -17,29 +17,29 @@ import {
   storybookFlightsDataView,
 } from '@kbn/presentation-util-plugin/public/mocks';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupContainerFactory,
-  OptionsListEmbeddableInput,
-  RangeSliderEmbeddableInput,
   OPTIONS_LIST_CONTROL,
+  OptionsListEmbeddableInput,
   RANGE_SLIDER_CONTROL,
+  RangeSliderEmbeddableInput,
 } from '..';
 
-import { decorators } from './decorators';
-import { ControlsPanels } from '../control_group/types';
-import { ControlGroupContainer } from '../control_group';
-import { pluginServices, registry } from '../services/plugin_services.story';
-import { injectStorybookDataView } from '../services/data_views/data_views.story';
-import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
-import { populateStorybookControlFactories } from './storybook_control_factories';
-import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
 import {
-  OptionsListResponse,
   OptionsListRequest,
+  OptionsListResponse,
   OptionsListSuggestions,
 } from '../../common/options_list/types';
+import { ControlGroupContainer } from '../control_group';
+import { ControlsPanels } from '../control_group/types';
+import { injectStorybookDataView } from '../services/data_views/data_views.story';
+import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
+import { pluginServices, registry } from '../services/plugin_services.story';
+import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
+import { decorators } from './decorators';
+import { populateStorybookControlFactories } from './storybook_control_factories';
 
 export default {
   title: 'Controls',

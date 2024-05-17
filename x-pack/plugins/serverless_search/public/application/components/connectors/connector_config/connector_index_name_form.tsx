@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiForm, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';

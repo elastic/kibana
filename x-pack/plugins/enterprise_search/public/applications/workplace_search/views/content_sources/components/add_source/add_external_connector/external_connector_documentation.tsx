@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 
 const DEFAULT_QUERY_SIZE = 1000;

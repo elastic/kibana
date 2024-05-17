@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf, Type, offeringBasedSchema } from '@kbn/config-schema';
-import { getConfigPath } from '@kbn/utils';
+import { Type, TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
+import { getConfigPath } from '@kbn/utils';
 import { labelsSchema } from './telemetry_labels';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [

@@ -6,8 +6,6 @@
     "id": "corePluginDeprecations",
     "server": true,
     "browser": false,
-    "configPath": [
-      "corePluginDeprecations"
-    ]
+    "configPath": ["corePluginDeprecations"]
   }
 }

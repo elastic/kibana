@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Query, AggregateQuery } from '../filters';
+import type { AggregateQuery, Query } from '../filters';
 
 type Language = keyof AggregateQuery;
 

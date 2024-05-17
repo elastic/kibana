@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 import { useDispatch } from '../../mappings_state_context';
 import { NormalizedRuntimeField } from '../../types';

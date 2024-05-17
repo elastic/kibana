@@ -41,9 +41,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -55,13 +53,9 @@
         "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.registerPerformanceMetricEventType",
         "type": "Function",
-        "tags": [
-          "private"
-        ],
+        "tags": ["private"],
         "label": "registerPerformanceMetricEventType",
-        "description": [
-          "\nRegister the `performance_metric` event type"
-        ],
+        "description": ["\nRegister the `performance_metric` event type"],
         "signature": [
           "(analytics: Pick<",
           {
@@ -112,9 +106,7 @@
         "type": "Function",
         "tags": [],
         "label": "reportPerformanceMetricEvent",
-        "description": [
-          "\nReport a `performance_metric` event type."
-        ],
+        "description": ["\nReport a `performance_metric` event type."],
         "signature": [
           "(analytics: Pick<",
           {
@@ -144,9 +136,7 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": [
-              "The {@link AnalyticsClient } to report the events."
-            ],
+            "description": ["The {@link AnalyticsClient } to report the events."],
             "signature": [
               "Pick<",
               {
@@ -197,10 +187,7 @@
         "tags": [],
         "label": "usePerformanceContext",
         "description": [],
-        "signature": [
-          "() => ",
-          "PerformanceApi"
-        ],
+        "signature": ["() => ", "PerformanceApi"],
         "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_performance_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -216,9 +203,7 @@
         "type": "Interface",
         "tags": [],
         "label": "PerformanceMetricEvent",
-        "description": [
-          "\nStructure of the `metric` event"
-        ],
+        "description": ["\nStructure of the `metric` event"],
         "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -245,9 +230,7 @@
             "description": [
               "\nSearchable but not aggregateable metadata relevant to the tracked action."
             ],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -256,9 +239,7 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.duration",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "duration",
             "description": [],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
@@ -269,14 +250,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key1",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key1",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -285,14 +262,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value1",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value1",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -301,14 +274,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key2",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key2",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -317,14 +286,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value2",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value2",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -333,14 +298,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key3",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key3",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -349,14 +310,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value3",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value3",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -365,14 +322,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key4",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key4",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -381,14 +334,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value4",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value4",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -397,14 +346,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key5",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key5",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -413,14 +358,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value5",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value5",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -429,14 +370,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key6",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key6",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -445,14 +382,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value6",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value6",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -461,14 +394,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key7",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key7",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -477,14 +406,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value7",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value7",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -493,14 +418,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key8",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key8",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -509,14 +430,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value8",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value8",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -525,14 +442,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.key9",
             "type": "string",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "key9",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -541,14 +454,10 @@
             "parentPluginId": "@kbn/ebt-tools",
             "id": "def-common.PerformanceMetricEvent.value9",
             "type": "number",
-            "tags": [
-              "group"
-            ],
+            "tags": ["group"],
             "label": "value9",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false

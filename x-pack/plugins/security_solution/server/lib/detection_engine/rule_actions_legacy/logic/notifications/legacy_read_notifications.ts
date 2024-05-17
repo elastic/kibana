@@ -7,11 +7,11 @@
 
 import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
+import { legacyFindNotifications } from './legacy_find_notifications';
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyReadNotificationParams } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { isLegacyRuleType } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
-import { legacyFindNotifications } from './legacy_find_notifications';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

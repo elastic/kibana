@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 

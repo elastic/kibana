@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildFilter, FILTERS } from '@kbn/es-query';
+import { FILTERS, buildFilter } from '@kbn/es-query';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { KibanaField, KibanaFilter } from './kibana_context_type';
 
 interface Arguments {

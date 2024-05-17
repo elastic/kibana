@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { ChromeService, InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { BehaviorSubject, of } from 'rxjs';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {

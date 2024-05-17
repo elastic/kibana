@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertTlsComponent } from './alert_tls';
-import { getDynamicSettings } from '../../state/settings/api';
-import { selectDynamicSettings } from '../../state/settings';
-import { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
+import { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
+import { selectDynamicSettings } from '../../state/settings';
+import { getDynamicSettings } from '../../state/settings/api';
+import { AlertTlsComponent } from './alert_tls';
 
 export const TLSRuleComponent: React.FC<{
   ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];

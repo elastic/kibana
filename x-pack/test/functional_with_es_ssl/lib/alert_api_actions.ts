@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import { getTestActionData, getTestAlertData } from './get_test_data';
 import type { ObjectRemover } from './object_remover';
-import { getTestAlertData, getTestActionData } from './get_test_data';
 
 export async function createAlertManualCleanup({
   supertest,

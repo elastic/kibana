@@ -7,8 +7,8 @@
 import 'cypress-axe';
 import 'cypress-real-events/support';
 import URL from 'url';
-import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
+import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 
 Cypress.Commands.add('loginAsElasticUser', () => {
   const username = Cypress.env('username');

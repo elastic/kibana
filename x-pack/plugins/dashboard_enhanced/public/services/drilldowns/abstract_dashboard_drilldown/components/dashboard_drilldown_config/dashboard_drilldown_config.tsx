@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import {
-  withSuspense,
   DashboardDrilldownOptionsComponent,
+  withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import React from 'react';
 
-import { txtChooseDestinationDashboard } from './i18n';
 import { Config as DrilldownConfig } from '../../types';
+import { txtChooseDestinationDashboard } from './i18n';
 
 const DashboardDrilldownOptions = withSuspense(DashboardDrilldownOptionsComponent, null);
 

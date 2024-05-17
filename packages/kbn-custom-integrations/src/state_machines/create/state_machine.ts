@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
+import { OmitDeprecatedState, sendIfDefined } from '@kbn/xstate-utils';
 import deepEqual from 'react-fast-compare';
-import { sendIfDefined, OmitDeprecatedState } from '@kbn/xstate-utils';
+import { ActorRefFrom, EmittedFrom, SpecialTargets, actions, createMachine } from 'xstate';
 import { IntegrationError, NamingCollisionError } from '../../types';
 import { IIntegrationsClient } from '../services/integrations_client';
 import {
@@ -22,6 +22,11 @@ import {
 import { DEFAULT_CONTEXT } from './defaults';
 import { CreateIntegrationNotificationEventSelectors } from './notifications';
 import {
+  datasetNameWillBePrefixed,
+  executeFieldsPipeline,
+  prefixDatasetName,
+} from './pipelines/fields';
+import {
   CreateCustomIntegrationContext,
   CreateCustomIntegrationEvent,
   CreateCustomIntegrationTypestate,
@@ -29,11 +34,6 @@ import {
   WithErrors,
   WithPreviouslyCreatedIntegration,
 } from './types';
-import {
-  datasetNameWillBePrefixed,
-  executeFieldsPipeline,
-  prefixDatasetName,
-} from './pipelines/fields';
 
 export const createPureCreateCustomIntegrationStateMachine = (
   initialContext: DefaultCreateCustomIntegrationContext = DEFAULT_CONTEXT

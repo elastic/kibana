@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import { SecurityPageName } from '../../../common';
-import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
+import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,

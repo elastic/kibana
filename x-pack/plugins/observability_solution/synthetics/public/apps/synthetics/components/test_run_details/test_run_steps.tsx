@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatTestDuration } from '../../utils/monitor_test_result/test_time_formats';
+import React from 'react';
 import { JourneyStep } from '../../../../../common/runtime_types';
+import { formatTestDuration } from '../../utils/monitor_test_result/test_time_formats';
 import { BrowserStepsList, isStepEnd } from '../common/monitor_test_result/browser_steps_list';
 
 export const TestRunSteps = ({

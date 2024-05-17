@@ -28,12 +28,8 @@
         "type": "string",
         "tags": [],
         "label": "TITLE",
-        "description": [
-          "The title of the Storybook."
-        ],
-        "signature": [
-          "\"Security Solution Storybook\""
-        ],
+        "description": ["The title of the Storybook."],
+        "signature": ["\"Security Solution Storybook\""],
         "path": "x-pack/packages/security-solution/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -48,9 +44,7 @@
         "description": [
           "The remote URL of the root from which Storybook loads stories for Security Solution."
         ],
-        "signature": [
-          "\"https://github.com/elastic/kibana/tree/main/packages/security_solution\""
-        ],
+        "signature": ["\"https://github.com/elastic/kibana/tree/main/packages/security_solution\""],
         "path": "x-pack/packages/security-solution/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -6,17 +6,17 @@
  */
 import {
   EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPanel,
   EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiLoadingSpinner,
-  EuiText,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { HttpStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';

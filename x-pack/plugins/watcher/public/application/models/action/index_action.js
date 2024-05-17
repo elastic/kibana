@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { BaseAction } from './base_action';
-import { i18n } from '@kbn/i18n';
 
 export class IndexAction extends BaseAction {
   constructor(props = {}) {

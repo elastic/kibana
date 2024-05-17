@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { GLOBAL_SETTINGS_ID, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
-import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
-import type { Settings, BaseSettings } from '../../common/types';
+import type { BaseSettings, Settings } from '../../common/types';
 import type { SettingsSOAttributes } from '../types';
 
 import { appContextService } from './app_context';
-import { listFleetServerHosts } from './fleet_server_host';
 import { auditLoggingService } from './audit_logging';
+import { listFleetServerHosts } from './fleet_server_host';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createHash } from 'crypto';
-import stringify from 'json-stable-stringify';
-import type { MaybePromise } from '@kbn/utility-types';
-import { isPromise } from '@kbn/std';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IClusterClient, Logger } from '@kbn/core/server';
+import { isPromise } from '@kbn/std';
+import type { MaybePromise } from '@kbn/utility-types';
+import stringify from 'json-stable-stringify';
+import { License } from '../common/license';
 import type {
   ILicense,
-  PublicLicense,
-  PublicFeatures,
-  LicenseType,
   LicenseStatus,
+  LicenseType,
+  PublicFeatures,
+  PublicLicense,
 } from '../common/types';
-import { License } from '../common/license';
 import type { ElasticsearchError, LicenseFetcher } from './types';
 
 export const getLicenseFetcher = ({

@@ -8,11 +8,11 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   AlertService,
-  CaseConfigureService,
-  CasesService,
-  CaseUserActionService,
-  ConnectorMappingsService,
   AttachmentService,
+  CaseConfigureService,
+  CaseUserActionService,
+  CasesService,
+  ConnectorMappingsService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { LicensingService } from './licensing';

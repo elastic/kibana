@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 import type { BuildFlavor } from '@kbn/config';
-import type { ServiceStatusLevelId, ServiceStatus } from '@kbn/core-status-common';
+import { type Type, type TypeOf, schema } from '@kbn/config-schema';
+import type { ServiceStatus, ServiceStatusLevelId } from '@kbn/core-status-common';
 
 import type {
-  StatusResponse,
-  StatusInfoCoreStatus,
   ServerMetrics,
-  StatusInfo,
   ServerVersion,
+  StatusInfo,
+  StatusInfoCoreStatus,
+  StatusResponse,
 } from '@kbn/core-status-common-internal';
 
 const serviceStatusLevelId: () => Type<ServiceStatusLevelId> = () =>

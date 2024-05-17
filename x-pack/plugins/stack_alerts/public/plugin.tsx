@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { registerRuleTypes } from './rule_types';
 
 export type Setup = void;

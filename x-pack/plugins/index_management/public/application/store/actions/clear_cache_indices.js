@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import { createAction } from 'redux-actions';
 
 import { clearCacheIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';

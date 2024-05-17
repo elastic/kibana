@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { HostDetailsLink } from '../../../../common/components/links';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { HostOverview } from '../../../../overview/components/host_overview';
-import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import styled from 'styled-components';
 import type { HostItem } from '../../../../../common/search_strategy';
+import { HostDetailsLink } from '../../../../common/components/links';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { ID, useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { HostOverview } from '../../../../overview/components/host_overview';
 
 interface ExpandableHostProps {
   hostName: string;

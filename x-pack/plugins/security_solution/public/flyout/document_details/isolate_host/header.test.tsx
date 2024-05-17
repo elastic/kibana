@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { useIsolateHostPanelContext } from './context';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { TECHNICAL_PREVIEW } from '../../../common/translations';
+import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
+import { useIsolateHostPanelContext } from './context';
 import { PanelHeader } from './header';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
-import { TECHNICAL_PREVIEW } from '../../../common/translations';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/utils/sentinelone_alert_check');

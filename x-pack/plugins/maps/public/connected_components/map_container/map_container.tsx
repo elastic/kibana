@@ -6,28 +6,28 @@
  */
 
 import '../../_index.scss';
-import React, { Component } from 'react';
-import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { Observable } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import classNames from 'classnames';
+import React, { Component } from 'react';
+import { Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { RENDER_TIMEOUT, RawValue } from '../../../common/constants';
+import { MapSettings } from '../../../common/descriptor_types';
+import { ILayer } from '../../classes/layers/layer';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { isScreenshotMode } from '../../kibana_services';
+import { FLYOUT_STATE } from '../../reducers/ui';
+import { AddLayerPanel } from '../add_layer_panel';
+import { EditLayerPanel } from '../edit_layer_panel';
+import { MapSettingsPanel } from '../map_settings_panel';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
-import { EditLayerPanel } from '../edit_layer_panel';
-import { AddLayerPanel } from '../add_layer_panel';
-import { isScreenshotMode } from '../../kibana_services';
-import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
-import { FLYOUT_STATE } from '../../reducers/ui';
-import { MapSettings } from '../../../common/descriptor_types';
-import { MapSettingsPanel } from '../map_settings_panel';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 

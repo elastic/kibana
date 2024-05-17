@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { comment, actionComment } from '../../mocks';
-import { createCasesClientMockArgs } from '../mocks';
 import { MAX_COMMENT_LENGTH, MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
-import { update } from './update';
+import { actionComment, comment } from '../../mocks';
 import { createUserActionServiceMock } from '../../services/mocks';
+import { createCasesClientMockArgs } from '../mocks';
+import { update } from './update';
 
 describe('update', () => {
   const caseID = 'test-case';

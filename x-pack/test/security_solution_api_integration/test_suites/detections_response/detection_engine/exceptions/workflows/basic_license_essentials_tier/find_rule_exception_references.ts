@@ -22,14 +22,14 @@ import {
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
-import { getSimpleRule, createExceptionList } from '../../../../utils';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   createAlertsIndex,
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import { createExceptionList, getSimpleRule } from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

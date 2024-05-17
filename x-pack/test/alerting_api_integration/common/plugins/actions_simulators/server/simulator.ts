@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import getPort from 'get-port';
 import http from 'http';
-import httpProxy from 'http-proxy';
 import { getProxyPort } from '@kbn/alerting-api-integration-helpers';
+import getPort from 'get-port';
+import httpProxy from 'http-proxy';
 import { getDataFromRequest } from './data_handler';
 
 export interface ProxyArgs {

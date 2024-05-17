@@ -6,11 +6,11 @@
  */
 
 import type { Immutable } from '../../../../../../../common/endpoint/types';
-import type { PolicyDetailsState } from '../../../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../../../common/constants';
+import type { PolicyDetailsState } from '../../../types';
 
 /**
  * Return a fresh copy of initial state, since we mutate state in the reducer.

@@ -8,31 +8,31 @@
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { ElasticsearchAssetType } from '../../../../types';
-import type {
-  EsAssetReference,
-  RegistryDataStream,
-  InstallablePackage,
-  PackageInfo,
-} from '../../../../types';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import type { ArchiveEntry } from '../../archive';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
+import type { PackageInstallContext } from '../../../../../common/types';
 import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
-import { getPipelineNameForDatastream } from '../../../../../common/services';
-import type { PackageInstallContext } from '../../../../../common/types';
+import { ElasticsearchAssetType } from '../../../../types';
+import type {
+  EsAssetReference,
+  InstallablePackage,
+  PackageInfo,
+  RegistryDataStream,
+} from '../../../../types';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import type { ArchiveEntry } from '../../archive';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import {
-  getPipelineNameForInstallation,
-  rewriteIngestPipeline,
-  isTopLevelPipeline,
   addCustomPipelineAndLocalRoutingRulesProcessor,
+  getPipelineNameForInstallation,
+  isTopLevelPipeline,
+  rewriteIngestPipeline,
 } from './helpers';
 import type { PipelineInstall, RewriteSubstitution } from './types';
 

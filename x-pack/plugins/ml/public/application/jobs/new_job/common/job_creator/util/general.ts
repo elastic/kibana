@@ -9,28 +9,28 @@ import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
-  mlCategory,
-  type Field,
   type AggFieldPair,
-  type SparseDataAggregation,
   DOC_COUNT,
-  _DOC_COUNT,
   EVENT_RATE_FIELD_ID,
+  type Field,
   MLCATEGORY,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
+  type SparseDataAggregation,
+  _DOC_COUNT,
+  mlCategory,
 } from '@kbn/ml-anomaly-utils';
+import type { JobCreatorType } from '..';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import type {
-  Job,
   Datafeed,
   Detector,
+  Job,
 } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { NavigateToPath } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { mlJobService } from '../../../../../services/job_service';
-import type { JobCreatorType } from '..';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
   let field = newJobCapsService.getFieldById(id);

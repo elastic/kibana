@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
 import { CaseStatuses } from '@kbn/cases-components';
+import { waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 
+import { CaseSeverity } from '../../../common';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { TestProviders } from '../../common/mock';
-import { useAllCasesState } from './use_all_cases_state';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { DEFAULT_CASES_TABLE_STATE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
 import { SortFieldCase } from '../../containers/types';
-import { stringifyUrlParams } from './utils/stringify_url_params';
-import { CaseSeverity } from '../../../common';
-import type { AllCasesTableState } from './types';
-import { CustomFieldTypes } from '../../../common/types/domain';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import type { AllCasesTableState } from './types';
+import { useAllCasesState } from './use_all_cases_state';
+import { stringifyUrlParams } from './utils/stringify_url_params';
 
 const mockLocation = { search: '' };
 const mockPush = jest.fn();

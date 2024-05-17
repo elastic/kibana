@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, forEach, isEmpty } from 'lodash';
+import { forEach, get, isEmpty } from 'lodash';
 import { overwrite } from '../../helpers';
 
 import type { TableRequestProcessorsFunction } from './types';

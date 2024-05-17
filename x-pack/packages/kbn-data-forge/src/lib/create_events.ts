@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
+import { isNumber, random, range } from 'lodash';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { isNumber, random, range } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
-import { Config, EventsPerCycle, EventsPerCycleTransitionDefRT, ParsedSchedule } from '../types';
 import { generateEvents } from '../data_sources';
+import { Config, EventsPerCycle, EventsPerCycleTransitionDefRT, ParsedSchedule } from '../types';
+import { createExponentialFunction, createLinearFunction, createSineFunction } from './data_shapes';
+import { isWeekendTraffic } from './is_weekend';
 import { createQueue } from './queue';
 import { wait } from './wait';
-import { isWeekendTraffic } from './is_weekend';
-import { createExponentialFunction, createLinearFunction, createSineFunction } from './data_shapes';
 
 function createEventsPerCycleFn(
   schedule: ParsedSchedule,
@@ -59,10 +59,13 @@ export async function createEvents(
   ) {
     logger.info('Pausing queue');
     queue.pause();
-    setTimeout(() => {
-      logger.info('Resuming queue');
-      queue.resume();
-    }, schedule.delayInMinutes * 60 * 1000);
+    setTimeout(
+      () => {
+        logger.info('Resuming queue');
+        queue.resume();
+      },
+      schedule.delayInMinutes * 60 * 1000
+    );
   }
 
   const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
 import {
+  EuiButtonIcon,
+  EuiConfirmModal,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonIcon,
   EuiPanel,
-  EuiConfirmModal,
+  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Conversation } from '../../..';
-import { AssistantTitle } from '../assistant_title';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
+import { AssistantTitle } from '../assistant_title';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
-import { AIConnector } from '../../connectorland/connector_selector';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;

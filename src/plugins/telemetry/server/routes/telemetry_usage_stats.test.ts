@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
+import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { RequestHandlerContext, IRouter } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
+import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
 
 async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,

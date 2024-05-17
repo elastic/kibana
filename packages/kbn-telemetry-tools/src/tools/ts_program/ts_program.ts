@@ -7,9 +7,9 @@
  */
 
 import * as path from 'path';
-import ts from 'typescript';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ImportResolver } from '@kbn/import-resolver';
+import { REPO_ROOT } from '@kbn/repo-info';
+import ts from 'typescript';
 
 function readTsConfigFile(configPath: string) {
   const json = ts.readConfigFile(configPath, ts.sys.readFile);

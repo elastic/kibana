@@ -6,8 +6,8 @@
  */
 
 import React, { useLayoutEffect, useState } from 'react';
-import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 
 interface PackQueriesAttachmentWrapperProps {
   actionId: string;

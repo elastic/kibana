@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { ManagementAppLocatorDefinition } from '@kbn/management-plugin/common/locator';
-import { LicenseManagementLocatorDefinition, LICENSE_MANAGEMENT_LOCATOR_ID } from './locator';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { LICENSE_MANAGEMENT_LOCATOR_ID, LicenseManagementLocatorDefinition } from './locator';
 describe('License Management URL locator', () => {
   let locator: LicenseManagementLocatorDefinition;
   beforeEach(() => {

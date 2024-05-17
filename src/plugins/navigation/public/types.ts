@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { Observable } from 'rxjs';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { Observable } from 'rxjs';
 
 import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
-import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
+import { TopNavMenuExtensionsRegistrySetup, TopNavMenuProps, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export interface NavigationPublicSetup {

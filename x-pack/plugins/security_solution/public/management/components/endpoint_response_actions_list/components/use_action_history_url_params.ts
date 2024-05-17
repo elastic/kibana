@@ -7,19 +7,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import {
-  isActionType,
-  isAgentType,
-} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import type { ResponseActionType } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   type ConsoleResponseActionCommands,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   type ResponseActionAgentType,
-  type ResponseActionsApiCommandNames,
   type ResponseActionStatus,
+  type ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  isActionType,
+  isAgentType,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
 

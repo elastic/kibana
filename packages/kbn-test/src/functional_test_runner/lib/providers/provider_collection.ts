@@ -10,7 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
-import { Providers, ProviderFn, isProviderConstructor } from './read_provider_spec';
+import { ProviderFn, Providers, isProviderConstructor } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
 
 export class ProviderCollection {
@@ -24,7 +24,10 @@ export class ProviderCollection {
 
   private readonly instances = new Map<ProviderFn, any>();
 
-  constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly providers: Providers
+  ) {}
 
   public getService = (name: string) => this.getInstance('Service', name);
 

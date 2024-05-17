@@ -7,8 +7,8 @@
  */
 
 import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
-import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsImportError } from '../errors';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 
 export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
   const nonUniqueRetryObjects = getNonUniqueEntries(retries);

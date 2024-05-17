@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import Axios from 'axios';
 import { createHash } from 'crypto';
-import { mkdir, open } from 'fs/promises';
 import { writeSync } from 'fs';
 import { dirname } from 'path';
 import { Readable } from 'stream';
-import { finished } from 'stream/promises';
 import type { Logger } from '@kbn/core/server';
+import Axios from 'axios';
+import { mkdir, open } from 'fs/promises';
+import { finished } from 'stream/promises';
 
 /**
  * Download a url and calculate it's checksum

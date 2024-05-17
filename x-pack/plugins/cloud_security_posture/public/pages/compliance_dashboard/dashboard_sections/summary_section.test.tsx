@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
+import { TestProvider } from '../../../test/test_provider';
 import { expectIdsInDoc } from '../../../test/utils';
+import { mockDashboardData } from '../mock';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { SummarySection } from './summary_section';
-import { mockDashboardData } from '../mock';
-import { TestProvider } from '../../../test/test_provider';
-import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 
 describe('<CloudSummarySection />', () => {
   const renderCloudSummarySection = (alterMockData = {}) => {

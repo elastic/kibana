@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonIcon, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
 export const DeleteLocation = ({

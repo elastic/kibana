@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
-import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { groupIdSelector } from '../../../common/store/grouping/selectors';
-import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { updateGroups } from '../../../common/store/grouping/actions';
+import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import { isEmpty, isEqual } from 'lodash/fp';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import type { Status } from '../../../../common/api/detection_engine';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../common/lib/kibana';
+import { track } from '../../../common/lib/telemetry';
+import { updateGroups } from '../../../common/store/grouping/actions';
+import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
-import { renderGroupPanel, getStats } from './grouping_settings';
-import { useKibana } from '../../../common/lib/kibana';
+import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { GroupedSubLevel } from './alerts_sub_grouping';
-import { track } from '../../../common/lib/telemetry';
+import { getStats, renderGroupPanel } from './grouping_settings';
 
 export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status[];

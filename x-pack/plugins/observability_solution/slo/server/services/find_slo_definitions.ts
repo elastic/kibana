@@ -8,8 +8,8 @@
 import {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
-  findSloDefinitionsResponseSchema,
   Pagination,
+  findSloDefinitionsResponseSchema,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';

@@ -11,12 +11,12 @@
  * 2.0.
  */
 
-import { executeAction, Props } from './executor';
 import { PassThrough } from 'stream';
-import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Props, executeAction } from './executor';
 import * as ParseStream from './parse_stream';
 const request = {
   body: {

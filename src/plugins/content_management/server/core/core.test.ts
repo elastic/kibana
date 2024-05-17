@@ -8,33 +8,33 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { until } from '../event_stream/tests/util';
-import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
 import { ContentClient } from '../content_client/content_client';
+import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
+import { until } from '../event_stream/tests/util';
 import { Core } from './core';
-import { createMemoryStorage, createMockedStorage } from './mocks';
-import { ContentRegistry } from './registry';
 import type { ContentCrud } from './crud';
 import type {
-  GetItemStart,
-  GetItemSuccess,
-  GetItemError,
+  BulkGetItemError,
   BulkGetItemStart,
   BulkGetItemSuccess,
-  BulkGetItemError,
+  CreateItemError,
   CreateItemStart,
   CreateItemSuccess,
-  CreateItemError,
-  UpdateItemStart,
-  UpdateItemSuccess,
-  UpdateItemError,
+  DeleteItemError,
   DeleteItemStart,
   DeleteItemSuccess,
-  DeleteItemError,
+  GetItemError,
+  GetItemStart,
+  GetItemSuccess,
+  SearchItemError,
   SearchItemStart,
   SearchItemSuccess,
-  SearchItemError,
+  UpdateItemError,
+  UpdateItemStart,
+  UpdateItemSuccess,
 } from './event_types';
+import { createMemoryStorage, createMockedStorage } from './mocks';
+import { ContentRegistry } from './registry';
 import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 const spyMsearch = jest.fn();

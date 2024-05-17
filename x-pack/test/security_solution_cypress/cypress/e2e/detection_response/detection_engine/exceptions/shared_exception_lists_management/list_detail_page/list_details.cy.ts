@@ -8,10 +8,13 @@
 import { getExceptionList } from '../../../../../../objects/exception';
 import { getNewRule } from '../../../../../../objects/rule';
 
-import { login } from '../../../../../../tasks/login';
-import { visit } from '../../../../../../tasks/navigation';
+import {
+  EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
+  EXCEPTIONS_LIST_MANAGEMENT_NAME,
+  EXCEPTION_LIST_DETAILS_LINK_RULES_BTN,
+} from '../../../../../../screens/exceptions';
+import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
-import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../../../urls/navigation';
 import {
   createSharedExceptionList,
   editExceptionLisDetails,
@@ -20,12 +23,9 @@ import {
   validateSharedListLinkedRules,
   waitForExceptionListDetailToBeLoaded,
 } from '../../../../../../tasks/exceptions_table';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
-import {
-  EXCEPTIONS_LIST_MANAGEMENT_NAME,
-  EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
-  EXCEPTION_LIST_DETAILS_LINK_RULES_BTN,
-} from '../../../../../../screens/exceptions';
+import { login } from '../../../../../../tasks/login';
+import { visit } from '../../../../../../tasks/navigation';
+import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../../../urls/navigation';
 
 const LIST_NAME = 'My exception list';
 const UPDATED_LIST_NAME = 'Updated exception list';

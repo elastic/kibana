@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
+import React from 'react';
 
-import { getField } from '../fields/index.mock';
 import { AutocompleteFieldListsComponent } from '.';
+import { getField } from '../fields/index.mock';
 import {
-  getListResponseMock,
-  getFoundListsBySizeSchemaMock,
   DATE_NOW,
   IMMUTABLE,
   VERSION,
+  getFoundListsBySizeSchemaMock,
+  getListResponseMock,
 } from '../list_schema/index.mock';
 
 // TODO: Once these mocks are available, use them instead of hand mocking, https://github.com/elastic/kibana/issues/100715

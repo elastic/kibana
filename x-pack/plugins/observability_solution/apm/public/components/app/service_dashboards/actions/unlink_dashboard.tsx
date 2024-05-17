@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { MergedServiceDashboard } from '..';
-import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 
 export function UnlinkDashboard({
   currentDashboard,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';

@@ -8,10 +8,10 @@
 
 import {
   EuiResizableContainer,
+  mathWithUnits,
+  useEuiTheme,
   useGeneratedHtmlId,
   useResizeObserver,
-  useEuiTheme,
-  mathWithUnits,
 } from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
@@ -66,9 +66,9 @@ export const PanelsResizable = ({
   const buttonBorderCss = css`
     position: relative;
     inset-${direction === 'horizontal' ? 'inline-start' : 'block-end'}: -${mathWithUnits(
-    euiTheme.border.width.thin,
-    (x) => x / 2
-  )};
+      euiTheme.border.width.thin,
+      (x) => x / 2
+    )};
     `;
   const defaultButtonCss = css`
     z-index: 3;

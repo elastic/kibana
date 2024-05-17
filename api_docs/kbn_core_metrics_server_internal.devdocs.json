@@ -38,9 +38,7 @@
             "tags": [],
             "label": "http",
             "description": [],
-            "signature": [
-              "InternalHttpServiceSetup"
-            ],
+            "signature": ["InternalHttpServiceSetup"],
             "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -52,9 +50,7 @@
             "tags": [],
             "label": "elasticsearchService",
             "description": [],
-            "signature": [
-              "InternalElasticsearchServiceSetup"
-            ],
+            "signature": ["InternalElasticsearchServiceSetup"],
             "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -84,9 +80,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": [
-              "\"ops\""
-            ],
+            "signature": ["\"ops\""],
             "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
             "deprecated": false,
             "trackAdoption": false

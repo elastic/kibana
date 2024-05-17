@@ -1,3 +1,12 @@
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  IndexPatternFieldEditorSetup,
+  IndexPatternFieldEditorStart,
+} from '@kbn/data-view-field-editor-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,17 +16,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import {
-  IndexPatternFieldEditorStart,
-  IndexPatternFieldEditorSetup,
-} from '@kbn/data-view-field-editor-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 import { App } from './app';
+import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 import { registerExampleFormatEditor } from './examples/3_creating_custom_format_editor';
 import img from './formats.png';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import agent from 'elastic-apm-node';
 import asyncHooks from 'async_hooks';
+import agent from 'elastic-apm-node';
 
 export interface SpanOptions {
   name: string;

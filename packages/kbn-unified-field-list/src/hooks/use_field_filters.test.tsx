@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { coreMock } from '@kbn/core/public/mocks';
-import { useFieldFilters, type FieldFiltersParams } from './use_field_filters';
+import { type FieldFiltersParams, useFieldFilters } from './use_field_filters';
 
 describe('UnifiedFieldList useFieldFilters()', () => {
   let mockedServices: FieldFiltersParams<DataViewField>['services'];

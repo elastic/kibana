@@ -7,12 +7,12 @@
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
+  getIndicesList,
+  getInlineEditorText,
+  getRemoteIndicesList,
+  getWrappedInPipesCode,
   parseErrors,
   parseWarning,
-  getInlineEditorText,
-  getWrappedInPipesCode,
-  getIndicesList,
-  getRemoteIndicesList,
 } from './helpers';
 
 describe('helpers', function () {

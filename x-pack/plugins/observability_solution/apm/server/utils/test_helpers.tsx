@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { APMConfig } from '..';
 import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { APMInternalESClient } from '../lib/helpers/create_es_client/create_internal_es_client';

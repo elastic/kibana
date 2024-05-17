@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';

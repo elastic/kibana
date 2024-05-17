@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Interpolation, Theme } from '@emotion/react';
-import { textWithEditContainerCss, editIconCss } from './text_with_edit.styles';
+import React, { FC } from 'react';
+import { editIconCss, textWithEditContainerCss } from './text_with_edit.styles';
 interface TextWithEditProps {
   isReadonly: boolean;
   dataTestSubj?: string;

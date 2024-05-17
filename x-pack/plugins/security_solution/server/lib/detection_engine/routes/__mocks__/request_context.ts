@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -21,23 +21,23 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
-import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
+import { siemMock } from '../../../../mocks';
+import { internalFrameworkRequest } from '../../../framework';
 import { detectionEngineHealthClientMock, ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
-import { internalFrameworkRequest } from '../../../framework';
 
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
 import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
-import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();

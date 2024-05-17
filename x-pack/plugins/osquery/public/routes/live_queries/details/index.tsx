@@ -10,10 +10,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { useRouterNavigate } from '../../../common/lib/kibana';
+import { WithHeaderLayout } from '../../../components/layouts';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 
 const tableWrapperCss = {

@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EuiCallOut,
+  EuiCheckboxGroup,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
   EuiPage,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
-  EuiFieldText,
-  EuiCheckboxGroup,
-  EuiFormRow,
   EuiSwitch,
-  EuiForm,
-  EuiCallOut,
 } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import type { StartDependencies } from './plugin';
+import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
 import { CodeSnippet } from './code_snippet';
+import type { StartDependencies } from './plugin';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   const [currentErrors, setErrors] = useState<string[]>([]);

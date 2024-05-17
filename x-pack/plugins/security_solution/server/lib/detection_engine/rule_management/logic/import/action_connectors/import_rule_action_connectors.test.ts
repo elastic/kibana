@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { coreMock } from '@kbn/core/server/mocks';
 import {
   getImportRulesSchemaMock,
   webHookConnector,
 } from '../../../../../../../common/api/detection_engine/rule_management/import_rules/rule_to_import.mock';
 import { importRuleActionConnectors } from './import_rule_action_connectors';
-import { coreMock } from '@kbn/core/server/mocks';
 
 const rules = [
   getImportRulesSchemaMock({

@@ -1,3 +1,11 @@
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import {
+  DeploymentDetailsKibanaProvider,
+  DeploymentDetailsModal,
+} from '@kbn/cloud/deployment_details';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { CoreStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +13,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  DeploymentDetailsKibanaProvider,
-  DeploymentDetailsModal,
-} from '@kbn/cloud/deployment_details';
 
 interface Props {
   closeModal: () => void;

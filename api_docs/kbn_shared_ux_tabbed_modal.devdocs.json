@@ -93,9 +93,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -107,9 +105,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -138,11 +134,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "{ state: S; dispatch: ",
-                  "IDispatchFunction",
-                  "; }"
-                ],
+                "signature": ["{ state: S; dispatch: ", "IDispatchFunction", "; }"],
                 "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -156,9 +148,7 @@
             "tags": [],
             "label": "modalActionBtn",
             "description": [],
-            "signature": [
-              "IModalTabActionBtn<S> | undefined"
-            ],
+            "signature": ["IModalTabActionBtn<S> | undefined"],
             "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,
             "trackAdoption": false

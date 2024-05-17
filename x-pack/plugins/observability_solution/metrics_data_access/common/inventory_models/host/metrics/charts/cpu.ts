@@ -7,12 +7,12 @@
 
 import {
   CPU_USAGE_LABEL,
-  LOAD_LABEL,
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
+  LOAD_LABEL,
 } from '../../../shared/charts/constants';
 import { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';

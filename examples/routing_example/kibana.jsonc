@@ -7,8 +7,6 @@
     "id": "routingExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "developerExamples"
-    ]
+    "requiredPlugins": ["developerExamples"]
   }
 }

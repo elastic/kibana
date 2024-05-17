@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { StartServices } from '../../types';
 import { enhanceActionWithTelemetry } from './telemetry';
-import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
 
 const actionId = 'test_action_id';
 const displayName = 'test-actions';

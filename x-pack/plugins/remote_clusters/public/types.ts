@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { I18nStart } from '@kbn/core/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { I18nStart } from '@kbn/core/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export interface Dependencies {
   management: ManagementSetup;

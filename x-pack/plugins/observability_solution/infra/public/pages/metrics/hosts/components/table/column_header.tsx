@@ -1,3 +1,5 @@
+import { EuiFlexGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { TooltipContent } from '../../../../../components/lens/metric_explanation/tooltip_content';
 import { Popover } from '../common/popover';
 

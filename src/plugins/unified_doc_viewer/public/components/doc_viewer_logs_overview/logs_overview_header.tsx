@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
+  EuiAccordion,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiAccordion,
-  useGeneratedHtmlId,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   LogDocumentOverview,
@@ -22,9 +21,10 @@ import {
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { Timestamp } from './sub_components/timestamp';
+import React from 'react';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
+import { Timestamp } from './sub_components/timestamp';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',

@@ -16,8 +16,8 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionMetrics } from './execution_metrics.gen';
+import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 
 export type RuleExecutionSummary = z.infer<typeof RuleExecutionSummary>;
 export const RuleExecutionSummary = z.object({

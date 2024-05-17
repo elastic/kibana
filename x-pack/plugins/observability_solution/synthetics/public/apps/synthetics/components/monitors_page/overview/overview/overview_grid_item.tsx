@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { MetricItem } from './metric_item';
-import { useLast50DurationChart, useStatusByLocationOverview } from '../../../../hooks';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { useLast50DurationChart, useStatusByLocationOverview } from '../../../../hooks';
+import { MetricItem } from './metric_item';
 
 export interface FlyoutParamProps {
   id: string;

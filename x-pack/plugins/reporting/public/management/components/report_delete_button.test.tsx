@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import * as Rx from 'rxjs';
 import {
-  fireEvent,
-  render,
   findByTestId as findItByTestId,
   findByText as findItByText,
+  fireEvent,
+  render,
 } from '@testing-library/react';
+import React from 'react';
+import * as Rx from 'rxjs';
 
-import { mockJobs } from '../../../common/test';
 import type { Job } from '@kbn/reporting-public/job';
+import { mockJobs } from '../../../common/test';
 import { ReportDeleteButton } from './report_delete_button';
 
 describe('ReportDeleteButton', () => {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
 import {
   SavedObject,
   SavedObjectConfig,
@@ -13,9 +14,8 @@ import {
   SavedObjectSaveOpts,
   StartServices,
 } from '../../types';
-import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
-import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { createSource } from './create_source';
 
 /**
  * @param error {Error} the error

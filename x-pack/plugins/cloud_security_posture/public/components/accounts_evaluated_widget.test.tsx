@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { AccountsEvaluatedWidget } from './accounts_evaluated_widget';
 import { BenchmarkData } from '../../common/types_old';
 import { TestProvider } from '../test/test_provider';
+import { AccountsEvaluatedWidget } from './accounts_evaluated_widget';
 
 const mockNavToFindings = jest.fn();
 jest.mock('../common/hooks/use_navigate_findings', () => ({

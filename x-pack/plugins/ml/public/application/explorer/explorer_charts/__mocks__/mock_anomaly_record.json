@@ -12,22 +12,14 @@
   "partition_field_value": "JAL",
   "function": "mean",
   "function_description": "mean",
-  "typical": [
-    499.9850000350266
-  ],
-  "actual": [
-    511.4997161865235
-  ],
+  "typical": [499.9850000350266],
+  "actual": [511.4997161865235],
   "field_name": "responsetime",
   "influencers": [
     {
       "influencer_field_name": "airline",
-      "influencer_field_values": [
-        "JAL"
-      ]
+      "influencer_field_values": ["JAL"]
     }
   ],
-  "airline": [
-    "JAL"
-  ]
+  "airline": ["JAL"]
 }

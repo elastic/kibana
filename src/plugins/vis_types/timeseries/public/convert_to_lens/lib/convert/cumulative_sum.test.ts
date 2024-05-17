@@ -54,7 +54,7 @@ describe('convertToCumulativeSumColumns', () => {
     [
       string,
       [common: CommonColumnsConverterArgs, reducedTimeRange?: string],
-      Partial<FormulaColumn> | Array<Partial<Column>> | null
+      Partial<FormulaColumn> | Array<Partial<Column>> | null,
     ]
   >([
     ['null if metric contains empty field param', [{ series, metrics: [metric], dataView }], null],

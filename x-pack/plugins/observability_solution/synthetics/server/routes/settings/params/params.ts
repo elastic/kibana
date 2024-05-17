@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
+import { syntheticsParamType } from '../../../../common/types/saved_objects';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 
 const RequestParamsSchema = schema.object({
   id: schema.maybe(schema.string()),

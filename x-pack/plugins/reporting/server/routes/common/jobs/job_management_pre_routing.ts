@@ -8,8 +8,8 @@
 import Boom from '@hapi/boom';
 
 import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
-import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 import { i18n } from '@kbn/i18n';
+import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 import { Counters } from '..';
 import { ReportingCore } from '../../..';
 import { ReportingUser } from '../../../types';

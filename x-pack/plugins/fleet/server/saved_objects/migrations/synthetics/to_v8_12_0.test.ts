@@ -11,8 +11,8 @@ import type { PackagePolicy } from '../../../../common';
 
 import { getBrowserPolicy } from './fixtures/8.7.0';
 
-import { migrateSyntheticsPackagePolicyToV8120 as migration } from './to_v8_12_0';
 import { migrateSyntheticsPackagePolicyToV8100 as migration10 } from './to_v8_10_0';
+import { migrateSyntheticsPackagePolicyToV8120 as migration } from './to_v8_12_0';
 
 describe('8.12.0 Synthetics Package Policy migration', () => {
   describe('processors migration', () => {

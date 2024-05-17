@@ -11,13 +11,13 @@ import { Collector } from './collector';
 import { CollectorSet, CollectorSetConfig } from './collector_set';
 import { UsageCollector } from './usage_collector';
 
+import type { ExecutionContextSetup, Logger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
+  executionContextServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-  executionContextServiceMock,
 } from '@kbn/core/server/mocks';
-import type { ExecutionContextSetup, Logger } from '@kbn/core/server';
 
 describe('CollectorSet', () => {
   let logger: jest.Mocked<Logger>;

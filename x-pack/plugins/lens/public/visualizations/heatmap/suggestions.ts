@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { partition } from 'lodash';
 import type { Visualization } from '../../types';
-import type { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
+import type { HeatmapVisualizationState } from './types';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,

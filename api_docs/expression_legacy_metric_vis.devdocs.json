@@ -121,10 +121,7 @@
             "tags": [],
             "label": "autoScaleMetricAlignment",
             "description": [],
-            "signature": [
-              "MetricAlignment",
-              " | undefined"
-            ],
+            "signature": ["MetricAlignment", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -147,9 +144,7 @@
             "tags": [],
             "label": "colorMode",
             "description": [],
-            "signature": [
-              "\"Background\" | \"Labels\" | \"None\""
-            ],
+            "signature": ["\"Background\" | \"Labels\" | \"None\""],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -241,9 +236,7 @@
             "tags": [],
             "label": "labelPosition",
             "description": [],
-            "signature": [
-              "\"top\" | \"bottom\""
-            ],
+            "signature": ["\"top\" | \"bottom\""],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -310,9 +303,7 @@
             "tags": [],
             "label": "autoScale",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -360,9 +351,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -374,9 +363,7 @@
             "tags": [],
             "label": "bgColor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -435,10 +422,7 @@
             "tags": [],
             "label": "autoScaleMetricAlignment",
             "description": [],
-            "signature": [
-              "MetricAlignment",
-              " | undefined"
-            ],
+            "signature": ["MetricAlignment", " | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -461,9 +445,7 @@
             "tags": [],
             "label": "percentageFormatPattern",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -475,9 +457,7 @@
             "tags": [],
             "label": "metricColorMode",
             "description": [],
-            "signature": [
-              "\"Background\" | \"Labels\" | \"None\""
-            ],
+            "signature": ["\"Background\" | \"Labels\" | \"None\""],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -581,9 +561,7 @@
             "tags": [],
             "label": "autoScale",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -609,9 +587,7 @@
             "tags": [],
             "label": "visType",
             "description": [],
-            "signature": [
-              "\"metric\""
-            ],
+            "signature": ["\"metric\""],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -760,9 +736,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"metric\""
-            ],
+            "signature": ["\"metric\""],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -780,9 +754,7 @@
         "tags": [],
         "label": "EXPRESSION_METRIC_NAME",
         "description": [],
-        "signature": [
-          "\"legacyMetricVis\""
-        ],
+        "signature": ["\"legacyMetricVis\""],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -886,9 +858,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"expressionLegacyMetricVis\""
-        ],
+        "signature": ["\"expressionLegacyMetricVis\""],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -901,9 +871,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"expressionLegacyMetricVis\""
-        ],
+        "signature": ["\"expressionLegacyMetricVis\""],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

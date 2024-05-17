@@ -11,21 +11,21 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
-  euiScrollBarStyles,
   EuiSpacer,
+  euiScrollBarStyles,
   useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
+  type ChatActionClickPayload,
   ChatActionClickType,
   ChatState,
+  type Feedback,
   MessageRole,
   ObservabilityAIAssistantTelemetryEventType,
   VisualizeESQLUserIntention,
-  type ChatActionClickPayload,
-  type Feedback,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';

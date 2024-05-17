@@ -7,9 +7,9 @@
 
 import React, { RefObject } from 'react';
 
+import { PanelId } from '../exploratory_view';
 import { SeriesEditor } from '../series_editor/series_editor';
 import { AddSeriesButton } from './add_series_button';
-import { PanelId } from '../exploratory_view';
 
 export function SeriesViews({
   seriesBuilderRef,

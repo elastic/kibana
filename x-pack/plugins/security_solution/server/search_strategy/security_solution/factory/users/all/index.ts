@@ -7,27 +7,27 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { SecuritySolutionFactory } from '../../types';
-import { buildUsersQuery } from './query.all_users.dsl';
+import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
+import {
+  RiskQueries,
+  RiskScoreEntity,
+  buildUserNamesFilter,
+  getUserRiskIndex,
+} from '../../../../../../common/search_strategy';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
   User,
   UsersStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/all';
 import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
-import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
-import {
-  buildUserNamesFilter,
-  getUserRiskIndex,
-  RiskScoreEntity,
-  RiskQueries,
-} from '../../../../../../common/search_strategy';
+import type { SecuritySolutionFactory } from '../../types';
+import { buildUsersQuery } from './query.all_users.dsl';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
   buildDsl: (options) => {

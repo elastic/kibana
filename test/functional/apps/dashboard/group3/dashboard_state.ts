@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import chroma from 'chroma-js';
-import rison from '@kbn/rison';
-import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/public/dashboard_constants';
 import type { SharedDashboardState } from '@kbn/dashboard-plugin/common';
-import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
+import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/public/dashboard_constants';
+import expect from '@kbn/expect';
+import rison from '@kbn/rison';
+import chroma from 'chroma-js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AREA_CHART_VIS_NAME, PIE_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -337,9 +337,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#FFFFFF'
-            );
+            const colorExists =
+              await PageObjects.visChart.doesSelectedLegendColorExistForPie('#FFFFFF');
             expect(colorExists).to.be(true);
           });
         });
@@ -379,9 +378,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#57c17b'
-            );
+            const colorExists =
+              await PageObjects.visChart.doesSelectedLegendColorExistForPie('#57c17b');
             expect(colorExists).to.be(true);
           });
         });

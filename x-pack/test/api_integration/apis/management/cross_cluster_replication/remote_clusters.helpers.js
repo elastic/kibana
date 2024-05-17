@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { REMOTE_CLUSTER_NAME, REMOTE_CLUSTERS_API_BASE_PATH } from './constants';
+import { REMOTE_CLUSTERS_API_BASE_PATH, REMOTE_CLUSTER_NAME } from './constants';
 
 /**
  * Helpers for the CCR application to easily create and delete

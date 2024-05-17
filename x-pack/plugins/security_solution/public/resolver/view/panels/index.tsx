@@ -7,14 +7,14 @@
 
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
-import * as selectors from '../../store/selectors';
-import { NodeEventsInCategory } from './node_events_of_type';
-import { NodeEvents } from './node_events';
-import { NodeDetail } from './node_detail';
-import { NodeList } from './node_list';
-import { EventDetail } from './event_detail';
-import type { PanelViewAndParameters } from '../../types';
 import type { State } from '../../../common/store/types';
+import * as selectors from '../../store/selectors';
+import type { PanelViewAndParameters } from '../../types';
+import { EventDetail } from './event_detail';
+import { NodeDetail } from './node_detail';
+import { NodeEvents } from './node_events';
+import { NodeEventsInCategory } from './node_events_of_type';
+import { NodeList } from './node_list';
 /**
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */

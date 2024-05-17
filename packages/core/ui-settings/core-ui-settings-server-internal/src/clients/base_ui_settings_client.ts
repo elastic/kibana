@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
-import type { Logger } from '@kbn/logging';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { Logger } from '@kbn/logging';
+import { omit } from 'lodash';
 import { ValidationBadValueError, ValidationSettingNotFoundError } from '../ui_settings_errors';
 
 export interface BaseUiSettingsDefaultsClientOptions {

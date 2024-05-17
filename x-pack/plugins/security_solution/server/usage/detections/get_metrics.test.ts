@@ -13,28 +13,28 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
+import { getInitialDetectionMetrics } from './get_initial_usage';
+import { getDetectionsMetrics } from './get_metrics';
 import {
-  getMockMlJobSummaryResponse,
-  getMockMlForceStartDatafeedsResponse,
-  getMockMlStopDatafeedsResponse,
   getMockListModulesResponse,
+  getMockMlDatafeedStatsResponse,
+  getMockMlForceStartDatafeedsResponse,
   getMockMlJobDetailsResponse,
   getMockMlJobStatsResponse,
-  getMockMlDatafeedStatsResponse,
+  getMockMlJobSummaryResponse,
+  getMockMlStopDatafeedsResponse,
   getMockRuleSearchResponse,
 } from './ml_jobs/get_metrics.mocks';
+import { getInitialRulesUsage } from './rules/get_initial_usage';
 import {
-  getMockRuleAlertsResponse,
-  getMockAlertCaseCommentsResponse,
+  getAllEventLogTransform,
+  getElasticLogCustomRules,
   getEmptySavedObjectResponse,
   getEventLogAllRules,
   getEventLogElasticRules,
-  getElasticLogCustomRules,
-  getAllEventLogTransform,
+  getMockAlertCaseCommentsResponse,
+  getMockRuleAlertsResponse,
 } from './rules/get_metrics.mocks';
-import { getInitialDetectionMetrics } from './get_initial_usage';
-import { getDetectionsMetrics } from './get_metrics';
-import { getInitialRulesUsage } from './rules/get_initial_usage';
 
 describe('Detections Usage and Metrics', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

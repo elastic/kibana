@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState, verifyApiAccess } from '../../lib';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { BASE_ACTION_API_PATH } from '../../../common';
-import { ActionsRequestHandlerContext } from '../../types';
+import { ILicenseState, verifyApiAccess } from '../../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { ActionsRequestHandlerContext } from '../../types';
 
 const paramSchema = schema.object({
   id: schema.string(),

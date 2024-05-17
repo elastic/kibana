@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { EuiFlexItem, EuiCard, EuiButton, EuiLink, EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiConfirmModal, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
-import { i18n } from '@kbn/i18n';
 
 export class RevertToBasic extends React.PureComponent {
   cancel = () => {

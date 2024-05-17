@@ -48,62 +48,61 @@ import { requiredOptional } from '@kbn/zod-helpers';
 
 import { createHash } from 'crypto';
 
+import type {
+  AncestorLatest,
+  BaseFieldsLatest,
+} from '../../../../../../common/api/detection_engine/model/alerts';
+import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import {
+  ALERT_ANCESTORS,
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_DEPTH,
+  ALERT_HOST_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_ACTIONS,
+  ALERT_RULE_EXCEPTIONS_LIST,
+  ALERT_RULE_FALSE_POSITIVES,
+  ALERT_RULE_IMMUTABLE,
+  ALERT_RULE_INDICES,
+  ALERT_RULE_MAX_SIGNALS,
+  ALERT_RULE_META,
+  ALERT_RULE_RISK_SCORE_MAPPING,
+  ALERT_RULE_SEVERITY_MAPPING,
+  ALERT_RULE_THREAT,
+  ALERT_RULE_THROTTLE,
+  ALERT_RULE_TIMELINE_ID,
+  ALERT_RULE_TIMELINE_TITLE,
+  ALERT_RULE_TIMESTAMP_OVERRIDE,
+  ALERT_THRESHOLD_RESULT,
+  ALERT_USER_CRITICALITY,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+} from '../../../../../../common/field_maps/field_names';
 import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
-import type { BaseSignalHit, SimpleHit } from '../../types';
+import type { SearchTypes } from '../../../../telemetry/types';
+import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { ThresholdResult } from '../../threshold/types';
+import type { BaseSignalHit, SimpleHit } from '../../types';
 import {
   getField,
   getValidDateFromDoc,
   isWrappedDetectionAlert,
   isWrappedSignalHit,
 } from '../../utils/utils';
-import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
-import type { SearchTypes } from '../../../../telemetry/types';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
-  ALERT_THRESHOLD_RESULT,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_RULE_ACTIONS,
-  ALERT_RULE_INDICES,
-  ALERT_RULE_THROTTLE,
-  ALERT_RULE_TIMELINE_ID,
-  ALERT_RULE_TIMELINE_TITLE,
-  ALERT_RULE_META,
-  ALERT_RULE_TIMESTAMP_OVERRIDE,
-  ALERT_RULE_FALSE_POSITIVES,
-  ALERT_RULE_MAX_SIGNALS,
-  ALERT_RULE_RISK_SCORE_MAPPING,
-  ALERT_RULE_SEVERITY_MAPPING,
-  ALERT_RULE_THREAT,
-  ALERT_RULE_EXCEPTIONS_LIST,
-  ALERT_RULE_IMMUTABLE,
-  LEGACY_ALERT_HOST_CRITICALITY,
-  LEGACY_ALERT_USER_CRITICALITY,
-  ALERT_HOST_CRITICALITY,
-  ALERT_USER_CRITICALITY,
-  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
-  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
-  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
-  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
-} from '../../../../../../common/field_maps/field_names';
-import type { CompleteRule, RuleParams } from '../../../rule_schema';
-import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import type {
-  AncestorLatest,
-  BaseFieldsLatest,
-} from '../../../../../../common/api/detection_engine/model/alerts';
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
     .update(
-      alert[ALERT_ANCESTORS].reduce(
-        (acc, ancestor) => acc.concat(ancestor.id, ancestor.index),
-        ''
-      ).concat(alert[ALERT_RULE_UUID])
+      alert[ALERT_ANCESTORS]
+        .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
+        .concat(alert[ALERT_RULE_UUID])
     )
     .digest('hex');
 };

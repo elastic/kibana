@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { CreateCaseFlyoutProps } from '../../components/create/flyout';
+import React, { lazy, Suspense } from 'react';
 import type { CasesContextProps } from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';
+import type { CreateCaseFlyoutProps } from '../../components/create/flyout';
 
 type GetCreateCaseFlyoutPropsInternal = CreateCaseFlyoutProps & CasesContextProps;
 export type GetCreateCaseFlyoutProps = Omit<

@@ -9,9 +9,9 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { TestProviders } from '../../../../common/mock';
 import { FlowTargetSelectConnectedComponent } from '.';
 import { FlowTarget } from '../../../../../common/search_strategy';
+import { TestProviders } from '../../../../common/mock';
 
 describe('Flow Target Select Connected', () => {
   test('renders correctly against snapshot flowTarget source', () => {

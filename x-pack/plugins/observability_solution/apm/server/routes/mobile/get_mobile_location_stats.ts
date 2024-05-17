@@ -6,12 +6,12 @@
  */
 
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../common/es_fields/apm';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getSessionsByLocation } from './get_mobile_sessions_by_location';
-import { getHttpRequestsByLocation } from './get_mobile_http_requests_by_location';
-import { getCrashesByLocation } from './get_mobile_crashes_by_location';
-import { getLaunchesByLocation } from './get_mobile_launches_by_location';
 import { Maybe } from '../../../typings/common';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getCrashesByLocation } from './get_mobile_crashes_by_location';
+import { getHttpRequestsByLocation } from './get_mobile_http_requests_by_location';
+import { getLaunchesByLocation } from './get_mobile_launches_by_location';
+import { getSessionsByLocation } from './get_mobile_sessions_by_location';
 
 export type Timeseries = Array<{ x: number; y: number }>;
 

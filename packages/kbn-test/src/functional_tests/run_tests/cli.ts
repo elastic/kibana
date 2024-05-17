@@ -9,8 +9,8 @@
 import { run } from '@kbn/dev-cli-runner';
 
 import { initLogsDir } from '../lib/logs_dir';
+import { FLAG_OPTIONS, parseFlags } from './flags';
 import { runTests } from './run_tests';
-import { parseFlags, FLAG_OPTIONS } from './flags';
 
 export function runTestsCli() {
   run(

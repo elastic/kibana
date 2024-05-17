@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { SnapshotComponent } from './snapshot';
+import React from 'react';
 import { Snapshot } from '../../../../../common/runtime_types/snapshot';
+import { SnapshotComponent } from './snapshot';
 import * as hook from './use_snap_shot';
 
 describe('Snapshot component', () => {

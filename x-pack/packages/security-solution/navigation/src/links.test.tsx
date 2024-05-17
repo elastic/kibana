@@ -1,3 +1,5 @@
+import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +7,17 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { render } from '@testing-library/react';
-import {
-  useGetLinkUrl,
-  useGetLinkProps,
-  withLink,
-  isSecurityId,
-  getAppIdsFromId,
-  formatPath,
-  isModified,
-  concatPaths,
-} from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
+import {
+  concatPaths,
+  formatPath,
+  getAppIdsFromId,
+  isModified,
+  isSecurityId,
+  useGetLinkProps,
+  useGetLinkUrl,
+  withLink,
+} from './links';
 
 jest.mock('./navigation');
 

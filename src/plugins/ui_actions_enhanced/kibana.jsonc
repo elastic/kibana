@@ -7,20 +7,9 @@
     "id": "uiActionsEnhanced",
     "server": true,
     "browser": true,
-    "configPath": [
-      "src",
-      "ui_actions_enhanced"
-    ],
-    "requiredPlugins": [
-      "embeddable",
-      "uiActions"
-    ],
-    "optionalPlugins": [
-      "licensing"
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
-    ]
+    "configPath": ["src", "ui_actions_enhanced"],
+    "requiredPlugins": ["embeddable", "uiActions"],
+    "optionalPlugins": ["licensing"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact"]
   }
 }

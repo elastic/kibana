@@ -8,7 +8,7 @@
 import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
 
-import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
+import { TIME_FORMAT, validateTimeRange } from '@kbn/ml-date-utils';
 
 import { parseInterval } from '../../../common/util/parse_interval';
 

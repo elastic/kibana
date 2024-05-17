@@ -10,18 +10,18 @@ import Fs from 'fs';
 import Path from 'path';
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
-import type { LoadActionPerfOptions } from './lib';
+import { ToolingLog } from '@kbn/tooling-log';
 import {
-  saveAction,
-  loadAction,
-  unloadAction,
-  rebuildAllAction,
-  emptyKibanaIndexAction,
   editAction,
+  emptyKibanaIndexAction,
+  loadAction,
+  rebuildAllAction,
+  saveAction,
+  unloadAction,
 } from './actions';
+import type { LoadActionPerfOptions } from './lib';
 interface Options {
   client: Client;
   baseDir?: string;

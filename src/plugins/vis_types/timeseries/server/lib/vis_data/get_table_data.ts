@@ -9,22 +9,22 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { buildTableRequest } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
+import { buildTableRequest } from './table/build_request_body';
 import { processBucket } from './table/process_bucket';
 
-import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { getFieldsForTerms, getMultiFieldLabel } from '../../../common/fields_utils';
-import { isAggSupported } from './helpers/check_aggs';
 import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
 import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
+import { getFieldsForTerms, getMultiFieldLabel } from '../../../common/fields_utils';
+import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
+import { isAggSupported } from './helpers/check_aggs';
 
+import type { DataResponseMeta, Panel } from '../../../common/types';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { Panel, DataResponseMeta } from '../../../common/types';
 import type { EsSearchRequest } from '../search_strategies';
 
 export async function getTableData(

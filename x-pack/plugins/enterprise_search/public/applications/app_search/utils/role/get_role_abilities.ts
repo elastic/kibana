@@ -7,7 +7,7 @@
 
 import { Account } from '../../types';
 
-import { RoleTypes, AbilityTypes, Role } from './types';
+import { AbilityTypes, Role, RoleTypes } from './types';
 
 /**
  * Transforms the `role` data we receive from the Enterprise Search

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import type { DocViewRenderProps } from '../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 import { DocViewsRegistry } from '../..';
+import type { DocViewRenderProps } from '../../types';
+import { DocViewer } from './doc_viewer';
 
 describe('<DocViewer />', () => {
   test('Render <DocViewer/> with 3 different tabs', () => {

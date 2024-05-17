@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useEffect, useRef, useState } from 'react';
 
-import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
+import * as i18n from './translations';
 
 export interface EditExceptionItemHookProps {
   itemsToUpdate: ExceptionListItemSchema[];

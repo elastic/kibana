@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { CustomRequestHandlerContext, IClusterClient, IRouter } from '@kbn/core/server';
 import { Observable } from 'rxjs';
-import type { IClusterClient, IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
 import { ILicense } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 

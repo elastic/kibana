@@ -9,8 +9,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 
-import { FileDraggable } from './file_draggable';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { FileDraggable } from './file_draggable';
 
 jest.mock('../../../../../common/lib/kibana');
 

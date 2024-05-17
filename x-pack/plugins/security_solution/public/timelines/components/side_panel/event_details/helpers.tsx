@@ -7,9 +7,9 @@
 
 import { some } from 'lodash/fp';
 import { useMemo } from 'react';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
-import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 export interface GetBasicDataFromDetailsData {
   agentId?: string;

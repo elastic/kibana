@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { globalSwitchToModelVersionAt } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { applyTypeDefaults } from './apply_type_defaults';
 
 const createType = (parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({

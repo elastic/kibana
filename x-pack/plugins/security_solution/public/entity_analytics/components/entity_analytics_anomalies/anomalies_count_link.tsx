@@ -1,3 +1,4 @@
+import React, { useCallback } from 'react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import { useDispatch } from 'react-redux';
-import React, { useCallback } from 'react';
-import { AnomalyEntity } from '../../../common/components/ml/anomaly/use_anomalies_search';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
-import { usersActions } from '../../../explore/users/store';
+import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import { AnomalyEntity } from '../../../common/components/ml/anomaly/use_anomalies_search';
 import { hostsActions } from '../../../explore/hosts/store';
 import { HostsType } from '../../../explore/hosts/store/model';
+import { usersActions } from '../../../explore/users/store';
 import { UsersType } from '../../../explore/users/store/model';
 
 import { useKibana } from '../../../common/lib/kibana';

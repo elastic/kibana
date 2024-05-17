@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
+import React from 'react';
 import { colors } from './common_styles';
 
 export const IconChartWaffle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, map, Observable, ReplaySubject, scan, shareReplay, switchMap } from 'rxjs';
+import { Observable, ReplaySubject, combineLatest, map, scan, shareReplay, switchMap } from 'rxjs';
 import type { NavigationSection } from '../page_template';
 
 export interface NavigationRegistry {

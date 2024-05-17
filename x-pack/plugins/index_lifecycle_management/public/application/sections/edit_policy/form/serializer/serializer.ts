@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { merge, cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 
 import { SerializedPolicy } from '../../../../../../common/types';
 
@@ -223,7 +223,8 @@ export const createSerializer =
           delete warmPhase.actions.shrink;
         } else if (_meta.warm.shrink.isUsingShardSize) {
           delete warmPhase.actions.shrink!.number_of_shards;
-          warmPhase.actions.shrink!.max_primary_shard_size = `${warmPhase.actions.shrink?.max_primary_shard_size}${_meta.warm?.shrink.maxPrimaryShardSizeUnits}`;
+          warmPhase.actions.shrink!.max_primary_shard_size =
+            `${warmPhase.actions.shrink?.max_primary_shard_size}${_meta.warm?.shrink.maxPrimaryShardSizeUnits}`;
         } else {
           delete warmPhase.actions.shrink!.max_primary_shard_size;
         }

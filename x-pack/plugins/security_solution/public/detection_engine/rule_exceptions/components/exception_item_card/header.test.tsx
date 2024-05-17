@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { mount } from 'enzyme';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import * as i18n from './translations';
-import { ExceptionItemCardHeader } from './header';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { ExceptionItemCardHeader } from './header';
+import * as i18n from './translations';
 
 const mockTheme = getMockTheme({
   eui: {

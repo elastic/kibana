@@ -15,8 +15,8 @@ import type {
   RenderContentPanelProps,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-import { useLicense } from '../../../hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useLicense } from '../../../hooks/use_license';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import * as i18n from './translations';

@@ -1,3 +1,6 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,17 +10,14 @@
 import type { FC } from 'react';
 import { useMemo } from 'react';
 import React, { useEffect, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
-import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
-import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
-import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
-import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
-import { ExamplesList } from '../../examples_list';
-import type { FieldVisConfig } from '../../stats_table/types';
-import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
+import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
+import { ExamplesList } from '../../examples_list';
+import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
+import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
+import type { FieldVisConfig } from '../../stats_table/types';
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;

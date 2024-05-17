@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import LaunchDarkly, {
   type LDClient,
   type LDFlagSet,
   type LDLogLevel,
   type LDSingleKindContext,
 } from 'launchdarkly-node-server-sdk';
-import type { Logger } from '@kbn/core/server';
 
 export interface LaunchDarklyClientConfig {
   sdk_key: string;
@@ -43,7 +43,10 @@ export class LaunchDarklyClient {
   private readonly launchDarklyClient: LDClient;
   private launchDarklyUser?: LDSingleKindContext;
 
-  constructor(ldConfig: LaunchDarklyClientConfig, private readonly logger: Logger) {
+  constructor(
+    ldConfig: LaunchDarklyClientConfig,
+    private readonly logger: Logger
+  ) {
     this.launchDarklyClient = LaunchDarkly.init(ldConfig.sdk_key, {
       application: { id: `kibana-server`, version: ldConfig.kibana_version },
       logger: LaunchDarkly.basicLogger({ level: ldConfig.client_log_level }),

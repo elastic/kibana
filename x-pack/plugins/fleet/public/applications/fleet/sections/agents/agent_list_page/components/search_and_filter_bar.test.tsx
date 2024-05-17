@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import type { Agent } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../services';
+import type { Agent } from '../../../../types';
 
 import { SearchAndFilterBar } from './search_and_filter_bar';
 

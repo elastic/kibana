@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from './use_breadcrumbs';
 
 const setBreadcrumbs = jest.fn();

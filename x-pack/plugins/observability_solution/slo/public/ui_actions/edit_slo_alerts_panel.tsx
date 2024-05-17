@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasType,
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  CanAccessViewMode,
-  HasType,
 } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { SLOAlertsEmbeddable } from '../embeddable/slo/alerts/slo_alerts_embeddable';
-import { SLO_ALERTS_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
+import type { SLOAlertsEmbeddable } from '../embeddable/slo/alerts/slo_alerts_embeddable';
 import { HasSloAlertsConfig } from '../embeddable/slo/alerts/types';
+import { SLO_ALERTS_EMBEDDABLE } from '../embeddable/slo/constants';
 
 export const EDIT_SLO_ALERTS_ACTION = 'editSloAlertsPanelAction';
 type EditSloAlertsPanelApi = CanAccessViewMode & HasType & HasSloAlertsConfig;

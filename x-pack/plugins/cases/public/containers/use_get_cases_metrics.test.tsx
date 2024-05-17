@@ -6,13 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { CaseMetricsFeature } from '../../common/types/api';
 import * as api from '../api';
+import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
 import { useGetCasesMetrics } from './use_get_cases_metrics';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useToasts } from '../common/lib/kibana';
-import { CaseMetricsFeature } from '../../common/types/api';
 
 jest.mock('../api');
 jest.mock('../common/lib/kibana');

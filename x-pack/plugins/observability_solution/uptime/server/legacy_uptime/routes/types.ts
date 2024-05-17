@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { Subject } from 'rxjs';
 import { ObjectType } from '@kbn/config-schema';
 import {
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
   RouteMethod,
   SavedObjectsClientContract,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
 } from '@kbn/core/server';
-import { UMServerLibs, UptimeEsClient } from '../lib/lib';
+import type { Subject } from 'rxjs';
 import type { UptimeRequestHandlerContext } from '../../types';
 import { UptimeServerSetup } from '../lib/adapters';
+import { UMServerLibs, UptimeEsClient } from '../lib/lib';
 
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,

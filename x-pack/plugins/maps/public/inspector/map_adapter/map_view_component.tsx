@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/public';
+import React, { Component } from 'react';
 import { MapDetails } from './map_details';
 import { Stats } from './types';
 

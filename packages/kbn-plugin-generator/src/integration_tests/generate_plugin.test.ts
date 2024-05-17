@@ -8,10 +8,10 @@
 
 import Path from 'path';
 
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
+import { REPO_ROOT } from '@kbn/repo-info';
 import del from 'del';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import globby from 'globby';
 
 const GENERATED_DIR = Path.resolve(REPO_ROOT, `plugins`);

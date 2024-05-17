@@ -8,9 +8,9 @@
 
 import React, { useState, useCallback } from 'react';
 
+import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 
 interface AddFilterProps {
   onAddFilter: (filter: string) => void;

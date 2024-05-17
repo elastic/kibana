@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
+import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -14,16 +14,16 @@ import {
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
+import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { DataProvider } from '@kbn/timelines-plugin/common';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
 import { Store } from 'redux';
-import { DataProvider } from '@kbn/timelines-plugin/common';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Policy } from './modules/block_list/hooks/use_policies';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {

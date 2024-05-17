@@ -10,11 +10,7 @@
         "tags": [],
         "label": "NoDataConfigPage",
         "description": [],
-        "signature": [
-          "(props: ",
-          "NoDataConfigPageProps",
-          ") => JSX.Element | null"
-        ],
+        "signature": ["(props: ", "NoDataConfigPageProps", ") => JSX.Element | null"],
         "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -26,9 +22,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "NoDataConfigPageProps"
-            ],
+            "signature": ["NoDataConfigPageProps"],
             "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -44,9 +38,7 @@
         "type": "Function",
         "tags": [],
         "label": "NoDataConfigPageKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
-        ],
+        "description": ["\nKibana-specific Provider that maps dependencies to services."],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
@@ -185,11 +177,7 @@
         "tags": [],
         "label": "NoDataConfigPageKibanaDependencies",
         "description": [],
-        "signature": [
-          "KibanaDependencies",
-          " & ",
-          "RedirectAppLinksKibanaDependencies"
-        ],
+        "signature": ["KibanaDependencies", " & ", "RedirectAppLinksKibanaDependencies"],
         "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -232,11 +220,7 @@
         "tags": [],
         "label": "NoDataConfigPageServices",
         "description": [],
-        "signature": [
-          "Services",
-          " & ",
-          "RedirectAppLinksServices"
-        ],
+        "signature": ["Services", " & ", "RedirectAppLinksServices"],
         "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,

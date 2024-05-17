@@ -10,24 +10,24 @@ jest.mock('./post_xmatters', () => ({
 }));
 import { postXmatters } from './post_xmatters';
 
-import { Logger } from '@kbn/core/server';
-import {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  getConnectorType,
-  XmattersConnectorType,
-} from '.';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { Services } from '@kbn/actions-plugin/server/types';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
   validateConfig,
   validateConnector,
   validateParams,
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { Services } from '@kbn/actions-plugin/server/types';
+import { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  XmattersConnectorType,
+  getConnectorType,
+} from '.';
 
 const postxMattersMock = postXmatters as jest.Mock;
 const services: Services = actionsMock.createServices();

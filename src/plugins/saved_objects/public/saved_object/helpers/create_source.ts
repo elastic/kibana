@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from '@kbn/core/public';
-import { SavedObject, SavedObjectKibanaServices, StartServices } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { OVERWRITE_REJECTED } from '../../constants';
+import { SavedObject, SavedObjectKibanaServices, StartServices } from '../../types';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 /**

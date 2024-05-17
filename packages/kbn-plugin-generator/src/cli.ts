@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 
-import execa from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import execa from 'execa';
 
-import { snakeCase } from './casing';
 import { askQuestions, getDefaultAnswers } from './ask_questions';
+import { snakeCase } from './casing';
 import { renderTemplates } from './render_template';
 
 export function runCli() {

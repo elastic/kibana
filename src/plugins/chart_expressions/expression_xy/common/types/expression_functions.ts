@@ -7,51 +7,51 @@
  */
 
 import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
+import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import type {
   Datatable,
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
+import type { $Values } from '@kbn/utility-types';
 import {
-  LegendSize,
   ExpressionValueVisDimension,
+  LegendSize,
   XYLegendValue,
 } from '@kbn/visualizations-plugin/common';
-import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
 import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
+  ANNOTATION_LAYER,
+  AXIS_EXTENT_CONFIG,
+  AvailableReferenceLineIcons,
   AxisExtentModes,
+  AxisModes,
+  DATA_DECORATION_CONFIG,
+  DATA_LAYER,
+  EXTENDED_ANNOTATION_LAYER,
+  EXTENDED_DATA_LAYER,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
+  EndValues,
   FillStyles,
   FittingFunctions,
   IconPositions,
+  LAYERED_XY_VIS,
+  LEGEND_CONFIG,
   LayerTypes,
   LineStyles,
+  REFERENCE_LINE,
+  REFERENCE_LINE_DECORATION_CONFIG,
+  REFERENCE_LINE_LAYER,
   SeriesTypes,
   ValueLabelModes,
   XScaleTypes,
   XYCurveTypes,
-  YScaleTypes,
-  AxisModes,
-  REFERENCE_LINE,
-  DATA_DECORATION_CONFIG,
-  REFERENCE_LINE_DECORATION_CONFIG,
-  LEGEND_CONFIG,
-  DATA_LAYER,
-  AXIS_EXTENT_CONFIG,
-  EXTENDED_DATA_LAYER,
-  REFERENCE_LINE_LAYER,
-  ANNOTATION_LAYER,
-  EndValues,
-  X_AXIS_CONFIG,
-  Y_AXIS_CONFIG,
-  AvailableReferenceLineIcons,
   XY_VIS,
-  LAYERED_XY_VIS,
-  EXTENDED_ANNOTATION_LAYER,
-  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
+  X_AXIS_CONFIG,
+  YScaleTypes,
+  Y_AXIS_CONFIG,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 

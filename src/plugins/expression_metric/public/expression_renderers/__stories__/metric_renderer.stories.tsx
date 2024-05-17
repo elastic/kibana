@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties } from 'react';
-import { storiesOf } from '@storybook/react';
 import { Style } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getMetricRenderer } from '../metric_renderer';
+import { storiesOf } from '@storybook/react';
+import React, { CSSProperties } from 'react';
 import { MetricRendererConfig } from '../../../common';
+import { getMetricRenderer } from '../metric_renderer';
 
 const labelFontSpec: CSSProperties = {
   fontFamily: "Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif",

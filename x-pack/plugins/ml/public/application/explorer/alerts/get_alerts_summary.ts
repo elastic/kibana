@@ -7,10 +7,10 @@
 
 import {
   ALERT_DURATION,
-  ALERT_RULE_NAME,
-  ALERT_STATUS,
   ALERT_END,
+  ALERT_RULE_NAME,
   ALERT_START,
+  ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import { groupBy } from 'lodash';

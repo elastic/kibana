@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import { get } from 'lodash';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
+import { get } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

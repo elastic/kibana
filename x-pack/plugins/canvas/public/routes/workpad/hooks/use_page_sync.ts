@@ -6,12 +6,12 @@
  */
 
 import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { WorkpadPageRouteParams } from '..';
-import { getWorkpad } from '../../../state/selectors/workpad';
 // @ts-expect-error
 import { setPage } from '../../../state/actions/pages';
+import { getWorkpad } from '../../../state/selectors/workpad';
 
 export const usePageSync = () => {
   const params = useParams<WorkpadPageRouteParams>();

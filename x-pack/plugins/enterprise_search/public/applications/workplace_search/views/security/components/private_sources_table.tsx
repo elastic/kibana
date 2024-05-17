@@ -11,34 +11,34 @@ import classNames from 'classnames';
 import { useValues } from 'kea';
 
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
   EuiSwitch,
-  EuiText,
-  EuiTitle,
   EuiTable,
   EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
-  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../../shared/licensing';
 import {
-  REMOTE_SOURCES_TOGGLE_TEXT,
-  REMOTE_SOURCES_TABLE_DESCRIPTION,
   REMOTE_SOURCES_EMPTY_TABLE_TITLE,
-  STANDARD_SOURCES_TOGGLE_TEXT,
-  STANDARD_SOURCES_TABLE_DESCRIPTION,
-  STANDARD_SOURCES_EMPTY_TABLE_TITLE,
+  REMOTE_SOURCES_TABLE_DESCRIPTION,
+  REMOTE_SOURCES_TOGGLE_TEXT,
   SOURCE,
+  STANDARD_SOURCES_EMPTY_TABLE_TITLE,
+  STANDARD_SOURCES_TABLE_DESCRIPTION,
+  STANDARD_SOURCES_TOGGLE_TEXT,
 } from '../../../constants';
-import { SecurityLogic, PrivateSourceSection } from '../security_logic';
+import { PrivateSourceSection, SecurityLogic } from '../security_logic';
 
 interface PrivateSourcesTableProps {
   sourceType: 'remote' | 'standard';

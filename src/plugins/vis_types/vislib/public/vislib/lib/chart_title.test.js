@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import d3 from 'd3';
-import _ from 'lodash';
 import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
 } from '@kbn/test-jest-helpers';
+import d3 from 'd3';
+import _ from 'lodash';
 
+import { getMockUiState } from '../../fixtures/mocks';
 import { ChartTitle } from './chart_title';
 import { VisConfig } from './vis_config';
-import { getMockUiState } from '../../fixtures/mocks';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let mockUiState;

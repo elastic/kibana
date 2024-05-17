@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { getPercentageColumnFormulaColumn } from './percentage_formula';
-import { FormulaColumn } from '../../types';
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { SchemaConfig } from '../../..';
+import { FormulaColumn } from '../../types';
+import { getPercentageColumnFormulaColumn } from './percentage_formula';
 
 const mockGetFormulaForAgg = jest.fn();
 const mockCreateFormulaColumn = jest.fn();
@@ -48,7 +48,7 @@ describe('getPercentageColumnFormulaColumn', () => {
       string,
       Parameters<typeof getPercentageColumnFormulaColumn>,
       () => void,
-      Partial<FormulaColumn> | null
+      Partial<FormulaColumn> | null,
     ]
   >([
     [

@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { getSecurityTelemetryStats, removeExtraFieldsFromTelemetryStats } from '../../../utils';
 import {
   createAlertsIndex,
-  deleteAllRules,
   deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import { getSecurityTelemetryStats, removeExtraFieldsFromTelemetryStats } from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

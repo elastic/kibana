@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import type { LayerType } from '../../../common/types';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import {
-  Visualization,
-  Datasource,
-  TableSuggestion,
-  DatasourceSuggestion,
-  DatasourceMap,
-  VisualizationMap,
-  VisualizeEditorContext,
-  Suggestion,
-  DatasourceLayers,
-  SuggestionRequest,
-} from '../../types';
-import type { LayerType } from '../../../common/types';
-import {
-  LensDispatch,
-  switchVisualization,
+  DataViewsState,
   DatasourceStates,
+  LensDispatch,
   VisualizationState,
   applyChanges,
-  DataViewsState,
+  switchVisualization,
 } from '../../state_management';
+import {
+  Datasource,
+  DatasourceLayers,
+  DatasourceMap,
+  DatasourceSuggestion,
+  Suggestion,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationMap,
+  VisualizeEditorContext,
+} from '../../types';
 
 /**
  * This function takes a list of available data tables and a list of visualization
@@ -71,18 +71,22 @@ export function getSuggestions({
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
   );
 
-  const layerTypesMap = datasources.reduce((memo, [datasourceId, datasource]) => {
-    const datasourceState = datasourceStates[datasourceId].state;
-    if (!activeVisualization || !datasourceState) {
+  const layerTypesMap = datasources.reduce(
+    (memo, [datasourceId, datasource]) => {
+      const datasourceState = datasourceStates[datasourceId].state;
+      if (!activeVisualization || !datasourceState) {
+        return memo;
+      }
+      const layers = datasource.getLayers(datasourceState);
+      for (const layerId of layers) {
+        const type =
+          activeVisualization.getLayerType(layerId, visualizationState) || LayerTypes.DATA;
+        memo[layerId] = type;
+      }
       return memo;
-    }
-    const layers = datasource.getLayers(datasourceState);
-    for (const layerId of layers) {
-      const type = activeVisualization.getLayerType(layerId, visualizationState) || LayerTypes.DATA;
-      memo[layerId] = type;
-    }
-    return memo;
-  }, {} as Record<string, LayerType>);
+    },
+    {} as Record<string, LayerType>
+  );
 
   const isLayerSupportedByVisualization = (layerId: string, supportedTypes: LayerType[]) =>
     supportedTypes.includes(layerTypesMap[layerId] ?? LayerTypes.DATA);

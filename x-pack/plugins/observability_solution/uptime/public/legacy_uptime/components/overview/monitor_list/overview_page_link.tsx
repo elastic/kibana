@@ -6,8 +6,8 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 import { useUrlParams } from '../../../hooks';
 

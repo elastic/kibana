@@ -7,14 +7,14 @@
  */
 
 import Url from 'url';
+import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { filter, take, map } from 'rxjs';
-import { ToolingLog } from '@kbn/tooling-log';
+import { filter, map, take } from 'rxjs';
 
 import { Lifecycle } from '../lifecycle';
-import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
+import { observeContainerRunning } from './container_running';
 import { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 const SECOND = 1000;

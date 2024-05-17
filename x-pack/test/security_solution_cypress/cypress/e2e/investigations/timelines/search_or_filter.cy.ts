@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ADD_FILTER, SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
+import { ADD_FILTER, SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
 
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -20,9 +21,8 @@ import {
   selectKqlSearchMode,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
-import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
+import { TIMELINES_URL, hostsUrl } from '../../../urls/navigation';
 
 describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () => {
   describe('timeline search or filter KQL bar', () => {

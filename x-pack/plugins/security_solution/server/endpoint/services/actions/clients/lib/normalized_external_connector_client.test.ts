@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { responseActionsClientMock } from '../mocks';
+import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { ResponseActionsConnectorNotConfiguredError } from '../errors';
+import { responseActionsClientMock } from '../mocks';
 import type { NormalizedExternalConnectorClientExecuteOptions } from './normalized_external_connector_client';
 import { NormalizedExternalConnectorClient } from './normalized_external_connector_client';
-import { ResponseActionsConnectorNotConfiguredError } from '../errors';
-import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 
 describe('`NormalizedExternalConnectorClient` class', () => {
   let logger: Logger;

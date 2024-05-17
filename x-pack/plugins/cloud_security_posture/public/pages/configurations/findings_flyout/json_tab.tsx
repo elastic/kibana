@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
+import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 const offsetTopHeight = 120;

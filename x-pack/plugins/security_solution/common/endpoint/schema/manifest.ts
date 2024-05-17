@@ -13,8 +13,8 @@ import {
   identifier,
   manifestSchemaVersion,
   relativeUrl,
-  sha256,
   semanticVersion,
+  sha256,
   size,
 } from './common';
 

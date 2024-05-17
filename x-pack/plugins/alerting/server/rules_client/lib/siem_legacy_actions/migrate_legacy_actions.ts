@@ -6,14 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObjectReference } from '@kbn/core/server';
 import type { RulesClientContext } from '../..';
-import { RawRuleAction, RawRule } from '../../../types';
+import { transformRawActionsToDomainActions } from '../../../application/rule/transforms/transform_raw_actions_to_domain_actions';
+import { RawRule, RawRuleAction } from '../../../types';
 import { validateActions } from '../validate_actions';
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
-import { transformRawActionsToDomainActions } from '../../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 
 type MigrateLegacyActions = (
   context: RulesClientContext,

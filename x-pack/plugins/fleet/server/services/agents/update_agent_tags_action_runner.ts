@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Agent } from '../../types';
 
@@ -19,9 +19,9 @@ import { FleetError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
+import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {

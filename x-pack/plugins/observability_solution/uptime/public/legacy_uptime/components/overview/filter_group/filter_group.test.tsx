@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import * as Hooks from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
 import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { FilterGroup } from './filter_group';
-import * as Hooks from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
 
 describe('FilterGroup', () => {
   it.each([

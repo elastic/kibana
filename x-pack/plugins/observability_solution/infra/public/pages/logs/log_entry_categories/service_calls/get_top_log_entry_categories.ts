@@ -10,9 +10,9 @@ import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
+  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
-  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
 } from '../../../../../common/http_api';
 import { CategoriesSort } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,15 +16,16 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
+import React, { memo, useCallback, useState } from 'react';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import type { PolicyFormComponentCommonProps } from '../types';
 import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
+import type { PolicyFormComponentCommonProps } from '../types';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;

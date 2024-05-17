@@ -6,13 +6,13 @@
  */
 
 import {
-  ShardFromEs,
-  Shard,
-  FollowerIndexFromEs,
   FollowerIndex,
-  FollowerIndexToEs,
   FollowerIndexAdvancedSettings,
   FollowerIndexAdvancedSettingsToEs,
+  FollowerIndexFromEs,
+  FollowerIndexToEs,
+  Shard,
+  ShardFromEs,
 } from '../types';
 /* eslint-disable @typescript-eslint/naming-convention */
 export const deserializeShard = ({

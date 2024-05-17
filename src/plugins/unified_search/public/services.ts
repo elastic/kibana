@@ -7,13 +7,13 @@
  */
 
 import {
-  ThemeServiceStart,
-  OverlayStart,
   AnalyticsServiceStart,
   I18nStart,
+  OverlayStart,
+  ThemeServiceStart,
 } from '@kbn/core/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');

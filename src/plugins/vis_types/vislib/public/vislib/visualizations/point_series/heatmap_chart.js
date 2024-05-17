@@ -11,10 +11,10 @@ import moment from 'moment';
 
 import { isColorDark } from '@elastic/eui';
 
-import { PointSeries } from './_point_series';
 import { getHeatmapColors } from '@kbn/charts-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
+import { PointSeries } from './_point_series';
 
 const defaults = {
   color: undefined, // todo

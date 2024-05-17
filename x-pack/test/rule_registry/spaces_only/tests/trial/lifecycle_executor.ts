@@ -13,32 +13,32 @@
 // I fixed this as a drive-by, but opened an issue to do something later,
 // if needed: https://github.com/elastic/kibana/issues/144557
 
-import { type Subject, ReplaySubject } from 'rxjs';
-import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
-import sinon from 'sinon';
-import expect from '@kbn/expect';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import {
-  AlertConsumers,
-  ALERT_REASON,
-  ALERT_UUID,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import {
-  createLifecycleExecutor,
-  WrappedLifecycleRuleState,
-} from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
-import { Dataset, IRuleDataClient, RuleDataService } from '@kbn/rule-registry-plugin/server';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
+import expect from '@kbn/expect';
 import {
-  MockRuleParams,
-  MockRuleState,
+  ALERT_REASON,
+  ALERT_UUID,
+  AlertConsumers,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { Dataset, IRuleDataClient, RuleDataService } from '@kbn/rule-registry-plugin/server';
+import {
+  WrappedLifecycleRuleState,
+  createLifecycleExecutor,
+} from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
+import { ReplaySubject, type Subject } from 'rxjs';
+import sinon from 'sinon';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { cleanupRegistryIndices, getMockAlertFactory } from '../../../common/lib/helpers';
+import {
   MockAlertContext,
   MockAlertState,
   MockAllowedActionGroups,
+  MockRuleParams,
+  MockRuleState,
 } from '../../../common/types';
-import { cleanupRegistryIndices, getMockAlertFactory } from '../../../common/lib/helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function createLifecycleExecutorApiTest({ getService }: FtrProviderContext) {

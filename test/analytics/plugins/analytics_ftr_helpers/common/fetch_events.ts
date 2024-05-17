@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import type { Event } from '@kbn/analytics-client';
+import { get } from 'lodash';
 import {
+  NEVER,
+  type Observable,
   filter,
   firstValueFrom,
   map,
-  NEVER,
-  type Observable,
   take,
   takeUntil,
   timer,
   toArray,
 } from 'rxjs';
-import { get } from 'lodash';
-import type { Event } from '@kbn/analytics-client';
 import type { GetEventsOptions } from './types';
 
 export async function fetchEvents(

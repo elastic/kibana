@@ -7,14 +7,14 @@
  */
 
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n-react';
-import type { Filter } from '@kbn/es-query';
-import React, { ReactNode, useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { injectI18n } from '@kbn/i18n-react';
+import React, { ReactNode, useRef } from 'react';
 import FilterItems, { type FilterItemsProps } from './filter_item/filter_items';
 
-import { filterBarStyles } from './filter_bar.styles';
 import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { filterBarStyles } from './filter_bar.styles';
 
 export interface Props {
   filters: Filter[];

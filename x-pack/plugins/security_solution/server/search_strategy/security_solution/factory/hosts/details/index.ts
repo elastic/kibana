@@ -7,24 +7,24 @@
 
 import { get } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
+  EndpointFields,
   HostAggEsData,
   HostDetailsStrategyResponse,
   HostsQueries,
-  EndpointFields,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
+import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
-import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem, getHostEndpoint } from './helpers';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
+import { buildHostDetailsQuery } from './query.host_details.dsl';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
   buildDsl: (options) => buildHostDetailsQuery(options),

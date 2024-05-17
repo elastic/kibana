@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Controller, Control } from 'react-hook-form';
+import { Control, Controller } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 
 import { EuiComboBox, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
@@ -15,8 +15,8 @@ import { ServiceLocation } from '../../../../../../common/runtime_types';
 import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { selectServiceLocationsState } from '../../../state';
 
-import { SimpleFormData } from '../simple_monitor_form';
 import { ConfigKey } from '../../../../../../common/constants/monitor_management';
+import { SimpleFormData } from '../simple_monitor_form';
 
 export const ServiceLocationsField = ({
   control,

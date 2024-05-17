@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { mount } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import type { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '..';
-import type { FormBasedLayer } from '../../../types';
 import { createMockedIndexPattern } from '../../../mocks';
+import type { FormBasedLayer } from '../../../types';
 import { FilterPopover } from './filter_popover';
 
 const uiSettingsMock = {} as IUiSettingsClient;

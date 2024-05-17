@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { toExpression } from './visualization';
-import { fromExpression, Ast } from '@kbn/interpreter';
 
 const baseInput = {
   id: 'elementId',

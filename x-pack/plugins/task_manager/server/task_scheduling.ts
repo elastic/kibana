@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import { filter, take } from 'rxjs';
-import pMap from 'p-map';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import pMap from 'p-map';
+import { filter, take } from 'rxjs';
 
-import { v4 as uuidv4 } from 'uuid';
+import { Logger } from '@kbn/core/server';
+import agent from 'elastic-apm-node';
 import { chunk, flatten, pick } from 'lodash';
 import { Subject } from 'rxjs';
-import agent from 'elastic-apm-node';
-import { Logger } from '@kbn/core/server';
-import { either, isErr, mapErr } from './lib/result_type';
-import {
-  ErroredTask,
-  ErrResultOf,
-  isTaskClaimEvent,
-  isTaskRunEvent,
-  isTaskRunRequestEvent,
-  OkResultOf,
-  RanTask,
-} from './task_events';
-import { Middleware } from './lib/middleware';
+import { v4 as uuidv4 } from 'uuid';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { parseIntervalAsMillisecond } from './lib/intervals';
+import { Middleware } from './lib/middleware';
+import { either, isErr, mapErr } from './lib/result_type';
+import { retryableBulkUpdate } from './lib/retryable_bulk_update';
+import { TaskLifecycleEvent } from './polling_lifecycle';
 import {
   ConcreteTaskInstance,
   EphemeralTask,
@@ -34,12 +29,17 @@ import {
   TaskInstanceWithId,
   TaskStatus,
 } from './task';
-import { TaskStore } from './task_store';
-import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent } from './polling_lifecycle';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import {
+  ErrResultOf,
+  ErroredTask,
+  OkResultOf,
+  RanTask,
+  isTaskClaimEvent,
+  isTaskRunEvent,
+  isTaskRunRequestEvent,
+} from './task_events';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
-import { retryableBulkUpdate } from './lib/retryable_bulk_update';
+import { TaskStore } from './task_store';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -403,8 +403,8 @@ export class TaskScheduling {
                     isTaskRunRequestEvent(taskEvent)
                       ? `Task Manager is at capacity, please try again later`
                       : isTaskRunEvent(taskEvent)
-                      ? `${(errorResult as ErroredTask).error}`
-                      : `${errorResult}`
+                        ? `${(errorResult as ErroredTask).error}`
+                        : `${errorResult}`
                   }`
                 )
               );

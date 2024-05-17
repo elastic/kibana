@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import React, { FC, PropsWithChildren } from 'react';
 
 export interface IndexOverviewPanelProps {
   title: React.ReactNode;

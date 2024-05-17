@@ -7,11 +7,11 @@
  */
 
 import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { startServers, stopServers } from './lib';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
+import { startServers, stopServers } from './lib';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const savedObjectIndex = `.kibana_${kibanaVersion}_001`;

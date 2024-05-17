@@ -1,3 +1,4 @@
+import { DatePicker } from '@kbn/observability-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import React from 'react';
-import { DatePicker } from '@kbn/observability-plugin/public';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 import { useDateRangeRedirect } from '../../../../hooks/use_date_range_redirect';
 import { clearCache } from '../../../../services/rest/call_api';

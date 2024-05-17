@@ -9,12 +9,12 @@
 // to indicate that the particular test is not working as expected
 // but is simply documenting the current behavior.
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 import type { Store } from 'redux';
 
-import { createMockStore, kibanaMock, mockGlobalState, TestProviders } from '../mock';
+import { TestProviders, createMockStore, kibanaMock, mockGlobalState } from '../mock';
 import { genHash, useInvalidFilterQuery } from './use_invalid_filter_query';
 
 const getStore = () =>

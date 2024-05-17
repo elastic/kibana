@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { Provider } from 'react-redux';
 import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { colorMappingReducer, updateModel } from './state/color_mapping';
+import React from 'react';
+import { Provider } from 'react-redux';
 import { Container } from './components/container/container';
 import { ColorMapping } from './config';
+import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { uiReducer } from './state/ui';
 
 /**

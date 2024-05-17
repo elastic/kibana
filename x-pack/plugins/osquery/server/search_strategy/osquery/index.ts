@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { from, map, mergeMap } from 'rxjs';
+import type { CoreStart } from '@kbn/core/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { CoreStart } from '@kbn/core/server';
+import { from, map, mergeMap } from 'rxjs';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import type {
   FactoryQueryTypes,
-  StrategyResponseType,
   StrategyRequestType,
+  StrategyResponseType,
 } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';

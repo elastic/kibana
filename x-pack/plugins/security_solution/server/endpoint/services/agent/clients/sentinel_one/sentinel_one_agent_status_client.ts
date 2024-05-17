@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary } from '../../..';
-import type { RawSentinelOneInfo } from './types';
-import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { AgentStatusClient } from '../lib/base_agent_status_client';
+import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
+import { catchAndWrapError } from '../../../../utils';
 import { AgentStatusClientError } from '../errors';
+import { AgentStatusClient } from '../lib/base_agent_status_client';
+import type { RawSentinelOneInfo } from './types';
 
 const SENTINEL_ONE_AGENT_INDEX_PATTERN = `logs-sentinel_one.agent-*`;
 
@@ -112,9 +112,9 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
           status: agentInfo?.is_active
             ? HostStatus.HEALTHY
             : // If the agent is pending uninstall or uninstalled, we consider it unenrolled
-            agentInfo?.is_pending_uninstall || agentInfo?.is_uninstalled
-            ? HostStatus.UNENROLLED
-            : HostStatus.OFFLINE,
+              agentInfo?.is_pending_uninstall || agentInfo?.is_uninstalled
+              ? HostStatus.UNENROLLED
+              : HostStatus.OFFLINE,
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
-import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { getOrElse, map } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { isString } from 'lodash';
 import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
-import { isOk, promiseResult, Result } from '../lib/result_type';
+import { Result, isOk, promiseResult } from '../lib/result_type';
 
 // config definition
 export enum WebhookMethods {

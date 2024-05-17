@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Actions, getActionsColumnWidth } from '../../../../../common/components/header_actions';
 import type { ControlColumnProps } from '../../../../../../common/types';
+import { Actions, getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
 import * as i18n from '../../../../../common/components/events_viewer/translations';
 

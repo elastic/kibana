@@ -6,10 +6,7 @@
     "id": "licensing",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "licensing"
-    ],
+    "configPath": ["xpack", "licensing"],
     "requiredBundles": []
   }
 }

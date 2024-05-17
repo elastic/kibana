@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { once } from 'lodash';
-import { createCallApmApi, callApmApi } from './create_call_apm_api';
+import { type APIEndpoint } from '../../../server';
+import { callApmApi, createCallApmApi } from './create_call_apm_api';
 import type {
-  AbstractAPMClient,
   APIClientRequestParamsOf,
   APIReturnType,
+  AbstractAPMClient,
 } from './create_call_apm_api';
-import { type APIEndpoint } from '../../../server';
 
 const spyObj = { createCallApmApi, callApmApi };
 

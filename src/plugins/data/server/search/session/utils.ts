@@ -7,8 +7,8 @@
  */
 
 import { createHash } from 'crypto';
-import stringify from 'json-stable-stringify';
 import { SavedObjectsFindResult } from '@kbn/core/server';
+import stringify from 'json-stable-stringify';
 import moment from 'moment';
 import { SearchSessionSavedObjectAttributes } from '../../../common';
 

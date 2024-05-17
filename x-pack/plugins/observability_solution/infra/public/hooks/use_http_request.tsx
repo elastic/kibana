@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { HttpFetchOptions, HttpHandler, ToastInput } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { InfraHttpError } from '../types';
+import { CanceledPromiseError, useTrackedPromise } from '../utils/use_tracked_promise';
 
 export function useHTTPRequest<Response>(
   pathname: string,

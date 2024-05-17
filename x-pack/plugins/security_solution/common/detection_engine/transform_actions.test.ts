@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import {
-  transformRuleToAlertAction,
-  transformAlertToRuleAction,
-  transformNormalizedRuleToAlertAction,
-  transformAlertToNormalizedRuleAction,
-  transformRuleToAlertResponseAction,
-  transformAlertToRuleResponseAction,
-} from './transform_actions';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type {
   ResponseAction,
   RuleResponseAction,
 } from '../api/detection_engine/model/rule_response_actions';
 import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
 import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import {
+  transformAlertToNormalizedRuleAction,
+  transformAlertToRuleAction,
+  transformAlertToRuleResponseAction,
+  transformNormalizedRuleToAlertAction,
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from './transform_actions';
 
 describe('transform_actions', () => {
   test('it should transform RuleAlertAction[] to RuleAction[]', () => {

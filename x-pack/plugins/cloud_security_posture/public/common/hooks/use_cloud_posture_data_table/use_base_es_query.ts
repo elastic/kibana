@@ -6,7 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import { EsQueryConfig, buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo } from 'react';
 import { useDataViewContext } from '../../contexts/data_view_context';

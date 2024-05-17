@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": ".monitoring-es-6-2018.09.19",
     "mappings": {
       "date_detection": false,

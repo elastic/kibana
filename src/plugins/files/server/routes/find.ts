@@ -7,11 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilesClient } from '../../common/files_client';
 import { FileJSON } from '../../common';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
-import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
-import { page, pageSize, fileMeta } from './common_schemas';
+import { FilesClient } from '../../common/files_client';
+import { CreateRouteDefinition, FILES_API_ROUTES } from './api_routes';
+import { fileMeta, page, pageSize } from './common_schemas';
 import type { CreateHandler, FilesRouter } from './types';
 
 const method = 'post' as const;

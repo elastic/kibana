@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { applyBulkEditOperation } from './apply_bulk_edit_operation';
 import { Rule } from '../../types';
+import { applyBulkEditOperation } from './apply_bulk_edit_operation';
 
 describe('applyBulkEditOperation', () => {
   describe('tags operations', () => {

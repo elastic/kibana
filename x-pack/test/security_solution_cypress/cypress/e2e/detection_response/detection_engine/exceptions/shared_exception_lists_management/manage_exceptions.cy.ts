@@ -8,40 +8,40 @@
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { MAX_COMMENT_LENGTH } from '@kbn/security-solution-plugin/common/constants';
 import { getNewRule } from '../../../../../objects/rule';
-import { login } from '../../../../../tasks/login';
-import { visit } from '../../../../../tasks/navigation';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
+  addExceptionHugeComment,
+  deleteFirstExceptionItemInListDetailPage,
   editException,
+  editExceptionComment,
   editExceptionFlyoutItemName,
+  editFirstExceptionItemInListDetailPage,
   linkFirstRuleOnExceptionFlyout,
   linkFirstSharedListOnExceptionFlyout,
-  editFirstExceptionItemInListDetailPage,
   submitEditedExceptionItem,
   submitNewExceptionItem,
-  deleteFirstExceptionItemInListDetailPage,
-  addExceptionHugeComment,
-  editExceptionComment,
 } from '../../../../../tasks/exceptions';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTIONS_LIST_MANAGEMENT_NAME,
-  EXECPTION_ITEM_CARD_HEADER_TITLE,
   EMPTY_EXCEPTIONS_VIEWER,
+  EXCEPTIONS_LIST_MANAGEMENT_NAME,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  EXECPTION_ITEM_CARD_HEADER_TITLE,
 } from '../../../../../screens/exceptions';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { deleteExceptionLists } from '../../../../../tasks/api_calls/exceptions';
 import {
   addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
   findSharedExceptionListItemsByName,
 } from '../../../../../tasks/exceptions_table';
 import { visitRuleDetailsPage } from '../../../../../tasks/rule_details';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { deleteExceptionLists } from '../../../../../tasks/api_calls/exceptions';
 
 // Failing: See https://github.com/elastic/kibana/issues/182476
 describe.skip('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {

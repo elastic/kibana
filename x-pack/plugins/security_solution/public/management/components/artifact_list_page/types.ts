@@ -7,8 +7,8 @@
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
-  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { PolicyData } from '../../../../common/endpoint/types';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Readable, Transform } from 'stream';
 import { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { Readable, Transform } from 'stream';
 
 export type BlobAttribute = [key: string, value: JsonValue];
 

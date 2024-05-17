@@ -6,40 +6,40 @@
  */
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPanel,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiSpacer,
-  EuiEmptyPrompt,
   EuiLoadingLogo,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   AwaitingDashboardAPI,
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { EmptyDashboards } from './empty_dashboards';
-import { GotoDashboard, LinkDashboard } from './actions';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
-import { ContextMenu } from './context_menu';
-import { UnlinkDashboard } from './actions/unlink_dashboard';
-import { EditDashboard } from './actions/edit_dashboard';
-import { DashboardSelector } from './dashboard_selector';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
-import { getFilters } from '../metrics/static_dashboard';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { getFilters } from '../metrics/static_dashboard';
+import { GotoDashboard, LinkDashboard } from './actions';
+import { EditDashboard } from './actions/edit_dashboard';
+import { UnlinkDashboard } from './actions/unlink_dashboard';
+import { ContextMenu } from './context_menu';
+import { DashboardSelector } from './dashboard_selector';
+import { EmptyDashboards } from './empty_dashboards';
 
 export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;

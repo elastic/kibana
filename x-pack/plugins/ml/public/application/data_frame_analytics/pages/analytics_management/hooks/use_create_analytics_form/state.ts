@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import {
-  getAnalysisType,
-  isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
-  type DataFrameAnalyticsMeta,
+  type DataFrameAnalysisConfigType,
   type DataFrameAnalyticsConfig,
   type DataFrameAnalyticsId,
-  type DataFrameAnalysisConfigType,
+  type DataFrameAnalyticsMeta,
   type FeatureProcessor,
+  getAnalysisType,
+  isClassificationAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { type RuntimeMappings, isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';

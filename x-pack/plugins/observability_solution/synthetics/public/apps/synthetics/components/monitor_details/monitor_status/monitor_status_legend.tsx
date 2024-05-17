@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import * as labels from './labels';
-import { DANGER_VIZ_COLOR, getSkippedVizColor, SUCCESS_VIZ_COLOR } from './monitor_status_data';
+import { DANGER_VIZ_COLOR, SUCCESS_VIZ_COLOR, getSkippedVizColor } from './monitor_status_data';
 
 export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
   const { euiTheme } = useEuiTheme();

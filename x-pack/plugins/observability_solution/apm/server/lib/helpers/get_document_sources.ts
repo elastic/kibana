@@ -1,3 +1,4 @@
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
+import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from './create_es_client/document_type';
-import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { isDurationSummaryNotSupportedFilter } from './transactions';
 
 const QUERY_INDEX = {

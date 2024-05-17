@@ -7,9 +7,9 @@
 
 import { InventoryViewsClient } from './inventory_views_client';
 import {
-  InventoryViewsServiceStartDeps,
   InventoryViewsServiceSetup,
   InventoryViewsServiceStart,
+  InventoryViewsServiceStartDeps,
 } from './types';
 
 export class InventoryViewsService {

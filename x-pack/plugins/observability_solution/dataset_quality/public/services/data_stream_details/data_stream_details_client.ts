@@ -8,16 +8,16 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  getDataStreamsSettingsResponseRt,
   getDataStreamsDetailsResponseRt,
+  getDataStreamsSettingsResponseRt,
   integrationDashboardsRT,
 } from '../../../common/api_types';
 import {
-  GetDataStreamsStatsError,
-  GetDataStreamSettingsParams,
-  GetDataStreamSettingsResponse,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
+  GetDataStreamSettingsParams,
+  GetDataStreamSettingsResponse,
+  GetDataStreamsStatsError,
   GetIntegrationDashboardsParams,
   GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';

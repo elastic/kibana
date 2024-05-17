@@ -6,8 +6,8 @@
  */
 import type {
   IngestProcessorContainer,
-  Metadata,
   IngestSetProcessor,
+  Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 
 export interface RouteEntry {

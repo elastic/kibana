@@ -15,8 +15,8 @@ import dedent from 'dedent';
 import { run } from '@kbn/dev-cli-runner';
 
 import {
-  MANAGED_CONFIG_KEYS,
   MANAGED_CONFIG_FILES,
+  MANAGED_CONFIG_KEYS,
   updateVscodeConfig,
 } from '@kbn/managed-vscode-config';
 

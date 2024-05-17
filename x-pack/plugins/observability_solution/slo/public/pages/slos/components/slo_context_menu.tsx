@@ -1,3 +1,14 @@
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelectableOption,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +16,6 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiSelectableOption,
-  useGeneratedHtmlId,
-  EuiTitle,
-} from '@elastic/eui';
 
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 

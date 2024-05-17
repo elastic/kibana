@@ -7,16 +7,16 @@
  */
 
 import {
-  projects,
-  projectIDs,
-  ProjectID,
   EnvironmentName,
-  getProjectIDs,
   Project,
+  ProjectID,
   SolutionName,
+  getProjectIDs,
+  projectIDs,
+  projects,
 } from '../../../common';
 import { PluginServiceFactory } from '../create';
-import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from './types';
+import { PresentationLabsService, applyProjectStatus, isEnabledByStorageValue } from './types';
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 
@@ -61,16 +61,19 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   statuses = reset();
 
   const getProjects = (solutions: SolutionName[] = []) =>
-    projectIDs.reduce((acc, id) => {
-      const project = getProject(id);
-      if (
-        solutions.length === 0 ||
-        solutions.some((solution) => project.solutions.includes(solution))
-      ) {
-        acc[id] = project;
-      }
-      return acc;
-    }, {} as { [id in ProjectID]: Project });
+    projectIDs.reduce(
+      (acc, id) => {
+        const project = getProject(id);
+        if (
+          solutions.length === 0 ||
+          solutions.some((solution) => project.solutions.includes(solution))
+        ) {
+          acc[id] = project;
+        }
+        return acc;
+      },
+      {} as { [id in ProjectID]: Project }
+    );
 
   const setProjectStatus = (id: ProjectID, env: EnvironmentName, value: boolean) => {
     statuses[id] = { ...statuses[id], [env]: value };

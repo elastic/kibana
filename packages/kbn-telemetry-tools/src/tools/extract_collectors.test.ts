@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import ts from 'typescript';
 import * as path from 'path';
-import { extractCollectors, getProgramPaths } from './extract_collectors';
-import { parseTelemetryRC } from './config';
+import ts from 'typescript';
 import { allExtractedCollectors } from './__fixture__/all_extracted_collectors';
+import { parseTelemetryRC } from './config';
+import { extractCollectors, getProgramPaths } from './extract_collectors';
 
 describe('extractCollectors', () => {
   it('extracts collectors given rc file', async () => {

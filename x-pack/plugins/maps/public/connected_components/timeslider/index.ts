@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { Timeslider } from './timeslider';
-import { setQuery } from '../../actions';
-import { getTimeFilters } from '../../selectors/map_selectors';
-import { MapStoreState } from '../../reducers/store';
 import { Timeslice } from '../../../common/descriptor_types';
+import { setQuery } from '../../actions';
+import { MapStoreState } from '../../reducers/store';
+import { getTimeFilters } from '../../selectors/map_selectors';
+import { Timeslider } from './timeslider';
 
 function mapStateToProps(state: MapStoreState) {
   return {

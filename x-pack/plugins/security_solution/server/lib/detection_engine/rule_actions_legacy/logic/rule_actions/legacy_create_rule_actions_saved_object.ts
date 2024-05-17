@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports

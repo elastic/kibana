@@ -8,14 +8,14 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback } from 'react';
 import { xor } from 'lodash';
+import React, { useCallback } from 'react';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api/metrics_explorer';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import {
-  metricsExplorerAggregationRT,
   METRIC_EXPLORER_AGGREGATIONS,
+  metricsExplorerAggregationRT,
 } from '../../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   options: MetricsExplorerOptions;

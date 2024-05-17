@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ProductFeaturesConfigurator } from '@kbn/security-solution-plugin/server/lib/product_features_service/types';
-import type { Logger } from '@kbn/logging';
+import { ProductLine } from '../../common/product';
 import type { ServerlessSecurityConfig } from '../config';
+import type { Tier } from '../types';
+import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
-import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
-import type { Tier } from '../types';
-import { ProductLine } from '../../common/product';
 
 export const getProductProductFeaturesConfigurator = (
   enabledProductFeatureKeys: ProductFeatureKeys,

@@ -1,3 +1,5 @@
+import { Filter, FilterStateStore } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/observability-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +7,7 @@
  * 2.0.
  */
 import { kqlWithFiltersSchema } from '@kbn/slo-schema';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { KQLCustomIndicator, GroupingsSchema, ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, GroupingsSchema, KQLCustomIndicator } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 
 export const getESQueryForLogRateAnalysis = (

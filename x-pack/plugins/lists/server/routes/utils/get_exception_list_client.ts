@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ListsRequestHandlerContext } from '../../types';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
+import type { ListsRequestHandlerContext } from '../../types';
 
 export const getExceptionListClient = async (
   context: ListsRequestHandlerContext

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { action } from '@storybook/addon-actions';
+import { EuiButton, EuiComboBox } from '@elastic/eui';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataViewBase, Query } from '@kbn/es-query';
-import { storiesOf } from '@storybook/react';
+import { buildExistsFilter } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { buildExistsFilter } from '@kbn/es-query';
-import { EuiButton, EuiComboBox } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
 

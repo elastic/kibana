@@ -6,10 +6,10 @@
  */
 
 import {
-  getCustomErrorClass,
   MLClusterClientUninitialized,
-  MLUISettingsClientUninitialized,
   MLFieldFormatRegistryUninitialized,
+  MLUISettingsClientUninitialized,
+  getCustomErrorClass,
 } from './errors';
 
 describe('Custom errors', () => {

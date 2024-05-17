@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { CONTENT_ID } from '../../common/content_management';

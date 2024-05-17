@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { registerHelpers } from './nodes.helpers';
 import { NODE_CUSTOM_ATTRIBUTE } from './constants';
 import { initElasticsearchHelpers } from './lib';
+import { registerHelpers } from './nodes.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

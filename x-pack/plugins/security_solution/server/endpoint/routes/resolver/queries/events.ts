@@ -8,11 +8,11 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
-import { parseFilterQuery } from '../../../../utils/serialized_query';
 import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
-import type { PaginationBuilder } from '../utils/pagination';
+import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { BaseResolverQuery } from '../tree/queries/base';
 import type { ResolverQueryParams } from '../tree/queries/base';
+import type { PaginationBuilder } from '../utils/pagination';
 
 /**
  * Builds a query for retrieving events.

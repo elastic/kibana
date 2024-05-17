@@ -1,13 +1,11 @@
 {
   "job_id": "JOB_ID",
-  "indices": [
-    "INDEX_PATTERN_NAME"
-  ],
+  "indices": ["INDEX_PATTERN_NAME"],
   "query": {
     "bool": {
       "filter": [
-        { "term":  { "event.module": "auditd" } },
-        { "term":  { "container.runtime": "docker" } }
+        { "term": { "event.module": "auditd" } },
+        { "term": { "container.runtime": "docker" } }
       ],
       "must": {
         "exists": { "field": "auditd.data.syscall" }

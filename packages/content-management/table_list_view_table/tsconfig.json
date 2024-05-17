@@ -13,10 +13,7 @@
       "@testing-library/react"
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -35,7 +32,5 @@
     "@kbn/core-user-profile-browser",
     "@kbn/react-kibana-mount"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

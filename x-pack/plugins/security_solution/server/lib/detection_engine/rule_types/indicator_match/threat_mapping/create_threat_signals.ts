@@ -9,34 +9,34 @@ import { firstValueFrom } from 'rxjs';
 
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { uniq, chunk } from 'lodash/fp';
+import { chunk, uniq } from 'lodash/fp';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
+import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../../constants';
+import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { createEventSignal } from './create_event_signal';
+import { createThreatSignal } from './create_threat_signal';
+import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import type {
-  CreateThreatSignalsOptions,
   CreateSignalInterface,
+  CreateThreatSignalsOptions,
   GetDocumentListInterface,
 } from './types';
-import { createThreatSignal } from './create_threat_signal';
-import { createEventSignal } from './create_event_signal';
-import type { SearchAfterAndBulkCreateReturnType } from '../../types';
-import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../../constants';
 import {
+  FAILED_CREATE_QUERY_MAX_CLAUSE,
+  MANY_NESTED_CLAUSES_ERR,
   buildExecutionIntervalValidator,
   combineConcurrentResults,
-  FAILED_CREATE_QUERY_MAX_CLAUSE,
   getMatchedFields,
   getMaxClauseCountErrorValue,
-  MANY_NESTED_CLAUSES_ERR,
 } from './utils';
-import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
 
+import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
+import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
+import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
-import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
-import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
-import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 
 export const createThreatSignals = async ({
   alertId,

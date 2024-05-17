@@ -9,8 +9,8 @@
 import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import type {
-  NoDataViewsPromptServices,
   NoDataViewsPromptKibanaDependencies,
+  NoDataViewsPromptServices,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useOnTryESQL } from './hooks';
 

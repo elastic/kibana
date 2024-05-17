@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
-import { NodeAvailableWarning } from '../../../components/node_available_warning';
-import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
-import { UpgradeWarning } from '../../../components/upgrade';
 import { JobMap } from '.';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
-import { useRefreshAnalyticsList } from '../../common';
+import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { MlPageHeader } from '../../../components/page_header';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
+import { UpgradeWarning } from '../../../components/upgrade';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { useRefreshAnalyticsList } from '../../common';
+import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
-import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');

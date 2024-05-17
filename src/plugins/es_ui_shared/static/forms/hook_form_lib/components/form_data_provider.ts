@@ -8,8 +8,8 @@
 
 import React from 'react';
 
-import { FormData } from '../types';
 import { useFormData } from '../hooks';
+import { FormData } from '../types';
 
 interface Props<I> {
   children: (formData: I) => JSX.Element | null;

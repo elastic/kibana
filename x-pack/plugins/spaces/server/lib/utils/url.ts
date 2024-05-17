@@ -9,9 +9,9 @@
 // DIRECT COPY FROM `src/core/utils/url`, since it's not possible to import from there,
 // nor can I re-export from `src/core/server`...
 
-import type { ParsedQuery } from 'query-string';
 import type { UrlObject } from 'url';
 import { format as formatUrl, parse as parseUrl } from 'url';
+import type { ParsedQuery } from 'query-string';
 
 export interface URLMeaningfulParts {
   auth: string | null;

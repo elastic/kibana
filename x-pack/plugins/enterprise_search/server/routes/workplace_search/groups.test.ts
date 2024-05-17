@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
+import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
 
 import {
-  registerGroupsRoute,
-  registerSearchGroupsRoute,
+  registerBoostsGroupRoute,
   registerGroupRoute,
   registerGroupUsersRoute,
+  registerGroupsRoute,
+  registerSearchGroupsRoute,
   registerShareGroupRoute,
-  registerBoostsGroupRoute,
 } from './groups';
 
 describe('groups routes', () => {

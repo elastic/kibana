@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
 import {
   ReadEndpointListItemRequestQueryDecoded,
   readEndpointListItemRequestQuery,
   readEndpointListItemResponse,
 } from '../../common/api';
+import type { ListsPluginRouter } from '../types';
 
 import {
   buildRouteValidation,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
+import { takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { addGlobalParam, editGlobalParam, getGlobalParams } from './api';
 import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } from './actions';
+import { addGlobalParam, editGlobalParam, getGlobalParams } from './api';
 
 export function* getGlobalParamEffect() {
   yield takeLeading(

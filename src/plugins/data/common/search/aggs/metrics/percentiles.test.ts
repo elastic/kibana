@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IPercentileAggConfig, getPercentilesMetricAgg } from './percentiles';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
-import { METRIC_TYPES } from './metric_agg_types';
 import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
+import { METRIC_TYPES } from './metric_agg_types';
+import { IPercentileAggConfig, getPercentilesMetricAgg } from './percentiles';
 
 describe('AggTypesMetricsPercentilesProvider class', () => {
   let aggConfigs: IAggConfigs;

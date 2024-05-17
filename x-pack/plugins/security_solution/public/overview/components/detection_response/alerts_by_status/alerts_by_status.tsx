@@ -15,27 +15,39 @@ import {
   useIsWithinMaxBreakpoint,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';
-import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import { ALERT_SEVERITY, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import type { Status } from '../../../../../common/api/detection_engine';
+import { SecurityPageName } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
-import { SecurityPageName } from '../../../../../common/constants';
+import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { Legend } from '../../../../common/components/charts/legend';
+import type { LegendItem } from '../../../../common/components/charts/legend_item';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
-import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import type { EntityFilter } from './use_alerts_by_status';
-import { useAlertsByStatus } from './use_alerts_by_status';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
+import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { VIEW_ALERTS } from '../../../pages/translations';
+import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import {
   ALERTS,
-  ALERTS_TEXT,
   ALERTS_BY_SEVERITY_TEXT,
+  ALERTS_TEXT,
   INVESTIGATE_IN_TIMELINE,
   OPEN_IN_ALERTS_TITLE_SEVERITY,
   OPEN_IN_ALERTS_TITLE_STATUS,
@@ -47,24 +59,12 @@ import {
   STATUS_MEDIUM_LABEL,
   STATUS_OPEN,
 } from '../translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { VIEW_ALERTS } from '../../../pages/translations';
 import { SEVERITY_COLOR } from '../utils';
-import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
-import { Legend } from '../../../../common/components/charts/legend';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
-import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import type { Status } from '../../../../../common/api/detection_engine';
-import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
+import type { EntityFilter } from './use_alerts_by_status';
+import { useAlertsByStatus } from './use_alerts_by_status';
+import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;

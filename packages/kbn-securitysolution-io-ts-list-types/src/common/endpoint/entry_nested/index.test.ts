@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { EndpointEntryNested, endpointEntryNested } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { getEndpointEntryNestedMock } from './index.mock';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { EndpointEntryNested, endpointEntryNested } from '.';
+import { getEntryExistsMock } from '../../entries_exist/index.mock';
+import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import {
-  nonEmptyEndpointNestedEntriesArray,
   NonEmptyEndpointNestedEntriesArray,
+  nonEmptyEndpointNestedEntriesArray,
 } from '../non_empty_nested_entries_array';
-import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
-import { getEntryExistsMock } from '../../entries_exist/index.mock';
+import { getEndpointEntryNestedMock } from './index.mock';
 
 describe('endpointEntryNested', () => {
   test('it should validate a nested entry', () => {

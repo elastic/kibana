@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { createMockedIndexPattern } from '../../mocks';
-import { LastValueIndexPatternColumn } from './last_value';
-import { lastValueOperation } from '.';
-import type { FormBasedLayer } from '../../types';
-import { TermsIndexPatternColumn } from './terms';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { ShallowWrapper, shallow } from 'enzyme';
+import React from 'react';
+import { lastValueOperation } from '.';
+import { createMockedIndexPattern } from '../../mocks';
+import type { FormBasedLayer } from '../../types';
+import { LastValueIndexPatternColumn } from './last_value';
+import { TermsIndexPatternColumn } from './terms';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -929,8 +929,9 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
-        .toMatchInlineSnapshot(`
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "displayLocations": Array [
@@ -980,8 +981,9 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
-        .toMatchInlineSnapshot(`
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "displayLocations": Array [

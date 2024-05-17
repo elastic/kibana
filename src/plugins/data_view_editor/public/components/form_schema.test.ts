@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { singleAstriskValidator } from './form_schema';
 import { ValidationFuncArg } from '../shared_imports';
+import { singleAstriskValidator } from './form_schema';
 
 describe('validators', () => {
   test('singleAstriskValidator should pass', async () => {

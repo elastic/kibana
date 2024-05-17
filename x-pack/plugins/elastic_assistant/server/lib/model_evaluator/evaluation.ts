@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { loadEvaluator } from 'langchain/evaluation';
-import { LLM } from '@langchain/core/language_models/llms';
-import { ChainValues } from '@langchain/core/utils/types';
-import { HumanMessage } from '@langchain/core/messages';
-import { chunk as createChunks } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
-import { ToolingLog } from '@kbn/tooling-log';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector';
 import { Dataset } from '@kbn/elastic-assistant-common';
-import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
-import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { LLM } from '@langchain/core/language_models/llms';
+import { HumanMessage } from '@langchain/core/messages';
+import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector';
+import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import { ChainValues } from '@langchain/core/utils/types';
+import { loadEvaluator } from 'langchain/evaluation';
+import { chunk as createChunks } from 'lodash/fp';
 import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
+import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
 import { ResponseBody } from '../langchain/types';
+import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
 
 export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluatorWithMetadata[];

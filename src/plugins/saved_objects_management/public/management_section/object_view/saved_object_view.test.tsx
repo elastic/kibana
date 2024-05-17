@@ -8,28 +8,28 @@
 
 import { bulkDeleteObjectsMock, bulkGetObjectsMock } from './saved_object_view.test.mocks';
 
-import React from 'react';
-import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import { ShallowWrapper } from 'enzyme';
+import React from 'react';
 
 import {
-  httpServiceMock,
-  overlayServiceMock,
-  notificationServiceMock,
   applicationServiceMock,
-  uiSettingsServiceMock,
-  scopedHistoryMock,
   docLinksServiceMock,
+  httpServiceMock,
+  notificationServiceMock,
+  overlayServiceMock,
+  scopedHistoryMock,
   themeServiceMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/public/mocks';
 
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { SavedObjectWithMetadata } from '../../types';
 import {
   SavedObjectEdition,
   SavedObjectEditionProps,
   SavedObjectEditionState,
 } from './saved_object_view';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));
 

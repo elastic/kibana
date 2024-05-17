@@ -1,3 +1,4 @@
+import type { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +7,10 @@
  */
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import type { DatatableProps } from '../../../common/expressions';
-import type { FormatFactory } from '../../../common/types';
 import { getDatatable } from '../../../common/expressions';
-import { getColumnCellValueActions, getColumnsFilterable } from './expression';
-import type { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { FormatFactory } from '../../../common/types';
 import { LensCellValueAction } from '../../types';
+import { getColumnCellValueActions, getColumnsFilterable } from './expression';
 
 const cellValueAction: LensCellValueAction = {
   displayName: 'Test',

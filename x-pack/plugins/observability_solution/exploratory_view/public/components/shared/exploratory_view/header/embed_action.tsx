@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiCodeBlock, EuiPopoverTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCodeBlock, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import React, { useState } from 'react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 
 export function EmbedAction({

@@ -7,7 +7,7 @@
 
 import { handleActions } from 'redux-actions';
 
-import { permissionsSuccess, permissionsError, permissionsLoading } from '../actions/permissions';
+import { permissionsError, permissionsLoading, permissionsSuccess } from '../actions/permissions';
 
 export const permissions = handleActions(
   {

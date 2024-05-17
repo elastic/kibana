@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   Chart,
   DARK_THEME,
-  isMetricElementEvent,
   Metric,
+  MetricDatum,
   MetricTrendShape,
   Settings,
-  MetricDatum,
+  isMetricElementEvent,
 } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import { useKibana } from '../../../utils/kibana_react';
-import { SloOverviewDetails } from '../common/slo_overview_details';
-import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
-import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
-import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
+import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import {
   getSubTitle,
   useSloCardColor,
 } from '../../../pages/slos/components/card_view/slo_card_item';
-import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
+import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
+import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
+import { useKibana } from '../../../utils/kibana_react';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { SloOverviewDetails } from '../common/slo_overview_details';
 
 const getSloChartData = ({
   slo,

@@ -8,8 +8,8 @@
 
 import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { AppPluginDependencies } from './with_data_services/types';
 import image from './state_sync.png';
+import { AppPluginDependencies } from './with_data_services/types';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

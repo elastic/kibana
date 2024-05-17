@@ -7,8 +7,9 @@
  */
 
 import {
-  EcsBase,
+  EcsAgent,
   EcsAs as EcsAutonomousSystem,
+  EcsBase,
   EcsClient,
   EcsCloud,
   EcsContainer,
@@ -39,7 +40,6 @@ import {
   EcsUser,
   EcsUserAgent,
   EcsVulnerability,
-  EcsAgent,
 } from '@elastic/ecs';
 
 /**

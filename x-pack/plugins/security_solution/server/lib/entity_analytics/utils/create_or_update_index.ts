@@ -1,3 +1,7 @@
+import type {
+  IndicesCreateRequest,
+  IndicesCreateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +10,6 @@
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type {
-  IndicesCreateRequest,
-  IndicesCreateResponse,
-} from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 /**

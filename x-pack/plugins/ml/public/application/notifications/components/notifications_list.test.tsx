@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { type FC, type PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, waitFor } from '@testing-library/react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { NotificationsList } from './notifications_list';
+import { render, waitFor } from '@testing-library/react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { useMlKibana } from '../../contexts/kibana';
+import { NotificationsList } from './notifications_list';
 
 jest.mock('../../contexts/kibana');
 jest.mock('../../services/toast_notification_service');

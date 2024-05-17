@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiPageBody, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
 import type { HeaderProps } from '../components';
 import { Header } from '../components';
 
-import { Page, ContentWrapper, Wrapper } from './without_header';
+import { ContentWrapper, Page, Wrapper } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;

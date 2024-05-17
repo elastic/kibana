@@ -12,20 +12,20 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
-  closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
-  PointerSensor,
   MeasuringStrategy,
+  PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import {
+  SortableContext,
   arrayMove,
   rectSortingStrategy,
-  SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import {

@@ -10,20 +10,20 @@ import React, { useState } from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCodeBlock,
+  EuiCopy,
   EuiEmptyPrompt,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiLink,
-  EuiTitle,
-  useGeneratedHtmlId,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiCopy,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLink,
   EuiPanel,
+  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { errorMessageStrings as strings } from './message_strings';

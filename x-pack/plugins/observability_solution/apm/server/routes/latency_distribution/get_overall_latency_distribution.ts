@@ -7,13 +7,13 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Environment } from '../../../common/environment_rt';
-import { withApmSpan } from '../../utils/with_apm_span';
-import { fetchDurationRanges } from '../correlations/queries/fetch_duration_ranges';
-import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_duration_histogram_range_steps';
-import { getPercentileThresholdValue } from './get_percentile_threshold_value';
-import type { OverallLatencyDistributionResponse } from './types';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { withApmSpan } from '../../utils/with_apm_span';
+import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_duration_histogram_range_steps';
+import { fetchDurationRanges } from '../correlations/queries/fetch_duration_ranges';
+import { getPercentileThresholdValue } from './get_percentile_threshold_value';
+import type { OverallLatencyDistributionResponse } from './types';
 
 export async function getOverallLatencyDistribution({
   chartType,

@@ -1,3 +1,6 @@
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,29 +8,26 @@
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ElasticsearchTemplate } from './elasticsearch_template';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { ElasticsearchNodes } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { useTable } from '../../hooks/use_table';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { AlertsByName } from '../../../alerts/types';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
   ELASTICSEARCH_SYSTEM_ID,
   RULE_CPU_USAGE,
   RULE_DISK_USAGE,
-  RULE_THREAD_POOL_SEARCH_REJECTIONS,
-  RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_MEMORY_USAGE,
   RULE_MISSING_MONITORING_DATA,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
 } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { ElasticsearchNodes } from '../../../components/elasticsearch';
+import { SetupModeProps, SetupModeRenderer } from '../../../components/renderers/setup_mode';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useTable } from '../../hooks/use_table';
+import { ComponentProps } from '../../route_init';
+import { ElasticsearchTemplate } from './elasticsearch_template';
 
 type ElasticsearchNodeRole =
   | 'master'

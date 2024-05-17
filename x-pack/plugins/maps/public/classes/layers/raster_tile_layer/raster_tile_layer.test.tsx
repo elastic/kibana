@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RasterTileLayer } from './raster_tile_layer';
+import { RasterTileSource } from 'maplibre-gl';
 import { ReactElement } from 'react';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { DataRequestMeta, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { AbstractSource } from '../../sources/source';
-import { ILayer } from '../layer';
-import { RasterTileSource } from 'maplibre-gl';
-import { DataRequest } from '../../util/data_request';
 import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
+import { AbstractSource } from '../../sources/source';
+import { DataRequest } from '../../util/data_request';
+import { ILayer } from '../layer';
+import { RasterTileLayer } from './raster_tile_layer';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,

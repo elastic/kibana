@@ -7,9 +7,9 @@
 
 import { pick } from 'lodash/fp';
 import { useMemo } from 'react';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../../common/store';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useCasesMttr } from './use_cases_mttr';
 import { useCriticalAlerts } from './use_critical_alerts';
 

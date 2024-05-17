@@ -86,10 +86,7 @@
             "tags": [],
             "label": "sections",
             "description": [],
-            "signature": [
-              "AppRegistrySections",
-              "[]"
-            ],
+            "signature": ["AppRegistrySections", "[]"],
             "path": "packages/kbn-management/cards_navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -126,9 +123,7 @@
                 "tags": [],
                 "label": "e",
                 "description": [],
-                "signature": [
-                  "React.MouseEvent<HTMLAnchorElement, MouseEvent>"
-                ],
+                "signature": ["React.MouseEvent<HTMLAnchorElement, MouseEvent>"],
                 "path": "packages/kbn-management/cards_navigation/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -184,9 +179,7 @@
         "type": "Enum",
         "tags": [],
         "label": "AppIds",
-        "description": [
-          "\napp ids shared by all solutions"
-        ],
+        "description": ["\napp ids shared by all solutions"],
         "path": "packages/kbn-management/cards_navigation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

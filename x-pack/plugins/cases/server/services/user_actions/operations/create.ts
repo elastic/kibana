@@ -7,6 +7,7 @@
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
+import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import type {
   CaseAssignees,
   CaseCustomField,
@@ -16,20 +17,24 @@ import type {
   UserActionType,
 } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import { isUserActionType } from '../../../../common/utils/user_actions';
+import { arraysDifference } from '../../../client/utils';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import { arraysDifference } from '../../../client/utils';
-import { isUserActionType } from '../../../../common/utils/user_actions';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import type { IndexRefresh } from '../../types';
+import { UserActionAuditLogger } from '../audit_logger';
 import { BuilderFactory } from '../builder_factory';
+import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
 import type {
   BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
   BulkCreateBulkUpdateCaseUserActions,
+  BulkCreateUserActionArgs,
   CommonUserActionArgs,
   CreatePayloadFunction,
+  CreateUserActionArgs,
   CreateUserActionES,
   GetUserActionItemByDifference,
   PostCaseUserActionArgs,
@@ -37,12 +42,7 @@ import type {
   TypedUserActionDiffedItems,
   UserActionEvent,
   UserActionsDict,
-  CreateUserActionArgs,
-  BulkCreateUserActionArgs,
 } from '../types';
-import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
-import type { IndexRefresh } from '../../types';
-import { UserActionAuditLogger } from '../audit_logger';
 
 export class UserActionPersister {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(
@@ -145,10 +145,8 @@ export class UserActionPersister {
   }
 
   private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
-    const createPayload: CreatePayloadFunction<
-      CaseUserProfile,
-      typeof UserActionTypes.assignees
-    > = (items: CaseAssignees) => ({ assignees: items });
+    const createPayload: CreatePayloadFunction<CaseUserProfile, typeof UserActionTypes.assignees> =
+      (items: CaseAssignees) => ({ assignees: items });
 
     return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.assignees);
   }

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { InternalStateProvider } from './discover_internal_state_container';
 import { DiscoverAppStateProvider } from './discover_app_state_container';
+import { InternalStateProvider } from './discover_internal_state_container';
 import { DiscoverStateContainer } from './discover_state';
 
 function createStateHelpers() {

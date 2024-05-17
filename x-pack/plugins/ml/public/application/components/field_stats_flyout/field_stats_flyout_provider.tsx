@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { PropsWithChildren, FC } from 'react';
-import React, { useCallback, useState } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
-import { useEffect } from 'react';
 import { getProcessedFields } from '@kbn/ml-data-grid';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
-import { lastValueFrom } from 'rxjs';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useEffect } from 'react';
 import { useRef } from 'react';
-import { getMergedSampleDocsForPopulatedFieldsQuery } from './populated_fields/get_merged_populated_fields_query';
+import { lastValueFrom } from 'rxjs';
 import { useMlKibana } from '../../contexts/kibana';
 import { FieldStatsFlyout } from './field_stats_flyout';
-import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
+import { getMergedSampleDocsForPopulatedFieldsQuery } from './populated_fields/get_merged_populated_fields_query';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
+import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
 export const FieldStatsFlyoutProvider: FC<
   PropsWithChildren<{

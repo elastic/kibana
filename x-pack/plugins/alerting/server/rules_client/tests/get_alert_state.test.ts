@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { getBeforeSetup } from './lib';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ConstructorOptions, RulesClient } from '../rules_client';
+import { getBeforeSetup } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

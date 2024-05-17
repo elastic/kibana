@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty, isNil, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { replaceStringWithParams } from '../formatting_utils';
-import { PARAMS_KEYS_TO_SKIP } from '../common';
+import { isEmpty, isNil, omitBy } from 'lodash';
+import { publicFormatters } from '.';
 import {
   BrowserFields,
   ConfigKey,
@@ -17,7 +16,8 @@ import {
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
-import { publicFormatters } from '.';
+import { PARAMS_KEYS_TO_SKIP } from '../common';
+import { replaceStringWithParams } from '../formatting_utils';
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,

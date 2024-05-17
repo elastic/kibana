@@ -6,27 +6,29 @@
  */
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
-import type { Store } from 'redux';
-import { applyMiddleware, createStore } from 'redux';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
-import type { DepsStartMock } from '../../../../common/mock/endpoint';
-import { depsStartMock } from '../../../../common/mock/endpoint';
-import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
-import { createSpyMiddleware } from '../../../../common/store/test_utils';
+import type { Store } from 'redux';
+import { applyMiddleware, createStore } from 'redux';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 import type {
   HostIsolationResponse,
-  Immutable,
   ISOLATION_ACTIONS,
+  Immutable,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
+import {
+  hostIsolationHttpMocks,
+  hostIsolationRequestBodyMock,
+  hostIsolationResponseMock,
+} from '../../../../common/lib/endpoint_isolation/mocks';
+import { KibanaServices } from '../../../../common/lib/kibana';
+import type { DepsStartMock } from '../../../../common/mock/endpoint';
+import { depsStartMock } from '../../../../common/mock/endpoint';
 import type { AppAction } from '../../../../common/store/actions';
-import { mockEndpointResultList } from './mock_endpoint_result_list';
-import { listData } from './selectors';
-import type { EndpointState, TransformStats } from '../types';
-import { endpointListReducer } from './reducer';
-import { endpointMiddlewareFactory } from './middleware';
+import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
+import { createSpyMiddleware } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 import type { FailedResourceState, LoadedResourceState } from '../../../state';
 import {
@@ -34,14 +36,12 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state';
-import { KibanaServices } from '../../../../common/lib/kibana';
-import {
-  hostIsolationHttpMocks,
-  hostIsolationRequestBodyMock,
-  hostIsolationResponseMock,
-} from '../../../../common/lib/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
-import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import type { EndpointState, TransformStats } from '../types';
+import { endpointMiddlewareFactory } from './middleware';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
+import { endpointListReducer } from './reducer';
+import { listData } from './selectors';
 
 jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),

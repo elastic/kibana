@@ -8,11 +8,11 @@
 import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { Stats } from '../../../data_anonymization_editor/stats';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
+import { Stats } from '../../../data_anonymization_editor/stats';
 import * as i18n from './translations';
 
 export interface Props {

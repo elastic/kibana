@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiIcon,
   EuiContextMenuPanelItemDescriptor,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Popover, ClosePopoverFn } from '../../popover';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 import {
+  CONTEXT_MENU_TOP_BORDER_CLASSNAME,
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
-  CONTEXT_MENU_TOP_BORDER_CLASSNAME,
 } from '../../../../common/lib/constants';
+import { ClosePopoverFn, Popover } from '../../popover';
 
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AutoRefreshControls } from './auto_refresh_controls';

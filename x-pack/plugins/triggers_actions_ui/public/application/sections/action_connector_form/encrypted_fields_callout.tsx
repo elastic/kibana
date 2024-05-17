@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import {
   FieldsMap,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
 
 export interface EncryptedFieldsCalloutProps {
   isEdit: boolean;

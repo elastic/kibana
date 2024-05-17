@@ -1,3 +1,4 @@
+import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +6,13 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
 import { AddPrebuiltRulesHeaderButtons } from './add_prebuilt_rules_header_buttons';
+import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
 import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table_context';
 
 import { useUserData } from '../../../../../detections/components/user_info';
-import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 
 // Mock components not needed in this test suite

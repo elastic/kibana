@@ -7,8 +7,8 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, IgnoredReason } from '@kbn/discover-utils/types';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { DocViewsRegistry } from './doc_views_registry';
 

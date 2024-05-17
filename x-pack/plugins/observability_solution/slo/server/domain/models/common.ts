@@ -9,8 +9,8 @@ import * as t from 'io-ts';
 import {
   dateRangeSchema,
   groupBySchema,
-  groupingsSchema,
   groupSummarySchema,
+  groupingsSchema,
   historicalSummarySchema,
   metaSchema,
   objectiveSchema,

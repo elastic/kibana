@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { map, distinctUntilChanged, Observable } from 'rxjs';
+import { Observable, distinctUntilChanged, map } from 'rxjs';
 
 export const stateSelectorFactory =
   <S>(state$: Observable<S>) =>

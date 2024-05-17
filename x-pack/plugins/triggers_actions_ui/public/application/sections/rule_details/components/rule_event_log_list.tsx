@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
 
 import { RuleSummary, RuleType } from '../../../../types';
@@ -42,8 +42,8 @@ export type RuleEventLogListProps<T extends RuleEventLogListOptions = 'default'>
   T extends 'default'
     ? RuleEventLogListCommonProps
     : T extends 'stackManagement'
-    ? RuleEventLogListStackManagementProps & RuleEventLogListCommonProps
-    : never;
+      ? RuleEventLogListStackManagementProps & RuleEventLogListCommonProps
+      : never;
 
 export const RuleEventLogList = <T extends RuleEventLogListOptions>(
   props: RuleEventLogListProps<T>

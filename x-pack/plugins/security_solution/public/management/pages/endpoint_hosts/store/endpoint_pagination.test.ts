@@ -21,16 +21,16 @@ import { endpointMiddlewareFactory } from './middleware';
 
 import { endpointListReducer } from './reducer';
 
-import { uiQueryParams } from './selectors';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
+import { createSpyMiddleware } from '../../../../common/store/test_utils';
+import { getEndpointListPath } from '../../../common/routing';
+import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import {
   mockEndpointResultList,
   setEndpointListApiMockImplementation,
 } from './mock_endpoint_result_list';
-import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
-import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
-import { createSpyMiddleware } from '../../../../common/store/test_utils';
-import { getEndpointListPath } from '../../../common/routing';
-import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import { uiQueryParams } from './selectors';
 
 jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),

@@ -10,13 +10,12 @@ import type { Logger, RequestHandler } from '@kbn/core/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import type {
-  MetadataListResponse,
   EndpointSortableField,
+  MetadataListResponse,
 } from '../../../../common/endpoint/types';
-import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { errorHandler } from '../error_handler';
 
-import type { EndpointAppContext } from '../../types';
 import type {
   GetMetadataListRequestQuery,
   GetMetadataRequestSchema,
@@ -30,6 +29,7 @@ import {
   METADATA_TRANSFORMS_PATTERN_V2,
 } from '../../../../common/endpoint/constants';
 import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/package_v2';
+import type { EndpointAppContext } from '../../types';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');

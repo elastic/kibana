@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { uniq } from 'lodash';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 

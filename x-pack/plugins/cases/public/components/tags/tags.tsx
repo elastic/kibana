@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import type { EuiBadgeGroupProps } from '@elastic/eui';
-import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { memo } from 'react';
 
 interface TagsProps {
   tags: string[];

@@ -7,13 +7,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ObjectStorage, IdObject } from '../../../common/types';
+import { IdObject, ObjectStorage } from '../../../common/types';
 import { Storage } from '../../services';
 
 export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> {
   private readonly prefix: string;
 
-  constructor(private readonly client: Storage, type: string) {
+  constructor(
+    private readonly client: Storage,
+    type: string
+  ) {
     this.prefix = `console_local_${type}`;
   }
 

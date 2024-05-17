@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { validateActions, ValidateActionsData } from './validate_actions';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { AlertsFilter, RecoveredActionGroup, RuleAction, RuleNotifyWhen } from '../../../common';
 import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
+import { AlertsFilter, RecoveredActionGroup, RuleAction, RuleNotifyWhen } from '../../../common';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { ValidateActionsData, validateActions } from './validate_actions';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();

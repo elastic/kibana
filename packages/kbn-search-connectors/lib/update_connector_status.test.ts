@@ -10,8 +10,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { updateConnectorStatus } from './update_connector_status';
 import { ConnectorStatus } from '../types/connectors';
+import { updateConnectorStatus } from './update_connector_status';
 
 describe('updateConnectorStatus lib function', () => {
   const mockClient = {

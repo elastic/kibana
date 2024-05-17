@@ -1,3 +1,5 @@
+import { EuiButtonGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +7,8 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup } from '@elastic/eui';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 
 export const QuickFilters = () => {
   const { statusFilter } = useGetUrlParams();

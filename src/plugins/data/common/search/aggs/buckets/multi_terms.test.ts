@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('Multi Terms Agg', () => {
   const getAggConfigs = (params: Record<string, any> = {}) => {
@@ -53,7 +53,7 @@ describe('Multi Terms Agg', () => {
       ],
     } as DataView;
 
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
+    indexPattern.fields.getByName = (name) => ({ name }) as unknown as DataViewField;
     indexPattern.fields.filter = () => indexPattern.fields;
 
     return new AggConfigs(
@@ -163,7 +163,7 @@ describe('Multi Terms Agg', () => {
       ],
     } as DataView;
 
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
+    indexPattern.fields.getByName = (name) => ({ name }) as unknown as DataViewField;
     indexPattern.fields.filter = () => indexPattern.fields;
 
     const aggConfigs = new AggConfigs(

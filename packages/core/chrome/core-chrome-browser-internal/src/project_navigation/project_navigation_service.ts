@@ -8,34 +8,34 @@
 
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
-  ChromeNavLinks,
-  SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeBreadcrumb,
-  ChromeSetProjectBreadcrumbsParams,
+  ChromeNavLinks,
+  ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,
-  NavigationTreeDefinition,
-  SolutionNavigationDefinitions,
+  ChromeSetProjectBreadcrumbsParams,
   CloudLinks,
+  NavigationTreeDefinition,
+  SideNavComponent,
+  SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import {
-  BehaviorSubject,
-  combineLatest,
-  map,
-  takeUntil,
-  ReplaySubject,
-  skip,
-  distinctUntilChanged,
-  skipWhile,
-  filter,
-  of,
-  type Observable,
-  type Subscription,
-  take,
-} from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
+import {
+  BehaviorSubject,
+  type Observable,
+  ReplaySubject,
+  type Subscription,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  of,
+  skip,
+  skipWhile,
+  take,
+  takeUntil,
+} from 'rxjs';
 
 import {
   AppDeepLinkId,
@@ -45,9 +45,9 @@ import {
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 
-import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
+import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -106,10 +106,13 @@ export class ProjectNavigationService {
 
     this.deepLinksMap$ = navLinksService.getNavLinks$().pipe(
       map((navLinks) => {
-        return navLinks.reduce((acc, navLink) => {
-          acc[navLink.id] = navLink;
-          return acc;
-        }, {} as Record<string, ChromeNavLink>);
+        return navLinks.reduce(
+          (acc, navLink) => {
+            acc[navLink.id] = navLink;
+            return acc;
+          },
+          {} as Record<string, ChromeNavLink>
+        );
       })
     );
 

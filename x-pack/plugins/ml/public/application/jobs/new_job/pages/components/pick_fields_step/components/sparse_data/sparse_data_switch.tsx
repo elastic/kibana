@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiSwitch } from '@elastic/eui';
-import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 

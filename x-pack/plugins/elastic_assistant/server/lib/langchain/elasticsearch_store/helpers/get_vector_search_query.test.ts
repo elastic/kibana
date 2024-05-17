@@ -7,9 +7,9 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import { getVectorSearchQuery } from './get_vector_search_query';
-import { mockTerms } from '../../../../__mocks__/terms';
 import { mockQueryText } from '../../../../__mocks__/query_text';
+import { mockTerms } from '../../../../__mocks__/terms';
+import { getVectorSearchQuery } from './get_vector_search_query';
 
 describe('getVectorSearchQuery', () => {
   it('returns the expected query when mustNotTerms is empty', () => {

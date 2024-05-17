@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Logger } from '@kbn/core/server';
+import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/constants';
+import { threatIntelligenceSearchStrategyProvider } from './search_strategy';
 import {
   IThreatIntelligencePlugin,
   ThreatIntelligencePluginCoreSetupDependencies,
   ThreatIntelligencePluginSetupDependencies,
 } from './types';
-import { threatIntelligenceSearchStrategyProvider } from './search_strategy';
 
 export class ThreatIntelligencePlugin implements IThreatIntelligencePlugin {
   private readonly logger: Logger;

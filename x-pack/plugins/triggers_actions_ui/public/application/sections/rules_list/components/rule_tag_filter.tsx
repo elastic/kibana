@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiSelectable,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiSelectableProps,
+  EuiSelectable,
   EuiSelectableOption,
+  EuiSelectableProps,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
 
 export interface RuleTagFilterProps {

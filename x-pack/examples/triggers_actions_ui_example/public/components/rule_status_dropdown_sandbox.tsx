@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useState } from 'react';
-import moment from 'moment';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import moment from 'moment';
+import { useState } from 'react';
 
 interface SandboxProps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

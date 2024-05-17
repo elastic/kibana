@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { InvokeCreator } from 'xstate';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
-import { LogsExplorerCustomizations } from '../../../../controller';
-import { Dataset } from '../../../../../common/datasets';
+import { InvokeCreator } from 'xstate';
 import {
   DataViewSelection,
-  isDataViewSelection,
-  isUnresolvedDatasetSelection,
   SingleDatasetSelection,
   UnresolvedDatasetSelection,
+  isDataViewSelection,
+  isUnresolvedDatasetSelection,
 } from '../../../../../common/data_source_selection';
+import { Dataset } from '../../../../../common/datasets';
+import { LogsExplorerCustomizations } from '../../../../controller';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 

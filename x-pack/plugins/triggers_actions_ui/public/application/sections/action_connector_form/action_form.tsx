@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTitle,
-  EuiSpacer,
   EuiKeyPadMenuItem,
-  EuiToolTip,
   EuiLink,
-  EuiEmptyPrompt,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   ActionGroup,
@@ -28,29 +25,32 @@ import {
   RuleActionParam,
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
-import {
-  ActionTypeModel,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
-  NotifyWhenSelectOptions,
-  RuleUiAction,
-  RuleAction,
-} from '../../../types';
-import { SectionLoading } from '../../components/section_loading';
-import { ActionTypeForm } from './action_type_form';
-import { AddConnectorInline } from './connector_add_inline';
-import { actionTypeCompare } from '../../lib/action_type_compare';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { ConnectorAddModal } from '.';
 import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorAddModal } from '.';
-import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import {
+  ActionConnector,
+  ActionTypeIndex,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+  ActionVariables,
+  NotifyWhenSelectOptions,
+  RuleAction,
+  RuleUiAction,
+} from '../../../types';
+import { SectionLoading } from '../../components/section_loading';
+import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
+import { actionTypeCompare } from '../../lib/action_type_compare';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
+import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { ActionTypeForm } from './action_type_form';
+import { AddConnectorInline } from './connector_add_inline';
 import { SystemActionTypeForm } from './system_action_type_form';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {

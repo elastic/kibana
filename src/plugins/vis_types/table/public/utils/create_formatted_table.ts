@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { chain } from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { getFormatService } from '../services';
-import { FormattedColumn, FormattedColumns, TableVisConfig, TableContext } from '../types';
+import { chain } from 'lodash';
 import { AggTypes } from '../../common';
+import { getFormatService } from '../services';
+import { FormattedColumn, FormattedColumns, TableContext, TableVisConfig } from '../types';
 
 export const createFormattedTable = (
   table: Datatable | TableContext,

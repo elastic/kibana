@@ -1,3 +1,4 @@
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +6,16 @@
  * 2.0.
  */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { ProcessTreeNode } from '../process_tree_node';
-import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
-import { useProcessTree } from './hooks';
-import { collapseProcessTree } from './helpers';
-import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
 import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '../../../common';
-import { useScroll } from '../../hooks/use_scroll';
-import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
+import { useScroll } from '../../hooks/use_scroll';
 import { SessionViewTelemetryKey } from '../../types';
+import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
+import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
+import { ProcessTreeNode } from '../process_tree_node';
+import { collapseProcessTree } from './helpers';
+import { useProcessTree } from './hooks';
+import { useStyles } from './styles';
 
 type FetchFunction = () => void;
 

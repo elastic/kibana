@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { ConfigurationRequest } from '../../../common/types/api';
 import type { Configuration } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { CaseConnectorMapping } from './types';
-import type { CasesConfigurationUI } from '../types';
 import { customFieldsConfigurationMock } from '../mock';
+import type { CasesConfigurationUI } from '../types';
+import type { CaseConnectorMapping } from './types';
 
 export const mappings: CaseConnectorMapping[] = [
   {

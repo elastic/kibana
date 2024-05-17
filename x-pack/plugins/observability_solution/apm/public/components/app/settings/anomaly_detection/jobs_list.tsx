@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import React, { useState } from 'react';
+import { AnomalyDetectionApiResponse } from '.';
 import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -32,7 +33,6 @@ import { MLManageJobsLink } from '../../../shared/links/machine_learning_links/m
 import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../../shared/ml_callout';
-import { AnomalyDetectionApiResponse } from '.';
 import { JobsListStatus } from './jobs_list_status';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIcon, EuiIconProps, useEuiTheme } from '@elastic/eui';
 import { AgentName } from '@kbn/elastic-agent-utils';
+import React from 'react';
 import { getAgentIcon } from './get_agent_icon';
 
 export interface AgentIconProps extends Omit<EuiIconProps, 'type'> {

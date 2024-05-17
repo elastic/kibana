@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   FieldFormat,
   FieldFormatsStartCommon,
@@ -13,20 +14,19 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { cloneDeep, merge } from 'lodash';
-import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
-  FieldSpec,
   FieldFormatMap,
+  FieldSpec,
+  RuntimeField,
   RuntimeFieldSpec,
   SourceFilter,
   TypeMeta,
-  RuntimeField,
 } from '../types';
-import { removeFieldAttrs } from './utils';
 import { metaUnitsToFormatter } from './meta_units_to_formatter';
+import { removeFieldAttrs } from './utils';
 
-import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
+import type { DataViewAttributes, FieldAttrSet, FieldAttrs } from '..';
 
 import type { DataViewField } from '../fields';
 
@@ -135,25 +135,28 @@ export abstract class AbstractDataView {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     const extractedFieldAttrs = spec?.fields
-      ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
-          const attrs: FieldAttrSet = {};
-          let hasAttrs = false;
+      ? Object.entries(spec.fields).reduce(
+          (acc, [key, value]) => {
+            const attrs: FieldAttrSet = {};
+            let hasAttrs = false;
 
-          if (value.count) {
-            attrs.count = value.count;
-            hasAttrs = true;
-          }
+            if (value.count) {
+              attrs.count = value.count;
+              hasAttrs = true;
+            }
 
-          if (value.customLabel) {
-            attrs.customLabel = value.customLabel;
-            hasAttrs = true;
-          }
+            if (value.customLabel) {
+              attrs.customLabel = value.customLabel;
+              hasAttrs = true;
+            }
 
-          if (hasAttrs) {
-            acc[key] = attrs;
-          }
-          return acc;
-        }, {} as Record<string, FieldAttrSet>)
+            if (hasAttrs) {
+              acc[key] = attrs;
+            }
+            return acc;
+          },
+          {} as Record<string, FieldAttrSet>
+        )
       : [];
 
     this.allowNoIndex = spec?.allowNoIndex || false;

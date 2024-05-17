@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
-import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { Logger } from '@kbn/core/server';
+import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
+import { FIELD_PREFIX } from './config';
+import * as i18n from './translations';
 import {
   ExternalServiceCredentials,
   Incident,
@@ -20,8 +22,6 @@ import {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
 } from './types';
-import { FIELD_PREFIX } from './config';
-import * as i18n from './translations';
 
 export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi

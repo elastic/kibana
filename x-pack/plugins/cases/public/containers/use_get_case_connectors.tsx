@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import * as i18n from './translations';
-import { getCaseConnectors } from './api';
-import type { ServerError } from '../types';
-import { casesQueriesKeys } from './constants';
 import { useCasesToast } from '../common/use_cases_toast';
+import type { ServerError } from '../types';
+import { getCaseConnectors } from './api';
+import { casesQueriesKeys } from './constants';
+import * as i18n from './translations';
 import type { CaseConnectors } from './types';
 
 // 30 seconds

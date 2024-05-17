@@ -1,8 +1,5 @@
 {
-  "sort": [
-    "@timestamp",
-    "desc"
-  ],
+  "sort": ["@timestamp", "desc"],
   "hits": 0,
   "description": "Filebeat HTTP Access Data (ECS)",
   "title": "ML HTTP Access: Access Data (ECS)",
@@ -10,7 +7,5 @@
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{\"index\":\"INDEX_PATTERN_ID\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"fileset.name : \\\"access\\\"\",\"language\":\"kuery\"},\"filter\":[]}"
   },
-  "columns": [
-    "_source"
-  ]
+  "columns": ["_source"]
 }

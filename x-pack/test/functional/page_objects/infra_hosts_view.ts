@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertStatus } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { AlertStatus } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
@@ -173,9 +173,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getLogsTableColumnHeaders() {
-      const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
-        '~logColumnHeader'
-      );
+      const columnHeaderElements: WebElementWrapper[] =
+        await testSubjects.findAll('~logColumnHeader');
       return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 

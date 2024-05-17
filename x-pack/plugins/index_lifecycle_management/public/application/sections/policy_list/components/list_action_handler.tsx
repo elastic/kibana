@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { usePolicyListContext } from '../policy_list_context';
 import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
-import { ConfirmDelete } from './confirm_delete';
+import { usePolicyListContext } from '../policy_list_context';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
+import { ConfirmDelete } from './confirm_delete';
 
 interface Props {
   updatePolicies: () => void;

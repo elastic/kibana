@@ -1,3 +1,7 @@
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +9,6 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewFieldBase } from '@kbn/es-query';
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 import { useQuery } from '@tanstack/react-query';
 

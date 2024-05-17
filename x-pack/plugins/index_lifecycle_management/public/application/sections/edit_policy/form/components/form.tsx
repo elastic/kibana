@@ -7,12 +7,12 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { Form as LibForm, FormHook } from '../../../../../shared_imports';
+import { FormHook, Form as LibForm } from '../../../../../shared_imports';
 
 import { ConfigurationProvider } from '../configuration_context';
 import { FormErrorsProvider } from '../form_errors_context';
-import { PhaseTimingsProvider } from '../phase_timings_context';
 import { GlobalFieldsProvider } from '../global_fields_context';
+import { PhaseTimingsProvider } from '../phase_timings_context';
 
 interface Props {
   form: FormHook;

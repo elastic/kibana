@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { ElementCard } from '../element_card';
 
 storiesOf('components/Elements/ElementCard', module)

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
-import { useTrackMetric, METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
-import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
-import { SidebarItem, LegendItem, NetworkItems } from './types';
-import { WaterfallProvider, WaterfallChart, RenderItem, useFlyout } from '../../waterfall';
+import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback, useMemo, useState } from 'react';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
+import { RenderItem, WaterfallChart, WaterfallProvider, useFlyout } from '../../waterfall';
+import { MarkerItems } from '../../waterfall/context/waterfall_chart';
+import { getLegendItems, getSeriesAndDomain, getSidebarItems } from './data_formatting';
+import { LegendItem, NetworkItems, SidebarItem } from './types';
 import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
-import { MarkerItems } from '../../waterfall/context/waterfall_chart';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return (

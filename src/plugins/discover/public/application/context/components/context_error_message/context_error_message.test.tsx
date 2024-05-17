@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { ContextErrorMessage } from './context_error_message';
+import React from 'react';
 import { FailureReason, LoadingStatus } from '../../services/context_query_state';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { ContextErrorMessage } from './context_error_message';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;

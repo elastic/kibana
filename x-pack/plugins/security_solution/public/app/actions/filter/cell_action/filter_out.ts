@@ -7,19 +7,19 @@
 
 import { addFilterIn, addFilterOut, createFilterOutActionFactory } from '@kbn/cell-actions/actions';
 import {
+  filterOutNullableValues,
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
-  filterOutNullableValues,
   valueToArray,
 } from '@kbn/cell-actions/actions/utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../../common/store';
-import type { StartServices } from '../../../../types';
 import { isTimelineScope } from '../../../../helpers';
-import type { SecurityCellAction } from '../../types';
+import type { StartServices } from '../../../../types';
 import { SecurityCellActionType } from '../../constants';
+import type { SecurityCellAction } from '../../types';
+import { fieldHasCellActions } from '../../utils';
 
 export const createFilterOutCellActionFactory = ({
   services,

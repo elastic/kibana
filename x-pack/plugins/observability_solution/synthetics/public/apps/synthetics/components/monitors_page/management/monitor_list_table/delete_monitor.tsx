@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { fetchDeleteMonitor } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
+import { fetchDeleteMonitor } from '../../../../state';
 import * as labels from './labels';
 
 export const DeleteMonitor = ({

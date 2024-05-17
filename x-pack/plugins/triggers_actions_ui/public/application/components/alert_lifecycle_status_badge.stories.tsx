@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Story } from '@storybook/react';
-import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import React, { ComponentProps } from 'react';
 import {
   AlertLifecycleStatusBadge,
   AlertLifecycleStatusBadgeProps,

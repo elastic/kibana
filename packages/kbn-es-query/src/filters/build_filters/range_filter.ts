@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { get, has, keys, map, mapValues, pickBy, reduce } from 'lodash';
+import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import type { Filter, FilterMeta, FilterMetaParams } from './types';
 import { FILTERS } from './types';
-import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
 

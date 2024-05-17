@@ -7,8 +7,8 @@
 import React from 'react';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../../common/types';
-import { useAuthz } from '../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../mock';
+import { useAuthz } from '../../../hooks';
 
 import { AgentPolicyActionMenu } from './actions_menu';
 

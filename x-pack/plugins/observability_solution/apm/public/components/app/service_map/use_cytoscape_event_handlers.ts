@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
 import { useEffect } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 /*

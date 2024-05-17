@@ -7,13 +7,16 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type {
-  AttackDiscoveryTelemetryEvent,
-  ReportAttackDiscoveriesGeneratedParams,
-  ReportAttackDiscoveryTelemetryEventParams,
-} from './events/attack_discovery/types';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
+import type {
+  AssistantTelemetryEvent,
+  ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
+  ReportAssistantSettingToggledParams,
+  ReportAssistantTelemetryEventParams,
+} from './events/ai_assistant/types';
 import type {
   AlertsGroupingTelemetryEvent,
   ReportAlertsGroupingChangedParams,
@@ -22,37 +25,34 @@ import type {
   ReportAlertsTakeActionParams,
 } from './events/alerts_grouping/types';
 import type {
+  AttackDiscoveryTelemetryEvent,
+  ReportAttackDiscoveriesGeneratedParams,
+  ReportAttackDiscoveryTelemetryEventParams,
+} from './events/attack_discovery/types';
+import type {
+  DataQualityTelemetryEvents,
   ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
-  DataQualityTelemetryEvents,
 } from './events/data_quality/types';
+import type {
+  DocumentDetailsTelemetryEvents,
+  ReportDetailsFlyoutOpenedParams,
+  ReportDetailsFlyoutTabClickedParams,
+  ReportDocumentDetailsTelemetryEventParams,
+} from './events/document_details/types';
 import type {
   EntityAnalyticsTelemetryEvent,
   ReportAddRiskInputToTimelineClickedParams,
+  ReportAssetCriticalityCsvImportedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
   ReportEntityAlertsClickedParams,
   ReportEntityAnalyticsTelemetryEventParams,
   ReportEntityDetailsClickedParams,
   ReportEntityRiskFilteredParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
-  ReportAssetCriticalityCsvPreviewGeneratedParams,
-  ReportAssetCriticalityFileSelectedParams,
-  ReportAssetCriticalityCsvImportedParams,
 } from './events/entity_analytics/types';
-import type {
-  AssistantTelemetryEvent,
-  ReportAssistantTelemetryEventParams,
-  ReportAssistantInvokedParams,
-  ReportAssistantQuickPromptParams,
-  ReportAssistantMessageSentParams,
-  ReportAssistantSettingToggledParams,
-} from './events/ai_assistant/types';
-import type {
-  DocumentDetailsTelemetryEvents,
-  ReportDocumentDetailsTelemetryEventParams,
-  ReportDetailsFlyoutOpenedParams,
-  ReportDetailsFlyoutTabClickedParams,
-} from './events/document_details/types';
 import type {
   OnboardingHubStepFinishedParams,
   OnboardingHubStepLinkClickedParams,

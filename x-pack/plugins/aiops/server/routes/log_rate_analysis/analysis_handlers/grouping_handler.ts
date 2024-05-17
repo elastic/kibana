@@ -9,24 +9,24 @@ import { queue } from 'async';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import {
-  fetchHistogramsForFields,
+  type NumericChartData,
   type SignificantItem,
   type SignificantItemGroup,
   type SignificantItemHistogramItem,
-  type NumericChartData,
+  fetchHistogramsForFields,
 } from '@kbn/ml-agg-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import {
   addSignificantItemsGroupAction,
   addSignificantItemsGroupHistogramAction,
   updateLoadingStateAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import { fetchFrequentItemSets } from '@kbn/aiops-log-rate-analysis/queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from '@kbn/aiops-log-rate-analysis/queries/fetch_terms_2_categories_counts';
@@ -34,8 +34,8 @@ import { getGroupFilter } from '@kbn/aiops-log-rate-analysis/queries/get_group_f
 import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 import { getSignificantItemGroups } from '@kbn/aiops-log-rate-analysis/queries/get_significant_item_groups';
 
-import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
+import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
 
 export const groupingHandlerFactory =
   <T extends ApiVersion>({

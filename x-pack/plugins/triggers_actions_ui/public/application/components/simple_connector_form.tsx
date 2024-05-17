@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   ComboBoxField,
   Field,
   PasswordField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
+import React, { memo, ReactNode } from 'react';
 
 export interface CommonFieldSchema {
   id: string;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { getSectionsFromFields } from '../helper';
+import React, { useMemo } from 'react';
 import { MetadataTable } from '..';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { getSectionsFromFields } from '../helper';
 
 interface Props {
   error: APMError;

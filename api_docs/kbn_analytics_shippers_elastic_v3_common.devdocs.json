@@ -47,12 +47,8 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": [
-              "\nConstructor of the error."
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nConstructor of the error."],
+            "signature": ["any"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -63,12 +59,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "message",
-                "description": [
-                  "The error message."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The error message."],
+                "signature": ["string"],
                 "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -80,12 +72,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "code",
-                "description": [
-                  "The code of the error."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The code of the error."],
+                "signature": ["string"],
                 "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -105,9 +93,7 @@
         "type": "Function",
         "tags": [],
         "label": "buildHeaders",
-        "description": [
-          "\nReturns the headers to send to the Remote Telemetry Service."
-        ],
+        "description": ["\nReturns the headers to send to the Remote Telemetry Service."],
         "signature": [
           "(clusterUuid: string, version: string, licenseId: string | undefined) => { 'x-elastic-license-id'?: string | undefined; 'content-type': string; 'x-elastic-cluster-id': string; 'x-elastic-stack-version': string; }"
         ],
@@ -121,12 +107,8 @@
             "type": "string",
             "tags": [],
             "label": "clusterUuid",
-            "description": [
-              "The UUID of the ES cluster."
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The UUID of the ES cluster."],
+            "signature": ["string"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -138,12 +120,8 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "The version of the ES cluster."
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The version of the ES cluster."],
+            "signature": ["string"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -155,12 +133,8 @@
             "type": "string",
             "tags": [],
             "label": "licenseId",
-            "description": [
-              "The ID of the license (if available)."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The ID of the license (if available)."],
+            "signature": ["string | undefined"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,9 +150,7 @@
         "type": "Function",
         "tags": [],
         "label": "buildUrl",
-        "description": [
-          "\nBuilds the URL for the V3 API."
-        ],
+        "description": ["\nBuilds the URL for the V3 API."],
         "signature": [
           "(urlOptions: ",
           {
@@ -200,9 +172,7 @@
             "type": "Object",
             "tags": [],
             "label": "urlOptions",
-            "description": [
-              "The options to build the URL of the V3 API."
-            ],
+            "description": ["The options to build the URL of the V3 API."],
             "signature": [
               {
                 "pluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -227,9 +197,7 @@
         "type": "Function",
         "tags": [],
         "label": "createTelemetryCounterHelper",
-        "description": [
-          "\nCreates a telemetry counter helper to make it easier to generate them"
-        ],
+        "description": ["\nCreates a telemetry counter helper to make it easier to generate them"],
         "signature": [
           "(telemetryCounter$: ",
           "Subject",
@@ -269,9 +237,7 @@
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
-            "description": [
-              "The observable that will be used to emit the telemetry counters"
-            ],
+            "description": ["The observable that will be used to emit the telemetry counters"],
             "signature": [
               "Subject",
               "<",
@@ -295,12 +261,8 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [
-              "The name of the shipper that is sending the events."
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["The name of the shipper that is sending the events."],
+            "signature": ["string"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -316,9 +278,7 @@
         "type": "Function",
         "tags": [],
         "label": "eventsToNDJSON",
-        "description": [
-          "\nConverts an array of events to a single ndjson string."
-        ],
+        "description": ["\nConverts an array of events to a single ndjson string."],
         "signature": [
           "(events: ",
           {
@@ -340,9 +300,7 @@
             "type": "Array",
             "tags": [],
             "label": "events",
-            "description": [
-              "An array of events {@link Event }"
-            ],
+            "description": ["An array of events {@link Event }"],
             "signature": [
               {
                 "pluginId": "@kbn/analytics-client",
@@ -370,9 +328,7 @@
         "type": "Interface",
         "tags": [],
         "label": "BuildUrlOptions",
-        "description": [
-          "The options to build the URL of the V3 API."
-        ],
+        "description": ["The options to build the URL of the V3 API."],
         "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -383,12 +339,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "sendTo",
-            "description": [
-              "Whether to send it to production or staging."
-            ],
-            "signature": [
-              "\"production\" | \"staging\""
-            ],
+            "description": ["Whether to send it to production or staging."],
+            "signature": ["\"production\" | \"staging\""],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -399,9 +351,7 @@
             "type": "string",
             "tags": [],
             "label": "channelName",
-            "description": [
-              "The name of the channel to send the data to."
-            ],
+            "description": ["The name of the channel to send the data to."],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -415,9 +365,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ElasticV3ShipperOptions",
-        "description": [
-          "\nOptions for the Elastic V3 shipper"
-        ],
+        "description": ["\nOptions for the Elastic V3 shipper"],
         "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -428,9 +376,7 @@
             "type": "string",
             "tags": [],
             "label": "channelName",
-            "description": [
-              "\nThe name of the channel to stream all the events to."
-            ],
+            "description": ["\nThe name of the channel to stream all the events to."],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -441,9 +387,7 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "\nThe product's version."
-            ],
+            "description": ["\nThe product's version."],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -457,9 +401,7 @@
             "description": [
               "\nProvide it to override the Analytics client's default configuration."
             ],
-            "signature": [
-              "\"production\" | \"staging\" | undefined"
-            ],
+            "signature": ["\"production\" | \"staging\" | undefined"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -473,9 +415,7 @@
             "description": [
               "\nShould show debug information about the requests it makes to the V3 API."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

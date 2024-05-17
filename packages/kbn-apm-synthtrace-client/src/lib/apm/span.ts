@@ -1,3 +1,5 @@
+import { generateShortId } from '../utils/generate_id';
+import { ApmFields, SpanParams } from './apm_fields';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import { BaseSpan } from './base_span';
-import { generateShortId } from '../utils/generate_id';
-import { ApmFields, SpanParams } from './apm_fields';
 
 export class Span extends BaseSpan {
   constructor(fields: ApmFields) {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { isStatusEnabled } from '../../../../common/runtime_types/monitor_management/alert_config';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../components/monitors_page/overview/types';
 import { enableMonitorAlertAction, selectMonitorUpsertStatuses } from '../state';

@@ -7,14 +7,14 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 
-import { EuiToolTip, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SeriesUrl, BuilderItem } from '../types';
-import { getSeriesToEdit } from '../series_editor/series_editor';
-import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
-import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
+import { getSeriesToEdit } from '../series_editor/series_editor';
+import { BuilderItem, SeriesUrl } from '../types';
 
 export function AddSeriesButton() {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
@@ -70,10 +70,10 @@ export function AddSeriesButton() {
               }
             )
           : isAddDisabled
-          ? i18n.translate('xpack.exploratoryView.expView.seriesBuilder.addSeries.limitation', {
-              defaultMessage: 'You can only add one series of this report type.',
-            })
-          : ''
+            ? i18n.translate('xpack.exploratoryView.expView.seriesBuilder.addSeries.limitation', {
+                defaultMessage: 'You can only add one series of this report type.',
+              })
+            : ''
       }
     >
       <EuiButton

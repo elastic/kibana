@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlDatafeedStats, MlJob, MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { MlJobMetric, MlJobUsageMetric } from './types';
 
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
 import { getInitialMlJobUsage } from './get_initial_usage';
-import { updateMlJobUsage } from './update_usage';
 import { getJobCorrelations } from './transform_utils/get_job_correlations';
+import { updateMlJobUsage } from './update_usage';
 
 export interface GetMlJobMetricsOptions {
   mlClient: MlPluginSetup | undefined;

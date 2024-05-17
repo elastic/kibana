@@ -8,8 +8,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { fetchConnectors } from './fetch_connectors';
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
+import { fetchConnectors } from './fetch_connectors';
 
 export async function fetchConnectorIndexNames(client: ElasticsearchClient): Promise<string[]> {
   try {

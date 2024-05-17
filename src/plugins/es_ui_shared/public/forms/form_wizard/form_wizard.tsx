@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { EuiSpacer, EuiStepStatus, EuiStepsHorizontal } from '@elastic/eui';
 import React from 'react';
-import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer } from '@elastic/eui';
 
 import {
-  FormWizardProvider,
   FormWizardConsumer,
+  FormWizardProvider,
   Props as ProviderProps,
 } from './form_wizard_context';
 import { FormWizardNav, NavTexts } from './form_wizard_nav';
@@ -91,8 +91,8 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
               status: (activeStepIndex === index
                 ? 'selected'
                 : activeStepIndex > index
-                ? 'complete'
-                : 'incomplete') as EuiStepStatus,
+                  ? 'complete'
+                  : 'incomplete') as EuiStepStatus,
               disabled: getIsStepDisabled(index),
               'data-test-subj': `formWizardStep-${index}`,
               onClick: () => navigateToStep(index),

@@ -8,9 +8,9 @@
 
 import { Readable } from 'stream';
 
+import { createConcatStream } from './concat_stream';
 import { concatStreamProviders } from './concat_stream_providers';
 import { createListStream } from './list_stream';
-import { createConcatStream } from './concat_stream';
 import { createPromiseFromStreams } from './promise_from_streams';
 
 describe('concatStreamProviders() helper', () => {

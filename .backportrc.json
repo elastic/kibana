@@ -47,9 +47,7 @@
     "6.0",
     "5.6"
   ],
-  "targetPRLabels": [
-    "backport"
-  ],
+  "targetPRLabels": ["backport"],
   "branchLabelMapping": {
     "^v8.15.0$": "main",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"

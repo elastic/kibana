@@ -8,17 +8,17 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ObjectType } from '@kbn/config-schema';
-import { isPlainObject, isArray } from 'lodash';
+import { isArray, isPlainObject } from 'lodash';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { getRootFields } from '../../utils';
+import { aggregationSchemas } from './aggs_types';
 import {
   isObjectTypeAttribute,
-  rewriteObjectTypeAttribute,
   isRootLevelAttribute,
+  rewriteObjectTypeAttribute,
   rewriteRootLevelAttribute,
 } from './validation_utils';
-import { aggregationSchemas } from './aggs_types';
 
 const aggregationKeys = ['aggs', 'aggregations'];
 
@@ -177,27 +177,30 @@ const recursiveRewrite = (
   context: ValidationContext,
   parents: string[]
 ): Record<string, any> => {
-  return Object.entries(currentLevel).reduce((memo, [key, value]) => {
-    const rewriteKey = isAttributeKey(parents);
-    const rewriteValue = isAttributeValue(key, value);
+  return Object.entries(currentLevel).reduce(
+    (memo, [key, value]) => {
+      const rewriteKey = isAttributeKey(parents);
+      const rewriteValue = isAttributeValue(key, value);
 
-    const nestedContext = childContext(context, key);
-    const newKey = rewriteKey ? validateAndRewriteAttributePath(key, nestedContext) : key;
+      const nestedContext = childContext(context, key);
+      const newKey = rewriteKey ? validateAndRewriteAttributePath(key, nestedContext) : key;
 
-    let newValue = value;
-    if (rewriteValue) {
-      newValue = validateAndRewriteAttributePath(value, nestedContext);
-    } else if (isArray(value)) {
-      newValue = value.map((v) =>
-        isPlainObject(v) ? recursiveRewrite(v, nestedContext, parents) : v
-      );
-    } else if (isPlainObject(value)) {
-      newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
-    }
+      let newValue = value;
+      if (rewriteValue) {
+        newValue = validateAndRewriteAttributePath(value, nestedContext);
+      } else if (isArray(value)) {
+        newValue = value.map((v) =>
+          isPlainObject(v) ? recursiveRewrite(v, nestedContext, parents) : v
+        );
+      } else if (isPlainObject(value)) {
+        newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
+      }
 
-    memo[newKey] = newValue;
-    return memo;
-  }, {} as Record<string, unknown>);
+      memo[newKey] = newValue;
+      return memo;
+    },
+    {} as Record<string, unknown>
+  );
 };
 
 const childContext = (context: ValidationContext, path: string): ValidationContext => {

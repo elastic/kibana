@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import * as i18n from '../translations';
-import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
+import * as i18n from '../translations';
 
 interface UserActionShowAlertProps {
   id: string;

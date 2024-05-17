@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
-import { pathsIntersect, splitIntoBuckets, convertBucketToSwitcher } from './resolve_helpers';
-import type { SwitcherWithId, SwitcherBucket } from './types';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { convertBucketToSwitcher, pathsIntersect, splitIntoBuckets } from './resolve_helpers';
+import type { SwitcherBucket, SwitcherWithId } from './types';
 
 describe('pathsIntersect', () => {
   test.each([

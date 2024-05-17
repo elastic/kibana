@@ -29,9 +29,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"filesManagement\""
-        ],
+        "signature": ["\"filesManagement\""],
         "path": "src/plugins/files_management/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

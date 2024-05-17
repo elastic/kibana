@@ -6,14 +6,14 @@
  */
 
 import { format } from 'url';
-import supertest from 'supertest';
-import request from 'superagent';
 import type {
-  APIReturnType,
   APIClientRequestParamsOf,
+  APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
+import request from 'superagent';
+import supertest from 'supertest';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(

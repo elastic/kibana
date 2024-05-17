@@ -22,12 +22,12 @@ import { docLinks } from '../../../../../shared/doc_links';
 import { LEARN_MORE_LINK } from '../../constants';
 
 import {
-  CONNECT_WHICH_OPTION_LINK,
   CONNECT_DOC_PERMISSIONS_LABEL,
   CONNECT_DOC_PERMISSIONS_TITLE,
   CONNECT_NEEDS_PERMISSIONS,
-  CONNECT_NOT_SYNCED_TITLE,
   CONNECT_NOT_SYNCED_TEXT,
+  CONNECT_NOT_SYNCED_TITLE,
+  CONNECT_WHICH_OPTION_LINK,
 } from './constants';
 
 interface Props {

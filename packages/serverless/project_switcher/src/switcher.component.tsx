@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import { EuiKeyPadMenu, EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiPopover, useGeneratedHtmlId, EuiPopoverTitle, EuiKeyPadMenu } from '@elastic/eui';
+import React, { useState } from 'react';
 
 import { ProjectType } from '@kbn/serverless-types';
 
+import { projectTypes } from './constants';
+import { HeaderButton } from './header_button';
 import { SwitcherItem } from './item';
 import type { ProjectSwitcherComponentProps } from './types';
-import { HeaderButton } from './header_button';
-import { projectTypes } from './constants';
 
 export { TEST_ID as TEST_ID_BUTTON } from './header_button';
 export const TEST_ID_ITEM_GROUP = 'projectSwitcherItemGroup';

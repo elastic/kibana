@@ -1,3 +1,6 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +8,10 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { HostMetrics } from './host_metrics';
-import { ContainerMetrics } from './container_metrics';
 import { Section } from '../../../components/section';
 import { MetricsSectionTitle } from '../section_titles';
+import { ContainerMetrics } from './container_metrics';
+import { HostMetrics } from './host_metrics';
 
 interface Props {
   assetId: string;

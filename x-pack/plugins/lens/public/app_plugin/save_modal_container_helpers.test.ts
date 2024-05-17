@@ -1,3 +1,4 @@
+import type { LensEmbeddableInput } from '../embeddable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { makeDefaultServices } from '../mocks';
-import type { LensEmbeddableInput } from '../embeddable';
-import type { LensAppServices } from './types';
 import { redirectToDashboard } from './save_modal_container_helpers';
+import type { LensAppServices } from './types';
 
 describe('redirectToDashboard', () => {
   const embeddableInput = {

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KueryNode } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
   EuiConfirmModal,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+import { KueryNode } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
+import { BulkEditActions, RuleTableItem, SnoozeSchedule } from '../../../../types';
+import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import {
-  withBulkRuleOperations,
   ComponentOpts as BulkOperationsComponentOpts,
+  withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
-import { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
-import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
-import { useKibana } from '../../../../common/lib/kibana';
 
 const failureMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleFailMessage',

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { join as joinPath } from 'path';
 import { existsSync, readFileSync } from 'fs';
+import { join as joinPath } from 'path';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';

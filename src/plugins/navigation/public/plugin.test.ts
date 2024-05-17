@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, of } from 'rxjs';
-import { coreMock } from '@kbn/core/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { BuildFlavor } from '@kbn/config';
+import { coreMock } from '@kbn/core/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { UserSettingsData } from '@kbn/user-profile-components';
+import { firstValueFrom, of } from 'rxjs';
 import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 import { NavigationPublicPlugin } from './plugin';
-import { ConfigSchema } from './types';
 import { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
+import { ConfigSchema } from './types';
 
 jest.mock('rxjs', () => {
   const original = jest.requireActual('rxjs');

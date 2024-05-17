@@ -6,35 +6,35 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
 import {
-  htmlIdGenerator,
   EuiComboBox,
-  EuiTabs,
-  EuiTab,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiFormLabel,
-  EuiSpacer,
-  EuiTitle,
+  EuiFormRow,
   EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 
 import { CodeEditor, CssLang } from '@kbn/code-editor';
-import { SeriesEditor } from '../series_editor';
+import { VisDataContext } from '../../contexts/vis_data_context';
+import { ColorPicker } from '../color_picker';
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { ColorPicker } from '../color_picker';
-import { YesNo } from '../yes_no';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { MarkdownEditor } from '../markdown_editor';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { VisDataContext } from '../../contexts/vis_data_context';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { SeriesEditor } from '../series_editor';
+import { YesNo } from '../yes_no';
+import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
 
 export class MarkdownPanelConfig extends Component<
   PanelConfigProps,

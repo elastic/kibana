@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  MetricsService,
-  InternalMetricsServiceSetup,
-  InternalMetricsServiceStart,
-} from '@kbn/core-metrics-server-internal';
 import {
-  mocked as eventLoopDelaysMonitorMock,
   collectorMock,
+  mocked as eventLoopDelaysMonitorMock,
 } from '@kbn/core-metrics-collectors-server-mocks';
 import type {
   ElasticsearchClientsMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
 } from '@kbn/core-metrics-server';
+import type {
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart,
+  MetricsService,
+} from '@kbn/core-metrics-server-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { BehaviorSubject } from 'rxjs';
 
 export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalActiveSockets: 25,

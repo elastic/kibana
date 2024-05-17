@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getThreatList } from './get_threat_list';
-import { getNamedQueryMock } from './enrich_signal_threat_matches.mock';
 import type { SignalSourceHit } from '../../types';
-import { threatSearchParamsMock } from './get_signals_map_from_threat_index.mock';
-import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
+import { getNamedQueryMock } from './enrich_signal_threat_matches.mock';
+import { threatSearchParamsMock } from './get_signals_map_from_threat_index.mock';
+import { getThreatList } from './get_threat_list';
+import { threatEnrichmentFactory } from './threat_enrichment_factory';
 
 jest.mock('./get_threat_list', () => ({ getThreatList: jest.fn() }));
 jest.mock('./enrich_signal_threat_matches', () => ({

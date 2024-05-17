@@ -8,7 +8,7 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
-import { TableVisData, TableGroup, TableVisConfig, TableContext } from '../types';
+import { TableContext, TableGroup, TableVisConfig, TableVisData } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
 import { createFormattedTable } from './create_formatted_table';
 

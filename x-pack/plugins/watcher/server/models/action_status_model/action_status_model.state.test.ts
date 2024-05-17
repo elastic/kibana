@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mergeWith, isObject } from 'lodash';
+import { isObject, mergeWith } from 'lodash';
 
 import { ACTION_STATES } from '../../../common/constants';
 import { ActionStatusModelEs } from '../../../common/types';
-import { buildServerActionStatusModel, buildClientActionStatusModel } from './action_status_model';
+import { buildClientActionStatusModel, buildServerActionStatusModel } from './action_status_model';
 
 // Treat all nested properties of type as optional.
 type DeepPartial<T> = T extends object

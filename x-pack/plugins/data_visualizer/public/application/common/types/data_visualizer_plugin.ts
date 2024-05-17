@@ -8,19 +8,19 @@ import type { AnalyticsServiceStart } from '@kbn/core/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { MapsStartApi } from '@kbn/maps-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;

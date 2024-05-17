@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import d3 from 'd3';
 import { EventEmitter } from 'events';
+import d3 from 'd3';
+import _ from 'lodash';
 
-import { VislibError } from './errors';
-import { VisConfig } from './lib/vis_config';
-import { Handler } from './lib/handler';
 import { HEATMAP_MAX_BUCKETS_SETTING } from '../../common';
+import { VislibError } from './errors';
+import { Handler } from './lib/handler';
+import { VisConfig } from './lib/vis_config';
 
 /**
  * Creates the visualizations.

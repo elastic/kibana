@@ -27,14 +27,14 @@ import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prom
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
 import {
-  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
-  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
-  SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION,
   SOURCE_ASSETS_AND_OBJECTS_ASSETS_LABEL,
-  SYNC_UNSAVED_CHANGES_MESSAGE,
+  SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION,
   SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK,
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_LABEL,
+  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
+  SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';

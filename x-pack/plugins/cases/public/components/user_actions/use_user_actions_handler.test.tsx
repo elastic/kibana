@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { act, renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
 import { basicCase } from '../../containers/mock';
 
+import { TestProviders } from '../../common/mock';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { TestProviders } from '../../common/mock';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { NEW_COMMENT_ID } from './constants';
 import { useUserActionsHandler } from './use_user_actions_handler';

@@ -8,19 +8,19 @@
 import { connect } from 'react-redux';
 
 import {
-  isDetailPanelOpen,
-  getClustersList,
-  isLoading,
-  isEditingCluster,
-  isRemovingCluster,
   clusterLoadError,
+  getClustersList,
+  isDetailPanelOpen,
+  isEditingCluster,
+  isLoading,
+  isRemovingCluster,
 } from '../../store/selectors';
 
 import {
-  loadClusters,
-  refreshClusters,
-  openDetailPanel,
   closeDetailPanel,
+  loadClusters,
+  openDetailPanel,
+  refreshClusters,
 } from '../../store/actions';
 
 import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';

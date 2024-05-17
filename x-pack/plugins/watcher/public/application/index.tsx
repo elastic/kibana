@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaRenderContextProvider } from './shared_imports';
 import { App, AppDeps } from './app';
 import { setHttpClient } from './lib/api';
+import { KibanaRenderContextProvider } from './shared_imports';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;

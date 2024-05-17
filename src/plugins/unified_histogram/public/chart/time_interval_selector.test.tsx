@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render, act, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { TimeIntervalSelector } from './time_interval_selector';
 

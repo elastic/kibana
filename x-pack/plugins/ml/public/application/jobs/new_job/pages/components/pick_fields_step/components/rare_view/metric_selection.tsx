@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { RareFieldSelector } from '../rare_field';
-import { JobCreatorContext } from '../../../job_creator_context';
 import type { RareJobCreator } from '../../../../../common/job_creator';
-import { RareDetector } from '../rare_detector';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationFieldSelector } from '../population_field';
+import { RareDetector } from '../rare_detector';
+import { RareFieldSelector } from '../rare_field';
 import { DetectorDescription } from './detector_description';
 import { RARE_DETECTOR_TYPE } from './rare_view';
 

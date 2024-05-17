@@ -13,6 +13,14 @@ import type {
   GetAgentsResponse,
   GetPackagesResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec';
+import {
+  ACTION_STATUS_ROUTE,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+} from '../../../../../common/endpoint/constants';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import type {
   GetHostPolicyResponse,
   HostInfo,
@@ -21,7 +29,7 @@ import type {
   PendingActionsResponse,
 } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import {
   INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
@@ -29,14 +37,6 @@ import {
   INGEST_API_PACKAGE_POLICIES,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
-import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
-import {
-  ACTION_STATUS_ROUTE,
-  ENDPOINT_DEFAULT_SORT_DIRECTION,
-  ENDPOINT_DEFAULT_SORT_FIELD,
-  HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
-} from '../../../../../common/endpoint/constants';
 import type { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');

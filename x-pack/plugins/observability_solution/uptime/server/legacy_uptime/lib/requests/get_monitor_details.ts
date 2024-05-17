@@ -7,11 +7,11 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
-import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../../common/runtime_types';
+import { createEsQuery } from '../../../../common/utils/es_search';
+import { UMElasticsearchQueryFn } from '../adapters';
 import { formatFilterString } from '../alerts/status_check';
 import { UptimeEsClient } from '../lib';
-import { createEsQuery } from '../../../../common/utils/es_search';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
@@ -94,65 +94,63 @@ export const getMonitorAlerts = async ({
   return monitorAlerts;
 };
 
-export const getMonitorDetails: UMElasticsearchQueryFn<
-  GetMonitorDetailsParams,
-  MonitorDetails
-> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
-  const queryFilters: any = [
-    {
-      range: {
-        '@timestamp': {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-    },
-    {
-      term: {
-        'monitor.id': monitorId,
-      },
-    },
-  ];
-
-  const params = {
-    size: 1,
-    _source: ['error', '@timestamp'],
-    query: {
-      bool: {
-        must: [
-          {
-            exists: {
-              field: 'error',
-            },
-          },
-        ],
-        filter: queryFilters,
-      },
-    },
-    sort: [
+export const getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails> =
+  async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
+    const queryFilters: any = [
       {
-        '@timestamp': {
-          order: 'desc' as const,
+        range: {
+          '@timestamp': {
+            gte: dateStart,
+            lte: dateEnd,
+          },
         },
       },
-    ],
+      {
+        term: {
+          'monitor.id': monitorId,
+        },
+      },
+    ];
+
+    const params = {
+      size: 1,
+      _source: ['error', '@timestamp'],
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'error',
+              },
+            },
+          ],
+          filter: queryFilters,
+        },
+      },
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc' as const,
+          },
+        },
+      ],
+    };
+
+    const { body: result } = await uptimeEsClient.search({ body: params }, 'getMonitorDetails');
+
+    const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
+
+    const errorTimestamp: string | undefined = data?.['@timestamp'];
+    const monAlerts = await getMonitorAlerts({
+      uptimeEsClient,
+      rulesClient,
+      monitorId,
+    });
+
+    return {
+      monitorId,
+      error: data?.error,
+      timestamp: errorTimestamp,
+      alerts: monAlerts,
+    };
   };
-
-  const { body: result } = await uptimeEsClient.search({ body: params }, 'getMonitorDetails');
-
-  const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
-
-  const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts({
-    uptimeEsClient,
-    rulesClient,
-    monitorId,
-  });
-
-  return {
-    monitorId,
-    error: data?.error,
-    timestamp: errorTimestamp,
-    alerts: monAlerts,
-  };
-};

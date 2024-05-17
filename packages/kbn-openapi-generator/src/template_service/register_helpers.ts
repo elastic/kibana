@@ -7,7 +7,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
-import { snakeCase, camelCase } from 'lodash';
+import { camelCase, snakeCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('concat', (...args) => {

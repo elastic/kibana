@@ -25,9 +25,7 @@
           "tags": [],
           "label": "metricsClient",
           "description": [],
-          "signature": [
-            "MetricsDataClient"
-          ],
+          "signature": ["MetricsDataClient"],
           "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -54,9 +52,7 @@
           "tags": [],
           "label": "metricsClient",
           "description": [],
-          "signature": [
-            "MetricsDataClient"
-          ],
+          "signature": ["MetricsDataClient"],
           "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -68,11 +64,7 @@
           "tags": [],
           "label": "HostMetricsTable",
           "description": [],
-          "signature": [
-            "(props: ",
-            "NodeMetricsTableProps",
-            ") => JSX.Element"
-          ],
+          "signature": ["(props: ", "NodeMetricsTableProps", ") => JSX.Element"],
           "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -84,9 +76,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "NodeMetricsTableProps"
-              ],
+              "signature": ["NodeMetricsTableProps"],
               "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -102,11 +92,7 @@
           "tags": [],
           "label": "PodMetricsTable",
           "description": [],
-          "signature": [
-            "(props: ",
-            "NodeMetricsTableProps",
-            ") => JSX.Element"
-          ],
+          "signature": ["(props: ", "NodeMetricsTableProps", ") => JSX.Element"],
           "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -118,9 +104,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "NodeMetricsTableProps"
-              ],
+              "signature": ["NodeMetricsTableProps"],
               "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -136,11 +120,7 @@
           "tags": [],
           "label": "ContainerMetricsTable",
           "description": [],
-          "signature": [
-            "(props: ",
-            "NodeMetricsTableProps",
-            ") => JSX.Element"
-          ],
+          "signature": ["(props: ", "NodeMetricsTableProps", ") => JSX.Element"],
           "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -152,9 +132,7 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": [
-                "NodeMetricsTableProps"
-              ],
+              "signature": ["NodeMetricsTableProps"],
               "path": "x-pack/plugins/observability_solution/metrics_data_access/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -400,9 +378,7 @@
         "tags": [],
         "label": "metricsDataSourceSavedObjectName",
         "description": [],
-        "signature": [
-          "\"metrics-data-source\""
-        ],
+        "signature": ["\"metrics-data-source\""],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/server/saved_objects/metrics_data_source/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -563,9 +539,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -631,9 +605,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -646,9 +618,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/shared/metrics/snapshot/network_traffic.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -669,9 +639,7 @@
         "tags": [],
         "label": "awsEC2SnapshotMetricTypes",
         "description": [],
-        "signature": [
-          "(\"rx\" | \"tx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
-        ],
+        "signature": ["(\"rx\" | \"tx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/aws_ec2/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -729,9 +697,7 @@
         "tags": [],
         "label": "containerSnapshotMetricTypes",
         "description": [],
-        "signature": [
-          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
-        ],
+        "signature": ["(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/container/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1415,9 +1381,7 @@
         "tags": [],
         "label": "InventoryVisType",
         "description": [],
-        "signature": [
-          "\"area\" | \"line\" | \"bar\""
-        ],
+        "signature": ["\"area\" | \"line\" | \"bar\""],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1447,9 +1411,7 @@
         "tags": [],
         "label": "podSnapshotMetricTypes",
         "description": [],
-        "signature": [
-          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
-        ],
+        "signature": ["(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/kubernetes/pod/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1518,9 +1480,7 @@
             "tags": [],
             "label": "indexPattern",
             "description": [],
-            "signature": [
-              "string | string[]"
-            ],
+            "signature": ["string | string[]"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1670,10 +1630,7 @@
         "tags": [],
         "label": "InventoryVisTypeRT",
         "description": [],
-        "signature": [
-          "KeyofC",
-          "<{ line: null; area: null; bar: null; }>"
-        ],
+        "signature": ["KeyofC", "<{ line: null; area: null; bar: null; }>"],
         "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1724,9 +1681,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1738,9 +1693,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1752,9 +1705,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1766,9 +1717,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1780,9 +1729,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1794,9 +1741,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1808,9 +1753,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1822,9 +1765,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/metrics.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1998,9 +1939,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2012,9 +1951,7 @@
             "tags": [],
             "label": "cpu",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2026,9 +1963,7 @@
             "tags": [],
             "label": "diskLatency",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2040,9 +1975,7 @@
             "tags": [],
             "label": "diskSpaceUsage",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2054,9 +1987,7 @@
             "tags": [],
             "label": "load",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2068,9 +1999,7 @@
             "tags": [],
             "label": "memory",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2082,9 +2011,7 @@
             "tags": [],
             "label": "memoryFree",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2096,9 +2023,7 @@
             "tags": [],
             "label": "memoryTotal",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2110,9 +2035,7 @@
             "tags": [],
             "label": "normalizedLoad1m",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2124,9 +2047,7 @@
             "tags": [],
             "label": "tx",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2138,9 +2059,7 @@
             "tags": [],
             "label": "rx",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2152,9 +2071,7 @@
             "tags": [],
             "label": "logRate",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2166,9 +2083,7 @@
             "tags": [],
             "label": "diskIOReadBytes",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2180,9 +2095,7 @@
             "tags": [],
             "label": "diskIOWriteBytes",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2194,9 +2107,7 @@
             "tags": [],
             "label": "s3TotalRequests",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2208,9 +2119,7 @@
             "tags": [],
             "label": "s3NumberOfObjects",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2222,9 +2131,7 @@
             "tags": [],
             "label": "s3BucketSize",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2236,9 +2143,7 @@
             "tags": [],
             "label": "s3DownloadBytes",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2250,9 +2155,7 @@
             "tags": [],
             "label": "s3UploadBytes",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2264,9 +2167,7 @@
             "tags": [],
             "label": "rdsConnections",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2278,9 +2179,7 @@
             "tags": [],
             "label": "rdsQueriesExecuted",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2292,9 +2191,7 @@
             "tags": [],
             "label": "rdsActiveTransactions",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2306,9 +2203,7 @@
             "tags": [],
             "label": "rdsLatency",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2320,9 +2215,7 @@
             "tags": [],
             "label": "sqsMessagesVisible",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2334,9 +2227,7 @@
             "tags": [],
             "label": "sqsMessagesDelayed",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2348,9 +2239,7 @@
             "tags": [],
             "label": "sqsMessagesSent",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2362,9 +2251,7 @@
             "tags": [],
             "label": "sqsMessagesEmpty",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2376,9 +2263,7 @@
             "tags": [],
             "label": "sqsOldestMessage",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2390,9 +2275,7 @@
             "tags": [],
             "label": "custom",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/plugins/observability_solution/metrics_data_access/common/inventory_models/types.ts",
             "deprecated": false,
             "trackAdoption": false

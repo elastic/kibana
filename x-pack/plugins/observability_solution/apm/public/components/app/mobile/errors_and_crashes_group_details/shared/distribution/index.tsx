@@ -6,19 +6,19 @@
  */
 
 import {
-  EuiTitle,
-  EuiIconTip,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiProgress,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { TimeseriesChartWithContext } from '../../../../../shared/charts/timeseries_chart_with_context';
 import { useLegacyUrlParams } from '../../../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, isPending } from '../../../../../../hooks/use_fetcher';
 import { usePreviousPeriodLabel } from '../../../../../../hooks/use_previous_period_text';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
+import { TimeseriesChartWithContext } from '../../../../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../../../../shared/time_comparison/get_comparison_chart_theme';
 
 import {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { chain } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import moment from 'moment';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chain } from 'fp-ts/lib/Either';
 
 const NANO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3,9}Z$/;
 

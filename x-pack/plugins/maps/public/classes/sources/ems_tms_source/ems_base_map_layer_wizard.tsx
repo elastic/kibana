@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
-import { EmsVectorTileLayer } from '../../layers/ems_vector_tile_layer/ems_vector_tile_layer';
-import { EmsTmsSourceConfig } from './tile_service_select';
-import { CreateSourceEditor } from './create_source_editor';
-import { getEMSSettings } from '../../../kibana_services';
+import React from 'react';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
+import { getEMSSettings } from '../../../kibana_services';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { EmsVectorTileLayer } from '../../layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
+import { CreateSourceEditor } from './create_source_editor';
+import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
+import { EmsTmsSourceConfig } from './tile_service_select';
 
 function getDescription() {
   const emsSettings = getEMSSettings();

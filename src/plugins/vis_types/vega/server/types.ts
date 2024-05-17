@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { SharedGlobalConfig } from '@kbn/core/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { Observable } from 'rxjs';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 

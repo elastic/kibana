@@ -9,14 +9,14 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
 
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardLocatorParams } from '../..';
+import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).

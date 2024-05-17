@@ -6,15 +6,15 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { API_PRIVILEGES } from '../../../../../common';
 import {
-  updateQueryDelaySettingsBodySchemaV1,
   UpdateQueryDelaySettingsRequestBodyV1,
   UpdateQueryDelaySettingsResponseV1,
+  updateQueryDelaySettingsBodySchemaV1,
 } from '../../../../../common/routes/rules_settings/apis/update';
+import { ILicenseState } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
 
 export const updateQueryDelaySettingsRoute = (

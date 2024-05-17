@@ -8,13 +8,13 @@
 import type { FC } from 'react';
 import React, { useState } from 'react';
 
-import {
-  type TestTrainedModelsContextType,
-  TestTrainedModelsContext,
-} from './test_trained_models_context';
+import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
 import type { ModelItem } from '../models_list';
 import { TestTrainedModelFlyout } from './test_flyout';
-import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
+import {
+  TestTrainedModelsContext,
+  type TestTrainedModelsContextType,
+} from './test_trained_models_context';
 
 interface Props {
   model: ModelItem;

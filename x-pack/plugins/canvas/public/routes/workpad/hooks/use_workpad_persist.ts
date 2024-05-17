@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { useEffect } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
 import { useSelector } from 'react-redux';
+import usePrevious from 'react-use/lib/usePrevious';
 import { CanvasWorkpad, State } from '../../../../types';
-import { getWorkpad } from '../../../state/selectors/workpad';
-import { canUserWrite } from '../../../state/selectors/app';
-import { useWorkpadService, useNotifyService } from '../../../services';
 import { notifyError } from '../../../lib/assets';
+import { useNotifyService, useWorkpadService } from '../../../services';
+import { canUserWrite } from '../../../state/selectors/app';
+import { getWorkpad } from '../../../state/selectors/workpad';
 
 export const useWorkpadPersist = () => {
   const service = useWorkpadService();

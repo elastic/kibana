@@ -6,7 +6,7 @@
  */
 
 import { ReactWrapper } from 'enzyme';
-import { getSettingsTrigger, getPortal, getContextMenuItems } from './selectors';
+import { getContextMenuItems, getPortal, getSettingsTrigger } from './selectors';
 import { waitFor } from './utils';
 
 export const openSettings = async function (wrapper: ReactWrapper) {

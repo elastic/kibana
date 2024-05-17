@@ -29,9 +29,7 @@
         "tags": [],
         "label": "ALL_COMMON_SETTINGS",
         "description": [],
-        "signature": [
-          "string[]"
-        ],
+        "signature": ["string[]"],
         "path": "packages/serverless/settings/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

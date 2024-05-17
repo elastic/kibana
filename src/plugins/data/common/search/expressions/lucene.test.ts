@@ -8,8 +8,8 @@
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueSearchContext } from './kibana_context_type';
-import { functionWrapper } from './utils';
 import { luceneFunction } from './lucene';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#lucene', () => {
   const fn = functionWrapper(luceneFunction);

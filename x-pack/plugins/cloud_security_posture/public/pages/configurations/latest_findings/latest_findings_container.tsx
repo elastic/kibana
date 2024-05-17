@@ -1,3 +1,5 @@
+import { EuiSpacer } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +7,14 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { Filter } from '@kbn/es-query';
-import { EuiSpacer } from '@elastic/eui';
 import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
-import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { FindingsSearchBar } from '../layout/findings_search_bar';
-import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
-import { LatestFindingsTable } from './latest_findings_table';
-import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
+import { EmptyState } from '../../../components/empty_state';
 import { ErrorCallout } from '../layout/error_callout';
+import { FindingsSearchBar } from '../layout/findings_search_bar';
+import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
+import { LatestFindingsTable } from './latest_findings_table';
+import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
 
 const SubGrouping = ({
   renderChildComponent,

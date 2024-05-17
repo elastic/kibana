@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiButton, EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiConfirmModal, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { ReadOnlyConnectorMessage } from './read_only';
+import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   ActionConnector,
   ActionTypeModel,
@@ -19,16 +19,16 @@ import {
   EditConnectorTabs,
   UserConfiguredActionConnector,
 } from '../../../../types';
-import { ConnectorForm, ConnectorFormState } from '../connector_form';
-import type { ConnectorFormSchema } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
-import { useKibana } from '../../../../common/lib/kibana';
-import { hasSaveActionsCapability } from '../../../lib/capabilities';
-import { TestConnectorForm } from '../test_connector_form';
-import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
-import { FlyoutHeader } from './header';
+import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import { ConnectorForm, ConnectorFormState } from '../connector_form';
+import { ConnectorRulesList } from '../connector_rules_list';
+import { TestConnectorForm } from '../test_connector_form';
+import type { ConnectorFormSchema } from '../types';
 import { FlyoutFooter } from './footer';
+import { FlyoutHeader } from './header';
+import { ReadOnlyConnectorMessage } from './read_only';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;

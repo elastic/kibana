@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
+import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { FC } from 'react';
 import type {
   ActionFactoryDefinition,
   BaseActionConfig,
@@ -35,7 +35,7 @@ import type {
 export interface DrilldownDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
   ExecutionContext extends object = object,
-  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > extends PersistableStateDefinition<SerializedEvent> {
   /**
    * Globally unique identifier for this drilldown.

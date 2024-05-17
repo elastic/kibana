@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { externalUrl, getEnterpriseSearchUrl, getAppSearchUrl, getWorkplaceSearchUrl } from '.';
+import { externalUrl, getAppSearchUrl, getEnterpriseSearchUrl, getWorkplaceSearchUrl } from '.';
 
 describe('Enterprise Search external URL helpers', () => {
   describe('getter/setter tests', () => {

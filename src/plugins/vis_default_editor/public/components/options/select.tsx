@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 interface SelectOptionProps<ParamName extends string, ValidParamValues extends string | number> {
   disabled?: boolean;

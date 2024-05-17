@@ -15,8 +15,8 @@ import {
   TooltipTableHeader,
   TooltipTableRow,
 } from '@elastic/charts';
-import React from 'react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import React from 'react';
 import { useFieldFormatter } from './charts/default_value_formatter';
 
 const style: TooltipCellStyle = { textAlign: 'right' };

@@ -6,15 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useMemo, Fragment } from 'react';
-import { chunk, find } from 'lodash/fp';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { chunk, find } from 'lodash/fp';
+import React, { useMemo, Fragment } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../types';
-import { getEnrichedFieldInfo } from '../helpers';
 import {
   ALERTS_HEADERS_RISK_SCORE,
   ALERTS_HEADERS_RULE,
@@ -26,10 +23,13 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { OverviewCardWithActions, OverviewCard } from './overview_card';
-import { StatusPopoverButton } from './status_popover_button';
+import type { BrowserFields } from '../../../containers/source';
 import { SeverityBadge } from '../../severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
+import { getEnrichedFieldInfo } from '../helpers';
+import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../types';
+import { OverviewCard, OverviewCardWithActions } from './overview_card';
+import { StatusPopoverButton } from './status_popover_button';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;

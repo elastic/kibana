@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import defaultComparator from 'fast-deep-equal';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import defaultComparator from 'fast-deep-equal';
 import { Comparator, Connect, StateContainer, UnboxState } from './types';
 
 const { useContext, useLayoutEffect, useRef, createElement: h } = React;

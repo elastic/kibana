@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
+import type { CoreContext, CoreService } from '@kbn/core-base-browser-internal';
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
@@ -49,7 +49,10 @@ export class PluginsService
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    plugins: InjectedMetadataPlugin[]
+  ) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 

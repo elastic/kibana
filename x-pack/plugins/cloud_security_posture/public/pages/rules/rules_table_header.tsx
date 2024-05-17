@@ -1,3 +1,21 @@
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,32 +23,14 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import {
-  EuiFieldSearch,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopoverTitle,
-  EuiFilterGroup,
-  EuiFilterButton,
-} from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
+import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { MultiSelectFilter } from '../../common/component/multi_select_filter';
+import { useKibana } from '../../common/hooks/use_kibana';
+import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
-import { MultiSelectFilter } from '../../common/component/multi_select_filter';
-import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
-import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';

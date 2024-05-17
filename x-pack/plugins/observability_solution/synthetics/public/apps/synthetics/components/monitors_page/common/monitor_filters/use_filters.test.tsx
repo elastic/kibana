@@ -1,3 +1,4 @@
+import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { useFilters } from './use_filters';
 import { useDispatch } from 'react-redux';
-import { WrappedHelper } from '../../../../utils/testing';
 import { fetchMonitorFiltersAction } from '../../../../state';
+import { WrappedHelper } from '../../../../utils/testing';
+import { useFilters } from './use_filters';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),

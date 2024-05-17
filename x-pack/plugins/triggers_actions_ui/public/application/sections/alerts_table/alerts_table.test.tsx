@@ -1,3 +1,17 @@
+import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import {
+  ALERT_CASE_IDS,
+  ALERT_FLAPPING,
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { identity } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +19,9 @@
  * 2.0.
  */
 import React, { useMemo, useReducer } from 'react';
-import { identity } from 'lodash';
-import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { act } from 'react-dom/test-utils';
 import {
-  ALERT_RULE_NAME,
-  ALERT_REASON,
-  ALERT_FLAPPING,
-  ALERT_STATUS,
-  ALERT_CASE_IDS,
-} from '@kbn/rule-data-utils';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { AlertsTable } from './alerts_table';
-import {
+  Alerts,
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableProps,
@@ -26,18 +29,15 @@ import {
   FetchAlertData,
   RowSelectionState,
   UseCellActions,
-  Alerts,
 } from '../../../types';
-import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
-import { bulkActionsReducer } from './bulk_actions/reducer';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { getCasesMockMap } from './cases/index.mock';
-import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
-import { createCasesServiceMock } from './index.mock';
+import { AlertsTable } from './alerts_table';
+import { bulkActionsReducer } from './bulk_actions/reducer';
+import { getCasesMockMap } from './cases/index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
-import { act } from 'react-dom/test-utils';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { createCasesServiceMock } from './index.mock';
+import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 
 const mockCaseService = createCasesServiceMock();
 

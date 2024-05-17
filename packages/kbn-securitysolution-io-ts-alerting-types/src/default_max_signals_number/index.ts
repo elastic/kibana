@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { max_signals } from '../max_signals';
+import * as t from 'io-ts';
 import { DEFAULT_MAX_SIGNALS } from '../constants';
+import { max_signals } from '../max_signals';
 
 /**
  * Types the default max signal:

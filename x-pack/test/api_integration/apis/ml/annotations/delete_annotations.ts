@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { jobIds, testSetupAnnotations, testSetupJobConfigs } from './common_jobs';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

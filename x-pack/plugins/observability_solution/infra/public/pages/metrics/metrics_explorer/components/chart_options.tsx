@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiRadioGroup,
   EuiButtonEmpty,
-  EuiPopover,
   EuiForm,
   EuiFormRow,
+  EuiPopover,
+  EuiRadioGroup,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
 import {
   MetricsExplorerChartOptions as ChartOptions,
-  MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
+  MetricsExplorerYAxisMode,
 } from '../hooks/use_metrics_explorer_options';
 
 interface Props {

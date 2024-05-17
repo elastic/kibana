@@ -6,10 +6,7 @@
     "id": "graph",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "graph"
-    ],
+    "configPath": ["xpack", "graph"],
     "requiredPlugins": [
       "licensing",
       "data",
@@ -20,15 +17,7 @@
       "savedObjectsFinder",
       "contentManagement"
     ],
-    "optionalPlugins": [
-      "home",
-      "features",
-      "spaces"
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "savedObjects"
-    ]
+    "optionalPlugins": ["home", "features", "spaces"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "savedObjects"]
   }
 }

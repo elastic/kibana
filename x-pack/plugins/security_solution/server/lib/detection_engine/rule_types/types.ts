@@ -7,46 +7,43 @@
 
 import type { Moment } from 'moment';
 
-import type { Logger } from '@kbn/logging';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/logging';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
+import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type {
+  AlertInstanceContext,
+  AlertInstanceState,
   RuleExecutorOptions,
+  RuleExecutorServices,
   RuleType,
   RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
+import type { DataViewFieldBase, Filter } from '@kbn/es-query';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type {
-  PersistenceServices,
-  IRuleDataClient,
-  SuppressedAlertService,
-} from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type {
+  IRuleDataClient,
+  PersistenceServices,
+  SuppressedAlertService,
+} from '@kbn/rule-registry-plugin/server';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
-import type { CompleteRule, EqlRuleParams, RuleParams, ThreatRuleParams } from '../rule_schema';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
+import type { CompleteRule, EqlRuleParams, RuleParams, ThreatRuleParams } from '../rule_schema';
 import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/api/detection_engine';
-import type { BaseHit, SearchTypes, EqlSequence } from '../../../../common/detection_engine/types';
-import type { GenericBulkCreateResponse } from './factories';
-import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
@@ -56,8 +53,11 @@ import type {
   RuleAction,
   RuleResponse,
 } from '../../../../common/api/detection_engine/model/rule_schema';
-import type { EnrichEvents } from './utils/enrichments/types';
+import type { BaseHit, EqlSequence, SearchTypes } from '../../../../common/detection_engine/types';
+import type { GenericBulkCreateResponse } from './factories';
 import type { ThresholdResult } from './threshold/types';
+import type { EnrichEvents } from './utils/enrichments/types';
+import type { BuildReasonMessage } from './utils/reason_formatters';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -108,7 +108,7 @@ export type SecurityAlertType<
   TParams extends RuleParams,
   TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
+  TActionGroupIds extends string = never,
 > = Omit<
   RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
@@ -258,7 +258,7 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 export type WrappedEventHit = BaseHit<EventHit>;
 
 export type SignalSearchResponse<
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;

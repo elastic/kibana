@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { BoolQuery } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
-import { AlertStatus } from '@kbn/observability-plugin/common/typings';
-import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../plugin';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getEnvironmentKuery } from '../../../../common/environment_filter_values';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { ApmPluginStartDeps } from '../../../plugin';
 import { push } from '../../shared/links/url_helpers';
 
 export const ALERT_STATUS_ALL = 'all';

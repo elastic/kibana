@@ -6,17 +6,17 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import {
+  prebuiltSavedObjectsBulkCreateUrl,
+  prebuiltSavedObjectsBulkDeleteUrl,
+} from '../../../../common/constants';
 import type { StartRenderServices } from '../../../types';
 import {
   RISKY_HOSTS_DASHBOARD_TITLE,
   RISKY_USERS_DASHBOARD_TITLE,
 } from '../../components/risk_score/constants';
-import {
-  prebuiltSavedObjectsBulkCreateUrl,
-  prebuiltSavedObjectsBulkDeleteUrl,
-} from '../../../../common/constants';
 
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 

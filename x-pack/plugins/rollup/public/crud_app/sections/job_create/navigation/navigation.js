@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiLoadingSpinner,
-  EuiCheckbox,
+  EuiText,
 } from '@elastic/eui';
 
 export const Navigation = ({

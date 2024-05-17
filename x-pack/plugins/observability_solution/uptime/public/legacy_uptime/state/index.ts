@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware } from 'redux';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { applyMiddleware, createStore } from 'redux';
 import type { Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rootEffect } from './effects';
-import { rootReducer, RootState } from './reducers';
+import { RootState, rootReducer } from './reducers';
 
 export type AppState = RootState;
 

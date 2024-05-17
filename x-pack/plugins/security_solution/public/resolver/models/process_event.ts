@@ -11,8 +11,8 @@ import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import type {
   ResolverEvent,
-  SafeResolverEvent,
   ResolverNode,
+  SafeResolverEvent,
 } from '../../../common/endpoint/types';
 import type { ResolverProcessType } from '../types';
 

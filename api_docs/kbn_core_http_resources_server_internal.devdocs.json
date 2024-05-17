@@ -50,9 +50,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,9 +62,7 @@
                 "tags": [],
                 "label": "core",
                 "description": [],
-                "signature": [
-                  "CoreContext"
-                ],
+                "signature": ["CoreContext"],
                 "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -122,9 +118,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": [
-                  "PrebootDeps"
-                ],
+                "signature": ["PrebootDeps"],
                 "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -180,9 +174,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": [
-                  "SetupDeps"
-                ],
+                "signature": ["SetupDeps"],
                 "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -198,9 +190,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -214,9 +204,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -7,21 +7,21 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTheme } from '../../../../../../hooks/use_theme';
+import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { SyncBadge } from './badge/sync_badge';
-import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
-import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { SpanLinksBadge } from './badge/span_links_badge';
+import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
-import { useApmRouter } from '../../../../../../hooks/use_apm_router';
-import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 

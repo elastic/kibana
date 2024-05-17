@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
+import React from 'react';
 import * as i18n from '../../../common/translations';
 import { useCasesToast } from '../../../common/use_cases_toast';
 

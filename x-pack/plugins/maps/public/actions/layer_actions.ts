@@ -5,11 +5,41 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import type { Query } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { AnyAction, Dispatch } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import {
+  DRAW_MODE,
+  LAYER_STYLE_TYPE,
+  LAYER_TYPE,
+  SCALING_TYPES,
+  STYLE_TYPE,
+} from '../../common/constants';
+import {
+  Attribution,
+  JoinDescriptor,
+  LayerDescriptor,
+  StyleDescriptor,
+  TileError,
+  TileMetaFeature,
+  VectorLayerDescriptor,
+  VectorStyleDescriptor,
+} from '../../common/descriptor_types';
+import { IESAggField } from '../classes/fields/agg';
+import { IField } from '../classes/fields/field';
+import { isSpatialJoin } from '../classes/joins/is_spatial_join';
+import { ILayer } from '../classes/layers/layer';
+import { LayerGroup, isLayerGroup } from '../classes/layers/layer_group';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
+import { isESVectorTileSource } from '../classes/sources/es_source';
+import { OnSourceChangeArgs } from '../classes/sources/source';
+import type { IVectorSource } from '../classes/sources/vector_source';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
+import { notifyLicensedFeatureUsage } from '../licensed_features';
+import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { MapStoreState } from '../reducers/store';
+import { FLYOUT_STATE } from '../reducers/ui';
 import {
   createLayerInstance,
   getEditState,
@@ -22,9 +52,13 @@ import {
   getMapSettings,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
-import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
+import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
+import {
+  autoFitToBounds,
+  clearDataRequests,
+  syncDataForLayerId,
+  updateStyleMeta,
+} from './data_request_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -44,41 +78,7 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import {
-  autoFitToBounds,
-  clearDataRequests,
-  syncDataForLayerId,
-  updateStyleMeta,
-} from './data_request_actions';
-import {
-  Attribution,
-  JoinDescriptor,
-  LayerDescriptor,
-  StyleDescriptor,
-  TileError,
-  TileMetaFeature,
-  VectorLayerDescriptor,
-  VectorStyleDescriptor,
-} from '../../common/descriptor_types';
-import { ILayer } from '../classes/layers/layer';
-import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import { OnSourceChangeArgs } from '../classes/sources/source';
-import { isESVectorTileSource } from '../classes/sources/es_source';
-import {
-  DRAW_MODE,
-  LAYER_STYLE_TYPE,
-  LAYER_TYPE,
-  SCALING_TYPES,
-  STYLE_TYPE,
-} from '../../common/constants';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
-import { notifyLicensedFeatureUsage } from '../licensed_features';
-import { IESAggField } from '../classes/fields/agg';
-import { IField } from '../classes/fields/field';
-import type { IVectorSource } from '../classes/sources/vector_source';
-import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
-import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
-import { isSpatialJoin } from '../classes/joins/is_spatial_join';
+import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 
 export function trackCurrentLayerState(layerId: string) {
   return {

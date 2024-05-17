@@ -6,9 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { act } from 'react-dom/test-utils';
 import { Field } from '../../../../../types';
 import { useSemanticText } from './use_semantic_text';
-import { act } from 'react-dom/test-utils';
 
 const mlMock: any = {
   mlApi: {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../common';
+import { AGENTS_PREFIX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { getAgentsByKuery } from '../services/agents';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, AGENTS_PREFIX } from '../constants';
 
 import { packagePolicyService } from '../services/package_policy';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { UrlObject, format } from 'url';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
-  LogsSynthtraceEsClient,
   AssetsSynthtraceEsClient,
-  createLogger,
   LogLevel,
+  LogsSynthtraceEsClient,
+  createLogger,
 } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';

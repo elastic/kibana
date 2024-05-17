@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isEmpty } from 'lodash';
 import {
-  EuiFormRow,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -24,14 +22,16 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Choice, Fields } from '../lib/servicenow/types';
-import { ServiceNowITSMActionParams, EventAction } from './types';
-import { useGetChoices } from '../lib/servicenow/use_get_choices';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ACTION_GROUP_RECOVERED,
-  choicesToEuiOptions,
   DEFAULT_CORRELATION_ID,
+  choicesToEuiOptions,
 } from '../lib/servicenow/helpers';
+import { Choice, Fields } from '../lib/servicenow/types';
+import { useGetChoices } from '../lib/servicenow/use_get_choices';
+import { EventAction, ServiceNowITSMActionParams } from './types';
 
 import * as i18n from '../lib/servicenow/translations';
 

@@ -7,26 +7,26 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import {
+  DEFAULT_REFRESH_INTERVAL,
+  defaultFilterStateKey,
+  defaultPositionStateKey,
+} from '@kbn/logs-shared-plugin/common';
 import * as Array from 'fp-ts/lib/Array';
 import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { InvokeCreator } from 'xstate';
-import {
-  defaultFilterStateKey,
-  defaultPositionStateKey,
-  DEFAULT_REFRESH_INTERVAL,
-} from '@kbn/logs-shared-plugin/common';
 import moment from 'moment';
+import { InvokeCreator } from 'xstate';
+import { createPlainError, formatErrors } from '../../../../common/runtime_types';
+import { minimalTimeKeyRT } from '../../../../common/time';
 import {
   getTimeRangeEndFromTime,
   getTimeRangeStartFromTime,
 } from '../../../../common/url_state_storage_service';
-import { minimalTimeKeyRT } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
-import { createPlainError, formatErrors } from '../../../../common/runtime_types';
-import type { LogStreamQueryContext, LogStreamQueryEvent, ParsedQuery } from './types';
 import { DEFAULT_FILTERS, DEFAULT_QUERY, DEFAULT_TIMERANGE } from './defaults';
+import type { LogStreamQueryContext, LogStreamQueryEvent, ParsedQuery } from './types';
 
 interface LogStreamQueryUrlStateDependencies {
   filterStateKey?: string;

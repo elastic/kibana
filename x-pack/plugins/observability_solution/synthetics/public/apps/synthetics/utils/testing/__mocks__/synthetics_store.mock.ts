@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { SyntheticsAppState } from '../../../state/root_reducer';
 import {
   ConfigKey,
-  MonitorTypeEnum,
   DEFAULT_THROTTLING,
   LocationStatus,
+  MonitorTypeEnum,
   ScheduleUnit,
   SourceType,
-  VerificationMode,
   TLSVersion,
+  VerificationMode,
 } from '../../../../../../common/runtime_types';
 import { MonitorDetailsState } from '../../../state';
+import { SyntheticsAppState } from '../../../state/root_reducer';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
@@ -495,27 +495,30 @@ function getPingStatusesMockSlice() {
   const monitorDetails = getMonitorDetailsMockSlice();
 
   return {
-    pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
-      const geoName = cur.observer.geo?.name!;
-      if (!acc[cur.monitor.id]) {
-        acc[cur.monitor.id] = {};
-      }
+    pingStatuses: monitorDetails.pings.data.reduce(
+      (acc, cur) => {
+        const geoName = cur.observer.geo?.name!;
+        if (!acc[cur.monitor.id]) {
+          acc[cur.monitor.id] = {};
+        }
 
-      if (!acc[cur.monitor.id][geoName]) {
-        acc[cur.monitor.id][geoName] = {};
-      }
+        if (!acc[cur.monitor.id][geoName]) {
+          acc[cur.monitor.id][geoName] = {};
+        }
 
-      acc[cur.monitor.id][geoName][cur.timestamp] = {
-        timestamp: cur.timestamp,
-        error: undefined,
-        locationId: geoName,
-        config_id: cur.config_id!,
-        docId: cur.docId,
-        summary: cur.summary!,
-      };
+        acc[cur.monitor.id][geoName][cur.timestamp] = {
+          timestamp: cur.timestamp,
+          error: undefined,
+          locationId: geoName,
+          config_id: cur.config_id!,
+          docId: cur.docId,
+          summary: cur.summary!,
+        };
 
-      return acc;
-    }, {} as SyntheticsAppState['pingStatus']['pingStatuses']),
+        return acc;
+      },
+      {} as SyntheticsAppState['pingStatus']['pingStatuses']
+    ),
     loading: false,
     error: null,
   } as SyntheticsAppState['pingStatus'];

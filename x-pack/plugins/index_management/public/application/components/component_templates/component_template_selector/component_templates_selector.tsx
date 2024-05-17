@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { useState, useEffect, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
 import { ComponentTemplateListItem } from '../../../../../common';
-import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
 import {
   ComponentTemplateDetailsFlyoutContent,
-  defaultFlyoutProps,
   ComponentTemplateDetailsProps,
+  defaultFlyoutProps,
 } from '../component_template_details';
-import { CreateButtonPopOver } from './components';
+import { useApi } from '../component_templates_context';
+import { GlobalFlyout, SectionError, SectionLoading } from '../shared_imports';
 import { ComponentTemplates } from './component_templates';
 import { ComponentTemplatesSelection } from './component_templates_selection';
-import { useApi } from '../component_templates_context';
+import { CreateButtonPopOver } from './components';
 
 import './component_templates_selector.scss';
 

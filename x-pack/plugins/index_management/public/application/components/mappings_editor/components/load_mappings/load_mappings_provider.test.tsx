@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -39,7 +39,7 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (

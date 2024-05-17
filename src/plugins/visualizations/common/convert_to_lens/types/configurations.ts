@@ -7,32 +7,32 @@
  */
 
 import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize, XYLegendValue, PartitionLegendValue } from '../../constants';
+import { $Values } from '@kbn/utility-types';
+import { LegendSize, PartitionLegendValue, XYLegendValue } from '../../constants';
+import { ExpressionValueVisDimension } from '../../expression_functions';
 import {
   CategoryDisplayTypes,
-  PartitionChartTypes,
-  NumberDisplayTypes,
-  LegendDisplayTypes,
+  CollapseFunctions,
   FillTypes,
-  SeriesTypes,
-  YAxisModes,
-  XYCurveTypes,
-  LayerTypes,
+  GaugeCentralMajorModes,
+  GaugeColorModes,
+  GaugeLabelMajorModes,
   GaugeShapes,
   GaugeTicksPositions,
-  GaugeLabelMajorModes,
-  GaugeColorModes,
-  GaugeCentralMajorModes,
-  CollapseFunctions,
+  LayerTypes,
+  LegendDisplayTypes,
+  NumberDisplayTypes,
+  PartitionChartTypes,
+  SeriesTypes,
+  XYCurveTypes,
+  YAxisModes,
 } from '../constants';
-import { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
 
-export type CollapseFunction = typeof CollapseFunctions[number];
+export type CollapseFunction = (typeof CollapseFunctions)[number];
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;

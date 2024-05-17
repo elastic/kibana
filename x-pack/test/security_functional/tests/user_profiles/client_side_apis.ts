@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { parse as parseCookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
+import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

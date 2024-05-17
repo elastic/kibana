@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FILTERS } from '@kbn/es-query';
+import { FILTERS, Filter } from '@kbn/es-query';
 export const getEmptyValue = () => '—';
 
 type StrictFilter = Filter & {

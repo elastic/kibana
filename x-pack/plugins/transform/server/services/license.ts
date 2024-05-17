@@ -8,15 +8,15 @@
 import type { Logger } from '@kbn/core/server';
 import type {
   CoreStart,
+  CustomRequestHandlerContext,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
-  CustomRequestHandlerContext,
 } from '@kbn/core/server';
 
-import type { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { LicenseType, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
 import { PLUGIN } from '../../common/constants';

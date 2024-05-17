@@ -1,3 +1,4 @@
+import type { AstProviderFn, ESQLAst, ESQLCommand, ESQLMessage, EditorError } from '@kbn/esql-ast';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,13 +8,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import levenshtein from 'js-levenshtein';
-import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import {
-  getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from '../shared/resources_helpers';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import { getAstContext } from '../shared/context';
 import {
   getAllFunctions,
   getCommandDefinition,
@@ -21,11 +18,14 @@ import {
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
+import {
+  getFieldsByTypeHelper,
+  getPolicyHelper,
+  getSourcesHelper,
+} from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
-import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import type { CodeAction, Callbacks, CodeActionOptions } from './types';
-import { getAstContext } from '../shared/context';
+import type { Callbacks, CodeAction, CodeActionOptions } from './types';
 import { wrapAsEditorMessage } from './utils';
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
@@ -182,10 +182,10 @@ async function getQuotableActionForColumns(
     /[()]/.test(remainingCommandText)
       ? remainingCommandText.indexOf(')')
       : /,/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(',') - 1
-      : /\s/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(' ')
-      : remainingCommandText.length,
+        ? remainingCommandText.indexOf(',') - 1
+        : /\s/.test(remainingCommandText)
+          ? remainingCommandText.indexOf(' ')
+          : remainingCommandText.length,
     0
   );
   const possibleUnquotedText = queryString.substring(
@@ -303,7 +303,9 @@ async function getSpellingActionForFunctions(
         // support nested expressions in STATS
         commandContext.name === 'stats' ? getCompatibleFunctionDefinitions('eval', undefined) : []
       ),
-    errorText.substring(0, errorText.lastIndexOf('(')).toLowerCase() // reduce a bit the distance check making al lowercase
+    errorText
+      .substring(0, errorText.lastIndexOf('('))
+      .toLowerCase() // reduce a bit the distance check making al lowercase
   );
   return wrapIntoSpellingChangeAction(
     error,

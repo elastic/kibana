@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Description, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs/blocks';
 import React from 'react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
 
 import { getCustomIntegrationsContextDecorator } from './decorator';
 

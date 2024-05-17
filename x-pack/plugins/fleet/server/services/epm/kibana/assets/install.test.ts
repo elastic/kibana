@@ -7,8 +7,8 @@
 import type {
   ISavedObjectsImporter,
   SavedObjectsImportFailure,
-  SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
 } from '@kbn/core/server';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -29,11 +29,11 @@ const mockImporter: jest.Mocked<ISavedObjectsImporter> = {
 };
 
 const createImportError = (so: ArchiveAsset, type: string) =>
-  ({ id: so.id, error: { type } } as SavedObjectsImportFailure);
+  ({ id: so.id, error: { type } }) as SavedObjectsImportFailure;
 const createImportSuccess = (so: ArchiveAsset) =>
-  ({ id: so.id, type: so.type, meta: {} } as SavedObjectsImportSuccess);
+  ({ id: so.id, type: so.type, meta: {} }) as SavedObjectsImportSuccess;
 const createAsset = (asset: Partial<ArchiveAsset>) =>
-  ({ id: 1234, type: 'dashboard', attributes: {}, ...asset } as ArchiveAsset);
+  ({ id: 1234, type: 'dashboard', attributes: {}, ...asset }) as ArchiveAsset;
 
 const createImportResponse = (
   errors: SavedObjectsImportFailure[] = [],
@@ -45,7 +45,7 @@ const createImportResponse = (
     successResults,
     warnings: [],
     successCount: successResults.length,
-  } as SavedObjectsImportResponse);
+  }) as SavedObjectsImportResponse;
 
 describe('installKibanaSavedObjects', () => {
   beforeEach(() => {

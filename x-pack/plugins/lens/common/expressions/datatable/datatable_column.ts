@@ -6,9 +6,9 @@
  */
 
 import type { Direction } from '@elastic/eui';
-import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
-import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { DatatableColumn, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { SortingHint } from '../../types';
 import { CollapseFunction } from '../collapse';
 

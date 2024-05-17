@@ -9,22 +9,22 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   BaseColumn,
-  Operation,
   DataType,
-  GenericColumnWithMeta,
   FormatParams,
+  GenericColumnWithMeta,
+  Operation,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
+import { DATA_FORMATTERS } from '../../../../common/enums';
+import type { Metric, Series } from '../../../../common/types';
 import {
   getDurationParams,
   inputFormats,
   isDuration,
   outputFormats,
 } from '../../../application/components/lib/durations';
-import type { Metric, Series } from '../../../../common/types';
-import { DATA_FORMATTERS } from '../../../../common/enums';
 import { getTimeScale } from '../metrics';
-import { ColumnWithMeta, Meta, Column } from './types';
+import { Column, ColumnWithMeta, Meta } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;

@@ -6,12 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "_data_stream/_promote/{name}"
-    ],
+    "methods": ["POST"],
+    "patterns": ["_data_stream/_promote/{name}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html",
     "availability": {
       "stack": true,

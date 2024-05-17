@@ -6,12 +6,12 @@
  */
 
 import { HttpHandler } from '@kbn/core/public';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
+  LOG_ANALYSIS_GET_ID_FORMATS,
   getLogAnalysisIdFormatsRequestPayloadRT,
   getLogAnalysisIdFormatsSuccessResponsePayloadRT,
-  LOG_ANALYSIS_GET_ID_FORMATS,
 } from '../../../../common/http_api/latest';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
 interface RequestArgs {
   spaceId: string;

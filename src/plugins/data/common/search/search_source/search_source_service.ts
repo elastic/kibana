@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
-} from '@kbn/kibana-utils-plugin/common';
 import { DataViewPersistableStateService, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
-  createSearchSource,
-  extractReferences,
-  injectReferences,
+  MigrateFunctionsObject,
+  mergeMigrationFunctionMaps,
+} from '@kbn/kibana-utils-plugin/common';
+import { mapValues } from 'lodash';
+import {
   SearchSource,
   SearchSourceDependencies,
   SerializedSearchSourceFields,
+  createSearchSource,
+  extractReferences,
+  injectReferences,
 } from '.';
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/filters/persistable_state';
 

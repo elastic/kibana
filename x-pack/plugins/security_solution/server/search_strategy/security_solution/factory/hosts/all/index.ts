@@ -7,28 +7,28 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   HostAggEsItem,
-  HostsStrategyResponse,
-  HostsQueries,
   HostsEdges,
+  HostsQueries,
+  HostsStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
   RiskQueries,
   RiskScoreEntity,
-  getHostRiskIndex,
   buildHostNamesFilter,
+  getHostRiskIndex,
 } from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
+import { HOSTS_FIELDS, formatHostEdgesData } from './helpers';
 import { buildHostsQuery } from './query.all_hosts.dsl';
-import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';

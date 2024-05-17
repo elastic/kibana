@@ -7,9 +7,9 @@
 
 import React from 'react';
 
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiIcon } from '@elastic/eui';
 import type { Sort } from '@kbn/securitysolution-io-ts-list-types';
 import styled from 'styled-components';
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiIcon } from '@elastic/eui';
 
 import {
   UtilityBar,

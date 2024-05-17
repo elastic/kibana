@@ -7,15 +7,15 @@
  */
 
 import {
+  SecurityRequestHandlerContext,
   SecurityServiceSetup,
   SecurityServiceStart,
-  SecurityRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
-import { auditServiceMock, type MockedAuditService } from './audit.mock';
+import { type MockedAuditService, auditServiceMock } from './audit.mock';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {

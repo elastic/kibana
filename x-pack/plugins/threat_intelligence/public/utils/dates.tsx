@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
 import { TickFormatter } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import moment from 'moment';
 import { EMPTY_VALUE } from '../constants/common';
 
 moment.suppressDeprecationWarnings = true;

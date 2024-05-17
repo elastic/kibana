@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
 import { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,

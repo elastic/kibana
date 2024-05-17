@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
-  SampleDatasetProvider,
-  SampleDatasetSchema,
-  SampleDatasetDashboardPanel,
   AppLinkData,
+  SampleDatasetDashboardPanel,
+  SampleDatasetProvider,
   SampleDatasetProviderContext,
+  SampleDatasetSchema,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import {
+  ecommerceSpecProvider,
   flightsSpecProvider,
   logsSpecProvider,
-  ecommerceSpecProvider,
   logsTSDBSpecProvider,
 } from './data_sets';
-import { createListRoute, createInstallRoute } from './routes';
-import { makeSampleDataUsageCollector, usage } from './usage';
-import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
+import { createInstallRoute, createListRoute } from './routes';
+import { createUninstallRoute } from './routes/uninstall';
+import { makeSampleDataUsageCollector, usage } from './usage';
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}

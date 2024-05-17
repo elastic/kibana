@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern';
 import type { StartDeps } from './types';
 import { wrapError } from './utils/error_wrapper';
-import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern';
 
 /**
  * @apiGroup DataVisualizer

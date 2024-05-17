@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import * as i18n from './translations';
 
 export type CasesColumnsConfiguration = Record<
   string,

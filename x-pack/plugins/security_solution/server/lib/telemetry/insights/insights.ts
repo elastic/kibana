@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
+import moment from 'moment';
 
 interface AlertContext {
   alert_id: string;

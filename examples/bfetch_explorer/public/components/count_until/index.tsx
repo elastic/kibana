@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
-import useList from 'react-use/lib/useList';
-import { EuiForm, EuiSpacer, EuiFieldNumber, EuiFormRow, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFieldNumber, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import React, { useState } from 'react';
+import useList from 'react-use/lib/useList';
+import useMountedState from 'react-use/lib/useMountedState';
 
 export interface Props {
   fetchStreaming: BfetchPublicSetup['fetchStreaming'];

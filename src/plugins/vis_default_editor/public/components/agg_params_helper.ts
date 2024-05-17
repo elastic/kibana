@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { get, isEmpty } from 'lodash';
-import { IAggConfig, AggParam, IFieldParamType, IAggType } from '@kbn/data-plugin/public';
+import { AggParam, IAggConfig, IAggType, IFieldParamType } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
+import { get, isEmpty } from 'lodash';
 
-import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
-import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
-import { AggTypeState, AggParamsState } from './agg_params_state';
+import { filterAggTypeFields, filterAggTypes } from '../agg_filters';
+import { getSchemaByName } from '../schemas';
+import { ComboBoxGroupedOptions, groupAndSortBy } from '../utils';
 import { AggParamEditorProps } from './agg_param_props';
 import { aggParamsMap } from './agg_params_map';
-import { EditorConfig } from './utils';
-import { getSchemaByName } from '../schemas';
+import { AggParamsState, AggTypeState } from './agg_params_state';
 import { EditorVisState } from './sidebar/state/reducers';
+import { EditorConfig } from './utils';
 
 interface ParamInstanceBase {
   agg: IAggConfig;

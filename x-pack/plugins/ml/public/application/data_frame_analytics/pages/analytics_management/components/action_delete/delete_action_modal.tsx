@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EUI_MODAL_CONFIRM_BUTTON,
   EuiConfirmModal,
-  EuiSwitch,
   EuiFlexGroup,
   EuiFlexItem,
-  EUI_MODAL_CONFIRM_BUTTON,
+  EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { DeleteAction } from './use_delete_action';
 

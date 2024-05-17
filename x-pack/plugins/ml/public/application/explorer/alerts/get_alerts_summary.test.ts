@@ -6,11 +6,11 @@
  */
 
 import {
-  ALERT_RULE_NAME,
-  ALERT_STATUS,
-  ALERT_START,
-  ALERT_END,
   ALERT_DURATION,
+  ALERT_END,
+  ALERT_RULE_NAME,
+  ALERT_START,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import { getAlertsSummary } from './get_alerts_summary';

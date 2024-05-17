@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import { EuiSpacer, EuiCodeBlock, EuiCallOut, EuiText } from '@elastic/eui';
-import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 import { getDisableStatusStep } from '../common_instructions';
+import { Monospace } from '../components/monospace';
 
 export function getKibanaInstructionsForDisablingInternalCollection(product, meta) {
   let restartWarning = null;

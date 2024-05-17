@@ -10,29 +10,29 @@ import React, { useContext, useState } from 'react';
 
 import {
   EuiAccordion,
-  EuiFieldText,
+  EuiButtonIcon,
   EuiFieldPassword,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiRadioGroup,
   EuiSelect,
   EuiSwitch,
   EuiTextArea,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '../..';
 
-import { ConfigEntryView, LicenseContext } from './connector_configuration';
-import { DocumentLevelSecurityPanel } from './document_level_security_panel';
 import {
   ensureBooleanType,
   ensureCorrectTyping,
   ensureStringType,
 } from '../../utils/connector_configuration_utils';
+import { ConfigEntryView, LicenseContext } from './connector_configuration';
+import { DocumentLevelSecurityPanel } from './document_level_security_panel';
 import { PlatinumLicensePopover } from './platinum_license_popover';
 
 interface ConnectorConfigurationFieldProps {

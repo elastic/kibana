@@ -6,31 +6,31 @@
  */
 
 import {
-  apiHasDynamicActions,
   type HasDynamicActions,
+  apiHasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
-  tracksOverlays,
   type PresentationContainer,
   type TracksOverlays,
+  tracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasParentApi,
+  type HasSupportedTriggers,
+  type HasType,
+  type HasUniqueId,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasSupportedTriggers,
   apiIsOfType,
   getInheritedViewMode,
-  type CanAccessViewMode,
-  type EmbeddableApiContext,
-  type HasUniqueId,
-  type HasParentApi,
-  type HasSupportedTriggers,
-  type HasType,
 } from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { StartDependencies } from '../../../../plugin';

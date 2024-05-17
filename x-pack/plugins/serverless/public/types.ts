@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
-  SideNavComponent,
   NavigationTreeDefinition,
+  SideNavComponent,
 } from '@kbn/core-chrome-browser';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { Observable } from 'rxjs';
-import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
+import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
+import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}

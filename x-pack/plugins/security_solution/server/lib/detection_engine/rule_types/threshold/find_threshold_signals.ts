@@ -19,19 +19,19 @@ import type {
   ThresholdNormalized,
   TimestampOverride,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { getMaxSignalsWarning } from '../utils/utils';
 import {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
 import type {
-  ThresholdMultiBucketAggregationResult,
   ThresholdBucket,
+  ThresholdMultiBucketAggregationResult,
   ThresholdSingleBucketAggregationResult,
 } from './types';
-import { shouldFilterByCardinality, searchResultHasAggs } from './utils';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { getMaxSignalsWarning } from '../utils/utils';
+import { searchResultHasAggs, shouldFilterByCardinality } from './utils';
 
 interface FindThresholdSignalsParams {
   from: string;

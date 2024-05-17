@@ -15,7 +15,7 @@ import { DashboardMountContextProps } from '../types';
 export const DashboardMountContext = createContext<DashboardMountContextProps>({
   // default values for the dashboard mount context
   restorePreviousUrl: () => {},
-  scopedHistory: () => ({} as ScopedHistory),
+  scopedHistory: () => ({}) as ScopedHistory,
   onAppLeave: (handler) => {},
   setHeaderActionMenu: (mountPoint) => {},
 });

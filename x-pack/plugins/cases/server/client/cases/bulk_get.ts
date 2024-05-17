@@ -7,16 +7,16 @@
 
 import { partition } from 'lodash';
 
-import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
-import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CasesBulkGetRequestRt, CasesBulkGetResponseRt } from '../../../common/types/api';
+import type { CaseAttributes } from '../../../common/types/domain';
+import { Operations } from '../../authorization';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import type { SOWithErrors } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
-import { Operations } from '../../authorization';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import type { SOWithErrors } from '../../common/types';
 
 type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 

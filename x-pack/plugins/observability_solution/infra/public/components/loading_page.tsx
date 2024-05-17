@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { PageTemplate } from './page_template';
 

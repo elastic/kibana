@@ -13,7 +13,6 @@ import {
   REPORT_METRIC_FIELD,
   ReportTypes,
 } from '../constants';
-import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
@@ -22,8 +21,9 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
+import { buildPhrasesFilter } from '../utils';
 
-import { CPU_USAGE, SYSTEM_MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
+import { CPU_USAGE, MOBILE_APP, RESPONSE_LATENCY, SYSTEM_MEMORY_USAGE } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIDistributionConfig({ dataView }: ConfigProps): SeriesConfig {

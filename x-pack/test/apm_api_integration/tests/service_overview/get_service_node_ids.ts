@@ -1,3 +1,4 @@
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { take } from 'lodash';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { ApmServices } from '../../common/config';
 
 export async function getServiceNodeIds({

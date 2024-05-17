@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
 
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/app';
-import { HttpService } from '../../application/services/http_service';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { MlDependencies } from '../../application/app';
 import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableServices } from '..';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../../common/constants/app';
+import type { MlDependencies } from '../../application/app';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
+import { HttpService } from '../../application/services/http_service';
+import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 
 export class AnomalyChartsEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput>

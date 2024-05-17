@@ -21,7 +21,6 @@ import type {
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
-import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
@@ -29,6 +28,7 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
+import { getFakeKibanaRequest } from './fake_kibana_request';
 
 export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
 

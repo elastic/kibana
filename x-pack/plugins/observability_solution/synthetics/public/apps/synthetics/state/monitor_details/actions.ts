@@ -6,13 +6,13 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { MostRecentPingsRequest } from './api';
 import {
+  EncryptedSyntheticsSavedMonitor,
   Ping,
   PingsResponse,
-  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
+import { MostRecentPingsRequest } from './api';
 
 export const setMonitorDetailsLocationAction = createAction<string>(
   '[MONITOR SUMMARY] SET LOCATION'

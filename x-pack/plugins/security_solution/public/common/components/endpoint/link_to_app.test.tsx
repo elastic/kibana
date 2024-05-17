@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
-import { LinkToApp } from './link_to_app';
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mount } from 'enzyme';
+import React from 'react';
+import { LinkToApp } from './link_to_app';
 
 type LinkToAppOnClickMock<Return = void> = jest.Mock<
   Return,

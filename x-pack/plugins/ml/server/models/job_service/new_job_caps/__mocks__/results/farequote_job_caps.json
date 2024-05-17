@@ -44,9 +44,7 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "high_mean",
@@ -58,9 +56,7 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "low_mean",
@@ -72,9 +68,7 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "sum",
@@ -86,9 +80,7 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "high_sum",
@@ -100,9 +92,7 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "low_sum",
@@ -114,9 +104,7 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "median",
@@ -128,9 +116,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "high_median",
@@ -142,9 +128,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "low_median",
@@ -156,9 +140,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "min",
@@ -170,9 +152,7 @@
           "max": "min",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "max",
@@ -184,9 +164,7 @@
           "max": "max",
           "min": "max"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "distinct_count",
@@ -198,10 +176,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "airline",
-          "responsetime"
-        ]
+        "fieldIds": ["airline", "responsetime"]
       },
       {
         "id": "non_zero_count",
@@ -246,10 +221,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "airline",
-          "responsetime"
-        ]
+        "fieldIds": ["airline", "responsetime"]
       },
       {
         "id": "low_distinct_count",
@@ -261,10 +233,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "airline",
-          "responsetime"
-        ]
+        "fieldIds": ["airline", "responsetime"]
       },
       {
         "id": "metric",
@@ -276,9 +245,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "varp",
@@ -290,9 +257,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "high_varp",
@@ -304,9 +269,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "low_varp",
@@ -318,9 +281,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "non_null_sum",
@@ -332,9 +293,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "high_non_null_sum",
@@ -346,9 +305,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "low_non_null_sum",
@@ -360,9 +317,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": ["responsetime"]
       },
       {
         "id": "rare",
@@ -396,10 +351,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "airline",
-          "responsetime"
-        ]
+        "fieldIds": ["airline", "responsetime"]
       },
       {
         "id": "high_info_content",
@@ -411,10 +363,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "airline",
-          "responsetime"
-        ]
+        "fieldIds": ["airline", "responsetime"]
       },
       {
         "id": "low_info_content",
@@ -426,10 +375,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "airline",
-          "responsetime"
-        ]
+        "fieldIds": ["airline", "responsetime"]
       },
       {
         "id": "time_of_day",

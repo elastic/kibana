@@ -10,15 +10,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { TimelineEventsType } from '../../../../common/types/timeline';
+import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { TimelineEventsType } from '../../../../common/types/timeline';
 import type { TopNOption } from './helpers';
 import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
-import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
   min-width: 600px;

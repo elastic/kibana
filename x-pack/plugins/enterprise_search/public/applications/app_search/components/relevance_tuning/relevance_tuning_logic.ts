@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
-import { omit, cloneDeep, isEmpty } from 'lodash';
+import { MakeLogicType, kea } from 'kea';
+import { cloneDeep, isEmpty, omit } from 'lodash';
 
 import type { SearchResult } from '@elastic/search-ui';
 
 import {
-  flashSuccessToast,
-  flashAPIErrors,
   clearFlashMessages,
+  flashAPIErrors,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { AdvancedSchema, SchemaConflicts } from '../../../shared/schema/types';
@@ -21,19 +21,19 @@ import { AdvancedSchema, SchemaConflicts } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import {
-  UPDATE_SUCCESS_MESSAGE,
-  RESET_CONFIRMATION_MESSAGE,
-  DELETE_SUCCESS_MESSAGE,
-  DELETE_CONFIRMATION_MESSAGE,
-  SUCCESS_CHANGES_MESSAGE,
   BOOST_TYPE_TO_EMPTY_BOOST,
+  DELETE_CONFIRMATION_MESSAGE,
+  DELETE_SUCCESS_MESSAGE,
+  RESET_CONFIRMATION_MESSAGE,
+  SUCCESS_CHANGES_MESSAGE,
+  UPDATE_SUCCESS_MESSAGE,
 } from './constants';
 import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
 import {
   filterIfTerm,
+  normalizeBoostValues,
   parseBoostCenter,
   removeBoostStateProps,
-  normalizeBoostValues,
   removeEmptyValueBoosts,
 } from './utils';
 

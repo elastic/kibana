@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { markdownVisDefinition } from './markdown_vis';
-import { createMarkdownVisFn } from './markdown_fn';
 import { ConfigSchema } from '../config';
+import { createMarkdownVisFn } from './markdown_fn';
 import { markdownVisRenderer } from './markdown_renderer';
+import { markdownVisDefinition } from './markdown_vis';
 
 /** @internal */
 export interface MarkdownPluginSetupDependencies {

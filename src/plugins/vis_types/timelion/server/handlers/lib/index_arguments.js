@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 // Only applies to already resolved arguments
 export default function indexArguments(functionDef, orderedArgs) {

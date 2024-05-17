@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import React, { useMemo } from 'react';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
 import {
   useCanEditSynthetics,

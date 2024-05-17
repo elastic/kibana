@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import { apmConfigSchema } from '@kbn/apm-config-loader';
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const elasticConfig = schema.object({

@@ -8,12 +8,12 @@
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useAppContext } from './use_app_context';
 import {
   AIAssistantManagementObservabilityRouter,
   AIAssistantManagementObservabilityRoutes,
 } from '../routes/config';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
+import { useAppContext } from './use_app_context';
 
 interface StatefulObservabilityAIAssistantRouter extends AIAssistantManagementObservabilityRouter {
   push<T extends PathsOf<AIAssistantManagementObservabilityRoutes>>(

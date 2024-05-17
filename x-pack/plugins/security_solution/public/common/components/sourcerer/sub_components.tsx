@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiButton, EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ResetButton, StyledFormRow } from './helpers';
 import * as i18n from './translations';
 

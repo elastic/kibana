@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs/promises';
 import { createWriteStream } from 'fs';
 import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import Fs from 'fs/promises';
 
-import Tar from 'tar';
-import Yauzl, { ZipFile, Entry } from 'yauzl';
 import * as Rx from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs';
+import Tar from 'tar';
+import Yauzl, { ZipFile, Entry } from 'yauzl';
 
 const strComplete = (obs: Rx.Observable<unknown>) =>
   new Promise<void>((resolve, reject) => {

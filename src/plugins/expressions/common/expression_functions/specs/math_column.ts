@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
-import { math, MathArguments } from './math';
 import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../expression_types';
+import { ExpressionFunctionDefinition } from '../types';
+import { MathArguments, math } from './math';
 
 export type MathColumnArguments = MathArguments & {
   id: string;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext } from 'react';
+import { EuiButtonGroup, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSelect, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
-import type { PivotAggsConfigTopMetrics, TopMetricsAggConfig } from '../types';
-import { PivotConfigurationContext } from '../../../../pivot_configuration/pivot_configuration';
+import React, { useCallback, useContext } from 'react';
 import type { SortDirection } from '../../../../../../../common/pivot_aggs';
 import {
-  isSpecialSortField,
   SORT_DIRECTION,
   TOP_METRICS_SORT_FIELD_TYPES,
   TOP_METRICS_SPECIAL_SORT_FIELDS,
+  isSpecialSortField,
 } from '../../../../../../../common/pivot_aggs';
+import { PivotConfigurationContext } from '../../../../pivot_configuration/pivot_configuration';
+import type { PivotAggsConfigTopMetrics, TopMetricsAggConfig } from '../types';
 
 export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = ({
   onChange,

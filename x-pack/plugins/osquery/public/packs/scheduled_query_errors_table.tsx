@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { encode } from '@kbn/rison';
 import { stringify } from 'querystring';
+import { EuiButtonIcon, EuiCodeBlock, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { encode } from '@kbn/rison';
+import React, { useCallback, useMemo } from 'react';
 
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
-import { AgentIdToName } from '../agents/agent_id_to_name';
-import { usePackQueryErrors } from './use_pack_query_errors';
 import type { SearchHit } from '../../common/search_strategy';
+import { AgentIdToName } from '../agents/agent_id_to_name';
+import { isLeftClickEvent, isModifiedEvent, useKibana } from '../common/lib/kibana';
+import { usePackQueryErrors } from './use_pack_query_errors';
 
 const VIEW_IN_LOGS = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewLogsErrorsActionAriaLabel',

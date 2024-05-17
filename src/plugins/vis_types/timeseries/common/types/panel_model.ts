@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Query, METRIC_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES, METRIC_TYPES, Query } from '@kbn/data-plugin/common';
+import type { Annotation, IndexPatternValue } from '.';
 import { PANEL_TYPES, TOOLTIP_MODES, TSVB_METRIC_TYPES } from '../enums';
-import type { IndexPatternValue, Annotation } from '.';
 import type {
-  ColorRules,
   BackgroundColorRules,
   BarColorRules,
+  ColorRules,
   GaugeColorRules,
 } from './color_rules';
 

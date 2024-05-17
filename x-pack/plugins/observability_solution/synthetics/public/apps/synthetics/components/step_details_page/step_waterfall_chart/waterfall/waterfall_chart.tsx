@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
+import { BarStyleAccessor, DomainRange, TickFormatter } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 
 import { useWaterfallContext } from './context/waterfall_context';
-import { WaterfallSearch } from './waterfall_header/waterfall_search';
 import { WaterfallMimeLegend } from './waterfall_header/waterfall_mime_legend';
-import { WaterfallTimingLegend } from './waterfall_header/waterfall_timing_legend';
+import { WaterfallSearch } from './waterfall_header/waterfall_search';
 import { WaterfallTickAxis } from './waterfall_header/waterfall_tick_axis';
+import { WaterfallTimingLegend } from './waterfall_header/waterfall_timing_legend';
 
-import {
-  WaterfallChartOuterContainer,
-  WaterfallChartStickyHeaderContainer,
-  WaterfallChartSidebarWrapper,
-  WaterfallChartStickyFooterContainer,
-} from './styles';
 import { MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
+import {
+  WaterfallChartOuterContainer,
+  WaterfallChartSidebarWrapper,
+  WaterfallChartStickyFooterContainer,
+  WaterfallChartStickyHeaderContainer,
+} from './styles';
 import { useBarCharts } from './use_bar_charts';
 import { WaterfallBarChart } from './waterfall_bar_chart';
 

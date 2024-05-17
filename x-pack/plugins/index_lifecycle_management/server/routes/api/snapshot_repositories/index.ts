@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { registerFetchRoute } from './register_fetch_route';
 import { RouteDependencies } from '../../../types';
+import { registerFetchRoute } from './register_fetch_route';
 
 export const registerSnapshotRepositoriesRoutes = (deps: RouteDependencies) => {
   registerFetchRoute(deps);

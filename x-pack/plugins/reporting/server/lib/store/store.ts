@@ -108,7 +108,10 @@ export class ReportingStore {
   private client?: ElasticsearchClient;
   config: ReportingCore['config'];
 
-  constructor(private reportingCore: ReportingCore, private logger: Logger) {
+  constructor(
+    private reportingCore: ReportingCore,
+    private logger: Logger
+  ) {
     this.config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
@@ -312,7 +315,11 @@ export class ReportingStore {
       const client = await this.getClient();
       body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
-      this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      this.logError(
+        `Error in updating status to processing! Report: ${jobDebugMessage(report)}`,
+        err,
+        report
+      ); // prettier-ignore
       throw err;
     }
 
@@ -344,7 +351,11 @@ export class ReportingStore {
       const client = await this.getClient();
       body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
-      this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      this.logError(
+        `Error in updating status to failed! Report: ${jobDebugMessage(report)}`,
+        err,
+        report
+      ); // prettier-ignore
       throw err;
     }
 
@@ -366,7 +377,11 @@ export class ReportingStore {
       const client = await this.getClient();
       body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
-      this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      this.logError(
+        `Error in updating status to failed! Report: ${jobDebugMessage(report)}`,
+        err,
+        report
+      ); // prettier-ignore
       throw err;
     }
 
@@ -394,7 +409,11 @@ export class ReportingStore {
       const client = await this.getClient();
       body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
-      this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      this.logError(
+        `Error in updating status to complete! Report: ${jobDebugMessage(report)}`,
+        err,
+        report
+      ); // prettier-ignore
       throw err;
     }
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup, Logger } from '@kbn/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import { RouteDependencies } from './types';
 import { registerRoutes } from './routes';
+import { RouteDependencies } from './types';
 
 export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
   log: Logger;

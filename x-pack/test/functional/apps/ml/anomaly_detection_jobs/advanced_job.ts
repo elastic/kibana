@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
+import type { DatafeedConfig, Detector, PickFieldsConfig } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

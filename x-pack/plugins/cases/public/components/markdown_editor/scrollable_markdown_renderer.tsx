@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 
 import { MarkdownRenderer } from './renderer';
 

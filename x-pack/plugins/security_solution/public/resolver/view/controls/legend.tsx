@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import { useColors } from '../use_colors';
-import { StyledDescriptionList } from '../panels/styles';
-import { CubeForProcess } from '../panels/cube_for_process';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { GeneratedText } from '../generated_text';
+import { CubeForProcess } from '../panels/cube_for_process';
+import { StyledDescriptionList } from '../panels/styles';
+import { useColors } from '../use_colors';
 import {
-  StyledEuiDescriptionListTitle,
-  StyledEuiDescriptionListDescription,
-  StyledEuiButtonIcon,
   COLUMN_WIDTH,
+  StyledEuiButtonIcon,
+  StyledEuiDescriptionListDescription,
+  StyledEuiDescriptionListTitle,
 } from './styles';
 
 // This component defines the cube legend that allows users to identify the meaning of the cubes

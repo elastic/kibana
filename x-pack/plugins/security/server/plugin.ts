@@ -36,6 +36,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
+import type { AuthenticatedUser, SecurityLicense } from '../common';
+import { SecurityLicenseService } from '../common/licensing';
 import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
@@ -60,8 +62,6 @@ import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
-import type { AuthenticatedUser, SecurityLicense } from '../common';
-import { SecurityLicenseService } from '../common/licensing';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],

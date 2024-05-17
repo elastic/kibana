@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID, durationToNumber } from '@kbn/reporting-common';
 
-import { checkLicense, Job } from '@kbn/reporting-public';
+import { Job, checkLicense } from '@kbn/reporting-public';
 import { ListingPropsInternal } from '.';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';

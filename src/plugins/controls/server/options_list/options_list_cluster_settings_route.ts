@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 
 export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();

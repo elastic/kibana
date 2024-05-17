@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import React, { memo } from 'react';
 
 import { BulkActionsHeader, BulkActionsRowCell } from './components';
 

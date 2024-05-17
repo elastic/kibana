@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ISavedObjectsPointInTimeFinder",
-        "description": [
-          "\nPoint-in-time finder\n"
-        ],
+        "description": ["\nPoint-in-time finder\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -78,9 +76,7 @@
             "description": [
               "\nCloses the Point-In-Time associated with this finder instance.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason."
             ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -96,9 +92,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ISavedObjectsRepository",
-        "description": [
-          "\nThe savedObjects repository contract.\n"
-        ],
+        "description": ["\nThe savedObjects repository contract.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -107,17 +101,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.create",
             "type": "Function",
-            "tags": [
-              "property",
-              "property",
-              "property",
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property", "property", "property", "property"],
             "label": "create",
-            "description": [
-              "\nPersists an object\n"
-            ],
+            "description": ["\nPersists an object\n"],
             "signature": [
               "<T = unknown>(type: string, attributes: T, options?: ",
               {
@@ -147,12 +133,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of object to create"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of object to create"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -164,12 +146,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
-                "description": [
-                  "- the attributes for the object to be created"
-                ],
-                "signature": [
-                  "T"
-                ],
+                "description": ["- the attributes for the object to be created"],
+                "signature": ["T"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -200,23 +178,15 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the created saved object { id, type, version, attributes }"
-            ]
+            "returnComment": ["the created saved object { id, type, version, attributes }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.bulkCreate",
             "type": "Function",
-            "tags": [
-              "property",
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property", "property"],
             "label": "bulkCreate",
-            "description": [
-              "\nCreates multiple documents at once\n"
-            ],
+            "description": ["\nCreates multiple documents at once\n"],
             "signature": [
               "<T = unknown>(objects: ",
               {
@@ -254,9 +224,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- array of objects to create [{ type, attributes, ... }]"
-                ],
+                "description": ["- array of objects to create [{ type, attributes, ... }]"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -347,9 +315,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- array of objects to check for conflicts [{ id, type }]"
-                ],
+                "description": ["- array of objects to check for conflicts [{ id, type }]"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -390,21 +356,15 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "-  {errors: [{ id, type, error: { message } }]}"
-            ]
+            "returnComment": ["-  {errors: [{ id, type, error: { message } }]}"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.delete",
             "type": "Function",
-            "tags": [
-              "property"
-            ],
+            "tags": ["property"],
             "label": "delete",
-            "description": [
-              "\nDeletes an object\n"
-            ],
+            "description": ["\nDeletes an object\n"],
             "signature": [
               "(type: string, id: string, options?: ",
               {
@@ -426,12 +386,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of the object to delete"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of the object to delete"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -443,12 +399,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the id of the object to delete"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the id of the object to delete"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -487,9 +439,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkDelete",
-            "description": [
-              "\nDeletes multiple documents at once"
-            ],
+            "description": ["\nDeletes multiple documents at once"],
             "signature": [
               "(objects: ",
               {
@@ -527,9 +477,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- an array of objects to delete (contains id and type)"
-                ],
+                "description": ["- an array of objects to delete (contains id and type)"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -570,9 +518,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { statuses: [{ id, type, success, error: { message } }] }"
-            ]
+            "returnComment": ["- { statuses: [{ id, type, success, error: { message } }] }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -580,9 +526,7 @@
             "type": "Function",
             "tags": [],
             "label": "deleteByNamespace",
-            "description": [
-              "\nDeletes all objects from the provided namespace.\n"
-            ],
+            "description": ["\nDeletes all objects from the provided namespace.\n"],
             "signature": [
               "(namespace: string, options?: ",
               {
@@ -604,12 +548,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": [
-                  "- the namespace in which to delete all objects"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the namespace in which to delete all objects"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -665,9 +605,7 @@
               "property"
             ],
             "label": "find",
-            "description": [
-              "\nFind saved objects by query\n"
-            ],
+            "description": ["\nFind saved objects by query\n"],
             "signature": [
               "<T = unknown, A = unknown>(options: ",
               {
@@ -725,10 +663,7 @@
                 "description": [
                   "{@link SavedObjectsFindInternalOptions } - internal-only options for the find operation"
                 ],
-                "signature": [
-                  "SavedObjectsFindInternalOptions",
-                  " | undefined"
-                ],
+                "signature": ["SavedObjectsFindInternalOptions", " | undefined"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -743,14 +678,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.bulkGet",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "bulkGet",
-            "description": [
-              "\nReturns an array of objects by id\n"
-            ],
+            "description": ["\nReturns an array of objects by id\n"],
             "signature": [
               "<T = unknown>(objects: ",
               {
@@ -788,9 +718,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- an array of objects containing id, type and optionally fields"
-                ],
+                "description": ["- an array of objects containing id, type and optionally fields"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -831,18 +759,13 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { saved_objects: [{ id, type, version, attributes }] }"
-            ]
+            "returnComment": ["- { saved_objects: [{ id, type, version, attributes }] }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.bulkResolve",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "bulkResolve",
             "description": [
               "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
@@ -884,9 +807,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- an array of objects containing id, type"
-                ],
+                "description": ["- an array of objects containing id, type"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -927,22 +848,15 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { resolved_objects: [{ saved_object, outcome }] }"
-            ]
+            "returnComment": ["- { resolved_objects: [{ saved_object, outcome }] }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.get",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "get",
-            "description": [
-              "\nGets a single object\n"
-            ],
+            "description": ["\nGets a single object\n"],
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
               {
@@ -972,12 +886,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of the object to get"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of the object to get"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -989,12 +899,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the ID of the object to get"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the ID of the object to get"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1006,9 +912,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsGetOptions } - options for the get operation"
-                ],
+                "description": ["{@link SavedObjectsGetOptions } - options for the get operation"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1025,18 +929,13 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { id, type, version, attributes }"
-            ]
+            "returnComment": ["- { id, type, version, attributes }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.resolve",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "resolve",
             "description": [
               "\nResolves a single object, using any legacy URL alias if it exists\n"
@@ -1070,12 +969,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of the object to resolve"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of the object to resolve"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1087,12 +982,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the id of the object to resolve"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the id of the object to resolve"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1123,23 +1014,15 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { saved_object, outcome }"
-            ]
+            "returnComment": ["- { saved_object, outcome }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.update",
             "type": "Function",
-            "tags": [
-              "property",
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property", "property"],
             "label": "update",
-            "description": [
-              "\nUpdates an object\n"
-            ],
+            "description": ["\nUpdates an object\n"],
             "signature": [
               "<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
               {
@@ -1169,12 +1052,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of the object to update"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of the object to update"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1186,12 +1065,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the ID of the object to update"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the ID of the object to update"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1203,12 +1078,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
-                "description": [
-                  "- attributes to update"
-                ],
-                "signature": [
-                  "Partial<T>"
-                ],
+                "description": ["- attributes to update"],
+                "signature": ["Partial<T>"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1239,9 +1110,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- updated saved object"
-            ]
+            "returnComment": ["- updated saved object"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -1289,9 +1158,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- The objects to get the references for (contains type and ID)"
-                ],
+                "description": ["- The objects to get the references for (contains type and ID)"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1406,12 +1273,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "spacesToAdd",
-                "description": [
-                  "- array of spaces in which the objects should be added"
-                ],
-                "signature": [
-                  "string[]"
-                ],
+                "description": ["- array of spaces in which the objects should be added"],
+                "signature": ["string[]"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1423,12 +1286,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "spacesToRemove",
-                "description": [
-                  "- array of spaces from which the objects should be removed"
-                ],
-                "signature": [
-                  "string[]"
-                ],
+                "description": ["- array of spaces from which the objects should be removed"],
+                "signature": ["string[]"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1459,22 +1318,15 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { objects: [{ id, type, spaces, error: { message } }] }"
-            ]
+            "returnComment": ["- { objects: [{ id, type, spaces, error: { message } }] }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.bulkUpdate",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "bulkUpdate",
-            "description": [
-              "\nUpdates multiple objects in bulk\n"
-            ],
+            "description": ["\nUpdates multiple objects in bulk\n"],
             "signature": [
               "<T = unknown>(objects: ",
               {
@@ -1597,12 +1449,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of the object to remove references to"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of the object to remove references to"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1614,12 +1462,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the ID of the object to remove references to"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the ID of the object to remove references to"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1700,12 +1544,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- The type of saved object whose fields should be incremented"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The type of saved object whose fields should be incremented"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1717,12 +1557,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- The id of the document whose fields should be incremented"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The id of the document whose fields should be incremented"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1759,9 +1595,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsIncrementCounterOptions }"
-                ],
+                "description": ["{@link SavedObjectsIncrementCounterOptions }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1778,18 +1612,13 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- The saved object after the specified fields were incremented"
-            ]
+            "returnComment": ["- The saved object after the specified fields were incremented"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.ISavedObjectsRepository.openPointInTimeForType",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "openPointInTimeForType",
             "description": [
               "\nOpens a Point In Time (PIT) against the indices for the specified Saved Object types.\nThe returned `id` can then be passed to `SavedObjects.find` to search against that PIT.\n\nOnly use this API if you have an advanced use case that's not solved by the\n{@link SavedObjectsRepository.createPointInTimeFinder} method.\n"
@@ -1825,12 +1654,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type or types for the PIT"
-                ],
-                "signature": [
-                  "string | string[]"
-                ],
+                "description": ["- the type or types for the PIT"],
+                "signature": ["string | string[]"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1869,19 +1694,14 @@
                 "description": [
                   "{@link SavedObjectsFindInternalOptions } - internal options for the open PIT operation"
                 ],
-                "signature": [
-                  "SavedObjectsFindInternalOptions",
-                  " | undefined"
-                ],
+                "signature": ["SavedObjectsFindInternalOptions", " | undefined"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { id - the ID for the PIT }"
-            ]
+            "returnComment": ["- { id - the ID for the PIT }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -1923,12 +1743,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- ID of the saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- ID of the saved object"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1967,19 +1783,14 @@
                 "description": [
                   "{@link SavedObjectsFindInternalOptions } - internal options for the close PIT operation"
                 ],
-                "signature": [
-                  "SavedObjectsFindInternalOptions",
-                  " | undefined"
-                ],
+                "signature": ["SavedObjectsFindInternalOptions", " | undefined"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- { succeeded, num_freed - number of contexts closed }"
-            ]
+            "returnComment": ["- { succeeded, num_freed - number of contexts closed }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -2069,9 +1880,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "- the point-in-time finder {@link ISavedObjectsPointInTimeFinder }"
-            ]
+            "returnComment": ["- the point-in-time finder {@link ISavedObjectsPointInTimeFinder }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -2082,9 +1891,7 @@
             "description": [
               "\nIf the spaces extension is enabled, it's used to get the current namespace (and optionally throws an error if a\nconsumer attempted to specify the namespace explicitly).\n\nIf the spaces extension is *not* enabled, this function simply normalizes the specified namespace so that\n`'default'` can be used interchangeably with `undefined` i.e. the method always returns `undefined` for the default\nnamespace."
             ],
-            "signature": [
-              "(namespace?: string | undefined) => string | undefined"
-            ],
+            "signature": ["(namespace?: string | undefined) => string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2096,9 +1903,7 @@
                 "tags": [],
                 "label": "namespace",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2116,9 +1921,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObject",
-        "description": [
-          "\nDefinition of the Saved Object interface\n"
-        ],
+        "description": ["\nDefinition of the Saved Object interface\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -2168,9 +1971,7 @@
             "description": [
               "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2181,12 +1982,8 @@
             "type": "string",
             "tags": [],
             "label": "created_at",
-            "description": [
-              "Timestamp of the time this document had been created."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Timestamp of the time this document had been created."],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2197,12 +1994,8 @@
             "type": "string",
             "tags": [],
             "label": "created_by",
-            "description": [
-              "The ID of the user who created this object."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The ID of the user who created this object."],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2213,12 +2006,8 @@
             "type": "string",
             "tags": [],
             "label": "updated_at",
-            "description": [
-              "Timestamp of the last time this document had been updated."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Timestamp of the last time this document had been updated."],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2255,9 +2044,7 @@
             "description": [
               "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2268,9 +2055,7 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [
-              "{@inheritdoc SavedObjectReference}"
-            ],
+            "description": ["{@inheritdoc SavedObjectReference}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -2289,13 +2074,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObject.migrationVersion",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "migrationVersion",
-            "description": [
-              "\n{@inheritdoc SavedObjectsMigrationVersion}"
-            ],
+            "description": ["\n{@inheritdoc SavedObjectsMigrationVersion}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -2509,9 +2290,7 @@
             "description": [
               "A semver value that is used when upgrading objects between Kibana versions."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2525,9 +2304,7 @@
             "description": [
               "A semver value that is used when migrating documents between Kibana versions."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2541,9 +2318,7 @@
             "description": [
               "\nSpace(s) that this saved object exists in. This attribute is not used for \"global\" saved object types which are registered with\n`namespaceType: 'agnostic'`."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2557,9 +2332,7 @@
             "description": [
               "\nThe ID of the saved object this originated from. This is set if this object's `id` was regenerated; that can happen during migration\nfrom a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import\nto ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given\nspace."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2573,9 +2346,7 @@
             "description": [
               "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2587,9 +2358,7 @@
         "parentPluginId": "@kbn/core-saved-objects-api-server",
         "id": "def-common.SavedObjectAttributes",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectAttributes",
         "description": [
           "\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
@@ -2894,9 +2663,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectReference",
-        "description": [
-          "\nA reference to another saved object.\n"
-        ],
+        "description": ["\nA reference to another saved object.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2956,9 +2723,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the referenced object"
-            ],
+            "description": ["The type of the referenced object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2969,9 +2734,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the referenced object"
-            ],
+            "description": ["The ID of the referenced object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2982,12 +2745,8 @@
             "type": "string",
             "tags": [],
             "label": "originId",
-            "description": [
-              "The origin ID of the referenced object (if it has one)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The origin ID of the referenced object (if it has one)"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2998,12 +2757,8 @@
             "type": "Array",
             "tags": [],
             "label": "spaces",
-            "description": [
-              "The space(s) that the referenced object exists in"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["The space(s) that the referenced object exists in"],
+            "signature": ["string[]"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3017,9 +2772,7 @@
             "description": [
               "\nReferences to this object; note that this does not contain _all inbound references everywhere for this object_, it only contains\ninbound references for the scope of this operation"
             ],
-            "signature": [
-              "{ type: string; id: string; name: string; }[]"
-            ],
+            "signature": ["{ type: string; id: string; name: string; }[]"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3030,12 +2783,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isMissing",
-            "description": [
-              "Whether or not this object or reference is missing"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["Whether or not this object or reference is missing"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3046,12 +2795,8 @@
             "type": "Array",
             "tags": [],
             "label": "spacesWithMatchingAliases",
-            "description": [
-              "The space(s) that legacy URL aliases matching this type/id exist in"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["The space(s) that legacy URL aliases matching this type/id exist in"],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3065,9 +2810,7 @@
             "description": [
               "The space(s) that objects matching this origin exist in (including this one)"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3081,9 +2824,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBaseOptions",
-        "description": [
-          "\nBase options used by most of the savedObject APIs."
-        ],
+        "description": ["\nBase options used by most of the savedObject APIs."],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3094,12 +2835,8 @@
             "type": "string",
             "tags": [],
             "label": "namespace",
-            "description": [
-              "Specify the namespace for this operation"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Specify the namespace for this operation"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3113,9 +2850,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkCreateObject",
-        "description": [
-          "\nObject parameters for the bulk create operation\n"
-        ],
+        "description": ["\nObject parameters for the bulk create operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3136,12 +2871,8 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "Optional ID of the object to create (the ID is generated by default)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Optional ID of the object to create (the ID is generated by default)"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3152,9 +2883,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of object to create"
-            ],
+            "description": ["The type of object to create"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3165,12 +2894,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [
-              "The attributes for the object to create"
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["The attributes for the object to create"],
+            "signature": ["T"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3181,12 +2906,8 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "The version string for the object to create"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The version string for the object to create"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3197,9 +2918,7 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [
-              "Array of references to other saved objects"
-            ],
+            "description": ["Array of references to other saved objects"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -3218,13 +2937,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsBulkCreateObject.migrationVersion",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "migrationVersion",
-            "description": [
-              "\n{@inheritDoc SavedObjectsMigrationVersion}"
-            ],
+            "description": ["\n{@inheritDoc SavedObjectsMigrationVersion}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -3258,9 +2973,7 @@
             "description": [
               "\nA semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current\nKibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the\ncurrent Kibana version, it will result in an error.\n"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3274,9 +2987,7 @@
             "description": [
               "A semver value that is used when migrating documents between Kibana versions."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3290,9 +3001,7 @@
             "description": [
               "Optional ID of the original saved object, if this object's `id` was regenerated"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3306,9 +3015,7 @@
             "description": [
               "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3322,9 +3029,7 @@
             "description": [
               "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3338,9 +3043,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteObject",
-        "description": [
-          "\nObject parameters for the bulk delete operation\n"
-        ],
+        "description": ["\nObject parameters for the bulk delete operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3351,9 +3054,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the saved object to delete"
-            ],
+            "description": ["The type of the saved object to delete"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3364,9 +3065,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the saved object to delete"
-            ],
+            "description": ["The ID of the saved object to delete"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3380,9 +3079,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteOptions",
-        "description": [
-          "\nOptions for the bulk delete operation\n"
-        ],
+        "description": ["\nOptions for the bulk delete operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3410,9 +3107,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch Refresh setting for this operation"
-            ],
+            "description": ["The Elasticsearch Refresh setting for this operation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3436,9 +3131,7 @@
             "description": [
               "\nForce deletion of all objects that exists in multiple namespaces, applied to all objects."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3452,9 +3145,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `bulkDelete()` method\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `bulkDelete()` method\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3465,9 +3156,7 @@
             "type": "Array",
             "tags": [],
             "label": "statuses",
-            "description": [
-              "Array of {@link SavedObjectsBulkDeleteStatus}"
-            ],
+            "description": ["Array of {@link SavedObjectsBulkDeleteStatus}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3491,9 +3180,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkDeleteStatus",
-        "description": [
-          "\nThe per-object result of a bulk delete operation\n"
-        ],
+        "description": ["\nThe per-object result of a bulk delete operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3504,9 +3191,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the saved object"
-            ],
+            "description": ["The ID of the saved object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3517,9 +3202,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the saved object"
-            ],
+            "description": ["The type of the saved object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3530,9 +3213,7 @@
             "type": "boolean",
             "tags": [],
             "label": "success",
-            "description": [
-              "The status of deleting the object: true for deleted, false for error"
-            ],
+            "description": ["The status of deleting the object: true for deleted, false for error"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3543,9 +3224,7 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [
-              "Reason the object could not be deleted (success is false)"
-            ],
+            "description": ["Reason the object could not be deleted (success is false)"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -3569,9 +3248,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkGetObject",
-        "description": [
-          "\nObject parameters for the bulk get operation\n"
-        ],
+        "description": ["\nObject parameters for the bulk get operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3582,9 +3259,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "ID of the object to get"
-            ],
+            "description": ["ID of the object to get"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3595,9 +3270,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "Type of the object to get"
-            ],
+            "description": ["Type of the object to get"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3608,12 +3281,8 @@
             "type": "Array",
             "tags": [],
             "label": "fields",
-            "description": [
-              "SavedObject fields to include in the response"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["SavedObject fields to include in the response"],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3627,9 +3296,7 @@
             "description": [
               "\nOptional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the\ntop-level options.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3643,9 +3310,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkResolveObject",
-        "description": [
-          "\nObject parameters for the bulk resolve operation\n"
-        ],
+        "description": ["\nObject parameters for the bulk resolve operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_resolve.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3656,9 +3321,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "ID of the object to resiolve"
-            ],
+            "description": ["ID of the object to resiolve"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_resolve.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3669,9 +3332,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "Type of the object to resolve"
-            ],
+            "description": ["Type of the object to resolve"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_resolve.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3685,9 +3346,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkResolveResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `bulkResolve()` method.\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `bulkResolve()` method.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3708,9 +3367,7 @@
             "type": "Array",
             "tags": [],
             "label": "resolved_objects",
-            "description": [
-              "array of {@link SavedObjectsResolveResponse}"
-            ],
+            "description": ["array of {@link SavedObjectsResolveResponse}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3734,9 +3391,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkResponse",
-        "description": [
-          "\nBase return for saved object bulk operations\n"
-        ],
+        "description": ["\nBase return for saved object bulk operations\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3757,9 +3412,7 @@
             "type": "Array",
             "tags": [],
             "label": "saved_objects",
-            "description": [
-              "array of saved objects"
-            ],
+            "description": ["array of saved objects"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -3783,9 +3436,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkUpdateObject",
-        "description": [
-          "\nObject parameters for the bulk update operation\n"
-        ],
+        "description": ["\nObject parameters for the bulk update operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3843,9 +3494,7 @@
             "description": [
               "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
-            "signature": [
-              "{ [P in keyof T]?: T[P] | undefined; }"
-            ],
+            "signature": ["{ [P in keyof T]?: T[P] | undefined; }"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3859,9 +3508,7 @@
             "description": [
               "\nOptional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsBulkUpdateOptions}.\n\nNote: the default namespace's string representation is `'default'`, and its ID representation is `undefined`."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3875,9 +3522,7 @@
             "description": [
               "\nBy default, update will merge the provided attributes with the ones present on the document\n(performing a standard partial update). Setting this option to `false` will change the behavior, performing\na \"full\" update instead, where the provided attributes will fully replace the existing ones.\nDefaults to `true`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3891,9 +3536,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkUpdateOptions",
-        "description": [
-          "\nOptions for the saved objects bulk update operation\n"
-        ],
+        "description": ["\nOptions for the saved objects bulk update operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3921,9 +3564,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch Refresh setting for this operation"
-            ],
+            "description": ["The Elasticsearch Refresh setting for this operation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3944,12 +3585,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "migrationVersionCompatibility",
-            "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
-            ],
-            "signature": [
-              "\"raw\" | \"compatible\" | undefined"
-            ],
+            "description": ["{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"],
+            "signature": ["\"raw\" | \"compatible\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3963,9 +3600,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsBulkUpdateResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `bulkUpdate()` method.\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `bulkUpdate()` method.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -3986,9 +3621,7 @@
             "type": "Array",
             "tags": [],
             "label": "saved_objects",
-            "description": [
-              "array of {@link SavedObjectsUpdateResponse}"
-            ],
+            "description": ["array of {@link SavedObjectsUpdateResponse}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -4012,9 +3645,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCheckConflictsObject",
-        "description": [
-          "\nObject parameters for the check conficts operation\n"
-        ],
+        "description": ["\nObject parameters for the check conficts operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/check_conflicts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4025,9 +3656,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the object to check"
-            ],
+            "description": ["The ID of the object to check"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/check_conflicts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4038,9 +3667,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the object to check"
-            ],
+            "description": ["The type of the object to check"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/check_conflicts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4054,9 +3681,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCheckConflictsResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `checkConflicts()` method.\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `checkConflicts()` method.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/check_conflicts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4107,9 +3732,7 @@
             "type": "Function",
             "tags": [],
             "label": "create",
-            "description": [
-              "\nPersists a SavedObject\n"
-            ],
+            "description": ["\nPersists a SavedObject\n"],
             "signature": [
               "<T = unknown>(type: string, attributes: T, options?: ",
               {
@@ -4139,12 +3762,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of saved object to create"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of saved object to create"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4156,12 +3775,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
-                "description": [
-                  "- attributes for the saved object"
-                ],
-                "signature": [
-                  "T"
-                ],
+                "description": ["- attributes for the saved object"],
+                "signature": ["T"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4192,9 +3807,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the created saved object"
-            ]
+            "returnComment": ["the created saved object"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4202,9 +3815,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkCreate",
-            "description": [
-              "\nPersists multiple documents batched together as a single request\n"
-            ],
+            "description": ["\nPersists multiple documents batched together as a single request\n"],
             "signature": [
               "<T = unknown>(objects: ",
               {
@@ -4285,9 +3896,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsBulkResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsBulkResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4335,9 +3944,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- array of objects to check (contains ID and type)"
-                ],
+                "description": ["- array of objects to check (contains ID and type)"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -4378,9 +3985,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsCheckConflictsResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsCheckConflictsResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4388,9 +3993,7 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [
-              "\nDeletes a SavedObject\n"
-            ],
+            "description": ["\nDeletes a SavedObject\n"],
             "signature": [
               "(type: string, id: string, options?: ",
               {
@@ -4412,12 +4015,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of saved object to delete"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of saved object to delete"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4429,12 +4028,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the ID of the saved object to delete"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the ID of the saved object to delete"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4513,9 +4108,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- array of objects to delete (contains ID and type)"
-                ],
+                "description": ["- array of objects to delete (contains ID and type)"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -4556,9 +4149,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsBulkDeleteResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsBulkDeleteResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4566,9 +4157,7 @@
             "type": "Function",
             "tags": [],
             "label": "find",
-            "description": [
-              "\nFind all SavedObjects matching the search query\n"
-            ],
+            "description": ["\nFind all SavedObjects matching the search query\n"],
             "signature": [
               "<T = unknown, A = unknown>(options: ",
               {
@@ -4616,9 +4205,7 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsFindResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsFindResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4626,9 +4213,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
-            "description": [
-              "\nReturns an array of objects by id\n"
-            ],
+            "description": ["\nReturns an array of objects by id\n"],
             "signature": [
               "<T = unknown>(objects: ",
               {
@@ -4709,9 +4294,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsBulkResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsBulkResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4719,9 +4302,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nRetrieves a single object\n"
-            ],
+            "description": ["\nRetrieves a single object\n"],
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
               {
@@ -4751,12 +4332,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- The type of the object to retrieve"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The type of the object to retrieve"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4768,12 +4345,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- The ID of the object to retrieve"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The ID of the object to retrieve"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4785,9 +4358,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsGetOptions } - options for the get operation"
-                ],
+                "description": ["{@link SavedObjectsGetOptions } - options for the get operation"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -4810,9 +4381,7 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsClientContract.bulkResolve",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "bulkResolve",
             "description": [
               "\nResolves an array of objects by id.\n\nSee documentation for `.resolve`.\n"
@@ -4854,9 +4423,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [
-                  "- an array of objects to resolve (contains id and type)"
-                ],
+                "description": ["- an array of objects to resolve (contains id and type)"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -4897,9 +4464,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsBulkResolveResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsBulkResolveResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -4939,12 +4504,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- The type of SavedObject to retrieve"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The type of SavedObject to retrieve"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4956,12 +4517,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- The ID of the SavedObject to retrieve"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The ID of the SavedObject to retrieve"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4992,9 +4549,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsResolveResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsResolveResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5002,9 +4557,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\nUpdates an SavedObject\n"
-            ],
+            "description": ["\nUpdates an SavedObject\n"],
             "signature": [
               "<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
               {
@@ -5034,12 +4587,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- The type of SavedObject to update"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The type of SavedObject to update"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5051,12 +4600,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- The ID of the SavedObject to update"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The ID of the SavedObject to update"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5068,12 +4613,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
-                "description": [
-                  "- Attributes to update"
-                ],
-                "signature": [
-                  "Partial<T>"
-                ],
+                "description": ["- Attributes to update"],
+                "signature": ["Partial<T>"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5104,9 +4645,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsUpdateResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsUpdateResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5197,9 +4736,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsBulkUpdateResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsBulkUpdateResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5239,12 +4776,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type of the object to remove references to"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the type of the object to remove references to"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5256,12 +4789,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the ID of the object to remove references to"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the ID of the object to remove references to"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5292,9 +4821,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsRemoveReferencesToResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsRemoveReferencesToResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5334,12 +4861,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
-                "description": [
-                  "- the type or array of types"
-                ],
-                "signature": [
-                  "string | string[]"
-                ],
+                "description": ["- the type or array of types"],
+                "signature": ["string | string[]"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5370,9 +4893,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsOpenPointInTimeResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsOpenPointInTimeResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5412,12 +4933,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- the ID of the PIT to close"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- the ID of the PIT to close"],
+                "signature": ["string"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5448,9 +4965,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsClosePointInTimeResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsClosePointInTimeResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5540,9 +5055,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the created PIT finder"
-            ]
+            "returnComment": ["the created PIT finder"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5633,9 +5146,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsCollectMultiNamespaceReferencesResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsCollectMultiNamespaceReferencesResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5707,12 +5218,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "spacesToAdd",
-                "description": [
-                  "- array of spaces each object should be included in"
-                ],
-                "signature": [
-                  "string[]"
-                ],
+                "description": ["- array of spaces each object should be included in"],
+                "signature": ["string[]"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5724,12 +5231,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "spacesToRemove",
-                "description": [
-                  "- array of spaces each object should not be included in"
-                ],
-                "signature": [
-                  "string[]"
-                ],
+                "description": ["- array of spaces each object should not be included in"],
+                "signature": ["string[]"],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5760,9 +5263,7 @@
                 "isRequired": false
               }
             ],
-            "returnComment": [
-              "the {@link SavedObjectsUpdateObjectsSpacesResponse }"
-            ]
+            "returnComment": ["the {@link SavedObjectsUpdateObjectsSpacesResponse }"]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5773,9 +5274,7 @@
             "description": [
               "\nReturns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`."
             ],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5791,9 +5290,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsClosePointInTimeResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `closePointInTime()` method.\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `closePointInTime()` method.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/close_point_in_time.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5817,9 +5314,7 @@
             "type": "number",
             "tags": [],
             "label": "num_freed",
-            "description": [
-              "The number of search contexts that have been successfully closed"
-            ],
+            "description": ["The number of search contexts that have been successfully closed"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/close_point_in_time.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5846,9 +5341,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the object to collect references for"
-            ],
+            "description": ["The ID of the object to collect references for"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5859,9 +5352,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the object to collect references for"
-            ],
+            "description": ["The type of the object to collect references for"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5875,9 +5366,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCollectMultiNamespaceReferencesOptions",
-        "description": [
-          "\nOptions for collecting references.\n"
-        ],
+        "description": ["\nOptions for collecting references.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -5908,10 +5397,7 @@
             "description": [
               "Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences'"
             ],
-            "signature": [
-              "SavedObjectsCollectMultiNamespaceReferencesPurpose",
-              " | undefined"
-            ],
+            "signature": ["SavedObjectsCollectMultiNamespaceReferencesPurpose", " | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5925,9 +5411,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCollectMultiNamespaceReferencesResponse",
-        "description": [
-          "\nThe response when object references are collected.\n"
-        ],
+        "description": ["\nThe response when object references are collected.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5938,9 +5422,7 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": [
-              "array of {@link SavedObjectReferenceWithContext}"
-            ],
+            "description": ["array of {@link SavedObjectReferenceWithContext}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -5964,9 +5446,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCreateOptions",
-        "description": [
-          "\nOptions for the saved objects create operation\n"
-        ],
+        "description": ["\nOptions for the saved objects create operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -5994,12 +5474,8 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "(not recommended) Specify an id for the document"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["(not recommended) Specify an id for the document"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6010,12 +5486,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "overwrite",
-            "description": [
-              "Overwrite existing documents (defaults to false)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["Overwrite existing documents (defaults to false)"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6029,9 +5501,7 @@
             "description": [
               "\nAn opaque version number which changes on each successful write operation.\nCan be used in conjunction with `overwrite` for implementing optimistic concurrency control."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6040,13 +5510,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsCreateOptions.migrationVersion",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "migrationVersion",
-            "description": [
-              "\n{@inheritDoc SavedObjectsMigrationVersion}"
-            ],
+            "description": ["\n{@inheritDoc SavedObjectsMigrationVersion}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -6092,9 +5558,7 @@
             "description": [
               "\nA semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current\nKibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the\ncurrent Kibana version, it will result in an error.\n"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6108,9 +5572,7 @@
             "description": [
               "\nA semver value that is used when migrating documents between Kibana versions."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6121,9 +5583,7 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [
-              "Array of references to other saved objects"
-            ],
+            "description": ["Array of references to other saved objects"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -6144,9 +5604,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch Refresh setting for this operation"
-            ],
+            "description": ["The Elasticsearch Refresh setting for this operation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -6170,9 +5628,7 @@
             "description": [
               "Optional ID of the original saved object, if this object's `id` was regenerated"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6186,9 +5642,7 @@
             "description": [
               "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6202,9 +5656,7 @@
             "description": [
               "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6215,12 +5667,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "migrationVersionCompatibility",
-            "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
-            ],
-            "signature": [
-              "\"raw\" | \"compatible\" | undefined"
-            ],
+            "description": ["{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"],
+            "signature": ["\"raw\" | \"compatible\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6234,9 +5682,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsCreatePointInTimeFinderDependencies",
-        "description": [
-          "\nDependencies for the create point-in-time finder operation\n"
-        ],
+        "description": ["\nDependencies for the create point-in-time finder operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6247,9 +5693,7 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [
-              "the point-in-time finder client"
-            ],
+            "description": ["the point-in-time finder client"],
             "signature": [
               "{ find: <T = unknown, A = unknown>(options: ",
               {
@@ -6320,9 +5764,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsDeleteByNamespaceOptions",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -6350,12 +5792,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch supports only boolean flag for this operation"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["The Elasticsearch supports only boolean flag for this operation"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/delete_by_namespace.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6369,9 +5807,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsDeleteOptions",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -6399,9 +5835,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch Refresh setting for this operation"
-            ],
+            "description": ["The Elasticsearch Refresh setting for this operation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -6422,12 +5856,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "force",
-            "description": [
-              "Force deletion of an object that exists in multiple namespaces"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["Force deletion of an object that exists in multiple namespaces"],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6441,9 +5871,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsFindOptions",
-        "description": [
-          "\nOptions for finding saved objects\n"
-        ],
+        "description": ["\nOptions for finding saved objects\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6454,12 +5882,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [
-              "the type or types of objects to find"
-            ],
-            "signature": [
-              "string | string[]"
-            ],
+            "description": ["the type or types of objects to find"],
+            "signature": ["string | string[]"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6470,12 +5894,8 @@
             "type": "number",
             "tags": [],
             "label": "page",
-            "description": [
-              "the page of results to return"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["the page of results to return"],
+            "signature": ["number | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6486,12 +5906,8 @@
             "type": "number",
             "tags": [],
             "label": "perPage",
-            "description": [
-              "the number of objects per page"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["the number of objects per page"],
+            "signature": ["number | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6502,12 +5918,8 @@
             "type": "string",
             "tags": [],
             "label": "sortField",
-            "description": [
-              "which field to sort by"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["which field to sort by"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6518,13 +5930,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "sortOrder",
-            "description": [
-              "sort order, ascending or descending"
-            ],
-            "signature": [
-              "SortOrder",
-              " | undefined"
-            ],
+            "description": ["sort order, ascending or descending"],
+            "signature": ["SortOrder", " | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6538,9 +5945,7 @@
             "description": [
               "\nAn array of attributes to fetch and include in the results. If unspecified, all attributes will be fetched.\n\nThe main purpose of this option is to avoid fetching unnecessary heavy fields (e.g blobs) when searching for\nsavedObjects, for performance purposes.\n\nDefaults to `undefined` (fetching all fields).\n"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6554,9 +5959,7 @@
             "description": [
               "Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6570,9 +5973,7 @@
             "description": [
               "The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6586,10 +5987,7 @@
             "description": [
               "\nUse the sort values from the previous page to retrieve the next page of results."
             ],
-            "signature": [
-              "SortResults",
-              " | undefined"
-            ],
+            "signature": ["SortResults", " | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6603,9 +6001,7 @@
             "description": [
               "\nThe fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not\nbe modified. If used in conjunction with `searchFields`, both are concatenated together."
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6650,9 +6046,7 @@
             "description": [
               "\nThe operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`"
             ],
-            "signature": [
-              "\"AND\" | \"OR\" | undefined"
-            ],
+            "signature": ["\"AND\" | \"OR\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6697,9 +6091,7 @@
             "description": [
               "\nThe operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`"
             ],
-            "signature": [
-              "\"AND\" | \"OR\" | undefined"
-            ],
+            "signature": ["\"AND\" | \"OR\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6713,9 +6105,7 @@
             "description": [
               "\nThe search operator to use with the provided filter. Defaults to `OR`"
             ],
-            "signature": [
-              "\"AND\" | \"OR\" | undefined"
-            ],
+            "signature": ["\"AND\" | \"OR\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6726,12 +6116,8 @@
             "type": "Any",
             "tags": [],
             "label": "filter",
-            "description": [
-              "filter string for the search query"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["filter string for the search query"],
+            "signature": ["any"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6740,18 +6126,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsFindOptions.aggs",
             "type": "Object",
-            "tags": [
-              "alpha"
-            ],
+            "tags": ["alpha"],
             "label": "aggs",
             "description": [
               "\nA record of aggregations to perform.\nThe API currently only supports a limited set of metrics and bucket aggregation types.\nAdditional aggregation types can be contributed to Core.\n"
             ],
-            "signature": [
-              "Record<string, ",
-              "AggregationsAggregationContainer",
-              "> | undefined"
-            ],
+            "signature": ["Record<string, ", "AggregationsAggregationContainer", "> | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6762,12 +6142,8 @@
             "type": "Array",
             "tags": [],
             "label": "namespaces",
-            "description": [
-              "array of namespaces to search"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["array of namespaces to search"],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6781,9 +6157,7 @@
             "description": [
               "\nThis map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved\nobject client wrapper.\nIf this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.\nAny types that are not included in this map will be excluded entirely.\nIf a type is included but its value is undefined, the operation will search for that type in the Default namespace."
             ],
-            "signature": [
-              "Map<string, string[] | undefined> | undefined"
-            ],
+            "signature": ["Map<string, string[] | undefined> | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6794,12 +6168,8 @@
             "type": "string",
             "tags": [],
             "label": "preference",
-            "description": [
-              "An optional ES preference value to be used for the query"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["An optional ES preference value to be used for the query"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6833,12 +6203,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "migrationVersionCompatibility",
-            "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
-            ],
-            "signature": [
-              "\"raw\" | \"compatible\" | undefined"
-            ],
+            "description": ["{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"],
+            "signature": ["\"raw\" | \"compatible\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6852,9 +6218,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsFindOptionsReference",
-        "description": [
-          "\nAn object reference for use in find operation options\n"
-        ],
+        "description": ["\nAn object reference for use in find operation options\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6865,9 +6229,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the saved object"
-            ],
+            "description": ["The type of the saved object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6878,9 +6240,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the saved object"
-            ],
+            "description": ["The ID of the saved object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6917,12 +6277,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "aggregations",
-            "description": [
-              "aggregations from the search query response"
-            ],
-            "signature": [
-              "A | undefined"
-            ],
+            "description": ["aggregations from the search query response"],
+            "signature": ["A | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6933,9 +6289,7 @@
             "type": "Array",
             "tags": [],
             "label": "saved_objects",
-            "description": [
-              "array of found saved objects"
-            ],
+            "description": ["array of found saved objects"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -6956,9 +6310,7 @@
             "type": "number",
             "tags": [],
             "label": "total",
-            "description": [
-              "the total number of objects"
-            ],
+            "description": ["the total number of objects"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6969,9 +6321,7 @@
             "type": "number",
             "tags": [],
             "label": "per_page",
-            "description": [
-              "the number of objects per page"
-            ],
+            "description": ["the number of objects per page"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6982,9 +6332,7 @@
             "type": "number",
             "tags": [],
             "label": "page",
-            "description": [
-              "the current page number"
-            ],
+            "description": ["the current page number"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6995,12 +6343,8 @@
             "type": "string",
             "tags": [],
             "label": "pit_id",
-            "description": [
-              "the point-in-time ID (undefined if not applicable)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["the point-in-time ID (undefined if not applicable)"],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7014,9 +6358,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsFindResult",
-        "description": [
-          "\nResults for a find operation\n"
-        ],
+        "description": ["\nResults for a find operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7045,9 +6387,7 @@
             "type": "number",
             "tags": [],
             "label": "score",
-            "description": [
-              "\nThe Elasticsearch `_score` of this result."
-            ],
+            "description": ["\nThe Elasticsearch `_score` of this result."],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7058,13 +6398,8 @@
             "type": "Array",
             "tags": [],
             "label": "sort",
-            "description": [
-              "\nThe Elasticsearch `sort` value of this result.\n"
-            ],
-            "signature": [
-              "SortResults",
-              " | undefined"
-            ],
+            "description": ["\nThe Elasticsearch `sort` value of this result.\n"],
+            "signature": ["SortResults", " | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7078,9 +6413,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsGetOptions",
-        "description": [
-          "\nOptions for the saved objects get operation\n"
-        ],
+        "description": ["\nOptions for the saved objects get operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7108,12 +6441,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "migrationVersionCompatibility",
-            "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
-            ],
-            "signature": [
-              "\"raw\" | \"compatible\" | undefined"
-            ],
+            "description": ["{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"],
+            "signature": ["\"raw\" | \"compatible\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/get.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7127,9 +6456,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsIncrementCounterField",
-        "description": [
-          "\nThe field and increment details for the increment counter operation\n"
-        ],
+        "description": ["\nThe field and increment details for the increment counter operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7140,9 +6467,7 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [
-              "The field name to increment the counter by."
-            ],
+            "description": ["The field name to increment the counter by."],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7153,12 +6478,8 @@
             "type": "number",
             "tags": [],
             "label": "incrementBy",
-            "description": [
-              "The number to increment the field by (defaults to 1)."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["The number to increment the field by (defaults to 1)."],
+            "signature": ["number | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7172,9 +6493,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsIncrementCounterOptions",
-        "description": [
-          "\nOptions for the increment counter operation\n"
-        ],
+        "description": ["\nOptions for the increment counter operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7205,9 +6524,7 @@
             "description": [
               "\n(default=false) If true, sets all the counter fields to 0 if they don't\nalready exist. Existing fields will be left as-is and won't be incremented."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7216,13 +6533,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObjectsIncrementCounterOptions.migrationVersion",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "migrationVersion",
-            "description": [
-              "\n{@link SavedObjectsMigrationVersion}"
-            ],
+            "description": ["\n{@link SavedObjectsMigrationVersion}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -7256,9 +6569,7 @@
             "description": [
               "\nA semver value that is used when migrating documents between Kibana versions."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7292,12 +6603,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "upsertAttributes",
-            "description": [
-              "\nAttributes to use when upserting the document if it doesn't exist."
-            ],
-            "signature": [
-              "Attributes | undefined"
-            ],
+            "description": ["\nAttributes to use when upserting the document if it doesn't exist."],
+            "signature": ["Attributes | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7311,9 +6618,7 @@
             "description": [
               "\nFlag indicating if a saved object is managed by Kibana (default=false).\nOnly used when upserting a saved object. If the saved object already\nexist this option has no effect.\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/increment_counter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7327,9 +6632,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsOpenPointInTimeOptions",
-        "description": [
-          "\nOptions for the open point-in-time for type operation\n"
-        ],
+        "description": ["\nOptions for the open point-in-time for type operation\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/open_point_in_time_for_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7343,9 +6646,7 @@
             "description": [
               "\nOptionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/open_point_in_time_for_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7356,12 +6657,8 @@
             "type": "string",
             "tags": [],
             "label": "preference",
-            "description": [
-              "\nAn optional ES preference value to be used for the query."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nAn optional ES preference value to be used for the query."],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/open_point_in_time_for_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7375,9 +6672,7 @@
             "description": [
               "\nAn optional list of namespaces to be used when opening the PIT.\n\nWhen the spaces plugin is enabled:\n - this will default to the user's current space (as determined by the URL)\n - if specified, the user's current space will be ignored\n - `['*']` will search across all available spaces"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/open_point_in_time_for_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7391,9 +6686,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsOpenPointInTimeResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `openPointInTimeForType()` method.\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `openPointInTimeForType()` method.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/open_point_in_time_for_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7404,9 +6697,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "PIT ID returned from ES"
-            ],
+            "description": ["PIT ID returned from ES"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/open_point_in_time_for_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7420,9 +6711,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsPitParams",
-        "description": [
-          "\nPoint-in-time parameters\n"
-        ],
+        "description": ["\nPoint-in-time parameters\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7433,9 +6722,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of point-in-time"
-            ],
+            "description": ["The ID of point-in-time"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7449,9 +6736,7 @@
             "description": [
               "Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7465,9 +6750,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsRemoveReferencesToOptions",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7498,9 +6781,7 @@
             "description": [
               "The Elasticsearch Refresh setting for this operation. Defaults to `true`"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/remove_references_to.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7514,9 +6795,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsRemoveReferencesToResponse",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7544,9 +6823,7 @@
             "type": "number",
             "tags": [],
             "label": "updated",
-            "description": [
-              "The number of objects that have been updated by this operation"
-            ],
+            "description": ["The number of objects that have been updated by this operation"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/remove_references_to.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7560,9 +6837,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsResolveOptions",
-        "description": [
-          "\nOptions for the saved objects get operation\n"
-        ],
+        "description": ["\nOptions for the saved objects get operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7590,12 +6865,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "migrationVersionCompatibility",
-            "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
-            ],
-            "signature": [
-              "\"raw\" | \"compatible\" | undefined"
-            ],
+            "description": ["{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"],
+            "signature": ["\"raw\" | \"compatible\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7609,9 +6880,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsResolveResponse",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7632,9 +6901,7 @@
             "type": "Object",
             "tags": [],
             "label": "saved_object",
-            "description": [
-              "\nThe saved object that was found."
-            ],
+            "description": ["\nThe saved object that was found."],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -7658,9 +6925,7 @@
             "description": [
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
-            "signature": [
-              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
-            ],
+            "signature": ["\"exactMatch\" | \"aliasMatch\" | \"conflict\""],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7674,9 +6939,7 @@
             "description": [
               "\nThe ID of the object that the legacy URL alias points to.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7690,9 +6953,7 @@
             "description": [
               "\nThe reason this alias was created.\n\nCurrently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias\nwas created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
             ],
-            "signature": [
-              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
-            ],
+            "signature": ["\"savedObjectConversion\" | \"savedObjectImport\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7706,9 +6967,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateObjectsSpacesObject",
-        "description": [
-          "\nAn object that should have its spaces updated.\n"
-        ],
+        "description": ["\nAn object that should have its spaces updated.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7719,9 +6978,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The type of the object to update"
-            ],
+            "description": ["The type of the object to update"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7732,9 +6989,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The ID of the object to update"
-            ],
+            "description": ["The ID of the object to update"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7748,9 +7003,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateObjectsSpacesOptions",
-        "description": [
-          "\nOptions for the update operation.\n"
-        ],
+        "description": ["\nOptions for the update operation.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7778,9 +7031,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch Refresh setting for this operation"
-            ],
+            "description": ["The Elasticsearch Refresh setting for this operation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7804,9 +7055,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateObjectsSpacesResponse",
-        "description": [
-          "\nThe response when objects' spaces are updated.\n"
-        ],
+        "description": ["\nThe response when objects' spaces are updated.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7817,9 +7066,7 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": [
-              "array of {@link SavedObjectsUpdateObjectsSpacesResponseObject}"
-            ],
+            "description": ["array of {@link SavedObjectsUpdateObjectsSpacesResponseObject}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7843,9 +7090,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateObjectsSpacesResponseObject",
-        "description": [
-          "\nDetails about a specific object's update result.\n"
-        ],
+        "description": ["\nDetails about a specific object's update result.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7856,9 +7101,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the referenced object"
-            ],
+            "description": ["The type of the referenced object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7869,9 +7112,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The ID of the referenced object"
-            ],
+            "description": ["The ID of the referenced object"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7882,12 +7123,8 @@
             "type": "Array",
             "tags": [],
             "label": "spaces",
-            "description": [
-              "The space(s) that the referenced object exists in"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["The space(s) that the referenced object exists in"],
+            "signature": ["string[]"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update_objects_spaces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7898,9 +7135,7 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [
-              "Included if there was an error updating this object's spaces"
-            ],
+            "description": ["Included if there was an error updating this object's spaces"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -7924,9 +7159,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateOptions",
-        "description": [
-          "\nOptions for the saved objects update operation\n"
-        ],
+        "description": ["\nOptions for the saved objects update operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -7957,9 +7190,7 @@
             "description": [
               "\nAn opaque version number which changes on each successful write operation.\nCan be used for implementing optimistic concurrency control.\nUnused for multi-namespace objects"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7970,9 +7201,7 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [
-              "{@inheritdoc SavedObjectReference}"
-            ],
+            "description": ["{@inheritdoc SavedObjectReference}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -7993,9 +7222,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": [
-              "The Elasticsearch Refresh setting for this operation"
-            ],
+            "description": ["The Elasticsearch Refresh setting for this operation"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -8019,9 +7246,7 @@
             "description": [
               "If specified, will be used to perform an upsert if the object doesn't exist"
             ],
-            "signature": [
-              "Attributes | undefined"
-            ],
+            "signature": ["Attributes | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8035,9 +7260,7 @@
             "description": [
               "\nThe Elasticsearch `retry_on_conflict` setting for this operation.\nDefaults to `0` when `version` is provided, `3` otherwise."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8048,12 +7271,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "migrationVersionCompatibility",
-            "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
-            ],
-            "signature": [
-              "\"raw\" | \"compatible\" | undefined"
-            ],
+            "description": ["{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"],
+            "signature": ["\"raw\" | \"compatible\" | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8067,9 +7286,7 @@
             "description": [
               "\nBy default, update will merge the provided attributes with the ones present on the document\n(performing a standard partial update). Setting this option to `false` will change the behavior, performing\na \"full\" update instead, where the provided attributes will fully replace the existing ones.\nDefaults to `true`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8083,9 +7300,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsUpdateResponse",
-        "description": [
-          "\nReturn type of the Saved Objects `update()` method.\n"
-        ],
+        "description": ["\nReturn type of the Saved Objects `update()` method.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -8114,12 +7329,8 @@
             "type": "Object",
             "tags": [],
             "label": "attributes",
-            "description": [
-              "partial attributes of the saved object"
-            ],
-            "signature": [
-              "{ [P in keyof T]?: T[P] | undefined; }"
-            ],
+            "description": ["partial attributes of the saved object"],
+            "signature": ["{ [P in keyof T]?: T[P] | undefined; }"],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8130,9 +7341,7 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [
-              "optionally included references to other saved objects"
-            ],
+            "description": ["optionally included references to other saved objects"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -8159,12 +7368,8 @@
         "type": "Type",
         "tags": [],
         "label": "MutatingOperationRefreshSetting",
-        "description": [
-          "\nElasticsearch Refresh setting for mutating operation"
-        ],
-        "signature": [
-          "boolean | \"wait_for\""
-        ],
+        "description": ["\nElasticsearch Refresh setting for mutating operation"],
+        "signature": ["boolean | \"wait_for\""],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8176,9 +7381,7 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectAttribute",
-        "description": [
-          "\nType definition for a Saved Object attribute value\n"
-        ],
+        "description": ["\nType definition for a Saved Object attribute value\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -8233,9 +7436,7 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsClosePointInTimeOptions",
-        "description": [
-          "\nOptions for the close point-in-time operation\n"
-        ],
+        "description": ["\nOptions for the close point-in-time operation\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -8256,9 +7457,7 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsCreatePointInTimeFinderOptions",
-        "description": [
-          "\nOptions for the create point-in-time finder operation\n"
-        ],
+        "description": ["\nOptions for the create point-in-time finder operation\n"],
         "signature": [
           "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",

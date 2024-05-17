@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ShippersRegistry } from './shippers_registry';
 import { shippersMock } from '../shippers/mocks';
+import { ShippersRegistry } from './shippers_registry';
 
 describe('ShippersRegistry', () => {
   let shippersRegistry: ShippersRegistry;

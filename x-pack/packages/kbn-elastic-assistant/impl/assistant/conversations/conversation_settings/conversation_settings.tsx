@@ -7,32 +7,32 @@
 
 import {
   EuiFormRow,
-  EuiLink,
-  EuiTitle,
-  EuiText,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import { noop } from 'lodash/fp';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { noop } from 'lodash/fp';
 import { Conversation, Prompt } from '../../../..';
-import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
+import * as i18n from './translations';
 
 import { AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
-import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
-import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
-import { ConversationSelectorSettings } from '../conversation_selector_settings';
-import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
-import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
+import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
+import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { ConversationsBulkActions } from '../../api';
+import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
+import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
+import { ConversationSelectorSettings } from '../conversation_selector_settings';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;

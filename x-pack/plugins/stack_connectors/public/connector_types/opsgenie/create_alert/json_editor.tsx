@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { isEmpty } from 'lodash';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
-import * as i18n from './translations';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateAlertProps } from '.';
-import { decodeCreateAlert } from './schema';
+import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
 import { isDecodeError } from '../schema_utils';
+import { decodeCreateAlert } from './schema';
+import * as i18n from './translations';
 
 export type JsonEditorProps = Pick<
   CreateAlertProps,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import React, {
   createContext,
   useCallback,
@@ -17,7 +18,6 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useEvent } from 'react-use';
-import moment from 'moment';
 import { selectRefreshInterval, selectRefreshPaused } from '../state';
 
 interface SyntheticsRefreshContext {

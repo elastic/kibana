@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
-import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InsightBase as Component, InsightBaseProps } from './insight_base';
+import { FindActionResult } from '@kbn/actions-plugin/server';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
-import { MessagePanel } from '../message_panel/message_panel';
-import { MessageText } from '../message_panel/message_text';
 import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
+import { MessagePanel } from '../message_panel/message_panel';
+import { MessageText } from '../message_panel/message_text';
 import { ActionsMenu } from './actions_menu';
+import { InsightBase as Component, InsightBaseProps } from './insight_base';
 
 export default {
   component: Component,

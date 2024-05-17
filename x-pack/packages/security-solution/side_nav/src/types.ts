@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type React from 'react';
-import type { UiCounterMetricType } from '@kbn/analytics';
 import type { IconType } from '@elastic/eui';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { LinkCategories } from '@kbn/security-solution-navigation';
+import type React from 'react';
 
 export enum SolutionSideNavItemPosition {
   top = 'top',

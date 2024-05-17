@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 interface Props {
   onSelectionChange: (selection: 'all' | 'none') => void;

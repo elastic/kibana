@@ -6,12 +6,7 @@
     "id": "sessionNotifications",
     "server": false,
     "browser": true,
-    "configPath": [
-      "session_notifications"
-    ],
-    "requiredPlugins": [
-      "data",
-      "navigation"
-    ]
+    "configPath": ["session_notifications"],
+    "requiredPlugins": ["data", "navigation"]
   }
 }

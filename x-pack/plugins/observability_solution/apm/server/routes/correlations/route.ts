@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import * as t from 'io-ts';
 
 import { i18n } from '@kbn/i18n';
 import { toNumberRt } from '@kbn/io-ts-utils';
 
-import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
+import { TopValuesStats } from '../../../common/correlations/field_stats_types';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
   DurationFieldCandidatesResponse,
   fetchDurationFieldCandidates,
 } from './queries/fetch_duration_field_candidates';
-import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
-import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
-import { fetchFieldValuePairs, FieldValuePairsResponse } from './queries/fetch_field_value_pairs';
+import { FieldValuePairsResponse, fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
+import { PValuesResponse, fetchPValues } from './queries/fetch_p_values';
 import {
-  fetchSignificantCorrelations,
   SignificantCorrelationsResponse,
+  fetchSignificantCorrelations,
 } from './queries/fetch_significant_correlations';
-import { fetchPValues, PValuesResponse } from './queries/fetch_p_values';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { TopValuesStats } from '../../../common/correlations/field_stats_types';
+import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:

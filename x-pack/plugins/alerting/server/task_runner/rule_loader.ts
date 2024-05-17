@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
   CoreKibanaRequest,
   FakeRawRequest,
@@ -14,17 +13,18 @@ import {
   SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { RunRuleParams, TaskRunnerContext } from './types';
-import { ErrorWithReason, validateRuleTypeParams } from '../lib';
-import {
-  RuleExecutionStatusErrorReasons,
-  RawRule,
-  RuleTypeRegistry,
-  RuleTypeParamsValidator,
-} from '../types';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
+import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  RawRule,
+  RuleExecutionStatusErrorReasons,
+  RuleTypeParamsValidator,
+  RuleTypeRegistry,
+} from '../types';
+import { RunRuleParams, TaskRunnerContext } from './types';
 
 interface RuleData {
   rawRule: RawRule;

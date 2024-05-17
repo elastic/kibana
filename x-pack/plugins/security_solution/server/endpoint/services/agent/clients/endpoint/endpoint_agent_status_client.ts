@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { catchAndWrapError } from '../../../../utils';
-import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { AgentStatusClient } from '../lib/base_agent_status_client';
+import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
+import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary } from '../../../actions';
 import { AgentStatusClientError } from '../errors';
+import { AgentStatusClient } from '../lib/base_agent_status_client';
 
 export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';

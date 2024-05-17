@@ -11,9 +11,9 @@ import { pick } from 'lodash';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
-import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_DASHBOARD_NAME } from '.';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');

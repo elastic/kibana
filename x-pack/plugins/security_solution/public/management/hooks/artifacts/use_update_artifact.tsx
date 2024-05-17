@@ -1,3 +1,4 @@
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import type {
-  UpdateExceptionListItemSchema,
   ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';

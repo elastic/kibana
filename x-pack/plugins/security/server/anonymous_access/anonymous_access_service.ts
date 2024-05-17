@@ -52,7 +52,10 @@ export class AnonymousAccessService {
    */
   private httpAuthorizationHeader: HTTPAuthorizationHeader | null = null;
 
-  constructor(private readonly logger: Logger, private readonly getConfig: () => ConfigType) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly getConfig: () => ConfigType
+  ) {}
 
   setup() {
     const config = this.getConfig();

@@ -6,26 +6,26 @@
  */
 /* eslint-disable max-classes-per-file */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 
-import { DefaultTransformManager } from './transform_manager';
-import {
-  ApmTransactionErrorRateTransformGenerator,
-  TransformGenerator,
-} from './transform_generators';
-import { SLODefinition, IndicatorTypes } from '../domain/models';
+import { IndicatorTypes, SLODefinition } from '../domain/models';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
   createSLO,
 } from './fixtures/slo';
+import {
+  ApmTransactionErrorRateTransformGenerator,
+  TransformGenerator,
+} from './transform_generators';
+import { DefaultTransformManager } from './transform_manager';
 
 describe('TransformManager', () => {
   let esClientMock: ElasticsearchClientMock;

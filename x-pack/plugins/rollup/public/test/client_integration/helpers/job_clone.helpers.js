@@ -6,10 +6,10 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { createRollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
-import { JOB_TO_CLONE } from './constants';
 import { deserializeJob } from '../../../crud_app/services';
+import { createRollupJobsStore } from '../../../crud_app/store';
+import { JOB_TO_CLONE } from './constants';
 
 import { wrapComponent } from './setup_context';
 

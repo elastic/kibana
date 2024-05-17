@@ -62,9 +62,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -520,9 +518,7 @@
             "tags": [],
             "label": "loadFrom",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/console/public/types/locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -578,9 +574,7 @@
             "tags": [],
             "label": "ViewContent",
             "description": [],
-            "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
-            ],
+            "signature": ["React.ComponentClass<{}, any> | React.FunctionComponent<{}>"],
             "path": "src/plugins/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -617,9 +611,7 @@
             "tags": [],
             "label": "onClick",
             "description": [],
-            "signature": [
-              "(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void"
-            ],
+            "signature": ["(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void"],
             "path": "src/plugins/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -632,9 +624,7 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": [
-                  "E"
-                ],
+                "signature": ["E"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -654,9 +644,7 @@
       "type": "Interface",
       "tags": [],
       "label": "ConsolePluginSetup",
-      "description": [
-        "\nConsole plugin's setup service object"
-      ],
+      "description": ["\nConsole plugin's setup service object"],
       "path": "src/plugins/console/public/types/plugin_dependencies.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -667,9 +655,7 @@
           "type": "Object",
           "tags": [],
           "label": "locator",
-          "description": [
-            "\nPublic locator for the console UI"
-          ],
+          "description": ["\nPublic locator for the console UI"],
           "signature": [
             {
               "pluginId": "share",
@@ -702,9 +688,7 @@
       "type": "Interface",
       "tags": [],
       "label": "ConsolePluginStart",
-      "description": [
-        "\nConsole plugin's start service object"
-      ],
+      "description": ["\nConsole plugin's start service object"],
       "path": "src/plugins/console/public/types/plugin_dependencies.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -718,9 +702,7 @@
           "description": [
             "\nisEmbeddedConsoleAvailable is available if the embedded console can be rendered. Returns true when\ncalled if the Embedded Console is currently rendered."
           ],
-          "signature": [
-            "(() => boolean) | undefined"
-          ],
+          "signature": ["(() => boolean) | undefined"],
           "path": "src/plugins/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -736,9 +718,7 @@
           "description": [
             "\nopenEmbeddedConsole is available if the embedded console can be rendered. Calling\nthis function will open the embedded console on the page if it is currently rendered."
           ],
-          "signature": [
-            "((content?: string | undefined) => void) | undefined"
-          ],
+          "signature": ["((content?: string | undefined) => void) | undefined"],
           "path": "src/plugins/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -750,9 +730,7 @@
               "tags": [],
               "label": "content",
               "description": [],
-              "signature": [
-                "string | undefined"
-              ],
+              "signature": ["string | undefined"],
               "path": "src/plugins/console/public/types/plugin_dependencies.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -770,9 +748,7 @@
           "description": [
             "\nEmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana"
           ],
-          "signature": [
-            "React.FC<{}> | undefined"
-          ],
+          "signature": ["React.FC<{}> | undefined"],
           "path": "src/plugins/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -845,9 +821,7 @@
       "tags": [],
       "label": "ConsoleStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "src/plugins/console/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import _ from 'lodash';
+import type { DevToolsVariable } from '../../application/components';
 import type {
   RequestArgs,
   RequestResult,
 } from '../../application/hooks/use_send_current_request/send_request';
-import type { DevToolsVariable } from '../../application/components';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

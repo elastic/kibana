@@ -7,8 +7,8 @@
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExportRulesDetails } from '../../../../../../common/api/detection_engine/rule_management';
-import type { DefaultActionConnectorDetails } from './get_export_rule_action_connectors';
 import type { ExportableRule } from './exportable_rule';
+import type { DefaultActionConnectorDetails } from './get_export_rule_action_connectors';
 
 export const getExportDetailsNdjson = (
   rules: ExportableRule[],

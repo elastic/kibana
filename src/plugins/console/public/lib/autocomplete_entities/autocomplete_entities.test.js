@@ -7,11 +7,11 @@
  */
 
 import '../../application/models/sense_editor/sense_editor.test.mocks';
-import { setAutocompleteInfo, AutocompleteInfo } from '../../services';
-import { expandAliases } from './expand_aliases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 import { SettingsMock } from '../../services/settings.mock';
 import { StorageMock } from '../../services/storage.mock';
+import { expandAliases } from './expand_aliases';
 
 function fc(f1, f2) {
   if (f1.name < f2.name) {

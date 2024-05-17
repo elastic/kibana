@@ -15,20 +15,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 import { of } from 'rxjs';
+import { docLinks } from '../common/doc_links';
+import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
 import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
-import { docLinks } from '../common/doc_links';
+import { navigationTree } from './navigation_tree';
 import {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
-import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
-import { navigationTree } from './navigation_tree';
 
 export class ServerlessSearchPlugin
   implements

@@ -11,9 +11,9 @@ import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
-import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
 
 const numeralInst = numeral();

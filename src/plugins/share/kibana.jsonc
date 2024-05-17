@@ -7,8 +7,6 @@
     "id": "share",
     "server": true,
     "browser": true,
-    "requiredBundles": [
-      "kibanaUtils"
-    ]
+    "requiredBundles": ["kibanaUtils"]
   }
 }

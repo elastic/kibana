@@ -47,8 +47,9 @@ describe('user_converter', () => {
     });
 
     it('returns the username as the key and the user info using the existing elastic user information', () => {
-      expect(convertToUserInfo({ username: 'sam', fullName: 'Sam Smith', email: 'sam@sam.com' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        convertToUserInfo({ username: 'sam', fullName: 'Sam Smith', email: 'sam@sam.com' })
+      ).toMatchInlineSnapshot(`
               Object {
                 "key": "sam",
                 "userInfo": Object {

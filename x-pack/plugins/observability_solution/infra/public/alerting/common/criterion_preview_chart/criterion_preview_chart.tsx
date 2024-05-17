@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, FC, PropsWithChildren } from 'react';
-import { niceTimeFormatter, TooltipProps } from '@elastic/charts';
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
+import { TooltipProps, niceTimeFormatter } from '@elastic/charts';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { sum, min as getMin, max as getMax } from 'lodash';
+import { max as getMax, min as getMin, sum } from 'lodash';
+import moment from 'moment';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import { formatNumber } from '../../../../common/formatters/number';
 import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../common/http_api';
 

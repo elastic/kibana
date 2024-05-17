@@ -7,11 +7,11 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
 import $ from 'jquery';
-import { layoutTypes } from './layout_types';
+import _ from 'lodash';
 import { Axis } from '../axis';
 import { ChartTitle } from '../chart_title';
+import { layoutTypes } from './layout_types';
 
 /**
  * Builds the visualization DOM layout

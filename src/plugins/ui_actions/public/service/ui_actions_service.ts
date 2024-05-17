@@ -7,15 +7,15 @@
  */
 
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import {
-  ActionInternal,
   Action,
   ActionDefinition,
+  ActionInternal,
   FrequentCompatibilityChangeAction,
 } from '../actions';
-import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
+import { TriggerInternal } from '../triggers/trigger_internal';
+import { ActionRegistry, TriggerRegistry, TriggerToActionsRegistry } from '../types';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
 
 export interface UiActionsServiceParams {

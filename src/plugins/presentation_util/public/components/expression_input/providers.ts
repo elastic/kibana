@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '@kbn/monaco';
 import { ExpressionFunction } from '@kbn/expressions-plugin/common';
+import { monaco } from '@kbn/monaco';
 import {
   AutocompleteSuggestion,
   getAutocompleteSuggestions,
   getFnArgDefAtPosition,
 } from './autocomplete';
 
-import { getFunctionReferenceStr, getArgReferenceStr } from './reference';
+import { getArgReferenceStr, getFunctionReferenceStr } from './reference';
 
 export const getSuggestionProvider = (expressionFunctions: ExpressionFunction[]) => {
   const provideCompletionItems = (

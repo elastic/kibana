@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, from, Observable } from 'rxjs';
-import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
-import type { ISearchStrategy } from '../../types';
+import { Observable, firstValueFrom, from } from 'rxjs';
+import { tap } from 'rxjs';
 import type { SearchUsage } from '../../collectors/search';
+import { searchUsageObserver } from '../../collectors/search/usage';
+import { KbnSearchError, getKbnSearchError } from '../../report_search_error';
+import type { ISearchStrategy } from '../../types';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
-import { searchUsageObserver } from '../../collectors/search/usage';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,

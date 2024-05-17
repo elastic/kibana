@@ -85,9 +85,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"serverlessSearch\""
-        ],
+        "signature": ["\"serverlessSearch\""],
         "path": "x-pack/plugins/serverless_search/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -100,9 +98,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"serverlessSearch\""
-        ],
+        "signature": ["\"serverlessSearch\""],
         "path": "x-pack/plugins/serverless_search/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

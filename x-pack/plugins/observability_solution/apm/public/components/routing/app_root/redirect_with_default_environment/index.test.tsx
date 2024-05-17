@@ -1,3 +1,7 @@
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { render } from '@testing-library/react';
+import { Location, MemoryHistory, createMemoryHistory } from 'history';
+import qs from 'query-string';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +9,10 @@
  * 2.0.
  */
 import React from 'react';
-import { RouterProvider } from '@kbn/typed-react-router-config';
-import { render } from '@testing-library/react';
-import { createMemoryHistory, Location, MemoryHistory } from 'history';
-import qs from 'query-string';
 import { RedirectWithDefaultEnvironment } from '.';
-import { apmRouter } from '../../apm_route_config';
-import * as useApmPluginContextExports from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import * as useApmPluginContextExports from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { apmRouter } from '../../apm_route_config';
 
 describe('RedirectWithDefaultEnvironment', () => {
   let history: MemoryHistory;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { FleetStartServices } from '@kbn/fleet-plugin/public';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
+import type { FleetStartServices } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useEditMonitorLocator } from './use_edit_monitor_locator';
+import React, { memo, useCallback } from 'react';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
+import { useEditMonitorLocator } from './use_edit_monitor_locator';
 
 enum DataStream {
   HTTP = 'http',

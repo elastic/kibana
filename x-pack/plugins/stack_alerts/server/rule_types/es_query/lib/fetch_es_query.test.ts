@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { OnlyEsQueryRuleParams } from '../types';
-import { Comparator } from '../../../../common/comparator_types';
-import { fetchEsQuery } from './fetch_es_query';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Comparator } from '../../../../common/comparator_types';
+import { OnlyEsQueryRuleParams } from '../types';
+import { fetchEsQuery } from './fetch_es_query';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
   const actual = jest.requireActual('@kbn/triggers-actions-ui-plugin/common');

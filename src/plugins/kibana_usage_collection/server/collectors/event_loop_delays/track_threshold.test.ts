@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
 import { loggingSystemMock, metricsServiceMock } from '@kbn/core/server/mocks';
-import { startTrackingEventLoopDelaysThreshold } from './track_threshold';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { Subject } from 'rxjs';
+import { startTrackingEventLoopDelaysThreshold } from './track_threshold';
 
 describe('startTrackingEventLoopDelaysThreshold', () => {
   const logger = loggingSystemMock.createLogger();

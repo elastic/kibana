@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { unzip } from 'lodash';
 import expect from '@kbn/expect';
+import { unzip } from 'lodash';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 

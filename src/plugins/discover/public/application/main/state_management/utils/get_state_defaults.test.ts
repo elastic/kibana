@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getStateDefaults } from './get_state_defaults';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { savedSearchMock, savedSearchMockWithESQL } from '../../../../__mocks__/saved_search';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import { getStateDefaults } from './get_state_defaults';
 
 describe('getStateDefaults', () => {
   test('data view with timefield', () => {

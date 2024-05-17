@@ -7,9 +7,9 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { initTlsAlertType } from './tls';
 import { ClientPluginsStart } from '../../../../plugin';
 import { initMonitorStatusAlertType } from './monitor_status';
+import { initTlsAlertType } from './tls';
 
 export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependencies: {
   core: CoreStart;

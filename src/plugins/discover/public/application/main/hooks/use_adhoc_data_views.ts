@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useEffect } from 'react';
 import { DiscoverServices } from '../../../build_services';
-import { useSavedSearch } from '../state_management/discover_state_provider';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useAppStateSelector } from '../state_management/discover_app_state_container';
 import { useInternalStateSelector } from '../state_management/discover_internal_state_container';
-import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { DiscoverStateContainer } from '../state_management/discover_state';
+import { useSavedSearch } from '../state_management/discover_state_provider';
+import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({

@@ -7,9 +7,9 @@
  */
 
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { LayerTypes, ANNOTATION_LAYER } from '../constants';
-import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
+import { ANNOTATION_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
+import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
 
 export function annotationLayerFunction(): ExpressionFunctionDefinition<
   typeof ANNOTATION_LAYER,

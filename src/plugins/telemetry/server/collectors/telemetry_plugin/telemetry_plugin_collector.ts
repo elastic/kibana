@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Observable, firstValueFrom } from 'rxjs';
 import { ISavedObjectsRepository } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getTelemetrySavedObject, TelemetrySavedObject } from '../../saved_objects';
+import { Observable, firstValueFrom } from 'rxjs';
 import type { TelemetryConfigType } from '../../config';
+import { TelemetrySavedObject, getTelemetrySavedObject } from '../../saved_objects';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 
 export interface TelemetryUsageStats {

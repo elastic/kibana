@@ -6,9 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { ObserverCodec } from './observer';
-import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
+import { ErrorStateCodec } from './error_state';
+import { ObserverCodec } from './observer';
 import { SyntheticsDataType } from './synthetics';
 
 // IO type for validation

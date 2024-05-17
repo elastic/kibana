@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
-import React from 'react';
 import { EmbeddableFactoryDefinition, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { EditorMenu } from '../editor_menu.component';
 
 const testFactories: EmbeddableFactoryDefinition[] = [

@@ -23,7 +23,7 @@
     {
       "key": "cypress/security_serverless_explore",
       "name": "[Serverless] Security Solution Explore - Cypress"
-    },   
+    },
     {
       "key": "cypress/security_solution_rule_management",
       "name": "Security Solution Rule Management - Cypress"

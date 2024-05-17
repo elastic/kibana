@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
+  EuiCheckboxGroup,
   EuiFlexGroup,
-  EuiText,
   EuiFlexItem,
   EuiFormRow,
-  EuiTextColor,
-  EuiCheckboxGroup,
-  EuiRadioGroup,
   EuiLoadingSpinner,
+  EuiRadioGroup,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import React, { useMemo, useCallback } from 'react';
 
 import * as i18n from '../translations';
 

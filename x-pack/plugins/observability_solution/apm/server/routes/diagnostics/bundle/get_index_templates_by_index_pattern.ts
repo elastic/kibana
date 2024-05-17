@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
-import { orderBy } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
+import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { getApmIndexPatterns } from './get_indices';
-import { getIndexTemplate } from './get_index_template';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { orderBy } from 'lodash';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
+import { getIndexTemplate } from './get_index_template';
+import { getApmIndexPatterns } from './get_indices';
 
 export async function getIndexTemplatesByIndexPattern({
   esClient,

@@ -9,10 +9,10 @@ import { z } from 'zod';
 
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 
+import { FirstLastSeenQuery } from '../model/factory_query_type';
+import { inspect } from '../model/inspect';
 import { order } from '../model/order';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
-import { inspect } from '../model/inspect';
-import { FirstLastSeenQuery } from '../model/factory_query_type';
 
 export const firstLastSeenRequestOptionsSchema = requestBasicOptionsSchema.extend({
   order,

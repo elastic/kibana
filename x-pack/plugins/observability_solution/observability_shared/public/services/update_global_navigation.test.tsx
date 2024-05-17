@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { App, AppDeepLink, AppUpdater, ApplicationStart } from '@kbn/core/public';
 import { Subject } from 'rxjs';
-import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 

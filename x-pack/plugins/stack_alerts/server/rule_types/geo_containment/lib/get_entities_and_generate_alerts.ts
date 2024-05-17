@@ -7,8 +7,8 @@
 
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type {
-  GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
+  GeoContainmentAlertInstanceState,
 } from '../types';
 
 import { ActionGroupId, OTHER_CATEGORY } from '../constants';

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
-  EuiPopover,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
   EuiSelect,
-  EuiFieldNumber,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isNil } from 'lodash';
+import React, { Fragment, useEffect, useState } from 'react';
+import { IErrorObject } from '../../types';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
-import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
 export interface ThresholdExpressionProps {

@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { TagCloudVisParams, TagCloudTypeProps } from '../types';
+import React, { lazy } from 'react';
+import { TagCloudTypeProps, TagCloudVisParams } from '../types';
 
 const TagCloudOptionsLazy = lazy(() => import('./tag_cloud_options'));
 
 export const getTagCloudOptions =
   ({ palettes }: TagCloudTypeProps) =>
-  (props: VisEditorOptionsProps<TagCloudVisParams>) =>
-    <TagCloudOptionsLazy {...props} palettes={palettes} />;
+  (props: VisEditorOptionsProps<TagCloudVisParams>) => (
+    <TagCloudOptionsLazy {...props} palettes={palettes} />
+  );

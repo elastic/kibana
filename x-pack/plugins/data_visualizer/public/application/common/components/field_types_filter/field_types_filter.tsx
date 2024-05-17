@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getFieldTypeName } from '@kbn/field-utils';
-import { FieldTypesHelpPopover } from './field_types_help_popover';
-import type { Option } from '../multi_select_picker';
-import { MultiSelectPicker } from '../multi_select_picker';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
 } from '../../../../../common/types/field_vis_config';
 import { FieldTypeIcon } from '../field_type_icon';
+import type { Option } from '../multi_select_picker';
+import { MultiSelectPicker } from '../multi_select_picker';
+import { FieldTypesHelpPopover } from './field_types_help_popover';
 
 interface Props {
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>;

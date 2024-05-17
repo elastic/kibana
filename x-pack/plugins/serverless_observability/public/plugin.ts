@@ -9,12 +9,12 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { of } from 'rxjs';
-import { navigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
+import { navigationTree } from './navigation_tree';
 import {
   ServerlessObservabilityPublicSetup,
-  ServerlessObservabilityPublicStart,
   ServerlessObservabilityPublicSetupDependencies,
+  ServerlessObservabilityPublicStart,
   ServerlessObservabilityPublicStartDependencies,
 } from './types';
 

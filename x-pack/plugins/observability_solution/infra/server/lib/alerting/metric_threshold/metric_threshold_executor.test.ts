@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { getThresholds } from '../common/get_values';
+import type { LogMeta, Logger } from '@kbn/logging';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 import { set } from '@kbn/safer-lodash-set';
 import {
   Aggregators,
@@ -14,23 +21,16 @@ import {
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
+import { InfraConfig } from '../../../../common/plugin_config_types';
+import { getThresholds } from '../common/get_values';
+import { Group } from '../common/types';
+import { Evaluation } from './lib/evaluate_rule';
 import {
-  createMetricThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
   WARNING_ACTIONS,
+  createMetricThresholdExecutor,
 } from './metric_threshold_executor';
-import { Evaluation } from './lib/evaluate_rule';
-import type { LogMeta, Logger } from '@kbn/logging';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import { InfraConfig } from '../../../../common/plugin_config_types';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUES,
-  ALERT_REASON,
-  ALERT_GROUP,
-} from '@kbn/rule-data-utils';
-import { Group } from '../common/types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 

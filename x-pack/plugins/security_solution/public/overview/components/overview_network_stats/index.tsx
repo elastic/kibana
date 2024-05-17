@@ -11,8 +11,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import type { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
-import type { FormattedStat, StatGroup } from '../types';
 import { StatValue } from '../stat_value';
+import type { FormattedStat, StatGroup } from '../types';
 
 interface OverviewNetworkProps {
   data: NetworkOverviewStrategyResponse['overviewNetwork'];

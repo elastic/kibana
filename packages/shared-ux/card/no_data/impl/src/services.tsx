@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
 import {
-  RedirectAppLinksProvider,
   RedirectAppLinksKibanaProvider,
+  RedirectAppLinksProvider,
 } from '@kbn/shared-ux-link-redirect-app';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import type {
-  Services,
-  NoDataCardServices,
   NoDataCardKibanaDependencies,
+  NoDataCardServices,
+  Services,
 } from '@kbn/shared-ux-card-no-data-types';
 
 const Context = React.createContext<Services | null>(null);

@@ -8,8 +8,8 @@
 import type {
   Field,
   FieldValue,
-  QueryDslTermQuery,
   QueryDslQueryContainer,
+  QueryDslTermQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 
 /**

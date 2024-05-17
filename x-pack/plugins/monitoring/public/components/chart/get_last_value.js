@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNumber, get, last } from 'lodash';
+import { get, isNumber, last } from 'lodash';
 
 /*
  * @param {Array/Number} data Data containing values to show in the horizontal legend

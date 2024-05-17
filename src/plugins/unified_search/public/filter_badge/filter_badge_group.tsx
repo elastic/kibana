@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-import type { Filter, BooleanRelation, DataViewBase } from '@kbn/es-query';
 import { EuiTextColor } from '@elastic/eui';
+import type { BooleanRelation, DataViewBase, Filter } from '@kbn/es-query';
+import React, { Fragment } from 'react';
+import { conditionCss } from './filter_badge.styles';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
-import { conditionCss } from './filter_badge.styles';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];

@@ -11,10 +11,10 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 
-import { RemoteClusterPrivilegesForm } from './remote_cluster_privileges_form';
 import type { Role, RoleRemoteClusterPrivilege, SecurityLicense } from '../../../../../../common';
 import { isRoleReadOnly } from '../../../../../../common/model';
 import type { RoleValidator } from '../../validate_role';
+import { RemoteClusterPrivilegesForm } from './remote_cluster_privileges_form';
 
 interface Props {
   remoteClusters?: Cluster[];

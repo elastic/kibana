@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-plugin/common';
+import type { ESQLColumn } from '@kbn/es-types';
 import {
   getESQLAdHocDataview,
-  getIndexPatternFromESQLQuery,
   getESQLQueryColumnsRaw,
+  getIndexPatternFromESQLQuery,
 } from '@kbn/esql-utils';
-import type { ESQLColumn } from '@kbn/es-types';
+import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 

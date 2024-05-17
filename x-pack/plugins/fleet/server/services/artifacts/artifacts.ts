@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { deflate } from 'zlib';
 import { promisify } from 'util';
+import { deflate } from 'zlib';
 
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
@@ -17,8 +17,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 
-import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
+import type { ListResult } from '../../../common/types';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
@@ -28,21 +28,21 @@ import { withPackageSpan } from '../epm/packages/utils';
 
 import { appContextService } from '../app_context';
 
-import { isElasticsearchItemNotFoundError } from './utils';
-import type {
-  Artifact,
-  ArtifactElasticsearchProperties,
-  ArtifactEncodedMetadata,
-  ArtifactsClientCreateOptions,
-  ListArtifactsProps,
-  NewArtifact,
-  FetchAllArtifactsOptions,
-} from './types';
 import {
   esSearchHitToArtifact,
   newArtifactToElasticsearchProperties,
   uniqueIdFromArtifact,
 } from './mappings';
+import type {
+  Artifact,
+  ArtifactElasticsearchProperties,
+  ArtifactEncodedMetadata,
+  ArtifactsClientCreateOptions,
+  FetchAllArtifactsOptions,
+  ListArtifactsProps,
+  NewArtifact,
+} from './types';
+import { isElasticsearchItemNotFoundError } from './utils';
 
 const deflateAsync = promisify(deflate);
 

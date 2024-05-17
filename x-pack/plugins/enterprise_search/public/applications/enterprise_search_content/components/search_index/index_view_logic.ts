@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -13,9 +13,9 @@ import {
   Connector,
   FeatureName,
   IngestPipelineParams,
-  SyncStatus,
-  IngestionStatus,
   IngestionMethod,
+  IngestionStatus,
+  SyncStatus,
 } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';

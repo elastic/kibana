@@ -51,10 +51,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "Rule",
-              ".RuleContext"
-            ],
+            "signature": ["Rule", ".RuleContext"],
             "path": "packages/kbn-eslint-plugin-imports/src/get_import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,

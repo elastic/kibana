@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { merge } from 'lodash';
 import type {
-  SavedObjectsModelChange,
   SavedObjectsMappingProperties,
+  SavedObjectsModelChange,
 } from '@kbn/core-saved-objects-server';
+import { merge } from 'lodash';
 
 /**
  * Merge the added mappings from the given list of model changes.

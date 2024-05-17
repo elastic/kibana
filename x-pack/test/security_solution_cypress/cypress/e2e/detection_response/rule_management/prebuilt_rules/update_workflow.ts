@@ -7,24 +7,24 @@
 
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
-  getUpgradeSingleRuleButtonByRuleId,
   NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE,
   RULES_UPDATES_TAB,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
+  getUpgradeSingleRuleButtonByRuleId,
 } from '../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  installPrebuiltRuleAssets,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import {
-  assertRulesNotPresentInRuleUpdatesTable,
   assertRuleUpgradeSuccessToastShown,
+  assertRulesNotPresentInRuleUpdatesTable,
   assertUpgradeRequestIsComplete,
   clickRuleUpdatesTab,
 } from '../../../../tasks/prebuilt_rules';

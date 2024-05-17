@@ -12,10 +12,10 @@ import { createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
 import type {
-  ShareMenuItem,
-  UrlParamExtension,
   BrowserUrlService,
   ShareContext,
+  ShareMenuItem,
+  UrlParamExtension,
 } from '../../types';
 
 export type { ShareMenuItemV2 } from '../../types';

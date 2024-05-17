@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
-  Vis,
   VIS_EVENT_TO_TRIGGER,
+  Vis,
   VisGroups,
   VisParams,
   VisTypeDefinition,
 } from '@kbn/visualizations-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { TSVB_EDITOR_NAME } from './application/editor_controller';
+import { v4 as uuidv4 } from 'uuid';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS, VIS_TYPE } from '../common/constants';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
 } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR, UI_SETTINGS, VIS_TYPE } from '../common/constants';
-import { toExpressionAst } from './to_ast';
-import { getDataViewsStart, getUISettings } from './services';
-import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
+import { TSVB_EDITOR_NAME } from './application/editor_controller';
+import { getDataViewsStart, getUISettings } from './services';
+import { toExpressionAst } from './to_ast';
+import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>

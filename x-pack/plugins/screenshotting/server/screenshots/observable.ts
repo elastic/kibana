@@ -6,14 +6,14 @@
  */
 
 import type { Headers } from '@kbn/core/server';
-import { defer, forkJoin, Observable, throwError } from 'rxjs';
+import { Observable, defer, forkJoin, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs';
 import { errors } from '../../common';
 import {
   Context,
   DEFAULT_VIEWPORT,
-  getChromiumDisconnectedError,
   HeadlessChromiumDriver,
+  getChromiumDisconnectedError,
 } from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { PdfScreenshotOptions } from '../formats';

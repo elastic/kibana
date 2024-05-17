@@ -7,23 +7,23 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 
+import { buildEsQuery } from '@kbn/es-query';
+import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
-import { buildEsQuery } from '@kbn/es-query';
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-import { getEsQueryConfig } from '../../es_query';
-import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext } from '..';
 import { UiSettingsCommon } from '../..';
+import { getEsQueryConfig } from '../../es_query';
+import { getTime } from '../../query';
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;

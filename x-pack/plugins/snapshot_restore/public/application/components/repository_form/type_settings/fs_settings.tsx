@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -15,6 +13,8 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 import { FSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxRestoreField, MaxSnapshotsField } from './common';

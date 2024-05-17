@@ -6,10 +6,10 @@
  */
 
 import type { EventAction, Process, ProcessFields } from '../../../common';
-import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
-import { dataOrDash } from '../../utils/data_or_dash';
 import { AUDITBEAT_INDEX } from '../../methods';
+import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
+import { dataOrDash } from '../../utils/data_or_dash';
 
 const DEFAULT_PROCESS_DATA: DetailPanelProcessLeader = {
   id: DASH,

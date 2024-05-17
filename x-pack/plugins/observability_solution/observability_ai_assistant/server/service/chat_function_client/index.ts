@@ -9,16 +9,16 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
-import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
+import { type FunctionResponse, FunctionVisibility } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
-  RegisteredInstruction,
   RegisterFunction,
   RegisterInstruction,
+  RegisteredInstruction,
 } from '../types';
 
 export class FunctionArgsValidationError extends Error {

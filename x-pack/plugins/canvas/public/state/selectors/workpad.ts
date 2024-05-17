@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { fromExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { get, omit } from 'lodash';
-import { safeElementFromExpression, fromExpression } from '@kbn/interpreter';
 import type { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
-import { append } from '../../lib/modify_path';
-import { getAssets } from './assets';
 import {
-  State,
-  CanvasWorkpad,
-  CanvasPage,
   CanvasElement,
+  CanvasPage,
   CanvasVariable,
+  CanvasWorkpad,
   ResolvedArgType,
+  State,
 } from '../../../types';
 import {
-  ExpressionContext,
   CanvasGroup,
-  PositionedElement,
   CanvasWorkpadBoundingBox,
   ExpressionAstArgument,
-  ExpressionAstFunction,
   ExpressionAstExpression,
+  ExpressionAstFunction,
+  ExpressionContext,
+  PositionedElement,
 } from '../../../types';
 import { isExpressionWithFilters } from '../../lib/filter';
+import { append } from '../../lib/modify_path';
+import { getAssets } from './assets';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;

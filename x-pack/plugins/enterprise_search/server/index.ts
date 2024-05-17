@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { EnterpriseSearchPlugin } = await import('./plugin');

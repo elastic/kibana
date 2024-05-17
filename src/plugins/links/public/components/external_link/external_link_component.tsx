@@ -18,9 +18,9 @@ import {
 
 import {
   EXTERNAL_LINK_TYPE,
+  LINKS_VERTICAL_LAYOUT,
   Link,
   LinksLayoutType,
-  LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import { validateUrl } from './external_link_tools';

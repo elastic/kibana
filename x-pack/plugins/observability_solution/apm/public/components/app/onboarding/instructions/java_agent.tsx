@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import { INSTRUCTION_VARIANT, AgentInstructions } from '../instruction_variants';
-import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
+import { AgentInstructions, INSTRUCTION_VARIANT } from '../instruction_variants';
+import { ApiKeyCallout } from './api_key_callout';
 
 export const createJavaAgentInstructions = (commonOptions: AgentInstructions): EuiStepProps[] => {
   const {

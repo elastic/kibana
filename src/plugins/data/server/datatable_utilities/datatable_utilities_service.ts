@@ -11,8 +11,8 @@ import type {
   SavedObjectsClientContract,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DatatableUtilitiesService as DatatableUtilitiesServiceCommon } from '../../common';
 import type { AggsStart } from '../search';
 

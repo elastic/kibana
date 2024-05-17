@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { registerPreviewScriptedFieldRoute } from './preview_scripted_field';
 
 describe('preview_scripted_field route', () => {

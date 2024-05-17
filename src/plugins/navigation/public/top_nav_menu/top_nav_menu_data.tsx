@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiBetaBadgeProps, EuiButtonProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;

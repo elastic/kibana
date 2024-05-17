@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { FunctionComponent, ReactNode } from 'react';
 
 export const TimelinePhaseText: FunctionComponent<{
   phaseName: ReactNode | string;

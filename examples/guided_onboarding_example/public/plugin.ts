@@ -7,12 +7,12 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PLUGIN_NAME } from '../common';
 import {
+  AppPluginStartDependencies,
   GuidedOnboardingExamplePluginSetup,
   GuidedOnboardingExamplePluginStart,
-  AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
 
 export class GuidedOnboardingExamplePlugin
   implements Plugin<GuidedOnboardingExamplePluginSetup, GuidedOnboardingExamplePluginStart>

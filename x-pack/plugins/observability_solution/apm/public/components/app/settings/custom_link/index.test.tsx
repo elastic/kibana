@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { fireEvent, render, RenderResult } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { License } from '@kbn/licensing-plugin/common/license';
+import { RenderResult, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { getCallApmApiSpy } from '../../../../services/rest/call_apm_api_spy';
 import { CustomLinkOverview } from '.';
-import { License } from '@kbn/licensing-plugin/common/license';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
-  mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  mockApmPluginContextValue,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../../context/license/license_context';
 import * as hooks from '../../../../hooks/use_fetcher';
+import { getCallApmApiSpy } from '../../../../services/rest/call_apm_api_spy';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';
 import * as saveCustomLink from './create_edit_custom_link_flyout/save_custom_link';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const data = {
   customLinks: [

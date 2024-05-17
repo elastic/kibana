@@ -11,39 +11,39 @@
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  type SavedObjectUnsanitizedDoc,
-  type SavedObjectReference,
-  SavedObjectsRawDocSource,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsRepository } from '../repository';
-import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   SavedObjectsSerializer,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import {
+  type SavedObjectReference,
+  type SavedObjectUnsanitizedDoc,
+  SavedObjectsErrorHelpers,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../../mocks';
 import {
-  NAMESPACE_AGNOSTIC_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   HIDDEN_TYPE,
-  mockVersionProps,
-  mockTimestampFields,
-  mockTimestamp,
-  mappings,
-  mockVersion,
-  createRegistry,
-  createDocumentMigrator,
-  getMockGetResponse,
-  createSpySerializer,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  NAMESPACE_AGNOSTIC_TYPE,
   createBadRequestErrorPayload,
   createConflictErrorPayload,
+  createDocumentMigrator,
   createGenericNotFoundErrorPayload,
+  createRegistry,
+  createSpySerializer,
+  getMockGetResponse,
+  mappings,
+  mockTimestamp,
+  mockTimestampFields,
+  mockVersion,
+  mockVersionProps,
   updateSuccess,
 } from '../../test_helpers/repository.test.common';
+import { SavedObjectsRepository } from '../repository';
 
 describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

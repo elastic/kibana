@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
 import { Location } from 'history';
 import { parse } from 'query-string';
+import React, { useState, useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
@@ -21,13 +21,13 @@ import {
   EnrichPoliciesAuthProvider,
   EnrichPoliciesWithPrivileges,
 } from '../../../components/enrich_policies';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
-import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
-import { PoliciesTable } from './policies_table';
+import { IndexManagementBreadcrumb, breadcrumbService } from '../../../services/breadcrumbs';
+import { documentationService } from '../../../services/documentation';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
-import { LoadingState, ErrorState, EmptyState } from './empty_states';
 import { PolicyDetailsFlyout } from './details_flyout';
+import { EmptyState, ErrorState, LoadingState } from './empty_states';
+import { PoliciesTable } from './policies_table';
 
 const getEnrichPolicyNameFromLocation = (location: Location) => {
   const { policy } = parse(location.search.substring(1));

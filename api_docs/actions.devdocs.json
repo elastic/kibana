@@ -46,9 +46,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/actions/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -110,9 +108,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/actions/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,9 +172,7 @@
               "tags": [],
               "label": "emails",
               "description": [],
-              "signature": [
-                "string[]"
-              ],
+              "signature": ["string[]"],
               "path": "x-pack/plugins/actions/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -254,9 +248,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -384,9 +376,7 @@
                 "tags": [],
                 "label": "incident",
                 "description": [],
-                "signature": [
-                  "Incident"
-                ],
+                "signature": ["Incident"],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -440,9 +430,7 @@
                     "tags": [],
                     "label": "incident",
                     "description": [],
-                    "signature": [
-                      "Incident"
-                    ],
+                    "signature": ["Incident"],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -459,9 +447,7 @@
             "tags": [],
             "label": "getIncident",
             "description": [],
-            "signature": [
-              "({ id }: { id: string; }) => Promise<GetIncidentResponse>"
-            ],
+            "signature": ["({ id }: { id: string; }) => Promise<GetIncidentResponse>"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -527,9 +513,7 @@
                     "tags": [],
                     "label": "incident",
                     "description": [],
-                    "signature": [
-                      "{ externalId: string | null; } & Incident"
-                    ],
+                    "signature": ["{ externalId: string | null; } & Incident"],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -541,9 +525,7 @@
                     "tags": [],
                     "label": "comments",
                     "description": [],
-                    "signature": [
-                      "{ commentId: string; comment: string; }[]"
-                    ],
+                    "signature": ["{ commentId: string; comment: string; }[]"],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1881,9 +1863,7 @@
             "tags": [],
             "label": "connector",
             "description": [],
-            "signature": [
-              "{ id: string; type: string; }"
-            ],
+            "signature": ["{ id: string; type: string; }"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1895,9 +1875,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "Config"
-            ],
+            "signature": ["Config"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1909,9 +1887,7 @@
             "tags": [],
             "label": "secrets",
             "description": [],
-            "signature": [
-              "Secrets"
-            ],
+            "signature": ["Secrets"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1923,9 +1899,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1962,11 +1936,7 @@
             "tags": [],
             "label": "registerSubAction",
             "description": [],
-            "signature": [
-              "(subAction: ",
-              "SubAction",
-              ") => void"
-            ],
+            "signature": ["(subAction: ", "SubAction", ") => void"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1978,9 +1948,7 @@
                 "tags": [],
                 "label": "subAction",
                 "description": [],
-                "signature": [
-                  "SubAction"
-                ],
+                "signature": ["SubAction"],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1996,9 +1964,7 @@
             "tags": [],
             "label": "removeNullOrUndefinedFields",
             "description": [],
-            "signature": [
-              "(data: unknown) => unknown"
-            ],
+            "signature": ["(data: unknown) => unknown"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2010,9 +1976,7 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": [
-                  "unknown"
-                ],
+                "signature": ["unknown"],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2028,11 +1992,7 @@
             "tags": [],
             "label": "getSubActions",
             "description": [],
-            "signature": [
-              "() => Map<string, ",
-              "SubAction",
-              ">"
-            ],
+            "signature": ["() => Map<string, ", "SubAction", ">"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2046,11 +2006,7 @@
             "tags": [],
             "label": "getResponseErrorMessage",
             "description": [],
-            "signature": [
-              "(error: ",
-              "AxiosError",
-              "<unknown, any>) => string"
-            ],
+            "signature": ["(error: ", "AxiosError", "<unknown, any>) => string"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2062,10 +2018,7 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": [
-                  "AxiosError",
-                  "<unknown, any>"
-                ],
+                "signature": ["AxiosError", "<unknown, any>"],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2099,10 +2052,7 @@
                 "tags": [],
                 "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    timeout,\n    ...config\n  }",
                 "description": [],
-                "signature": [
-                  "SubActionRequestParams",
-                  "<R>"
-                ],
+                "signature": ["SubActionRequestParams", "<R>"],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2132,9 +2082,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2146,9 +2094,7 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": [
-                  "UnsecuredActionsClientOpts"
-                ],
+                "signature": ["UnsecuredActionsClientOpts"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2186,9 +2132,7 @@
                 "tags": [],
                 "label": "{\n    requesterId,\n    id,\n    params,\n    relatedSavedObjects,\n    spaceId,\n  }",
                 "description": [],
-                "signature": [
-                  "UnsecuredExecuteOptions"
-                ],
+                "signature": ["UnsecuredExecuteOptions"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2222,9 +2166,7 @@
                 "tags": [],
                 "label": "requesterId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2237,10 +2179,7 @@
                 "tags": [],
                 "label": "actionsToExecute",
                 "description": [],
-                "signature": [
-                  "ExecuteOptions",
-                  "[]"
-                ],
+                "signature": ["ExecuteOptions", "[]"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2278,9 +2217,7 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2350,12 +2287,7 @@
         "tags": [],
         "label": "asNotificationExecutionSource",
         "description": [],
-        "signature": [
-          "(source: ",
-          "NotificationSource",
-          ") => ",
-          "NotificationExecutionSource"
-        ],
+        "signature": ["(source: ", "NotificationSource", ") => ", "NotificationExecutionSource"],
         "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2367,9 +2299,7 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": [
-              "NotificationSource"
-            ],
+            "signature": ["NotificationSource"],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2452,9 +2382,7 @@
             "tags": [],
             "label": "urlKey",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2530,9 +2458,7 @@
                 "tags": [],
                 "label": "featureId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/actions/server/action_type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2646,9 +2572,7 @@
             "tags": [],
             "label": "maxAttempts",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2674,9 +2598,7 @@
             "tags": [],
             "label": "supportedFeatureIds",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2708,9 +2630,7 @@
             "tags": [],
             "label": "isSystemActionType",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2749,9 +2669,7 @@
                     "tags": [],
                     "label": "params",
                     "description": [],
-                    "signature": [
-                      "Params | undefined"
-                    ],
+                    "signature": ["Params | undefined"],
                     "path": "x-pack/plugins/actions/server/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2768,10 +2686,7 @@
             "tags": [],
             "label": "renderParameterTemplates",
             "description": [],
-            "signature": [
-              "RenderParameterTemplates",
-              "<Params> | undefined"
-            ],
+            "signature": ["RenderParameterTemplates", "<Params> | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2927,11 +2842,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Services",
-              " | ",
-              "UnsecuredServices"
-            ],
+            "signature": ["Services", " | ", "UnsecuredServices"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2943,9 +2854,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "Config"
-            ],
+            "signature": ["Config"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2957,9 +2866,7 @@
             "tags": [],
             "label": "secrets",
             "description": [],
-            "signature": [
-              "Secrets"
-            ],
+            "signature": ["Secrets"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2971,9 +2878,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Params"
-            ],
+            "signature": ["Params"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3005,9 +2910,7 @@
             "tags": [],
             "label": "isEphemeral",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3019,10 +2922,7 @@
             "tags": [],
             "label": "taskInfo",
             "description": [],
-            "signature": [
-              "TaskInfo",
-              " | undefined"
-            ],
+            "signature": ["TaskInfo", " | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3034,9 +2934,7 @@
             "tags": [],
             "label": "configurationUtilities",
             "description": [],
-            "signature": [
-              "ActionsConfigurationUtilities"
-            ],
+            "signature": ["ActionsConfigurationUtilities"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3048,10 +2946,7 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": [
-              "ActionExecutionSource",
-              "<unknown> | undefined"
-            ],
+            "signature": ["ActionExecutionSource", "<unknown> | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3145,9 +3040,7 @@
             "tags": [],
             "label": "secrets",
             "description": [],
-            "signature": [
-              "Secrets"
-            ],
+            "signature": ["Secrets"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3159,9 +3052,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "Config"
-            ],
+            "signature": ["Config"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3209,9 +3100,7 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3249,9 +3138,7 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": [
-                  "UnsecuredExecuteOptions"
-                ],
+                "signature": ["UnsecuredExecuteOptions"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3285,9 +3172,7 @@
                 "tags": [],
                 "label": "requesterId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3300,10 +3185,7 @@
                 "tags": [],
                 "label": "actionsToExecute",
                 "description": [],
-                "signature": [
-                  "ExecuteOptions",
-                  "[]"
-                ],
+                "signature": ["ExecuteOptions", "[]"],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3345,9 +3227,7 @@
             "description": [
               "\nThe type is the connector type id. For example \".servicenow\"\nThe id is the connector's SavedObject UUID."
             ],
-            "signature": [
-              "{ id: string; type: string; }"
-            ],
+            "signature": ["{ id: string; type: string; }"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3359,9 +3239,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "Config"
-            ],
+            "signature": ["Config"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3373,9 +3251,7 @@
             "tags": [],
             "label": "configurationUtilities",
             "description": [],
-            "signature": [
-              "ActionsConfigurationUtilities"
-            ],
+            "signature": ["ActionsConfigurationUtilities"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3407,9 +3283,7 @@
             "tags": [],
             "label": "secrets",
             "description": [],
-            "signature": [
-              "Secrets"
-            ],
+            "signature": ["Secrets"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3421,9 +3295,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Services"
-            ],
+            "signature": ["Services"],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3462,9 +3334,7 @@
         "tags": [],
         "label": "ACTION_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": [
-          "\"action\""
-        ],
+        "signature": ["\"action\""],
         "path": "x-pack/plugins/actions/server/constants/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3477,9 +3347,7 @@
         "tags": [],
         "label": "ActionResult",
         "description": [],
-        "signature": [
-          "Connector"
-        ],
+        "signature": ["Connector"],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3700,10 +3568,7 @@
               "tags": [],
               "label": "connector",
               "description": [],
-              "signature": [
-                "SubActionConnectorType",
-                "<Config, Secrets>"
-              ],
+              "signature": ["SubActionConnectorType", "<Config, Secrets>"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -3719,9 +3584,7 @@
           "tags": [],
           "label": "isPreconfiguredConnector",
           "description": [],
-          "signature": [
-            "(connectorId: string) => boolean"
-          ],
+          "signature": ["(connectorId: string) => boolean"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3733,9 +3596,7 @@
               "tags": [],
               "label": "connectorId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -3751,11 +3612,7 @@
           "tags": [],
           "label": "getSubActionConnectorClass",
           "description": [],
-          "signature": [
-            "<Config, Secrets>() => ",
-            "IServiceAbstract",
-            "<Config, Secrets>"
-          ],
+          "signature": ["<Config, Secrets>() => ", "IServiceAbstract", "<Config, Secrets>"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3787,9 +3644,7 @@
           "tags": [],
           "label": "getActionsHealth",
           "description": [],
-          "signature": [
-            "() => { hasPermanentEncryptionKey: boolean; }"
-          ],
+          "signature": ["() => { hasPermanentEncryptionKey: boolean; }"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3803,10 +3658,7 @@
           "tags": [],
           "label": "getActionsConfigurationUtilities",
           "description": [],
-          "signature": [
-            "() => ",
-            "ActionsConfigurationUtilities"
-          ],
+          "signature": ["() => ", "ActionsConfigurationUtilities"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3820,9 +3672,7 @@
           "tags": [],
           "label": "setEnabledConnectorTypes",
           "description": [],
-          "signature": [
-            "(connectorTypes: string[]) => void"
-          ],
+          "signature": ["(connectorTypes: string[]) => void"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3834,9 +3684,7 @@
               "tags": [],
               "label": "connectorTypes",
               "description": [],
-              "signature": [
-                "string[]"
-              ],
+              "signature": ["string[]"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -3867,9 +3715,7 @@
           "tags": [],
           "label": "isActionTypeEnabled",
           "description": [],
-          "signature": [
-            "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
-          ],
+          "signature": ["(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -3881,9 +3727,7 @@
               "tags": [],
               "label": "id",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -3937,9 +3781,7 @@
               "tags": [],
               "label": "actionId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -3952,9 +3794,7 @@
               "tags": [],
               "label": "actionTypeId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -3994,9 +3834,7 @@
           "tags": [],
           "label": "getAllTypes",
           "description": [],
-          "signature": [
-            "() => string[]"
-          ],
+          "signature": ["() => string[]"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -4202,9 +4040,7 @@
               "tags": [],
               "label": "actionTypeId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -4217,9 +4053,7 @@
               "tags": [],
               "label": "actionId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -4232,9 +4066,7 @@
               "tags": [],
               "label": "params",
               "description": [],
-              "signature": [
-                "Params"
-              ],
+              "signature": ["Params"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -4247,9 +4079,7 @@
               "tags": [],
               "label": "variables",
               "description": [],
-              "signature": [
-                "Record<string, unknown>"
-              ],
+              "signature": ["Record<string, unknown>"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -4265,9 +4095,7 @@
           "tags": [],
           "label": "isSystemActionConnector",
           "description": [],
-          "signature": [
-            "(connectorId: string) => boolean"
-          ],
+          "signature": ["(connectorId: string) => boolean"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -4279,9 +4107,7 @@
               "tags": [],
               "label": "connectorId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -4305,9 +4131,7 @@
         "tags": [],
         "label": "areValidFeatures",
         "description": [],
-        "signature": [
-          "(ids: string[]) => boolean"
-        ],
+        "signature": ["(ids: string[]) => boolean"],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4319,9 +4143,7 @@
             "tags": [],
             "label": "ids",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4352,9 +4174,7 @@
             "tags": [],
             "label": "variables",
             "description": [],
-            "signature": [
-              "Record<string, unknown>"
-            ],
+            "signature": ["Record<string, unknown>"],
             "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4371,9 +4191,7 @@
         "tags": [],
         "label": "getConnectorCompatibility",
         "description": [],
-        "signature": [
-          "(featureIds: string[] | undefined) => string[]"
-        ],
+        "signature": ["(featureIds: string[] | undefined) => string[]"],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4385,9 +4203,7 @@
             "tags": [],
             "label": "featureIds",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4404,9 +4220,7 @@
         "tags": [],
         "label": "getConnectorFeatureName",
         "description": [],
-        "signature": [
-          "(id: string) => string"
-        ],
+        "signature": ["(id: string) => string"],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4418,9 +4232,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4436,12 +4248,8 @@
         "type": "Function",
         "tags": [],
         "label": "hasMustacheTemplate",
-        "description": [
-          "does the string contain `{{.*}}`?"
-        ],
-        "signature": [
-          "(string: string) => boolean"
-        ],
+        "description": ["does the string contain `{{.*}}`?"],
+        "signature": ["(string: string) => boolean"],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4453,9 +4261,7 @@
             "tags": [],
             "label": "string",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "x-pack/plugins/actions/common/mustache_template.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4520,9 +4326,7 @@
         "tags": [],
         "label": "isActionTypeExecutorResult",
         "description": [],
-        "signature": [
-          "(result: unknown) => boolean"
-        ],
+        "signature": ["(result: unknown) => boolean"],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4534,9 +4338,7 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4583,9 +4385,7 @@
             "tags": [],
             "label": "allowedDomains",
             "description": [],
-            "signature": [
-              "string[] | null"
-            ],
+            "signature": ["string[] | null"],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4598,9 +4398,7 @@
             "tags": [],
             "label": "addresses",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4660,9 +4458,7 @@
             "tags": [],
             "label": "addresses",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4678,12 +4474,8 @@
         "type": "Function",
         "tags": [],
         "label": "withoutMustacheTemplate",
-        "description": [
-          "filter strings that do not contain `{{.*}}`"
-        ],
-        "signature": [
-          "(strings: string[]) => string[]"
-        ],
+        "description": ["filter strings that do not contain `{{.*}}`"],
+        "signature": ["(strings: string[]) => string[]"],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4695,9 +4487,7 @@
             "tags": [],
             "label": "strings",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/mustache_template.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4727,9 +4517,7 @@
             "tags": [],
             "label": "allowedEmailDomains",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4824,9 +4612,7 @@
             "tags": [],
             "label": "supportedFeatureIds",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4884,9 +4670,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": [
-              "\"ok\" | \"error\""
-            ],
+            "signature": ["\"ok\" | \"error\""],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4898,9 +4682,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4912,9 +4694,7 @@
             "tags": [],
             "label": "serviceMessage",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4926,9 +4706,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "Data | undefined"
-            ],
+            "signature": ["Data | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4940,9 +4718,7 @@
             "tags": [],
             "label": "retry",
             "description": [],
-            "signature": [
-              "boolean | Date | null | undefined"
-            ],
+            "signature": ["boolean | Date | null | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5000,9 +4776,7 @@
             "tags": [],
             "label": "dateEnd",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5014,9 +4788,7 @@
             "tags": [],
             "label": "filter",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5028,9 +4800,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "(string | undefined)[] | undefined"
-            ],
+            "signature": ["(string | undefined)[] | undefined"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5067,9 +4837,7 @@
             "tags": [],
             "label": "dateEnd",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5081,9 +4849,7 @@
             "tags": [],
             "label": "filter",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5117,12 +4883,7 @@
             "tags": [],
             "label": "sort",
             "description": [],
-            "signature": [
-              "SortCombinations",
-              " | ",
-              "SortCombinations",
-              "[]"
-            ],
+            "signature": ["SortCombinations", " | ", "SortCombinations", "[]"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5134,9 +4895,7 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": [
-              "(string | undefined)[] | undefined"
-            ],
+            "signature": ["(string | undefined)[] | undefined"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5239,9 +4998,7 @@
             "tags": [],
             "label": "space_ids",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5402,9 +5159,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ValidateEmailAddressesOptions",
-        "description": [
-          "Options that can be used when validating email addresses"
-        ],
+        "description": ["Options that can be used when validating email addresses"],
         "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5415,12 +5170,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "treatMustacheTemplatesAsValid",
-            "description": [
-              "treat any address which contains a mustache template as valid"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["treat any address which contains a mustache template as valid"],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5451,9 +5202,7 @@
         "tags": [],
         "label": "ACTIONS_FEATURE_ID",
         "description": [],
-        "signature": [
-          "\"actions\""
-        ],
+        "signature": ["\"actions\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5488,9 +5237,7 @@
         "tags": [],
         "label": "ALERT_HISTORY_PREFIX",
         "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
+        "signature": ["\"kibana-alert-history-\""],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5530,9 +5277,7 @@
         "tags": [],
         "label": "AlertHistoryEsIndexConnectorId",
         "description": [],
-        "signature": [
-          "\"preconfigured-alert-history-es-index\""
-        ],
+        "signature": ["\"preconfigured-alert-history-es-index\""],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5545,9 +5290,7 @@
         "tags": [],
         "label": "AlertingConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"alerting\""
-        ],
+        "signature": ["\"alerting\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5583,9 +5326,7 @@
         "tags": [],
         "label": "BASE_ACTION_API_PATH",
         "description": [],
-        "signature": [
-          "\"/api/actions\""
-        ],
+        "signature": ["\"/api/actions\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5598,9 +5339,7 @@
         "tags": [],
         "label": "CasesConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"cases\""
-        ],
+        "signature": ["\"cases\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5613,9 +5352,7 @@
         "tags": [],
         "label": "DEFAULT_MICROSOFT_EXCHANGE_URL",
         "description": [],
-        "signature": [
-          "\"https://login.microsoftonline.com\""
-        ],
+        "signature": ["\"https://login.microsoftonline.com\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5628,9 +5365,7 @@
         "tags": [],
         "label": "DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
         "description": [],
-        "signature": [
-          "\"https://graph.microsoft.com/.default\""
-        ],
+        "signature": ["\"https://graph.microsoft.com/.default\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5643,9 +5378,7 @@
         "tags": [],
         "label": "DEFAULT_MICROSOFT_GRAPH_API_URL",
         "description": [],
-        "signature": [
-          "\"https://graph.microsoft.com/v1.0\""
-        ],
+        "signature": ["\"https://graph.microsoft.com/v1.0\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5658,9 +5391,7 @@
         "tags": [],
         "label": "ExecutionLogSortFields",
         "description": [],
-        "signature": [
-          "\"timestamp\" | \"execution_duration\" | \"schedule_delay\""
-        ],
+        "signature": ["\"timestamp\" | \"execution_duration\" | \"schedule_delay\""],
         "path": "x-pack/plugins/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5673,9 +5404,7 @@
         "tags": [],
         "label": "GenerativeAIForObservabilityConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"generativeAIForObservability\""
-        ],
+        "signature": ["\"generativeAIForObservability\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5688,9 +5417,7 @@
         "tags": [],
         "label": "GenerativeAIForSearchPlaygroundConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"generativeAIForSearchPlayground\""
-        ],
+        "signature": ["\"generativeAIForSearchPlayground\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5703,9 +5430,7 @@
         "tags": [],
         "label": "GenerativeAIForSecurityConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"generativeAIForSecurity\""
-        ],
+        "signature": ["\"generativeAIForSecurity\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5718,9 +5443,7 @@
         "tags": [],
         "label": "IExecutionKPIResult",
         "description": [],
-        "signature": [
-          "{ success: number; unknown: number; failure: number; warning: number; }"
-        ],
+        "signature": ["{ success: number; unknown: number; failure: number; warning: number; }"],
         "path": "x-pack/plugins/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5733,9 +5456,7 @@
         "tags": [],
         "label": "INTERNAL_BASE_ACTION_API_PATH",
         "description": [],
-        "signature": [
-          "\"/internal/actions\""
-        ],
+        "signature": ["\"/internal/actions\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5827,9 +5548,7 @@
             "tags": [],
             "label": "responded",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5844,9 +5563,7 @@
         "tags": [],
         "label": "SecurityConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"siem\""
-        ],
+        "signature": ["\"siem\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5859,9 +5576,7 @@
         "tags": [],
         "label": "UptimeConnectorFeatureId",
         "description": [],
-        "signature": [
-          "\"uptime\""
-        ],
+        "signature": ["\"uptime\""],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6028,9 +5743,7 @@
         "tags": [],
         "label": "executionLogSortableColumns",
         "description": [],
-        "signature": [
-          "readonly [\"timestamp\", \"execution_duration\", \"schedule_delay\"]"
-        ],
+        "signature": ["readonly [\"timestamp\", \"execution_duration\", \"schedule_delay\"]"],
         "path": "x-pack/plugins/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6184,9 +5897,7 @@
         "tags": [],
         "label": "MustacheInEmailRegExp",
         "description": [],
-        "signature": [
-          "RegExp"
-        ],
+        "signature": ["RegExp"],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
         "trackAdoption": false,

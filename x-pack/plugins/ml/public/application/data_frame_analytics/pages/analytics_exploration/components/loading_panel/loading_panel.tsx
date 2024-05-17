@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 export const LoadingPanel: FC = () => (
   <>

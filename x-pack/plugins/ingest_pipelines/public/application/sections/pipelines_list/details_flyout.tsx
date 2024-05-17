@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiContextMenu,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiFlyoutFooter,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiIcon,
   EuiPopover,
-  EuiContextMenu,
-  EuiButton,
-  EuiBadge,
-  EuiCodeBlock,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useState } from 'react';
 
 import { Pipeline } from '../../../../common/types';
 
-import { deprecatedPipelineBadge } from './table';
-import { PipelineDetailsJsonBlock } from './details_json_block';
 import { stringifyJson } from '../../lib/utils';
+import { PipelineDetailsJsonBlock } from './details_json_block';
+import { deprecatedPipelineBadge } from './table';
 
 export interface Props {
   pipeline: Pipeline;

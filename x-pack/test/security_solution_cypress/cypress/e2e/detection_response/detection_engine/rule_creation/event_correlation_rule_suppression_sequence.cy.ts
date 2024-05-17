@@ -6,11 +6,11 @@
  */
 import { getEqlSequenceRule } from '../../../../objects/rule';
 
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { fillDefineEqlRule, selectEqlRuleType } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { fillDefineEqlRule, selectEqlRuleType } from '../../../../tasks/create_new_rule';
 
 import { TOOLTIP } from '../../../../screens/common';
 import {

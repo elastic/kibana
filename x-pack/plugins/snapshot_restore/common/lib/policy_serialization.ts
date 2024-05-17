@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
 import {
   deserializeSnapshotConfig,
-  serializeSnapshotConfig,
   deserializeSnapshotRetention,
+  serializeSnapshotConfig,
   serializeSnapshotRetention,
 } from '.';
+import { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
 
 export const deserializePolicy = (
   name: string,

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { requestMock, serverMock } from '../__mocks__';
-import type { SetupPlugins } from '../../../../plugin';
+import { getIndexAliases } from '@kbn/securitysolution-es-utils';
 import type { SignalsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
-import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration_route.mock';
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
+import type { SetupPlugins } from '../../../../plugin';
+import { createMigration } from '../../migrations/create_migration';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
-import { createMigration } from '../../migrations/create_migration';
-import { getIndexAliases } from '@kbn/securitysolution-es-utils';
+import { requestMock, serverMock } from '../__mocks__';
 import { getTemplateVersion } from '../index/check_template_version';
-import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import { createSignalsMigrationRoute } from './create_signals_migration_route';
 
 jest.mock('../index/check_template_version');
 jest.mock('@kbn/securitysolution-es-utils', () => {

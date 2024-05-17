@@ -6,28 +6,13 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "emit_stacktraces": "__flag__",
-      "metric": [
-        "_all",
-        "queued_watches",
-        "current_watches",
-        "pending_watches"
-      ]
+      "metric": ["_all", "queued_watches", "current_watches", "pending_watches"]
     },
     "url_components": {
-      "metric": [
-        "_all",
-        "queued_watches",
-        "current_watches",
-        "pending_watches"
-      ]
+      "metric": ["_all", "queued_watches", "current_watches", "pending_watches"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_watcher/stats",
-      "_watcher/stats/{metric}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_watcher/stats", "_watcher/stats/{metric}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html",
     "availability": {
       "stack": true,

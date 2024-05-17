@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const es = getService('es');

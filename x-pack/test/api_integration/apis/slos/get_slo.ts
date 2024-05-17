@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { cleanup } from '@kbn/infra-forge';
-import expect from 'expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
+import expect from 'expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { loadTestData } from './helper/load_test_data';
-import { SloEsClient } from './helper/es';
 import { sloData } from './fixtures/create_slo';
+import { SloEsClient } from './helper/es';
+import { loadTestData } from './helper/load_test_data';
 
 export default function ({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/177806

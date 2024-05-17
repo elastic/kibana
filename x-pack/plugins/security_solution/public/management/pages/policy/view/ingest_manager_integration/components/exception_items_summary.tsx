@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { memo, useCallback } from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useCallback } from 'react';
+import styled from 'styled-components';
 import type { GetExceptionSummaryResponse } from '../../../../../../../common/endpoint/types';
 
 const SUMMARY_KEYS: Readonly<Array<keyof GetExceptionSummaryResponse>> = [

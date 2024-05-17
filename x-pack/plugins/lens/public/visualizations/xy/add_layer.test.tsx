@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { Position } from '@elastic/charts';
+import { IconChartBarAnnotations } from '@kbn/chart-icons';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { LayerTypes } from '@kbn/visualizations-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
 import { AddLayerButton } from './add_layer';
 import { XYState } from './types';
-import { Position } from '@elastic/charts';
-import { LayerTypes } from '@kbn/visualizations-plugin/common';
-import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
 describe('AddLayerButton', () => {
   const addLayer = jest.fn();

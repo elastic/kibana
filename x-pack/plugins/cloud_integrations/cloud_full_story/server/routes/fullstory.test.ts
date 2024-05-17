@@ -6,8 +6,8 @@
  */
 
 jest.mock('fs/promises');
-import { renderFullStoryLibraryFactory, FULLSTORY_LIBRARY_PATH } from './fullstory';
 import fs from 'fs/promises';
+import { FULLSTORY_LIBRARY_PATH, renderFullStoryLibraryFactory } from './fullstory';
 
 const fsMock = fs as jest.Mocked<typeof fs>;
 

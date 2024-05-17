@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isJobStarted, isJobLoading, isJobFailed } from './helpers';
+import { isJobFailed, isJobLoading, isJobStarted } from './helpers';
 
 describe('isJobStarted', () => {
   test('returns false if only jobState is enabled', () => {

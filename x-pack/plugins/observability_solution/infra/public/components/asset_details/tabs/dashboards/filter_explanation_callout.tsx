@@ -6,11 +6,11 @@
  */
 import React from 'react';
 
+import { EuiCallOut, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon, EuiCode } from '@elastic/eui';
 
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { css } from '@emotion/react';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 interface Props {

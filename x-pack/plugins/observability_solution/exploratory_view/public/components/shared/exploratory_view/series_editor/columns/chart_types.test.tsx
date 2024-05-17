@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { mockUxSeries, render } from '../../rtl_helpers';
 import { SeriesChartTypesSelect, XYChartTypesSelect } from './chart_types';
 

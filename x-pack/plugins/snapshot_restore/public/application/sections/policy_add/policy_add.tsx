@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
-import { SlmPolicyPayload } from '../../../../common/types';
+import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { TIME_UNITS } from '../../../../common';
+import { SlmPolicyPayload } from '../../../../common/types';
 
-import { SectionError, PageError } from '../../../shared_imports';
+import { PageError, SectionError } from '../../../shared_imports';
 
-import { PolicyForm, PageLoading } from '../../components';
+import { PageLoading, PolicyForm } from '../../components';
 import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
-import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,

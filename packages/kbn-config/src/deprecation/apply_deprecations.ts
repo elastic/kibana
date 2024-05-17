@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
 import type {
   AddConfigDeprecation,
   ChangedDeprecatedPaths,

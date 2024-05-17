@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
 import { getField } from '../utils';
 
 export interface UseShowRelatedAlertsBySessionParams {

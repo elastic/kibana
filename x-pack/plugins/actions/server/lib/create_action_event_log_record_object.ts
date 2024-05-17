@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { RelatedSavedObjects } from './related_saved_objects';
 import { ActionExecutionSource, isSavedObjectExecutionSource } from './action_execution_source';
+import { RelatedSavedObjects } from './related_saved_objects';
 
 export type Event = Exclude<IEvent, undefined>;
 

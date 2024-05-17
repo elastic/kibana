@@ -13,12 +13,12 @@ import {
   EuiButton,
   EuiConfirmModal,
   EuiFieldText,
+  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiForm,
+  EuiFormRow,
   EuiSpacer,
-  EuiFilePicker,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -32,33 +32,33 @@ import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
-  NAV,
-  GITHUB_VIA_APP_SERVICE_TYPE,
   GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+  NAV,
 } from '../../../constants';
 
 import {
   CANCEL_BUTTON,
-  OK_BUTTON,
   CONFIRM_MODAL_TITLE,
-  SAVE_CHANGES_BUTTON,
+  OK_BUTTON,
   REMOVE_BUTTON,
+  SAVE_CHANGES_BUTTON,
 } from '../../../constants';
 import { getEditPath } from '../../../routes';
 import { handlePrivateKeyUpload } from '../../../utils';
 
 import {
+  SOURCE_CONFIG_LINK,
+  SOURCE_CONFIG_TITLE,
+  SOURCE_NAME_LABEL,
+  SOURCE_REMOVE_DESCRIPTION,
+  SOURCE_REMOVE_TITLE,
+  SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
-  SOURCE_SETTINGS_DESCRIPTION,
-  SOURCE_NAME_LABEL,
-  SOURCE_CONFIG_TITLE,
-  SOURCE_CONFIG_LINK,
-  SOURCE_REMOVE_TITLE,
-  SOURCE_REMOVE_DESCRIPTION,
-  SYNC_DIAGNOSTICS_TITLE,
-  SYNC_DIAGNOSTICS_DESCRIPTION,
   SYNC_DIAGNOSTICS_BUTTON,
+  SYNC_DIAGNOSTICS_DESCRIPTION,
+  SYNC_DIAGNOSTICS_TITLE,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 

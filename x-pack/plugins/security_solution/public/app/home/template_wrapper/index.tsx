@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo, useState, useCallback } from 'react';
-import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { AttackDiscoveryTour } from '../../../attack_discovery/tour';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
-import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
-import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
+import React, { type ReactNode, useMemo, useState, useCallback } from 'react';
+import styled from 'styled-components';
 import { TimelineId } from '../../../../common/types/timeline';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
+import { AttackDiscoveryTour } from '../../../attack_discovery/tour';
+import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
+import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
+import { SecurityPageName } from '../../types';
 import { GlobalKQLHeader } from './global_kql_header';
 import { Timeline } from './timeline';
-import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
-import { SecurityPageName } from '../../types';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar

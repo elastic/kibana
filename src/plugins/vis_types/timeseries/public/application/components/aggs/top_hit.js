@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { AggRow } from './agg_row';
-import { AggSelect } from './agg_select';
-import { FieldSelect } from './field_select';
-import { i18n } from '@kbn/i18n';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { createNumberHandler } from '../lib/create_number_handler';
 import {
-  htmlIdGenerator,
+  EuiComboBox,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
-  EuiSpacer,
   EuiFormRow,
-  EuiFieldNumber,
+  EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import React, { useMemo, useEffect } from 'react';
 import { PANEL_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;

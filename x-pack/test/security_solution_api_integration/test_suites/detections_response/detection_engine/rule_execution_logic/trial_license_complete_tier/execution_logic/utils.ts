@@ -7,8 +7,8 @@
 
 import supertest from 'supertest';
 
-import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
 
 export const getMetricsRequest = (
   request: supertest.SuperTest<supertest.Test>,

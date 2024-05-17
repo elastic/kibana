@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  serviceNameHint,
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
+  serviceNameHint,
 } from './shared_hints';
 
 export const rackVariables = {

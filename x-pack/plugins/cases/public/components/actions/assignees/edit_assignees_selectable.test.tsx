@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import { basicCase } from '../../../containers/mock';
-import userEvent from '@testing-library/user-event';
-import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import * as api from '../../../containers/user_profiles/api';
+import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
+import { EditAssigneesSelectable } from './edit_assignees_selectable';
 
 jest.mock('../../../containers/user_profiles/api');
 

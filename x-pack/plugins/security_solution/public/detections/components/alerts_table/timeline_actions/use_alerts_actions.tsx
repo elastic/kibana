@@ -8,10 +8,10 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { AlertWorkflowStatus } from '../../../../common/types';
-import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
-import { getScopedActions } from '../../../../helpers';
 import type { Status } from '../../../../../common/api/detection_engine';
+import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import type { AlertWorkflowStatus } from '../../../../common/types';
+import { getScopedActions } from '../../../../helpers';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {

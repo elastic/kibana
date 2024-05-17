@@ -6,19 +6,19 @@
  */
 
 import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
   IKibanaResponse,
+  IRouter,
+  KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { IClusterClient } from '@kbn/core/server';
-import { Observable, Subject } from 'rxjs';
-import { throttleTime, tap, map } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { MonitoringStats } from '../monitoring';
+import { Observable, Subject } from 'rxjs';
+import { map, tap, throttleTime } from 'rxjs';
 import { TaskManagerConfig } from '../config';
+import { MonitoringStats } from '../monitoring';
 import {
   BackgroundTaskUtilizationStat,
   PublicBackgroundTaskUtilizationStat,

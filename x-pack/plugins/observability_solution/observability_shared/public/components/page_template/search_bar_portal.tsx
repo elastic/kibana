@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { ReactNode, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 export interface Props {
   children: ReactNode;
 }

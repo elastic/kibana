@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import * as tinymath from '@kbn/tinymath';
 import { parse as hjsonParse } from 'hjson';
 import moment from 'moment-timezone';
-import { Logger } from '@kbn/core/server';
 
 import { formatNumber } from './number_formatter';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 
 export interface CreateIndexMapOptions {
   kibanaIndexName: string;

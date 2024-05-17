@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import { CaseStatuses } from '../status/types';
 import { Tooltip } from '../tooltip/tooltip';
-import type { CaseTooltipProps, CaseTooltipContentProps } from '../tooltip/types';
+import type { CaseTooltipContentProps, CaseTooltipProps } from '../tooltip/types';
 
 const sampleText = 'This is a test span element!!';
 const TestSpan = () => (

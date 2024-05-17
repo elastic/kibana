@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import * as rt from 'io-ts';
 import { TIEBREAKER_FIELD } from '../../../../common/constants';
+import { Pagination, Sort } from '../../../../common/http_api/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
+import { InfluencerFilter } from '../common';
 import {
-  createJobIdsFilters,
-  createTimeRangeFilters,
-  createResultTypeFilters,
-  defaultRequestParameters,
   createAnomalyScoreFilter,
   createInfluencerFilter,
+  createJobIdsFilters,
   createJobIdsQuery,
+  createResultTypeFilters,
+  createTimeRangeFilters,
+  defaultRequestParameters,
 } from './common';
-import { InfluencerFilter } from '../common';
-import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 const sortToMlFieldMap = {
   dataset: 'partition_field_value',

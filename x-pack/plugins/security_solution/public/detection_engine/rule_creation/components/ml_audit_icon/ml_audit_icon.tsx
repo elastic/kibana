@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 

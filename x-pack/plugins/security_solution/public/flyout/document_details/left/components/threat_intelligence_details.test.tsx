@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
+import { LeftPanelContext } from '../context';
+import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
 } from './test_ids';
 import { ThreatIntelligenceDetails } from './threat_intelligence_details';
-import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');

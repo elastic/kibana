@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, Fragment } from 'react';
 import {
   EuiCallOut,
   EuiForm,
@@ -16,17 +15,18 @@ import {
   EuiSplitPanel,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
-import { withSuspense } from '@kbn/shared-ux-utility';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { UiSettingMetadata } from '@kbn/management-settings-types';
-import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];

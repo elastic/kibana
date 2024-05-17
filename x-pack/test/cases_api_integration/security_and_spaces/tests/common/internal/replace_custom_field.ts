@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  deleteAllCaseItems,
   createCase,
   createConfiguration,
+  deleteAllCaseItems,
   getConfigurationRequest,
   replaceCustomField,
 } from '../../../../common/lib/api';
@@ -27,6 +26,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

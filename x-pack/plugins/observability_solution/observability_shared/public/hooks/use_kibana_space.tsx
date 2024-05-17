@@ -1,3 +1,4 @@
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import type { Space } from '@kbn/spaces-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from './use_fetcher';
 import { ObservabilitySharedStart } from '../plugin';
+import { useFetcher } from './use_fetcher';
 
 export const useKibanaSpace = () => {
   const { services } = useKibana<ObservabilitySharedStart>();

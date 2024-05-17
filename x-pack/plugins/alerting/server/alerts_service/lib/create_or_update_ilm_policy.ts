@@ -6,9 +6,9 @@
  */
 
 import { IlmPolicy } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { DataStreamAdapter } from './data_stream_adapter';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 interface CreateOrUpdateIlmPolicyOpts {
   logger: Logger;

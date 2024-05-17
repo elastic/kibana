@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<InjectedMetadataServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<InjectedMetadataServiceContract>"],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,11 +55,7 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalInjectedMetadataSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalInjectedMetadataSetup", ">"],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -75,11 +69,7 @@
             "tags": [],
             "label": "createStartContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalInjectedMetadataSetup",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalInjectedMetadataSetup", ">"],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

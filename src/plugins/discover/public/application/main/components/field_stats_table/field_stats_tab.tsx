@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
+import React from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
 
 export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
   React.memo((props) => {

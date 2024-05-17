@@ -6,13 +6,13 @@
  */
 
 import type { Rule } from '@kbn/alerting-plugin/common';
-import type { TopAlert, AlertSummaryField } from '@kbn/observability-plugin/public';
+import type { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 export interface AlertDetailsAppSectionProps {
   rule: Rule<{

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiTitle,
   EuiAccordion,
-  EuiSpacer,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { RuleAboutSection, Description } from './rule_about_section';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { Description, RuleAboutSection } from './rule_about_section';
 import { RuleDefinitionSection } from './rule_definition_section';
 import { RuleScheduleSection } from './rule_schedule_section';
 import { RuleSetupGuideSection } from './rule_setup_guide_section';
-import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 
 import * as i18n from './translations';
 

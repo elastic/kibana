@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as t from 'io-ts';
+import React from 'react';
 
-import { EuiLink, EuiCode } from '@elastic/eui';
+import { EuiCode, EuiLink } from '@elastic/eui';
+import { documentationService } from '../../../services/documentation';
 import {
   FIELD_TYPES,
-  fieldValidators,
+  FieldConfig,
   ValidationFunc,
   ValidationFuncArg,
   fieldFormatters,
-  FieldConfig,
+  fieldValidators,
 } from '../shared_imports';
 import {
   AliasOption,
-  DataType,
   ComboBoxOption,
-  ParameterName,
+  DataType,
   ParameterDefinition,
+  ParameterName,
 } from '../types';
-import { documentationService } from '../../../services/documentation';
-import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
+import { INDEX_DEFAULT } from './default_values';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;

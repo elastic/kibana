@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { SanitizedRule, RawRule } from '../../../../types';
-import { getDefaultMonitoring } from '../../../../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import Semver from 'semver';
 import { parseDuration } from '../../../../../common/parse_duration';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
+import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { getDefaultMonitoring } from '../../../../lib';
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
-import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import { createNewAPIKeySet, createRuleSavedObject } from '../../../../rules_client/lib';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { CloneRuleParams } from './types';
-import { RuleAttributes } from '../../../../data/rule/types';
-import { RuleDomain, RuleParams } from '../../types';
-import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
-import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
+import { RawRule, SanitizedRule } from '../../../../types';
 import { ruleDomainSchema } from '../../schemas';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { RuleDomain, RuleParams } from '../../types';
 import { cloneRuleParamsSchema } from './schemas';
+import { CloneRuleParams } from './types';
 
 export async function cloneRule<Params extends RuleParams = never>(
   context: RulesClientContext,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createMemoryHistory } from 'history';
-import React, { FC, PropsWithChildren } from 'react';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import { mountHook } from '@kbn/test-jest-helpers';
-import { CoreScopedHistory } from '@kbn/core/public';
+import { createMemoryHistory } from 'history';
+import React, { FC, PropsWithChildren } from 'react';
 import { useMetricsTime } from './use_metrics_time';
 
 describe('useMetricsTime hook', () => {

@@ -11,9 +11,9 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { validatePrebuiltRuleAssets } from './prebuilt_rule_assets_validation';
-import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../model/rule_versions/rule_version_specifier';
+import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
+import { validatePrebuiltRuleAssets } from './prebuilt_rule_assets_validation';
 
 const MAX_PREBUILT_RULES_COUNT = 10_000;
 

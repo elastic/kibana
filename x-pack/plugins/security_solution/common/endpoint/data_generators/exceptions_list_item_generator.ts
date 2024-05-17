@@ -6,19 +6,19 @@
  */
 
 import type {
-  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import { BaseDataGenerator } from './base_data_generator';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
+import { BaseDataGenerator } from './base_data_generator';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {

@@ -12,13 +12,13 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { SearchSelection } from './search_selection';
-import { GroupSelection } from './group_selection';
+import type { BaseVisType, TypesStart, VisTypeAlias } from '../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
-import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
+import { GroupSelection } from './group_selection';
+import { SearchSelection } from './search_selection';
 import './dialog.scss';
 
 interface TypeSelectionProps {

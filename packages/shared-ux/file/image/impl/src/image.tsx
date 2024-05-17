@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { useState } from 'react';
 import { EuiImage, EuiImageProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { getBlurhashSrc } from '@kbn/shared-ux-file-util';
 import classNames from 'classnames';
-import { css } from '@emotion/react';
+import React from 'react';
+import { useState } from 'react';
 
 export type Props = { meta?: FileImageMetadata } & EuiImageProps;
 
@@ -45,7 +45,7 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
   }, [blurhash, width, height]);
 
   // prettier-ignore
-  const currentSrc = (isBlurHashLoaded || !blurhashSrc) ? imageSrc : blurhashSrc
+  const currentSrc = isBlurHashLoaded || !blurhashSrc ? imageSrc : blurhashSrc;
 
   return (
     <EuiImage

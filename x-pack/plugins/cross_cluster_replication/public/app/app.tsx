@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
+import { ApplicationStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 
-import { getFatalErrors } from './services/notifications';
-import { routing } from './services/routing';
+import { PageError, SectionLoading } from '../shared_imports';
 // @ts-ignore
 import { loadPermissions } from './services/api';
-import { SectionLoading, PageError } from '../shared_imports';
+import { getFatalErrors } from './services/notifications';
+import { routing } from './services/routing';
 
 // @ts-ignore
 import {
-  CrossClusterReplicationHome,
   AutoFollowPatternAdd,
   AutoFollowPatternEdit,
+  CrossClusterReplicationHome,
   FollowerIndexAdd,
   FollowerIndexEdit,
 } from './sections';

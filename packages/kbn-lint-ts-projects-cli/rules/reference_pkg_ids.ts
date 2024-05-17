@@ -8,9 +8,9 @@
 
 import Path from 'path';
 
+import { replaceReferences } from '@kbn/json-ast';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { readPackageMap } from '@kbn/repo-packages';
-import { replaceReferences } from '@kbn/json-ast';
 
 import { TsProjectRule } from '@kbn/repo-linter';
 

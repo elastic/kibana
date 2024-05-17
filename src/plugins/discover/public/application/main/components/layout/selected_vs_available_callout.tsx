@@ -1,3 +1,6 @@
+import { EuiCallOut } from '@elastic/eui';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +9,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 interface SelectedVSAvailableCallout {
   isPlainRecord: boolean;

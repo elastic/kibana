@@ -22,24 +22,24 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/code-editor';
 
 import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
-import { ExecuteDetails } from '../../../../models/execute_details';
 import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
+import { useAppContext } from '../../../../app_context';
 import { ErrableFormRow } from '../../../../components';
 import { executeWatch } from '../../../../lib/api';
+import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
+import { ExecuteDetails } from '../../../../models/execute_details';
 import { WatchContext } from '../../watch_context';
 import { SimulateWatchResultsFlyout } from './simulate_watch_results_flyout';
-import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
-import { useAppContext } from '../../../../app_context';
 
 import { XJson } from '../../../../shared_imports';
 

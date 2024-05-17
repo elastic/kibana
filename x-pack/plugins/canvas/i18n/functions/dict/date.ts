@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { date } from '../../../canvas_plugin_src/functions/common/date';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { ISO8601, MOMENTJS, JS } from '../../constants';
+import { ISO8601, JS, MOMENTJS } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof date>> = {
   help: i18n.translate('xpack.canvas.functions.dateHelpText', {

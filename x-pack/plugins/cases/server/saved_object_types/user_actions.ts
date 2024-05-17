@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
 import type { UserActionsMigrationsDeps } from './migrations/user_actions';
 import { createUserActionsMigrations } from './migrations/user_actions';

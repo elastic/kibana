@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { mockConfig, mockLogger, mockHttpAgent } from '../__mocks__';
+import { mockConfig, mockHttpAgent, mockLogger } from '../__mocks__';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
-  JSON_HEADER,
   ERROR_CONNECTING_HEADER,
+  JSON_HEADER,
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 

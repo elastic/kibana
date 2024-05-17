@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEmpty, serviceTypeMap } from '../lib/shared_values';
-import type { Service, ModelConfig } from '../types';
+import type { ModelConfig, Service } from '../types';
 import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 import { SaveInferenceEndpoint } from './save_inference_mappings_button';
 

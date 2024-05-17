@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import path from 'path';
 import { i18n } from '@kbn/i18n';
 import fs from 'fs/promises';
-import path from 'path';
 import Handlebars from 'handlebars';
 import { assetPath } from '../../../constants';
 

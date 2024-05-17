@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
-import { catchError } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
-import apm from 'elastic-apm-node';
 import type {
-  IKibanaSearchResponse,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptionsSerializable,
 } from '@kbn/search-types';
+import apm from 'elastic-apm-node';
+import { firstValueFrom } from 'rxjs';
+import { catchError } from 'rxjs';
 import { getRequestAbortedSignal } from '../..';
 import type { ISearchStart } from '../types';
 

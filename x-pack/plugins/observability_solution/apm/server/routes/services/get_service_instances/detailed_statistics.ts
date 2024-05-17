@@ -6,14 +6,14 @@
  */
 
 import { keyBy } from 'lodash';
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../typings/timeseries';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceDetailedStatisticsParams {
   environment: string;

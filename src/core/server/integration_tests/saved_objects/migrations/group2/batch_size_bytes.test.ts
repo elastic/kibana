@@ -7,20 +7,20 @@
  */
 
 import Path from 'path';
+import { Env } from '@kbn/config';
+import { getEnvOptions } from '@kbn/config-mocks';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Root } from '@kbn/core-root-server-internal';
+import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
+import {
+  type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
+import { LogRecord } from '@kbn/logging';
+import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { getEnvOptions } from '@kbn/config-mocks';
-import { LogRecord } from '@kbn/logging';
-import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;

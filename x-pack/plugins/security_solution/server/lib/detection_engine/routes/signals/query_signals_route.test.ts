@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
-  getSignalsQueryRequest,
+  getEmptySignalsResponse,
+  getSignalsAggsAndQueryRequest,
   getSignalsAggsQueryRequest,
+  getSignalsQueryRequest,
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
-  getSignalsAggsAndQueryRequest,
-  getEmptySignalsResponse,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;

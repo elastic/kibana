@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { getPkgsById } from '@kbn/repo-packages';
+import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPkgsById } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const locatePkgsByID = function (inputFilters: string[], log: ToolingLog) {

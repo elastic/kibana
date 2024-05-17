@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
-import { FiltersExpressionsSelect } from './filters_expression_select';
-import { render } from '../../../../lib/helper/rtl_helpers';
-import { filterAriaLabels as aria } from './translations';
 import * as Hooks from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
+import { fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+import { render } from '../../../../lib/helper/rtl_helpers';
+import { FiltersExpressionsSelect } from './filters_expression_select';
+import { filterAriaLabels as aria } from './translations';
 
 describe('FiltersExpressionSelect', () => {
   const LOCATION_FIELD_NAME = 'observer.geo.name';

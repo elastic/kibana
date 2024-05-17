@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToastsStart } from '@kbn/core/public';
-import {
-  copyColumnValuesToClipboard,
-  copyColumnNameToClipboard,
-} from '../utils/copy_value_to_clipboard';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import type { ValueToStringConverter } from '../types';
+import {
+  copyColumnNameToClipboard,
+  copyColumnValuesToClipboard,
+} from '../utils/copy_value_to_clipboard';
 
 function buildCopyColumnButton({
   label,

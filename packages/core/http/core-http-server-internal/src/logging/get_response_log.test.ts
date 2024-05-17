@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { Request } from '@hapi/hapi';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { getEcsResponseLog } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({

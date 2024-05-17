@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { i18n } from '@kbn/i18n';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
+import { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 interface Deps {

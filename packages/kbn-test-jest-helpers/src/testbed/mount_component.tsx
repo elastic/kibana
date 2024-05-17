@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType } from 'react';
-import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
+import React, { ComponentType } from 'react';
 import { act } from 'react-dom/test-utils';
+import { Store } from 'redux';
 
 import { mountWithIntl } from '../enzyme_helpers';
-import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
+import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { MemoryRouterConfig } from './types';
 
 interface Config<T extends object = Record<string, any>> {

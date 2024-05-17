@@ -8,9 +8,9 @@
 import { orderBy } from 'lodash';
 
 import { fields } from '@kbn/aiops-test-utils/artificial_logs/fields';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 import { frequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/frequent_item_sets';
 import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
-import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import { getSignificantItemGroups } from './get_significant_item_groups';
 

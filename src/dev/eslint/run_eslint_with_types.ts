@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
 import Os from 'os';
+import Path from 'path';
 
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { supportsColor } from 'chalk';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs';
-import { supportsColor } from 'chalk';
-import { run } from '@kbn/dev-cli-runner';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
 
@@ -142,9 +142,7 @@ export function runEslintWithTypes() {
 
       throw createFailError(
         `
-          ${
-            failures.length
-          } projects failed, run the following commands locally to try auto-fixing them:
+          ${failures.length} projects failed, run the following commands locally to try auto-fixing them:
 
             ${failures
               .map((p) => `node scripts/eslint_with_types --fix --project ${p.repoRel}`)

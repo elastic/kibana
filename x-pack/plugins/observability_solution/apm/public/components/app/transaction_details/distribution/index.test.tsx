@@ -11,15 +11,15 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { merge } from 'lodash';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
+import { merge } from 'lodash';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
-  mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  mockApmPluginContextValue,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import * as useFetcherModule from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import { Event } from '@kbn/analytics-client';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../services';
 
 export default function ({ getService }: FtrProviderContext) {

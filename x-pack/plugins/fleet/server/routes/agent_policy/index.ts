@@ -11,31 +11,31 @@ import { API_VERSIONS } from '../../../common/constants';
 
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
-  GetAgentPoliciesRequestSchema,
-  GetOneAgentPolicyRequestSchema,
-  CreateAgentPolicyRequestSchema,
-  UpdateAgentPolicyRequestSchema,
+  BulkGetAgentPoliciesRequestSchema,
   CopyAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
+  GetAgentPoliciesRequestSchema,
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
-  BulkGetAgentPoliciesRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
 
 import {
-  getAgentPoliciesHandler,
-  getOneAgentPolicyHandler,
-  createAgentPolicyHandler,
-  updateAgentPolicyHandler,
+  bulkGetAgentPoliciesHandler,
   copyAgentPolicyHandler,
+  createAgentPolicyHandler,
   deleteAgentPoliciesHandler,
-  getFullAgentPolicy,
   downloadFullAgentPolicy,
   downloadK8sManifest,
+  getAgentPoliciesHandler,
+  getFullAgentPolicy,
   getK8sManifest,
-  bulkGetAgentPoliciesHandler,
+  getOneAgentPolicyHandler,
+  updateAgentPolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {

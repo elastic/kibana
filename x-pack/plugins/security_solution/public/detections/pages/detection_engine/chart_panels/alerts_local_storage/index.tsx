@@ -11,28 +11,28 @@ import {
   isDefaultWhenEmptyString,
 } from '../../../../../common/components/local_storage/helpers';
 
-import {
-  ALERTS_PAGE,
-  ALERT_VIEW_SELECTION_SETTING_NAME,
-  TABLE_CATEGORY,
-  EXPAND_SETTING_NAME,
-  TREEMAP_CATEGORY,
-  STACK_BY_0_SETTING_NAME,
-  STACK_BY_1_SETTING_NAME,
-  STACK_BY_SETTING_NAME,
-  TREND_CHART_CATEGORY,
-  VIEW_CATEGORY,
-  GROUP_BY_SETTING_NAME,
-} from './constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
 } from '../../../../components/alerts_kpis/common/config';
-import type { AlertsSettings } from './types';
 import type { AlertViewSelection } from '../chart_select/helpers';
 import { CHARTS_ID, TREND_ID } from '../chart_select/helpers';
-import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import {
+  ALERTS_PAGE,
+  ALERT_VIEW_SELECTION_SETTING_NAME,
+  EXPAND_SETTING_NAME,
+  GROUP_BY_SETTING_NAME,
+  STACK_BY_0_SETTING_NAME,
+  STACK_BY_1_SETTING_NAME,
+  STACK_BY_SETTING_NAME,
+  TABLE_CATEGORY,
+  TREEMAP_CATEGORY,
+  TREND_CHART_CATEGORY,
+  VIEW_CATEGORY,
+} from './constants';
+import type { AlertsSettings } from './types';
 
 export const useAlertsLocalStorage = (): AlertsSettings => {
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');

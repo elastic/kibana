@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { IconTriangle, IconCircle } from '@kbn/chart-icons';
-import type { IconSet } from '@kbn/visualization-ui-components';
+import { IconCircle, IconTriangle } from '@kbn/chart-icons';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
+import { i18n } from '@kbn/i18n';
+import type { IconSet } from '@kbn/visualization-ui-components';
 
 export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
   {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Tutorial } from './tutorial';
 

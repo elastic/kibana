@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
 
 import type { AppMockRenderer } from '../../../common/mock';
-import { readCasesPermissions, createAppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, readCasesPermissions } from '../../../common/mock';
 
-import { CustomFields } from './custom_fields';
-import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 import { CustomFieldTypes } from '../../../../common/types/domain';
+import { customFieldsConfigurationMock, customFieldsMock } from '../../../containers/mock';
+import { CustomFields } from './custom_fields';
 
 describe('Case View Page files tab', () => {
   const onSubmit = jest.fn();

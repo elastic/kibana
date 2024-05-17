@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
-import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
+import { EmbeddableInput as CanvasEmbeddableInput } from '../../../../canvas_plugin_src/expression_types';
+import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
+import { CANVAS_APP } from '../../../../common/lib';
+import { ElementSpec } from '../../../../types';
+import { METRIC_TYPE, trackCanvasUiMetric } from '../../../lib/ui_metric';
 import {
   useEmbeddablesService,
   useUiActionsService,
   useVisualizationsService,
 } from '../../../services';
-import { CANVAS_APP } from '../../../../common/lib';
-import { ElementSpec } from '../../../../types';
-import { EditorMenu as Component } from './editor_menu.component';
-import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { EmbeddableInput as CanvasEmbeddableInput } from '../../../../canvas_plugin_src/expression_types';
-import { useCanvasApi } from '../../hooks/use_canvas_api';
 import { ADD_CANVAS_ELEMENT_TRIGGER } from '../../../state/triggers/add_canvas_element_trigger';
+import { useCanvasApi } from '../../hooks/use_canvas_api';
+import { EditorMenu as Component } from './editor_menu.component';
 
 interface Props {
   /**

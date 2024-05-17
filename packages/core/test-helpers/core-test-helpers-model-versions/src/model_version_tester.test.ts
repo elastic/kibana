@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SavedObjectsType, SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from './model_version_tester';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => {

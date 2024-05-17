@@ -7,8 +7,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useCasesToast } from '../common/use_cases_toast';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import type { ServerError } from '../types';
 import { patchComment } from './api';
 import { casesMutationsKeys } from './constants';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from './use_kibana';
-import { PlaygroundProvider } from '../providers/playground_provider';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import * as ReactHookForm from 'react-hook-form';
+import { PlaygroundProvider } from '../providers/playground_provider';
+import { useKibana } from './use_kibana';
 
 jest.mock('./use_kibana', () => ({
   useKibana: jest.fn(),
@@ -17,8 +17,8 @@ jest.mock('./use_kibana', () => ({
 
 let formHookSpy: jest.SpyInstance;
 
-import { getIndicesWithNoSourceFields, useSourceIndicesFields } from './use_source_indices_field';
 import { IndicesQuerySourceFields } from '../types';
+import { getIndicesWithNoSourceFields, useSourceIndicesFields } from './use_source_indices_field';
 
 // FLAKY: https://github.com/elastic/kibana/issues/181102
 describe.skip('useSourceIndicesFields Hook', () => {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiIcon,
-  EuiText,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 import type { ActionStatus, AgentPolicy } from '../../../../../types';
 

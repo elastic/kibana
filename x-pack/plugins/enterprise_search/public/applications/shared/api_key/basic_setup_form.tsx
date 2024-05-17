@@ -8,15 +8,15 @@
 import React from 'react';
 
 import {
-  EuiIcon,
-  EuiText,
-  EuiForm,
-  EuiFieldText,
-  EuiFormRow,
   EuiFieldNumber,
-  EuiRadioGroup,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiRadioGroup,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';

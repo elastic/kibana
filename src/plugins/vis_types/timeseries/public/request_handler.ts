@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Adapters } from '@kbn/inspector-plugin/common';
 import { KibanaContext } from '@kbn/data-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { getTimeZone } from '@kbn/visualization-utils';
-import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES } from '../common/constants';
+import { getCoreStart, getDataStart, getUISettings } from './services';
 
-import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';
+import type { TimeseriesVisParams } from './types';
 
 interface MetricsRequestHandlerParams {
   input: KibanaContext | null;

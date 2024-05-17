@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { without, uniq } from 'lodash';
-import { SuperTest } from 'supertest';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateObjectsSpacesResponse,
 } from '@kbn/core/server';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { SPACES } from '../lib/spaces';
+import expect from '@kbn/expect';
+import { uniq, without } from 'lodash';
+import { SuperTest } from 'supertest';
 import {
   expectResponses,
   getUrlPrefix,
@@ -25,6 +24,7 @@ import {
   TestDefinition,
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
+import { SPACES } from '../lib/spaces';
 
 export interface UpdateObjectsSpacesTestDefinition extends TestDefinition {
   request: {

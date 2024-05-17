@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, memo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import React, { useState, memo } from 'react';
 
 import {
-  getFieldValidityAndErrorMessage,
   UseField,
+  getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useKibana } from '../../../common/lib/kibana';
 import type { ActionConnector } from '../../../../common/types/domain';
-import { useGetIssues } from './use_get_issues';
+import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
+import { useGetIssues } from './use_get_issues';
 
 interface Props {
   actionConnector?: ActionConnector;

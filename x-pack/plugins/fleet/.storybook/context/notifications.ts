@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { of } from 'rxjs';
-import { action } from '@storybook/addon-actions';
 import type { NotificationsStart } from '@kbn/core/public';
+import { action } from '@storybook/addon-actions';
+import { of } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);

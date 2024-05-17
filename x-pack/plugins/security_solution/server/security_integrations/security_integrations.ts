@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { putCriblRoutingPipeline } from './handlers/put_cribl_routing_pipeline';
 

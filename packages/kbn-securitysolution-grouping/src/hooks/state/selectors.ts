@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GroupsById, GroupState } from '../types';
+import { GroupState, GroupsById } from '../types';
 
 const selectGroupById = (state: GroupState): GroupsById => state.groups.groupById;
 

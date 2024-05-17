@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import * as Either from 'fp-ts/lib/Either';
-import _ from 'lodash';
 import {
   SavedObjectTypeRegistry,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { set } from '@kbn/safer-lodash-set';
+import * as Either from 'fp-ts/lib/Either';
+import _ from 'lodash';
 import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,

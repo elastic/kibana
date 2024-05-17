@@ -15,7 +15,10 @@ export class ErrorWithCode extends Error {
    * @param message The error message.
    * @param code The code of the error.
    */
-  constructor(message: string, public readonly code: string) {
+  constructor(
+    message: string,
+    public readonly code: string
+  ) {
     super(message);
   }
 }

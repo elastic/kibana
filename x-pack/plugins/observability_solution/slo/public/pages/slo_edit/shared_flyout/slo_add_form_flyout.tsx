@@ -6,13 +6,13 @@
  */
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import React from 'react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { RecursivePartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
-import { CreateSLOForm } from '../types';
+import React from 'react';
+import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
+import { CreateSLOForm } from '../types';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 

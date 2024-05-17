@@ -7,8 +7,8 @@
  */
 
 import { indices } from '../../../../public';
+import { containsChars, startsWith } from '../../../validators/string';
 import { ValidationFunc } from '../../hook_form_lib';
-import { startsWith, containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
 export const indexNameField =

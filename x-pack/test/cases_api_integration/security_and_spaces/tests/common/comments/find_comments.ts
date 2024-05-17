@@ -11,6 +11,18 @@ import { CASES_URL, MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/const
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  bulkCreateAttachments,
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  deleteCasesByESQuery,
+  deleteCasesUserActions,
+  deleteComments,
+  ensureSavedObjectIsAuthorized,
+  findAttachments,
+  getSpaceUrlPrefix,
+} from '../../../../common/lib/api';
+import {
   getPostCaseRequest,
   persistableStateAttachment,
   postCaseReq,
@@ -19,28 +31,16 @@ import {
   postCommentUserReq,
   postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
-import {
-  createComment,
-  deleteAllCaseItems,
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
-  ensureSavedObjectIsAuthorized,
-  getSpaceUrlPrefix,
-  createCase,
-  findAttachments,
-  bulkCreateAttachments,
-} from '../../../../common/lib/api';
 
 import {
-  obsOnly,
-  secOnly,
-  obsOnlyRead,
-  secOnlyRead,
-  noKibanaPrivileges,
-  superUser,
   globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
   obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

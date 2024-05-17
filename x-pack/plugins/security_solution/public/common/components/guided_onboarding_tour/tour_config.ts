@@ -6,8 +6,8 @@
  */
 
 import type { EuiTourStepProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ElementTarget } from '@elastic/eui/src/services/findElement';
+import { i18n } from '@kbn/i18n';
 
 export enum SecurityStepId {
   rules = 'rules',

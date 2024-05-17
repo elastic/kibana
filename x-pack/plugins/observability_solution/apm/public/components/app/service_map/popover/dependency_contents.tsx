@@ -6,20 +6,20 @@
  */
 
 import { EuiButton, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { NodeDataDefinition } from 'cytoscape';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import React from 'react';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { ApmRoutes } from '../../../routing/apm_route_config';
-import { StatsList } from './stats_list';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { ApmRoutes } from '../../../routing/apm_route_config';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { StatsList } from './stats_list';
 
 type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 

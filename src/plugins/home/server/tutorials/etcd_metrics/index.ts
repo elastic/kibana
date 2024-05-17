@@ -9,14 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
-  onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
-} from '../instructions/metricbeat_instructions';
-import {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
+import {
+  cloudInstructions,
+  onPremCloudInstructions,
+  onPremInstructions,
+} from '../instructions/metricbeat_instructions';
 
 export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'etcd';

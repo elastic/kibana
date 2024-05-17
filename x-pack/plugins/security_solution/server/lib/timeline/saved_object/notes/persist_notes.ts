@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FrameworkRequest } from '../../../framework';
-import { persistNote } from './saved_object';
-import { getOverridableNote } from './get_overridable_note';
 import type { Note } from '../../../../../common/api/timeline';
+import type { FrameworkRequest } from '../../../framework';
+import { getOverridableNote } from './get_overridable_note';
+import { persistNote } from './saved_object';
 
 export const persistNotes = async (
   frameworkRequest: FrameworkRequest,

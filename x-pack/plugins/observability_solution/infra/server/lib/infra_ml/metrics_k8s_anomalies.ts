@@ -6,17 +6,17 @@
  */
 
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
-import { InfraRequestHandlerContext } from '../../types';
-import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
+import { Pagination, Sort } from '../../../common/http_api/infra_ml';
 import { getJobId, metricsK8SJobTypes } from '../../../common/infra_ml';
-import { Sort, Pagination } from '../../../common/http_api/infra_ml';
-import type { MlSystem, MlAnomalyDetectors } from '../../types';
-import { isMlPrivilegesError } from './errors';
+import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
+import { InfraRequestHandlerContext } from '../../types';
+import type { MlAnomalyDetectors, MlSystem } from '../../types';
+import { InfluencerFilter, MappedAnomalyHit, fetchMlJob } from './common';
+import { isMlPrivilegesError } from './errors';
 import {
-  metricsK8sAnomaliesResponseRT,
   createMetricsK8sAnomaliesQuery,
+  metricsK8sAnomaliesResponseRT,
 } from './queries/metrics_k8s_anomalies';
 
 async function getCompatibleAnomaliesJobIds(

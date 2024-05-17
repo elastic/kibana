@@ -7,20 +7,20 @@
 
 import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
-import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
   createAlertsIndex,
-  deleteAllRules,
+  createRule,
   deleteAllAlerts,
+  deleteAllRules,
   waitForRulePartialFailure,
 } from '../../../../../../common/utils/security_solution';
+import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
+import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import { createConnector } from '../../../utils/connectors';
+import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

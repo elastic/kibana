@@ -15,19 +15,10 @@
       "_source_includes": [],
       "stored_fields": [],
       "version": "",
-      "version_type": [
-        "internal",
-        "external",
-        "external_gte",
-        "force"
-      ]
+      "version_type": ["internal", "external", "external_gte", "force"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "{index}/_doc/{id}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["{index}/_doc/{id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html",
     "availability": {
       "stack": true,

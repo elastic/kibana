@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mount } from 'enzyme';
 
-import { useKibana } from '../../lib/kibana';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import { useKibana } from '../../lib/kibana';
 
-import { ListItemComponent } from './list_item';
-import type { ThreatMapEntries } from './types';
 import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { ListItemComponent } from './list_item';
+import type { ThreatMapEntries } from './types';
 
 const mockTheme = getMockTheme({
   eui: {

@@ -7,16 +7,16 @@
 
 import { omit, union } from 'lodash/fp';
 
-import { isEmpty } from 'lodash';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ExpandedDetail, ExpandedDetailType } from '../../common/types/detail_panel';
+import { isEmpty } from 'lodash';
 import type { ColumnHeaderOptions, SessionViewConfig, SortColumnTable } from '../../common/types';
+import type { ExpandedDetail, ExpandedDetailType } from '../../common/types/detail_panel';
 import type { TableToggleDetailPanel } from './actions';
-import type { DataTablePersistInput, TableById } from './types';
 import type { DataTableModelSettings } from './model';
+import type { DataTablePersistInput, TableById } from './types';
 
-import { getDataTableManageDefaults, tableDefaults } from './defaults';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../../components/data_table/constants';
+import { getDataTableManageDefaults, tableDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;

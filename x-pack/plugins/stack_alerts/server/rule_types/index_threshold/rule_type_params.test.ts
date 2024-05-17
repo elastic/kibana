@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ParamsSchema, Params } from './rule_type_params';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
 import { CoreQueryParams, MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
+import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
+import { Params, ParamsSchema } from './rule_type_params';
 
 const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',

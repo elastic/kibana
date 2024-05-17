@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { useHasRequiredIndicesPermissions } from '../hooks';
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,15 +13,17 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useState } from 'react';
 import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
-import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { RestoreSettings, SnapshotDetails } from '../../../../common/types';
 import { RestoreValidation, validateRestore } from '../../services/validation';
+import { RestoreSnapshotNavigation } from './navigation';
 import {
   RestoreSnapshotStepLogistics,
-  RestoreSnapshotStepSettings,
   RestoreSnapshotStepReview,
+  RestoreSnapshotStepSettings,
 } from './steps';
-import { RestoreSnapshotNavigation } from './navigation';
 
 interface Props {
   snapshotDetails: SnapshotDetails;

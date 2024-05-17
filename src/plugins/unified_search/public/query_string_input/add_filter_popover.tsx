@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
 import {
-  EuiFlexItem,
   EuiButtonIcon,
-  EuiPopover,
   EuiButtonIconProps,
+  EuiFlexItem,
+  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterEditorWrapper } from './filter_editor_wrapper';
+import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback } from 'react';
 import {
-  withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
+  withCloseFilterEditorConfirmModal,
 } from '../filter_bar/filter_editor';
 import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 export const strings = {
   getAddFilterButtonLabel: () =>

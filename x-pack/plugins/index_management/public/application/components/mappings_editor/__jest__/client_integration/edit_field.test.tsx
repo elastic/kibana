@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed } from './helpers';
-import { defaultTextParameters, defaultShapeParameters } from './datatypes';
+import { defaultShapeParameters, defaultTextParameters } from './datatypes';
+import { MappingsEditorTestBed, componentHelpers } from './helpers';
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
 describe('Mappings editor: edit field', () => {

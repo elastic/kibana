@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import type { RuleReferences } from '@kbn/securitysolution-exception-list-components';
@@ -12,6 +5,13 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { useCallback, useState } from 'react';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import {
   deleteException,

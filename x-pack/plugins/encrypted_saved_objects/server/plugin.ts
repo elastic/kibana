@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import nodeCrypto from '@elastic/node-crypto';
 import { createHash } from 'crypto';
+import nodeCrypto from '@elastic/node-crypto';
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';

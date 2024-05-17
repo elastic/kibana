@@ -8,41 +8,41 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import {
-  EuiToolTip,
-  EuiIcon,
-  EuiSpacer,
-  useEuiFontSize,
-  EuiButtonIcon,
-  useGeneratedHtmlId,
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiSuperSelect,
   EuiTitle,
-  EuiHorizontalRule,
+  EuiToolTip,
+  useEuiFontSize,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 import { useToggle } from 'react-use';
-import { PICK_ASSET_CRITICALITY } from './translations';
-import { AssetCriticalityBadge } from './asset_criticality_badge';
-import type { Entity, State } from './use_asset_criticality';
-import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
 import type {
   CriticalityLevel,
   CriticalityLevelWithUnassigned,
 } from '../../../../common/entity_analytics/asset_criticality/types';
+import { AssetCriticalityBadge } from './asset_criticality_badge';
+import { PICK_ASSET_CRITICALITY } from './translations';
+import type { Entity, State } from './use_asset_criticality';
+import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
 
 interface Props {
   entity: Entity;

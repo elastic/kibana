@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
+import React, { useState, useCallback } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import * as i18n from './translations';
-import { TitleExperimentalBadge, TitleBetaBadge } from './title';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { TitleBetaBadge, TitleExperimentalBadge } from './title';
+import * as i18n from './translations';
 
 export interface EditableTitleProps {
   isLoading: boolean;

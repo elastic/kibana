@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 
 const createWrapper = () => {
   const queryClient = new QueryClient();

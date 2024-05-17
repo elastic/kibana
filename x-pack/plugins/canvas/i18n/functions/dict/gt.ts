@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { gt } from '../../../canvas_plugin_src/functions/common/gt';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof gt>> = {
   help: i18n.translate('xpack.canvas.functions.gtHelpText', {

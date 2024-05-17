@@ -9,16 +9,16 @@
 import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import AnnotationEditorControls from './annotation_editor_controls';
 
-import React from 'react';
-import { mount } from 'enzyme';
+import { EuiButtonGroup } from '@elastic/eui';
 import type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
+import { mount } from 'enzyme';
 import moment from 'moment';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiButtonGroup } from '@elastic/eui';
 
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   QueryStringInput: () => {

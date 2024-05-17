@@ -7,15 +7,15 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  findTestSubject,
-  TestBed,
-  AsyncTestBedConfig,
-} from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
-import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
+import {
+  AsyncTestBedConfig,
+  TestBed,
+  findTestSubject,
+  registerTestBed,
+} from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../public/application/constants';
+import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {

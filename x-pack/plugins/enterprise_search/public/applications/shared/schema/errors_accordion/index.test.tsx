@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiAccordion, EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
+import { EuiAccordion, EuiTableHeaderCell, EuiTableRow } from '@elastic/eui';
 
 import { EuiLinkTo } from '../../react_router_helpers';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../../../common/mock';
 import { useGetStatefulQueryBar } from './use_get_stateful_query_bar';
 
 describe('useGetStatefulQueryBar', () => {

@@ -8,43 +8,43 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { selectTimelineById } from '../../../../store/selectors';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
-import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
-import { withDataView } from '../../../../../common/components/with_data_view';
-import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
-import { useKibana } from '../../../../../common/lib/kibana';
+import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
   RowRenderer,
-  ToggleDetailPanel,
   TimelineTabs,
+  ToggleDetailPanel,
 } from '../../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../../common/types/timeline';
+import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { withDataView } from '../../../../../common/components/with_data_view';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type { State, inputsModel } from '../../../../../common/store';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { DetailsPanel } from '../../../side_panel';
-import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
-import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
-import ToolbarAdditionalControls from './toolbar_additional_controls';
-import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineActions } from '../../../../store';
-import { transformTimelineItemToUnifiedRows } from '../utils';
-import { TimelineEventDetailRow } from './timeline_event_detail_row';
-import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
+import { selectTimelineById } from '../../../../store/selectors';
+import { DetailsPanel } from '../../../side_panel';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
+import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
+import { StyledEuiProgress, StyledTimelineUnifiedDataTable } from '../styles';
+import { transformTimelineItemToUnifiedRows } from '../utils';
+import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
+import { TimelineEventDetailRow } from './timeline_event_detail_row';
+import ToolbarAdditionalControls from './toolbar_additional_controls';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);

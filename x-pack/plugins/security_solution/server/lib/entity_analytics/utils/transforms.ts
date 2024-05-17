@@ -1,3 +1,12 @@
+import type {
+  TransformGetTransformResponse,
+  TransformGetTransformStatsTransformStats,
+  TransformGetTransformTransformSummary,
+  TransformPutTransformRequest,
+  TransformPutTransformResponse,
+  TransformStartTransformResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +14,10 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type {
-  TransformGetTransformResponse,
-  TransformStartTransformResponse,
-  TransformPutTransformResponse,
-  TransformGetTransformTransformSummary,
-  TransformPutTransformRequest,
-  TransformGetTransformStatsTransformStats,
-} from '@elastic/elasticsearch/lib/api/types';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
-  getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
+  getRiskScorePivotTransformId,
 } from '../../../../common/utils/risk_score_modules';
 
 export const getLegacyTransforms = async ({

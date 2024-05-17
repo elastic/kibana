@@ -1,3 +1,4 @@
+import type { CoreStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';

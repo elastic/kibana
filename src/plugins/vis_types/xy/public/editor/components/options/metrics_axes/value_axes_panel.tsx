@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import {
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
   EuiAccordion,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo } from 'react';
 
+import { SetParamByIndex } from '.';
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
-import { SetParamByIndex } from '.';
 
 export interface ValueAxesPanelProps {
   addValueAxis: () => ValueAxis;

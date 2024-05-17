@@ -11,10 +11,10 @@ import type {
   VirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  setMetaDocMigrationStarted,
-  setMetaDocMigrationComplete,
-  setMetaMappingMigrationComplete,
   removePropertiesFromV2,
+  setMetaDocMigrationComplete,
+  setMetaDocMigrationStarted,
+  setMetaMappingMigrationComplete,
 } from './update_index_meta';
 
 const getDefaultMeta = (): IndexMappingMeta => ({

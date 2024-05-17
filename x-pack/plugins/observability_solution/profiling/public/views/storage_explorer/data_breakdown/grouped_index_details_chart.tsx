@@ -6,10 +6,10 @@
  */
 
 import { Chart, Datum, Partition, Position, Settings } from '@elastic/charts';
-import { euiPaletteColorBlind, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { StorageDetailsGroupedByIndex } from '../../../../common/storage_explorer';
 import { useProfilingChartsTheme } from '../../../hooks/use_profiling_charts_theme';
 import { getGroupedIndexLabel } from './utils';

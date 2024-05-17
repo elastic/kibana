@@ -10,9 +10,9 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { getErrorSummaries } from '../../helpers';
+import type { OnCheckCompleted, PatternRollup } from '../../types';
 import { StatsRollup } from '../pattern/pattern_summary/stats_rollup';
 import { SummaryActions } from './summary_actions';
-import type { OnCheckCompleted, PatternRollup } from '../../types';
 
 const MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH = 400;
 const MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH = 235;

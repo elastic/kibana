@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import React from 'react';
 
 export function NumberParameter({ id, label, value, setParameter }) {
   const handleChange = (evt) => {

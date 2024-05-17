@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
-import { ResultMeta, ResultAction } from './types';
+import { ResultAction, ResultMeta } from './types';
 
 import './result_header.scss';
 

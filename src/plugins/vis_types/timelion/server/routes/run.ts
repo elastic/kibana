@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import _ from 'lodash';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner';
 // @ts-ignore
-import getNamespacesSettings from '../lib/get_namespaced_settings';
-// @ts-ignore
 import getTlConfig from '../handlers/lib/tl_config';
-import { TimelionFunctionInterface } from '../types';
 import { ConfigManager } from '../lib/config_manager';
+// @ts-ignore
+import getNamespacesSettings from '../lib/get_namespaced_settings';
 import { TimelionPluginStartDeps } from '../plugin';
+import { TimelionFunctionInterface } from '../types';
 
 const timelionDefaults = getNamespacesSettings();
 

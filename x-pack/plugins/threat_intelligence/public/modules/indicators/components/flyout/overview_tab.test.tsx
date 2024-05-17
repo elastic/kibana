@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutOverview } from './overview_tab';
-import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
+import { Indicator, generateMockIndicator } from '../../../../../common/types/indicator';
+import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
+import { IndicatorsFlyoutOverview } from './overview_tab';
 import {
   INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
   INDICATORS_FLYOUT_OVERVIEW_TABLE,

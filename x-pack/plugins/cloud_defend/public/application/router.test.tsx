@@ -1,3 +1,11 @@
+import { Router } from '@kbn/shared-ux-router';
+import { QueryClientProviderProps } from '@tanstack/react-query';
+import { render } from '@testing-library/react';
+import { MemoryHistory, createMemoryHistory } from 'history';
+import React from 'react';
+import * as constants from '../common/navigation/constants';
+import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/navigation/types';
+import { CloudDefendSecuritySolutionContext } from '../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +13,6 @@
  * 2.0.
  */
 import CloudDefendRouter from './router';
-import React from 'react';
-import { render } from '@testing-library/react';
-import { Router } from '@kbn/shared-ux-router';
-import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/navigation/types';
-import { CloudDefendSecuritySolutionContext } from '../types';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import * as constants from '../common/navigation/constants';
-import { QueryClientProviderProps } from '@tanstack/react-query';
 
 jest.mock('../pages/policies', () => ({
   Policies: () => <div data-test-subj="Policies">Policies</div>,

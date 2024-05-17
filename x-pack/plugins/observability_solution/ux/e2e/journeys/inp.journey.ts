@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { journey, step, expect, before } from '@elastic/synthetics';
 import { Client } from '@elastic/elasticsearch';
+import { before, expect, journey, step } from '@elastic/synthetics';
 import { recordVideo } from '../helpers/record_video';
 import { loginToKibana, waitForLoadingToFinish } from './utils';
 

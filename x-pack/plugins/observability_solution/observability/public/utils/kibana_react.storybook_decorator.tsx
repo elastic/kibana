@@ -1,3 +1,9 @@
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { casesFeatureId, sloFeatureId } from '@kbn/observability-shared-plugin/common';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +11,11 @@
  * 2.0.
  */
 import React, { ComponentType } from 'react';
-import { of } from 'rxjs';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AppMountParameters } from '@kbn/core-application-browser';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { CoreTheme } from '@kbn/core-theme-browser';
 import { MemoryRouter } from 'react-router-dom';
-import { casesFeatureId, sloFeatureId } from '@kbn/observability-shared-plugin/common';
+import { of } from 'rxjs';
 import { PluginContext } from '../context/plugin_context/plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const queryClient = new QueryClient();

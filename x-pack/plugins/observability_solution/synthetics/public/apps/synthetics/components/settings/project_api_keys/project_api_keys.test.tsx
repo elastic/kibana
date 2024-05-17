@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { screen } from '@testing-library/react';
-import { ProjectAPIKeys } from './project_api_keys';
+import React from 'react';
 import { makeUptimePermissionsCore, render } from '../../../utils/testing';
+import { ProjectAPIKeys } from './project_api_keys';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 

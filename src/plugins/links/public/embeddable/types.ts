@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import {
-  LinkType,
-  EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LINKS_VERTICAL_LAYOUT,
-  LinksLayoutType,
+  EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+  LinkType,
   LinksAttributes,
+  LinksLayoutType,
 } from '../../common/content_management';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { ExternalLinkStrings } from '../components/external_link/external_link_strings';

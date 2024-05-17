@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useLayoutEffect } from 'react';
-import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import React, { CSSProperties, useLayoutEffect } from 'react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {

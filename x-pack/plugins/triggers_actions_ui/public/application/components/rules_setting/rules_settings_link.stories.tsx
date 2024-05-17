@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { Meta, Story } from '@storybook/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { RulesSettingsLink } from './rules_settings_link';
-import { StorybookContextDecorator } from '../../../../.storybook/decorator';
+import { Meta, Story } from '@storybook/react';
+import React, { ComponentProps } from 'react';
 import { getDefaultCapabilities } from '../../../../.storybook/context/capabilities';
+import { StorybookContextDecorator } from '../../../../.storybook/decorator';
+import { RulesSettingsLink } from './rules_settings_link';
 
 type Args = ComponentProps<typeof RulesSettingsLink>;
 

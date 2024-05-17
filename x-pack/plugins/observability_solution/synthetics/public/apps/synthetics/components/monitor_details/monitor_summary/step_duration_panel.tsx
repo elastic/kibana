@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 
 import { Position } from '@elastic/charts/dist/utils/common';
-import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
-import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useAbsoluteDate } from '../../../hooks';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const StepDurationPanel = ({
   legendPosition,
@@ -42,8 +42,8 @@ export const StepDurationPanel = ({
   const label = !doBreakdown
     ? MONITOR_DURATION
     : isBrowser
-    ? DURATION_BY_STEP_LABEL
-    : DURATION_BY_LOCATION;
+      ? DURATION_BY_STEP_LABEL
+      : DURATION_BY_LOCATION;
 
   return (
     <EuiPanel hasShadow={false} hasBorder>

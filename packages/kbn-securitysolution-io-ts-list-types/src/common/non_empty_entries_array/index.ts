@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { entriesArray, EntriesArray } from '../entries';
+import * as t from 'io-ts';
+import { EntriesArray, entriesArray } from '../entries';
 import { entriesList } from '../entries_list';
 
 /**

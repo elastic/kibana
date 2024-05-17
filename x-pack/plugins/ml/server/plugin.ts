@@ -5,76 +5,76 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type {
+  CapabilitiesStart,
   CoreSetup,
   CoreStart,
-  Plugin,
+  IClusterClient,
   KibanaRequest,
   Logger,
+  Plugin,
   PluginInitializerContext,
-  CapabilitiesStart,
-  IClusterClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import type { MlCapabilities } from '../common/types/capabilities';
-import { jsonSchemaRoutes } from './routes/json_schema';
-import { notificationsRoutes } from './routes/notifications';
+import { i18n } from '@kbn/i18n';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import {
+  type CompatibleModule,
+  type ConfigSchema,
   type MlFeatures,
   PLUGIN_ID,
-  type ConfigSchema,
   initEnabledFeatures,
-  type CompatibleModule,
 } from '../common/constants/app';
-import { initMlServerLog } from './lib/log';
-import { annotationRoutes } from './routes/annotations';
-import { calendars } from './routes/calendars';
-import { dataFeedRoutes } from './routes/datafeeds';
-import { dataFrameAnalyticsRoutes } from './routes/data_frame_analytics';
-import { dataRecognizer } from './routes/modules';
-import { dataVisualizerRoutes } from './routes/data_visualizer';
-import { fieldsService } from './routes/fields_service';
-import { filtersRoutes } from './routes/filters';
-import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
-import { jobRoutes } from './routes/anomaly_detectors';
-import { jobServiceRoutes } from './routes/job_service';
-import { savedObjectsRoutes } from './routes/saved_objects';
-import { jobValidationRoutes } from './routes/job_validation';
-import { resultsServiceRoutes } from './routes/results_service';
-import { modelManagementRoutes } from './routes/model_management';
-import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
-import type { SharedServices } from './shared_services';
-import { createSharedServices } from './shared_services';
+import type { MlCapabilities } from '../common/types/capabilities';
 import { getPluginPrivileges } from '../common/types/capabilities';
-import { setupCapabilitiesSwitcher } from './lib/capabilities';
-import { registerKibanaSettings } from './lib/register_settings';
-import { trainedModelsRoutes } from './routes/trained_models';
-import { managementRoutes } from './routes/management';
-import {
-  setupSavedObjects,
-  jobSavedObjectsInitializationFactory,
-  savedObjectClientsFactory,
-} from './saved_objects';
-import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
-import { ML_ALERT_TYPES } from '../common/constants/alerts';
-import { alertingRoutes } from './routes/alerting';
-import { registerCollector } from './usage';
-import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import { setupCapabilitiesSwitcher } from './lib/capabilities';
+import { initMlServerLog } from './lib/log';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
+import { registerKibanaSettings } from './lib/register_settings';
+import { RouteGuard } from './lib/route_guard';
+import { alertingRoutes } from './routes/alerting';
+import { annotationRoutes } from './routes/annotations';
+import { jobRoutes } from './routes/anomaly_detectors';
+import { calendars } from './routes/calendars';
+import { dataFrameAnalyticsRoutes } from './routes/data_frame_analytics';
+import { dataVisualizerRoutes } from './routes/data_visualizer';
+import { dataFeedRoutes } from './routes/datafeeds';
+import { fieldsService } from './routes/fields_service';
+import { filtersRoutes } from './routes/filters';
 import { inferenceModelRoutes } from './routes/inference_models';
+import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
+import { jobServiceRoutes } from './routes/job_service';
+import { jobValidationRoutes } from './routes/job_validation';
+import { jsonSchemaRoutes } from './routes/json_schema';
+import { managementRoutes } from './routes/management';
+import { modelManagementRoutes } from './routes/model_management';
+import { dataRecognizer } from './routes/modules';
+import { notificationsRoutes } from './routes/notifications';
+import { resultsServiceRoutes } from './routes/results_service';
+import { savedObjectsRoutes } from './routes/saved_objects';
+import { systemRoutes } from './routes/system';
+import { trainedModelsRoutes } from './routes/trained_models';
+import {
+  jobSavedObjectsInitializationFactory,
+  savedObjectClientsFactory,
+  setupSavedObjects,
+} from './saved_objects';
+import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import type { SharedServices } from './shared_services';
+import { createSharedServices } from './shared_services';
+import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import { registerCollector } from './usage';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;

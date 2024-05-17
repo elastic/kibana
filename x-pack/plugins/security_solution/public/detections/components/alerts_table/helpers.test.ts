@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/api/timeline';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { TimelineType } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 
-import {
-  getStringArray,
-  replaceTemplateFieldFromQuery,
-  replaceTemplateFieldFromMatchFilters,
-  reformatDataProviderWithNewValue,
-  buildTimeRangeFilter,
-} from './helpers';
 import { mockTimelineDetails } from '../../../common/mock';
+import {
+  buildTimeRangeFilter,
+  getStringArray,
+  reformatDataProviderWithNewValue,
+  replaceTemplateFieldFromMatchFilters,
+  replaceTemplateFieldFromQuery,
+} from './helpers';
 
 describe('helpers', () => {
   describe('getStringOrStringArray', () => {

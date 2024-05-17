@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../../../../common/types/timeline';
-import { render, fireEvent } from '@testing-library/react';
-import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 import { get } from 'lodash';
+import React from 'react';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
-import { getThreatMatchDetectionAlert, TestProviders } from '../../../../../../common/mock';
 import type { Fields } from '../../../../../../../common/search_strategy';
+import { TestProviders, getThreatMatchDetectionAlert } from '../../../../../../common/mock';
 
-import { threatMatchRowRenderer } from './threat_match_row_renderer';
+import type { ThreatEnrichmentEcs } from '@kbn/securitysolution-ecs/src/threat';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { mockTimelines } from '../../../../../../common/mock/mock_timelines_plugin';
-import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
-import type { ThreatEnrichmentEcs } from '@kbn/securitysolution-ecs/src/threat';
+import { threatMatchRowRenderer } from './threat_match_row_renderer';
 
 jest.mock('../../../../../../common/lib/kibana');
 describe('threatMatchRowRenderer', () => {

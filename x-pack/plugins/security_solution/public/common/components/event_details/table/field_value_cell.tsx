@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { CSSProperties } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import type { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
-import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import type { EventFieldsData, FieldsData } from '../types';
 
 export interface FieldValueCellProps {

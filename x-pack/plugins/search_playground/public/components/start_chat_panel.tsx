@@ -14,8 +14,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC, PropsWithChildren } from 'react';
 
 interface StartChatPanelProps {
   children: React.ReactNode;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { CommonArtifactEntryCardProps } from './artifact_entry_card';
-import { CardContainerPanel } from './components/card_container_panel';
-import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
+import React, { memo } from 'react';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { CommonArtifactEntryCardProps } from './artifact_entry_card';
+import { CardCompressedHeader } from './components/card_compressed_header';
+import { CardContainerPanel } from './components/card_container_panel';
 import { CardSectionPanel } from './components/card_section_panel';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
-import { CardCompressedHeader } from './components/card_compressed_header';
+import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 
 export interface ArtifactEntryCollapsibleCardProps extends CommonArtifactEntryCardProps {
   onExpandCollapse: () => void;

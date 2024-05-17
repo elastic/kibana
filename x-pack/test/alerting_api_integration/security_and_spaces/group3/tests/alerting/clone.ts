@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
-import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  ObjectRemover,
+  TaskManagerDoc,
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
   getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 
 interface RuleSpace {
   body: any;
@@ -109,8 +109,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             space.id === space1
               ? ruleSpace1.body.id
               : space.id === space2
-              ? ruleSpace2.body.id
-              : null;
+                ? ruleSpace2.body.id
+                : null;
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${ruleIdToClone}/_clone`)
             .set('kbn-xsrf', 'foo')

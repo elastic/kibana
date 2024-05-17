@@ -8,12 +8,12 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import {
   profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
   profilingCo2PerKWH,
   profilingCostPervCPUPerHour,
   profilingDatacenterPUE,
   profilingPervCPUWattArm64,
   profilingPervCPUWattX86,
-  profilingAzureCostDiscountRate,
 } from '@kbn/observability-plugin/common';
 import { percentToFactor } from '../../utils/percent_to_factor';
 import { RegisterServicesParams } from '../register_services';

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { asRelativeDateTimeRange, asAbsoluteDateTime, getDateDifference } from './datetime';
+import { asAbsoluteDateTime, asRelativeDateTimeRange, getDateDifference } from './datetime';
 
 describe('date time formatters', () => {
   beforeAll(() => {

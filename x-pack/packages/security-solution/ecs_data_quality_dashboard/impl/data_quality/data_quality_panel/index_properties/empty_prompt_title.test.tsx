@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { EmptyPromptTitle } from './empty_prompt_title';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { EmptyPromptTitle } from './empty_prompt_title';
 
 describe('EmptyPromptTitle', () => {
   const title = 'What is a great title?';

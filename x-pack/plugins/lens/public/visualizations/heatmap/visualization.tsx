@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
+import { CUSTOM_PALETTE, CustomPaletteParams, PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
 import {
   HeatmapExpressionFunctionDefinition,
   HeatmapGridExpressionFunctionDefinition,
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Ast } from '@kbn/interpreter';
+import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import React from 'react';
+import { FormBasedPersistedState } from '../..';
 import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
-import type { HeatmapVisualizationState } from './types';
-import { getSuggestions } from './suggestions';
 import {
   CHART_NAMES,
   CHART_SHAPES,
@@ -34,10 +33,11 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
 } from './constants';
-import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
+import { getSuggestions } from './suggestions';
+import { HeatmapToolbar } from './toolbar_component';
+import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
-import { FormBasedPersistedState } from '../..';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',

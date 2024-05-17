@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { MaintenanceWindowClientContext } from '../../../../../common';
-import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
+import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import type { FindMaintenanceWindowsResult } from './types';
 
 export async function findMaintenanceWindows(

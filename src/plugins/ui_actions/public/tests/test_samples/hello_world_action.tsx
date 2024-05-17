@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 import { ActionDefinition } from '../../actions';
 
 const MenuItem: React.FC = () => {

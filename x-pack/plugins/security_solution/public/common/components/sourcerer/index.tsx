@@ -17,23 +17,23 @@ import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import * as i18n from './translations';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { URL_PARAM_KEY } from '../../hooks/use_url_state';
+import type { State } from '../../store';
 import type { sourcererModel } from '../../store/sourcerer';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import type { SourcererUrlState } from '../../store/sourcerer/model';
-import type { State } from '../../store';
-import type { ModifiedTypes } from './use_pick_index_patterns';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { usePickIndexPatterns } from './use_pick_index_patterns';
-import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
-import { TemporarySourcerer } from './temporary';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useUpdateDataView } from './use_update_data_view';
-import { Trigger } from './trigger';
-import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
-import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
-import { URL_PARAM_KEY } from '../../hooks/use_url_state';
+import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
+import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
+import { TemporarySourcerer } from './temporary';
+import * as i18n from './translations';
+import { Trigger } from './trigger';
+import type { ModifiedTypes } from './use_pick_index_patterns';
+import { usePickIndexPatterns } from './use_pick_index_patterns';
+import { useUpdateDataView } from './use_update_data_view';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;

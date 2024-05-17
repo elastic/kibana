@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { registerErrorCountRuleType } from './register_error_count_rule_type';
 import { createRuleTypeMocks } from '../../test_utils';
+import { registerErrorCountRuleType } from './register_error_count_rule_type';
 
 describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {

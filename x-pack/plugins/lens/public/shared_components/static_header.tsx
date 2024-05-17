@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React from 'react';
 
 export const StaticHeader = ({
   label,

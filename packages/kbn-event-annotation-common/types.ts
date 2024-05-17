@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from 'utility-types';
-import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import type { LineStyle } from '@kbn/visualization-ui-components';
+import { $Values } from 'utility-types';
 import { AvailableAnnotationIcons } from '.';
 
 export type AvailableAnnotationIcon = $Values<typeof AvailableAnnotationIcons>;

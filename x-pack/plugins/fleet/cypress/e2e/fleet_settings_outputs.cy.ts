@@ -8,11 +8,11 @@
 import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
 
 import {
-  getSpecificSelectorId,
   SETTINGS_CONFIRM_MODAL_BTN,
   SETTINGS_OUTPUTS,
   SETTINGS_OUTPUTS_KAFKA,
   SETTINGS_SAVE_BTN,
+  getSpecificSelectorId,
 } from '../screens/fleet';
 import {
   cleanupOutput,
@@ -33,8 +33,8 @@ import {
   validateSavedKafkaOutputForm,
 } from '../screens/fleet_outputs';
 
-import { login } from '../tasks/login';
 import { visit } from '../tasks/common';
+import { login } from '../tasks/login';
 
 export const fillYamlConfigBox = (query: string) => {
   cy.get('[data-test-subj="kibanaCodeEditor"] textarea').type(query, { force: true });

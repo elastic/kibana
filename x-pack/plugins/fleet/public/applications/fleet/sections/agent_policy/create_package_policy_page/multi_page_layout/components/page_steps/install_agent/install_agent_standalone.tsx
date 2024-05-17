@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSteps, EuiSpacer } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
+import React, { useState, useEffect } from 'react';
 
-import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
-import { API_VERSIONS } from '../../../../../../../../../../common/constants';
 import {
   AgentStandaloneBottomBar,
-  StandaloneModeWarningCallout,
   NotObscuredByBottomBar,
+  StandaloneModeWarningCallout,
 } from '../..';
+import { API_VERSIONS } from '../../../../../../../../../../common/constants';
+import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 import {
-  fullAgentPolicyToYaml,
   agentPolicyRouteService,
+  fullAgentPolicyToYaml,
 } from '../../../../../../../../../services';
 
-import { Error as FleetError } from '../../../../../../../components';
 import {
-  useKibanaVersion,
-  useStartServices,
-  sendGetOneAgentPolicyFull,
-} from '../../../../../../../../../hooks';
-import {
-  InstallStandaloneAgentStep,
   ConfigureStandaloneAgentStep,
+  InstallStandaloneAgentStep,
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { StandaloneInstructions } from '../../../../../../../../../components/enrollment_instructions';
+import {
+  sendGetOneAgentPolicyFull,
+  useKibanaVersion,
+  useStartServices,
+} from '../../../../../../../../../hooks';
+import { Error as FleetError } from '../../../../../../../components';
 
 import type { InstallAgentPageProps } from './types';
 

@@ -11,18 +11,18 @@ import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { Subject, Subscription, merge, switchMap, tap } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import {
+  COMPARE_ALL_OPTIONS,
+  Filter,
   buildExistsFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
   compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Filter,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -32,8 +32,8 @@ import {
   ControlGroupContainer,
   ControlInput,
   ControlOutput,
-  OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
+  OptionsListEmbeddableInput,
 } from '../..';
 import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';

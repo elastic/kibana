@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type {
   AfterKeys,
   EntityAfterKey,

@@ -12,12 +12,12 @@ import type {
 } from '@kbn/features-plugin/common';
 import type { RecursivePartial } from '@kbn/utility-types';
 import type {
+  AssistantSubFeatureId,
+  CasesSubFeatureId,
   ProductFeatureAssistantKey,
   ProductFeatureCasesKey,
   ProductFeatureKeyType,
   ProductFeatureSecurityKey,
-  AssistantSubFeatureId,
-  CasesSubFeatureId,
   SecuritySubFeatureId,
 } from './product_features_keys';
 

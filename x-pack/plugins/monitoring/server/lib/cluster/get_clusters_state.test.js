@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { handleResponse } from './get_clusters_state';
-import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
+import moment from 'moment';
+import { handleResponse } from './get_clusters_state';
 
 const clusters = [
   {

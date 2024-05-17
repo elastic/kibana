@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { expectedDsl, mockOptions } from './__mocks__';
 import { buildFirstOrLastSeenQuery as buildQuery } from './query.first_or_last_seen.dsl';
-import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildQuery', () => {
   test('build query from options correctly', () => {

@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import {
   Axis,
+  BrushEndListener,
   Chart,
-  niceTimeFormatter,
   Position,
   Settings,
-  BrushEndListener,
-  TooltipProps,
   Tooltip,
+  TooltipProps,
+  niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiPageSection } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React, { useCallback, useMemo } from 'react';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
-import { SeriesChart } from './series_chart';
+import { VisSectionProps } from '../types';
+import { ErrorMessage } from './error_message';
 import {
+  getChartColor,
+  getChartName,
+  getChartType,
   getFormatter,
   getMaxMinTimestamp,
-  getChartName,
-  getChartColor,
-  getChartType,
   seriesHasLessThen2DataPoints,
 } from './helpers';
-import { ErrorMessage } from './error_message';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { VisSectionProps } from '../types';
+import { SeriesChart } from './series_chart';
 
 export const ChartSectionVis = ({
   id,

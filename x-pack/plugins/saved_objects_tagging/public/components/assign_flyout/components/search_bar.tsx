@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
 import { EuiSearchBar, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC, useMemo } from 'react';
 
 export interface AssignFlyoutSearchBarProps {
   onChange: (args: any) => void | boolean;

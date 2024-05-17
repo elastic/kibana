@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { constant, trimEnd, trimStart, get } from 'lodash';
+import { constant, get, trimEnd, trimStart } from 'lodash';
 import { FieldFormat } from './field_format';
-import { asPrettyString } from './utils';
 import { FieldFormatParams, TextContextTypeOptions } from './types';
+import { asPrettyString } from './utils';
 
 const getTestFormat = (
   _params?: FieldFormatParams,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesNotificationParams } from '../legacy_types';

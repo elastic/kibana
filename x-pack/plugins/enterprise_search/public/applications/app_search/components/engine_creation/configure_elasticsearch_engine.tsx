@@ -92,8 +92,8 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
   const aliasOptionalOrRequired = !isAliasAllowed
     ? 'Disabled'
     : isAliasRequired
-    ? 'Required'
-    : 'Optional';
+      ? 'Required'
+      : 'Optional';
 
   useEffect(() => {
     loadIndices();

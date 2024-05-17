@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { AttributeService, ErrorEmbeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { getCapabilities, getHttp, getTimeFilter } from '../services';
 import { Vis } from '../types';
+import { urlFor } from '../utils/saved_visualize_utils';
 import type {
-  VisualizeInput,
-  VisualizeEmbeddable,
-  VisualizeByValueInput,
   VisualizeByReferenceInput,
+  VisualizeByValueInput,
+  VisualizeEmbeddable,
+  VisualizeInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { getHttp, getTimeFilter, getCapabilities } from '../services';
-import { urlFor } from '../utils/saved_visualize_utils';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 export const createVisEmbeddableFromObject =
   (deps: VisualizeEmbeddableFactoryDeps) =>

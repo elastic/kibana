@@ -16,11 +16,11 @@ import {
   AttackDiscoveryPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
+import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { uniq } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as uuid from 'uuid';
-import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useKibana } from '../../common/lib/kibana';

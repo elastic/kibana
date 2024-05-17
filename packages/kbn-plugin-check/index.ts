@@ -8,8 +8,8 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { checkDependencies } from './dependencies';
-import { rankDependencies } from './rank';
 import { findDependents } from './dependents';
+import { rankDependencies } from './rank';
 
 /**
  * A CLI for checking the consistency of a plugin's declared and implicit dependencies.

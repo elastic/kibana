@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiConfirmModal } from '@elastic/eui';
+import React from 'react';
 import * as i18n from './translations';
 
 type Props = Pick<

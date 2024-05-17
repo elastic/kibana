@@ -7,7 +7,7 @@
  */
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
-import { type PerformanceMetricEvent, METRIC_EVENT_SCHEMA } from './schema';
+import { METRIC_EVENT_SCHEMA, type PerformanceMetricEvent } from './schema';
 
 const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';
 

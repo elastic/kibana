@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,22 +13,21 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { merge, omit } from 'lodash';
 import {
+  Observable,
+  catchError,
+  combineLatest,
+  defer,
   filter,
   forkJoin,
   from,
-  merge as mergeOperator,
   map,
-  Observable,
+  merge as mergeOperator,
   of,
   shareReplay,
   switchMap,
-  throwError,
-  combineLatest,
   tap,
-  catchError,
-  defer,
+  throwError,
 } from 'rxjs';
-import { Readable } from 'stream';
 import { v4 } from 'uuid';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -35,21 +35,21 @@ import {
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
+  type StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
+  TokenCountEvent,
   createConversationNotFoundError,
   createInternalServerError,
   createTokenLimitReachedError,
-  StreamingChatResponseEventType,
-  TokenCountEvent,
-  type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
+  UserInstruction,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import type { ChatFunctionClient } from '../chat_function_client';
@@ -68,11 +68,11 @@ import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_f
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
+import { continueConversation } from './operators/continue_conversation';
 import { extractMessages } from './operators/extract_messages';
 import { extractTokenCount } from './operators/extract_token_count';
-import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
-import { continueConversation } from './operators/continue_conversation';
 import { getGeneratedTitle } from './operators/get_generated_title';
+import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
 
 const MAX_FUNCTION_CALLS = 8;
 

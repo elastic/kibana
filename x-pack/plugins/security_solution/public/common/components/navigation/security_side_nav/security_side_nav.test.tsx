@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
-import { TestProviders } from '../../../mock';
-import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
-import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
-import type { NavigationLink } from '../../../links/types';
-import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
+import { track } from '../../../lib/telemetry';
+import type { NavigationLink } from '../../../links/types';
+import { TestProviders } from '../../../mock';
 import { CATEGORIES } from './categories';
+import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 
 const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,

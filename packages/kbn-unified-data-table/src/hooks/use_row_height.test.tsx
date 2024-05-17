@@ -8,8 +8,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { useRowHeight } from './use_row_height';
 import { RowHeightMode } from '../components/row_height_settings';
+import { useRowHeight } from './use_row_height';
 
 const CONFIG_ROW_HEIGHT = 3;
 

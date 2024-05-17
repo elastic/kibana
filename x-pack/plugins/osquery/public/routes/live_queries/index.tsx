@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { LiveQueriesPage } from './list';
-import { NewLiveQueryPage } from './new';
-import { LiveQueryDetailsPage } from './details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useKibana } from '../../common/lib/kibana';
 import { MissingPrivileges } from '../components';
+import { LiveQueryDetailsPage } from './details';
+import { LiveQueriesPage } from './list';
+import { NewLiveQueryPage } from './new';
 
 const LiveQueriesComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;

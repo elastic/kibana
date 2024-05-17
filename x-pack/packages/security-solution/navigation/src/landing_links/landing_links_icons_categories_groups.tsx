@@ -1,3 +1,16 @@
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  type IconType,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,20 +18,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import {
-  useEuiTheme,
-  useEuiFontSize,
-  EuiAccordion,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiTitle,
-  type IconType,
-} from '@elastic/eui';
-import type { NavigationLink, TitleLinkCategory, AccordionLinkCategory } from '../types';
+import type { AccordionLinkCategory, NavigationLink, TitleLinkCategory } from '../types';
 import { LandingColumnLinks } from './landing_links';
 
 export interface LandingLinksIconsCategoriesGroupsProps {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { FLEET_SERVER_PACKAGE } from '../../common/constants';
 
-import type { PackagePolicy, PackagePolicyPackage } from '../types';
 import { useGetOneAgentPolicy } from '../hooks';
+import type { PackagePolicy, PackagePolicyPackage } from '../types';
 
 import { AgentPolicyPackageBadge } from './agent_policy_package_badge';
 

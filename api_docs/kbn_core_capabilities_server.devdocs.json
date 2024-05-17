@@ -167,9 +167,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CapabilitiesStart",
-        "description": [
-          "\nAPIs to access the application {@link Capabilities}.\n"
-        ],
+        "description": ["\nAPIs to access the application {@link Capabilities}.\n"],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -180,9 +178,7 @@
             "type": "Function",
             "tags": [],
             "label": "resolveCapabilities",
-            "description": [
-              "\nResolve the {@link Capabilities} to be used for given request\n"
-            ],
+            "description": ["\nResolve the {@link Capabilities} to be used for given request\n"],
             "signature": [
               "(request: ",
               {
@@ -220,9 +216,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": [
-                  "The request to resolve capabilities for"
-                ],
+                "description": ["The request to resolve capabilities for"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -271,9 +265,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CapabilitiesSwitcherOptions",
-        "description": [
-          "\nOptions for the {@link CapabilitiesSetup.registerSwitcher} API.\n"
-        ],
+        "description": ["\nOptions for the {@link CapabilitiesSetup.registerSwitcher} API.\n"],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -287,9 +279,7 @@
             "description": [
               "\nThe path(s) of capabilities the switcher may alter. The '*' wildcard is supported as a suffix only.\n\nE.g. capabilityPath: \"myPlugin.*\" or capabilityPath: \"myPlugin.myKey\""
             ],
-            "signature": [
-              "string | string[]"
-            ],
+            "signature": ["string | string[]"],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -303,9 +293,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ResolveCapabilitiesOptions",
-        "description": [
-          "\nOptions for {@link CapabilitiesStart.resolveCapabilities}.\n"
-        ],
+        "description": ["\nOptions for {@link CapabilitiesStart.resolveCapabilities}.\n"],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -319,9 +307,7 @@
             "description": [
               "\nThe path(s) of capabilities that the API consumer is interested in. The '*' wildcard is supported as a suffix only.\n\nE.g. capabilityPath: \"*\" or capabilityPath: \"myPlugin.*\" or capabilityPath: \"myPlugin.myKey\"\n"
             ],
-            "signature": [
-              "string | string[]"
-            ],
+            "signature": ["string | string[]"],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -335,9 +321,7 @@
             "description": [
               "\nIndicates if capability switchers are supposed to return a default set of capabilities.\n\nDefaults to `false`"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -354,9 +338,7 @@
         "type": "Type",
         "tags": [],
         "label": "CapabilitiesProvider",
-        "description": [
-          "\nSee {@link CapabilitiesSetup}"
-        ],
+        "description": ["\nSee {@link CapabilitiesSetup}"],
         "signature": [
           "() => Partial<",
           {
@@ -381,9 +363,7 @@
         "type": "Type",
         "tags": [],
         "label": "CapabilitiesSwitcher",
-        "description": [
-          "\nSee {@link CapabilitiesSetup}"
-        ],
+        "description": ["\nSee {@link CapabilitiesSetup}"],
         "signature": [
           "(request: ",
           {

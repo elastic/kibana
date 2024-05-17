@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { sortColorRanges, calculateMaxStep, toColorStops, getValueForContinuity } from './utils';
+import { calculateMaxStep, getValueForContinuity, sortColorRanges, toColorStops } from './utils';
 
 describe('utils', () => {
   it('sortColorRanges', () => {

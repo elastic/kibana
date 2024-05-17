@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
   EuiHighlight,
   EuiLink,
@@ -15,12 +14,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
-import { useMonitorName } from '../../../hooks/use_monitor_name';
-import { useSelectedLocation } from '../hooks/use_selected_location';
-import { AddMonitorLink } from '../../common/links/add_monitor';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
+import { AddMonitorLink } from '../../common/links/add_monitor';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 
 type MonitorOption = EuiSelectableOption & {
   locationIds?: string[];

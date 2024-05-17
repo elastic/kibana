@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiFlexGroupProps,
   EuiFlexItem,
   EuiPanel,
-  EuiFlexGroupProps,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import React from 'react';
 import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
-import { createAllLogsItem } from '../utils';
 import { showAllLogsLabel, tryEsql } from '../constants';
+import { createAllLogsItem } from '../utils';
 
 interface ShowAllLogsProps {
   isSelected: boolean;

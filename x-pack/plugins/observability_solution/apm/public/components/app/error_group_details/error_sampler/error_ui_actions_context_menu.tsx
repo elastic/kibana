@@ -10,9 +10,9 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { ObservabilityActionContextMenuItemProps } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityActionContextMenuItemProps } from '@kbn/observability-shared-plugin/public';
+import React, { useState } from 'react';
 
 interface Props {
   items: ObservabilityActionContextMenuItemProps[];

@@ -8,33 +8,33 @@
 import {
   EuiBadge,
   EuiBasicTableColumn,
+  EuiButtonIcon,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiText,
-  formatNumber,
   EuiSkeletonRectangle,
+  EuiText,
+  EuiToolTip,
+  formatNumber,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { css } from '@emotion/react';
 import {
+  BYTE_NUMBER_FORMAT,
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
-  BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
-import { IntegrationIcon } from '../../common';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
+import { IntegrationIcon } from '../../common';
+import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {

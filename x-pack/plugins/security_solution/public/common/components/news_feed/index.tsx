@@ -7,8 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { KibanaServices, useKibana, useUiSetting$ } from '../../lib/kibana';
 import { fetchNews, getNewsFeedUrl, getNewsItemsFromApiResponse } from './helpers';
-import { useKibana, useUiSetting$, KibanaServices } from '../../lib/kibana';
 import { NewsFeed } from './news_feed';
 import type { NewsItem } from './types';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { EuiHighlight, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import React, { useCallback, useMemo } from 'react';
 
-import type { Tag } from '../types';
 import { useServices } from '../services';
 import type { TableListViewTableProps } from '../table_list_view_table';
+import type { Tag } from '../types';
 
 import { TagBadge } from './tag_badge';
 

@@ -7,8 +7,8 @@
 
 import {
   LogicMounter,
-  mockHttpValues,
   mockFlashMessageHelpers,
+  mockHttpValues,
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
@@ -19,13 +19,13 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { CrawlerDomainsLogic } from './crawler_domains_logic';
 import { CrawlerLogic, CrawlerValues } from './crawler_logic';
 import {
+  CrawlRule,
+  CrawlType,
   CrawlerData,
   CrawlerDataFromServer,
   CrawlerPolicies,
   CrawlerRules,
   CrawlerStatus,
-  CrawlRule,
-  CrawlType,
 } from './types';
 import { crawlerDataServerToClient } from './utils';
 

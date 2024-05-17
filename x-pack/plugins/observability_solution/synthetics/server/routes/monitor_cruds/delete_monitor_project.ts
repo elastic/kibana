@@ -6,11 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getMonitors, getKqlFilter } from '../common';
+import { ConfigKey } from '../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { getKqlFilter, getMonitors } from '../common';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({

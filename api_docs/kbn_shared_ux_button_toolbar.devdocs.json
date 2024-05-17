@@ -74,9 +74,7 @@
         "type": "Function",
         "tags": [],
         "label": "IconButtonGroup",
-        "description": [
-          "\nA group of buttons each performing an action, represented by an icon."
-        ],
+        "description": ["\nA group of buttons each performing an action, represented by an icon."],
         "signature": [
           "({ buttons, legend, buttonSize, \"data-test-subj\": dataTestSubj, }: ",
           {
@@ -123,9 +121,7 @@
         "type": "Function",
         "tags": [],
         "label": "Toolbar",
-        "description": [
-          "\n"
-        ],
+        "description": ["\n"],
         "signature": [
           "({ children }: ",
           {
@@ -163,9 +159,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "Toolbar component"
-        ],
+        "returnComment": ["Toolbar component"],
         "initialIsOpen": false
       },
       {
@@ -286,9 +280,7 @@
             "type": "string",
             "tags": [],
             "label": "label",
-            "description": [
-              "The accessible button label."
-            ],
+            "description": ["The accessible button label."],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -299,12 +291,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iconType",
-            "description": [
-              "EUI `IconType` to display."
-            ],
-            "signature": [
-              "string | React.ComponentType<{}>"
-            ],
+            "description": ["EUI `IconType` to display."],
+            "signature": ["string | React.ComponentType<{}>"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -315,12 +303,8 @@
             "type": "Function",
             "tags": [],
             "label": "onClick",
-            "description": [
-              "Handler for button click."
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["Handler for button click."],
+            "signature": ["() => void"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -333,12 +317,8 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": [
-              "HTML `title` attribute for tooltips if different from `label`"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["HTML `title` attribute for tooltips if different from `label`"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -349,12 +329,8 @@
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
-            "description": [
-              "Test subject for button"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Test subject for button"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -365,12 +341,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isDisabled",
-            "description": [
-              "To disable the action"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["To disable the action"],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -381,12 +353,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "'aria-expanded'",
-            "description": [
-              "A11y for button"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["A11y for button"],
+            "signature": ["boolean | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -397,12 +365,8 @@
             "type": "string",
             "tags": [],
             "label": "'aria-controls'",
-            "description": [
-              "A11y for button"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["A11y for button"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -416,9 +380,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Props",
-        "description": [
-          "\nProps for `IconButtonGroup`."
-        ],
+        "description": ["\nProps for `IconButtonGroup`."],
         "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -429,9 +391,7 @@
             "type": "string",
             "tags": [],
             "label": "legend",
-            "description": [
-              "Required accessible legend for the whole group"
-            ],
+            "description": ["Required accessible legend for the whole group"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -442,9 +402,7 @@
             "type": "Array",
             "tags": [],
             "label": "buttons",
-            "description": [
-              "Array of `IconButton`"
-            ],
+            "description": ["Array of `IconButton`"],
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-button-toolbar",
@@ -465,12 +423,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "buttonSize",
-            "description": [
-              "Button size"
-            ],
-            "signature": [
-              "\"m\" | \"compressed\" | \"s\" | undefined"
-            ],
+            "description": ["Button size"],
+            "signature": ["\"m\" | \"compressed\" | \"s\" | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -481,12 +435,8 @@
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
-            "description": [
-              "Test subject for button group"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["Test subject for button group"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -500,9 +450,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Props",
-        "description": [
-          "\nProps for a generic toolbar component"
-        ],
+        "description": ["\nProps for a generic toolbar component"],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -514,9 +462,7 @@
             "tags": [],
             "label": "children",
             "description": [],
-            "signature": [
-              "NamedSlots"
-            ],
+            "signature": ["NamedSlots"],
             "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -550,12 +496,8 @@
         "type": "Type",
         "tags": [],
         "label": "Props",
-        "description": [
-          "\nProps for `PrimaryButton`."
-        ],
-        "signature": [
-          "T extends \"iconButton\" ? ToolbarIconButton : ToolbarStandardButton"
-        ],
+        "description": ["\nProps for `PrimaryButton`."],
+        "signature": ["T extends \"iconButton\" ? ToolbarIconButton : ToolbarStandardButton"],
         "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -567,9 +509,7 @@
         "type": "Type",
         "tags": [],
         "label": "Props",
-        "description": [
-          "\nProps for `ToolbarPopover`."
-        ],
+        "description": ["\nProps for `ToolbarPopover`."],
         "signature": [
           "AllowedButtonProps & AllowedPopoverProps & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal; }"
         ],
@@ -584,9 +524,7 @@
         "type": "Type",
         "tags": [],
         "label": "ToolbarButtonType",
-        "description": [
-          "type for cases with both button or a popover could be used"
-        ],
+        "description": ["type for cases with both button or a popover could be used"],
         "signature": [
           "(<T extends ButtonRenderStyle>(props: ",
           {

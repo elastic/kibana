@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import { ISource } from '../sources/source';
+import _ from 'lodash';
 import { DataRequestMeta, Timeslice } from '../../../common/descriptor_types';
+import { ISource } from '../sources/source';
 import { DataRequest } from './data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;

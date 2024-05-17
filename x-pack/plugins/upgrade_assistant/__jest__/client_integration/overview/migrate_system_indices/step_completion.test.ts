@@ -7,9 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment, advanceTime } from '../../helpers';
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/constants';
+import { advanceTime, setupEnvironment } from '../../helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Migrate system indices - Step completion', () => {
   let testBed: OverviewTestBed;

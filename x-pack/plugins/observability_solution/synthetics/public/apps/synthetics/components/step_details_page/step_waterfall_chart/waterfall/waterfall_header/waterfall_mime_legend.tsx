@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useCallback } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 
-import { MIME_FILTERS, MimeType } from '../../../common/network_data/types';
 import { colourPalette } from '../../../common/network_data/data_formatting';
+import { MIME_FILTERS, MimeType } from '../../../common/network_data/types';
 import { WaterfallLegendItem } from './waterfall_legend_item';
 
 interface Props {

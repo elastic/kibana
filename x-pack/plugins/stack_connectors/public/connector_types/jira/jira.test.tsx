@@ -6,11 +6,11 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { registerConnectorTypes } from '..';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 
 const CONNECTOR_TYPE_ID = '.jira';
 let connectorTypeModel: ConnectorTypeModel;

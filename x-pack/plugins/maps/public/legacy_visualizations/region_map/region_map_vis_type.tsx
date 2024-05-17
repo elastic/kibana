@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
 import { toExpressionAst } from './to_ast';
 import { REGION_MAP_VIS_TYPE, RegionMapVisParams } from './types';
 

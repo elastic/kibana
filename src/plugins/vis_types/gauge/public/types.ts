@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
-import { Range } from '@kbn/expressions-plugin/public';
 import { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
+import { Range } from '@kbn/expressions-plugin/public';
+import { $Values } from '@kbn/utility-types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeGaugePluginSetup {}

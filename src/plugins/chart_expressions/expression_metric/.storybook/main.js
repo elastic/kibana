@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +8,6 @@
  */
 import { defaultConfig } from '@kbn/storybook';
 import webpackMerge from 'webpack-merge';
-import { resolve } from 'path';
 
 const mockConfig = {
   resolve: {

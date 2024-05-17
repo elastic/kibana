@@ -8,14 +8,14 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
-  TabType,
-  ElserServiceSettings,
-  ModelConfig,
-  HuggingFaceServiceSettings,
-  OpenaiServiceSettings,
   CohereServiceSettings,
+  ElserServiceSettings,
+  HuggingFaceServiceSettings,
+  ModelConfig,
+  OpenaiServiceSettings,
+  TabType,
 } from '../types';
-import { Service, ElasticsearchModelDefaultOptions } from '../types';
+import { ElasticsearchModelDefaultOptions, Service } from '../types';
 
 export const elasticsearchModelsOptions: Array<
   EuiSuperSelectOption<ElasticsearchModelDefaultOptions | string>

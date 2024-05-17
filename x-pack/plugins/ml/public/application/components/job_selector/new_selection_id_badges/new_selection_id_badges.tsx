@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FC, MouseEventHandler } from 'react';
-import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobSelectorBadge } from '../job_selector_badge';
+import type { FC, MouseEventHandler } from 'react';
+import React from 'react';
 import type { JobSelectionMaps } from '../job_selector';
+import { JobSelectorBadge } from '../job_selector_badge';
 
 interface NewSelectionIdBadgesProps {
   limit: number;

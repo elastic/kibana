@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiSpacer,
   EuiLoadingSpinner,
-  EuiButton,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import type { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
-import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { useMlApiContext } from '../../../../../../contexts/kibana';
+import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;

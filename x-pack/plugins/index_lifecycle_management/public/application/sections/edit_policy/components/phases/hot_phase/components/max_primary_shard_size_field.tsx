@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
 import { NumericField } from '../../../../../../../shared_imports';
+import { ROLLOVER_FORM_PATHS, byteSizeUnits } from '../../../../constants';
 import { UseField } from '../../../../form';
-import { byteSizeUnits, ROLLOVER_FORM_PATHS } from '../../../../constants';
 import { i18nTexts } from '../../../../i18n_texts';
 import { UnitField } from '../../shared_fields/unit_field';
 

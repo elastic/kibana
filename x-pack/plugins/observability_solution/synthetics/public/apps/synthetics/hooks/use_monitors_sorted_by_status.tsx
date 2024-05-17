@@ -7,9 +7,9 @@
 
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { selectOverviewStatus } from '../state/overview_status';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
+import { selectOverviewStatus } from '../state/overview_status';
 import { useGetUrlParams } from './use_url_params';
 
 export function useMonitorsSortedByStatus() {

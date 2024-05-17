@@ -9,8 +9,8 @@ import { uniq } from 'lodash';
 import { SUPPORTED_PLATFORMS } from './constants';
 
 import linuxSvg from './logos/linux.svg';
-import windowsSvg from './logos/windows.svg';
 import macosSvg from './logos/macos.svg';
+import windowsSvg from './logos/windows.svg';
 import { PlatformType } from './types';
 
 export const getPlatformIconModule = (platform: string) => {

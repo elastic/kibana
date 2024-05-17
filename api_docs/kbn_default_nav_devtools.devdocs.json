@@ -107,9 +107,7 @@
         "tags": [],
         "label": "NavigationID",
         "description": [],
-        "signature": [
-          "\"root\" | \"rootNav:devtools\""
-        ],
+        "signature": ["\"root\" | \"rootNav:devtools\""],
         "path": "packages/default-nav/devtools/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -146,9 +144,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "\"rootNav:devtools\""
-            ],
+            "signature": ["\"rootNav:devtools\""],
             "path": "packages/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -171,9 +167,7 @@
             "tags": [],
             "label": "renderAs",
             "description": [],
-            "signature": [
-              "\"accordion\""
-            ],
+            "signature": ["\"accordion\""],
             "path": "packages/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false

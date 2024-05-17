@@ -6,7 +6,10 @@
  */
 
 export class CustomHttpRequestError extends Error {
-  constructor(message: string, public readonly statusCode: number = 500) {
+  constructor(
+    message: string,
+    public readonly statusCode: number = 500
+  ) {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;

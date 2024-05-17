@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
 interface HeightProps {
   elementId: string;

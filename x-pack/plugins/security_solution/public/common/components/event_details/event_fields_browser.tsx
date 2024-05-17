@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { getOr, noop, sortBy } from 'lodash/fp';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { rgba } from 'polished';
-import styled from 'styled-components';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import {
-  arrayIndexToAriaIndex,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
+  arrayIndexToAriaIndex,
   isTab,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
-import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
+import { getOr, noop, sortBy } from 'lodash/fp';
+import { rgba } from 'polished';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 import { isInTableScope, isTimelineScope } from '../../../helpers';
+import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineSelectors } from '../../../timelines/store';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineDefaults } from '../../../timelines/store/defaults';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import type { TimelineTabs } from '../../../../common/types/timeline';
 
 export type ColumnsProvider = (providerOptions: {
   browserFields: BrowserFields;

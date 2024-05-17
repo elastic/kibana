@@ -9,9 +9,9 @@ import { useCallback } from 'react';
 import { LogViewReference } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
+  LOG_ENTRY_SEARCH_STRATEGY,
   logEntrySearchRequestParamsRT,
   logEntrySearchResponsePayloadRT,
-  LOG_ENTRY_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entry';
 import {
   normalizeDataSearchResponses,

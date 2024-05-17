@@ -7,11 +7,6 @@
     "id": "fieldFormatsExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "developerExamples",
-      "fieldFormats",
-      "dataViewFieldEditor",
-      "data"
-    ]
+    "requiredPlugins": ["developerExamples", "fieldFormats", "dataViewFieldEditor", "data"]
   }
 }

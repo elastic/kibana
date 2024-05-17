@@ -7,20 +7,20 @@
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { getMissingTimestampComment, showMissingTimestampCallout } from '../helpers';
+import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import {
   ALL_TAB_ID,
-  ECS_COMPLIANT_TAB_ID,
   CUSTOM_TAB_ID,
+  ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
 } from '../../index_properties/helpers';
+import * as i18n from '../../index_properties/translations';
+import { getMissingTimestampComment, showMissingTimestampCallout } from '../helpers';
 import {
   getAllIncompatibleMarkdownComments,
   showInvalidCallout,
 } from '../incompatible_tab/helpers';
-import * as i18n from '../../index_properties/translations';
-import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 export type CategoryId = 'incompatible' | 'custom' | 'ecs-compliant' | 'same-family';
 

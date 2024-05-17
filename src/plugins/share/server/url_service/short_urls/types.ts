@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/server';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ShortUrlData } from '../../../common/url_service/short_urls/types';
 
 /**

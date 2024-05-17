@@ -1,3 +1,6 @@
+import { Filter, buildQueryFromFilters } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +8,9 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { sloKeys } from '../../../hooks/query_key_factory';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { sloKeys } from '../../../hooks/query_key_factory';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
 import { SearchState } from './use_url_search_state';

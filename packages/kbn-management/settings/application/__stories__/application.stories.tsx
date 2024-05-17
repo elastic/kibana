@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { ComponentMeta, Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import type { ComponentMeta, Story } from '@storybook/react';
+import React from 'react';
 
-import { Subscription } from 'rxjs';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import {
   getGlobalSettingsMock,
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
+import { Subscription } from 'rxjs';
 import { SettingsApplication as Component } from '../application';
 import { SettingsApplicationProvider } from '../services';
 

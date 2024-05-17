@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { login } from '../../../../tasks/login';
-import { loadPage } from '../../../../tasks/common';
 import { APP_POLICIES_PATH } from '../../../../../../../common/constants';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { loadPage } from '../../../../tasks/common';
+import { login } from '../../../../tasks/login';
 
 describe(
   'When displaying the Policy Details in Endpoint Essentials PLI',

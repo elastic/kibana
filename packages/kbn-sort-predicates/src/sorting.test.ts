@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getSortingCriteria } from './sorting';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { getSortingCriteria } from './sorting';
 
 function getMockFormatter() {
   return { convert: (v: unknown) => `${v as string}` } as FieldFormat;

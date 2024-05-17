@@ -1,3 +1,15 @@
+import expect from '@kbn/expect';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
+import {
+  ConfigKey,
+  HTTPFields,
+  LocationStatus,
+  PrivateLocation,
+  ServiceLocation,
+} from '@kbn/synthetics-plugin/common/runtime_types';
+import { omit } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,26 +19,14 @@
 import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ConfigKey,
-  HTTPFields,
-  LocationStatus,
-  PrivateLocation,
-  ServiceLocation,
-} from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { omit } from 'lodash';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import {
   INSTALLED_VERSION,
   PrivateLocationTestService,
 } from './services/private_location_test_service';
-import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {

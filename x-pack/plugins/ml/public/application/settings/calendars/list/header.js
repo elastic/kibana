@@ -9,18 +9,18 @@
  * React component for the header section of the calendars list page.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiSpacer,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';

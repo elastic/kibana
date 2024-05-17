@@ -1,3 +1,7 @@
+import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
+import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,39 +9,35 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { bulkDeleteRulesSo } from '../../../../data/rule';
+import type { RuleAttributes } from '../../../../data/rule/types';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { tryToRemoveTasks } from '../../../../rules_client/common';
+import {
+  buildKueryNodeFilter,
+  retryIfBulkOperationConflicts,
+} from '../../../../rules_client/common';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import {
-  getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
+  getAuthorizationFilter,
   migrateLegacyActions,
 } from '../../../../rules_client/lib';
-import {
-  retryIfBulkOperationConflicts,
-  buildKueryNodeFilter,
-} from '../../../../rules_client/common';
+import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import type { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { RawRule, SanitizedRule } from '../../../../types';
+import { ruleDomainSchema } from '../../schemas';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import type { RuleDomain, RuleParams } from '../../types';
 import type {
-  BulkOperationError,
-  BulkDeleteRulesResult,
   BulkDeleteRulesRequestBody,
+  BulkDeleteRulesResult,
+  BulkOperationError,
 } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
-import type { RuleAttributes } from '../../../../data/rule/types';
-import { bulkDeleteRulesSo } from '../../../../data/rule';
-import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
-import { ruleDomainSchema } from '../../schemas';
-import type { RuleParams, RuleDomain } from '../../types';
-import type { RawRule, SanitizedRule } from '../../../../types';
-import { untrackRuleAlerts } from '../../../../rules_client/lib';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,

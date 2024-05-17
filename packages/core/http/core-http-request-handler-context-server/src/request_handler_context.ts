@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
-import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
+import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
+import type { RequestHandlerContextBase } from '@kbn/core-http-server';
+import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
+import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
 
 /**

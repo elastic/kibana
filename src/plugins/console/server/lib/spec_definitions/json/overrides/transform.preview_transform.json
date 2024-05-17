@@ -8,7 +8,7 @@
         "index": "",
         "query": {
           "__scope_link": "GLOBAL.query"
-       }
+        }
       },
       "pivot": {
         "group_by": {

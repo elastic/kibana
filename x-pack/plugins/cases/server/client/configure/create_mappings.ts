@@ -6,13 +6,13 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { CasesClientArgs } from '..';
 import type { ConnectorMappingResponse } from '../../../common/types/api';
 import { ConnectorMappingResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import type { CasesClientArgs } from '..';
-import type { CreateMappingsArgs } from './types';
+import { decodeOrThrow } from '../../common/runtime_types';
 import { casesConnectors } from '../../connectors';
+import type { CreateMappingsArgs } from './types';
 
 export const createMappings = async (
   { connector, owner, refresh }: CreateMappingsArgs,

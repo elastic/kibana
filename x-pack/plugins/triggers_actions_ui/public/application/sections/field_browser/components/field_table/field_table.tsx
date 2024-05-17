@@ -1,3 +1,5 @@
+import { Direction, EuiInMemoryTable, Pagination, useEuiTheme } from '@elastic/eui';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
-import { FieldTableHeader } from './field_table_header';
+import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { styles } from './field_table.styles';
+import { FieldTableHeader } from './field_table_header';
 
 const DEFAULT_SORTING: { field: string; direction: Direction } = {
   field: '',

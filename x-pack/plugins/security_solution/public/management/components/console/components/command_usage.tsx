@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConsoleCodeBlock } from './console_code_block';
-import { getArgumentsForCommand } from '../service/parsed_command_input';
-import type { CommandDefinition } from '../types';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { getArgumentsForCommand } from '../service/parsed_command_input';
+import type { CommandDefinition } from '../types';
+import { ConsoleCodeBlock } from './console_code_block';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
 
 const additionalProps = {

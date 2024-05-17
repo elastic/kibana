@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -15,9 +13,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
+import React from 'react';
 import {
   getDevToolsCapabilities,
   getNavigateToUrl,

@@ -6,26 +6,26 @@
  */
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
-import { isTimeComparison } from '../../time_comparison/get_comparison_options';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { asPercent } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
-import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
+import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);

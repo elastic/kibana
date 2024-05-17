@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
 
+import userEvent from '@testing-library/user-event';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, noCasesSettingsPermission } from '../../../common/mock';
 import type { CallOutProps } from './callout';
 import { CallOut } from './callout';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
-import type { AppMockRenderer } from '../../../common/mock';
-import { noCasesSettingsPermission, createAppMockRenderer } from '../../../common/mock';
-import userEvent from '@testing-library/user-event';
 
 describe('Callout', () => {
   let appMockRenderer: AppMockRenderer;

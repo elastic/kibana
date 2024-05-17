@@ -8,10 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
+import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 const defaultOptions = { wrapper: I18nProvider };
 
 describe('AnomalyChartsInitializer', () => {

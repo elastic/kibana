@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo, ChangeEvent } from 'react';
-import { i18n } from '@kbn/i18n';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiTableSortingType,
-  EuiLink,
-  EuiText,
-  EuiHealth,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
+  EuiHealth,
+  EuiLink,
+  EuiTableSortingType,
+  EuiText,
 } from '@elastic/eui';
-import { fromKueryExpression } from '@kbn/es-query';
 import {
-  systemConnectorActionRefPrefix,
   preconfiguredConnectorActionRefPrefix,
+  systemConnectorActionRefPrefix,
 } from '@kbn/alerting-plugin/common';
+import { fromKueryExpression } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import React, { useCallback, useState, useMemo, ChangeEvent } from 'react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { getRuleHealthColor } from '../../../common/lib/rule_status_helpers';
+import { ActionConnector, Pagination, Rule } from '../../../types';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
+import { DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE } from '../../constants';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../hooks/use_load_rules_query';
-import { Pagination, Rule, ActionConnector } from '../../../types';
-import { DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE } from '../../constants';
-import { rulesLastRunOutcomeTranslationMapping } from '../rules_list/translations';
-import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
-import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { RuleTagBadge } from '../rules_list/components/rule_tag_badge';
+import { rulesLastRunOutcomeTranslationMapping } from '../rules_list/translations';
 
 export interface ConnectorRulesListProps {
   connector: ActionConnector;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FINAL_SUMMARY_KQL } from '../synthetics/single_metric_config';
 import { mockDataView } from '../../rtl_helpers';
+import { FINAL_SUMMARY_KQL } from '../synthetics/single_metric_config';
 
 export const sampleMetricFormulaAttribute = {
   description: '',

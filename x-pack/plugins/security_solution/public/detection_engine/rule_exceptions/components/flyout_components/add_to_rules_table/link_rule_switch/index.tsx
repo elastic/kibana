@@ -1,3 +1,4 @@
+import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 
 export const LinkRuleSwitch = memo(

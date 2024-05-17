@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
-import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 import { CustomIntegration } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
-import { defineRoutes } from './routes/define_routes';
-import { registerLanguageClients } from './language_clients';
 import { registerExternalIntegrations } from './external_integration';
+import { registerLanguageClients } from './language_clients';
+import { defineRoutes } from './routes/define_routes';
+import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart>

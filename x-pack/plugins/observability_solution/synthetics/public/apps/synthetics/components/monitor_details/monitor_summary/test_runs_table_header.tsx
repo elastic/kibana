@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 
-import { StatusFilter } from './status_filter';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
 import { stringifyUrlParams } from '../../../utils/url_params';
+import { StatusFilter } from './status_filter';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 

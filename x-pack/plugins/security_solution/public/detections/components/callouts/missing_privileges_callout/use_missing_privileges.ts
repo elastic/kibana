@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { Privilege } from '../../../containers/detection_engine/alerts/types';
 import { useUserData } from '../../user_info';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const REQUIRED_INDEX_PRIVILEGES = ['read', 'write', 'view_index_metadata', 'manage'] as const;
 

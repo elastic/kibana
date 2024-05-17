@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
-import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { i18n } from '@kbn/i18n';
+import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import React, { useState } from 'react';
 import { type IndexPatternRef } from '../../types';
 import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 

@@ -6,8 +6,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { Component } from 'react';
 
 import { EuiAccordion, EuiPagination } from '@elastic/eui';
 import { css } from '@emotion/react';

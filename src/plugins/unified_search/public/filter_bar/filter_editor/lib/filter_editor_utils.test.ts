@@ -11,8 +11,8 @@ import {
   phraseFilter,
   phrasesFilter,
   rangeFilter,
-  stubIndexPattern,
   stubFields,
+  stubIndexPattern,
 } from '@kbn/data-plugin/common/stubs';
 import { toggleFilterNegated } from '@kbn/es-query';
 import {

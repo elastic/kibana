@@ -1,3 +1,6 @@
+import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LogViewReference, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getLogsLocatorsFromUrlService, LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface LogsLinkToStreamProps {

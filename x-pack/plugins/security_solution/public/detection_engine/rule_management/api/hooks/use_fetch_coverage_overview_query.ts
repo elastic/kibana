@@ -8,14 +8,14 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import * as i18n from '../../../rule_management_ui/pages/coverage_overview/translations';
 import type { CoverageOverviewFilter } from '../../../../../common/api/detection_engine';
 import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../common/api/detection_engine';
-import { fetchCoverageOverview } from '../api';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import * as i18n from '../../../rule_management_ui/pages/coverage_overview/translations';
 import { buildCoverageOverviewDashboardModel } from '../../logic/coverage_overview/build_coverage_overview_dashboard_model';
 import type { CoverageOverviewDashboard } from '../../model/coverage_overview/dashboard';
+import { fetchCoverageOverview } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 const COVERAGE_OVERVIEW_QUERY_KEY = ['POST', RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL];
 

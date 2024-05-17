@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';

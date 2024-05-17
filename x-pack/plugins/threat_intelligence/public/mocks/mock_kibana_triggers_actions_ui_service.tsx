@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 
 /**
  * Returns a default object to mock the triggers actions ui plugin for our unit tests and storybook stories.

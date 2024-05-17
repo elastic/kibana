@@ -1,3 +1,7 @@
+import type {
+  ChatActionClickHandler,
+  Message,
+} from '@kbn/observability-ai-assistant-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +9,6 @@
  * 2.0.
  */
 import React from 'react';
-import type {
-  ChatActionClickHandler,
-  Message,
-} from '@kbn/observability-ai-assistant-plugin/public';
 import { useObservabilityAIAssistantChatService } from '../hooks/use_observability_ai_assistant_chat_service';
 
 interface Props {

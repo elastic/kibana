@@ -8,15 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
-import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { showErrorDialog, ToastsService } from './toasts';
+import { Subscription } from 'rxjs';
+import { ToastsService, showErrorDialog } from './toasts';
 import { EventReporter, eventTypes } from './toasts/telemetry';
 
 export interface SetupDeps {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import type { LoadWhenInViewProps } from './load_when_in_view';
 
 const LoadWhenInViewLazy = lazy(() => import('./load_when_in_view'));

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { transformRegistry } from '../expression_types/transform_registry';
 import { modelRegistry } from '../expression_types/model_registry';
-import { viewRegistry } from '../expression_types/view_registry';
+import { transformRegistry } from '../expression_types/transform_registry';
 import { ArgType, ExpressionType } from '../expression_types/types';
+import { viewRegistry } from '../expression_types/view_registry';
 
 const expressionTypes: ArgType[] = ['view', 'model', 'transform', 'datasource'];
 

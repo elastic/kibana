@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 import { State } from '../../../types';
 

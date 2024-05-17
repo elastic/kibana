@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EnteredInput } from './entered_input';
-import { parseCommandInput } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
 import { getCommandListMock } from '../../../mocks';
+import { parseCommandInput } from '../../../service/parsed_command_input';
 import type { EnteredCommand } from '../../console_state/types';
+import { EnteredInput } from './entered_input';
 
 describe('When using `EnteredInput` class', () => {
   let enteredInput: EnteredInput;

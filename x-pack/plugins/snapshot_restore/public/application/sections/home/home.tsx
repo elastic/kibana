@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
-import { BASE_PATH, Section } from '../../constants';
 import { useConfig, useCore } from '../../app_context';
+import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
-import { RepositoryList } from './repository_list';
-import { SnapshotList } from './snapshot_list';
-import { RestoreList } from './restore_list';
 import { PolicyList } from './policy_list';
+import { RepositoryList } from './repository_list';
+import { RestoreList } from './restore_list';
+import { SnapshotList } from './snapshot_list';
 
 interface MatchParams {
   section: Section;

@@ -9,10 +9,10 @@
 import { CoreSetup, IRouter } from '@kbn/core/server';
 import { ServerUrlService } from '../types';
 import { registerCreateRoute } from './short_urls/register_create_route';
-import { registerGetRoute } from './short_urls/register_get_route';
 import { registerDeleteRoute } from './short_urls/register_delete_route';
-import { registerResolveRoute } from './short_urls/register_resolve_route';
+import { registerGetRoute } from './short_urls/register_get_route';
 import { registerGotoRoute } from './short_urls/register_goto_route';
+import { registerResolveRoute } from './short_urls/register_resolve_route';
 
 export const registerUrlServiceRoutes = (
   core: CoreSetup,

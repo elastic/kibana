@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
+  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormFieldset,
   EuiIcon,
   EuiKeyPadMenuItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
-  EuiFormFieldset,
-  EuiCheckableCard,
   EuiTextColor,
   EuiTitle,
-  EuiLink,
-  EuiBetaBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Trigger } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
   txtChangeButton,
   txtTriggerPickerHelpText,
-  txtTriggerPickerLabel,
   txtTriggerPickerHelpTooltip,
+  txtTriggerPickerLabel,
 } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 
 export interface ActionWizardProps<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > {
   /**
    * List of available action factories
@@ -222,7 +222,7 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
 };
 
 interface SelectedActionFactoryProps<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > {
   actionFactory: ActionFactory;
   config: BaseActionConfig;
@@ -305,7 +305,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
 };
 
 interface ActionFactorySelectorProps<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > {
   actionFactories: ActionFactory[];
   context: ActionFactoryContext;

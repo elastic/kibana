@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { CustomIntegrationsStartDependencies } from '../../types';
 import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';
 import { PluginServiceFactory } from '../types';
-import { CustomIntegrationsStartDependencies } from '../../types';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsFindService` with stubbed output.

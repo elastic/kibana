@@ -11,34 +11,34 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { NodeRoles } from '@kbn/core-node-server';
-import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
-import type {
-  SavedObjectUnsanitizedDoc,
-  ISavedObjectTypeRegistry,
-} from '@kbn/core-saved-objects-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import {
-  SavedObjectsSerializer,
-  type IndexMapping,
-  type SavedObjectsTypeMappingDefinitions,
-  type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
-  type MigrateDocumentOptions,
-  type KibanaMigratorStatus,
-  type MigrationResult,
+  type IndexMapping,
   type IndexTypesMap,
+  type KibanaMigratorStatus,
+  type MigrateDocumentOptions,
+  type MigrationResult,
+  type SavedObjectsMigrationConfigType,
+  SavedObjectsSerializer,
+  type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core-saved-objects-server';
+import type { Logger } from '@kbn/logging';
+import { BehaviorSubject } from 'rxjs';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';
-import { runZeroDowntimeMigration } from './zdt';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { runV2Migration } from './run_v2_migration';
+import { runZeroDowntimeMigration } from './zdt';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;

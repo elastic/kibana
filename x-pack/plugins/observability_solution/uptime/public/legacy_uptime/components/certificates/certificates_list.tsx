@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
 import { Direction, EuiBasicTable } from '@elastic/eui';
-import { CertStatus } from './cert_status';
-import { CertMonitors } from './cert_monitors';
-import * as labels from './translations';
+import moment from 'moment';
+import React from 'react';
 import { Cert, CertMonitor, CertResult } from '../../../../common/runtime_types';
+import { CertMonitors } from './cert_monitors';
+import { CertStatus } from './cert_status';
 import { FingerprintCol } from './fingerprint_col';
+import * as labels from './translations';
 import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
 
 interface Page {

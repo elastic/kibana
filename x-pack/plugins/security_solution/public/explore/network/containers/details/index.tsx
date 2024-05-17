@@ -7,13 +7,13 @@
 
 import { useEffect, useMemo } from 'react';
 
-import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { inputsModel } from '../../../../common/store';
-import { createFilter } from '../../../../common/containers/helpers';
 import type { NetworkDetailsStrategyResponse } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
-import * as i18n from './translations';
+import type { ESTermQuery } from '../../../../../common/typed_json';
+import { createFilter } from '../../../../common/containers/helpers';
+import type { inputsModel } from '../../../../common/store';
 import type { InspectResponse } from '../../../../types';
+import * as i18n from './translations';
 
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 

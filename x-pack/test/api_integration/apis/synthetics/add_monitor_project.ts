@@ -1,3 +1,17 @@
+import expect from '@kbn/expect';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import {
+  PROFILES_MAP,
+  PROFILE_VALUES_ENUM,
+} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
+import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import {
+  ELASTIC_MANAGED_LOCATIONS_DISABLED,
+  REQUEST_TOO_LARGE,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,28 +19,14 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import expect from '@kbn/expect';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import {
-  ELASTIC_MANAGED_LOCATIONS_DISABLED,
-  REQUEST_TOO_LARGE,
-} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  PROFILE_VALUES_ENUM,
-  PROFILES_MAP,
-} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { PrivateLocationTestService } from './services/private_location_test_service';
 import { comparePolicies } from './sample_data/test_policy';
 import {
   getTestProjectSyntheticsPolicy,
   getTestProjectSyntheticsPolicyLightweight,
 } from './sample_data/test_project_monitor_policy';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {

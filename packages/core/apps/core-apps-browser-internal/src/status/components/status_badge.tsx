@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
+import React, { FC } from 'react';
 import type { StatusState } from '../lib';
 
 export type StatusWithoutMessage = Omit<StatusState, 'message'>;

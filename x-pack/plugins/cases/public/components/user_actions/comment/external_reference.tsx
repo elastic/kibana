@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SnakeToCamelCase } from '../../../../common/types';
 import type { ExternalReferenceAttachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import type { SnakeToCamelCase } from '../../../../common/types';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 type BuilderArgs = Pick<

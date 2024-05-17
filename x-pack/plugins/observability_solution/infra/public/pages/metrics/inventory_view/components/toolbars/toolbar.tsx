@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React from 'react';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import React from 'react';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useInventoryMeta } from '../../hooks/use_inventory_meta';
 import { AwsEC2ToolbarItems } from './aws_ec2_toolbar_items';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiCode, EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiTitle, EuiCode } from '@elastic/eui';
+import React from 'react';
 import { RepositorySettingsValidation } from '../../../../services/validation';
 
 interface Props {

@@ -7,17 +7,17 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
-import { useKibana } from '../../../common/lib/kibana';
-import { getManualAlertIds } from './helpers';
-import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
-import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
-import { CaseViewTabs } from '../case_view_tabs';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
+import { CaseViewTabs } from '../case_view_tabs';
+import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
+import { getManualAlertIds } from './helpers';
 interface CaseViewAlertsProps {
   caseData: CaseUI;
 }
@@ -43,10 +43,10 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     caseData.owner === SECURITY_SOLUTION_OWNER
       ? `${caseData.owner}-case`
       : !isLoadingAlertFeatureIds
-      ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleTypes(
-          alertData?.ruleTypeIds ?? []
-        )
-      : '';
+        ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleTypes(
+            alertData?.ruleTypeIds ?? []
+          )
+        : '';
 
   const alertStateProps = useMemo(
     () => ({

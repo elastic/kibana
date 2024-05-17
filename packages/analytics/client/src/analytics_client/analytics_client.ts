@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { LogMeta } from '@kbn/logging';
 import type { Mixed } from 'io-ts';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject, combineLatest, from, merge } from 'rxjs';
@@ -24,8 +25,12 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import type { LogMeta } from '@kbn/logging';
+import type { Event, EventContext, EventType, TelemetryCounter } from '../events';
+import { schemaToIoTs, validateSchema } from '../schema/validation';
 import type { IShipper } from '../shippers';
+import { ContextService } from './context_service';
+import { OptInConfigService } from './opt_in_config';
+import { ShippersRegistry } from './shippers_registry';
 import type {
   AnalyticsClientInitContext,
   ContextProviderName,
@@ -36,11 +41,6 @@ import type {
   RegisterShipperOpts,
   ShipperClassConstructor,
 } from './types';
-import type { Event, EventContext, EventType, TelemetryCounter } from '../events';
-import { ShippersRegistry } from './shippers_registry';
-import { OptInConfigService } from './opt_in_config';
-import { ContextService } from './context_service';
-import { schemaToIoTs, validateSchema } from '../schema/validation';
 
 interface EventDebugLogMeta extends LogMeta {
   ebt_event: Event<unknown>;

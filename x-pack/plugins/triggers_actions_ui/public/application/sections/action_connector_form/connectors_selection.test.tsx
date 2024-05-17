@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { ConnectorsSelection } from './connectors_selection';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import * as React from 'react';
+import { ActionType, GenericValidationResult } from '../../../types';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { ConnectorsSelection } from './connectors_selection';
 
 describe('connectors_selection', () => {
   const core = coreMock.createStart();

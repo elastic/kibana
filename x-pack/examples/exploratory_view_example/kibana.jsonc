@@ -6,18 +6,8 @@
     "id": "exploratoryViewExample",
     "server": false,
     "browser": true,
-    "configPath": [
-      "exploratory_view_example"
-    ],
-    "requiredPlugins": [
-      "cases",
-      "data",
-      "developerExamples",
-      "embeddable",
-      "observability"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "configPath": ["exploratory_view_example"],
+    "requiredPlugins": ["cases", "data", "developerExamples", "embeddable", "observability"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

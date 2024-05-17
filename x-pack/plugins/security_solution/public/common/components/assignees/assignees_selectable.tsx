@@ -12,14 +12,14 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
 import { isEmpty } from 'lodash';
+import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
+import { useSuggestUsers } from '../user_profiles/use_suggest_users';
+import { NO_ASSIGNEES_VALUE } from './constants';
+import { ASSIGNEES_SELECTABLE_TEST_ID } from './test_ids';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
-import { NO_ASSIGNEES_VALUE } from './constants';
-import { useSuggestUsers } from '../user_profiles/use_suggest_users';
-import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { bringCurrentUserToFrontAndSort, removeNoAssigneesSelection } from './utils';
-import { ASSIGNEES_SELECTABLE_TEST_ID } from './test_ids';
 
 export interface AssigneesSelectableProps {
   /**

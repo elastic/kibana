@@ -13,11 +13,11 @@ import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 

@@ -10,7 +10,6 @@ import { errors } from '@elastic/elasticsearch';
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { SubmitErrorCallout } from './submit_error_callout';
 import {
   ERROR_CONFIGURE_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
@@ -21,6 +20,7 @@ import {
   ERROR_PING_FAILURE,
 } from '../common';
 import { interactiveSetupMock } from '../server/mocks';
+import { SubmitErrorCallout } from './submit_error_callout';
 
 describe('SubmitErrorCallout', () => {
   it('renders unknown errors correctly', async () => {

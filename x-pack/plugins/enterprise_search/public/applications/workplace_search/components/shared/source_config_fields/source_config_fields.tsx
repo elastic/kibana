@@ -20,12 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import {
-  PUBLIC_KEY_LABEL,
   CONSUMER_KEY_LABEL,
-  EXTERNAL_CONNECTOR_API_KEY_LABEL,
-  EXTERNAL_CONNECTOR_URL_LABEL,
   COPIED_TOOLTIP,
   COPY_TOOLTIP,
+  EXTERNAL_CONNECTOR_API_KEY_LABEL,
+  EXTERNAL_CONNECTOR_URL_LABEL,
+  PUBLIC_KEY_LABEL,
 } from '../../../constants';
 import {
   SourceConfigData,

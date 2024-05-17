@@ -7,12 +7,12 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
+import type { CleanupUnknownAndExcludedDocsWaitForTaskState } from '../../state';
 import {
+  type MockedMigratorContext,
   createContextMock,
   createPostDocInitState,
-  type MockedMigratorContext,
 } from '../../test_helpers';
-import type { CleanupUnknownAndExcludedDocsWaitForTaskState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { cleanupUnknownAndExcludedDocsWaitForTask } from './cleanup_unknown_and_excluded_docs_wait_for_task';
 

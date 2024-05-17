@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import {
   commentsArrayOrUndefined,
   created_at,
@@ -27,6 +26,7 @@ import {
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { versionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 /**
  * Superset saved object of both lists and list items since they share the same saved object type.

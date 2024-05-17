@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { isEmpty } from 'lodash';
+import { EuiSpacer } from '@elastic/eui';
 import {
   Form,
   FormHook,
   useForm,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiSpacer } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
+import { ConnectorFormSchema } from './types';
 
 export interface ConnectorFormState {
   isValid: boolean | undefined;

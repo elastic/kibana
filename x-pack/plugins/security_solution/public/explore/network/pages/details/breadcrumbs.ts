@@ -8,14 +8,14 @@
 import { get } from 'lodash/fp';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { decodeIpv6 } from '../../../../common/lib/helpers';
+import { SecurityPageName } from '../../../../app/types';
 import { getNetworkDetailsUrl } from '../../../../common/components/link_to/redirect_to_network';
+import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
+import { decodeIpv6 } from '../../../../common/lib/helpers';
+import type { NetworkRouteSpyState } from '../../../../common/utils/route/types';
+import { NetworkRouteType } from '../navigation/types';
 import * as i18n from '../translations';
 import { NetworkDetailsRouteType } from './types';
-import type { NetworkRouteSpyState } from '../../../../common/utils/route/types';
-import { SecurityPageName } from '../../../../app/types';
-import { NetworkRouteType } from '../navigation/types';
-import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
 
 const TabNameMappedToI18nKey: Record<NetworkDetailsRouteType | NetworkRouteType, string> = {
   [NetworkDetailsRouteType.events]: i18n.NAVIGATION_EVENTS_TITLE,

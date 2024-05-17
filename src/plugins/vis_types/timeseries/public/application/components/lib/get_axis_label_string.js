@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { convertIntervalIntoUnit } from './get_interval';
 import { i18n } from '@kbn/i18n';
+import { convertIntervalIntoUnit } from './get_interval';
 
 export function getAxisLabelString(interval) {
   if (!interval) {

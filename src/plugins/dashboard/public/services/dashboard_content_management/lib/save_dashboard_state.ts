@@ -15,7 +15,7 @@ import {
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
-import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
+import { RefreshInterval, extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
 import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';

@@ -6,21 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { Cookie } from 'tough-cookie';
 import { UserProfile } from '@kbn/security-plugin/common';
+import { Cookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  findCases,
   createCase,
   deleteAllCaseItems,
-  suggestUserProfiles,
+  findCases,
   loginUsers,
+  suggestUserProfiles,
 } from '../../../../common/lib/api';
-import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
+import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
+import { findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

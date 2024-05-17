@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
 export type SavedQueryMenuVisibility =

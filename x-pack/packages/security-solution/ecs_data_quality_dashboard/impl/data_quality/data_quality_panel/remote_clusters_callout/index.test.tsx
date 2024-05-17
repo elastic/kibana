@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TITLE, TO_CHECK_INDICES_ON_REMOTE_CLUSTERS } from './translations';
 import { RemoteClustersCallout } from '.';
+import { TITLE, TO_CHECK_INDICES_ON_REMOTE_CLUSTERS } from './translations';
 
 describe('RemoteClustersCallout', () => {
   test('it renders the expected content', () => {

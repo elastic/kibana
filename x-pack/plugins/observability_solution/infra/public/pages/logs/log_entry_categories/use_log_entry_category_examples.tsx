@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useMemo, useState } from 'react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { useMemo, useState } from 'react';
 
-import { IdFormat } from '../../../../common/http_api/latest';
 import { LogEntryCategoryExample } from '../../../../common/http_api';
+import { IdFormat } from '../../../../common/http_api/latest';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryCategoryExamplesAPI } from './service_calls/get_log_entry_category_examples';

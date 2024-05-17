@@ -6,9 +6,9 @@
  */
 
 import {
-  getKueryWithMobileFilters,
   getKueryWithMobileCrashFilter,
   getKueryWithMobileErrorFilter,
+  getKueryWithMobileFilters,
 } from './get_kuery_with_mobile_filters';
 describe('getKueryWithMobileFilters', () => {
   it('should handle empty and undefined values', () => {

@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getJourneyScreenshot } from '../../legacy_uptime/lib/requests/get_journey_screenshot';
-import { isFullScreenshot, isRefResult, Ping } from '../../../common/runtime_types';
-import { getLastSuccessfulCheck } from '../../legacy_uptime/lib/requests/get_last_successful_check';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { Ping, isFullScreenshot, isRefResult } from '../../../common/runtime_types';
+import { getJourneyScreenshot } from '../../legacy_uptime/lib/requests/get_journey_screenshot';
+import { getLastSuccessfulCheck } from '../../legacy_uptime/lib/requests/get_last_successful_check';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
 export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () => ({

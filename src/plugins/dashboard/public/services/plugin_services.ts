@@ -7,19 +7,23 @@
  */
 
 import {
-  PluginServiceProviders,
   PluginServiceProvider,
+  PluginServiceProviders,
   PluginServiceRegistry,
   PluginServices,
 } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardPluginServiceParams, DashboardServices } from './types';
 
+import { analyticsServiceFactory } from './analytics/analytics_service';
 import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
+import { contentManagementServiceFactory } from './content_management/content_management_service';
 import { coreContextServiceFactory } from './core_context/core_context_service';
-import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
+import { customBrandingServiceFactory } from './custom_branding/custom_branding_service';
 import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
+import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
+import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
@@ -28,25 +32,21 @@ import { httpServiceFactory } from './http/http_service';
 import { i18nServiceFactory } from './i18n/i18n_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
+import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 import { notificationsServiceFactory } from './notifications/notifications_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
-import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
+import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
 import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging_service';
+import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
+import { serverlessServiceFactory } from './serverless/serverless_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { shareServiceFactory } from './share/share_services';
 import { spacesServiceFactory } from './spaces/spaces_service';
-import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
-import { visualizationsServiceFactory } from './visualizations/visualizations_service';
-import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
-import { analyticsServiceFactory } from './analytics/analytics_service';
-import { customBrandingServiceFactory } from './custom_branding/custom_branding_service';
-import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
-import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
-import { contentManagementServiceFactory } from './content_management/content_management_service';
-import { serverlessServiceFactory } from './serverless/serverless_service';
-import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
+import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
+import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 import { userProfileServiceFactory } from './user_profile/user_profile_service';
+import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [

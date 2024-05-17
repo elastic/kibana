@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useStepMetrics } from '../../step_details_page/hooks/use_step_metrics';
-import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
-import { ThresholdIndicator } from '../components/thershold_indicator';
+import React from 'react';
+import { JourneyStep } from '../../../../../../common/runtime_types';
+import { formatMillisecond } from '../../step_details_page/common/network_data/data_formatting';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
 import { useNetworkTimingsPrevious24Hours } from '../../step_details_page/hooks/use_network_timings_prev';
-import { formatMillisecond } from '../../step_details_page/common/network_data/data_formatting';
-import { JourneyStep } from '../../../../../../common/runtime_types';
-import { parseBadgeStatus, StatusBadge } from './status_badge';
+import { useStepMetrics } from '../../step_details_page/hooks/use_step_metrics';
 import { useStepPrevMetrics } from '../../step_details_page/hooks/use_step_prev_metrics';
+import { ThresholdIndicator } from '../components/thershold_indicator';
+import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
+import { StatusBadge, parseBadgeStatus } from './status_badge';
 
 export const ResultDetails = ({
   testNowMode,

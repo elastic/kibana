@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense, type FC } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { Suspense, type FC } from 'react';
 import type { Props as NavigationProps } from './navigation';
 
 const SideNavComponentLazy = React.lazy(() => import('./navigation'));

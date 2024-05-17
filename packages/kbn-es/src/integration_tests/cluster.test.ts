@@ -7,21 +7,21 @@
  */
 
 import fs from 'fs';
-import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import * as extractConfig from '../utils/extract_config_files';
-import * as dockerUtils from '../utils/docker';
-import { createAnyInstanceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
-import * as installUtils from '../install';
-import * as waitClusterUtil from '../utils/wait_until_cluster_ready';
-import { Cluster } from '../cluster';
+import { Client } from '@elastic/elasticsearch';
 import { ES_NOPASSWORD_P12_PATH } from '@kbn/dev-utils/src/certs';
+import { createAnyInstanceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { Cluster } from '../cluster';
+import * as installUtils from '../install';
 import {
   DownloadSnapshotOptions,
   InstallArchiveOptions,
   InstallSnapshotOptions,
   InstallSourceOptions,
 } from '../install/types';
-import { Client } from '@elastic/elasticsearch';
+import * as dockerUtils from '../utils/docker';
+import * as extractConfig from '../utils/extract_config_files';
+import * as waitClusterUtil from '../utils/wait_until_cluster_ready';
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Client));

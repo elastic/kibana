@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +7,11 @@
  * Side Public License, v 1.
  */
 import { of } from 'rxjs';
-import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
 jest.mock('../services');
 

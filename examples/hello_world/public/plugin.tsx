@@ -1,3 +1,5 @@
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +9,6 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

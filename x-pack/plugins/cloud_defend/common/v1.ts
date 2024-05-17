@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 
 export type IndexStatus =
   | 'not-empty' // Index contains documents

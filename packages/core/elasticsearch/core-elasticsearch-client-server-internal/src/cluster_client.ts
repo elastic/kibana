@@ -7,29 +7,29 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
-import type { Headers, IAuthHeadersStorage } from '@kbn/core-http-server';
+import type {
+  ICustomClusterClient,
+  ScopeableRequest,
+  UnauthorizedErrorHandler,
+} from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import {
   ensureRawRequest,
   filterHeaders,
   isKibanaRequest,
   isRealRequest,
 } from '@kbn/core-http-router-server-internal';
-import type {
-  ScopeableRequest,
-  UnauthorizedErrorHandler,
-  ICustomClusterClient,
-} from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import type { Headers, IAuthHeadersStorage } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
+import type { AgentFactoryProvider } from './agent_manager';
 import { configureClient } from './configure_client';
-import { ScopedClusterClient } from './scoped_cluster_client';
+import { createTransport } from './create_transport';
 import { getDefaultHeaders } from './headers';
 import {
-  createInternalErrorHandler,
   type InternalUnauthorizedErrorHandler,
+  createInternalErrorHandler,
 } from './retry_unauthorized';
-import { createTransport } from './create_transport';
-import type { AgentFactoryProvider } from './agent_manager';
+import { ScopedClusterClient } from './scoped_cluster_client';
 
 const noop = () => undefined;
 

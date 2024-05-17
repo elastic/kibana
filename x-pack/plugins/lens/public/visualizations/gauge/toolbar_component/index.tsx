@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import type { VisualizationToolbarProps } from '../../../types';
+import React, { memo, useState } from 'react';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
+import type { VisualizationToolbarProps } from '../../../types';
 import './gauge_config_panel.scss';
 import type { GaugeVisualizationState } from '../constants';
 

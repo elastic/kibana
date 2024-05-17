@@ -6,8 +6,8 @@
  */
 
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
+import { ItemTypeRT, SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import * as rt from 'io-ts';
-import { SnapshotMetricTypeRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAPISeriesRT } from './metrics_api';
 
 export const SnapshotNodePathRT = rt.intersection([
@@ -76,7 +76,7 @@ export const SnapshotNamedMetricInputRT = rt.type({
 
 export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
 
-export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
+export type SnapshotCustomAggregation = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
 const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
   Record<SnapshotCustomAggregation, null>

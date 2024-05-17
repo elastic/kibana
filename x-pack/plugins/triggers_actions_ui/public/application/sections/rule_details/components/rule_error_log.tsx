@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import datemath from '@kbn/datemath';
 import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
   EuiFieldSearch,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
-  Pagination,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
-  EuiBasicTable,
   EuiTableSortingType,
-  EuiBasicTableColumn,
+  OnTimeChangeProps,
+  Pagination,
 } from '@elastic/eui';
 import { IExecutionErrors } from '@kbn/alerting-plugin/common';
+import datemath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 
+import { EventLogListCellRenderer } from '../../common/components/event_log';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { EventLogListCellRenderer } from '../../common/components/event_log';
 import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {

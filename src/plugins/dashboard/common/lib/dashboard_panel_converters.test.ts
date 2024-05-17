@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  convertSavedDashboardPanelToPanelState,
-  convertPanelStateToSavedDashboardPanel,
-} from './dashboard_panel_converters';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 import { SavedDashboardPanel } from '../content_management';
 import { DashboardPanelState } from '../dashboard_container/types';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
+import {
+  convertPanelStateToSavedDashboardPanel,
+  convertSavedDashboardPanelToPanelState,
+} from './dashboard_panel_converters';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {

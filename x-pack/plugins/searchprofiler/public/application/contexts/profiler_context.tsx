@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, createContext, Dispatch } from 'react';
-import { useStore, State, Action } from '../store';
+import { Action, State, useStore } from '../store';
 
 const ProfilerReadContext = createContext<State>(null as any);
 const ProfilerActionContext = createContext<Dispatch<Action>>(null as any);

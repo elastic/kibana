@@ -39,9 +39,7 @@
             "type": "Function",
             "tags": [],
             "label": "trace",
-            "description": [
-              "\nLog messages at the most detailed log level\n"
-            ],
+            "description": ["\nLog messages at the most detailed log level\n"],
             "signature": [
               "<Meta extends ",
               {
@@ -71,12 +69,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "message",
-                "description": [
-                  "- The log message"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The log message"],
+                "signature": ["string"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -88,12 +82,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
-                "description": [
-                  "-"
-                ],
-                "signature": [
-                  "Meta | undefined"
-                ],
+                "description": ["-"],
+                "signature": ["Meta | undefined"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -108,9 +98,7 @@
             "type": "Function",
             "tags": [],
             "label": "debug",
-            "description": [
-              "\nLog messages useful for debugging and interactive investigation"
-            ],
+            "description": ["\nLog messages useful for debugging and interactive investigation"],
             "signature": [
               "<Meta extends ",
               {
@@ -140,12 +128,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "message",
-                "description": [
-                  "- The log message"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The log message"],
+                "signature": ["string"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -157,12 +141,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
-                "description": [
-                  "-"
-                ],
-                "signature": [
-                  "Meta | undefined"
-                ],
+                "description": ["-"],
+                "signature": ["Meta | undefined"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -177,9 +157,7 @@
             "type": "Function",
             "tags": [],
             "label": "info",
-            "description": [
-              "\nLogs messages related to general application flow"
-            ],
+            "description": ["\nLogs messages related to general application flow"],
             "signature": [
               "<Meta extends ",
               {
@@ -209,12 +187,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "message",
-                "description": [
-                  "- The log message"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The log message"],
+                "signature": ["string"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -226,12 +200,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
-                "description": [
-                  "-"
-                ],
-                "signature": [
-                  "Meta | undefined"
-                ],
+                "description": ["-"],
+                "signature": ["Meta | undefined"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -246,9 +216,7 @@
             "type": "Function",
             "tags": [],
             "label": "warn",
-            "description": [
-              "\nLogs abnormal or unexpected errors or messages"
-            ],
+            "description": ["\nLogs abnormal or unexpected errors or messages"],
             "signature": [
               "<Meta extends ",
               {
@@ -278,12 +246,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "errorOrMessage",
-                "description": [
-                  "- An Error object or message string to log"
-                ],
-                "signature": [
-                  "string | Error"
-                ],
+                "description": ["- An Error object or message string to log"],
+                "signature": ["string | Error"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -295,12 +259,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
-                "description": [
-                  "-"
-                ],
-                "signature": [
-                  "Meta | undefined"
-                ],
+                "description": ["-"],
+                "signature": ["Meta | undefined"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -347,12 +307,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "errorOrMessage",
-                "description": [
-                  "- An Error object or message string to log"
-                ],
-                "signature": [
-                  "string | Error"
-                ],
+                "description": ["- An Error object or message string to log"],
+                "signature": ["string | Error"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -364,12 +320,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
-                "description": [
-                  "-"
-                ],
-                "signature": [
-                  "Meta | undefined"
-                ],
+                "description": ["-"],
+                "signature": ["Meta | undefined"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -416,12 +368,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "errorOrMessage",
-                "description": [
-                  "- An Error object or message string to log"
-                ],
-                "signature": [
-                  "string | Error"
-                ],
+                "description": ["- An Error object or message string to log"],
+                "signature": ["string | Error"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -433,12 +381,8 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "meta",
-                "description": [
-                  "-"
-                ],
-                "signature": [
-                  "Meta | undefined"
-                ],
+                "description": ["-"],
+                "signature": ["Meta | undefined"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -456,11 +400,7 @@
             "description": [
               "\nChecks if given level is currently enabled for this logger.\nCan be used to wrap expensive logging operations into conditional blocks\n"
             ],
-            "signature": [
-              "(level: ",
-              "LogLevelId",
-              ") => boolean"
-            ],
+            "signature": ["(level: ", "LogLevelId", ") => boolean"],
             "path": "packages/kbn-logging/src/logger.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -471,12 +411,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "level",
-                "description": [
-                  "The log level to check for."
-                ],
-                "signature": [
-                  "LogLevelId"
-                ],
+                "description": ["The log level to check for."],
+                "signature": ["LogLevelId"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -515,9 +451,7 @@
                 "tags": [],
                 "label": "childContextPaths",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-logging/src/logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -548,9 +482,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nReturns a `Logger` instance for the specified context.\n"
-            ],
+            "description": ["\nReturns a `Logger` instance for the specified context.\n"],
             "signature": [
               "(...contextParts: string[]) => ",
               {
@@ -574,9 +506,7 @@
                 "description": [
                   "- Parts of the context to return logger for. For example\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
                 ],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-logging/src/logger_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,

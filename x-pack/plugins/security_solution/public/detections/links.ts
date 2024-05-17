@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { ALERTS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import { ALERTS_PATH, SERVER_APP_ID, SecurityPageName } from '../../common/constants';
 import { ALERTS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 

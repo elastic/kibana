@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type {
   ActionResponsesRequestOptions,
   ActionResponsesRequestStrategyResponse,
   ResponseActionsQueries,
 } from '../../../../../../common/search_strategy/endpoint/response_actions';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 
-import { buildActionResultsQuery } from './query.action_results.dsl';
 import type { EndpointFactory } from '../../types';
+import { buildActionResultsQuery } from './query.action_results.dsl';
 
 export const actionResults: EndpointFactory<ResponseActionsQueries.results> = {
   buildDsl: (options: ActionResponsesRequestOptions) => buildActionResultsQuery(options),
@@ -40,10 +40,10 @@ export const actionResults: EndpointFactory<ResponseActionsQueries.results> = {
     const status = isExpired
       ? 'failed'
       : isCompleted
-      ? wasSuccessful
-        ? 'successful'
-        : 'failed'
-      : 'pending';
+        ? wasSuccessful
+          ? 'successful'
+          : 'failed'
+        : 'pending';
 
     return {
       ...response,

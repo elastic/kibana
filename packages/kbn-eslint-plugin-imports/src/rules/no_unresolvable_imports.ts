@@ -9,9 +9,9 @@
 import Path from 'path';
 import type { Rule } from 'eslint';
 
+import { getImportResolver } from '../get_import_resolver';
 import { report } from '../helpers/report';
 import { getSourcePath } from '../helpers/source';
-import { getImportResolver } from '../get_import_resolver';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
 export const NoUnresolvableImportsRule: Rule.RuleModule = {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
+import { getSavedSearchFullPathUrl, getSavedSearchUrl } from './saved_searches_url';
 
 describe('saved_searches_url', () => {
   describe('getSavedSearchUrl', () => {

@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import moment from 'moment';
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+  API_VERSIONS,
   BulkActionSkipResult,
   BulkCrudActionResponse,
   BulkCrudActionResults,
   BulkCrudActionSummary,
+  ConversationResponse,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
-  ConversationResponse,
-  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
-import { buildResponse } from '../utils';
-import { getUpdateScript } from '../../ai_assistant_data_clients/conversations/helpers';
 import { transformToCreateScheme } from '../../ai_assistant_data_clients/conversations/create_conversation';
+import { getUpdateScript } from '../../ai_assistant_data_clients/conversations/helpers';
 import {
-  transformESToConversations,
   transformESSearchToConversations,
+  transformESToConversations,
 } from '../../ai_assistant_data_clients/conversations/transforms';
+import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import {
   UpdateConversationSchema,
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
-import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { buildResponse } from '../utils';
 
 export interface BulkOperationError {
   message: string;

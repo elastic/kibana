@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');

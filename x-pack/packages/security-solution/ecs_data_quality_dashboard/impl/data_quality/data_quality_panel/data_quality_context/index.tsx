@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { PropsWithChildren } from 'react';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import React, { useMemo } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { TelemetryEvents } from '../../types';
 
 interface DataQualityProviderProps {

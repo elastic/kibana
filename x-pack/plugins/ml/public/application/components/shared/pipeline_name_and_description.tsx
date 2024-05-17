@@ -12,10 +12,10 @@
  * 2.0.
  */
 
+import { EuiFieldText, EuiFormRow, EuiText, EuiTextArea } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiFormRow, EuiText, EuiTextArea } from '@elastic/eui';
 
 interface Props {
   handlePipelineConfigUpdate: (configUpdate: Partial<any>) => void;

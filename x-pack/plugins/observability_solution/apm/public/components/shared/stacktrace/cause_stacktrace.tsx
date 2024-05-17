@@ -7,8 +7,8 @@
 
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import { Stacktrace } from '.';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 

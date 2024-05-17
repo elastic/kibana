@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { isNumberGreaterThan } from '../../../validators/number';
+import { ValidationError, ValidationFunc } from '../../hook_form_lib';
 import { ERROR_CODE } from './types';
 
 export const numberGreaterThanField =

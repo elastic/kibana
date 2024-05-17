@@ -11,8 +11,8 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleType } from '@kbn/alerting-plugin/server';
 import { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { UMServerLibs } from '../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
+import { UMServerLibs } from '../lib';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,

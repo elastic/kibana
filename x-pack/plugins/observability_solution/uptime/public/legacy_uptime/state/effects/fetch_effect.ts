@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { call, put } from 'redux-saga/effects';
-import type { Action } from 'redux-actions';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { Action } from 'redux-actions';
+import { call, put } from 'redux-saga/effects';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,

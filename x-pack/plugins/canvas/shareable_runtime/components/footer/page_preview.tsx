@@ -6,10 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { PageComponent } from '../page';
-import { CanvasRenderedPage } from '../../types';
 import { useCanvasShareableState } from '../../context';
 import { setPageAction } from '../../context/actions';
+import { CanvasRenderedPage } from '../../types';
+import { PageComponent } from '../page';
 
 import css from './page_preview.module.scss';
 

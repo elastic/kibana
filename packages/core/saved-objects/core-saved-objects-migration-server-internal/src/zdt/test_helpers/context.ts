@@ -7,6 +7,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
@@ -17,7 +18,6 @@ import {
   type SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { MigratorContext } from '../context';
 import { createDocumentMigrator } from './document_migrator';
 

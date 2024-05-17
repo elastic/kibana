@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { readCasesPermissions, TestProviders } from '../../../common/mock';
+import React from 'react';
 import { NoCases } from '.';
 import type { NoCasesComp } from '.';
+import { TestProviders, readCasesPermissions } from '../../../common/mock';
 
 jest.mock('../../../common/navigation/hooks');
 

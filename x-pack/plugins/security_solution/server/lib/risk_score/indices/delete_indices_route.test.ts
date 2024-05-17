@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { RISK_SCORE_DELETE_INDICES } from '../../../../common/constants';
 import {
-  serverMock,
   requestContextMock,
   requestMock,
+  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { deleteEsIndicesRoute } from './delete_indices_route';
-import { RISK_SCORE_DELETE_INDICES } from '../../../../common/constants';
 import { deleteEsIndices } from './lib/delete_indices';
 
 jest.mock('./lib/delete_indices', () => {

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { EuiPageSidebarProps, EuiPageTemplateProps } from '@elastic/eui';
 import { ReactNode } from 'react';
-import { EuiPageTemplateProps, EuiPageSidebarProps } from '@elastic/eui';
 
 import type {
+  NoDataPageKibanaDependencies,
   NoDataPageProps,
   NoDataPageServices,
-  NoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-types';
 
 export type NoDataConfigPageKibanaDependencies = NoDataPageKibanaDependencies;

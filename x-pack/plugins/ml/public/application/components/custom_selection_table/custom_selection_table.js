@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import {
-  htmlIdGenerator,
   EuiCheckbox,
-  EuiSearchBar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiRadio,
+  EuiSearchBar,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
   EuiTableHeaderCellCheckbox,
+  EuiTableHeaderMobile,
   EuiTablePagination,
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
-  EuiTableHeaderMobile,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { PropTypes } from 'prop-types';
+import React, { Fragment, useState, useEffect, useMemo } from 'react';
 
 import { Pager } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';

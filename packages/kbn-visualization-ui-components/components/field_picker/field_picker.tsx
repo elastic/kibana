@@ -7,14 +7,14 @@
  */
 
 import './field_picker.scss';
-import React from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
-import type { FieldOptionValue, FieldOption } from './types';
+import React from 'react';
+import type { FieldOption, FieldOptionValue } from './types';
 
 export interface FieldPickerProps<T extends FieldOptionValue>
   extends EuiComboBoxProps<FieldOption<T>['value']> {

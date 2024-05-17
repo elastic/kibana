@@ -8,9 +8,9 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 
+import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
-import { i18n } from '@kbn/i18n';
 
 const emptyMessages = {};
 

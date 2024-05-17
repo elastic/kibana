@@ -27,9 +27,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, useMemo, useState } from 'react';
-import { groupBy } from 'lodash';
 import { ElandPythonClient } from '@kbn/inference_integration_flyout';
+import { groupBy } from 'lodash';
+import React, { type FC, useMemo, useState } from 'react';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import type { ModelItem } from './models_list';

@@ -1,3 +1,8 @@
+import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
+import type { InternalElasticsearchServicePreboot } from '@kbn/core-elasticsearch-server-internal';
+import type { InternalContextPreboot } from '@kbn/core-http-context-server-internal';
+import type { InternalHttpResourcesPreboot } from '@kbn/core-http-resources-server-internal';
+import type { InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +11,8 @@
  * Side Public License, v 1.
  */
 import type { InternalLoggingServicePreboot } from '@kbn/core-logging-server-internal';
-import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
 import type { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
-import type { InternalContextPreboot } from '@kbn/core-http-context-server-internal';
-import type { InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
-import type { InternalElasticsearchServicePreboot } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalUiSettingsServicePreboot } from '@kbn/core-ui-settings-server-internal';
-import type { InternalHttpResourcesPreboot } from '@kbn/core-http-resources-server-internal';
 
 /** @internal */
 export interface InternalCorePreboot {

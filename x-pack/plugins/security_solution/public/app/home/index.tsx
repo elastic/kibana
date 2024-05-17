@@ -13,22 +13,22 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
 import {
-  useInitSourcerer,
   getScopeFromPath,
+  useInitSourcerer,
   useSourcererDataView,
 } from '../../common/containers/sourcerer';
-import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
+import { GlobalHeader } from './global_header';
 
 import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
 
-import { useUrlState } from '../../common/hooks/use_url_state';
+import { AssistantOverlay } from '../../assistant/overlay';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
+import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
-import { AssistantOverlay } from '../../assistant/overlay';
 
 interface HomePageProps {
   children: React.ReactNode;

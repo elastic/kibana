@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { last } from 'lodash';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';

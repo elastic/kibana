@@ -1,3 +1,4 @@
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  */
 import { FromSchema } from 'json-schema-to-ts';
 import { omit } from 'lodash';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { FunctionRegistrationParameters } from '.';
 import { ApmTimeseries, getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';

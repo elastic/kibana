@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiBasicTableColumn,
   EuiButtonEmpty,
@@ -14,10 +13,11 @@ import {
   EuiInMemoryTable,
   EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types_old';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 
 export interface RisksTableProps {
   data: ComplianceDashboardData['groupedFindingsEvaluation'];

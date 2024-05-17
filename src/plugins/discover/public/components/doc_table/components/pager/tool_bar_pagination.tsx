@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -16,10 +15,11 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getRowsPerPageOptions } from '@kbn/unified-data-table';
+import React, { useState } from 'react';
 
 export const MAX_ROWS_PER_PAGE_OPTION = 100;
 

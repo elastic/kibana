@@ -8,15 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { LayoutDirection } from '@elastic/charts';
 import {
-  prepareLogTable,
   Dimension,
+  prepareLogTable,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { LayoutDirection } from '@elastic/charts';
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 import { MetricVisRenderConfig, visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,

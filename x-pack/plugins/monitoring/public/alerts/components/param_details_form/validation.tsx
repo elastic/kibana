@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export type MonitoringAlertTypeParams = ValidateOptions & RuleTypeParams;

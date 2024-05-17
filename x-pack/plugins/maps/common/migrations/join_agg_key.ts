@@ -14,14 +14,14 @@ import {
   LAYER_TYPE,
   VECTOR_STYLES,
 } from '../constants';
-import { getJoinAggKey } from '../get_agg_key';
+import type { MapAttributes } from '../content_management';
 import {
   AggDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import { getJoinAggKey } from '../get_agg_key';
 
 const GROUP_BY_DELIMITER = '_groupby_';
 

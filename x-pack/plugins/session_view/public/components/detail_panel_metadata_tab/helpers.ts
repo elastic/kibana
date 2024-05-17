@@ -6,17 +6,17 @@
  */
 
 import type {
-  ProcessEventHost,
-  ProcessEventContainer,
-  ProcessEventOrchestrator,
   ProcessEventCloud,
+  ProcessEventContainer,
+  ProcessEventHost,
+  ProcessEventOrchestrator,
 } from '../../../common';
 import { DASH } from '../../constants';
 import {
-  DetailPanelHost,
-  DetailPanelContainer,
-  DetailPanelOrchestrator,
   DetailPanelCloud,
+  DetailPanelContainer,
+  DetailPanelHost,
+  DetailPanelOrchestrator,
 } from '../../types';
 import { dataOrDash } from '../../utils/data_or_dash';
 

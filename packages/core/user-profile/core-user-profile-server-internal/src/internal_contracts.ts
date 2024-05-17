@@ -7,9 +7,9 @@
  */
 
 import type {
+  CoreUserProfileDelegateContract,
   UserProfileServiceSetup,
   UserProfileServiceStart,
-  CoreUserProfileDelegateContract,
 } from '@kbn/core-user-profile-server';
 
 export type InternalUserProfileServiceSetup = UserProfileServiceSetup;

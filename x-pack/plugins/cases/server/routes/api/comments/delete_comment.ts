@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
-import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
 export const deleteCommentRoute = createCasesRoute({
   method: 'delete',

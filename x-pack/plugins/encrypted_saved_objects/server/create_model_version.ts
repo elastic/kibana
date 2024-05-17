@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 
 import { EncryptionError } from './crypto';
-import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
+import type { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
 import { mapAttributes } from './saved_objects/map_attributes';
 
 export interface CreateEsoModelVersionFnOpts {

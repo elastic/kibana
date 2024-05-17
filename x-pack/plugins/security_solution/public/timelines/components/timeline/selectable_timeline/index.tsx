@@ -7,32 +7,32 @@
 
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
-  EuiSelectable,
-  EuiHighlight,
+  EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiIcon,
+  EuiSelectable,
   EuiTextColor,
-  EuiFilterButton,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty, debounce } from 'lodash/fp';
+import { debounce, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import type {
-  TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
+  TimelineTypeLiteralWithNull,
 } from '../../../../../common/api/timeline';
 import { SortFieldTimeline } from '../../../../../common/api/timeline';
 
+import { Direction } from '../../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
 import type { OpenTimelineResult } from '../../open_timeline/types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
-import { Direction } from '../../../../../common/search_strategy';
 
 const TimelineContentItem = styled(EuiFlexItem)`
   max-width: calc(100% - 56px);

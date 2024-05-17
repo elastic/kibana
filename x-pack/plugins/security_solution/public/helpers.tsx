@@ -13,8 +13,8 @@ import { matchPath } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
 import {
   ALERTS_PATH,
@@ -32,13 +32,13 @@ import type {
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
-import { NoPrivilegesPage } from './common/components/no_privileges';
-import { SecurityPageName } from './app/types';
-import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
-import { CASES_SUB_PLUGIN_KEY } from './types';
-import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
+import { SecurityPageName } from './app/types';
+import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SourcererScopeName } from './common/store/sourcerer/model';
+import { timelineActions } from './timelines/store';
+import type { InspectResponse, StartServices, StartedSubPlugins } from './types';
+import { CASES_SUB_PLUGIN_KEY } from './types';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState } from 'react';
 import {
+  EuiButton,
+  EuiCallOut,
+  EuiDescriptionList,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButton,
-  EuiSteps,
   EuiLoadingSpinner,
-  EuiDescriptionList,
-  EuiCallOut,
   EuiSpacer,
-  EuiErrorBoundary,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
-import { Option, map, getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Option, getOrElse, map } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import React, { Suspense, useEffect, useState } from 'react';
 import {
   ActionConnector,
   ActionConnectorMode,

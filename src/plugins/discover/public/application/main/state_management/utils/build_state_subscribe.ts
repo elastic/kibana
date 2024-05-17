@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import {
+  DataSourceType,
+  createDataViewDataSource,
+  isDataSourceType,
+} from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
-import type { DiscoverDataStateContainer } from '../discover_data_state_container';
-import type { DiscoverStateContainer } from '../discover_state';
+import { addLog } from '../../../../utils/add_log';
+import { FetchStatus } from '../../../types';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   isEqualState,
 } from '../discover_app_state_container';
-import { addLog } from '../../../../utils/add_log';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
-import { FetchStatus } from '../../../types';
+import type { DiscoverDataStateContainer } from '../discover_data_state_container';
+import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
+import type { DiscoverStateContainer } from '../discover_state';
 import { loadAndResolveDataView } from './resolve_data_view';
-import {
-  createDataViewDataSource,
-  DataSourceType,
-  isDataSourceType,
-} from '../../../../../common/data_sources';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL

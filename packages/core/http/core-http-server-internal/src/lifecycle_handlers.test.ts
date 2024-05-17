@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type {
   KibanaRequest,
-  RouteMethod,
   KibanaRouteOptions,
-  OnPreResponseToolkit,
-  OnPostAuthToolkit,
-  OnPreRoutingToolkit,
   OnPostAuthHandler,
+  OnPostAuthToolkit,
   OnPreResponseInfo,
+  OnPreResponseToolkit,
+  OnPreRoutingToolkit,
+  RouteMethod,
 } from '@kbn/core-http-server';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
@@ -25,10 +25,10 @@ import {
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
 
-import { HttpConfig } from './http_config';
-import { loggerMock } from '@kbn/logging-mocks';
-import { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import { Logger } from '@kbn/logging';
+import { loggerMock } from '@kbn/logging-mocks';
+import { HttpConfig } from './http_config';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
 

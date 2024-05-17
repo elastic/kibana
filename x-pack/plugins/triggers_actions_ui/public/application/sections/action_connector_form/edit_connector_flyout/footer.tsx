@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
 
 interface Props {
   onClose: () => void;

@@ -7,8 +7,8 @@
 
 import fetchMock from 'fetch-mock';
 
-import { ToasterError } from '../../toasters';
 import type { SetupMlResponse } from '../../ml_popover/types';
+import { ToasterError } from '../../toasters';
 import { isMlStartJobError } from './errors';
 import {
   throwIfErrorAttached,

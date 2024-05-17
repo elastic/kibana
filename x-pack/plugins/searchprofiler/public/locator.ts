@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export const SEARCH_PROFILER_LOCATOR_ID = 'SEARCH_PROFILER_LOCATOR';
 

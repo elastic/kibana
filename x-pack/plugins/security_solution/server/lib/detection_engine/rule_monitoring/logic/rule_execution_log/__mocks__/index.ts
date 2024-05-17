@@ -10,11 +10,11 @@ import {
   getRuleExecutionResultsResponseMock,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 
-import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
 } from '../client_for_executors/client_interface';
+import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
 
 type GetExecutionEvents = IRuleExecutionLogForRoutes['getExecutionEvents'];
 type GetExecutionResults = IRuleExecutionLogForRoutes['getExecutionResults'];

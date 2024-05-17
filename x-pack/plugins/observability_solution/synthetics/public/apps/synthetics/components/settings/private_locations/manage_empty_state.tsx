@@ -8,9 +8,9 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
+import { selectAgentPolicies } from '../../../state/private_locations';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { EmptyLocations } from './empty_locations';
-import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const ManageEmptyState: FC<
   PropsWithChildren<{

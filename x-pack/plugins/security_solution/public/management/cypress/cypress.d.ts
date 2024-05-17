@@ -10,37 +10,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
-import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
-import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type {
-  HostPolicyResponse,
-  LogsEndpointActionResponse,
-} from '../../../common/endpoint/types';
-import type {
-  HostActionResponse,
-  IndexEndpointHostsCyTaskOptions,
-  LoadUserAndRoleCyTaskOptions,
-  CreateUserAndRoleCyTaskOptions,
-  UninstallAgentFromHostTaskOptions,
-  IsAgentAndEndpointUninstalledFromHostTaskOptions,
-  LogItTaskOptions,
-} from './types';
-import type {
-  DeleteIndexedFleetEndpointPoliciesResponse,
-  IndexedFleetEndpointPolicyResponse,
-} from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type {
   DeletedIndexedCase,
   IndexedCase,
 } from '../../../common/endpoint/data_loaders/index_case';
-import type { IndexedHostsAndAlertsResponse } from '../../../common/endpoint/index_data';
 import type { DeleteIndexedEndpointHostsResponse } from '../../../common/endpoint/data_loaders/index_endpoint_hosts';
+import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type {
   DeletedIndexedEndpointRuleAlerts,
   IndexedEndpointRuleAlerts,
 } from '../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type {
+  DeleteIndexedFleetEndpointPoliciesResponse,
+  IndexedFleetEndpointPolicyResponse,
+} from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { IndexedHostsAndAlertsResponse } from '../../../common/endpoint/index_data';
+import type {
+  HostPolicyResponse,
+  LogsEndpointActionResponse,
+} from '../../../common/endpoint/types';
+import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { LoadedRoleAndUser } from '../../../scripts/endpoint/common/role_and_user_loader';
+import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
+import type {
+  CreateUserAndRoleCyTaskOptions,
+  HostActionResponse,
+  IndexEndpointHostsCyTaskOptions,
+  IsAgentAndEndpointUninstalledFromHostTaskOptions,
+  LoadUserAndRoleCyTaskOptions,
+  LogItTaskOptions,
+  UninstallAgentFromHostTaskOptions,
+} from './types';
 
 declare global {
   namespace Cypress {

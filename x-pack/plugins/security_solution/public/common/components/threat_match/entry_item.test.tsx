@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
-import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
+import { mount } from 'enzyme';
+import React from 'react';
 
-import { EntryItem } from './entry_item';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { DataViewBase } from '@kbn/es-query';
+import { EntryItem } from './entry_item';
 
 jest.mock('../../lib/kibana');
 

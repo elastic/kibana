@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC } from 'react';
 
 const strings = {
   getLoadingLabel: () =>

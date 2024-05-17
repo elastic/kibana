@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import sinon from 'sinon';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ListControl } from './list_control';
 

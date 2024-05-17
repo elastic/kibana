@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import React, { useEffect, useState } from 'react';
 import { usePresentationPanelTitleClickHandler } from './presentation_panel_title';
 
 describe('usePresentationPanelTitleClickHandler', () => {

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Setup as InspectorSetup, Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { getExpressionsInspectorViewDescription } from './inspector';
-import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ACTION_NAVIGATE, createNavigateAction } from './actions/navigate_action';
-import { buttonRenderer } from './renderers/button';
+import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
 import { buttonFn } from './functions/button';
+import { getExpressionsInspectorViewDescription } from './inspector';
+import { buttonRenderer } from './renderers/button';
 
 interface StartDeps {
   expressions: ExpressionsStart;

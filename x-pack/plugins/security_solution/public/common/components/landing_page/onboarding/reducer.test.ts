@@ -8,10 +8,10 @@
 import { ProductLine } from './configs';
 import { setupActiveSections } from './helpers';
 import {
-  reducer,
-  getFinishedStepsInitialStates,
   getActiveProductsInitialStates,
   getActiveSectionsInitialStates,
+  getFinishedStepsInitialStates,
+  reducer,
 } from './reducer';
 import type {
   AddFinishedStepAction,
@@ -25,8 +25,8 @@ import {
   AddIntegrationsSteps,
   CreateProjectSteps,
   EnablePrebuiltRulesSteps,
-  OnboardingActions,
   GetStartedWithAlertsCardsId,
+  OnboardingActions,
   OverviewSteps,
   QuickStartSectionCardsId,
   SectionId,

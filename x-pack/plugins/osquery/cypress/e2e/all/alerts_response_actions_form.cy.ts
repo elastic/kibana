@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
 import {
   cleanupPack,
   cleanupRule,
@@ -14,15 +13,16 @@ import {
   multiQueryPackFixture,
   packFixture,
 } from '../../tasks/api_fixtures';
+import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
+import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
+import { initializeDataViews } from '../../tasks/login';
 import {
-  RESPONSE_ACTIONS_ERRORS,
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
+  RESPONSE_ACTIONS_ERRORS,
   RESPONSE_ACTIONS_ITEM_0,
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
 } from '../../tasks/response_actions';
-import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
-import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
 describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;

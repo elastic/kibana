@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
-import React, { useMemo } from 'react';
-import { useAsync } from 'react-use/lib';
-import { Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters } from '@kbn/core/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { AppMountParameters } from '@kbn/core/public';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import React, { useMemo } from 'react';
+import ReactDOM from 'react-dom';
+import { Redirect } from 'react-router-dom';
+import { useAsync } from 'react-use/lib';
 
-import { DualReduxExample } from './dual_redux_example';
-import { StartDeps } from './plugin';
-import { StaticByValueExample } from './static_by_value_example';
-import { StaticByReferenceExample } from './static_by_reference_example';
-import { DynamicByReferenceExample } from './dynamically_add_panels_example';
 import { DashboardWithControlsExample } from './dashboard_with_controls_example';
+import { DualReduxExample } from './dual_redux_example';
+import { DynamicByReferenceExample } from './dynamically_add_panels_example';
+import { StartDeps } from './plugin';
+import { StaticByReferenceExample } from './static_by_reference_example';
+import { StaticByValueExample } from './static_by_value_example';
 
 const DASHBOARD_DEMO_PATH = '/dashboardDemo';
 const DASHBOARD_LIST_PATH = '/listingDemo';

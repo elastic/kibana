@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { FieldPopoverHeader } from './field_popover_header';
 
 describe('UnifiedFieldList <FieldPopoverHeader />', () => {

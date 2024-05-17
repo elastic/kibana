@@ -6,13 +6,13 @@
  */
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { wrapError } from '../client/error_wrapper';
 import { NotificationsService } from '../models/notifications_service';
+import type { RouteInitialization } from '../types';
 import {
   getNotificationsCountQuerySchema,
   getNotificationsQuerySchema,
 } from './schemas/notifications_schema';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
 
 export function notificationsRoutes({
   router,

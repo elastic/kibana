@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../test/context_jest';
 import { takeMountedSnapshot } from '../../../test';
+import { JestContext } from '../../../test/context_jest';
 import { openSettings, selectMenuItem } from '../../../test/interactions';
 import {
-  getSettingsTrigger as trigger,
-  getPopover as popover,
-  getPortal as portal,
   getContextMenu as contextMenu,
   getContextMenuItems as menuItems,
+  getPopover as popover,
+  getPortal as portal,
+  getSettingsTrigger as trigger,
 } from '../../../test/selectors';
 import { Settings } from './settings';
 

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { take, delay } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { delay, take } from 'rxjs';
 import { of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
+import { NodesInfo, mapNodesVersionCompatibility, pollEsNodesVersion } from './ensure_es_version';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');

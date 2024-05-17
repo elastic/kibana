@@ -41,7 +41,9 @@ files.forEach((file) => {
   if (!Object.keys(convertedSpec).length) {
     console.log(
       // prettier-ignore
-      `${chalk.yellow('Detected')} ${chalk.grey(file)} but no endpoints were converted; ${chalk.yellow('skipping')}...`
+      `${chalk.yellow('Detected')} ${chalk.grey(
+        file
+      )} but no endpoints were converted; ${chalk.yellow('skipping')}...`
     );
     return;
   }
@@ -63,6 +65,10 @@ files.forEach((file) => {
 
 console.log();
 // prettier-ignore
-console.log(`${chalk.grey('Converted')} ${chalk.bold(`${convertedFilesCount}/${totalFilesCount}`)} ${chalk.grey('files')}`);
+console.log(
+  `${chalk.grey('Converted')} ${chalk.bold(
+    `${convertedFilesCount}/${totalFilesCount}`
+  )} ${chalk.grey('files')}`
+);
 console.log(`Check your ${chalk.bold('git status')}.`);
 console.log();

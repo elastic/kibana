@@ -17,8 +17,8 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import {
-  ChangePointDetectionControlsContextProvider,
   type ChangePointAnnotation,
+  ChangePointDetectionControlsContextProvider,
 } from '../components/change_point_detection/change_point_detection_context';
 import { ChartGridEmbeddableWrapper } from '../embeddables/change_point_chart/embeddable_chart_component_wrapper';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';

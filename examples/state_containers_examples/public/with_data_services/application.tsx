@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { AppPluginDependencies } from './types';
-import { App } from './app';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { ExampleLink } from '../common/example_page';
+import { App } from './app';
+import { AppPluginDependencies } from './types';
 
 export const renderApp = (
   { notifications, application }: CoreStart,

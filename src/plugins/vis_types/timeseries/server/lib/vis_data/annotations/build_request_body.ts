@@ -7,7 +7,7 @@
  */
 
 import { buildProcessorFunction } from '../build_processor_function';
-import { query, dateHistogram, topHits } from '../request_processors/annotations';
+import { dateHistogram, query, topHits } from '../request_processors/annotations';
 
 import type {
   AnnotationSearchRequest,

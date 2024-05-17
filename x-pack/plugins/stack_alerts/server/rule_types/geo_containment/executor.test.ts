@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { executor } from './executor';
 import sampleAggsJsonResponse from './tests/es_sample_response.json';
 import sampleShapesJsonResponse from './tests/es_sample_response_shapes.json';
-import { executor } from './executor';
-import type { GeoContainmentRuleParams, GeoContainmentAlertInstanceContext } from './types';
+import type { GeoContainmentAlertInstanceContext, GeoContainmentRuleParams } from './types';
 
 describe('executor', () => {
   const expectedAlerts = [

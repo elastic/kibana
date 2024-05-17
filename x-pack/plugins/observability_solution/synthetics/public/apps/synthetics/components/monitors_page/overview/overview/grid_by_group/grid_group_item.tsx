@@ -19,11 +19,11 @@ import {
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useKey } from 'react-use';
-import { OverviewLoader } from '../overview_loader';
-import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MonitorOverviewItem } from '../../types';
 import { FlyoutParamProps, OverviewGridItem } from '../overview_grid_item';
-import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { OverviewLoader } from '../overview_loader';
+import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;

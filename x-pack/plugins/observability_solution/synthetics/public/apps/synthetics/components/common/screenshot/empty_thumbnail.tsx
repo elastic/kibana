@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  useEuiTheme,
-  useEuiBackgroundColor,
   EuiIcon,
-  EuiText,
   EuiSkeletonRectangle,
+  EuiText,
+  useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import {
-  getConfinedScreenshotSize,
   ScreenshotImageSize,
   THUMBNAIL_SCREENSHOT_SIZE,
+  getConfinedScreenshotSize,
 } from './screenshot_size';
 
 export const thumbnailStyle = {

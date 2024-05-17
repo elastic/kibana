@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks/dom';
-import * as api from '../../../../lib/rule_api/unmute_alert';
 import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import { useKibana } from '../../../../../common/lib/kibana';
+import * as api from '../../../../lib/rule_api/unmute_alert';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
-import { useUnmuteAlert } from './use_unmute_alert';
 import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
+import { useUnmuteAlert } from './use_unmute_alert';
 
 jest.mock('../../../../lib/rule_api/mute_alert');
 jest.mock('../../../../../common/lib/kibana');

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 
 /**
  * Get the stringified version of all the categories that needs to be colored in the chart.

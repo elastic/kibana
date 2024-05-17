@@ -1,3 +1,4 @@
+import type { TypeOf } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,58 +6,57 @@
  * 2.0.
  */
 import type { RequestHandler } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 
-import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
-import { stringify } from '../../utils/stringify';
-import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type {
-  NoParametersRequestSchema,
-  ResponseActionsRequestBody,
   ExecuteActionRequestBody,
+  NoParametersRequestSchema,
   ResponseActionGetFileRequestBody,
+  ResponseActionsRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../common/api/endpoint';
 import {
-  ExecuteActionRequestSchema,
   EndpointActionGetFileSchema,
+  ExecuteActionRequestSchema,
+  GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
   KillProcessRouteRequestSchema,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
-  GetProcessesRouteRequestSchema,
   UploadActionRequestSchema,
 } from '../../../../common/api/endpoint';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { NormalizedExternalConnectorClient, getResponseActionsClient } from '../../services';
+import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import { stringify } from '../../utils/stringify';
 
 import {
-  ISOLATE_HOST_ROUTE_V2,
-  UNISOLATE_HOST_ROUTE_V2,
-  KILL_PROCESS_ROUTE,
-  SUSPEND_PROCESS_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE,
-  GET_FILE_ROUTE,
-  EXECUTE_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
+  ActionDetails,
   EndpointActionDataParameterTypes,
+  KillOrSuspendProcessRequestBody,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
-  ActionDetails,
-  KillOrSuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,

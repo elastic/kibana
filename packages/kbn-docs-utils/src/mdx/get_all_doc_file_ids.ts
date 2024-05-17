@@ -8,8 +8,8 @@
 
 import Fsp from 'fs/promises';
 
-import globby from 'globby';
 import { asyncMapWithLimit } from '@kbn/std';
+import globby from 'globby';
 import Yaml from 'js-yaml';
 
 const FM_SEP_RE = /^---$/m;

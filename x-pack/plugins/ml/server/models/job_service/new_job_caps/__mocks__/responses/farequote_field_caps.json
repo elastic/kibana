@@ -1,7 +1,5 @@
 {
-  "indices": [
-    "farequote-2019"
-  ],
+  "indices": ["farequote-2019"],
   "fields": {
     "_routing": {
       "_routing": {

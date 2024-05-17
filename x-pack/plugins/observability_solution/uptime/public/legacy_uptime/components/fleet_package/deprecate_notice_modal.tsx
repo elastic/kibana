@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiConfirmModal, EuiIcon, EuiLink } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 
 export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => {
   const { application } = useKibana().services;

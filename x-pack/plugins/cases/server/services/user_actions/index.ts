@@ -13,15 +13,25 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
+import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
+import { UserActionTypes } from '../../../common/types/domain';
 import { buildFilter, combineFilters } from '../../client/utils';
+import { decodeOrThrow } from '../../common/runtime_types';
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+} from '../../common/types/user_actions';
+import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
+import { defaultSortField } from '../../common/utils';
+import { UserActionPersister } from './operations/create';
+import { UserActionFinder } from './operations/find';
+import { legacyTransformFindResponseToExternalModel, transformToExternalModel } from './transform';
 import type {
   CaseConnectorActivity,
   CaseConnectorFields,
@@ -37,16 +47,6 @@ import type {
   TopHits,
   UserActionsStatsAggsResult,
 } from './types';
-import { defaultSortField } from '../../common/utils';
-import { UserActionPersister } from './operations/create';
-import { UserActionFinder } from './operations/find';
-import { transformToExternalModel, legacyTransformFindResponseToExternalModel } from './transform';
-import type {
-  UserActionPersistedAttributes,
-  UserActionSavedObjectTransformed,
-} from '../../common/types/user_actions';
-import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
-import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;

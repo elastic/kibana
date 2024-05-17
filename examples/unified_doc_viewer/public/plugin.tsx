@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

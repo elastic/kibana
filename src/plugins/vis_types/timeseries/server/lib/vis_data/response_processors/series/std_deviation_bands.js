@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getAggValue, getLastMetric, getSplits } from '../../helpers';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { getAggValue, getLastMetric, getSplits } from '../../helpers';
 
 export function stdDeviationBands(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

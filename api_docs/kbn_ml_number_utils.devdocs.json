@@ -28,9 +28,7 @@
         "description": [
           "\nRounds a number to a specified decimal place.\nIf the specified number is undefined, an empty string is returned.\n"
         ],
-        "signature": [
-          "(num: number | undefined, dp: number) => string | number"
-        ],
+        "signature": ["(num: number | undefined, dp: number) => string | number"],
         "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -41,12 +39,8 @@
             "type": "number",
             "tags": [],
             "label": "num",
-            "description": [
-              "- number to round"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["- number to round"],
+            "signature": ["number | undefined"],
             "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -58,21 +52,15 @@
             "type": "number",
             "tags": [],
             "label": "dp",
-            "description": [
-              "- decimal place, default value is 2"
-            ],
-            "signature": [
-              "number"
-            ],
+            "description": ["- decimal place, default value is 2"],
+            "signature": ["number"],
             "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "rounded number"
-        ],
+        "returnComment": ["rounded number"],
         "initialIsOpen": false
       }
     ],

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { memo, Fragment } from 'react';
 
-import { IndexDetails } from './index_details';
-import { ShardDetails } from './shard_details';
-import { initDataFor } from './init_data';
-import { Targets, ShardSerialized, Index } from '../../types';
+import { Index, ShardSerialized, Targets } from '../../types';
 import { HighlightContextProvider, OnHighlightChangeArgs } from './highlight_context';
+import { IndexDetails } from './index_details';
+import { initDataFor } from './init_data';
+import { ShardDetails } from './shard_details';
 
 export interface Props {
   target: Targets;

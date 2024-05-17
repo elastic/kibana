@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
-import isEmpty from 'lodash/isEmpty';
-import get from 'lodash/get';
-import deepmerge from 'deepmerge';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
   DataViewsServerPluginStart,
-  IndexPatternsFetcher,
   ISearchStrategy,
+  IndexPatternsFetcher,
   SearchStrategyDependencies,
 } from '@kbn/data-plugin/server';
+import deepmerge from 'deepmerge';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import { from } from 'rxjs';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';

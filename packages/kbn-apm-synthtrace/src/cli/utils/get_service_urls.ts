@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Url, format, parse } from 'url';
 import fetch from 'node-fetch';
-import { format, parse, Url } from 'url';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 

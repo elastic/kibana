@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import {
-  getFindExceptionListSchemaDecodedMock,
-  getFindExceptionListSchemaMock,
-} from './index.mock';
 import {
   FindExceptionListSchema,
   FindExceptionListSchemaDecoded,
   findExceptionListSchema,
 } from '.';
+import {
+  getFindExceptionListSchemaDecodedMock,
+  getFindExceptionListSchemaMock,
+} from './index.mock';
 
 describe('find_exception_list_schema', () => {
   test('it should validate a typical find item request', () => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import useAsync from 'react-use/lib/useAsync';
-import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useCallback } from 'react';
-import { useLazyRef } from './use_lazy_ref';
+import useAsync from 'react-use/lib/useAsync';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibanaContextForPlugin } from './use_kibana';
+import { useLazyRef } from './use_lazy_ref';
 
 interface Props {
   id: string;

@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { UserHostWorkingDir } from './user_host_working_dir';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { UserHostWorkingDir } from './user_host_working_dir';
 
 jest.mock('../../../../../common/lib/kibana');
 

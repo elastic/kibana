@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';

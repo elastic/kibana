@@ -7,14 +7,14 @@
 
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { TopNComparisonFunctionSortField } from '@kbn/profiling-utils';
+import React from 'react';
 import { NormalizationMode } from '../../components/normalization_menu';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const { query } = useProfilingParams('/functions/*');

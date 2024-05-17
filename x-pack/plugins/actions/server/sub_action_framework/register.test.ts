@@ -6,13 +6,13 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../actions_config.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import {
-  TestSecretsSchema,
-  TestConfigSchema,
   TestConfig,
+  TestConfigSchema,
   TestSecrets,
+  TestSecretsSchema,
   TestSubActionConnector,
 } from './mocks';
 import { register } from './register';

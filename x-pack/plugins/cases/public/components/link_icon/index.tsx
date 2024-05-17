@@ -8,9 +8,9 @@
 import type { EuiThemeComputed, IconSize, IconType } from '@elastic/eui';
 import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
+import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
 
 interface LinkProps {
   ariaLabel?: string;
@@ -33,20 +33,24 @@ export const getLinkCss = ({
     display: inline-flex;
     vertical-align: top;
     white-space: nowrap;
-    ${iconSide === 'left' &&
-    css`
+    ${
+      iconSide === 'left' &&
+      css`
       .euiIcon {
         margin-right: ${euiTheme.size.xs};
       }
-    `}
-    ${iconSide === 'right' &&
-    css`
+    `
+    }
+    ${
+      iconSide === 'right' &&
+      css`
       flex-direction: row-reverse;
 
       .euiIcon {
         margin-left: ${euiTheme.size.xs};
       }
-    `}
+    `
+    }
   `;
 
 export interface LinkIconProps extends LinkProps {

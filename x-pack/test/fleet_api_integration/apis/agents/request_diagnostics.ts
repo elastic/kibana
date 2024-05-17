@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
+import { setupFleetAndAgents } from './services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

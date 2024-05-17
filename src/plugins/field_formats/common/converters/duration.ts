@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import moment, { unitOfTime, Duration } from 'moment';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
 } from '../constants/duration_formats';
+import { FieldFormat } from '../field_format';
+import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,

@@ -6,15 +6,15 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DataAccessLayer, TimeRange } from '../types';
 import type {
-  ResolverNode,
-  ResolverRelatedEvents,
   ResolverEntityIndex,
+  ResolverNode,
   ResolverPaginatedEvents,
-  SafeResolverEvent,
+  ResolverRelatedEvents,
   ResolverSchema,
+  SafeResolverEvent,
 } from '../../../common/endpoint/types';
+import type { DataAccessLayer, TimeRange } from '../types';
 
 function getRangeFilter(timeRange: TimeRange | undefined) {
   return timeRange

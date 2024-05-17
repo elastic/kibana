@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiSkeletonRectangle } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
 export interface LoadWhenInViewProps {

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import {
-  RequiredPaletteParamTypes,
-  FIXED_PROGRESSION,
-  DEFAULT_CONTINUITY,
-  DEFAULT_MIN_STOP,
-  DEFAULT_MAX_STOP,
   DEFAULT_COLOR_STEPS,
+  DEFAULT_CONTINUITY,
+  DEFAULT_MAX_STOP,
+  DEFAULT_MIN_STOP,
+  FIXED_PROGRESSION,
+  RequiredPaletteParamTypes,
 } from '@kbn/coloring';
 
 export const defaultPaletteParams: RequiredPaletteParamTypes = {

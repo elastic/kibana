@@ -7,26 +7,26 @@
 import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiSpacer, EuiTabbedContent, type EuiTabbedContentProps } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EmbeddableProfilingSearchBar,
   ProfilingEmptyState,
 } from '@kbn/observability-shared-plugin/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Flamegraph } from './flamegraph';
-import { Functions } from './functions';
+import React, { useCallback } from 'react';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
 import { useProfilingStatusData } from '../../hooks/use_profiling_status_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
-import { ErrorPrompt } from './error_prompt';
-import { Threads } from './threads';
-import { DescriptionCallout } from './description_callout';
 import { Popover } from '../common/popover';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
+import { DescriptionCallout } from './description_callout';
+import { ErrorPrompt } from './error_prompt';
+import { Flamegraph } from './flamegraph';
+import { Functions } from './functions';
+import { Threads } from './threads';
 
 export function Profiling() {
   const { activeTabId } = useTabSwitcherContext();

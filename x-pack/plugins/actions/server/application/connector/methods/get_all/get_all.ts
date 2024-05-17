@@ -9,17 +9,17 @@
  * Get all actions with in-memory connectors
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AuditLogger } from '@kbn/security-plugin-types-server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin-types-server';
 import { omit } from 'lodash';
 import { InMemoryConnector } from '../../../..';
-import { SavedObjectClientForFind } from '../../../../data/connector/types/params';
-import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
-import { GetAllParams, InjectExtraFindDataParams } from './types';
+import { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { ConnectorWithExtraFindData } from '../../types';
+import { GetAllParams, InjectExtraFindDataParams } from './types';
 import { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {

@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../..';
-import { INSTRUCTION_VARIANT, AgentInstructions, AgentApiKey } from './instruction_variants';
+import { AgentApiKey, AgentInstructions, INSTRUCTION_VARIANT } from './instruction_variants';
 import {
+  createDjangoAgentInstructions,
+  createDotNetAgentInstructions,
+  createFlaskAgentInstructions,
+  createGoAgentInstructions,
   createJavaAgentInstructions,
   createNodeAgentInstructions,
-  createDjangoAgentInstructions,
-  createFlaskAgentInstructions,
-  createRailsAgentInstructions,
-  createRackAgentInstructions,
-  createGoAgentInstructions,
-  createDotNetAgentInstructions,
-  createPhpAgentInstructions,
   createOpenTelemetryAgentInstructions,
+  createPhpAgentInstructions,
+  createRackAgentInstructions,
+  createRailsAgentInstructions,
 } from './instructions';
 
 export function serverlessInstructions(

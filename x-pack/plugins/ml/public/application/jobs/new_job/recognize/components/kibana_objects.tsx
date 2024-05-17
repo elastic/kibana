@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiHorizontalRule,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import type { KibanaObjectUi } from '../page';
 
 export interface KibanaObjectItemProps {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors, TransportResult } from '@elastic/elasticsearch';
+import { TransportResult, errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
@@ -13,8 +13,10 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { sanitizeBulkErrorResponse } from '@kbn/alerting-plugin/server';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
@@ -22,8 +24,6 @@ import {
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { IResourceInstaller } from '../rule_data_plugin_service/resource_installer';
 import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 
 export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;
@@ -107,7 +107,7 @@ export class RuleDataClient implements IRuleDataClient {
     return {
       search: async <
         TSearchRequest extends ESSearchRequest,
-        TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+        TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>,
       >(
         request: TSearchRequest
       ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>> => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { logStateTransition, type LogAwareState } from './logs';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { type LogAwareState, logStateTransition } from './logs';
 
 describe('logStateTransition', () => {
   let logger: MockedLogger;

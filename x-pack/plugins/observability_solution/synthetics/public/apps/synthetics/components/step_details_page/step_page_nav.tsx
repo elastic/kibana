@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { ReactElement, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiSkeletonText,
   EuiText,
-  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
+import { useDateFormat } from '../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { getTestRunDetailLink } from '../common/links/test_details_link';
-import { useStepDetailLink } from './hooks/use_step_detail_page';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
-import { useDateFormat } from '../../../../hooks/use_date_format';
+import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
+import { useStepDetailLink } from './hooks/use_step_detail_page';
 
 export const StepRunDate = () => {
   return (

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
-  catchRetryableEsClientErrors,
-  type RetryableEsClientError,
-} from './catch_retryable_es_client_errors';
+import * as Either from 'fp-ts/lib/Either';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { DEFAULT_TIMEOUT, IndexNotFound } from '.';
+import {
+  type RetryableEsClientError,
+  catchRetryableEsClientErrors,
+} from './catch_retryable_es_client_errors';
 
 /** @internal */
 export interface SetWriteBlockParams {

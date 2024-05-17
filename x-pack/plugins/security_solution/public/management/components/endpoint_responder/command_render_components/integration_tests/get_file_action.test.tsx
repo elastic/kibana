@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
-import {
-  ConsoleManagerTestComponent,
-  getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../../../console/components/console_manager/mocks';
-import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
-import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
-import React from 'react';
-import { enterConsoleCommand } from '../../../console/mocks';
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { waitFor } from '@testing-library/react';
+import React from 'react';
 import { GET_FILE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetailsApiResponse,
   EndpointPrivileges,
   ResponseActionGetFileOutputContent,
 } from '../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
+import {
+  ConsoleManagerTestComponent,
+  getConsoleManagerMockRenderResultQueriesAndActions,
+} from '../../../console/components/console_manager/mocks';
+import { enterConsoleCommand } from '../../../console/mocks';
+import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
+import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 jest.mock('../../../../../common/components/user_privileges');

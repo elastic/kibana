@@ -12,13 +12,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
-  EuiText,
+  EuiFlyoutHeader,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
-  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { map, shareReplay } from 'rxjs';
-import { combineLatest, Observable } from 'rxjs';
-import { PathConfigType, config as pathConfig } from '@kbn/utils';
-import { pick, deepFreeze } from '@kbn/std';
 import { IConfigService } from '@kbn/config';
+import { deepFreeze, pick } from '@kbn/std';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
+import { map, shareReplay } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '@kbn/core-elasticsearch-server-internal';
+import { SharedGlobalConfig, SharedGlobalConfigKeys } from '@kbn/core-plugins-server';
 import {
   type SavedObjectsConfigType,
   savedObjectsConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { SharedGlobalConfig, SharedGlobalConfigKeys } from '@kbn/core-plugins-server';
 
 const createGlobalConfig = ({
   elasticsearch,

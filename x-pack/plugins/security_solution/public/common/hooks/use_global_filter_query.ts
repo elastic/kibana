@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { useMemo } from 'react';
+import type { ESBoolQuery } from '../../../common/typed_json';
 import { useGlobalTime } from '../containers/use_global_time';
 import { useKibana } from '../lib/kibana';
 import { inputsSelectors } from '../store';
-import { useDeepEqualSelector } from './use_selector';
 import { useInvalidFilterQuery } from './use_invalid_filter_query';
-import type { ESBoolQuery } from '../../../common/typed_json';
+import { useDeepEqualSelector } from './use_selector';
 
 interface GlobalFilterQueryProps {
   extraFilter?: Filter;

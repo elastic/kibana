@@ -7,9 +7,9 @@
  */
 
 import {
+  SavedObjectAttributes,
   SavedObjectsClientContract,
   SimpleSavedObject,
-  SavedObjectAttributes,
 } from '@kbn/core/public';
 
 /**

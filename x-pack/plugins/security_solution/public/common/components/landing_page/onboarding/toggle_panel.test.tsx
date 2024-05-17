@@ -1,3 +1,4 @@
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
-import { TogglePanel } from './toggle_panel';
+import { ProductLine } from './configs';
 import { useSetUpSections } from './hooks/use_setup_sections';
+import { TogglePanel } from './toggle_panel';
 import type { ActiveSections } from './types';
 import { QuickStartSectionCardsId, SectionId } from './types';
-import { ProductLine } from './configs';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

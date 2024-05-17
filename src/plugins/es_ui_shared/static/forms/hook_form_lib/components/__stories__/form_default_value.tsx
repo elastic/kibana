@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import React from 'react';
 
 import { TextField } from '../../../components';
 import { useForm } from '../../hooks/use_form';
 import { Form } from '../form';
 import { UseField } from '../use_field';
 import { titleConfigBase } from './constants';
-import { FormArgs } from './types';
 import { submitForm } from './form_utils';
+import { FormArgs } from './types';
 
 // The defaultValue would probably come from an HTTP request
 const formDefaultValue = { title: 'Title of the post' };

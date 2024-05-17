@@ -6,34 +6,34 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
 import {
-  EuiTitle,
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiLink,
   EuiIcon,
-  EuiCallOut,
-  EuiLoadingElastic,
   EuiInMemoryTable,
-  EuiToolTip,
-  EuiText,
-  EuiSpacer,
+  EuiLink,
+  EuiLoadingElastic,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { SearchFilterConfig } from '@elastic/eui';
+import { IBasePath } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IBasePath } from '@kbn/core/public';
+import React, { Component } from 'react';
+import type { v1 } from '../../../../common';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
-import type { v1 } from '../../../../common';
 import {
-  SavedObjectWithMetadata,
-  SavedObjectRelationKind,
-  SavedObjectRelation,
   SavedObjectInvalidRelation,
+  SavedObjectRelation,
+  SavedObjectRelationKind,
+  SavedObjectWithMetadata,
 } from '../../../types';
 
 export interface RelationshipsProps {

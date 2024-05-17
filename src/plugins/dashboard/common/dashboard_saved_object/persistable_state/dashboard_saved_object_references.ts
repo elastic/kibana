@@ -7,15 +7,15 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 
+import { DashboardAttributes, SavedDashboardPanel } from '../../content_management';
 import {
   convertPanelMapToSavedPanels,
   convertSavedPanelsToPanelMap,
 } from '../../lib/dashboard_panel_converters';
 import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
-import { DashboardAttributes, SavedDashboardPanel } from '../../content_management';
 
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

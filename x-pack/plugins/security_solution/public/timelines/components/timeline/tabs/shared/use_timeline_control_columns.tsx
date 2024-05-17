@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { getDefaultControlColumn } from '../../body/control_columns';
-import type { UnifiedActionProps } from '../../unified_components/data_table/control_column_cell_render';
+import React, { useMemo } from 'react';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { getDefaultControlColumn } from '../../body/control_columns';
+import type { UnifiedActionProps } from '../../unified_components/data_table/control_column_cell_render';
 import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
-import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { useTimelineColumns } from './use_timeline_columns';
 
 const noSelectAll = ({ isSelected }: { isSelected: boolean }) => {};

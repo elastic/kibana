@@ -11,11 +11,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CommonHelper,
   EncryptionHelper,
-  ValidationHelper,
+  MigrationHelper,
   PreflightCheckHelper,
   SerializerHelper,
-  MigrationHelper,
   UserHelper,
+  ValidationHelper,
 } from '../lib/apis/helpers';
 
 export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;

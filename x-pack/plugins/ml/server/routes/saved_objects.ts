@@ -6,20 +6,20 @@
  */
 
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import type { MlSavedObjectType } from '../../common/types/saved_objects';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
+import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import {
-  updateJobsSpaces,
-  updateTrainedModelsSpaces,
-  itemsAndCurrentSpace,
-  syncJobObjects,
-  syncCheckSchema,
   canDeleteMLSpaceAwareItemsSchema,
   itemTypeSchema,
+  itemsAndCurrentSpace,
+  syncCheckSchema,
+  syncJobObjects,
+  updateJobsSpaces,
+  updateTrainedModelsSpaces,
 } from './schemas/saved_objects';
-import { spacesUtilsProvider } from '../lib/spaces_utils';
-import type { MlSavedObjectType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management

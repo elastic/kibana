@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiSkeletonRectangle } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiSkeletonRectangle } from '@elastic/eui';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 
 export const StepTitle = () => {

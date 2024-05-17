@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions, getNewSavedSearch } from '.';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { SaveSavedSearchOptions, getNewSavedSearch, getSavedSearch, saveSavedSearch } from '.';
 import { SavedSearchType } from '../../../common';
+import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import type { SavedSearch } from '../../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 

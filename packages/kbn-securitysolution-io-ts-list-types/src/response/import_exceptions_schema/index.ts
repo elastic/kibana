@@ -11,8 +11,8 @@ import * as t from 'io-ts';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 import { id } from '../../common/id';
-import { list_id } from '../../common/list_id';
 import { item_id } from '../../common/item_id';
+import { list_id } from '../../common/list_id';
 
 export const bulkErrorErrorSchema = t.exact(
   t.type({

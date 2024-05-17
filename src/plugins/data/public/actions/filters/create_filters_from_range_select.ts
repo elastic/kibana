@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { DataViewFieldBase, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { last } from 'lodash';
 import moment from 'moment';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { buildRangeFilter, DataViewFieldBase, RangeFilterParams } from '@kbn/es-query';
-import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
+import { getIndexPatterns, getSearchService } from '../../services';
 
 interface RangeSelectDataContext {
   table: Datatable;

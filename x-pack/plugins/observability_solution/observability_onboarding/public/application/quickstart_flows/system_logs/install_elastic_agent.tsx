@@ -7,17 +7,19 @@
 
 import { EuiButton, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import {
-  AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
-  SingleDatasetLocatorParams,
+  AllDatasetsLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
+  SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
+import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
@@ -30,9 +32,7 @@ import {
 import { StepModal } from '../shared/step_panel';
 import { TroubleshootingLink } from '../shared/troubleshooting_link';
 import { WindowsInstallStep } from '../shared/windows_install_step';
-import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { SystemIntegrationBanner, SystemIntegrationBannerState } from './system_integration_banner';
-import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 export function InstallElasticAgent() {
   const {
@@ -161,8 +161,8 @@ export function InstallElasticAgent() {
         stepStatus === 'loading'
           ? CHECK_LOGS_LABELS.loading
           : stepStatus === 'complete'
-          ? CHECK_LOGS_LABELS.completed
-          : CHECK_LOGS_LABELS.incomplete;
+            ? CHECK_LOGS_LABELS.completed
+            : CHECK_LOGS_LABELS.incomplete;
       return {
         title,
         status: stepStatus,
@@ -282,8 +282,8 @@ export function InstallElasticAgent() {
           installShipperSetupStatus === FETCH_STATUS.LOADING
             ? 'loading'
             : isInstallCompleted
-            ? 'complete'
-            : 'current'
+              ? 'complete'
+              : 'current'
         }
         showInstallProgressSteps={isInstallStarted}
         installProgressSteps={

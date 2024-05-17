@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { uniq, sortBy, isEqual } from 'lodash';
+import { isEqual, sortBy, uniq } from 'lodash';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
-import { RuleDiffTab } from '../rule_diff_tab';
-import { savedRuleMock } from '../../../logic/mock';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { savedRuleMock } from '../../../logic/mock';
+import { RuleDiffTab } from '../rule_diff_tab';
 import { COLORS } from './constants';
 
 /*

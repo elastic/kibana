@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { render, act as renderAct } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { from } from 'rxjs';
 import { take } from 'rxjs';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { render, act as renderAct } from '@testing-library/react';
 
-import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
 
-import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ThemeService } from './theme';
 
 const createTheme$Mock = (mode: boolean) => {
   return from([{ darkMode: mode }]);

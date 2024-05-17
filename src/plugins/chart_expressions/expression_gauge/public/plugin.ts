@@ -9,11 +9,11 @@ import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public'
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { gaugeFunction } from '../common';
-import { setFormatService, setPaletteService } from './services';
 import { gaugeRenderer } from './expression_renderers';
+import { setFormatService, setPaletteService } from './services';
 
 /** @internal */
 export interface ExpressionGaugePluginSetup {

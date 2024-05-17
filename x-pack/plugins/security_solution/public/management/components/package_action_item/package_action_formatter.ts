@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 import type {
-  FleetServerAgentComponentUnit,
   FleetServerAgentComponentStatus,
+  FleetServerAgentComponentUnit,
 } from '@kbn/fleet-plugin/common/types';
+import { i18n } from '@kbn/i18n';
 
 import { ENDPOINT_ERROR_CODES } from '../../../../common/endpoint/constants';
 

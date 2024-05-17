@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
+import { useCallback, useMemo, useState } from 'react';
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
 const DEFAULT_PAGE_NUMBER = 1;

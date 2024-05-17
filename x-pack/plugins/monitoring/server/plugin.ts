@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { TypeOf } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
   CoreStart,
@@ -20,24 +19,25 @@ import {
   PluginInitializerContext,
   ResponseError,
 } from '@kbn/core/server';
-import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RouteMethod } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
-  RULES,
   LOGGING_TAG,
+  RULES,
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
-import { RulesFactory } from './rules';
-import { configSchema, createConfig, MonitoringConfig } from './config';
+import { MonitoringConfig, configSchema, createConfig } from './config';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader } from './kibana_monitoring';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { initLogView } from './lib/logs/init_log_view';
 import { LicenseService } from './license_service';
 import { requireUIRoutes } from './routes';
+import { RulesFactory } from './rules';
 import { EndpointTypes, Globals } from './static_globals';
 import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import {
@@ -48,10 +48,10 @@ import {
   MonitoringCore,
   MonitoringLicenseService,
   MonitoringPluginSetup,
+  MonitoringRouteConfig,
   PluginsSetup,
   PluginsStart,
   RequestHandlerContextMonitoringPlugin,
-  MonitoringRouteConfig,
 } from './types';
 
 // This is used to test the version of kibana

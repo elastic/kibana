@@ -10,38 +10,38 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AnalyticsServiceSetup,
   CoreRequestHandlerContext,
   CoreSetup,
-  AnalyticsServiceSetup,
   CustomRequestHandlerContext,
   IRouter,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  AttackDiscoveryPostRequestBody,
   AssistantFeatures,
+  AttackDiscoveryPostRequestBody,
   ExecuteConnectorRequestBody,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
 } from '@kbn/elastic-assistant-common/impl/language_models';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
+import { RetrievalQAChain } from 'langchain/chains';
 
+import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
-import { AIAssistantDataClient } from './ai_assistant_data_clients';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 

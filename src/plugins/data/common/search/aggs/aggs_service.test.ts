@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { getAggTypes } from './agg_types';
 import {
   AggsCommonService,
   AggsCommonSetupDependencies,
   AggsCommonStartDependencies,
 } from './aggs_service';
-import { getAggTypes } from './agg_types';
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 
@@ -48,7 +48,7 @@ describe('Aggs service', () => {
       const aSetup = a.setup(setupDeps);
       aSetup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
       );
       const aStart = a.start(startDeps);
       expect(aStart.types.getAll().buckets.map((t) => t.name)).toMatchInlineSnapshot(`
@@ -174,11 +174,11 @@ describe('Aggs service', () => {
       const setup = service.setup(setupDeps);
       setup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
       );
       setup.types.registerMetric(
         'bar',
-        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
+        () => ({ name: 'bar', type: 'metrics' }) as MetricAggType<any>
       );
       const start = service.start(startDeps);
 

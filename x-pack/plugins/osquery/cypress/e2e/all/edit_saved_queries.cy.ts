@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { customActionEditSavedQuerySelector, UPDATE_QUERY_BUTTON } from '../../screens/packs';
-import { navigateTo } from '../../tasks/navigation';
-import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { UPDATE_QUERY_BUTTON, customActionEditSavedQuerySelector } from '../../screens/packs';
 import { ServerlessRoleName } from '../../support/roles';
+import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
+import { navigateTo } from '../../tasks/navigation';
 
 describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryName: string;

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
-import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
+import { createNavigationRegistry } from './helpers/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './lazy_page_template';
 import { ObservabilityPageTemplate } from './page_template';
-import { createNavigationRegistry } from './helpers/navigation_registry';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

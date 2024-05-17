@@ -14,17 +14,17 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
-import { getJoinAggKey } from '../../../../../../common/get_agg_key';
 import {
   CountAggDescriptor,
   JoinDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
-import { VectorStyle } from '../../../../styles/vector/vector_style';
-import { GeoJsonVectorLayer } from '../../../vector_layer';
+import { getJoinAggKey } from '../../../../../../common/get_agg_key';
 // @ts-ignore
 import { ESSearchSource } from '../../../../sources/es_search_source';
+import { VectorStyle } from '../../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
+import { GeoJsonVectorLayer } from '../../../vector_layer';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

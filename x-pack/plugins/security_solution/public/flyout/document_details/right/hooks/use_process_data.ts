@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { useMemo } from 'react';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { getField } from '../../shared/utils';
 import { useRightPanelContext } from '../context';

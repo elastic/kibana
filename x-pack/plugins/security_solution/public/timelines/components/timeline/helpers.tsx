@@ -16,16 +16,16 @@ import {
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
 
-import { prepareKQLParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import { assertUnreachable } from '../../../../common/utility_types';
+import { prepareKQLParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../common/containers/source';
 import {
-  convertDateFieldToQuery,
-  checkIfFieldTypeIsDate,
-  convertNestedFieldToQuery,
-  convertNestedFieldToExistQuery,
-  checkIfFieldTypeIsNested,
   type PrimitiveOrArrayOfPrimitives,
+  checkIfFieldTypeIsDate,
+  checkIfFieldTypeIsNested,
+  convertDateFieldToQuery,
+  convertNestedFieldToExistQuery,
+  convertNestedFieldToQuery,
 } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
 import {

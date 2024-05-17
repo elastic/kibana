@@ -8,16 +8,16 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import {
   AwaitingDashboardAPI,
-  DashboardRenderer,
   DashboardCreationOptions,
+  DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { JobExistResult, MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { handleActions } from 'redux-actions';
-import { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
 import {
-  getExistingMLJobAction,
-  createMLJobAction,
-  getAnomalyRecordsAction,
-  deleteMLJobAction,
-  resetMLState,
   AnomalyRecords,
+  createMLJobAction,
+  deleteMLJobAction,
+  getAnomalyRecordsAction,
+  getExistingMLJobAction,
   getMLCapabilitiesAction,
+  resetMLState,
 } from '../actions';
-import { asyncInitState, handleAsyncAction } from './utils';
-import { AsyncInitState } from './types';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
+import { AsyncInitState } from './types';
+import { asyncInitState, handleAsyncAction } from './utils';
 
 export interface MLJobState {
   mlJob: AsyncInitState<JobExistResult>;

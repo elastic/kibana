@@ -7,13 +7,13 @@
  */
 
 import {
-  isDeclaringField,
-  isConstructorInstance,
   hasDeclaredType,
   isAccessingProperty,
-  showStaticSuggestions,
-  isDefiningString,
+  isConstructorInstance,
+  isDeclaringField,
   isDefiningBoolean,
+  isDefiningString,
+  showStaticSuggestions,
 } from './autocomplete_utils';
 
 const primitives = ['boolean', 'int', 'char', 'float', 'double'];

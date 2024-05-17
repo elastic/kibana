@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { Spaces } from '../../../scenarios';
-import {
-  checkAAD,
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  getEventLog,
-} from '../../../../common/lib';
+import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  ObjectRemover,
+  checkAAD,
+  getEventLog,
+  getTestRuleData,
+  getUrlPrefix,
+} from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 const getSnoozeSchedule = () => {
   return {

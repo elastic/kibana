@@ -1,3 +1,4 @@
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,16 +7,6 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
-import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
-import { calculatePostureScore } from '../../../../common/utils/helpers';
-import type {
-  AccountEntity,
-  AccountsStats,
-  CloudProviderKey,
-  CloudSecurityAccountsStats,
-} from './types';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
@@ -23,10 +14,19 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
+import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
+import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
+import { calculatePostureScore } from '../../../../common/utils/helpers';
 import {
   getCspBenchmarkRulesStatesHandler,
   getMutedRulesFilterQuery,
 } from '../../../routes/benchmark_rules/get_states/v1';
+import type {
+  AccountEntity,
+  AccountsStats,
+  CloudProviderKey,
+  CloudSecurityAccountsStats,
+} from './types';
 
 export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
   index,

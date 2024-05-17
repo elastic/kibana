@@ -1,3 +1,4 @@
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { DASHBOARDS_PATH, SecurityPageName } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';

@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const moduleIds = [
   'apache_data_stream',

@@ -7,18 +7,14 @@
 
 import { get, groupBy } from 'lodash';
 import {
-  getIndexPatterns,
-  getElasticsearchDataset,
-} from '../../../../lib/cluster/get_index_patterns';
-import {
-  postElasticsearchCcrRequestParamsRT,
-  postElasticsearchCcrRequestPayloadRT,
-  PostElasticsearchCcrResponsePayload,
-  postElasticsearchCcrResponsePayloadRT,
   CcrBucket,
   CcrFullStats,
   CcrShard,
   CcrShardBucket,
+  PostElasticsearchCcrResponsePayload,
+  postElasticsearchCcrRequestParamsRT,
+  postElasticsearchCcrRequestPayloadRT,
+  postElasticsearchCcrResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import { TimeRange } from '../../../../../common/http_api/shared';
 import {
@@ -27,6 +23,10 @@ import {
   ElasticsearchResponse,
 } from '../../../../../common/types/es';
 import { MonitoringConfig } from '../../../../config';
+import {
+  getElasticsearchDataset,
+  getIndexPatterns,
+} from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { MonitoringCore } from '../../../../types';

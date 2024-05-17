@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import jwt, { Algorithm } from 'jsonwebtoken';
 import { Logger } from '@kbn/core/server';
+import jwt, { Algorithm } from 'jsonwebtoken';
 
 export interface JWTClaims {
   audience: string;

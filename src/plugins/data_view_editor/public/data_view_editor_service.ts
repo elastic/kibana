@@ -9,26 +9,26 @@
 import { HttpSetup } from '@kbn/core/public';
 import {
   BehaviorSubject,
+  Observable,
   Subject,
+  Subscription,
+  distinctUntilChanged,
   first,
   firstValueFrom,
   from,
-  Observable,
-  Subscription,
   map,
-  distinctUntilChanged,
 } from 'rxjs';
 
 import {
-  DataViewsServicePublic,
-  MatchedItem,
-  INDEX_PATTERN_TYPE,
   DataViewField,
+  DataViewsServicePublic,
+  INDEX_PATTERN_TYPE,
+  MatchedItem,
 } from '@kbn/data-views-plugin/public';
 
-import { RollupIndicesCapsResponse, MatchedIndicesSet, TimestampOption } from './types';
-import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';
+import { ensureMinimumTime, extractTimeFields, getMatchedIndices, removeSpaces } from './lib';
 import { GetFieldsOptions } from './shared_imports';
+import { MatchedIndicesSet, RollupIndicesCapsResponse, TimestampOption } from './types';
 
 export const matchedIndiciesDefault = {
   allIndices: [],

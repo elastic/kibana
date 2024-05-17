@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
 export type StartServices<TAdditionalServices> = CoreStart & {

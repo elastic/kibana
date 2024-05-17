@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { StoriesProvider } from '../../../../stories';
-import { SuccessFormControlled } from './success_form_controlled';
 import type { Format } from './format_select';
+import { SuccessFormControlled } from './success_form_controlled';
 
 export default {
   title: 'Connection Details/Tabs/API Keys/Success Form (controlled)',

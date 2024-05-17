@@ -6,9 +6,9 @@
  */
 
 import type {
-  SavedObjectsUpdateResponse,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
@@ -18,18 +18,18 @@ import type {
 } from '../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
-  injectPersistableReferencesToSO,
   extractPersistableStateReferencesFromSO,
+  injectPersistableReferencesToSO,
 } from '../attachment_framework/so_references';
 import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
 import type {
   AttachmentPersistedAttributes,
   AttachmentRequestAttributes,
-  AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
+  AttachmentTransformedAttributes,
 } from '../common/types/attachments';
-import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import { SOReferenceExtractor } from './so_reference_extractor';
+import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import type { OptionalAttributes } from './types';
 
 export const getAttachmentSOExtractor = (

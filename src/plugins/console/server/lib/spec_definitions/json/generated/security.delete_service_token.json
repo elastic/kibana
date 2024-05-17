@@ -5,18 +5,10 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "refresh": [
-        "true",
-        "false",
-        "wait_for"
-      ]
+      "refresh": ["true", "false", "wait_for"]
     },
-    "methods": [
-      "DELETE"
-    ],
-    "patterns": [
-      "_security/service/{namespace}/{service}/credential/token/{name}"
-    ],
+    "methods": ["DELETE"],
+    "patterns": ["_security/service/{namespace}/{service}/credential/token/{name}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-service-token.html",
     "availability": {
       "stack": true,

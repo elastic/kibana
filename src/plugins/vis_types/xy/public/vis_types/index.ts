@@ -9,9 +9,9 @@
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import type { VisParams } from '../types';
 import { areaVisTypeDefinition } from './area';
-import { lineVisTypeDefinition } from './line';
 import { histogramVisTypeDefinition } from './histogram';
 import { horizontalBarVisTypeDefinition } from './horizontal_bar';
+import { lineVisTypeDefinition } from './line';
 
 export const visTypesDefinitions = [
   areaVisTypeDefinition,

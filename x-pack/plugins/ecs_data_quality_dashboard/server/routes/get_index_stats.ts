@@ -1,3 +1,4 @@
+import type { IRouter, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,18 +6,17 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { IRouter, Logger } from '@kbn/core/server';
 
+import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import {
-  fetchStats,
   fetchAvailableIndices,
   fetchMeteringStats,
+  fetchStats,
   parseIndicesStats,
   parseMeteringStats,
   pickAvailableMeteringStats,
 } from '../lib';
 import { buildResponse } from '../lib/build_response';
-import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
 import { API_DEFAULT_ERROR_MESSAGE } from '../translations';

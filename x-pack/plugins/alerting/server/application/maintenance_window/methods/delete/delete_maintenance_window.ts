@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
-import type { DeleteMaintenanceWindowParams } from './types';
-import { deleteMaintenanceWindowParamsSchema } from './schemas';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { deleteMaintenanceWindowSo } from '../../../../data/maintenance_window';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { deleteMaintenanceWindowParamsSchema } from './schemas';
+import type { DeleteMaintenanceWindowParams } from './types';
 
 export async function deleteMaintenanceWindow(
   context: MaintenanceWindowClientContext,

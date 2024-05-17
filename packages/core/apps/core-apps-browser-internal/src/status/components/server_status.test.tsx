@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { ServerStatus } from './server_status';
+import React from 'react';
 import { StatusState } from '../lib';
+import { ServerStatus } from './server_status';
 
 const getStatus = (parts: Partial<StatusState> = {}): StatusState => ({
   id: 'available',

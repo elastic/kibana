@@ -7,8 +7,8 @@
  */
 
 import { ExpressionType } from './expression_type';
-import { ExpressionTypeDefinition } from './types';
 import { ExpressionValueRender } from './specs';
+import { ExpressionTypeDefinition } from './types';
 
 export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
   name: 'boolean',

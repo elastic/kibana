@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ChartEmptyState } from './chart_empty_state';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartEmptyState } from './chart_empty_state';
 
 describe('ChartEmptyState', () => {
   it('renders string values', () => {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -14,16 +13,17 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useState, useCallback } from 'react';
 
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  CSV_SEPARATOR_SETTING,
   CSV_QUOTE_VALUES_SETTING,
+  CSV_SEPARATOR_SETTING,
   downloadFileAs,
 } from '@kbn/share-plugin/public';
 import { getFormatService } from '../services';

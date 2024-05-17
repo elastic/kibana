@@ -17,14 +17,14 @@ import { z } from 'zod';
  */
 
 import {
-  SavedQueryId,
   DescriptionOrUndefined,
-  QueryOrUndefined,
   ECSMappingOrUndefined,
-  VersionOrUndefined,
   Interval,
-  SnapshotOrUndefined,
+  QueryOrUndefined,
   RemovedOrUndefined,
+  SavedQueryId,
+  SnapshotOrUndefined,
+  VersionOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
 export type CreateSavedQueryRequestBody = z.infer<typeof CreateSavedQueryRequestBody>;

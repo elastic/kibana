@@ -1,3 +1,4 @@
+import { useEuiTheme } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,19 +7,18 @@
  * Side Public License, v 1.
  */
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useEuiTheme } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
-import { EditorMenu } from './editor_menu';
-import { useDashboardAPI } from '../dashboard_app';
-import { pluginServices } from '../../services/plugin_services';
-import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { pluginServices } from '../../services/plugin_services';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import { useDashboardAPI } from '../dashboard_app';
+import { ControlsToolbarButton } from './controls_toolbar_button';
+import { EditorMenu } from './editor_menu';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import moment from 'moment';
-import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
+import expect from '@kbn/expect';
+import moment from 'moment';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

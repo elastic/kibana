@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import type { Case } from '../../../common/types/domain';
-import type { IndexRefresh } from '../types';
-import type { User } from '../../common/types/user';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { User } from '../../common/types/user';
+import type { IndexRefresh } from '../types';
 
 export interface GetCaseIdsByAlertIdArgs {
   alertId: string;

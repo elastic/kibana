@@ -6,11 +6,11 @@
  */
 
 import { RouteInitializerDeps } from '..';
+import { initializeCreateCustomElementRoute } from './create';
+import { initializeDeleteCustomElementRoute } from './delete';
 import { initializeFindCustomElementsRoute } from './find';
 import { initializeGetCustomElementRoute } from './get';
-import { initializeCreateCustomElementRoute } from './create';
 import { initializeUpdateCustomElementRoute } from './update';
-import { initializeDeleteCustomElementRoute } from './delete';
 
 export function initCustomElementsRoutes(deps: RouteInitializerDeps) {
   initializeFindCustomElementsRoute(deps);

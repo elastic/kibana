@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import expect from '@kbn/expect';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_CURRENT_TRANSFORM_V2,
   METADATA_DATASTREAM,
   METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
   metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EndpointSortableField,
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { targetTags } from '../../security_solution_endpoint/target_tags';
-import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
+import { FtrProviderContext } from '../ftr_provider_context';
 import {
   bulkIndex,
   deleteAllDocsFromFleetAgents,
@@ -40,7 +40,7 @@ import {
   startTransform,
   stopTransform,
 } from './data_stream_helper';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

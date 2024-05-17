@@ -6,8 +6,8 @@
  */
 
 import type {
-  PostMessageSubActionParams,
   PostBlockkitSubActionParams,
+  PostMessageSubActionParams,
   SlackApiService,
   ValidChannelIdSubActionParams,
 } from '../../../common/slack_api/types';

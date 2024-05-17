@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor } from '@elastic/eui';
-import { LearnMoreLink } from '../../learn_more_link';
-import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useKibana } from '../../../../../../shared_imports';
+import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
+import { LearnMoreLink } from '../../learn_more_link';
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
 }

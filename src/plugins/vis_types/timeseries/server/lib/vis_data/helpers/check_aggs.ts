@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AggNotSupportedError } from '../../../../common/errors';
 import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
+import { AggNotSupportedError } from '../../../../common/errors';
 
 import type { Metric } from '../../../../common/types';
 import type { SearchCapabilities } from '../../search_strategies';

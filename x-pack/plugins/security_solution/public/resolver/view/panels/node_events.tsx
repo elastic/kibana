@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { FormattedCount } from '../../../common/components/formatted_number';
-import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
+import { FormattedCount } from '../../../common/components/formatted_number';
+import type { State } from '../../../common/store/types';
+import * as nodeDataModel from '../../models/node_data';
 import * as selectors from '../../store/selectors';
 import { StyledPanel } from '../styles';
-import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';
-import * as nodeDataModel from '../../models/node_data';
-import type { State } from '../../../common/store/types';
+import { Breadcrumbs } from './breadcrumbs';
+import { PanelLoading } from './panel_loading';
 
 export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
   const processEvent = useSelector((state: State) =>

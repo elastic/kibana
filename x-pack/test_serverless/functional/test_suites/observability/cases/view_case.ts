@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { v4 as uuidv4 } from 'uuid';
 import {
   CaseSeverity,
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createOneCaseBeforeDeleteAllAfter,
   createAndNavigateToCase,
+  createOneCaseBeforeDeleteAllAfter,
 } from '../../../../shared/lib/cases/helpers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const owner = OBSERVABILITY_OWNER;
 

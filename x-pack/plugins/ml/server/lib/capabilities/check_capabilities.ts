@@ -7,22 +7,22 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { once } from 'lodash';
-import type { MlClient } from '../ml_client';
-import { mlLog } from '../log';
+import type { MlLicense } from '../../../common/license';
 import type {
   MlCapabilities,
+  MlCapabilitiesKey,
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
-  MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { adminMlCapabilities } from '../../../common/types/capabilities';
-import { upgradeCheckProvider } from './upgrade';
-import type { MlLicense } from '../../../common/license';
+import { mlLog } from '../log';
+import type { MlClient } from '../ml_client';
 import {
   InsufficientMLCapabilities,
-  UnknownMLCapabilitiesError,
   MLPrivilegesUninitialized,
+  UnknownMLCapabilitiesError,
 } from './errors';
+import { upgradeCheckProvider } from './upgrade';
 
 export function capabilitiesProvider(
   mlClient: MlClient,

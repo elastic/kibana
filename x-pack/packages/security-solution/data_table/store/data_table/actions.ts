@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type { ExpandedDetailType } from '../../common/types/detail_panel';
+import actionCreatorFactory from 'typescript-fsa';
 import type {
   ColumnHeaderOptions,
   SessionViewConfig,
   SortColumnTable,
   ViewSelection,
 } from '../../common/types';
-import type { InitialyzeDataTableSettings, DataTablePersistInput } from './types';
+import type { ExpandedDetailType } from '../../common/types/detail_panel';
+import type { DataTablePersistInput, InitialyzeDataTableSettings } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/data-table');
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { min, max, isNumber } from 'lodash';
+import { isNumber, max, min } from 'lodash';
 import { MetricsExplorerSeries } from '../types';
 
 const getMin = (values: Array<number | null>) => {

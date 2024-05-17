@@ -10,13 +10,13 @@ import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
-import { useLoadConnectors } from '../use_load_connectors';
-import * as i18n from '../translations';
-import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
+import { useAssistantContext } from '../../assistant_context';
+import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { getGenAiConfig } from '../helpers';
+import * as i18n from '../translations';
+import { useLoadConnectors } from '../use_load_connectors';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 

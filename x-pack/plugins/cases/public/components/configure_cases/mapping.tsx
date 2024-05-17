@@ -13,8 +13,8 @@ import type { TextColor } from '@elastic/eui/src/components/text/text_color';
 import { ConnectorTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 
-import { FieldMapping } from './field_mapping';
 import type { CaseConnectorMapping } from '../../containers/configure/types';
+import { FieldMapping } from './field_mapping';
 
 export interface MappingProps {
   actionTypeName: string;
@@ -37,14 +37,14 @@ const MappingComponent: React.FC<MappingProps> = ({
             color: 'subdued',
           }
         : connectorType === ConnectorTypes.casesWebhook
-        ? {
-            desc: i18n.CASES_WEBHOOK_MAPPINGS,
-            color: 'subdued',
-          }
-        : {
-            desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
-            color: 'danger',
-          },
+          ? {
+              desc: i18n.CASES_WEBHOOK_MAPPINGS,
+              color: 'subdued',
+            }
+          : {
+              desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
+              color: 'danger',
+            },
     [mappings.length, isLoading, actionTypeName, connectorType]
   );
 

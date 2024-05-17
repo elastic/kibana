@@ -8,16 +8,16 @@
 import React from 'react';
 
 import {
+  EuiIcon,
+  EuiToolTip,
   euiCanAnimate,
   euiFocusRing,
-  EuiIcon,
   euiShadowSmall,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
 import { ColorMapping } from '../../config';
 import { addGradientColorStep } from '../../state/color_mapping';
 import { colorPickerVisibility } from '../../state/ui';

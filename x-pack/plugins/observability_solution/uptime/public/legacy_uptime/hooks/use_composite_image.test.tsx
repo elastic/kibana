@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as redux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
-import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../common/runtime_types';
-import { shouldCompose, useCompositeImage } from './use_composite_image';
+import * as redux from 'react-redux';
+import { ScreenshotBlockCache, ScreenshotRefImageData } from '../../../common/runtime_types';
 import * as compose from '../lib/helper/compose_screenshot_images';
+import { shouldCompose, useCompositeImage } from './use_composite_image';
 
 const MIME = 'image/jpeg';
 

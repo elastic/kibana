@@ -1,3 +1,4 @@
+import { errors as EsErrors } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { getIndexTemplate, createOrUpdateIndexTemplate } from './create_or_update_index_template';
-import { createDataStreamAdapterMock } from './data_stream_adapter.mock';
+import { createOrUpdateIndexTemplate, getIndexTemplate } from './create_or_update_index_template';
 import { DataStreamAdapter } from './data_stream_adapter';
+import { createDataStreamAdapterMock } from './data_stream_adapter.mock';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();

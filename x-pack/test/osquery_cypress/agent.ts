@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import execa from 'execa';
-import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
 import {
   fetchFleetServerUrl,
   waitForHostToEnroll,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+import { KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import execa from 'execa';
 
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';

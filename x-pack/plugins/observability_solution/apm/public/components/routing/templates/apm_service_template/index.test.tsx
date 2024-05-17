@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isMetricsTabHidden, isInfraTabHidden } from '.';
+import { isInfraTabHidden, isMetricsTabHidden } from '.';
 import { ServerlessType } from '../../../../../common/serverless';
 
 describe('APM service template', () => {

@@ -6,13 +6,13 @@
  */
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   type ResponderContextMenuItemProps,
   useResponderActionData,
 } from './use_responder_action_data';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
   ({ endpointId, onClick }) => {

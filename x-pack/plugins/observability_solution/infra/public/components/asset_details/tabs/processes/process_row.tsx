@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTableRow,
-  EuiTableRowCell,
+  EuiButton,
   EuiButtonEmpty,
   EuiCode,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiSpacer,
+  EuiTableRow,
+  EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import useToggle from 'react-use/lib/useToggle';
 import { type Message } from '@kbn/observability-ai-assistant-plugin/public';
+import React, { useMemo } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
+import { Process } from './types';
 
 interface Props {
   cells: React.ReactNode[];

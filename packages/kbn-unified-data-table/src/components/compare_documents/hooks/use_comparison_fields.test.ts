@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { FieldSpec, fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { EsHitRecord } from '@kbn/discover-utils/types';
+import { renderHook } from '@testing-library/react-hooks';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
   MAX_COMPARISON_FIELDS,
-  useComparisonFields,
   UseComparisonFieldsProps,
+  useComparisonFields,
 } from './use_comparison_fields';
-import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { fieldList, FieldSpec } from '@kbn/data-views-plugin/common';
-import { EsHitRecord } from '@kbn/discover-utils/types';
 
 const matchValues = (hit: EsHitRecord) => {
   hit.fields!.bytes = [50];

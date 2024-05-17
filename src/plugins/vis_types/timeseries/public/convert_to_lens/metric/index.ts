@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { v4 as uuidv4 } from 'uuid';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
-import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForMetric as getConfiguration } from '../lib/configurations/metric';
-import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
-import { ConvertTsvbToLensVisualization } from '../types';
 import { ColumnsWithoutMeta, Layer as ExtendedLayer } from '../lib/convert';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
+import { getBucketsColumns, getMetricsColumns } from '../lib/series';
+import { ConvertTsvbToLensVisualization } from '../types';
 import { excludeMetaFromLayers, getUniqueBuckets } from '../utils';
 
 const MAX_SERIES = 2;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useEffect, useMemo, useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { statReducer } from './stat_reducer';
+import { APP_ID } from '../../../../../../common/constants';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../common/constants';
 import { getPercChange, makePrettyNumber } from '../helpers';
 import * as i18n from '../translations';
+import { statReducer } from './stat_reducer';
 import type { StatState } from './use_soc_trends';
 
 export interface UseCasesMttr {
@@ -103,8 +103,8 @@ export const useCasesMttr = ({
               color: isZero
                 ? 'hollow'
                 : isNegative
-                ? 'success' // a negative change is good
-                : 'danger',
+                  ? 'success' // a negative change is good
+                  : 'danger',
               note: isZero
                 ? i18n.NO_CHANGE('case resolution time')
                 : i18n.STAT_DIFFERENCE({
@@ -122,8 +122,8 @@ export const useCasesMttr = ({
             badCurrent && badCompare
               ? i18n.NO_DATA('case')
               : badCurrent
-              ? i18n.NO_DATA_CURRENT('case')
-              : i18n.NO_DATA_COMPARE('case');
+                ? i18n.NO_DATA_CURRENT('case')
+                : i18n.NO_DATA_COMPARE('case');
 
           dispatch({
             type: 'setPercentage',

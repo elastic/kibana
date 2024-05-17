@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 
-import { createAddToExistingCaseLensAction } from './add_to_existing_case';
-import type { ActionContext } from './types';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { waitFor } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
+import { useKibana } from '../../../common/lib/kibana';
+import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 import {
+  MockEmbeddable,
   getMockApplications$,
   getMockCaseUiActionProps,
   getMockCurrentAppId$,
   mockAttributes,
-  MockEmbeddable,
   mockTimeRange,
 } from './mocks';
-import { useKibana } from '../../../common/lib/kibana';
-import { waitFor } from '@testing-library/react';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
-import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
+import type { ActionContext } from './types';
 
 const element = document.createElement('div');
 document.body.appendChild(element);

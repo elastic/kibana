@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.host_details.dsl';
-import { hostDetails } from '.';
-import {
-  mockOptions,
-  mockSearchStrategyResponse,
-  formattedSearchStrategyResponse,
-} from './__mocks__';
 import type {
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { hostDetails } from '.';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import {
+  formattedSearchStrategyResponse,
+  mockOptions,
+  mockSearchStrategyResponse,
+} from './__mocks__';
+import * as buildQuery from './query.host_details.dsl';
 
 const mockDeps = {
   esClient: {} as IScopedClusterClient,

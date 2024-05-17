@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import pick from 'lodash/pick';
 import get from 'lodash/get';
 import partition from 'lodash/partition';
+import pick from 'lodash/pick';
 
 import type { SignalSourceHit } from '../types';
 
@@ -17,7 +17,7 @@ import type { SignalSourceHit } from '../types';
  * 2. where any of fields is empty
  */
 export const partitionMissingFieldsEvents = <
-  T extends SignalSourceHit | { event: SignalSourceHit }
+  T extends SignalSourceHit | { event: SignalSourceHit },
 >(
   events: T[],
   suppressedBy: string[] = [],

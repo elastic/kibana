@@ -7,8 +7,8 @@
 
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 
-import { SessionExpired } from './session_expired';
 import { LogoutReason } from '../../common/types';
+import { SessionExpired } from './session_expired';
 
 describe('#logout', () => {
   const application = applicationServiceMock.createStartContract();

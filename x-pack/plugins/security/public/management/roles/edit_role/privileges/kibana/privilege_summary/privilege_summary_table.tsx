@@ -22,15 +22,15 @@ import React, { Fragment, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
-import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
-import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
-import { SpaceColumnHeader } from './space_column_header';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
+import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
+import { SpaceColumnHeader } from './space_column_header';
 
 export interface PrivilegeSummaryTableProps {
   role: Role;
@@ -174,12 +174,15 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
   }
   columns.push(featureColumn, ...privilegeColumns);
 
-  const privileges = rawKibanaPrivileges.reduce((acc, entry) => {
-    return {
-      ...acc,
-      [getColumnKey(entry)]: calculator.getEffectiveFeaturePrivileges(entry),
-    };
-  }, {} as Record<string, EffectiveFeaturePrivileges>);
+  const privileges = rawKibanaPrivileges.reduce(
+    (acc, entry) => {
+      return {
+        ...acc,
+        [getColumnKey(entry)]: calculator.getEffectiveFeaturePrivileges(entry),
+      };
+    },
+    {} as Record<string, EffectiveFeaturePrivileges>
+  );
 
   const accordions: any[] = [];
 

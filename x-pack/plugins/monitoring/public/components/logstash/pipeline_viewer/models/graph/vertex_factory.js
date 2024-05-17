@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginVertex } from './plugin_vertex';
 import { IfVertex } from './if_vertex';
+import { PluginVertex } from './plugin_vertex';
 import { QueueVertex } from './queue_vertex';
 
 export function vertexFactory(graph, vertexJson) {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, type Observable } from 'rxjs';
+import { type Observable, firstValueFrom } from 'rxjs';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 

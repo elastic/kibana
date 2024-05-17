@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Store, Reducer, AnyAction } from 'redux';
+import type { AnyAction, Reducer, Store } from 'redux';
 import { createStore } from 'redux';
-import { cameraReducer } from './reducer';
 import type { AnalyzerById, Vector2 } from '../../types';
-import { translation } from './selectors';
 import { EMPTY_RESOLVER } from '../helpers';
 import {
-  userStartedPanning,
-  userStoppedPanning,
+  userMovedPointer,
   userNudgedCamera,
   userSetRasterSize,
-  userMovedPointer,
+  userStartedPanning,
+  userStoppedPanning,
 } from './action';
+import { cameraReducer } from './reducer';
+import { translation } from './selectors';
 
 describe('panning interaction', () => {
   let store: Store<AnalyzerById, AnyAction>;

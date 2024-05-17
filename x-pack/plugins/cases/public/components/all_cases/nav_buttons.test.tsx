@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import {
+  buildCasesPermissions,
   createAppMockRenderer,
   noCasesSettingsPermission,
   noCreateCasesPermissions,
-  buildCasesPermissions,
 } from '../../common/mock';
 import { NavButtons } from './nav_buttons';
 

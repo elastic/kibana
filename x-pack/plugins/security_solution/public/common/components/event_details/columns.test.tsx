@@ -6,10 +6,10 @@
  */
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { getColumns } from './columns';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { mockBrowserFields } from '../../containers/source/mock';
+import { getColumns } from './columns';
 import type { EventFieldsData } from './types';
 
 jest.mock('../../lib/kibana');

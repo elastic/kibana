@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
-import { omitBy, isNil } from 'lodash/fp';
 import { CaseConnector, ServiceParams } from '@kbn/actions-plugin/server';
-import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { Type, schema } from '@kbn/config-schema';
+import { AxiosError } from 'axios';
+import { isNil, omitBy } from 'lodash/fp';
+import { SUB_ACTION } from './constants';
+import {
+  ExecutorSubActionCommonFieldsParamsSchema,
+  ExecutorSubActionGetIncidentTypesParamsSchema,
+  ExecutorSubActionGetSeverityParamsSchema,
+  GetCommonFieldsResponseSchema,
+  GetIncidentResponseSchema,
+  GetIncidentTypesResponseSchema,
+  GetSeverityResponseSchema,
+} from './schema';
+import * as i18n from './translations';
 import {
   CreateIncidentData,
   ExternalServiceIncidentResponse,
@@ -21,17 +32,6 @@ import {
   ResilientSecrets,
   UpdateIncidentParams,
 } from './types';
-import * as i18n from './translations';
-import { SUB_ACTION } from './constants';
-import {
-  ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetIncidentTypesParamsSchema,
-  ExecutorSubActionGetSeverityParamsSchema,
-  GetCommonFieldsResponseSchema,
-  GetIncidentTypesResponseSchema,
-  GetSeverityResponseSchema,
-  GetIncidentResponseSchema,
-} from './schema';
 import { formatUpdateRequest } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;

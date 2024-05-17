@@ -7,26 +7,26 @@
  */
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
+  EuiButtonEmpty,
   EuiDescriptionList,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
-  EuiSpacer,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiHealth,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
-import type { FunctionComponent } from 'react';
 import { FileImage as Image } from '@kbn/shared-ux-file-image';
+import type { FunctionComponent } from 'react';
 import React from 'react';
-import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 
 interface Props {
   file: FileJSON;
@@ -56,8 +56,8 @@ export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
                         file.status === 'READY'
                           ? 'success'
                           : file.status === 'AWAITING_UPLOAD' || file.status === 'UPLOADING'
-                          ? 'primary'
-                          : 'warning'
+                            ? 'primary'
+                            : 'warning'
                       }
                     >
                       {i18nTexts.filesStatus[file.status]}

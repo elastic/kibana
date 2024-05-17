@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { Chart, LEGACY_LIGHT_THEME, Settings, Tooltip, TooltipType } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
-import { Chart, Settings, TooltipType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
-import type { ModelItem, Anomaly } from '../../../../common/results_loader';
+import type { LineChartPoint } from '../../../../common/chart_loader';
+import type { Anomaly, ModelItem } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
-import { ModelBounds } from './model_bounds';
-import { Line } from './line';
-import { Scatter } from './scatter';
 import { Axes } from '../common/axes';
 import { getXRange } from '../common/utils';
-import type { LineChartPoint } from '../../../../common/chart_loader';
 import { LoadingWrapper } from '../loading_wrapper';
+import { Line } from './line';
+import { ModelBounds } from './model_bounds';
+import { Scatter } from './scatter';
 
 export enum CHART_TYPE {
   LINE,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,10 +14,10 @@ import { shallow } from 'enzyme';
 import { EuiFlyout } from '@elastic/eui';
 
 import {
-  ShowCreationModes,
   ApiCodeExample,
-  JsonFlyout,
   ElasticsearchIndex,
+  JsonFlyout,
+  ShowCreationModes,
 } from './creation_mode_components';
 import { Summary } from './creation_response_components';
 import { DocumentCreationFlyout, FlyoutContent } from './document_creation_flyout';

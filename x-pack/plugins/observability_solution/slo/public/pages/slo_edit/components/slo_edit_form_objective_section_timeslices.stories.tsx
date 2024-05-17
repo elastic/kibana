@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import { SloEditFormObjectiveSectionTimeslices as Component } from './slo_edit_form_objective_section_timeslices';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { SloEditFormObjectiveSectionTimeslices as Component } from './slo_edit_form_objective_section_timeslices';
 
 export default {
   component: Component,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ValueExpression } from './value';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 describe('value expression', () => {
   it('renders description and value', () => {

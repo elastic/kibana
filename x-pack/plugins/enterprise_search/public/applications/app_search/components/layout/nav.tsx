@@ -13,7 +13,7 @@ import { generateNavLink } from '../../../shared/layout';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
 import { AppLogic } from '../../app_logic';
-import { ENGINES_PATH, SETTINGS_PATH, CREDENTIALS_PATH, USERS_AND_ROLES_PATH } from '../../routes';
+import { CREDENTIALS_PATH, ENGINES_PATH, SETTINGS_PATH, USERS_AND_ROLES_PATH } from '../../routes';
 import { CREDENTIALS_TITLE } from '../credentials';
 import { useEngineNav } from '../engine/engine_nav';
 import { ENGINES_TITLE } from '../engines';

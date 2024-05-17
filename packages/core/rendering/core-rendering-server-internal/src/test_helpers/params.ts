@@ -7,12 +7,12 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
-import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
+import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 
 const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();

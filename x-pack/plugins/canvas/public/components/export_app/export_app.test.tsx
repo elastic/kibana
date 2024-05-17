@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { ExportApp } from './export_app.component';
+import React from 'react';
 import { CanvasWorkpad } from '../../../types';
+import { ExportApp } from './export_app.component';
 
 jest.mock('../workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,

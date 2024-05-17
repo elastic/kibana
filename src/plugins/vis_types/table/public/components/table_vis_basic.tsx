@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridProps,
@@ -14,13 +13,14 @@ import {
   EuiDataGridSorting,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { createTableVisCell } from './table_vis_cell';
+import { i18n } from '@kbn/i18n';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';
-import { TableVisControls } from './table_vis_controls';
+import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
+import { TableVisControls } from './table_vis_controls';
 import { sortNullsLast } from './utils';
 
 interface TableVisBasicProps {

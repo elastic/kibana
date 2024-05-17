@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
@@ -20,7 +20,7 @@ import {
   ALERT_UUID,
   AlertStatus,
 } from '@kbn/rule-data-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEmpty } from 'lodash';
 import { AlertingAuthorizationEntity } from '../../authorization/alerting_authorization';
 import type { RulesClientContext } from '../../rules_client';
 

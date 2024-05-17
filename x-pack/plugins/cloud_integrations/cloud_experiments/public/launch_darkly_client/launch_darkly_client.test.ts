@@ -6,8 +6,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { ldClientMock, launchDarklyLibraryMock } from './launch_darkly_client.test.mock';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
+import { launchDarklyLibraryMock, ldClientMock } from './launch_darkly_client.test.mock';
 
 describe('LaunchDarklyClient - browser', () => {
   beforeEach(() => {

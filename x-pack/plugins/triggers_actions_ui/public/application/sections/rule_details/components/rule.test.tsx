@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { shallow } from 'enzyme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RuleComponent, alertToListItem, RuleComponentProps } from './rule';
-import { AlertListItem } from './types';
-import { RuleAlertList } from './rule_alert_list';
-import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
-import { mockRule, mockLogResponse } from './test_helpers';
-import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { shallow } from 'enzyme';
+import * as React from 'react';
+import { act } from 'react-dom/test-utils';
 import { useKibana } from '../../../../common/lib/kibana';
+import { AlertStatus, RuleSummary, RuleType, RuleTypeModel } from '../../../../types';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
+import { RuleComponent, RuleComponentProps, alertToListItem } from './rule';
+import { RuleAlertList } from './rule_alert_list';
+import { mockLogResponse, mockRule } from './test_helpers';
+import { AlertListItem } from './types';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -59,8 +59,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { waitFor } from '@testing-library/react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { type Observable, timer, takeUntil } from 'rxjs';
-import { Logger, ISavedObjectsRepository } from '@kbn/core/server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { type Observable, takeUntil, timer } from 'rxjs';
 import { ROLL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import { rollUsageCountersIndices } from './rollups';
 

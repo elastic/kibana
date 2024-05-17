@@ -6,6 +6,7 @@
  */
 
 import type {
+  EmailConnectorTypeId,
   IndexConnectorTypeId,
   JiraConnectorTypeId,
   PagerDutyConnectorTypeId,
@@ -14,7 +15,6 @@ import type {
   SlackWebhookConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
-  EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';

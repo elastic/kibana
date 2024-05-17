@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TaskContext } from './task_context';
 import { generateMapping } from '../manage_schema';
+import { TaskContext } from './task_context';
 
 export function generateSchemasTask({ roots }: TaskContext) {
   return roots.map((root) => ({

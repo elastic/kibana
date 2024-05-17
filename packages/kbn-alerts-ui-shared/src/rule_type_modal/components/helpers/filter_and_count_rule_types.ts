@@ -8,8 +8,8 @@
 
 import { countBy } from 'lodash';
 import {
-  RuleTypeIndexWithDescriptions,
   RuleTypeCountsByProducer,
+  RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '../../types';
 

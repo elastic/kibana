@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css as emotion } from '@emotion/css';
+import React from 'react';
 
 import svg from './data_view_illustration.svg';
 

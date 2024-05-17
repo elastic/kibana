@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
   EntryExists,
   EntryList,
@@ -53,18 +56,15 @@ import {
   isOperator,
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
-import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
-import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
+import { getListResponseMock } from '../../../../common/schemas/response/list_schema.mock';
+import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
+import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
-import { getListResponseMock } from '../../../../common/schemas/response/list_schema.mock';
-import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mock';
+import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 
 // TODO: ALL THESE TESTS SHOULD BE MOVED TO @kbn/securitysolution-list-utils for its helper. The only reason why they're here is due to missing other packages we hae to create or missing things from kbn packages such as mocks from kibana core
 

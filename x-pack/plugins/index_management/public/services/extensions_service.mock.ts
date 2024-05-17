@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExtensionsSetup } from '@kbn/index-management/src/services/extensions_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExtensionsService } from './extensions_service';
 
 export type ExtensionsSetupMock = jest.Mocked<ExtensionsSetup>;

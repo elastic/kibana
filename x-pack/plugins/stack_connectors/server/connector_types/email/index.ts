@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import nodemailerGetService from 'nodemailer/lib/well-known';
-import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
+} from '@kbn/actions-plugin/common/connector_feature_config';
+import {
+  renderMustacheObject,
+  renderMustacheString,
+} from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
-import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
-import {
-  renderMustacheObject,
-  renderMustacheString,
-} from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { curry } from 'lodash';
+import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import nodemailerGetService from 'nodemailer/lib/well-known';
 import { AdditionalEmailServices } from '../../../common';
-import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
+import { JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport, sendEmail } from './send_email';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,

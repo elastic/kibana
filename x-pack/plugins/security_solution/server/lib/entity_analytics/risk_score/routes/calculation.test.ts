@@ -10,14 +10,14 @@ import { riskScoreCalculationRoute } from './calculation';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RISK_SCORE_CALCULATION_URL } from '../../../../../common/constants';
 import {
-  serverMock,
   requestContextMock,
   requestMock,
+  serverMock,
 } from '../../../detection_engine/routes/__mocks__';
+import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
+import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
-import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
 
 jest.mock('../get_risk_inputs_index');
 jest.mock('../risk_score_service');

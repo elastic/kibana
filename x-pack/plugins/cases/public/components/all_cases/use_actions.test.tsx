@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
+import {
+  waitForEuiContextMenuPanelTransition,
+  waitForEuiPopoverOpen,
+} from '@elastic/eui/lib/test/rtl';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
-import {
-  waitForEuiPopoverOpen,
-  waitForEuiContextMenuPanelTransition,
-} from '@elastic/eui/lib/test/rtl';
+import userEvent from '@testing-library/user-event';
 
-import { useActions } from './use_actions';
-import { basicCase } from '../../containers/mock';
-import * as api from '../../containers/api';
 import type { AppMockRenderer } from '../../common/mock';
 import {
+  allCasesPermissions,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
-  allCasesPermissions,
   readCasesPermissions,
 } from '../../common/mock';
+import * as api from '../../containers/api';
+import { basicCase } from '../../containers/mock';
+import { useActions } from './use_actions';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');

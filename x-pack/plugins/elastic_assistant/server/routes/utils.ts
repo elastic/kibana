@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { snakeCase } from 'lodash/fp';
 
 import type {
-  RouteValidationFunction,
-  KibanaResponseFactory,
   CustomHttpResponseOptions,
+  KibanaResponseFactory,
+  RouteValidationFunction,
 } from '@kbn/core/server';
 import { CustomHttpRequestError } from './custom_http_request_error';
 

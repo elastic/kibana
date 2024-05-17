@@ -5,34 +5,19 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { ReactElement } from 'react';
 import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
+import { type Filter, type TimeRange, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
-import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import _ from 'lodash';
+import React, { ReactElement } from 'react';
 import { lastValueFrom } from 'rxjs';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
-import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
-import { AbstractESSource } from '../es_source';
-import {
-  getHttp,
-  getSearchService,
-  getSecurityService,
-  getTimeFilter,
-} from '../../../kibana_services';
-import {
-  addFieldToDSL,
-  getField,
-  hitsToGeoJson,
-  isTotalHitsGreaterThan,
-  TotalHits,
-} from '../../../../common/elasticsearch_util';
-import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -43,11 +28,6 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { getSourceFields } from '../../../index_pattern_util';
-import { loadIndexSettings } from './util/load_index_settings';
-import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { ESDocField } from '../../fields/es_doc_field';
 import {
   AbstractESSourceDescriptor,
   DataRequestMeta,
@@ -56,28 +36,48 @@ import {
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { IField } from '../../fields/field';
 import {
-  getLayerFeaturesRequestName,
-  GetFeatureActionsArgs,
-  GeoJsonWithMeta,
-  IMvtVectorSource,
-  SourceStatus,
-} from '../vector_source';
+  TotalHits,
+  addFieldToDSL,
+  getField,
+  hitsToGeoJson,
+  isTotalHitsGreaterThan,
+} from '../../../../common/elasticsearch_util';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
+import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
+import { getSourceFields } from '../../../index_pattern_util';
+import {
+  getHttp,
+  getSearchService,
+  getSecurityService,
+  getTimeFilter,
+} from '../../../kibana_services';
+import { ESDocField } from '../../fields/es_doc_field';
+import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { AbstractESSource } from '../es_source';
+import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import {
+  GeoJsonWithMeta,
+  GetFeatureActionsArgs,
+  IMvtVectorSource,
+  SourceStatus,
+  getLayerFeaturesRequestName,
+} from '../vector_source';
+import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
+import { UpdateSourceEditor } from './update_source_editor';
 import {
   addFeatureToIndex,
   deleteFeatureFromIndex,
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
-import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
-import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
+import { ScriptField, getDocValueAndSourceFields } from './util/get_docvalue_source_fields';
+import { loadIndexSettings } from './util/load_index_settings';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,

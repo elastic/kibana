@@ -10,9 +10,9 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
+import { GROUP_PATH, GROUP_SOURCE_PRIORITIZATION_PATH } from '../../routes';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';

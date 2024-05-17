@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 
 import type { PatchListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_URL, LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { LIST_INDEX, LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import {
-  createListsIndex,
-  deleteListsIndex,
-  createListsIndices,
-  createListBypassingChecks,
-} from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  createListBypassingChecks,
+  createListsIndex,
+  createListsIndices,
+  deleteListsIndex,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -7,19 +7,19 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  type Field,
-  type SplitField,
   type Aggregation,
+  type Field,
   ML_JOB_AGGREGATION,
+  type SplitField,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { JobCreator } from './job_creator';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import type {
-  Job,
   Datafeed,
   Detector,
+  Job,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
+import { JobCreator } from './job_creator';
 import { getRichDetectors, isSparseDataJob } from './util/general';
 
 export class RareJobCreator extends JobCreator {

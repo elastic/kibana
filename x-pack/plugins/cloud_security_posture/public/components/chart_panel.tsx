@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { ReactNode, FC, PropsWithChildren } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
-  EuiLoadingChart,
-  EuiFlexGroup,
-  EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
+import React, { ReactNode, FC, PropsWithChildren } from 'react';
 import { CHART_PANEL_TEST_SUBJECTS } from './test_subjects';
 
 interface ChartPanelProps {

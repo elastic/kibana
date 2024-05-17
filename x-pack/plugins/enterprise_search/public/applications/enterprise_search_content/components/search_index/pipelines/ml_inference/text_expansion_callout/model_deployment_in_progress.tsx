@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { TextExpansionCallOutState, TextExpansionDismissButton } from './text_expansion_callout';

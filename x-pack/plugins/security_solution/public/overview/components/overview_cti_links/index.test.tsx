@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import { ThreatIntelLinkPanel } from '.';
 
 import { TestProviders } from '../../../common/mock';
-import { mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
-import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
+import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { mockCtiLinksResponse, mockProps, mockTiDataSources } from './mock';
 
 jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
 const useTiDataSourcesMock = useTiDataSources as jest.Mock;

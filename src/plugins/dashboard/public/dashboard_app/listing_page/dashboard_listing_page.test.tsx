@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { ReactWrapper, mount } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';

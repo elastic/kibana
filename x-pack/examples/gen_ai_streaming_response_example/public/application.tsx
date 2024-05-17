@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { GenAiStreamingResponseExampleApp } from './gen_ai_streaming_response_example';
 import { GenAiStreamingResponseExamplePublicStartDeps } from './plugin';
 

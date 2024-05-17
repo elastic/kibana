@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 import { TestProviders, mockIndexPattern } from '../../mock';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { allEvents, defaultOptions } from './helpers';
 import type { Props as TopNProps } from './top_n';
 import { TopN } from './top_n';
-import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('../visualization_actions/visualization_embeddable');
 

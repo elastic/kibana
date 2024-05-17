@@ -6,6 +6,7 @@
  */
 
 import { formatNumber } from '@elastic/eui';
+import { DataStreamDetails } from '../../../../common/api_types';
 import {
   BYTE_NUMBER_FORMAT,
   DEFAULT_DATEPICKER_REFRESH,
@@ -21,9 +22,8 @@ import {
   flyoutShowAllText,
   flyoutSizeText,
 } from '../../../../common/translations';
-import { DataStreamDetails } from '../../../../common/api_types';
-import { useKibanaContextForPlugin } from '../../../utils';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { useKibanaContextForPlugin } from '../../../utils';
 
 export function getSummaryKpis({
   dataStreamDetails,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimeScaleExpressionFunction } from './types';
 import type { timeScaleFn } from './time_scale_fn';
+import type { TimeScaleExpressionFunction } from './types';
 
 export const getTimeScale = (
   ...timeScaleFnParameters: Parameters<typeof timeScaleFn>

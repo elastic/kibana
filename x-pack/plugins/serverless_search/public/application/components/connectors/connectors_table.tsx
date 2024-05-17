@@ -6,7 +6,6 @@
  */
 
 import {
-  copyToClipboard,
   Criteria,
   EuiBadge,
   EuiBasicTable,
@@ -24,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,10 +42,10 @@ import {
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
-import { useConnectors } from '../../hooks/api/use_connectors';
-import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { EDIT_CONNECTOR_PATH } from '../../constants';
+import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useConnectors } from '../../hooks/api/use_connectors';
+import { useKibanaServices } from '../../hooks/use_kibana';
 import { DeleteConnectorModal } from './delete_connector_modal';
 
 export const ConnectorsTable: React.FC = () => {

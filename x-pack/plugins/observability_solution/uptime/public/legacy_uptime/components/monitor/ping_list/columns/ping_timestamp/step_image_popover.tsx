@@ -6,12 +6,12 @@
  */
 
 import { EuiImage, EuiPopover } from '@elastic/eui';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LoadingImageState } from './no_image_available';
+import React from 'react';
 import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
-import { fullSizeImageAlt } from './translations';
 import { useCompositeImage } from '../../../../../hooks/use_composite_image';
+import { LoadingImageState } from './no_image_available';
+import { fullSizeImageAlt } from './translations';
 
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;

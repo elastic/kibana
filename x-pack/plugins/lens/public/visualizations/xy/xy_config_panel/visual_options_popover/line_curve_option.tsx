@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import { XYCurveTypes } from '@kbn/expression-xy-plugin/public';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { lineCurveDefinitions } from './line_curve_definitions';
 
 export interface LineCurveOptionProps {

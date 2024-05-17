@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,15 +18,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 
 import { useAgentPolicyWithPackagePolicies } from '../../../../../../../../components/agent_enrollment_flyout/hooks';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 import { sendGetEnrollmentAPIKeys, useFleetServerHostsForPolicy } from '../../../../../../hooks';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 
 import { CloudFormationGuide } from '../../../../../../../../components/cloud_security_posture';
-import { getCloudFormationPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 import { useCreateCloudFormationUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
+import { getCloudFormationPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 
 export const PostInstallCloudFormationModal: React.FunctionComponent<{
   onConfirm: () => void;

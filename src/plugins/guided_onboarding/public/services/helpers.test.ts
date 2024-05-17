@@ -9,17 +9,6 @@
 import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import type { GuidesConfig } from '../../common';
 import {
-  findGuideConfigByGuideId,
-  getCompletedSteps,
-  getInProgressStepConfig,
-  getInProgressStepId,
-  getStepConfig,
-  isGuideActive,
-  isLastStep,
-  isStepInProgress,
-  isStepReadyToComplete,
-} from './helpers';
-import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
   testGuideFirstStep,
@@ -30,6 +19,17 @@ import {
   testGuideStep2InProgressState,
   testGuideStep2ReadyToCompleteState,
 } from './api.mocks';
+import {
+  findGuideConfigByGuideId,
+  getCompletedSteps,
+  getInProgressStepConfig,
+  getInProgressStepId,
+  getStepConfig,
+  isGuideActive,
+  isLastStep,
+  isStepInProgress,
+  isStepReadyToComplete,
+} from './helpers';
 
 describe('GuidedOnboarding ApiService helpers', () => {
   describe('findGuideConfigByGuideId', () => {

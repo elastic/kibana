@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
+import { $Values } from '@kbn/utility-types';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
-import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
+import { EXPRESSION_NAME, Orientation, ScaleOptions } from '../constants';
 
 interface TagCloudCommonParams {
   scale?: $Values<typeof ScaleOptions>;

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiColorPalettePicker } from '@elastic/eui';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { PalettePicker, PalettePickerProps } from './palette_picker';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EuiColorPalettePicker } from '@elastic/eui';
 
 describe('PalettePicker', function () {
   let props: PalettePickerProps<'palette'>;

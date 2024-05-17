@@ -10,17 +10,17 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
-  SEARCH_APPLICATION_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
-  SearchApplicationViewTabs,
+  SEARCH_APPLICATION_PATH,
   SearchApplicationContentTabs,
+  SearchApplicationViewTabs,
 } from '../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 

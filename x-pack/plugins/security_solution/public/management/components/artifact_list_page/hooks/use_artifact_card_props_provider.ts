@@ -7,12 +7,12 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useCallback, useMemo } from 'react';
-import type { AnyArtifact, ArtifactEntryCardProps } from '../../artifact_entry_card';
-import { useEndpointPoliciesToArtifactPolicies } from '../../artifact_entry_card';
+import { useToasts } from '../../../../common/lib/kibana';
+import { getLoadPoliciesError } from '../../../common/translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
-import { getLoadPoliciesError } from '../../../common/translations';
-import { useToasts } from '../../../../common/lib/kibana';
+import type { AnyArtifact, ArtifactEntryCardProps } from '../../artifact_entry_card';
+import { useEndpointPoliciesToArtifactPolicies } from '../../artifact_entry_card';
 
 type CardActionType = 'edit' | 'delete';
 

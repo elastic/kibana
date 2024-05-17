@@ -6,7 +6,7 @@
  */
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEqual } from 'lodash';
-import type { BulkEditOperation, BulkEditFields } from '../types';
+import type { BulkEditFields, BulkEditOperation } from '../types';
 
 // defining an union type that will passed directly to generic function as a workaround for the issue similar to
 // https://github.com/microsoft/TypeScript/issues/29479

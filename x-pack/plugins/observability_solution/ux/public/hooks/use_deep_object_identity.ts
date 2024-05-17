@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
 import { isEqual } from 'lodash';
+import { useRef } from 'react';
 
 // preserve object identity if it is deeply equal to the previous instance of it
 export function useDeepObjectIdentity<T>(value: T) {

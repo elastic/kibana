@@ -6,11 +6,12 @@
  */
 
 import {
+  AggregationsAggregationContainer,
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
-  AggregationsAggregationContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
@@ -23,21 +24,20 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import { ScopedQueryAlerts, SummarizedAlertsChunk } from '../..';
 import { AlertsFilter, ISO_WEEKDAYS, RuleAlertData } from '../../../common';
+import { FormatAlert } from '../../types';
 import {
+  GetAlertsQueryParams,
   GetLifecycleAlertsQueryByExecutionUuidParams,
   GetLifecycleAlertsQueryByTimeRangeParams,
-  GetAlertsQueryParams,
-  GetQueryByExecutionUuidParams,
-  GetQueryByTimeRangeParams,
-  GetQueryByScopedQueriesParams,
   GetMaintenanceWindowAlertsQueryParams,
+  GetQueryByExecutionUuidParams,
+  GetQueryByScopedQueriesParams,
+  GetQueryByTimeRangeParams,
   ScopedQueryAggregationResult,
   SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
-import { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;

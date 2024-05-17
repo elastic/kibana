@@ -16,16 +16,16 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { ChangePointType } from '@kbn/es-types/src';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import momentTz from 'moment-timezone';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
+import momentTz from 'moment-timezone';
+import React, { useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
 import { useTheme } from '../../hooks/use_theme';
 import { SparkPlot } from '../charts/spark_plot';
-import { useKibana } from '../../hooks/use_kibana';
 
 export enum ChangeListItemImpact {
   low = 1,

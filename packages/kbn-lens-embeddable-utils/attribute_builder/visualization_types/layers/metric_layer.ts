@@ -9,8 +9,8 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
-  FormulaPublicApi,
   FormBasedPersistedState,
+  FormulaPublicApi,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
+import type { AnomalyChartsEmbeddableInput } from '..';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalyChartsEmbeddableInput } from '..';
-import { resolveJobSelection } from '../common/resolve_job_selection';
-import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { mlApiServicesProvider } from '../../application/services/ml_api_service';
+import { resolveJobSelection } from '../common/resolve_job_selection';
+import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
+import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,

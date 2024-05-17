@@ -6,17 +6,17 @@
  */
 
 import type { FC } from 'react';
-import styled from 'styled-components';
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import type {
   RuleStepProps,
   ScheduleStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { StepRuleDescription } from '../description_step';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
+import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
+import { StepRuleDescription } from '../description_step';
 import { schema } from './schema';
 
 const StyledForm = styled(Form)`

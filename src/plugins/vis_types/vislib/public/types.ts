@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
 import { Position } from '@elastic/charts';
+import { $Values } from '@kbn/utility-types';
 
 import { Labels } from '@kbn/charts-plugin/public';
 import {

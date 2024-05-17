@@ -9,11 +9,11 @@ import type { ColumnarViewModel } from '@elastic/charts';
 import { memoize, sumBy } from 'lodash';
 import { lighten, parseToRgb } from 'polished';
 import seedrandom from 'seedrandom';
-import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 import {
   CriticalPathTreeNode,
   getAggregatedCriticalPathRootNodes,
 } from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
+import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 
 const lightenColor = lighten(0.2);
 

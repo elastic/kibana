@@ -103,9 +103,7 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": [
-              "\"base64\""
-            ],
+            "signature": ["\"base64\""],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -117,9 +115,7 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": [
-              "\"csv\""
-            ],
+            "signature": ["\"csv\""],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -145,9 +141,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -319,9 +313,7 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -355,9 +347,7 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
+                "signature": ["TaskInstanceFields"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -391,9 +381,7 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": [
-                  "Writable"
-                ],
+                "signature": ["Writable"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -409,9 +397,7 @@
         "parentPluginId": "@kbn/reporting-export-types-csv",
         "id": "def-server.CsvSearchSourceImmediateExportType",
         "type": "Class",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "CsvSearchSourceImmediateExportType",
         "description": [],
         "signature": [
@@ -504,9 +490,7 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": [
-              "\"base64\""
-            ],
+            "signature": ["\"base64\""],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -518,9 +502,7 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": [
-              "\"csv\""
-            ],
+            "signature": ["\"csv\""],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -546,9 +528,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -618,9 +598,7 @@
             "tags": [],
             "label": "createJob",
             "description": [],
-            "signature": [
-              "() => Promise<never>"
-            ],
+            "signature": ["() => Promise<never>"],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -670,9 +648,7 @@
                 "tags": [],
                 "label": "_jobId",
                 "description": [],
-                "signature": [
-                  "string | null"
-                ],
+                "signature": ["string | null"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -706,9 +682,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "ReportingRequestHandlerContext"
-                ],
+                "signature": ["ReportingRequestHandlerContext"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -721,9 +695,7 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": [
-                  "Writable"
-                ],
+                "signature": ["Writable"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -852,9 +824,7 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": [
-              "\"base64\""
-            ],
+            "signature": ["\"base64\""],
             "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -866,9 +836,7 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": [
-              "\"csv\""
-            ],
+            "signature": ["\"csv\""],
             "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -894,9 +862,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1039,9 +1005,7 @@
                 "tags": [],
                 "label": "_context",
                 "description": [],
-                "signature": [
-                  "ReportingRequestHandlerContext"
-                ],
+                "signature": ["ReportingRequestHandlerContext"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1115,9 +1079,7 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1151,9 +1113,7 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
+                "signature": ["TaskInstanceFields"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1187,9 +1147,7 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": [
-                  "Writable"
-                ],
+                "signature": ["Writable"],
                 "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,

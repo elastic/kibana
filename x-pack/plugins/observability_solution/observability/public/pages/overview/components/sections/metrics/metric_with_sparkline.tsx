@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Chart, Settings, AreaSeries, TooltipType, Tooltip } from '@elastic/charts';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
-import React from 'react';
+import { AreaSeries, Chart, Settings, Tooltip, TooltipType } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { NumberOrNull } from '../../../../..';

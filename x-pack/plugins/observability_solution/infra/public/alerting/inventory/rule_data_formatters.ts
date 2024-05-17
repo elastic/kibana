@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { getInventoryViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {

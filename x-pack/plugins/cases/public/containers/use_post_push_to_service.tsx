@@ -8,12 +8,12 @@
 import { useMutation } from '@tanstack/react-query';
 
 import type { CaseConnector } from '../../common/types/domain';
-import { pushCase } from './api';
-import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';
-import { casesMutationsKeys } from './constants';
-import type { ServerError } from '../types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import type { ServerError } from '../types';
+import { pushCase } from './api';
+import { casesMutationsKeys } from './constants';
+import * as i18n from './translations';
 
 interface PushToServiceRequest {
   caseId: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiErrorBoundary,
@@ -29,23 +29,23 @@ import {
 } from '@elastic/eui';
 
 import {
+  UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  UIM_DETAIL_PANEL_JSON_TAB_CLICK,
+  UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
   UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK,
   UIM_DETAIL_PANEL_TERMS_TAB_CLICK,
-  UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
-  UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
-  UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 } from '../../../../../common';
-import { METRIC_TYPE } from '../../../services';
 import { trackUiMetric } from '../../../../kibana_services';
+import { METRIC_TYPE } from '../../../services';
 
 import {
-  JobActionMenu,
-  JobDetails,
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
-  JOB_DETAILS_TAB_HISTOGRAM,
-  JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
+  JobActionMenu,
+  JobDetails,
   tabToHumanizedMap,
 } from '../../components';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { mockTimelineModel, TestProviders } from '../../mock';
-import { mockTriggersActionsUi } from '../../mock/mock_triggers_actions_ui_plugin';
+import React from 'react';
 import type { ColumnHeaderOptions, HeaderActionProps } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
-import { HeaderActions } from './header_actions';
-import { timelineActions } from '../../../timelines/store';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
+import { timelineActions } from '../../../timelines/store';
+import { TestProviders, mockTimelineModel } from '../../mock';
+import { mockTriggersActionsUi } from '../../mock/mock_triggers_actions_ui_plugin';
+import { HeaderActions } from './header_actions';
 
 jest.mock('../../../timelines/components/row_renderers_browser', () => ({
   StatefulRowRenderersBrowser: () => null,

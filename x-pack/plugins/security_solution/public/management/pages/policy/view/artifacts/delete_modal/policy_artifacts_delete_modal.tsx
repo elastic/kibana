@@ -6,14 +6,14 @@
  */
 
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useCallback } from 'react';
-import { useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
-import { useToasts } from '../../../../../../common/lib/kibana';
-import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
+import { useToasts } from '../../../../../../common/lib/kibana';
+import { useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
+import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import type { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
 interface PolicyArtifactsDeleteModalProps {

@@ -13,10 +13,10 @@ export default function ({ getService }: FtrProviderContext) {
   const indexManagementService = getService('indexManagement');
 
   describe('settings', () => {
-    let getIndexSettings: typeof indexManagementService['settings']['api']['getIndexSettings'];
-    let updateIndexSettings: typeof indexManagementService['settings']['api']['updateIndexSettings'];
-    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
-    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
+    let getIndexSettings: (typeof indexManagementService)['settings']['api']['getIndexSettings'];
+    let updateIndexSettings: (typeof indexManagementService)['settings']['api']['updateIndexSettings'];
+    let createIndex: (typeof indexManagementService)['indices']['helpers']['createIndex'];
+    let deleteAllIndices: (typeof indexManagementService)['indices']['helpers']['deleteAllIndices'];
 
     before(async () => {
       ({

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { StatusIcon, StatusIconProps } from '../status_icon';
+import { capitalize } from 'lodash';
+import React, { Fragment } from 'react';
 import { AlertsStatus } from '../../alerts/status';
 import type { AlertsByName } from '../../alerts/types';
+import { StatusIcon, StatusIconProps } from '../status_icon';
 import './summary_status.scss';
 
 interface Metrics {

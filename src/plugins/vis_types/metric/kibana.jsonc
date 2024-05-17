@@ -7,16 +7,7 @@
     "id": "visTypeMetric",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "visualizations",
-      "charts",
-      "expressions",
-      "dataViews"
-    ],
-    "requiredBundles": [
-      "visDefaultEditor",
-      "kibanaUtils"
-    ]
+    "requiredPlugins": ["data", "visualizations", "charts", "expressions", "dataViews"],
+    "requiredBundles": ["visDefaultEditor", "kibanaUtils"]
   }
 }

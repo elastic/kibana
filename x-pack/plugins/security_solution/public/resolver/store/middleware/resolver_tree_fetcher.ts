@@ -6,24 +6,24 @@
  */
 
 import type { Dispatch, MiddlewareAPI } from 'redux';
+import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type {
+  NewResolverTree,
   ResolverEntityIndex,
   ResolverNode,
-  NewResolverTree,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
+import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
 import type { DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
-import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
-import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
 
+import type { State } from '../../../common/store/types';
 import {
+  appAbortedResolverDataRequest,
   appRequestedResolverData,
   serverFailedToReturnResolverData,
-  appAbortedResolverDataRequest,
   serverReturnedResolverData,
 } from '../data/action';
-import type { State } from '../../../common/store/types';
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)

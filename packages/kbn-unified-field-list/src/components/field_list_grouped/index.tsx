@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListGroupedProps, GenericFieldListGrouped } from './field_list_grouped';
+import React, { Fragment } from 'react';
 import { type FieldListItem } from '../../types';
+import type { FieldListGroupedProps, GenericFieldListGrouped } from './field_list_grouped';
 
 const Fallback = () => <Fragment />;
 

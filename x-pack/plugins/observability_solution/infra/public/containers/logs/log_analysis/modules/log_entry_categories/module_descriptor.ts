@@ -6,16 +6,16 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { IdFormat } from '../../../../../../common/http_api/latest';
 import {
+  DatasetFilter,
+  LogEntryCategoriesJobType,
   bucketSpan,
   categoriesMessageField,
-  DatasetFilter,
   getJobId,
   logEntryCategoriesJobType,
-  LogEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   partitionField,
 } from '../../../../../../common/log_analysis';

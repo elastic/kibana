@@ -12,11 +12,11 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MonitoringStartServices } from '../types';
+import React, { useState } from 'react';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
+import { MonitoringStartServices } from '../types';
 import { WatcherMigrationStep } from './enable_alerts_modal';
 
 export const AlertsDropdown: React.FC<{}> = () => {

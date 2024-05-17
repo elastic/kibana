@@ -7,25 +7,25 @@
 
 import {
   TransportRequestOptions,
-  TransportResult,
   TransportRequestOptionsWithMeta,
   TransportRequestOptionsWithOutMeta,
   TransportRequestParams,
+  TransportResult,
 } from '@elastic/elasticsearch';
 import type {
-  SearchRequest,
-  SearchResponse,
   AggregateName,
   EqlSearchRequest,
   EqlSearchResponse,
+  SearchRequest,
+  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
   EqlSearchRequest as EqlSearchRequestWithBody,
+  SearchRequest as SearchRequestWithBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SearchMetrics, RuleInfo } from './types';
+import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { RuleInfo, SearchMetrics } from './types';
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -254,28 +254,28 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
   // A bunch of overloads to make TypeScript happy
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptionsWithOutMeta
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptionsWithMeta
   ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >(
     params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions

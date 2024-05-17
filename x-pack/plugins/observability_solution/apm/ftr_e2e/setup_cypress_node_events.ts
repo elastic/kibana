@@ -1,16 +1,16 @@
+import { Readable } from 'stream';
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, LogLevel, createLogger } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import del from 'del';
 import { some } from 'lodash';
-import { Readable } from 'stream';
 
 export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   const logger = createLogger(LogLevel.info);

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import type { LoggerFactory } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 
 import {
   fileIdsWithoutChunksByIndex,

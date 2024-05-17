@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiConfirmModal, EuiIconTip, EuiRadioGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';

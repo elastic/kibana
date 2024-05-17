@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  RuleTypeState,
-  RuleExecutorOptions,
   AlertsClientError,
+  GetViewInAppRelativeUrlFnOpts,
+  RuleExecutorOptions,
+  RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
+  ProcessorEvent,
+  TimeUnitChar,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
   observabilityPaths,
-  ProcessorEvent,
-  TimeUnitChar,
 } from '@kbn/observability-plugin/common';
+import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -41,11 +41,12 @@ import {
 } from '../../../../../common/es_fields/apm';
 import {
   APM_SERVER_FEATURE_ID,
-  formatErrorCountReason,
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
+  formatErrorCountReason,
 } from '../../../../../common/rules/apm_rule_types';
-import { errorCountParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { ApmRuleParamsType, errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
 import { apmActionVariables } from '../../action_variables';
@@ -58,9 +59,8 @@ import {
   getApmAlertSourceFields,
   getApmAlertSourceFieldsAgg,
 } from '../get_apm_alert_source_fields';
-import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
-import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -192,10 +192,13 @@ export function registerErrorCountRuleType({
 
       const errorCountResults =
         response.aggregations?.error_counts.buckets.map((bucket) => {
-          const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
-            obj[allGroupByFields[bucketIndex]] = bucketKey;
-            return obj;
-          }, {} as Record<string, string>);
+          const groupByFields = bucket.key.reduce(
+            (obj, bucketKey, bucketIndex) => {
+              obj[allGroupByFields[bucketIndex]] = bucketKey;
+              return obj;
+            },
+            {} as Record<string, string>
+          );
 
           const bucketKey = bucket.key;
 

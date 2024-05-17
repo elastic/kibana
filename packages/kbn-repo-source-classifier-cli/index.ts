@@ -8,11 +8,11 @@
 
 import Path from 'path';
 
-import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
+import { run } from '@kbn/dev-cli-runner';
+import { getRepoFiles } from '@kbn/get-repo-files';
 import { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getRepoFiles } from '@kbn/get-repo-files';
-import { run } from '@kbn/dev-cli-runner';
+import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 
 import { TypeTree } from './src/type_tree';
 

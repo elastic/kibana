@@ -7,29 +7,29 @@
  */
 
 import {
-  pointInTimeFinderMock,
-  mockUpdateObjectsSpaces,
   mockGetCurrentTime,
   mockGetSearchDsl,
+  mockUpdateObjectsSpaces,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
-  SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsRepository } from '../repository';
-import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  mockTimestamp,
-  mappings,
-  createRegistry,
   createDocumentMigrator,
+  createRegistry,
   createSpySerializer,
+  mappings,
+  mockTimestamp,
 } from '../../test_helpers/repository.test.common';
 
 describe('#updateObjectsSpaces', () => {

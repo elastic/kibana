@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { initVegaLayer } from './vega_layer';
 import type { View } from 'vega';
+import { initVegaLayer } from './vega_layer';
 
 type InitVegaLayerParams = Parameters<typeof initVegaLayer>[0];
 

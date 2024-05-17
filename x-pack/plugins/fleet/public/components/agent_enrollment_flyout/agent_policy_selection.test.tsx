@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from '@testing-library/react';
+import React from 'react';
 
 import type { TestRenderer } from '../../mock';
 import { createFleetTestRendererMock } from '../../mock';

@@ -6,21 +6,21 @@
  */
 
 import {
+  HOST_BY_RISK_TABLE_CELL,
+  HOST_BY_RISK_TABLE_HOSTNAME_CELL,
+  HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON,
+} from '../../../screens/hosts/host_risk';
+import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
+import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
   removeCriticalFilterAndCloseRiskTableFilter,
   selectFiveItemsPerPageOption,
 } from '../../../tasks/host_risk';
-import {
-  HOST_BY_RISK_TABLE_CELL,
-  HOST_BY_RISK_TABLE_HOSTNAME_CELL,
-  HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON,
-} from '../../../screens/hosts/host_risk';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
-import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {

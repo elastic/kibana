@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
-import { login, ROLE } from '../../../tasks/login';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { getNoPrivilegesPage } from '../../../screens/common';
 import { getEndpointManagementPageList } from '../../../screens';
+import { getNoPrivilegesPage } from '../../../screens/common';
+import { ROLE, login } from '../../../tasks/login';
+import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 
 describe(
   'App Features for Security Essential PLI',

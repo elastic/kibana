@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { listCustomLinks } from './list_custom_links';
-import { inspectSearchParams, SearchParamsMock } from '../../../utils/test_helpers';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
+import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
+import { listCustomLinks } from './list_custom_links';
 
 describe('List Custom Links', () => {
   let mock: SearchParamsMock;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { setTimeout } from 'timers/promises';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
+import { setTimeout } from 'timers/promises';
 
 const MAX_ATTEMPTS = 5;
 

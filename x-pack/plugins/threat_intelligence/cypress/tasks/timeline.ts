@@ -6,7 +6,13 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import { openBarchartPopoverMenu } from './common';
+import {
+  ADDED_TO_TIMELINE_TOAST,
+  BARCHART_TIMELINE_BUTTON,
+  FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
+  FLYOUT_TABLE_MORE_ACTIONS_BUTTON,
+  INDICATOR_TYPE_CELL,
+} from '../screens/indicators';
 import {
   CLOSE_TIMELINE_BTN,
   FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM,
@@ -16,13 +22,7 @@ import {
   INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON,
   UNTITLED_TIMELINE_BUTTON,
 } from '../screens/timeline';
-import {
-  ADDED_TO_TIMELINE_TOAST,
-  BARCHART_TIMELINE_BUTTON,
-  FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
-  FLYOUT_TABLE_MORE_ACTIONS_BUTTON,
-  INDICATOR_TYPE_CELL,
-} from '../screens/indicators';
+import { openBarchartPopoverMenu } from './common';
 
 /**
  * Add data to timeline from barchart legend menu item

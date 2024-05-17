@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, checkAAD, getUrlPrefix } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {

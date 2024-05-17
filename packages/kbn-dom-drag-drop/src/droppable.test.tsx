@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { fireEvent, screen, act, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Droppable } from './droppable';
+import React from 'react';
 import { Draggable } from './draggable';
+import { Droppable } from './droppable';
 import {
+  EXACT,
   dataTransfer,
   generateDragDropValue,
   renderWithDragDropContext,
-  EXACT,
 } from './test_utils';
 
 jest.useFakeTimers({ legacyFakeTimers: true });

@@ -6,18 +6,18 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DatasourceDimensionDropHandlerProps } from '../../../types';
+import { addColumnsToCache } from '../fieldlist_cache';
+import { TextBasedPrivateState } from '../types';
 import { getDropProps } from './get_drop_props';
 import {
   column1,
   column2,
   column3,
-  numericDraggedColumn,
   fieldList,
   notNumericDraggedField,
+  numericDraggedColumn,
   numericDraggedField,
 } from './mocks';
-import { TextBasedPrivateState } from '../types';
-import { addColumnsToCache } from '../fieldlist_cache';
 
 const defaultProps = {
   state: {

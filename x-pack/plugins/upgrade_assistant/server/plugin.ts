@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
-  Plugin,
   CoreSetup,
   CoreStart,
-  PluginInitializerContext,
   Logger,
+  Plugin,
+  PluginInitializerContext,
   SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { DEPRECATION_LOGS_INDEX, DEPRECATION_LOGS_SOURCE_ID } from '../common/constants';
 
-import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
+import type { FeatureSet } from '../common/types';
+import type { UpgradeAssistantConfig } from './config';
 import { ReindexWorker } from './lib/reindexing';
+import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
-import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
+import { createReindexWorker } from './routes/reindex_indices';
 import {
-  reindexOperationSavedObjectType,
-  mlSavedObjectType,
   hiddenTypes,
+  mlSavedObjectType,
+  reindexOperationSavedObjectType,
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
-import type { UpgradeAssistantConfig } from './config';
-import type { FeatureSet } from '../common/types';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;

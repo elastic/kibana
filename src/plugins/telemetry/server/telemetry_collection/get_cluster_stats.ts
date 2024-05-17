@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ClusterDetailsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { ClusterDetailsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
 import { TIMEOUT } from './constants';
 
 /**

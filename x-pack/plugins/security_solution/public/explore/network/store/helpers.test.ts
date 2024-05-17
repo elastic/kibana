@@ -9,14 +9,14 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopTablesFields,
   NetworkTlsFields,
+  NetworkTopTablesFields,
   NetworkUsersFields,
 } from '../../../../common/search_strategy';
 import { DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
-import type { NetworkModel } from './model';
-import { NetworkTableType, NetworkDetailsTableType, NetworkType } from './model';
 import { setNetworkQueriesActivePageToZero } from './helpers';
+import type { NetworkModel } from './model';
+import { NetworkDetailsTableType, NetworkTableType, NetworkType } from './model';
 
 export const mockNetworkState: NetworkModel = {
   page: {

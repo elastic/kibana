@@ -7,10 +7,10 @@
  */
 
 import crypto from 'crypto';
-import { join } from 'path';
-import { get } from 'lodash';
 import { readFileSync } from 'fs';
+import { join } from 'path';
 import { safeLoad } from 'js-yaml';
+import { get } from 'lodash';
 
 import { getConfigDirectory } from '@kbn/utils';
 

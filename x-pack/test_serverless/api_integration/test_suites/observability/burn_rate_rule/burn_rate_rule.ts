@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
+import { Dataset, PartialConfig, cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

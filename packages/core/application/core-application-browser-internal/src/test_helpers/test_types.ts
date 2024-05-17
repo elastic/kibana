@@ -7,8 +7,8 @@
  */
 
 import { AppUnmount } from '@kbn/core-application-browser';
-import { Mounter } from '../types';
 import { ApplicationService } from '../application_service';
+import { Mounter } from '../types';
 
 /** @internal */
 export type MockedUnmount = jest.Mocked<AppUnmount>;
@@ -28,5 +28,5 @@ export type MockedMounterMap = Map<string, Mountable>;
 /** @internal */
 export type MockLifecycle<
   T extends keyof ApplicationService,
-  U = Parameters<ApplicationService[T]>[0]
+  U = Parameters<ApplicationService[T]>[0],
 > = { [P in keyof U]: jest.Mocked<U[P]> };

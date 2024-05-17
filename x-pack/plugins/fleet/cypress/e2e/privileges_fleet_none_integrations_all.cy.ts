@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { INTEGRATIONS } from '../tasks/navigation';
 import {
-  createUsersAndRoles,
   FleetNoneIntegrAllRole,
   FleetNoneIntegrAllUser,
+  createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../tasks/privileges';
-import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { ADD_INTEGRATION_POLICY_BTN, getIntegrationCard } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';

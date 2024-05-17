@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { createElement as h } from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
-  UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
+  UiActionsEnhancedMemoryActionStorage,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
-import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
-import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
+import { createElement as h } from 'react';
 import { App1HelloWorldDrilldown } from './drilldowns/app1_hello_world_drilldown';
+import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
+import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
+import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
+import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
+import { mount } from './mount';
 import {
-  sampleApp1ClickTrigger,
-  sampleApp2ClickTrigger,
   SAMPLE_APP2_CLICK_TRIGGER,
   SampleApp2ClickContext,
+  sampleApp1ClickTrigger,
   sampleApp2ClickContext,
+  sampleApp2ClickTrigger,
 } from './triggers';
-import { mount } from './mount';
-import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
 
 export interface SetupDependencies {
   dashboard: DashboardSetup;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 // Upsampling of non-cumulative sets
 // Good: average, min, max

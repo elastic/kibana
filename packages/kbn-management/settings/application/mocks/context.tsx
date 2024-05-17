@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactChild } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import React, { ReactChild } from 'react';
 
-import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { createFormServicesMock } from '@kbn/management-settings-components-form/mocks';
-import { Subscription } from 'rxjs';
+import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import {
   getGlobalSettingsMock,
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
+import { Subscription } from 'rxjs';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
 const createRootMock = () => {

@@ -9,25 +9,25 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { getOr } from 'lodash/fp';
 import { v1 as uuidv1 } from 'uuid';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
+import { fold, map } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
-  Note,
   BareNote,
   BareNoteWithoutExternalRefs,
+  Note,
   ResponseNote,
 } from '../../../../../common/api/timeline';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';
-import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
+import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { noteFieldsMigrator } from './field_migrator';
 
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {

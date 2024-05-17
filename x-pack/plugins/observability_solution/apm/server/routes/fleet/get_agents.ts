@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { keyBy } from 'lodash';
-import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
+import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 
 async function getFleetAgentByIds({
@@ -23,9 +23,8 @@ async function getFleetAgentByIds({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
   // @ts-ignore
-  const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
-    coreStart
-  );
+  const savedObjectsClient: SavedObjectsClientContract =
+    await getInternalSavedObjectsClient(coreStart);
 
   return await fleetPluginStart.agentPolicyService.getByIds(savedObjectsClient, policyIds);
 }

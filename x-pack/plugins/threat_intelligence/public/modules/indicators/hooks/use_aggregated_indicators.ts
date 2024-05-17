@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useMemo, useState } from 'react';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useInspector } from '../../../hooks/use_inspector';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useInspector } from '../../../hooks/use_inspector';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useDateFormat, useTimeZone } from '../../../hooks/use_kibana_ui_settings';
 import {
   ChartSeries,
-  createFetchAggregatedIndicators,
   FetchAggregatedIndicatorsParams,
+  createFetchAggregatedIndicators,
 } from '../services/fetch_aggregated_indicators';
-import { useDateFormat, useTimeZone } from '../../../hooks/use_kibana_ui_settings';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 
 export interface UseAggregatedIndicatorsParam {
   /**

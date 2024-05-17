@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IContainer } from '../../containers';
+import { EmbeddableFactoryDefinition } from '../../embeddables';
 import {
+  FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
-  FILTERABLE_EMBEDDABLE,
 } from './filterable_embeddable';
-import { EmbeddableFactoryDefinition } from '../../embeddables';
-import { IContainer } from '../../containers';
 
 export class FilterableEmbeddableFactory
   implements EmbeddableFactoryDefinition<FilterableEmbeddableInput>

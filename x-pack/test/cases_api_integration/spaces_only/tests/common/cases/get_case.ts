@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { postCaseResp, getPostCaseRequest, nullUser } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
   createCase,
+  deleteCasesByESQuery,
+  getAuthWithSuperUser,
   getCase,
   removeServerGeneratedPropertiesFromCase,
-  getAuthWithSuperUser,
 } from '../../../../common/lib/api';
+import { getPostCaseRequest, nullUser, postCaseResp } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

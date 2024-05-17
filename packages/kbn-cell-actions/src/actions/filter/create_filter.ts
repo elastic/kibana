@@ -7,11 +7,11 @@
  */
 import {
   BooleanRelation,
-  FILTERS,
   type CombinedFilter,
   type ExistsFilter,
-  type PhraseFilter,
+  FILTERS,
   type Filter,
+  type PhraseFilter,
 } from '@kbn/es-query';
 import type { DefaultActionsSupportedValue } from '../types';
 

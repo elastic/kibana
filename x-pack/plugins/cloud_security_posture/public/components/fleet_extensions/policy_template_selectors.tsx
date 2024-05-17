@@ -1,3 +1,8 @@
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +10,22 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
+  CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
-  CNVM_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
-import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
-import { RadioGroup } from './csp_boxed_radio_group';
-import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
-import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
 import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
 import { AwsCredentialsFormAgentless } from './aws_credentials_form/aws_credentials_form_agentless';
+import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
+import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
+import { RadioGroup } from './csp_boxed_radio_group';
 import { EksCredentialsForm } from './eks_credentials_form';
 import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
 import { GcpCredentialsFormAgentless } from './gcp_credentials_form/gcp_credentials_form_agentless';
+import { type NewPackagePolicyPostureInput, getPolicyTemplateInputOptions } from './utils';
 
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import React, { useState } from 'react';
 
+import { render } from '../../rtl_helpers';
 import { SelectableUrlList } from './selectable_url_list';
 import { I18LABELS } from './translations';
-import { render } from '../../rtl_helpers';
 
 describe('SelectableUrlList', () => {
   jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({

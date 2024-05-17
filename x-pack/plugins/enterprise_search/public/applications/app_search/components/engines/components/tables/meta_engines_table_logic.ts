@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { recursivelyFetchEngines } from '../../../../utils/recursively_fetch_engines';
 import { EngineDetails } from '../../../engine/types';
@@ -66,10 +66,13 @@ export const MetaEnginesTableLogic = kea<
     expandedSourceEngines: [
       (selectors) => [selectors.sourceEngines, selectors.expandedRows],
       (sourceEngines: MetaEnginesTableValues['sourceEngines'], expandedRows: string[]) => {
-        return Object.keys(expandedRows).reduce((expandedRowMap, engineName) => {
-          expandedRowMap[engineName] = sourceEngines[engineName];
-          return expandedRowMap;
-        }, {} as MetaEnginesTableValues['sourceEngines']);
+        return Object.keys(expandedRows).reduce(
+          (expandedRowMap, engineName) => {
+            expandedRowMap[engineName] = sourceEngines[engineName];
+            return expandedRowMap;
+          },
+          {} as MetaEnginesTableValues['sourceEngines']
+        );
       },
     ],
   },

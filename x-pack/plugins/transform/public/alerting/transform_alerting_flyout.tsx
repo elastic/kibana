@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import type { FC } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import { memoize } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
-import { useAppDependencies } from '../app/app_dependencies';
+import { TRANSFORM_RULE_TYPE } from '../../common';
 import type {
   TransformHealthAlertRule,
   TransformHealthRuleParams,
 } from '../../common/types/alerting';
-import { TRANSFORM_RULE_TYPE } from '../../common';
+import { useAppDependencies } from '../app/app_dependencies';
 
 interface TransformAlertFlyoutProps {
   initialAlert?: TransformHealthAlertRule | null;

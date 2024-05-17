@@ -8,17 +8,17 @@
 import React from 'react';
 
 import {
-  EuiText,
+  EuiCallOut,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
-  EuiCallOut,
+  EuiPageSection,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { CreateAlert } from './create_alert';
 import { AlertingExampleComponentParams } from '../application';
+import { CreateAlert } from './create_alert';
 
 export const DocumentationPage = (
   deps: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>

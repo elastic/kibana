@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
 import { css } from '@emotion/css';
+import React, { ReactNode } from 'react';
 
 import { EuiNotificationBadge } from '@elastic/eui';
-import { Toast } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
+import { Toast } from '@kbn/core-notifications-browser';
 
 /**
  * We can introduce this type within this domain, to allow for react-managed titles

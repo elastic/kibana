@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
-import { useKibana } from '../common/lib/kibana';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
+import { useKibana } from '../common/lib/kibana';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 
 interface ViewResultsInDiscoverActionProps {

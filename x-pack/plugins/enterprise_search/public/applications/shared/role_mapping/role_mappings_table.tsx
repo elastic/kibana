@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiIconTip, EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
@@ -18,13 +18,13 @@ import { RoleRules } from '../types';
 import './role_mappings_table.scss';
 
 import {
-  ROLE_LABEL,
   ALL_LABEL,
-  EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
-  FILTER_ROLE_MAPPINGS_PLACEHOLDER,
-  ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
+  EXTERNAL_ATTRIBUTE_LABEL,
   EXTERNAL_ATTRIBUTE_TOOLTIP,
+  FILTER_ROLE_MAPPINGS_PLACEHOLDER,
+  ROLE_LABEL,
+  ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
 } from './constants';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 

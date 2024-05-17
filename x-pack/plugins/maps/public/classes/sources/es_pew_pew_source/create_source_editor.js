@@ -6,18 +6,18 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Fragment, Component } from 'react';
 
-import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SingleFieldSelect } from '../../../components/single_field_select';
+import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 
-import { EuiFormRow, EuiCallOut, EuiPanel } from '@elastic/eui';
-import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
-import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
+import { EuiCallOut, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
+import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 
 export class CreateSourceEditor extends Component {
   static propTypes = {

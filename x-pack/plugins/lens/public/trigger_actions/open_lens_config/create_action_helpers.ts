@@ -1,3 +1,10 @@
+import type { CoreStart } from '@kbn/core/public';
+import {
+  ENABLE_ESQL,
+  getESQLAdHocDataview,
+  getESQLQueryColumns,
+  getIndexForESQLQuery,
+} from '@kbn/esql-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,22 +12,15 @@
  * 2.0.
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import {
-  getESQLAdHocDataview,
-  getIndexForESQLQuery,
-  ENABLE_ESQL,
-  getESQLQueryColumns,
-} from '@kbn/esql-utils';
-import type { Datasource, Visualization } from '../../types';
-import type { LensPluginStartDependencies } from '../../plugin';
-import { suggestionsApi } from '../../lens_suggestions_api';
-import { generateId } from '../../id_generator';
-import { executeEditAction } from './edit_action_helpers';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { Embeddable } from '../../embeddable';
+import { generateId } from '../../id_generator';
+import { suggestionsApi } from '../../lens_suggestions_api';
+import type { LensPluginStartDependencies } from '../../plugin';
+import type { Datasource, Visualization } from '../../types';
+import { executeEditAction } from './edit_action_helpers';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<

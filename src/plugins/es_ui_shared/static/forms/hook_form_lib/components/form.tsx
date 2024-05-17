@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
 import { EuiForm } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 
 import { FormProvider } from '../form_context';
 import { FormDataContextProvider } from '../form_data_context';

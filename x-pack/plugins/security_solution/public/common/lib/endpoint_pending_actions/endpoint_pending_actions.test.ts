@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../kibana';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { KibanaServices } from '../kibana';
 import { fetchPendingActionsByAgentId } from './endpoint_pending_actions';
 import { pendingActionsHttpMock, pendingActionsResponseMock } from './mocks';
-import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 
 jest.mock('../kibana');
 

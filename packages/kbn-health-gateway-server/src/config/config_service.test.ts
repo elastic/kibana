@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  envCreateDefaultMock,
-  configServiceMock,
-  rawConfigServiceMock,
-} from './config_service.test.mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { fromRoot } from '@kbn/repo-info';
 import { getConfigService } from './config_service';
+import {
+  configServiceMock,
+  envCreateDefaultMock,
+  rawConfigServiceMock,
+} from './config_service.test.mocks';
 
 const DEFAULT_CONFIG_PATH = fromRoot('config/gateway.yml');
 

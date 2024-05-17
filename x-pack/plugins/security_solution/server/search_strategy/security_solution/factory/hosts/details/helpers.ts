@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set/fp';
-import { get, has, head } from 'lodash/fp';
 import type {
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
+import { get, has, head } from 'lodash/fp';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import type {
   AggregationRequest,
@@ -23,8 +23,8 @@ import type {
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { getPendingActionsSummary } from '../../../../../endpoint/services';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const HOST_DETAILS_FIELDS = [
   '_id',

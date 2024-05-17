@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { ConnectorSelector } from '.';
-import { fireEvent, render } from '@testing-library/react';
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const onConnectorSelectionChange = jest.fn();
 const setIsOpen = jest.fn();

@@ -6,9 +6,9 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import styled from 'styled-components';
 import {
   EuiBasicTable,
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,26 +20,26 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
-  EuiBetaBadge,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import styled from 'styled-components';
 
-import * as i18n from './translations';
-import { useOnOpenCloseHandler } from '../../../helper_hooks';
-import { RiskScoreLevel } from '../severity/common';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   CriticalityLevels,
   CriticalityModifiers,
 } from '../../../../common/entity_analytics/asset_criticality';
+import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { useOnOpenCloseHandler } from '../../../helper_hooks';
+import { AssetCriticalityBadge } from '../asset_criticality';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
-import { AssetCriticalityBadge } from '../asset_criticality';
+import { RiskScoreLevel } from '../severity/common';
+import * as i18n from './translations';
 
 const SpacedOrderedList = styled.ol`
   li {

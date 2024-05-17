@@ -6,9 +6,9 @@
  */
 
 import {
+  flattenSourceDoc,
   getApmAlertSourceFields,
   getApmAlertSourceFieldsAgg,
-  flattenSourceDoc,
 } from './get_apm_alert_source_fields';
 
 const mockSourceObj = {

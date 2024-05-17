@@ -10,10 +10,10 @@ import {
   compressionAlgorithm,
   encryptionAlgorithm,
   identifier,
+  manifestSchemaVersion,
   semanticVersion,
   sha256,
   size,
-  manifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
 import { created } from './common';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
 import PropTypes from 'prop-types';
+import React, { FC } from 'react';
 import tinycolor from 'tinycolor2';
 
 import { ColorManager, Props as ColorManagerProps } from '../color_manager';

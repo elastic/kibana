@@ -11,9 +11,9 @@ import { isNumber } from 'lodash';
 import React, { useMemo } from 'react';
 import { asDuration, asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 

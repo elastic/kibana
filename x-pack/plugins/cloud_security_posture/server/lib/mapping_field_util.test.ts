@@ -6,9 +6,9 @@
  */
 
 import {
+  MAPPING_VERSION_DELIMITER,
   toBenchmarkDocFieldKey,
   toBenchmarkMappingFieldKey,
-  MAPPING_VERSION_DELIMITER,
 } from './mapping_field_util'; // replace 'yourFile' with the actual file name
 
 describe('Benchmark Field Key Functions', () => {

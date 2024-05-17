@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Executor } from './executor';
 import { parseExpression } from '../ast';
 import { Execution } from '../execution/execution';
+import { Executor } from './executor';
 
 jest.mock('../execution/execution', () => ({
   Execution: jest.fn(),

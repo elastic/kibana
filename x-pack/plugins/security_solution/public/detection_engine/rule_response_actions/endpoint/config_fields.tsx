@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
-import { OverwriteField } from './overwrite_process_field';
+import React from 'react';
 import { FieldNameField } from './field_name';
+import { OverwriteField } from './overwrite_process_field';
 
 interface AdditionalConfigFieldProps {
   basePath: string;

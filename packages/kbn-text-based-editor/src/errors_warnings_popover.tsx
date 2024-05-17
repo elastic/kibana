@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
+  EuiBadge,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiBadge,
+  EuiText,
 } from '@elastic/eui';
-import { css, Interpolation, Theme } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
+import { Interpolation, Theme, css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import type { MonacoMessage } from './helpers';
 
 export const getConstsByType = (type: 'error' | 'warning', count: number) => {

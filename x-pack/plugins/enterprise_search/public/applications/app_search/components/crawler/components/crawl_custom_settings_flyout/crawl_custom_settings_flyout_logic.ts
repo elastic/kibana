@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
-import { CrawlerLogic, CrawlRequestOverrides } from '../../crawler_logic';
+import { CrawlRequestOverrides, CrawlerLogic } from '../../crawler_logic';
 import { DomainConfig, DomainConfigFromServer } from '../../types';
 import { domainConfigServerToClient } from '../../utils';
 import { extractDomainAndEntryPointFromUrl } from '../add_domain/utils';
@@ -52,10 +52,13 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
 }
 
 const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
-  const domainUrlMap = domainUrls.reduce((acc, domainUrl) => {
-    acc[domainUrl] = true;
-    return acc;
-  }, {} as { [key: string]: boolean });
+  const domainUrlMap = domainUrls.reduce(
+    (acc, domainUrl) => {
+      acc[domainUrl] = true;
+      return acc;
+    },
+    {} as { [key: string]: boolean }
+  );
 
   return seedUrls.filter((seedUrl) => {
     const { domain } = extractDomainAndEntryPointFromUrl(seedUrl);
@@ -173,10 +176,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     domainConfigMap: [
       (selectors) => [selectors.domainConfigs],
       (domainConfigs: DomainConfig[]) =>
-        domainConfigs.reduce((acc, domainConfig) => {
-          acc[domainConfig.name] = domainConfig;
-          return acc;
-        }, {} as { [key: string]: DomainConfig }),
+        domainConfigs.reduce(
+          (acc, domainConfig) => {
+            acc[domainConfig.name] = domainConfig;
+            return acc;
+          },
+          {} as { [key: string]: DomainConfig }
+        ),
     ],
     entryPointUrls: [
       (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],

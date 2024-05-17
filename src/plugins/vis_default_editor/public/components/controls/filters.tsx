@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
-import { omit, isEqual } from 'lodash';
-import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual, omit } from 'lodash';
+import React, { useState, useEffect } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import type { Query } from '@kbn/es-query';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
+import { FilterRow } from './filter';
 
 const generateId = htmlIdGenerator();
 

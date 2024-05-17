@@ -6,41 +6,41 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { groupBy } from 'lodash';
-import { schema } from '@kbn/config-schema';
-import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { isDefined } from '@kbn/ml-is-defined';
+import { schema } from '@kbn/config-schema';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { RouteInitialization } from '../types';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { groupBy } from 'lodash';
+import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
+import type { PipelineDefinition } from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
+import { mlLog } from '../lib/log';
+import { modelsProvider } from '../models/model_management';
+import type { RouteInitialization } from '../types';
+import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import {
+  createIngestPipelineSchema,
   deleteTrainedModelQuerySchema,
   getInferenceQuerySchema,
   inferTrainedModelBody,
   inferTrainedModelQuery,
   modelAndDeploymentIdSchema,
+  modelDownloadsQuery,
   modelIdSchema,
   optionalModelIdSchema,
   pipelineSimulateBody,
   putTrainedModelQuerySchema,
   threadingParamsSchema,
   updateDeploymentParamsSchema,
-  createIngestPipelineSchema,
-  modelDownloadsQuery,
 } from './schemas/inference_schema';
-import type { PipelineDefinition } from '../../common/types/trained_models';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
-import { mlLog } from '../lib/log';
-import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
-import { modelsProvider } from '../models/model_management';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
 export function filterForEnabledFeatureModels<
-  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
+  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig,
 >(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {
@@ -154,17 +154,20 @@ export function trainedModelsRoutes(
                 size: 10000,
               });
 
-              const modelDeploymentsMap = stats.trained_model_stats.reduce((acc, curr) => {
-                if (!curr.deployment_stats) return acc;
-                // @ts-ignore elasticsearch-js client is missing deployment_id
-                const deploymentId = curr.deployment_stats.deployment_id;
-                if (acc[curr.model_id]) {
-                  acc[curr.model_id].push(deploymentId);
-                } else {
-                  acc[curr.model_id] = [deploymentId];
-                }
-                return acc;
-              }, {} as Record<string, string[]>);
+              const modelDeploymentsMap = stats.trained_model_stats.reduce(
+                (acc, curr) => {
+                  if (!curr.deployment_stats) return acc;
+                  // @ts-ignore elasticsearch-js client is missing deployment_id
+                  const deploymentId = curr.deployment_stats.deployment_id;
+                  if (acc[curr.model_id]) {
+                    acc[curr.model_id].push(deploymentId);
+                  } else {
+                    acc[curr.model_id] = [deploymentId];
+                  }
+                  return acc;
+                },
+                {} as Record<string, string[]>
+              );
 
               const modelIdsAndAliases: string[] = Array.from(
                 new Set([

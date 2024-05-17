@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { StatusIcon, STATUS_ICON_TYPES } from '../../status_icon';
+import React from 'react';
+import { STATUS_ICON_TYPES, StatusIcon } from '../../status_icon';
 
 export function MachineLearningJobStatusIcon({ status }: { status: string }) {
   const type = (() => {

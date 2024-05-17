@@ -1,3 +1,4 @@
+import { EuiSpacer } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +6,14 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useMetricsDataViewContext } from '../hooks/use_metrics_data_view';
-import { UnifiedSearchBar } from './search_bar/unified_search_bar';
-import { HostsContent } from './hosts_content';
-import { ErrorCallout } from './error_callout';
 import { UnifiedSearchProvider } from '../hooks/use_unified_search';
+import { ErrorCallout } from './error_callout';
+import { HostsContent } from './hosts_content';
+import { UnifiedSearchBar } from './search_bar/unified_search_bar';
 
 export const HostContainer = () => {
   const { dataView, loading, error, metricAlias, retry } = useMetricsDataViewContext();

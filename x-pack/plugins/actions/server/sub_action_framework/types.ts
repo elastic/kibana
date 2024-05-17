@@ -6,11 +6,11 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { Logger } from '@kbn/logging';
 
-import type { Method, AxiosRequestConfig } from 'axios';
 import { KibanaRequest } from '@kbn/core-http-server';
+import type { AxiosRequestConfig, Method } from 'axios';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,

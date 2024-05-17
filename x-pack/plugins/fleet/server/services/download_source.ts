@@ -10,19 +10,19 @@ import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import {
-  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-  DEFAULT_DOWNLOAD_SOURCE_URI,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_URI,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 } from '../constants';
 
-import type { DownloadSource, DownloadSourceSOAttributes, DownloadSourceBase } from '../types';
-import { DownloadSourceError, FleetError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
+import { DownloadSourceError, FleetError } from '../errors';
+import type { DownloadSource, DownloadSourceBase, DownloadSourceSOAttributes } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
-import { escapeSearchQueryPhrase } from './saved_object';
 import { getFleetProxy } from './fleet_proxies';
+import { escapeSearchQueryPhrase } from './saved_object';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { source_id: sourceId, ...attributes } = so.attributes;

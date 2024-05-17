@@ -8,22 +8,22 @@
 import React, { useState, useMemo } from 'react';
 
 import {
-  EuiCallOut,
   EuiButton,
-  EuiSpacer,
-  EuiLink,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiCopy,
-  EuiButtonIcon,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { EuiCallOutProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices } from '../../../../hooks';
 
-import { getLogstashPipeline, LOGSTASH_CONFIG_PIPELINES } from './helpers';
+import { LOGSTASH_CONFIG_PIPELINES, getLogstashPipeline } from './helpers';
 import { useLogstashApiKey } from './hooks';
 
 export const LogstashInstructions = () => {

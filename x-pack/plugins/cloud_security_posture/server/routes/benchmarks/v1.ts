@@ -1,27 +1,27 @@
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ListResult, PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { Logger } from '@kbn/core/server';
+import { AgentPolicy, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  PackagePolicyClient,
   AgentPolicyServiceInterface,
   AgentService,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, POSTURE_TYPE_ALL } from '../../../common/constants';
-import { isNonNullable, getBenchmarkFromPackagePolicy } from '../../../common/utils/helpers';
+import { Benchmark } from '../../../common/types/benchmarks/v1';
+import { getBenchmarkFromPackagePolicy, isNonNullable } from '../../../common/utils/helpers';
 import { AgentStatusByAgentPolicyMap } from '../../lib/fleet_util';
 import {
-  getCspPackagePolicies,
-  getCspAgentPolicies,
   getAgentStatusesByAgentPolicies,
+  getCspAgentPolicies,
+  getCspPackagePolicies,
 } from '../../lib/fleet_util';
 import { getRulesCountForPolicy } from './utilities';
-import { Benchmark } from '../../../common/types/benchmarks/v1';
 
 export const getBenchmarksData = (
   soClient: SavedObjectsClientContract,

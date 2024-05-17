@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { I18nProvider } from '@kbn/i18n-react';
 import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 import './mount_wrapper.scss';
 

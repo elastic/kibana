@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
-import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import {
@@ -18,9 +18,9 @@ import {
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
 } from '../../common/mock';
-import { useBulkActions } from './use_bulk_actions';
 import * as api from '../../containers/api';
 import { basicCase } from '../../containers/mock';
+import { useBulkActions } from './use_bulk_actions';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');

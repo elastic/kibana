@@ -10,13 +10,13 @@ import { APP_ID, ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/con
 jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
-import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
 import { SearchSource } from '@kbn/data-plugin/public';
+import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 
 import { loadIndexSettings } from './util/load_index_settings';
 
-import { ESSearchSource } from './es_search_source';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import { ESSearchSource } from './es_search_source';
 
 const mockDescriptor = { indexPatternId: 'foo', geoField: 'bar' };
 

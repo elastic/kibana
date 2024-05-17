@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useConnectionDetailsService } from '../../../context';
+import * as React from 'react';
 import { SpaNoRouterLink } from '../../../components/spa_no_router_link';
+import { useConnectionDetailsService } from '../../../context';
 
 export const ManageKeysLink: React.FC = () => {
   const service = useConnectionDetailsService();

@@ -7,8 +7,8 @@
 
 import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { PublicAssetsClient } from './public_assets_client';
 import * as routePaths from '../../common/constants_routes';
+import { PublicAssetsClient } from './public_assets_client';
 
 describe('Public assets client', () => {
   let http: HttpSetupMock = coreMock.createSetup().http;

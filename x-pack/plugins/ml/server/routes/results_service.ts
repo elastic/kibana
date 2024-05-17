@@ -7,25 +7,25 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
+import type { MlClient } from '../lib/ml_client';
+import { resultsServiceProvider } from '../models/results_service';
 import type { RouteInitialization } from '../types';
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
   anomaliesTableDataSchema,
+  anomalySearchSchema,
   categoryDefinitionSchema,
   categoryExamplesSchema,
+  getAnomalyChartsSchema,
+  getAnomalyRecordsSchema,
   getDatafeedResultsChartDataSchema,
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
-  anomalySearchSchema,
-  getAnomalyChartsSchema,
-  getAnomalyRecordsSchema,
 } from './schemas/results_service_schema';
-import { resultsServiceProvider } from '../models/results_service';
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
   getCategorizerStatsSchema,
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
-import type { MlClient } from '../lib/ml_client';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);

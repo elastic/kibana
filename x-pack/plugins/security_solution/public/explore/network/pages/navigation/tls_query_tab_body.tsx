@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
+import React, { useEffect, useState } from 'react';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useNetworkTls, ID } from '../../containers/tls';
-import { TlsTable } from '../../components/tls_table';
-import type { FTQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { TlsTable } from '../../components/tls_table';
+import { ID, useNetworkTls } from '../../containers/tls';
+import type { FTQueryTabBodyProps } from './types';
 
 const TlsTableManage = manageQuery(TlsTable);
 

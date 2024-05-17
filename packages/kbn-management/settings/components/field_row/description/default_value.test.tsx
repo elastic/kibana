@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { FieldDefaultValue, DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX } from './default_value';
+import React from 'react';
 import { wrap } from '../mocks';
+import { DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX, FieldDefaultValue } from './default_value';
 
 describe('FieldDefaultValue', () => {
   it('renders without errors', () => {

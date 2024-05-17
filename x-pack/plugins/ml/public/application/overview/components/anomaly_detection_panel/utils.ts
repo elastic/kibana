@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import type { GroupsDictionary } from './anomaly_detection_panel';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import type {
-  MlSummaryJobs,
   MlSummaryJob,
+  MlSummaryJobs,
 } from '../../../../../common/types/anomaly_detection_jobs';
+import type { GroupsDictionary } from './anomaly_detection_panel';
 
 export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   groups: GroupsDictionary;

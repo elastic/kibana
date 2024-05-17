@@ -6,35 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiButton,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiTitle,
-  EuiEmptyPrompt,
-  EuiStat,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiFlexItem,
-} from '@elastic/eui';
-import {
-  Chart,
   Axis,
-  Position,
+  Chart,
   HistogramBarSeries,
+  LEGACY_LIGHT_THEME,
+  Position,
   ScaleType,
   Settings,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiStat,
+  EuiTitle,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { useQuery } from '@tanstack/react-query';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 
 interface Props {
   onClose: () => void;

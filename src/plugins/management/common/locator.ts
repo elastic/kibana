@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { MANAGEMENT_APP_ID } from './contants';
 
 export interface ManagementAppLocatorParams extends SerializableRecord {

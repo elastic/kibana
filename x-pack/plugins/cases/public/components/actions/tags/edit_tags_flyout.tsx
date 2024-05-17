@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,17 +14,19 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  euiFullHeight,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  euiFullHeight,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useState } from 'react';
 
 import type { CasesUI } from '../../../../common';
 import { useGetTags } from '../../../containers/use_get_tags';
+import type { ItemsSelectionState } from '../types';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
-import type { ItemsSelectionState } from '../types';
 
 interface Props {
   selectedCases: CasesUI;

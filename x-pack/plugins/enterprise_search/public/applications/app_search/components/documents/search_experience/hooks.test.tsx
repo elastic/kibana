@@ -26,10 +26,10 @@ jest.mock('react', () => ({
 
 import React from 'react';
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { useSearchContextState, useSearchContextActions } from './hooks';
+import { useSearchContextActions, useSearchContextState } from './hooks';
 
 describe('hooks', () => {
   describe('useSearchContextState', () => {

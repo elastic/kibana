@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +7,9 @@
  * Side Public License, v 1.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { get } from 'lodash';
 
-import { FieldHook, FormHook } from '../types';
 import { useFormContext } from '../form_context';
+import { FieldHook, FormHook } from '../types';
 import { useFormData } from './use_form_data';
 
 interface Options {
@@ -61,10 +61,13 @@ export const useFormIsModified = ({
       return;
     }
 
-    return fieldPathsToDiscard.reduce((acc, path) => {
-      acc[path] = true;
-      return acc;
-    }, {} as { [key: string]: {} });
+    return fieldPathsToDiscard.reduce(
+      (acc, path) => {
+        acc[path] = true;
+        return acc;
+      },
+      {} as { [key: string]: {} }
+    );
 
     // discardArrayToString === discard, we don't want to add it to the dependencies so
     // the consumer does not need to memoize the "discard" array they provide.

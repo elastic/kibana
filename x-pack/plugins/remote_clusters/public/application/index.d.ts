@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, ScopedHistory, ExecutionContextStart } from '@kbn/core/public';
+import { CoreStart, ExecutionContextStart, ScopedHistory } from '@kbn/core/public';
 import { RegisterManagementAppArgs } from '../types';
 
 export declare const renderApp: (

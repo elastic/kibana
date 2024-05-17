@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { format, ALLOWED_FIELDS } from './formatter';
-import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,
-  PROFILE_VALUES_ENUM,
   PROFILES_MAP,
+  PROFILE_VALUES_ENUM,
 } from '../../../../../../common/constants/monitor_defaults';
+import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import { ALLOWED_FIELDS, format } from './formatter';
 
 describe('format', () => {
   let formValues: Record<string, unknown>;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
-import { omit, isEqual } from 'lodash';
+import { MakeLogicType, kea } from 'kea';
+import { isEqual, omit } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 

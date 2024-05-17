@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 import {
-  FIELD_TYPES,
-  fieldValidators,
-  UseField,
-  Field,
   ComboBoxField,
+  FIELD_TYPES,
+  Field,
   SelectField,
+  UseField,
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to, from } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
+import { FieldsConfig, from, to } from './shared';
 
 const { emptyField } = fieldValidators;
 

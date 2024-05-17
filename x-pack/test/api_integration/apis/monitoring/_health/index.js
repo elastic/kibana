@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
 import expect from '@kbn/expect';
+import { mapValues } from 'lodash';
 
 import { getLifecycleMethods } from '../data_stream';
 

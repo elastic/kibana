@@ -10,16 +10,16 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createIndexConnector,
   createEsQueryRule,
+  createIndexConnector,
+  createSlackConnector,
   disableRule,
-  updateEsQueryRule,
-  runRule,
-  muteRule,
   enableRule,
   muteAlert,
+  muteRule,
+  runRule,
   unmuteRule,
-  createSlackConnector,
+  updateEsQueryRule,
 } from './helpers/alerting_api_helper';
 import {
   createIndex,

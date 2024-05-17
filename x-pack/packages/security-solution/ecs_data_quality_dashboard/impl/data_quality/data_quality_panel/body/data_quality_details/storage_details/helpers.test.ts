@@ -9,6 +9,10 @@ import numeral from '@elastic/numeral';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { EMPTY_STAT } from '../../../../helpers';
+import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
+import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
+import { PatternRollup } from '../../../../types';
 import {
   DEFAULT_INDEX_COLOR,
   getFillColor,
@@ -21,10 +25,6 @@ import {
   getPatternLegendItem,
   getPatternSizeInBytes,
 } from './helpers';
-import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
-import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { PatternRollup } from '../../../../types';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

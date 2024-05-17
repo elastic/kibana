@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type Filter, isCombinedFilter, CombinedFilter } from '@kbn/es-query';
+import { CombinedFilter, type Filter, isCombinedFilter } from '@kbn/es-query';
 
 /**
  * Defines a boolean relation type (AND/OR) from the filter otherwise returns undefined.

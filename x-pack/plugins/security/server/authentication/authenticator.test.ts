@@ -21,15 +21,6 @@ import {
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { AuthenticationResult } from './authentication_result';
-import type { AuthenticatorOptions } from './authenticator';
-import { Authenticator, enrichWithUserProfileId } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
-import type {
-  BasicAuthenticationProvider,
-  HTTPAuthenticationProvider,
-  SAMLAuthenticationProvider,
-} from './providers';
 import type { SecurityLicenseFeatures } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -54,6 +45,15 @@ import {
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
+import { AuthenticationResult } from './authentication_result';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator, enrichWithUserProfileId } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
+import type {
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+} from './providers';
 
 let auditLogger: AuditLogger;
 function getMockOptions({

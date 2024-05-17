@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import deepEqual from 'fast-deep-equal';
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import React, { useCallback, useMemo, useContext } from 'react';
 import { useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import type { ExpandedDetailType } from '../../../../common/types';
-import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { getScopedActions } from '../../../helpers';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { ExpandedDetailType } from '../../../../common/types';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 import {
   DragEffects,
   DraggableWrapper,
@@ -22,12 +21,13 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { NetworkDetailsLink } from '../../../common/components/links';
+import { getScopedActions } from '../../../helpers';
 import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 import type { DataProvider } from '../timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
-import type { TimelineTabs } from '../../../../common/types/timeline';
-import { NetworkDetailsLink } from '../../../common/components/links';
 
 const getUniqueId = ({
   contextId,

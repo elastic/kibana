@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import React from 'react';
 import { Observable, of } from 'rxjs';
-import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
 export const hasUserDataView = jest.fn();
 export const hasESData = jest.fn();

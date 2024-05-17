@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { RuleEventLogList } from '../application/sections';
 import type {
-  RuleEventLogListProps,
   RuleEventLogListOptions,
+  RuleEventLogListProps,
 } from '../application/sections/rule_details/components/rule_event_log_list';
 
 const queryClient = new QueryClient();

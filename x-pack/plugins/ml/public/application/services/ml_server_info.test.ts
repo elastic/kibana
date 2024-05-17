@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 import {
-  loadMlServerInfo,
+  extractDeploymentId,
   getCloudDeploymentId,
-  isCloud,
-  isCloudTrial,
   getNewJobDefaults,
   getNewJobLimits,
-  extractDeploymentId,
+  isCloud,
+  isCloudTrial,
+  loadMlServerInfo,
 } from './ml_server_info';
-import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
 jest.mock('./ml_api_service', () => ({
   ml: {

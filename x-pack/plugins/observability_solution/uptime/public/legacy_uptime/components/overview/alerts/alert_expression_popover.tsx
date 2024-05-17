@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
+import React, { useState } from 'react';
 
 interface AlertExpressionPopoverProps {
   'aria-label': string;

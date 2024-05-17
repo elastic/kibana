@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
-import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import React from 'react';
 import {
   DataView,
   DataViewField,
   DataViewFieldMap,
   IIndexPatternFieldList,
 } from '@kbn/data-views-plugin/common';
+import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import {
   EmbeddableComponent,
   FieldBasedIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import '@testing-library/jest-dom';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { GroupPreview } from './group_preview';
 import { LensByValueInput } from '@kbn/lens-plugin/public/embeddable';
-import { DATA_LAYER_ID, DATE_HISTOGRAM_COLUMN_ID, getCurrentTimeField } from './lens_attributes';
 import { EuiSuperDatePickerTestHarness } from '@kbn/test-eui-helpers';
+import userEvent from '@testing-library/user-event';
+import { GroupPreview } from './group_preview';
+import { DATA_LAYER_ID, DATE_HISTOGRAM_COLUMN_ID, getCurrentTimeField } from './lens_attributes';
 
 describe('group editor preview', () => {
   const annotation = getDefaultManualAnnotation('my-id', 'some-timestamp');

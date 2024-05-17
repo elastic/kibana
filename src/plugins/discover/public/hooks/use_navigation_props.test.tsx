@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { MouseEvent } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { useNavigationProps } from './use_navigation_props';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
+import React, { MouseEvent } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { useNavigationProps } from './use_navigation_props';
 
 const mockServices = {
   singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url'), navigate: jest.fn() },

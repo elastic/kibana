@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  IngestInferenceProcessor,
   IngestInferenceConfig,
+  IngestInferenceProcessor,
 } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { DEFAULT_INPUT_FIELD } from '../test_models/models/inference_base';

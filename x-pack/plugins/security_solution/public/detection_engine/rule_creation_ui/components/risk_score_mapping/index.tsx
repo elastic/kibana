@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-import { noop } from 'lodash/fp';
 import {
-  EuiFormRow,
   EuiCheckbox,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
+  EuiFormRow,
   EuiIcon,
-  EuiSpacer,
   EuiRange,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import type { EuiRangeProps } from '@elastic/eui';
+import { noop } from 'lodash/fp';
+import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { PropTypes } from 'prop-types';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import { JobSelectorBadge } from '../job_selector_badge';
 import { i18n } from '@kbn/i18n';
+import { PropTypes } from 'prop-types';
+import React from 'react';
+import { JobSelectorBadge } from '../job_selector_badge';
 
 export function IdBadges({ limit, maps, onLinkClick, selectedIds, showAllBarBadges }) {
   const badges = [];

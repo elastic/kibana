@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiText, logicalCSS, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import type { ErrorToastOptions } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isValidOwner } from '../../common/utils/owner';
+import React, { useMemo } from 'react';
 import type { CaseUI } from '../../common';
+import { OWNER_INFO } from '../../common/constants';
 import { AttachmentType } from '../../common/types/domain';
-import { useKibana, useToasts } from './lib/kibana';
-import { generateCaseViewPath } from './navigation';
+import { isValidOwner } from '../../common/utils/owner';
+import { TruncatedText } from '../components/truncated_text';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
+import { useKibana, useToasts } from './lib/kibana';
+import { useApplication } from './lib/kibana/use_application';
+import { generateCaseViewPath } from './navigation';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
-import { OWNER_INFO } from '../../common/constants';
-import { useApplication } from './lib/kibana/use_application';
-import { TruncatedText } from '../components/truncated_text';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;

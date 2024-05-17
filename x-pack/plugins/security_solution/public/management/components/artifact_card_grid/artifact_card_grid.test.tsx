@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { act, fireEvent } from '@testing-library/react';
+import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import React from 'react';
-import type { ArtifactCardGridProps } from './artifact_card_grid';
-import { ArtifactCardGrid } from './artifact_card_grid';
-import { fireEvent, act } from '@testing-library/react';
+import type { AnyArtifact } from '../artifact_entry_card';
 import {
   getExceptionProviderMock,
   getTrustedAppProviderMock,
 } from '../artifact_entry_card/test_utils';
-import type { AnyArtifact } from '../artifact_entry_card';
+import type { ArtifactCardGridProps } from './artifact_card_grid';
+import { ArtifactCardGrid } from './artifact_card_grid';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

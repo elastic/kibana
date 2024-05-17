@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-import { RoundedBadge } from './rounded_badge';
 import type { AndOr } from '.';
+import { RoundedBadge } from './rounded_badge';
 
 const antennaStyles = css`
   background: ${({ theme }) => theme.eui.euiColorLightShade};

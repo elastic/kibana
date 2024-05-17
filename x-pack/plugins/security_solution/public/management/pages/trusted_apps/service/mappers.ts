@@ -8,8 +8,8 @@
 import type { CreateExceptionListItemSchema, OsType } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import type { EffectScope, NewTrustedApp } from '../../../../../common/endpoint/types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts/constants';
+import type { EffectScope, NewTrustedApp } from '../../../../../common/endpoint/types';
 import { conditionEntriesToEntries } from '../../../../common/utils/exception_list_items';
 
 type Mapping<T extends string, U> = { [K in T]: U };

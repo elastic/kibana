@@ -1,3 +1,16 @@
+import {
+  EuiAccordion,
+  EuiButtonEmpty,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,19 +18,6 @@
  * 2.0.
  */
 import React from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiAccordion,
-  EuiButtonEmpty,
-  EuiLink,
-  useEuiTheme,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;

@@ -36,17 +36,17 @@ jest.mock('../kibana_services', () => ({
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
 import {
-  isMapLoading,
   getDataFilters,
-  getTimeFilters,
   getQueryableUniqueIndexPatternIds,
   getSpatialFiltersLayer,
+  getTimeFilters,
+  isMapLoading,
 } from './map_selectors';
 
+import { Filter } from '@kbn/es-query';
 import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { buildGeoShapeFilter } from '../../common/elasticsearch_util';
 import { ILayer } from '../classes/layers/layer';
-import { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import { getDefaultMapSettings } from '../reducers/map/default_map_settings';

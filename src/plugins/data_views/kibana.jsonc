@@ -7,20 +7,10 @@
     "id": "dataViews",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "fieldFormats",
-      "expressions",
-      "contentManagement"
-    ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaUtils"
-    ],
-    "runtimePluginDependencies" : ["security"],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredPlugins": ["fieldFormats", "expressions", "contentManagement"],
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaUtils"],
+    "runtimePluginDependencies": ["security"],
+    "extraPublicDirs": ["common"]
   }
 }

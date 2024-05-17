@@ -6,21 +6,21 @@
  */
 
 import {
-  EuiText,
   EuiIcon,
   EuiInMemoryTable,
   EuiSearchBarProps,
+  EuiText,
   type HorizontalAlignment,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { AddMetadataFilterButton } from './add_metadata_filter_button';
 import { ExpandableContent } from '../../components/expandable_content';
-import { type Field, getRowsWithPins } from './utils';
+import { AddMetadataFilterButton } from './add_metadata_filter_button';
 import { AddMetadataPinToRow } from './add_pin_to_row';
+import { type Field, getRowsWithPins } from './utils';
 
 export interface Props {
   rows: Field[];

@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useMountedState from 'react-use/lib/useMountedState';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { FC } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { SingleMetricViewerEmbeddableInput } from '..';
+import type { MlEntity, SingleMetricViewerEmbeddableUserInput } from '..';
 import { ML_PAGES } from '../../../common/constants/locator';
+import { JobSelectorControl } from '../../alerting/job_selector';
+import { useMlLink } from '../../application/contexts/kibana';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import { useMlLink } from '../../application/contexts/kibana';
-import { JobSelectorControl } from '../../alerting/job_selector';
-import type { SingleMetricViewerEmbeddableUserInput, MlEntity } from '..';
 import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
 
 export interface SingleMetricViewerInitializerProps {

@@ -7,10 +7,10 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getSessionStatus } from './get_session_status';
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import moment from 'moment';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { SearchSessionsConfigSchema } from '../../../config';
+import { getSessionStatus } from './get_session_status';
 
 const mockInProgressSearchResponse = {
   body: {

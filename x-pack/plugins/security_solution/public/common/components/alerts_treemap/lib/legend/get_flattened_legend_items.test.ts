@@ -7,12 +7,12 @@
 
 import { omit } from 'lodash/fp';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { LegendItem } from '../../../charts/draggable_legend_item';
-import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
-import { getFlattenedLegendItems } from './get_flattened_legend_items';
+import { RISK_SCORE_STEPS, getRiskScorePalette } from '../chart_palette';
 import { bucketsWithStackByField1, maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import { flattenedBuckets } from '../flatten/mocks/mock_flattened_buckets';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { getFlattenedLegendItems } from './get_flattened_legend_items';
 
 describe('getFlattenedLegendItems', () => {
   it('returns the expected legend items', () => {

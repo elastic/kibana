@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
 import {
+  DataPublicPluginStart,
   SerializedSearchSourceFields,
   TimefilterContract,
-  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import { Filter } from '@kbn/es-query';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 

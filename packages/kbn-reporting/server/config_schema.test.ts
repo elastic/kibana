@@ -18,8 +18,9 @@ describe('Reporting Config Schema', () => {
   });
 
   it('allows ByteSizeValue values for certain keys', () => {
-    expect(ConfigSchema.validate({ csv: { maxSizeBytes: '12mb' } }).csv.maxSizeBytes)
-      .toMatchInlineSnapshot(`
+    expect(
+      ConfigSchema.validate({ csv: { maxSizeBytes: '12mb' } }).csv.maxSizeBytes
+    ).toMatchInlineSnapshot(`
       ByteSizeValue {
         "valueInBytes": 12582912,
       }

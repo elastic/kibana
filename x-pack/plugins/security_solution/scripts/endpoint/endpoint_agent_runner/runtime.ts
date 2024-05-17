@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { getAgentVersionMatchingCurrentStack } from '../common/fleet_services';
-import type { StartRuntimeServicesOptions } from './types';
 import type { RuntimeServices } from '../common/stack_services';
 import { createRuntimeServices } from '../common/stack_services';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import type { StartRuntimeServicesOptions } from './types';
 
 interface EndpointRunnerRuntimeServices extends RuntimeServices {
   options: Omit<

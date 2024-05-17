@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import * as i18n from './translations';
 

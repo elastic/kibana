@@ -10,49 +10,49 @@
  * annotated with anomalies.
  */
 
+import d3 from 'd3';
+import { each, get, isEqual, reduce } from 'lodash';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { isEqual, reduce, each, get } from 'lodash';
-import d3 from 'd3';
-import moment from 'moment';
 
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { context } from '@kbn/kibana-react-plugin/public';
 import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
-import { context } from '@kbn/kibana-react-plugin/public';
 
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { formatValue } from '../../../formatters/format_value';
+import { mlTableService } from '../../../services/table_service';
 import {
-  LINE_CHART_ANOMALY_RADIUS,
   ANNOTATION_SYMBOL_HEIGHT,
+  LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
   SCHEDULED_EVENT_SYMBOL_HEIGHT,
   drawLineChartDots,
   filterAxisLabels,
+  getMultiBucketImpactTooltipValue,
   numTicksForDateFormat,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
-  getMultiBucketImpactTooltipValue,
 } from '../../../util/chart_utils';
-import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
-import { mlTableService } from '../../../services/table_service';
-import { ContextChartMask } from '../context_chart_mask';
-import { timeSeriesExplorerServiceFactory } from '../../../util/time_series_explorer_service';
 import { mlEscape } from '../../../util/string_utils';
+import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
+import { timeSeriesExplorerServiceFactory } from '../../../util/time_series_explorer_service';
+import { ContextChartMask } from '../context_chart_mask';
 import {
   ANNOTATION_MASK_ID,
+  ANNOTATION_MIN_WIDTH,
   getAnnotationBrush,
   getAnnotationLevels,
   getAnnotationWidth,
-  renderAnnotations,
   highlightFocusChartAnnotation,
+  renderAnnotations,
   unhighlightFocusChartAnnotation,
-  ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
-import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
@@ -1330,7 +1330,8 @@ class TimeseriesChartIntl extends Component {
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[0]) - 10).html(`
+      .attr('x', contextXScale(handleBrushExtent[0]) - 10)
+      .html(`
         <div class="brush-handle-inner brush-handle-inner-left" style="padding-top: 27px">
           <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
             <polygon points="5,0 5,8 0,4" />
@@ -1341,7 +1342,8 @@ class TimeseriesChartIntl extends Component {
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[1]) + 0).html(`
+      .attr('x', contextXScale(handleBrushExtent[1]) + 0)
+      .html(`
         <div class="brush-handle-inner brush-handle-inner-right" style="padding-top: 27px">
           <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
             <polygon points="0,0 0,8 5,4" />

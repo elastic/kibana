@@ -7,8 +7,8 @@
  */
 
 import { buildRangeFilter } from '@kbn/es-query';
-import { CidrMask } from '../lib/cidr_mask';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { CidrMask } from '../lib/cidr_mask';
 import { IpPrefixKey } from '../lib/ip_prefix';
 
 export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, key: IpPrefixKey) => {

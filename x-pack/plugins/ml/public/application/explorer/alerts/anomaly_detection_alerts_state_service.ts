@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, EMPTY, type Observable, Subscription } from 'rxjs';
-import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import type {
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchResponse,
-} from '@kbn/rule-registry-plugin/common';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -23,8 +19,12 @@ import {
   ALERT_UUID,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import type {
+  RuleRegistrySearchRequest,
+  RuleRegistrySearchResponse,
+} from '@kbn/rule-registry-plugin/common';
+import { BehaviorSubject, EMPTY, type Observable, Subscription, combineLatest } from 'rxjs';
+import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,

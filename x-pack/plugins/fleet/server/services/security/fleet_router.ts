@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type {
   IKibanaResponse,
   IRouter,
@@ -14,7 +15,6 @@ import type {
   RequestHandler,
   RouteMethod,
 } from '@kbn/core/server';
-import type { VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
 
@@ -24,17 +24,17 @@ import { getRequestStore } from '../request_store';
 
 import type { FleetVersionedRouteConfig } from './types';
 
-import type {
-  FleetAuthzRouteConfig,
-  FleetAuthzRouter,
-  FleetAddVersionOpts,
-  FleetHandler,
-} from './types';
 import {
   checkSecurityEnabled,
-  getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
+  getAuthzFromRequest,
 } from './security';
+import type {
+  FleetAddVersionOpts,
+  FleetAuthzRouteConfig,
+  FleetAuthzRouter,
+  FleetHandler,
+} from './types';
 
 function withDefaultPublicAccess<Method extends RouteMethod>(
   options: FleetVersionedRouteConfig<Method>

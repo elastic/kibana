@@ -6,8 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { GraphPlugin } from './plugin';
 import { ConfigSchema } from '../config';
+import { GraphPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
   new GraphPlugin(initializerContext);

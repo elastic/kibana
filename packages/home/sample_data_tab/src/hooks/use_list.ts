@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { useServices } from '../services';

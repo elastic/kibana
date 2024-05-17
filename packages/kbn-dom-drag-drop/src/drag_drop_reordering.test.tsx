@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { fireEvent, screen, act } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Droppable, DroppableProps } from './droppable';
+import React from 'react';
 import { Draggable } from './draggable';
-import { dataTransfer, generateDragDropValue, renderWithDragDropContext } from './test_utils';
+import { Droppable, DroppableProps } from './droppable';
 import { ReorderProvider } from './providers/reorder_provider';
+import { dataTransfer, generateDragDropValue, renderWithDragDropContext } from './test_utils';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -34,7 +34,7 @@ describe('Drag and drop reordering', () => {
   type MaximumThreeDroppablesProps = [
     Partial<DroppableProps>?,
     Partial<DroppableProps>?,
-    Partial<DroppableProps>?
+    Partial<DroppableProps>?,
   ];
 
   const renderDragAndDropGroup = (

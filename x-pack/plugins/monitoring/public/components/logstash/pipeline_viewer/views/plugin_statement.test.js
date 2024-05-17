@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
 import { PluginStatement } from './plugin_statement';
-import { shallow } from 'enzyme';
 
-import { EuiButtonEmpty, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 
 describe('PluginStatement component', () => {
   let props;

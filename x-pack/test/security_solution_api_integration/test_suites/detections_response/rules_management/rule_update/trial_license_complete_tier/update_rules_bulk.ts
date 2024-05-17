@@ -5,44 +5,44 @@
  * 2.0.
  */
 
+import { Rule } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
+  NOTIFICATION_DEFAULT_FREQUENCY,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
-  NOTIFICATION_DEFAULT_FREQUENCY,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
-import {
-  getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  getSimpleRuleUpdate,
-  getSimpleRule,
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  removeServerGeneratedPropertiesIncludingRuleId,
-  getSimpleRuleWithoutRuleId,
-  getSimpleRuleOutputWithoutRuleId,
-  getRuleSavedObjectWithLegacyInvestigationFields,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  getRuleSOById,
-  removeUUIDFromActions,
-  getActionsWithFrequencies,
-  getActionsWithoutFrequencies,
-  getSomeActionsWithFrequencies,
-  updateUsername,
-} from '../../../utils';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   createRule,
+  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  createLegacyRuleAction,
+  createRuleThroughAlertingEndpoint,
+  getActionsWithFrequencies,
+  getActionsWithoutFrequencies,
+  getLegacyActionSO,
+  getRuleSOById,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getSimpleRule,
+  getSimpleRuleOutput,
+  getSimpleRuleOutputWithoutRuleId,
+  getSimpleRuleUpdate,
+  getSimpleRuleWithoutRuleId,
+  getSomeActionsWithFrequencies,
+  removeServerGeneratedProperties,
+  removeServerGeneratedPropertiesIncludingRuleId,
+  removeUUIDFromActions,
+  updateUsername,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

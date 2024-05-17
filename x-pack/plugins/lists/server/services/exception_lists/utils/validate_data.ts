@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { pipe } from 'fp-ts/pipeable';
-import { fold } from 'fp-ts/Either';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
+import * as t from 'io-ts';
 
 import { DataValidationError } from './errors';
 

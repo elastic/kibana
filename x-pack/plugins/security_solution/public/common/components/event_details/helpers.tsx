@@ -14,16 +14,16 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { BrowserFields } from '../../containers/source';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
-import * as i18n from './translations';
 import {
   AGENT_STATUS_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
+import * as i18n from './translations';
 
 /**
  * Defines the behavior of the search input that appears above the table of data

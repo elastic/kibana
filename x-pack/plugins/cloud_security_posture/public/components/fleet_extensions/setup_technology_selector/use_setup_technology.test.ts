@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 import {
   CLOUDBEAT_AWS,

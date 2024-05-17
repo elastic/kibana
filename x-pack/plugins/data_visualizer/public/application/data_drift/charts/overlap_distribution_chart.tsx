@@ -16,14 +16,14 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { NoChartsData } from './no_charts_data';
-import type { ComparisonHistogram, DataDriftField } from '../types';
-import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
+import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
+import type { ComparisonHistogram, DataDriftField } from '../types';
 import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
+import { NoChartsData } from './no_charts_data';
 
 export const OverlapDistributionComparison = ({
   data,

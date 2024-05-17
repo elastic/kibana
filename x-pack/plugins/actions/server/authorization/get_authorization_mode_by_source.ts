@@ -6,8 +6,8 @@
  */
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
 import { ALERT_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
 import { SavedObjectExecutionSource } from '../lib/action_execution_source';
 
 const LEGACY_VERSION = 'pre-7.10.0';

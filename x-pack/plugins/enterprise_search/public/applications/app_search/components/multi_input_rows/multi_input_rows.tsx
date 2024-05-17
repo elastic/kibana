@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import { EuiForm, EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiForm, EuiSpacer } from '@elastic/eui';
 
 import { CONTINUE_BUTTON_LABEL } from '../../../shared/constants';
 

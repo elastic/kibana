@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { useEffect } from 'react';
-import { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
 
 /**
  * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)

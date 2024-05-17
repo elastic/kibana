@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { ShardsView } from './shards_view';
 
 describe('render', () => {

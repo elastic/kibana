@@ -7,24 +7,24 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { deleteAllAlerts, deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
-import { deleteAllRules, deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 import {
+  assetCriticalityRouteHelpersFactory,
   buildDocument,
+  cleanAssetCriticality,
+  cleanRiskEngine,
   createAndSyncRuleAndAlertsFactory,
-  readRiskScores,
-  waitForRiskScoresToBePresent,
+  getRiskEngineTask,
   normalizeScores,
+  readRiskScores,
   riskEngineRouteHelpersFactory,
   updateRiskEngineConfigSO,
-  getRiskEngineTask,
-  waitForRiskEngineTaskToBeGone,
-  cleanRiskEngine,
-  assetCriticalityRouteHelpersFactory,
-  cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
+  waitForRiskEngineTaskToBeGone,
+  waitForRiskScoresToBePresent,
 } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

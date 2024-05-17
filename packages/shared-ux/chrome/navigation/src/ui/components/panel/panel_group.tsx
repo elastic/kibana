@@ -1,3 +1,15 @@
+import {
+  EuiAccordion,
+  EuiHorizontalRule,
+  EuiListGroup,
+  EuiSpacer,
+  type EuiThemeComputed,
+  EuiTitle,
+  type UseEuiTheme,
+  euiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +18,6 @@
  * Side Public License, v 1.
  */
 import React, { FC, useCallback } from 'react';
-import {
-  EuiListGroup,
-  EuiTitle,
-  useEuiTheme,
-  euiFontSize,
-  type EuiThemeComputed,
-  type UseEuiTheme,
-  EuiSpacer,
-  EuiAccordion,
-  EuiHorizontalRule,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { PanelNavItem } from './panel_nav_item';

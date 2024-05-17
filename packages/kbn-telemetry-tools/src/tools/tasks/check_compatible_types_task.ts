@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TaskContext } from './task_context';
 import { checkCompatibleTypeDescriptor } from '../check_collector_integrity';
+import { TaskContext } from './task_context';
 
 export function checkCompatibleTypesTask({ reporter, roots }: TaskContext) {
   return roots.map((root) => ({

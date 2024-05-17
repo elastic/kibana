@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import { EuiThemeComputed } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const getAppStyles = (euiTheme: EuiThemeComputed) => {
   return {

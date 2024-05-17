@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { importList } from '@kbn/securitysolution-list-api';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { importList } from '@kbn/securitysolution-list-api';
 
 const importListWithOptionalSignal = withOptionalSignal(importList);
 

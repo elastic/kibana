@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { MapAttributes } from '../content_management';
+import { MapSettingsCollector } from './map_settings_collector';
 // @ts-ignore
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
-import { MapSettingsCollector } from './map_settings_collector';
-import type { MapAttributes } from '../content_management';
 
 const expecteds = [
   {

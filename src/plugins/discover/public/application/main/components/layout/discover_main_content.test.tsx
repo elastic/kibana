@@ -6,13 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataView } from '@kbn/data-plugin/common';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { BehaviorSubject, of } from 'rxjs';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { PanelsToggle } from '../../../../components/panels_toggle';
+import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -20,22 +32,10 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../state_management/discover_data_state_container';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FetchStatus, SidebarToggleState } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { DiscoverDocuments } from './discover_documents';
-import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { PanelsToggle } from '../../../../components/panels_toggle';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { FieldStatisticsTab } from '../field_stats_table';
+import { DiscoverDocuments } from './discover_documents';
+import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 
 const mountComponent = async ({
   hideChart = false,

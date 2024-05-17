@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { set } from '@kbn/safer-lodash-set/fp';
 import { get } from 'lodash/fp';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopTablesFields,
   NetworkTlsFields,
+  NetworkTopTablesFields,
   NetworkUsersFields,
 } from '../../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
@@ -21,16 +21,16 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/
 import {
   setNetworkDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
-  updateNetworkTable,
-  updateNetworkAnomaliesJobIdFilter,
   updateNetworkAnomaliesInterval,
+  updateNetworkAnomaliesJobIdFilter,
+  updateNetworkTable,
 } from './actions';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
 import type { NetworkModel } from './model';
-import { NetworkType, NetworkDetailsTableType, NetworkTableType } from './model';
+import { NetworkDetailsTableType, NetworkTableType, NetworkType } from './model';
 
 export type NetworkState = NetworkModel;
 

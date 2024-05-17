@@ -10,9 +10,9 @@ import React from 'react';
 
 import { useDateFormat, useTimeZone } from '../../lib/kibana';
 
+import { FormattedDate, FormattedRelativePreferenceDate, PreferenceFormattedDate } from '.';
 import { TestProviders } from '../../mock';
 import { getEmptyString, getEmptyValue } from '../empty_value';
-import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 
 jest.mock('../../lib/kibana');
 const mockUseDateFormat = useDateFormat as jest.Mock;

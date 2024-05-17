@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC } from 'react';
 
 import type { Tag } from '../types';
 

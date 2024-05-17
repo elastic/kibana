@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export function validateMetrics(metrics) {
   const missingTypes = metrics.reduce((accumMissingTypes, { name, types }) => {

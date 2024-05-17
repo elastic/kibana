@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { get, intersection, union } from 'lodash';
 import React, { PureComponent, Fragment } from 'react';
-import { intersection, union, get } from 'lodash';
 
 import {
+  EUI_MODAL_CONFIRM_BUTTON,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
@@ -27,30 +28,29 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { PainlessLang } from '@kbn/monaco';
-import type {
-  FieldFormat,
-  FieldFormatInstanceType,
-  FieldFormatParams,
-} from '@kbn/field-formats-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
+import { CodeEditor } from '@kbn/code-editor';
 import {
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
+import type {
+  FieldFormat,
+  FieldFormatInstanceType,
+  FieldFormatParams,
+} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
-import { CodeEditor } from '@kbn/code-editor';
+import { PainlessLang } from '@kbn/monaco';
 import {
-  getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
+  getEnabledScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
@@ -58,11 +58,11 @@ import {
   ScriptingWarningCallOut,
 } from './components/scripting_call_outs';
 
-import { ScriptingHelpFlyout } from './components/scripting_help';
-import { FieldFormatEditor } from './components/field_format_editor';
 import { IndexPatternManagmentContextValue } from '../../types';
+import { FieldFormatEditor } from './components/field_format_editor';
+import { ScriptingHelpFlyout } from './components/scripting_help';
 
-import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
+import { DEFAULT_FIELD_TYPES, FIELD_TYPES_BY_LANG } from './constants';
 import { executeScript, isScriptValid } from './lib';
 
 const getFieldTypeFormatsList = (

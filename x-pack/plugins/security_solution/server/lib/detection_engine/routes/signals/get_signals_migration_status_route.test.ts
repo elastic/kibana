@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getSignalsMigrationStatusRequest } from '../__mocks__/request_responses';
-import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
-import { serverMock } from '../__mocks__';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
-import { getSignalsMigrationStatusRoute } from './get_signals_migration_status_route';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
+import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
+import { serverMock } from '../__mocks__';
+import { getSignalsMigrationStatusRequest } from '../__mocks__/request_responses';
+import { getSignalsMigrationStatusRoute } from './get_signals_migration_status_route';
 
 jest.mock('../../migrations/get_signals_indices_in_range');
 jest.mock('../../migrations/get_signal_versions_by_index');

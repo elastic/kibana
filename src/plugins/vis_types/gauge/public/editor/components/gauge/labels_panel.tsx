@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SwitchOption, TextInputOption } from '@kbn/vis-default-editor-plugin/public';
+import React from 'react';
 import { GaugeOptionsInternalProps } from '.';
 
 function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInternalProps) {

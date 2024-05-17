@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiConfirmModal, EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AggDescriptor } from '../../../../common/descriptor_types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { AggDescriptor } from '../../../../common/descriptor_types';
 import { isMvt } from './is_mvt';
 
 function isUnsupportedVectorTileMetric(metric: AggDescriptor) {

@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import { find, isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
-  EuiComboBox,
-  EuiHealth,
-  EuiFormRow,
-  EuiHighlight,
-  EuiSpacer,
   EuiCallOut,
+  EuiComboBox,
+  EuiFormRow,
+  EuiHealth,
+  EuiHighlight,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import { find, isEmpty } from 'lodash/fp';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 
-import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
 
 import { AgentGrouper } from './agent_grouper';
 import {
-  getNumAgentsInGrouping,
   generateAgentCheck,
-  getNumOverlapped,
   generateAgentSelection,
+  getNumAgentsInGrouping,
+  getNumOverlapped,
 } from './helpers';
 
 import {
-  SELECT_AGENT_LABEL,
-  generateSelectedAgentsMessage,
-  ALL_AGENTS_LABEL,
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
+  ALL_AGENTS_LABEL,
   NO_AGENT_AVAILABLE_TITLE,
+  SELECT_AGENT_LABEL,
+  generateSelectedAgentsMessage,
 } from './translations';
 
-import type { GroupOption, AgentSelection } from './types';
+import type { AgentSelection, GroupOption } from './types';
 import { AGENT_GROUP_KEY } from './types';
 
 interface AgentsTableProps {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler } from 'react';
-import { EuiPanel, EuiStat, useEuiTheme, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { MouseEventHandler } from 'react';
 
 export interface VulnCounterCardProps {
   id: string;

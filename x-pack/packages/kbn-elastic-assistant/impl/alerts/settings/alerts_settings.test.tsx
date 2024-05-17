@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { AlertsSettings } from './alerts_settings';
 import { KnowledgeBaseConfig } from '../../assistant/types';
 import { DEFAULT_LATEST_ALERTS } from '../../assistant_context/constants';
+import { AlertsSettings } from './alerts_settings';
 
 describe('AlertsSettings', () => {
   beforeEach(() => {

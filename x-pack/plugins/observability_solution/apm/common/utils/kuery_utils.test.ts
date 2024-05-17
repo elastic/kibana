@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toKueryFilterFormat, mergeKueries } from './kuery_utils';
+import { mergeKueries, toKueryFilterFormat } from './kuery_utils';
 
 describe('toKueryFilterFormat', () => {
   it('returns a single value', () => {

@@ -6,8 +6,8 @@
  */
 
 import path from 'path';
-import { unzip } from './unzip';
 import { ExtractError } from './extract_error';
+import { unzip } from './unzip';
 
 export async function extract(archivePath: string, targetPath: string) {
   const fileType = path.parse(archivePath).ext.substr(1);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { APP_ID } from '../constants';
 
 const updateAnonymizationSubFeature: SubFeatureConfig = {

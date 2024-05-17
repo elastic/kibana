@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AlertsPopover } from './open_alerts_popover';
-import { discoverServiceMock } from '../../../../__mocks__/services';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { dataViewWithNoTimefieldMock } from '../../../../__mocks__/data_view_no_timefield';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { dataViewWithNoTimefieldMock } from '../../../../__mocks__/data_view_no_timefield';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { discoverServiceMock } from '../../../../__mocks__/services';
+import { AlertsPopover } from './open_alerts_popover';
 
 const mount = (dataView = dataViewMock, isPlainRecord = false) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });

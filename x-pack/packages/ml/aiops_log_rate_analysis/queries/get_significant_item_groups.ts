@@ -13,9 +13,9 @@ import { duplicateIdentifier } from './duplicate_identifier';
 import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
+import { getMissingSignificantItems } from './get_missing_significant_items';
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
-import { getMissingSignificantItems } from './get_missing_significant_items';
 import { transformSignificantItemToGroup } from './transform_significant_item_to_group';
 
 export function getSignificantItemGroups(

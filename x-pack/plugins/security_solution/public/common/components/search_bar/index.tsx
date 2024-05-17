@@ -6,24 +6,31 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
+import deepEqual from 'fast-deep-equal';
 import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { inputsActions } from '../../store/inputs';
-import type { InputsRange } from '../../store/inputs/model';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { hostsActions } from '../../../explore/hosts/store';
+import { networkActions } from '../../../explore/network/store';
+import { usersActions } from '../../../explore/users/store';
+import { timelineActions } from '../../../timelines/store';
+import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
+import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
+import { useKibana } from '../../lib/kibana';
 import type { State, inputsModel } from '../../store';
+import { inputsActions } from '../../store/inputs';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { InputsRange } from '../../store/inputs/model';
 import { formatDate } from '../super_date_picker';
 import {
   endSelector,
@@ -35,13 +42,6 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { timelineActions } from '../../../timelines/store';
-import { useKibana } from '../../lib/kibana';
-import { usersActions } from '../../../explore/users/store';
-import { hostsActions } from '../../../explore/hosts/store';
-import { networkActions } from '../../../explore/network/store';
-import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
-import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;

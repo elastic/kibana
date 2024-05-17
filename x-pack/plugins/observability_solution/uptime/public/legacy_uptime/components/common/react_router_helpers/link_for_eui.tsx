@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonEmptyProps,
+  EuiButtonProps,
+  EuiLink,
+  EuiLinkAnchorProps,
+} from '@elastic/eui';
 import React, { FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiLink,
-  EuiButton,
-  EuiButtonProps,
-  EuiButtonEmptyProps,
-  EuiLinkAnchorProps,
-  EuiButtonEmpty,
-} from '@elastic/eui';
 
 import { letBrowserHandleEvent } from './link_events';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ChromeStart } from '@kbn/core/public';
-import { GraphWorkspaceSavedObject } from '../types';
+import { i18n } from '@kbn/i18n';
 import { MetaDataState } from '../state_management';
+import { GraphWorkspaceSavedObject } from '../types';
 
 export function getHomePath() {
   return '/home';

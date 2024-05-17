@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useMemo } from 'react';
-import { EuiPopover, EuiHeaderLink, EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useState, useCallback, useMemo } from 'react';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
+import { InfraClientStartDeps } from '../../../types';
+import { AlertFlyout as CustomThresholdAlertFlyout } from '../../custom_threshold';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledMetricThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { AlertFlyout as CustomThresholdAlertFlyout } from '../../custom_threshold';
-import { InfraClientStartDeps } from '../../../types';
 
 type VisibleFlyoutType = 'inventory' | 'metricThreshold' | 'customThreshold';
 

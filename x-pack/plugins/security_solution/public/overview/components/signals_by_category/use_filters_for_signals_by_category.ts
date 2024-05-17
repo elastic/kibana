@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
+import { useMemo } from 'react';
 
 import { buildShowBuildingBlockFilter } from '../../../detections/components/alerts_table/default_config';
 

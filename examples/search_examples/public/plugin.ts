@@ -7,15 +7,15 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PLUGIN_NAME } from '../common';
+import img from './search_examples.png';
+import { SearchSessionsExamplesAppLocatorDefinition } from './search_sessions/app_locator';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchExamplesPluginSetup,
   SearchExamplesPluginStart,
 } from './types';
-import { SearchSessionsExamplesAppLocatorDefinition } from './search_sessions/app_locator';
-import { PLUGIN_NAME } from '../common';
-import img from './search_examples.png';
 
 export class SearchExamplesPlugin
   implements

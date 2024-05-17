@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { type LinkProps, useGetLinkProps, withLink } from '@kbn/security-solution-navigation/links';
 import React, { useCallback, useMemo, type MouseEventHandler } from 'react';
-import { useGetLinkProps, withLink, type LinkProps } from '@kbn/security-solution-navigation/links';
-import { useGetUrlStateQueryParams } from '../navigation/use_url_state_query_params';
 import type { SecurityPageName } from '../../../../common/constants';
+import { useGetUrlStateQueryParams } from '../navigation/use_url_state_query_params';
 
 interface SecuritySolutionLinkProps {
   deepLinkId: SecurityPageName;

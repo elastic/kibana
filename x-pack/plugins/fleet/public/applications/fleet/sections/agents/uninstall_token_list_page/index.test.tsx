@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import React from 'react';
 
-import { waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
-import type {
-  GetUninstallTokensMetadataResponse,
-  GetUninstallTokenResponse,
-} from '../../../../../../common/types/rest_spec/uninstall_token';
-import type { RequestError } from '../../../../../hooks';
-import { createFleetTestRendererMock } from '../../../../../mock';
-import {
-  useGetUninstallToken,
-  useGetUninstallTokens,
-  sendGetUninstallToken,
-} from '../../../../../hooks/use_request/uninstall_tokens';
 import type {
   UninstallToken,
   UninstallTokenMetadata,
 } from '../../../../../../common/types/models/uninstall_token';
+import type {
+  GetUninstallTokenResponse,
+  GetUninstallTokensMetadataResponse,
+} from '../../../../../../common/types/rest_spec/uninstall_token';
+import type { RequestError } from '../../../../../hooks';
+import {
+  sendGetUninstallToken,
+  useGetUninstallToken,
+  useGetUninstallTokens,
+} from '../../../../../hooks/use_request/uninstall_tokens';
+import { createFleetTestRendererMock } from '../../../../../mock';
 
 import { UninstallTokenListPage } from '.';
 

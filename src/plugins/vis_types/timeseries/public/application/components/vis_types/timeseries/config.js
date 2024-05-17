@@ -7,36 +7,36 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import PropTypes from 'prop-types';
-import { last } from 'lodash';
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { DataFormatPicker } from '../../data_format_picker';
-import { createSelectHandler } from '../../lib/create_select_handler';
-import { createNumberHandler } from '../../lib/create_number_handler';
-import { YesNo } from '../../yes_no';
-import { createTextHandler } from '../../lib/create_text_handler';
-import { IndexPattern } from '../../index_pattern';
 import {
-  htmlIdGenerator,
+  EuiCode,
   EuiComboBox,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
   EuiFormRow,
-  EuiCode,
   EuiHorizontalRule,
-  EuiFieldNumber,
+  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
-import { PalettePicker } from '../../palette_picker';
+import { last } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getCharts } from '../../../../services';
-import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
-import { isPercentDisabled } from '../../lib/stacked';
-import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 import { tsvbEditorRowStyles } from '../../../styles/common.styles';
+import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+import { DataFormatPicker } from '../../data_format_picker';
+import { IndexPattern } from '../../index_pattern';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
+import { createNumberHandler } from '../../lib/create_number_handler';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
+import { isPercentDisabled } from '../../lib/stacked';
+import { PalettePicker } from '../../palette_picker';
+import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
+import { YesNo } from '../../yes_no';
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);

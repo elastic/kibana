@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { analyticsClientMock } from './analytics_service.test.mocks';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AnalyticsService } from './analytics_service';
+import { analyticsClientMock } from './analytics_service.test.mocks';
 
 function findRegisteredContextProviderByName(contextProviderName: string) {
   return analyticsClientMock.registerContextProvider.mock.calls.find(
@@ -44,8 +44,9 @@ describe('AnalyticsService', () => {
   });
   test('should register some context providers on creation', async () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(4);
-    expect(await firstValueFrom(findRegisteredContextProviderByName('build info')[0].context$))
-      .toMatchInlineSnapshot(`
+    expect(
+      await firstValueFrom(findRegisteredContextProviderByName('build info')[0].context$)
+    ).toMatchInlineSnapshot(`
         Object {
           "branch": "branch",
           "buildNum": 100,

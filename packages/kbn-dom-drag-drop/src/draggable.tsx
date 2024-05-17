@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { EuiScreenReaderOnly, keys } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { useContext, useCallback, useEffect, memo, useMemo } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
-import classNames from 'classnames';
-import { keys, EuiScreenReaderOnly } from '@elastic/eui';
+import { REORDER_ITEM_MARGIN } from './constants';
 import {
+  DragDropAction,
   DragDropIdentifier,
   DropIdentifier,
-  nextValidDropTarget,
-  ReorderContext,
   RegisteredDropTargets,
-  DragDropAction,
+  ReorderContext,
+  nextValidDropTarget,
   useDragDropContext,
 } from './providers';
-import { REORDER_ITEM_MARGIN } from './constants';
 import './sass/draggable.scss';
 
 type DragEvent = React.DragEvent<HTMLElement>;

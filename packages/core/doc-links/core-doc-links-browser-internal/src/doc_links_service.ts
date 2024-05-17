@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 
 /** @internal */
 export interface DocLinksServiceStartDeps {

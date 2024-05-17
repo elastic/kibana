@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import moment from 'moment-timezone';
 import { getDateFormatSettings } from './date_formats';
 
 describe('accessibility settings', () => {

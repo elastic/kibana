@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
+import { POLICY_MANAGED_BY_ES, POLICY_NAME, getDefaultHotPhasePolicy } from '../constants';
 import { initTestBed } from '../init_test_bed';
-import { getDefaultHotPhasePolicy, POLICY_NAME, POLICY_MANAGED_BY_ES } from '../constants';
 
 describe('<EditPolicy /> edit warning', () => {
   let testBed: TestBed;

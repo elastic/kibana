@@ -341,9 +341,7 @@
         "type": "Type",
         "tags": [],
         "label": "CustomRequestHandlerContext",
-        "description": [
-          "\nMixin allowing plugins to define their own request handler contexts.\n"
-        ],
+        "description": ["\nMixin allowing plugins to define their own request handler contexts.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-request-handler-context-server",

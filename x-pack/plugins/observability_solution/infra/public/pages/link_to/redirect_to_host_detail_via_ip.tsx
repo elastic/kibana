@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
-import { useHostIpToName } from './use_host_ip_to_name';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { LoadingPage } from '../../components/loading_page';
-import { Error } from '../error';
 import { useSourceContext } from '../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { Error } from '../error';
 import { getSearchParams } from './redirect_to_node_detail';
+import { useHostIpToName } from './use_host_ip_to_name';
 
 type RedirectToHostDetailType = RouteComponentProps<{
   hostIp: string;

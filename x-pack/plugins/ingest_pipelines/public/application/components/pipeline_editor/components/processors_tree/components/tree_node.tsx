@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent, useMemo, useCallback } from 'react';
 
 import { ProcessorInternal } from '../../../types';
 
-import { ProcessorInfo, OnActionHandler } from '../processors_tree';
+import { OnActionHandler, ProcessorInfo } from '../processors_tree';
 
-import { PipelineProcessorsEditorItem, Handlers } from '../../pipeline_processors_editor_item';
 import { AddProcessorButton } from '../../add_processor_button';
+import { Handlers, PipelineProcessorsEditorItem } from '../../pipeline_processors_editor_item';
 
 import { PrivateTree } from './private_tree';
 

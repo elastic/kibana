@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../../types';
+import { TSVBMetricModel, TSVBMetricModelCreator } from '../../../../types';
 
 export const podOverview: TSVBMetricModelCreator = (
   timeField,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +12,8 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
 } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
+import React from 'react';
 import * as i18n from './translations';
 
 export enum CaseSeverity {

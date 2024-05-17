@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getTemplateStrings } from './template_strings';
 import { loadTemplates } from '../../server/templates';
+import { getTemplateStrings } from './template_strings';
 
 import { TagStrings } from '../tags';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import {
+  EuiButton,
   EuiFieldNumber,
-  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
-  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 import type { FilterAggConfigRange } from '../types';
 
 const BUTTON_SIZE = 40;

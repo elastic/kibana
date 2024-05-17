@@ -8,7 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, keys } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, keys } from '@elastic/eui';
 
 import { JobGroup } from '../../../job_group';
 

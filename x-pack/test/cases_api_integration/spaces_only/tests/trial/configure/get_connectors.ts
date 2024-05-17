@@ -10,17 +10,17 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
-  getAuthWithSuperUser,
+  createConnector,
   getActionsSpace,
-  getServiceNowConnector,
-  getServiceNowSIRConnector,
-  getEmailConnector,
+  getAuthWithSuperUser,
   getCaseConnectors,
   getCasesWebhookConnector,
-  getServiceNowOAuthConnector,
+  getEmailConnector,
   getJiraConnector,
-  createConnector,
   getResilientConnector,
+  getServiceNowConnector,
+  getServiceNowOAuthConnector,
+  getServiceNowSIRConnector,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export

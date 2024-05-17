@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, render, within } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
+import { fireEvent, render, within } from '@testing-library/react';
+import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
-import type { AlertsTableComponentProps } from './alerts_grouping';
-import { GroupedAlertsTable } from './alerts_grouping';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { TestProviders, createMockStore, mockGlobalState } from '../../../common/mock';
+import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
+import type { AlertsTableComponentProps } from './alerts_grouping';
+import { GroupedAlertsTable } from './alerts_grouping';
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');

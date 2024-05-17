@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { useCallback } from 'react';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { ContentTabIds } from '../types';
+import { fold } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
+import { useCallback } from 'react';
 import { useUrlState } from '../../../utils/use_url_state';
-import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
 import { ALERT_STATUS_ALL } from '../../shared/alerts/constants';
+import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
+import { ContentTabIds } from '../types';
 
 export const DEFAULT_STATE: AssetDetailsUrlState = {
   tabId: ContentTabIds.OVERVIEW,

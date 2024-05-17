@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ShowMoreButton } from './show_more_button';
+import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { ShowMoreButton } from './show_more_button';
 
 const showMoreClickMock = jest.fn();
 

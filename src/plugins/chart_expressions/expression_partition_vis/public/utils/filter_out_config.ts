@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PartitionVisParams, ChartTypes } from '../../common/types';
+import { ChartTypes, PartitionVisParams } from '../../common/types';
 
 export const filterOutConfig = (visType: ChartTypes, visConfig: PartitionVisParams) => {
   if ([ChartTypes.PIE, ChartTypes.DONUT].includes(visType)) {

@@ -6,8 +6,8 @@
  */
 
 import {
-  resetTransformsRequestSchema,
   type ResetTransformsRequestSchema,
+  resetTransformsRequestSchema,
 } from '../../../../common/api_schemas/reset_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { SearchHit } from '@kbn/es-types';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { SearchHit } from '@kbn/es-types';
-import { createOrUpdateConfiguration } from './create_or_update_configuration';
-import { searchConfigurations } from './search_configurations';
-import { findExactConfiguration } from './find_exact_configuration';
-import { listConfigurations } from './list_configurations';
-import { EnvironmentsResponse, getEnvironments } from './get_environments';
-import { deleteConfiguration } from './delete_configuration';
-import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getAgentNameByService } from './get_agent_name_by_service';
-import { markAppliedByAgent } from './mark_applied_by_agent';
-import {
-  serviceRt,
-  agentConfigurationIntakeRt,
-} from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
-import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
-import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import * as t from 'io-ts';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import {
+  agentConfigurationIntakeRt,
+  serviceRt,
+} from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
+import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
+import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
+import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
+import { createOrUpdateConfiguration } from './create_or_update_configuration';
+import { deleteConfiguration } from './delete_configuration';
+import { findExactConfiguration } from './find_exact_configuration';
+import { getAgentNameByService } from './get_agent_name_by_service';
+import { EnvironmentsResponse, getEnvironments } from './get_environments';
+import { listConfigurations } from './list_configurations';
+import { markAppliedByAgent } from './mark_applied_by_agent';
+import { searchConfigurations } from './search_configurations';
 
 function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.agentConfigurationAvailable) {

@@ -7,14 +7,16 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import { schema } from '@kbn/config-schema';
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { AIAssistantType } from '../common/ai_assistant_type';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -22,8 +24,6 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
-import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 export class AIAssistantManagementSelectionPlugin
   implements

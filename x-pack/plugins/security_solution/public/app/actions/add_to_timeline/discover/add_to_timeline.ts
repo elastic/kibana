@@ -7,8 +7,8 @@
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
 import type { SecurityAppStore } from '../../../../common/store';
-import { isInSecurityApp } from '../../utils';
 import type { StartServices } from '../../../../types';
+import { isInSecurityApp } from '../../utils';
 import { createAddToTimelineCellActionFactory } from '../cell_action/add_to_timeline';
 
 export const createAddToTimelineDiscoverCellActionFactory = ({

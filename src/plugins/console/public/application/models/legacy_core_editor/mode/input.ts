@@ -7,8 +7,8 @@
  */
 
 import ace from 'brace';
-import { workerModule } from './worker';
 import { ScriptMode } from './script';
+import { workerModule } from './worker';
 
 const TextMode = ace.acequire('ace/mode/text').Mode;
 
@@ -75,4 +75,4 @@ export class Mode extends TextMode {
 
     return worker;
   };
-}.call(Mode.prototype));
+}).call(Mode.prototype);

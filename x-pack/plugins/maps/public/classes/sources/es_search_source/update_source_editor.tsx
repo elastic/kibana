@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SortDirection, indexPatterns } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import { FIELD_ORIGIN, SCALING_TYPES } from '../../../../common/constants';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
-import { getIndexPatternService } from '../../../kibana_services';
 import {
   getGeoTileAggNotSupportedReason,
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
+import { getIndexPatternService } from '../../../kibana_services';
 import { ESDocField } from '../../fields/es_doc_field';
+import { IField } from '../../fields/field';
 import { IESSource } from '../es_source';
 import { OnSourceChangeArgs } from '../source';
-import { IField } from '../../fields/field';
 import { ScalingForm } from './util/scaling_form';
 
 interface Props {

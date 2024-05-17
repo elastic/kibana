@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { LogLevelId, LogRecord } from '@kbn/logging';
 import { clusterInfo, isElasticCloudDeployment } from './helpers';
 

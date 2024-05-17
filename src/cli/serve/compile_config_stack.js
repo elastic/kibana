@@ -8,10 +8,10 @@
 
 import _ from 'lodash';
 
-import { readFileSync, writeFileSync, statSync, existsSync } from 'fs';
+import { existsSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { getConfigFromFiles } from '@kbn/config';
+import { getConfigDirectory, getConfigPath } from '@kbn/utils';
 
 const isNotEmpty = _.negate(_.isEmpty);
 const isNotNull = _.negate(_.isNull);

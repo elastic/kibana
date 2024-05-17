@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { get } from 'lodash';
-import { LegacyRequest, Bucket, Pipeline } from '../../types';
+import moment from 'moment';
+import { Globals } from '../../static_globals';
+import { Bucket, LegacyRequest, Pipeline } from '../../types';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
-import { Globals } from '../../static_globals';
 
 interface GetLogstashPipelineIdsParams {
   req: LegacyRequest;

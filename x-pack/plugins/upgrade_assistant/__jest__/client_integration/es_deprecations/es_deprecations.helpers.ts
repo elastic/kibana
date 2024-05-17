@@ -6,8 +6,8 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { EsDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 

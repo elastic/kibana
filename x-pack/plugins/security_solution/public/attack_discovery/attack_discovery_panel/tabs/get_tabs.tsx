@@ -9,10 +9,10 @@ import { EuiSpacer } from '@elastic/eui';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
-import { AttackDiscoveryTab } from './attack_discovery_tab';
-import { AlertsTab } from './alerts_tab';
-import * as i18n from './translations';
 import type { AttackDiscovery } from '../../types';
+import { AlertsTab } from './alerts_tab';
+import { AttackDiscoveryTab } from './attack_discovery_tab';
+import * as i18n from './translations';
 
 interface TabInfo {
   content: JSX.Element;

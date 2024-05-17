@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { castProvider } from '@kbn/interpreter';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
-import { getFunctionHelp, getFunctionErrors } from '../../i18n';
+import { castProvider } from '@kbn/interpreter';
 import { InitializeArguments } from '.';
+import { getFunctionErrors, getFunctionHelp } from '../../i18n';
 
 export interface Arguments {
   type: string[];

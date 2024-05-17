@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { GaugeTypeProps, GaugeVisParams } from '../../../types';
+import { LabelsPanel } from './labels_panel';
 import { RangesPanel } from './ranges_panel';
 import { StylePanel } from './style_panel';
-import { LabelsPanel } from './labels_panel';
 
 export interface GaugeOptionsProps extends VisEditorOptionsProps<GaugeVisParams>, GaugeTypeProps {}
 

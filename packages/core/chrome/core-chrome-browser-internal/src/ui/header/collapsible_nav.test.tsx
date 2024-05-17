@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
-import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import { CollapsibleNav } from './collapsible_nav';
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;

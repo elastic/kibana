@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFocusTrap,
+  EuiI18n,
+  EuiOverlayMask,
+  EuiToolTip,
+  htmlIdGenerator,
+  keys,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  CODE_EDITOR_DARK_THEME_ID,
+  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+  CODE_EDITOR_LIGHT_THEME_ID,
+  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
+  monaco,
+} from '@kbn/monaco';
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
 import ReactMonacoEditor, {
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from 'react-monaco-editor';
-import {
-  htmlIdGenerator,
-  EuiToolTip,
-  keys,
-  EuiButtonIcon,
-  EuiOverlayMask,
-  EuiI18n,
-  EuiFocusTrap,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
-import {
-  monaco,
-  CODE_EDITOR_LIGHT_THEME_ID,
-  CODE_EDITOR_DARK_THEME_ID,
-  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
-  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
-} from '@kbn/monaco';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
-import { PlaceholderWidget } from './placeholder_widget';
 import { styles } from './editor.styles';
+import { PlaceholderWidget } from './placeholder_widget';
 
 export interface CodeEditorProps {
   /** Width of editor. Defaults to 100%. */
@@ -478,8 +478,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         ? CODE_EDITOR_DARK_THEME_TRANSPARENT_ID
         : CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID
       : useDarkTheme
-      ? CODE_EDITOR_DARK_THEME_ID
-      : CODE_EDITOR_LIGHT_THEME_ID);
+        ? CODE_EDITOR_DARK_THEME_ID
+        : CODE_EDITOR_LIGHT_THEME_ID);
 
   return (
     <div

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { exactCheck, foldLeftRight, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
   exceptionListRuleReferencesSchema,
-  rulesReferencedByExceptionListsSchema,
   findExceptionReferencesOnRuleSchema,
+  rulesReferencedByExceptionListsSchema,
 } from './find_exception_references_route';
 import type {
   ExceptionListRuleReferencesSchema,
-  RulesReferencedByExceptionListsSchema,
   FindExceptionReferencesOnRuleSchema,
+  RulesReferencedByExceptionListsSchema,
 } from './find_exception_references_route';
 
 describe('Find exception list references', () => {

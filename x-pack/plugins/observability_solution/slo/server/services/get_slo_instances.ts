@@ -11,7 +11,10 @@ import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SLORepository } from './slo_repository';
 
 export class GetSLOInstances {
-  constructor(private repository: SLORepository, private esClient: ElasticsearchClient) {}
+  constructor(
+    private repository: SLORepository,
+    private esClient: ElasticsearchClient
+  ) {}
 
   public async execute(sloId: string): Promise<GetSLOInstancesResponse> {
     const slo = await this.repository.findById(sloId);

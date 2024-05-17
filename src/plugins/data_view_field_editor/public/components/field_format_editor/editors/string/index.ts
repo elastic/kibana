@@ -11,7 +11,6 @@ import { formatId } from './constants';
 import { StringFormatEditorFormatParams } from './string';
 
 export type { StringFormatEditor } from './string';
-export const stringFormatEditorFactory: FieldFormatEditorFactory<
-  StringFormatEditorFormatParams
-> = () => import('./string').then((m) => m.StringFormatEditor);
+export const stringFormatEditorFactory: FieldFormatEditorFactory<StringFormatEditorFormatParams> =
+  () => import('./string').then((m) => m.StringFormatEditor);
 stringFormatEditorFactory.formatId = formatId;

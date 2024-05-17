@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { CorePreboot, PrebootPlugin, PluginInitializerContext } from '@kbn/core/server';
-import fs from 'fs/promises';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import { schema } from '@kbn/config-schema';
+import type { CorePreboot, PluginInitializerContext, PrebootPlugin } from '@kbn/core/server';
+import fs from 'fs/promises';
 import type { ConfigType } from './config';
 
 export function getDetailedErrorMessage(error: any): string {

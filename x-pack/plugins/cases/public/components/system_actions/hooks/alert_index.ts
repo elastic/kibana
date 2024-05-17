@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import type { HttpSetup } from '@kbn/core/public';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 export async function fetchAlertIndexNames({
   http,

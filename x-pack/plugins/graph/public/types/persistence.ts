@@ -7,7 +7,7 @@
 
 import { SavedObjectReference } from '@kbn/core/public';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
-import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
+import { WorkspaceEdge, WorkspaceNode } from './workspace_state';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 

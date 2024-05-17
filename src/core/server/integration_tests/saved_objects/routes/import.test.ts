@@ -8,24 +8,24 @@
 
 jest.mock('uuid');
 
-import supertest from 'supertest';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
-import {
-  coreUsageStatsClientMock,
-  coreUsageDataServiceMock,
-} from '@kbn/core-usage-data-server-mocks';
 import {
   LEGACY_URL_ALIAS_TYPE,
   SavedObjectConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
-  registerImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
+  registerImportRoute,
 } from '@kbn/core-saved-objects-server-internal';
-import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import { createExportableType, setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageDataServiceMock,
+  coreUsageStatsClientMock,
+} from '@kbn/core-usage-data-server-mocks';
+import supertest from 'supertest';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -64,7 +64,7 @@ describe(`POST ${URL}`, () => {
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
       (type: string) =>
         // other attributes aren't needed for the purposes of injecting metadata
-        ({ management: { icon: `${type}-icon` } } as any)
+        ({ management: { icon: `${type}-icon` } }) as any
     );
 
     savedObjectsClient = handlerContext.savedObjects.client;

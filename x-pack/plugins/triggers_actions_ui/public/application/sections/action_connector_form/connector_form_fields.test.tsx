@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { FormTestProvider } from '../../components/test_utils';
-import { ConnectorFormFields } from './connector_form_fields';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { waitFor } from '@testing-library/react';
+import React, { lazy } from 'react';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { FormTestProvider } from '../../components/test_utils';
 import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
+import { ConnectorFormFields } from './connector_form_fields';
 
 describe('ConnectorFormFields', () => {
   let appMockRenderer: AppMockRenderer;

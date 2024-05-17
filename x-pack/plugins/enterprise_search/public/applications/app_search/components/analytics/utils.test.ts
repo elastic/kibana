@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertToChartData, convertTagsToSelectOptions } from './utils';
+import { convertTagsToSelectOptions, convertToChartData } from './utils';
 
 describe('convertToChartData', () => {
   it('converts server-side analytics data into an array of objects that Elastic Charts can consume', () => {

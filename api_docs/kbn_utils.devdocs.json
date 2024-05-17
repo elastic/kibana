@@ -23,9 +23,7 @@
         "parentPluginId": "@kbn/utils",
         "id": "def-common.concatStreamProviders",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "concatStreamProviders",
         "description": [
           "\n Write the data and errors from a list of stream providers\n to a single stream in order. Stream providers are only\n called right before they will be consumed, and only one\n provider will be active at a time.\n"
@@ -49,11 +47,7 @@
             "tags": [],
             "label": "sourceProviders",
             "description": [],
-            "signature": [
-              "(() => ",
-              "Readable",
-              ")[]"
-            ],
+            "signature": ["(() => ", "Readable", ")[]"],
             "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -65,39 +59,27 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "options passed to the PassThrough constructor"
-            ],
-            "signature": [
-              "TransformOptions",
-              " | undefined"
-            ],
+            "description": ["options passed to the PassThrough constructor"],
+            "signature": ["TransformOptions", " | undefined"],
             "path": "packages/kbn-utils/src/streams/concat_stream_providers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "combined stream"
-        ],
+        "returnComment": ["combined stream"],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/utils",
         "id": "def-common.createConcatStream",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "createConcatStream",
         "description": [
           "\n Creates a Transform stream that consumes all provided\n values and concatenates them using each values `concat`\n method.\n\n Concatenate strings:\n   createListStream(['f', 'o', 'o'])\n     .pipe(createConcatStream())\n     .on('data', console.log)\n     // logs \"foo\"\n\n Concatenate values into an array:\n   createListStream([1,2,3])\n     .pipe(createConcatStream([]))\n     .on('data', console.log)\n     // logs \"[1,2,3]\"\n\n"
         ],
-        "signature": [
-          "(initial: T | undefined) => ",
-          "Transform"
-        ],
+        "signature": ["(initial: T | undefined) => ", "Transform"],
         "path": "packages/kbn-utils/src/streams/concat_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -108,12 +90,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "initial",
-            "description": [
-              "The initial value that subsequent\nitems will concat with"
-            ],
-            "signature": [
-              "T | undefined"
-            ],
+            "description": ["The initial value that subsequent\nitems will concat with"],
+            "signature": ["T | undefined"],
             "path": "packages/kbn-utils/src/streams/concat_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -130,10 +108,7 @@
         "tags": [],
         "label": "createFilterStream",
         "description": [],
-        "signature": [
-          "(fn: (obj: T) => boolean) => ",
-          "Transform"
-        ],
+        "signature": ["(fn: (obj: T) => boolean) => ", "Transform"],
         "path": "packages/kbn-utils/src/streams/filter_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -145,9 +120,7 @@
             "tags": [],
             "label": "fn",
             "description": [],
-            "signature": [
-              "(obj: T) => boolean"
-            ],
+            "signature": ["(obj: T) => boolean"],
             "path": "packages/kbn-utils/src/streams/filter_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -161,17 +134,12 @@
         "parentPluginId": "@kbn/utils",
         "id": "def-common.createIntersperseStream",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "createIntersperseStream",
         "description": [
           "\n Create a Transform stream that receives values in object mode,\n and intersperses a chunk between each object received.\n\n This is useful for writing lists:\n\n   createListStream(['foo', 'bar'])\n     .pipe(createIntersperseStream('\\n'))\n     .pipe(process.stdout) // outputs \"foo\\nbar\"\n\n Combine with a concat stream to get \"join\" like functionality:\n\n   await createPromiseFromStreams([\n     createListStream(['foo', 'bar']),\n     createIntersperseStream(' '),\n     createConcatStream()\n   ]) // produces a single value \"foo bar\"\n"
         ],
-        "signature": [
-          "(intersperseChunk: string | Buffer) => ",
-          "Transform"
-        ],
+        "signature": ["(intersperseChunk: string | Buffer) => ", "Transform"],
         "path": "packages/kbn-utils/src/streams/intersperse_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -183,9 +151,7 @@
             "tags": [],
             "label": "intersperseChunk",
             "description": [],
-            "signature": [
-              "string | Buffer"
-            ],
+            "signature": ["string | Buffer"],
             "path": "packages/kbn-utils/src/streams/intersperse_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -199,17 +165,12 @@
         "parentPluginId": "@kbn/utils",
         "id": "def-common.createListStream",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "createListStream",
         "description": [
           "\n Create a Readable stream that provides the items\n from a list as objects to subscribers\n"
         ],
-        "signature": [
-          "(items: T | T[]) => ",
-          "Readable"
-        ],
+        "signature": ["(items: T | T[]) => ", "Readable"],
         "path": "packages/kbn-utils/src/streams/list_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -220,12 +181,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "items",
-            "description": [
-              "- the list of items to provide"
-            ],
-            "signature": [
-              "T | T[]"
-            ],
+            "description": ["- the list of items to provide"],
+            "signature": ["T | T[]"],
             "path": "packages/kbn-utils/src/streams/list_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -242,10 +199,7 @@
         "tags": [],
         "label": "createMapStream",
         "description": [],
-        "signature": [
-          "(fn: (value: T, i: number) => void) => ",
-          "Transform"
-        ],
+        "signature": ["(fn: (value: T, i: number) => void) => ", "Transform"],
         "path": "packages/kbn-utils/src/streams/map_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -257,9 +211,7 @@
             "tags": [],
             "label": "fn",
             "description": [],
-            "signature": [
-              "(value: T, i: number) => void"
-            ],
+            "signature": ["(value: T, i: number) => void"],
             "path": "packages/kbn-utils/src/streams/map_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -276,13 +228,7 @@
         "tags": [],
         "label": "createPromiseFromStreams",
         "description": [],
-        "signature": [
-          "(streams: [",
-          "Readable",
-          ", ...",
-          "Writable",
-          "[]]) => Promise<T>"
-        ],
+        "signature": ["(streams: [", "Readable", ", ...", "Writable", "[]]) => Promise<T>"],
         "path": "packages/kbn-utils/src/streams/promise_from_streams.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -294,13 +240,7 @@
             "tags": [],
             "label": "streams",
             "description": [],
-            "signature": [
-              "[",
-              "Readable",
-              ", ...",
-              "Writable",
-              "[]]"
-            ],
+            "signature": ["[", "Readable", ", ...", "Writable", "[]]"],
             "path": "packages/kbn-utils/src/streams/promise_from_streams.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -314,9 +254,7 @@
         "parentPluginId": "@kbn/utils",
         "id": "def-common.createReduceStream",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "createReduceStream",
         "description": [
           "\n Create a transform stream that consumes each chunk it receives\n and passes it to the reducer, which will return the new value\n for the stream. Once all chunks have been received the reduce\n stream provides the result of final call to the reducer to\n subscribers.\n"
@@ -336,9 +274,7 @@
             "tags": [],
             "label": "reducer",
             "description": [],
-            "signature": [
-              "(value: any, chunk: T, enc: string) => T"
-            ],
+            "signature": ["(value: any, chunk: T, enc: string) => T"],
             "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -353,9 +289,7 @@
             "description": [
               "Initial value for the stream, if undefined\nthen the first chunk provided is used as the\ninitial value."
             ],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "packages/kbn-utils/src/streams/reduce_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -372,10 +306,7 @@
         "tags": [],
         "label": "createReplaceStream",
         "description": [],
-        "signature": [
-          "(toReplace: string, replacement: string | Buffer) => ",
-          "Transform"
-        ],
+        "signature": ["(toReplace: string, replacement: string | Buffer) => ", "Transform"],
         "path": "packages/kbn-utils/src/streams/replace_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -387,9 +318,7 @@
             "tags": [],
             "label": "toReplace",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-utils/src/streams/replace_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -402,9 +331,7 @@
             "tags": [],
             "label": "replacement",
             "description": [],
-            "signature": [
-              "string | Buffer"
-            ],
+            "signature": ["string | Buffer"],
             "path": "packages/kbn-utils/src/streams/replace_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -418,17 +345,12 @@
         "parentPluginId": "@kbn/utils",
         "id": "def-common.createSplitStream",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "createSplitStream",
         "description": [
           "\n Creates a Transform stream that consumes a stream of Buffers\n and produces a stream of strings (in object mode) by splitting\n the received bytes using the splitChunk.\n\n Ways this is behaves like String#split:\n   - instances of splitChunk are removed from the input\n   - splitChunk can be on any size\n   - if there are no bytes found after the last splitChunk\n     a final empty chunk is emitted\n\n Ways this deviates from String#split:\n   - splitChunk cannot be a regexp\n   - an empty string or Buffer will not produce a stream of individual\n     bytes like `string.split('')` would\n"
         ],
-        "signature": [
-          "(splitChunk: string | Uint8Array) => ",
-          "Transform"
-        ],
+        "signature": ["(splitChunk: string | Uint8Array) => ", "Transform"],
         "path": "packages/kbn-utils/src/streams/split_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -440,9 +362,7 @@
             "tags": [],
             "label": "splitChunk",
             "description": [],
-            "signature": [
-              "string | Uint8Array"
-            ],
+            "signature": ["string | Uint8Array"],
             "path": "packages/kbn-utils/src/streams/split_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -461,9 +381,7 @@
         "description": [
           "\nGiven a JS object, will return a JSON.stringified result with consistently\nsorted keys."
         ],
-        "signature": [
-          "(object: object) => string"
-        ],
+        "signature": ["(object: object) => string"],
         "path": "packages/kbn-utils/src/json/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -475,9 +393,7 @@
             "tags": [],
             "label": "object",
             "description": [],
-            "signature": [
-              "object"
-            ],
+            "signature": ["object"],
             "path": "packages/kbn-utils/src/json/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -498,9 +414,7 @@
         "tags": [],
         "label": "PathConfigType",
         "description": [],
-        "signature": [
-          "{ readonly data: string; }"
-        ],
+        "signature": ["{ readonly data: string; }"],
         "path": "packages/kbn-utils/src/path/index.ts",
         "deprecated": false,
         "trackAdoption": false,

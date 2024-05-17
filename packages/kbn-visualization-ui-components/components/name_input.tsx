@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { DebouncedInput } from './debounced_input';
 
 export const NameInput = ({

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { monaco } from '../monaco_imports';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { ParsedRequest } from './types';
-import { monaco } from '../monaco_imports';
 
 /*
  * This class is a helper interface that is used in the Console plugin.

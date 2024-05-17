@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useState } from 'react';
 
-import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
 import { policyHasFleetServer } from '../services';
+import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -14,17 +13,18 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useEuiTheme } from '../../../hooks';
 import {
-  KubernetesCollectionMap,
   KubernetesCollection,
-  TreeViewIconProps,
+  KubernetesCollectionMap,
   KubernetesTreeViewLevels,
+  TreeViewIconProps,
 } from '../../../types';
-import { useStyles } from './styles';
 import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
-import { showBreadcrumbDisplayText } from './helper';
 import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
+import { showBreadcrumbDisplayText } from './helper';
+import { useStyles } from './styles';
 interface BreadcrumbDeps {
   treeNavSelection: Partial<KubernetesCollectionMap>;
   onSelect: (selection: Partial<KubernetesCollectionMap>) => void;

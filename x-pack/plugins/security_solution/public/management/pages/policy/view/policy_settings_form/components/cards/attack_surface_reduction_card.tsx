@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { cloneDeep } from 'lodash';
-import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
-import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import React, { memo, useCallback } from 'react';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
-import { SettingLockedCard } from '../setting_locked_card';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import { SettingCard } from '../setting_card';
+import { SettingLockedCard } from '../setting_locked_card';
 
 const ATTACK_SURFACE_OS_LIST = [OperatingSystem.WINDOWS];
 

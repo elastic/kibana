@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import ccrShardFixture from './fixtures/ccr_shard.json';
+import { omit } from 'lodash';
 import { getLifecycleMethods } from '../data_stream';
+import ccrShardFixture from './fixtures/ccr_shard.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

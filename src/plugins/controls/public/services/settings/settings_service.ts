@@ -7,8 +7,8 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsSettingsService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
+import { ControlsSettingsService } from './types';
 
 export type SettingsServiceFactory = KibanaPluginServiceFactory<
   ControlsSettingsService,

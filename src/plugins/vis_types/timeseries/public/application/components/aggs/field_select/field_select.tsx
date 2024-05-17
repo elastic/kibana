@@ -1,3 +1,11 @@
+import {
+  DragDropContextProps,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+  EuiFormRow,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,30 +14,22 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo, ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
-  EuiFormRow,
-  htmlIdGenerator,
-  DragDropContextProps,
-} from '@elastic/eui';
 
-import { FieldSelectItem } from './field_select_item';
+import { getIndexPatternKey } from '../../../../../common/index_patterns_utils';
 import { IndexPatternValue, SanitizedFieldType } from '../../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../../common/ui_restrictions';
-import { getIndexPatternKey } from '../../../../../common/index_patterns_utils';
-import { MultiFieldSelect } from './multi_field_select';
+import { FieldSelectItem } from './field_select_item';
 import {
-  addNewItem,
-  deleteItem,
-  swapItems,
-  getGroupedOptions,
-  findInGroupedOptions,
   INVALID_FIELD_ID,
   MAX_MULTI_FIELDS_ITEMS,
+  addNewItem,
+  deleteItem,
+  findInGroupedOptions,
+  getGroupedOptions,
+  swapItems,
   updateItem,
 } from './field_select_utils';
+import { MultiFieldSelect } from './multi_field_select';
 
 interface FieldSelectProps {
   label: string | ReactNode;
@@ -134,20 +134,19 @@ export function FieldSelect({
   );
 
   const FieldSelectItemFactory = useMemo(
-    () => (props: { value?: string | null; index?: number }) =>
-      (
-        <FieldSelectItem
-          options={groupedOptions}
-          selectedOptions={(props.value ? selectedOptionsMap.get(props.value) : undefined) ?? []}
-          disabled={disabled}
-          onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
-          onDeleteItem={onDeleteItem.bind(undefined, props.index)}
-          onChange={onFieldSelectItemChange.bind(undefined, props.index)}
-          placeholder={getPlaceholderValue(placeholder, groupedOptions)}
-          disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
-          disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
-        />
-      ),
+    () => (props: { value?: string | null; index?: number }) => (
+      <FieldSelectItem
+        options={groupedOptions}
+        selectedOptions={(props.value ? selectedOptionsMap.get(props.value) : undefined) ?? []}
+        disabled={disabled}
+        onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
+        onDeleteItem={onDeleteItem.bind(undefined, props.index)}
+        onChange={onFieldSelectItemChange.bind(undefined, props.index)}
+        placeholder={getPlaceholderValue(placeholder, groupedOptions)}
+        disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
+        disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
+      />
+    ),
     [
       groupedOptions,
       selectedOptionsMap,

@@ -1,3 +1,15 @@
+import type { EuiDescriptionListProps } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiNotificationBadge,
+  EuiPortal,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,40 +17,28 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiDescriptionListProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextColor,
-  EuiDescriptionList,
-  EuiNotificationBadge,
-  EuiLink,
-  EuiPortal,
-} from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { withSuspense, LazyReplacementCard } from '@kbn/custom-integrations-plugin/public';
+import { LazyReplacementCard, withSuspense } from '@kbn/custom-integrations-plugin/public';
 import { uniq } from 'lodash';
 
+import { useGetCategoriesQuery } from '../../../../../hooks';
 import type {
-  PackageInfo,
-  PackageSpecCategory,
   AssetTypeToParts,
   KibanaAssetType,
-  RegistryPolicyTemplate,
+  PackageInfo,
+  PackageSpecCategory,
   RegistryPolicyIntegrationTemplate,
+  RegistryPolicyTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useGetCategoriesQuery } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
 
-import { NoticeModal } from './notice_modal';
 import { LicenseModal } from './license_modal';
+import { NoticeModal } from './notice_modal';
 
 const ReplacementCard = withSuspense(LazyReplacementCard);
 

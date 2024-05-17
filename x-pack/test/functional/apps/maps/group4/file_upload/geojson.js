@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import path from 'path';
+import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function ({ getPageObjects, getService }) {

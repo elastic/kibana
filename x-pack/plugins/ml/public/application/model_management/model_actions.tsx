@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
+import {
+  type DataFrameAnalysisConfigType,
+  getAnalysisType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
   DEPLOYMENT_STATE,
@@ -19,19 +22,16 @@ import {
   ELASTIC_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
-import {
-  getAnalysisType,
-  type DataFrameAnalysisConfigType,
-} from '@kbn/ml-data-frame-analytics-utils';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { isTestable, isDfaTrainedModel } from './test_models';
+import { getUserConfirmationProvider } from './force_stop_dialog';
 import type { ModelItem } from './models_list';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { isDfaTrainedModel, isTestable } from './test_models';
 
 export function useModelActions({
   onDfaTestAction,
@@ -486,15 +486,15 @@ export function useModelActions({
                 }
               )
             : hasDeployments
-            ? i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                {
-                  defaultMessage: 'Model has started deployments',
-                }
-              )
-            : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete model',
-              });
+              ? i18n.translate(
+                  'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                  {
+                    defaultMessage: 'Model has started deployments',
+                  }
+                )
+              : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                  defaultMessage: 'Delete model',
+                });
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',

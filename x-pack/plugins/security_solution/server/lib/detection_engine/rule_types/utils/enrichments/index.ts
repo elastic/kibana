@@ -10,22 +10,22 @@ import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
 
 import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
 
-import {
-  createHostAssetCriticalityEnrichments,
-  createUserAssetCriticalityEnrichments,
-} from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
-import type {
-  EnrichEventsFunction,
-  EventsMapByEnrichments,
-  CreateEnrichEventsFunction,
-} from './types';
-import { applyEnrichmentsToEvents } from './utils/transforms';
-import { isIndexExist } from './utils/is_index_exist';
 import {
   getHostRiskIndex,
   getUserRiskIndex,
 } from '../../../../../../common/search_strategy/security_solution/risk_score/common';
+import {
+  createHostAssetCriticalityEnrichments,
+  createUserAssetCriticalityEnrichments,
+} from './enrichment_by_type/asset_criticality';
+import type {
+  CreateEnrichEventsFunction,
+  EnrichEventsFunction,
+  EventsMapByEnrichments,
+} from './types';
+import { isIndexExist } from './utils/is_index_exist';
+import { applyEnrichmentsToEvents } from './utils/transforms';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,

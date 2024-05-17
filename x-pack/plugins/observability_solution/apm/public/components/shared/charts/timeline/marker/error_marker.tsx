@@ -6,8 +6,8 @@
  */
 
 import { EuiPopover, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React, { useState } from 'react';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';

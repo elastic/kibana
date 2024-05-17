@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
-import { SO_SEARCH_LIMIT } from '../../constants';
 import { appContextService } from '../app_context';
 
 export async function ensureAgentPoliciesFleetServerKeysAndPolicies({

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from '.';
-import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { mockData } from './mock';
 
 const defaultProps = {
   data: undefined,

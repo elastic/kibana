@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { Router } from '@kbn/shared-ux-router';
 import { mount } from 'enzyme';
 import React from 'react';
-import { Router } from '@kbn/shared-ux-router';
 
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import type { Filter } from '@kbn/es-query';
-import { TestProviders, createMockStore } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { TestProviders, createMockStore } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/components/empty_prompt');

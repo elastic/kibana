@@ -10,6 +10,8 @@ import {
   getMockThreatData,
 } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
 import { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { getNewRule } from '../../../../objects/rule';
 import {
   COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON,
   COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES,
@@ -18,20 +20,17 @@ import {
   COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS,
   COVERAGE_OVERVIEW_TACTIC_PANEL,
 } from '../../../../screens/rules_coverage_overview';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { visit } from '../../../../tasks/navigation';
-import { RULES_COVERAGE_OVERVIEW_URL } from '../../../../urls/rules_management';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { getNewRule } from '../../../../objects/rule';
-import {
-  createAndInstallMockedPrebuiltRules,
-  preventPrebuiltRulesPackageInstallation,
-} from '../../../../tasks/api_calls/prebuilt_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../../tasks/api_calls/common';
+import {
+  createAndInstallMockedPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import {
   enableAllDisabledRules,
   filterCoverageOverviewBySearchBar,
@@ -40,6 +39,7 @@ import {
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
 } from '../../../../tasks/rules_coverage_overview';
+import { RULES_COVERAGE_OVERVIEW_URL } from '../../../../urls/rules_management';
 
 // Mitre data used in base case tests
 const EnabledPrebuiltRuleMitreData = getMockThreatData()[0];

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { createHash } from 'crypto';
-import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
-import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
-import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -69,10 +69,13 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         const allTypes = externalReferenceAttachmentTypeRegistry.list();
 
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getExternalReferenceAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
+        const hashMap = allTypes.reduce(
+          (map, type) => {
+            map[type.id] = getExternalReferenceAttachmentTypeHash(type);
+            return map;
+          },
+          {} as Record<string, string>
+        );
 
         return response.ok({
           body: hashMap,
@@ -94,10 +97,13 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         const allTypes = persistableStateAttachmentTypeRegistry.list();
 
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getPersistableStateAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
+        const hashMap = allTypes.reduce(
+          (map, type) => {
+            map[type.id] = getPersistableStateAttachmentTypeHash(type);
+            return map;
+          },
+          {} as Record<string, string>
+        );
 
         return response.ok({
           body: hashMap,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import {
-  dateRt,
-  inRangeFromStringRt,
-  datemathStringRt,
   createLiteralValueFromUndefinedRT,
+  dateRt,
+  datemathStringRt,
+  inRangeFromStringRt,
 } from '@kbn/io-ts-utils';
+import * as rt from 'io-ts';
 
 export const assetTypeRT = rt.keyof({
   'k8s.pod': null,

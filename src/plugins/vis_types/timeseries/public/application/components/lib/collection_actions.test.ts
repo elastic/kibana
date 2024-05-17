@@ -7,10 +7,10 @@
  */
 
 import {
-  handleChange,
-  handleAdd,
-  handleDelete,
   CollectionActionsProps,
+  handleAdd,
+  handleChange,
+  handleDelete,
 } from './collection_actions';
 
 describe('collection actions', () => {

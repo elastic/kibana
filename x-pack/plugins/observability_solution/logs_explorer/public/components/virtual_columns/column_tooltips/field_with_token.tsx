@@ -6,9 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elastic/eui';
-import React from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 
 const spacingXsCss = css`
   margin-bottom: ${euiThemeVars.euiSizeXS};

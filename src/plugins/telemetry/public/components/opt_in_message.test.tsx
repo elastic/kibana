@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { mockTelemetryConstants, mockTelemetryService } from '../mocks';
 import { OptInMessage } from './opt_in_message';
 

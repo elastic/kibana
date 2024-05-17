@@ -6,20 +6,20 @@
  */
 
 import {
-  EuiText,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiLoadingSpinner,
-  EuiButton,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
-import * as React from 'react';
 import { Unit } from '@kbn/datemath';
+import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
+import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogTextSeparator } from './log_text_separator';
 import { extendDatemath } from '../../../utils/datemath';
+import { LogTextSeparator } from './log_text_separator';
 
 type Position = 'start' | 'end';
 

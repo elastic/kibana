@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { RenderHookResult, Renderer, renderHook } from '@testing-library/react-hooks';
 import {
+  Indicator,
   generateMockIndicator,
   generateMockUrlIndicator,
-  Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
 import { FilterIn } from '../utils/filter';
 import { updateFiltersArray } from '../utils/filter';
+import { UseFilterInValue, useFilterInOut } from './use_filter_in_out';
 
 jest.mock('../utils/filter', () => ({ updateFiltersArray: jest.fn() }));
 

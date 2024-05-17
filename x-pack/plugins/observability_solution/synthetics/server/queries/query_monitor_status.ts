@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
-import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
+import times from 'lodash/times';
+import pMap from 'p-map';
 import { FINAL_SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import {
   OverviewPendingStatusMetaData,
@@ -16,7 +16,7 @@ import {
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../common/runtime_types';
-import { createEsParams, UptimeEsClient } from '../lib';
+import { UptimeEsClient, createEsParams } from '../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 

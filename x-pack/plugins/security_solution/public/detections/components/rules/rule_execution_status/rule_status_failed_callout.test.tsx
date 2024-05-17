@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render } from '@testing-library/react';
 
-import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
+import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
 
 jest.mock('../../../../common/lib/kibana');
 

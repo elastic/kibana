@@ -19,10 +19,10 @@ export const convertToApiThreshold = (
   return isPercent === isPreviousPercent
     ? threshold
     : isPercent
-    ? threshold.map((v: number) => pctToDecimal(v))
-    : isPreviousPercent
-    ? threshold.map((v: number) => decimalToPct(v))
-    : threshold;
+      ? threshold.map((v: number) => pctToDecimal(v))
+      : isPreviousPercent
+        ? threshold.map((v: number) => decimalToPct(v))
+        : threshold;
 };
 
 export const isPercent = (metrics: CustomThresholdExpressionMetric[]) =>

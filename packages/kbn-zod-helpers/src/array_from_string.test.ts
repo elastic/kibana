@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ArrayFromString } from './array_from_string';
 import * as z from 'zod';
+import { ArrayFromString } from './array_from_string';
 
 describe('ArrayFromString', () => {
   const itemsSchema = z.string();

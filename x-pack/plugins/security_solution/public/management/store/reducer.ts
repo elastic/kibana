@@ -6,19 +6,19 @@
  */
 
 import { combineReducers } from 'redux';
-import {
-  policyDetailsReducer,
-  initialPolicyDetailsState,
-} from '../pages/policy/store/policy_details';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { ImmutableCombineReducers } from '../../common/store';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../common/constants';
-import type { ImmutableCombineReducers } from '../../common/store';
-import type { Immutable } from '../../../common/endpoint/types';
-import type { ManagementState } from '../types';
-import { endpointListReducer } from '../pages/endpoint_hosts/store/reducer';
 import { initialEndpointPageState } from '../pages/endpoint_hosts/store/builders';
+import { endpointListReducer } from '../pages/endpoint_hosts/store/reducer';
+import {
+  initialPolicyDetailsState,
+  policyDetailsReducer,
+} from '../pages/policy/store/policy_details';
+import type { ManagementState } from '../types';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 

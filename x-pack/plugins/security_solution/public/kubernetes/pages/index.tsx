@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { InputsModelId } from '../../common/store/inputs/constants';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useKibana } from '../../common/lib/kibana';
+import React, { useCallback, useMemo } from 'react';
 import { SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../../common/components/filters_global';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
-import { inputsSelectors } from '../../common/store';
-import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { convertToBuildEsQuery } from '../../common/lib/kuery';
-import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { useKibana } from '../../common/lib/kibana';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
+import { inputsSelectors } from '../../common/store';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { kubernetesSessionsHeaders } from './constants';
 
 export const KubernetesContainer = React.memo(() => {

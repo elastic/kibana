@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
-import type { AggregateQuery } from '@kbn/es-query';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

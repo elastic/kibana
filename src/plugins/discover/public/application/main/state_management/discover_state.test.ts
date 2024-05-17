@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
-import {
-  getDiscoverStateContainer,
-  DiscoverStateContainer,
-  createSearchSessionRestorationDataProvider,
-} from './discover_state';
-import { createBrowserHistory, createMemoryHistory, History } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { IKbnUrlStateStorage, createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { waitFor } from '@testing-library/react';
+import { History, createBrowserHistory, createMemoryHistory } from 'history';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
+import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import {
   savedSearchAdHoc,
   savedSearchMock,
+  savedSearchMockWithESQL,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
-  savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
-import { waitFor } from '@testing-library/react';
-import { FetchStatus } from '../../types';
-import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
-import { copySavedSearch } from './discover_saved_search_container';
-import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
+import { FetchStatus } from '../../types';
+import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import { copySavedSearch } from './discover_saved_search_container';
+import {
+  DiscoverStateContainer,
+  createSearchSessionRestorationDataProvider,
+  getDiscoverStateContainer,
+} from './discover_state';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getInterval } from './get_interval';
 import { FetchedIndexPattern, Panel, Series } from '../../../common/types';
+import { getInterval } from './get_interval';
 
 describe('getInterval', () => {
   const index: FetchedIndexPattern = {} as FetchedIndexPattern;

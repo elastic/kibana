@@ -6,35 +6,35 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import {
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
+  apmEnableContinuousRollups,
+  apmEnableProfilingIntegration,
+  apmEnableServiceInventoryTableSearchBar,
+  apmEnableServiceMetrics,
+  apmEnableTableSearchBar,
+  apmEnableTransactionProfiling,
   apmLabsButton,
   apmServiceGroupMaxNumberOfServices,
   defaultApmServiceEnvironment,
+  enableAgentExplorerView,
   enableComparisonByDefault,
   enableInspectEsQueries,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableAgentExplorerView,
-  apmEnableProfilingIntegration,
-  apmEnableTableSearchBar,
-  apmEnableTransactionProfiling,
-  apmEnableServiceInventoryTableSearchBar,
 } from '@kbn/observability-plugin/common';
-import { isEmpty } from 'lodash';
-import React from 'react';
 import {
   BottomBarActions,
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
-import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { isEmpty } from 'lodash';
+import React from 'react';
 import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row')).FieldRow,

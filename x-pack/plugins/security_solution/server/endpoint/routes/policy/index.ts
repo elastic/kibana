@@ -7,16 +7,16 @@
 
 import type { IRouter } from '@kbn/core/server';
 import {
-  GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
+  GetPolicyResponseSchema,
 } from '../../../../common/api/endpoint';
-import type { EndpointAppContext } from '../../types';
-import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
 } from '../../../../common/endpoint/constants';
+import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { getAgentPolicySummaryHandler, getHostPolicyResponseHandler } from './handlers';
 
 export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 

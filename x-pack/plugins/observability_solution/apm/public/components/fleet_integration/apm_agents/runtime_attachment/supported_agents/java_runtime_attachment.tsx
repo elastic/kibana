@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import yaml from 'js-yaml';
 import React, { useCallback, useState, useMemo } from 'react';
-import { RuntimeAttachment, RuntimeAttachmentSettings, IDiscoveryRule, validateVersion } from '..';
+import { IDiscoveryRule, RuntimeAttachment, RuntimeAttachmentSettings, validateVersion } from '..';
 import type {
   NewPackagePolicy,
   PackagePolicy,

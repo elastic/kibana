@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React from 'react';
+import { EuiDescriptionList } from '@elastic/eui';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import { memoize } from 'lodash';
+import React from 'react';
 import type {
   ChangePointDetectionProps,
   ChangePointDetectionSharedComponent,

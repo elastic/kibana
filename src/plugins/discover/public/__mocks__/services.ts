@@ -1,3 +1,34 @@
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import {
+  chromeServiceMock,
+  coreMock,
+  docLinksServiceMock,
+  scopedHistoryMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
+import { SearchSourceDependencies } from '@kbn/data-plugin/common';
+import { SearchSource, UI_SETTINGS, calculateBounds } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import {
+  CONTEXT_STEP_SETTING,
+  DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  HIDE_ANNOUNCEMENTS,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { TopNavMenu } from '@kbn/navigation-plugin/public';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { createElement } from 'react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,40 +38,9 @@
  */
 import { Observable, of } from 'rxjs';
 import { DiscoverServices } from '../build_services';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import {
-  chromeServiceMock,
-  coreMock,
-  docLinksServiceMock,
-  scopedHistoryMock,
-  themeServiceMock,
-} from '@kbn/core/public/mocks';
-import {
-  CONTEXT_STEP_SETTING,
-  DEFAULT_COLUMNS_SETTING,
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-  SAMPLE_SIZE_SETTING,
-  SAMPLE_ROWS_PER_PAGE_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-  HIDE_ANNOUNCEMENTS,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-} from '@kbn/discover-utils';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { UI_SETTINGS, calculateBounds, SearchSource } from '@kbn/data-plugin/public';
-import { TopNavMenu } from '@kbn/navigation-plugin/public';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
-import { SearchSourceDependencies } from '@kbn/data-plugin/common';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { LocalStorageMock } from './local_storage_mock';
 import { urlTrackerMock } from './url_tracker.mock';
-import { createElement } from 'react';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();

@@ -8,24 +8,24 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
-import { buildSiemResponse } from '../../../routes/utils';
 import type { SetupPlugins } from '../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildSiemResponse } from '../../../routes/utils';
 
 import {
   GetPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
-import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
+import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { rulesToMap } from '../../logic/utils';
 
-import { buildFrameworkRequest } from '../../../../timeline/utils/common';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
+import { buildFrameworkRequest } from '../../../../timeline/utils/common';
 
 export const getPrebuiltRulesAndTimelinesStatusRoute = (
   router: SecuritySolutionPluginRouter,

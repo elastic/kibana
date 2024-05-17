@@ -6,21 +6,21 @@
  */
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 import { isMobileAgentName, isRumAgentName } from '../../../../../common/agent_name';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../../../../../common/es_fields/apm';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 

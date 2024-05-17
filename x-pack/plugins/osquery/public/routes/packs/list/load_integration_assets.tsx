@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
-import { useImportAssets } from '../../../assets/use_import_assets';
+import React, { useCallback } from 'react';
 import { useAssetsStatus } from '../../../assets/use_assets_status';
+import { useImportAssets } from '../../../assets/use_import_assets';
 import {
   LOAD_PREBUILT_PACKS_BUTTON,
-  UPDATE_PREBUILT_PACKS_BUTTON,
   LOAD_PREBUILT_PACKS_SUCCESS_TEXT,
+  UPDATE_PREBUILT_PACKS_BUTTON,
   UPDATE_PREBUILT_PACKS_SUCCESS_TEXT,
 } from './translations';
 

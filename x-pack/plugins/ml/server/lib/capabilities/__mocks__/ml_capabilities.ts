@@ -8,8 +8,8 @@
 import type { MlCapabilities } from '../../../../common/types/capabilities';
 import {
   adminMlCapabilities,
-  userMlCapabilities,
   getDefaultCapabilities,
+  userMlCapabilities,
 } from '../../../../common/types/capabilities';
 
 export function getAdminCapabilities() {

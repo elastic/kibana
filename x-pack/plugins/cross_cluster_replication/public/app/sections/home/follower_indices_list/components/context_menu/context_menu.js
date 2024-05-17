@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { PureComponent, Fragment } from 'react';
 
-import { routing } from '../../../../../services/routing';
 import {
   FollowerIndexPauseProvider,
   FollowerIndexResumeProvider,
   FollowerIndexUnfollowProvider,
 } from '../../../../../components';
+import { routing } from '../../../../../services/routing';
 
 export class ContextMenu extends PureComponent {
   static propTypes = {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import React from 'react';
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
-import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
 
 function getColor(classes) {
   const classList = classes.split(' ');

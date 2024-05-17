@@ -8,8 +8,8 @@
 
 import { generateFileHashMock, getFileCacheKeyMock } from './file_hash.test.mocks';
 
-import { resolve } from 'path';
 import { Stats } from 'fs';
+import { resolve } from 'path';
 import { getFileHash } from './file_hash';
 import { IFileHashCache } from './file_hash_cache';
 

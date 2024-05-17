@@ -30,13 +30,13 @@ import {
   mathWithUnits,
 } from '@elastic/eui';
 
+import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreSetup } from '@kbn/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { euiDataGridStyle, euiDataGridToolbarSettings, INDEX_STATUS } from '../lib/common';
+import { INDEX_STATUS, euiDataGridStyle, euiDataGridToolbarSettings } from '../lib/common';
 import type { UseIndexDataReturnType } from '../lib/types';
 
 const histogramHeaderProps = { className: 'cellHeaderWithHistogramChart' };
@@ -81,7 +81,7 @@ const cssOverride = ({ euiTheme }: UseEuiTheme) =>
         },
       },
     },
-  } as const);
+  }) as const;
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">

@@ -7,10 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { DynamicTool } from '@langchain/core/tools';
-import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
-import type { RetrievalQAChain } from 'langchain/chains';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { DynamicTool } from '@langchain/core/tools';
+import type { RetrievalQAChain } from 'langchain/chains';
+import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';

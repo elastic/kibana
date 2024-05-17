@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { hostsRelatedUsers } from '.';
-import { mockDeps, mockOptions, mockSearchStrategyResponse, mockRelatedHosts } from './__mocks__';
 import { get } from 'lodash/fp';
+import { hostsRelatedUsers } from '.';
+import { mockDeps, mockOptions, mockRelatedHosts, mockSearchStrategyResponse } from './__mocks__';
 import * as buildQuery from './query.related_users.dsl';
 
 describe('hostsRelatedUsers search strategy', () => {

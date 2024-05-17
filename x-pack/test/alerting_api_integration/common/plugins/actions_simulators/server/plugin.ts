@@ -7,28 +7,28 @@
 
 import http from 'http';
 import https from 'https';
-import { Plugin, CoreSetup } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { ActionType } from '@kbn/actions-plugin/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
-import { ActionType } from '@kbn/actions-plugin/server';
-import { initPlugin as initPagerduty } from './pagerduty_simulation';
-import { initPlugin as initSwimlane } from './swimlane_simulation';
-import { initPlugin as initServiceNow } from './servicenow_simulation';
-import { initPlugin as initServiceNowOAuth } from './servicenow_oauth_simulation';
+import { schema } from '@kbn/config-schema';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { initPlugin as initJira } from './jira_simulation';
-import { initPlugin as initResilient } from './resilient_simulation';
-import { initPlugin as initSlack } from './slack_simulation';
-import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
-import { initPlugin as initXmatters } from './xmatters_simulation';
+import { initPlugin as initPagerduty } from './pagerduty_simulation';
+import { initPlugin as initResilient } from './resilient_simulation';
+import { initPlugin as initServiceNowOAuth } from './servicenow_oauth_simulation';
+import { initPlugin as initServiceNow } from './servicenow_simulation';
+import { initPlugin as initSlack } from './slack_simulation';
+import { initPlugin as initSwimlane } from './swimlane_simulation';
+import { initPlugin as initTines } from './tines_simulation';
 import { initPlugin as initTorq } from './torq_simulation';
 import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
-import { initPlugin as initTines } from './tines_simulation';
+import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initXmatters } from './xmatters_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 

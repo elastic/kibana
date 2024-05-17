@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, useEuiTheme, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
-import { DocumentStatus } from './status';
-import { DocumentSeverity } from './severity';
-import { RiskScore } from './risk_score';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import React, { memo, useCallback, useMemo } from 'react';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { useRefetchByScope } from '../../../../timelines/components/side_panel/event_details/flyout/use_refetch_by_scope';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { useRightPanelContext } from '../context';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
-import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
+import { useRightPanelContext } from '../context';
+import { Assignees } from './assignees';
+import { RiskScore } from './risk_score';
+import { DocumentSeverity } from './severity';
+import { DocumentStatus } from './status';
+import { ALERT_SUMMARY_PANEL_TEST_ID, FLYOUT_ALERT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 /**
  * Alert details flyout right section header

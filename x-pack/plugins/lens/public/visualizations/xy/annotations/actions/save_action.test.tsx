@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import {
-  XYByValueAnnotationLayerConfig,
-  XYAnnotationLayerConfig,
-  XYState,
-  XYByReferenceAnnotationLayerConfig,
-} from '../../types';
-import { onSave, SaveModal } from './save_action';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
   EventAnnotationGroupConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import {
+  XYAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
+  XYState,
+} from '../../types';
+import { SaveModal, onSave } from './save_action';
 
 describe('annotation group save action', () => {
   describe('save modal', () => {

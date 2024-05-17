@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { act, render, fireEvent } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
-import { useActionStatus } from '../../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../../hooks';
+import { useActionStatus } from '../../hooks';
 
 import { AgentActivityFlyout } from '.';
 

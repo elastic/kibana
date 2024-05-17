@@ -6,7 +6,7 @@
  */
 
 import { EsQueryRuleParams, SearchType } from './types';
-import { validateExpression, hasExpressionValidationErrors } from './validation';
+import { hasExpressionValidationErrors, validateExpression } from './validation';
 
 describe('expression params validation', () => {
   test('if params are not set should return a proper error message', () => {

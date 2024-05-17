@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of } from 'rxjs';
-import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { Header } from './header';
 
 function mockProps() {

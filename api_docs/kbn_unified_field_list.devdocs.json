@@ -23,13 +23,9 @@
         "parentPluginId": "@kbn/unified-field-list",
         "id": "def-common.FieldItemButton",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": ["constructor"],
         "label": "FieldItemButton",
-        "description": [
-          "\nField list item component"
-        ],
+        "description": ["\nField list item component"],
         "signature": [
           "({\n  field,\n  fieldSearchHighlight,\n  isSelected,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  dataTestSubj,\n  size,\n  withDragIcon,\n  onClick,\n  shouldAlwaysShowAction,\n  buttonAddFieldToWorkspaceProps,\n  buttonRemoveFieldFromWorkspaceProps,\n  onAddFieldToWorkspace,\n  onRemoveFieldFromWorkspace,\n  ...otherProps\n}: ",
           {
@@ -75,9 +71,7 @@
         "parentPluginId": "@kbn/unified-field-list",
         "id": "def-common.FieldList",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": ["constructor"],
         "label": "FieldList",
         "description": [
           "\nA top level wrapper for field list components (filters and field list groups)"
@@ -427,9 +421,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
+            "signature": ["P & { children?: React.ReactNode; }"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -441,9 +433,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -481,9 +471,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
+            "signature": ["P & { children?: React.ReactNode; }"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -495,9 +483,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -535,9 +521,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
+            "signature": ["P & { children?: React.ReactNode; }"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -549,9 +533,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -565,9 +547,7 @@
         "type": "Function",
         "tags": [],
         "label": "getSearchMode",
-        "description": [
-          "\nDetermines current search mode"
-        ],
+        "description": ["\nDetermines current search mode"],
         "signature": [
           "(query: ",
           {
@@ -760,9 +740,7 @@
             "tags": [],
             "label": "contextualFields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -800,9 +778,7 @@
         "type": "Function",
         "tags": [],
         "label": "hasQuerySubscriberData",
-        "description": [
-          "\nChecks if query result is ready to be used"
-        ],
+        "description": ["\nChecks if query result is ready to be used"],
         "signature": [
           "(result: ",
           {
@@ -904,9 +880,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "FetchFieldExistenceParams"
-            ],
+            "signature": ["FetchFieldExistenceParams"],
             "path": "packages/kbn-unified-field-list/src/services/field_existing/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -945,9 +919,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "FetchFieldStatsParams"
-            ],
+            "signature": ["FetchFieldStatsParams"],
             "path": "packages/kbn-unified-field-list/src/services/field_stats/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -964,9 +936,7 @@
         "tags": [],
         "label": "resetExistingFieldsCache",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1061,9 +1031,7 @@
             "tags": [],
             "label": "contextualFields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1076,9 +1044,7 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1176,9 +1142,7 @@
             "tags": [],
             "label": "contextualFields",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1191,9 +1155,7 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1329,9 +1291,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1434,9 +1394,7 @@
         "type": "Function",
         "tags": [],
         "label": "useFieldFilters",
-        "description": [
-          "\nA hook for managing field search and filters state"
-        ],
+        "description": ["\nA hook for managing field search and filters state"],
         "signature": [
           "({\n  allFields,\n  getCustomFieldType,\n  onSupportedFieldFilter,\n  services,\n}: ",
           {
@@ -1548,9 +1506,7 @@
         "type": "Function",
         "tags": [],
         "label": "useQuerySubscriber",
-        "description": [
-          "\nMemorizes current query, filters and absolute date range"
-        ],
+        "description": ["\nMemorizes current query, filters and absolute date range"],
         "signature": [
           "({ data, timeRangeUpdatesType, }: ",
           {
@@ -1628,9 +1584,7 @@
             "tags": [],
             "label": "buckets",
             "description": [],
-            "signature": [
-              "{ key: KeyType; count: number; }[]"
-            ],
+            "signature": ["{ key: KeyType; count: number; }[]"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1642,9 +1596,7 @@
             "tags": [],
             "label": "areExamples",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1670,9 +1622,7 @@
             "tags": [],
             "label": "refetchFieldsExistenceInfo",
             "description": [],
-            "signature": [
-              "(dataViewId?: string | undefined) => Promise<void>"
-            ],
+            "signature": ["(dataViewId?: string | undefined) => Promise<void>"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1684,9 +1634,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1727,9 +1675,7 @@
             "tags": [],
             "label": "disableAutoFetching",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1762,9 +1708,7 @@
             "tags": [],
             "label": "fromDate",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1776,9 +1720,7 @@
             "tags": [],
             "label": "toDate",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1878,9 +1820,7 @@
             "tags": [],
             "label": "onNoData",
             "description": [],
-            "signature": [
-              "((dataViewId: string) => unknown) | undefined"
-            ],
+            "signature": ["((dataViewId: string) => unknown) | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1892,9 +1832,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1944,9 +1882,7 @@
             "tags": [],
             "label": "existingFieldsByFieldNameMap",
             "description": [],
-            "signature": [
-              "{ [x: string]: boolean; }"
-            ],
+            "signature": ["{ [x: string]: boolean; }"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1990,9 +1926,7 @@
             "tags": [],
             "label": "hasDataViewRestrictions",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2018,9 +1952,7 @@
             "tags": [],
             "label": "hasFieldData",
             "description": [],
-            "signature": [
-              "(dataViewId: string, fieldName: string) => boolean"
-            ],
+            "signature": ["(dataViewId: string, fieldName: string) => boolean"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2032,9 +1964,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2047,9 +1977,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2086,9 +2014,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2104,9 +2030,7 @@
             "tags": [],
             "label": "isFieldsExistenceInfoUnavailable",
             "description": [],
-            "signature": [
-              "(dataViewId: string) => boolean"
-            ],
+            "signature": ["(dataViewId: string) => boolean"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2118,9 +2042,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2158,9 +2080,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2178,9 +2098,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldFiltersParams",
-        "description": [
-          "\nInput params for useFieldFilters hook"
-        ],
+        "description": ["\nInput params for useFieldFilters hook"],
         "signature": [
           {
             "pluginId": "@kbn/unified-field-list",
@@ -2202,9 +2120,7 @@
             "tags": [],
             "label": "allFields",
             "description": [],
-            "signature": [
-              "T[] | null"
-            ],
+            "signature": ["T[] | null"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_field_filters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2237,9 +2153,7 @@
             "tags": [],
             "label": "onSupportedFieldFilter",
             "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
+            "signature": ["((field: T) => boolean) | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_field_filters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2251,9 +2165,7 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_field_filters.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2293,9 +2205,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldFiltersResult",
-        "description": [
-          "\nOutput of useFieldFilters hook"
-        ],
+        "description": ["\nOutput of useFieldFilters hook"],
         "signature": [
           {
             "pluginId": "@kbn/unified-field-list",
@@ -2349,9 +2259,7 @@
             "tags": [],
             "label": "onFilterField",
             "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
+            "signature": ["((field: T) => boolean) | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_field_filters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2363,9 +2271,7 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_field_filters.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2383,9 +2289,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldItemButtonProps",
-        "description": [
-          "\nProps of FieldItemButton component"
-        ],
+        "description": ["\nProps of FieldItemButton component"],
         "signature": [
           {
             "pluginId": "@kbn/unified-field-list",
@@ -2407,9 +2311,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2421,9 +2323,7 @@
             "tags": [],
             "label": "fieldSearchHighlight",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2446,9 +2346,7 @@
             "tags": [],
             "label": "isActive",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2485,9 +2383,7 @@
             "tags": [],
             "label": "className",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2499,9 +2395,7 @@
             "tags": [],
             "label": "flush",
             "description": [],
-            "signature": [
-              "\"both\" | undefined"
-            ],
+            "signature": ["\"both\" | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2513,9 +2407,7 @@
             "tags": [],
             "label": "withDragIcon",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2548,9 +2440,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2562,9 +2452,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": [
-              "\"s\" | \"xs\" | undefined"
-            ],
+            "signature": ["\"s\" | \"xs\" | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2576,9 +2464,7 @@
             "tags": [],
             "label": "onClick",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2590,9 +2476,7 @@
             "tags": [],
             "label": "shouldAlwaysShowAction",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2604,11 +2488,7 @@
             "tags": [],
             "label": "buttonAddFieldToWorkspaceProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonIconProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonIconProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2620,11 +2500,7 @@
             "tags": [],
             "label": "buttonRemoveFieldFromWorkspaceProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonIconProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonIconProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2636,9 +2512,7 @@
             "tags": [],
             "label": "onAddFieldToWorkspace",
             "description": [],
-            "signature": [
-              "((field: T) => unknown) | undefined"
-            ],
+            "signature": ["((field: T) => unknown) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2650,9 +2524,7 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2668,9 +2540,7 @@
             "tags": [],
             "label": "onRemoveFieldFromWorkspace",
             "description": [],
-            "signature": [
-              "((field: T) => unknown) | undefined"
-            ],
+            "signature": ["((field: T) => unknown) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2682,9 +2552,7 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2702,9 +2570,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldListFiltersProps",
-        "description": [
-          "\nProps for FieldListFilters component"
-        ],
+        "description": ["\nProps for FieldListFilters component"],
         "signature": [
           {
             "pluginId": "@kbn/unified-field-list",
@@ -2726,9 +2592,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2760,9 +2624,7 @@
             "tags": [],
             "label": "selectedFieldTypes",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2774,9 +2636,7 @@
             "tags": [],
             "label": "allFields",
             "description": [],
-            "signature": [
-              "T[] | null | undefined"
-            ],
+            "signature": ["T[] | null | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2809,9 +2669,7 @@
             "tags": [],
             "label": "onSupportedFieldFilter",
             "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
+            "signature": ["((field: T) => boolean) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2823,9 +2681,7 @@
             "tags": [],
             "label": "onChangeFieldTypes",
             "description": [],
-            "signature": [
-              "(fieldTypes: string[]) => unknown"
-            ],
+            "signature": ["(fieldTypes: string[]) => unknown"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2838,9 +2694,7 @@
                 "tags": [],
                 "label": "fieldTypes",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_type_filter.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2854,9 +2708,7 @@
             "tags": [],
             "label": "compressed",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2879,9 +2731,7 @@
             "tags": [],
             "label": "screenReaderDescriptionId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2893,9 +2743,7 @@
             "tags": [],
             "label": "onChangeNameFilter",
             "description": [],
-            "signature": [
-              "(nameFilter: string) => unknown"
-            ],
+            "signature": ["(nameFilter: string) => unknown"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3063,9 +2911,7 @@
             "tags": [],
             "label": "screenReaderDescriptionId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3077,9 +2923,7 @@
             "tags": [],
             "label": "localStorageKeyPrefix",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3091,9 +2935,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3107,9 +2949,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldListProps",
-        "description": [
-          "\nA top level wrapper props"
-        ],
+        "description": ["\nA top level wrapper props"],
         "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -3121,9 +2961,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3174,9 +3012,7 @@
             "tags": [],
             "label": "className",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3222,9 +3058,7 @@
             "tags": [],
             "label": "closePopover",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3238,11 +3072,7 @@
             "tags": [],
             "label": "buttonAddFieldToWorkspaceProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonIconProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonIconProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3254,11 +3084,7 @@
             "tags": [],
             "label": "buttonAddFilterProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonIconProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonIconProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3270,11 +3096,7 @@
             "tags": [],
             "label": "buttonEditFieldProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonIconProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonIconProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3286,11 +3108,7 @@
             "tags": [],
             "label": "buttonDeleteFieldProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonIconProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonIconProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3369,9 +3187,7 @@
             "tags": [],
             "label": "onEditField",
             "description": [],
-            "signature": [
-              "((fieldName: string) => unknown) | undefined"
-            ],
+            "signature": ["((fieldName: string) => unknown) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3383,9 +3199,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3401,9 +3215,7 @@
             "tags": [],
             "label": "onDeleteField",
             "description": [],
-            "signature": [
-              "((fieldName: string) => unknown) | undefined"
-            ],
+            "signature": ["((fieldName: string) => unknown) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3415,9 +3227,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3458,9 +3268,7 @@
             "tags": [],
             "label": "renderHeader",
             "description": [],
-            "signature": [
-              "(() => React.ReactNode) | undefined"
-            ],
+            "signature": ["(() => React.ReactNode) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3474,9 +3282,7 @@
             "tags": [],
             "label": "renderContent",
             "description": [],
-            "signature": [
-              "(() => React.ReactNode) | undefined"
-            ],
+            "signature": ["(() => React.ReactNode) | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3537,9 +3343,7 @@
             "tags": [],
             "label": "helpText",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3573,9 +3377,7 @@
             "tags": [],
             "label": "hideDetails",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3587,9 +3389,7 @@
             "tags": [],
             "label": "defaultNoFieldsMessage",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3601,9 +3401,7 @@
             "tags": [],
             "label": "hideIfEmpty",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3639,9 +3437,7 @@
             "tags": [],
             "label": "totalDocuments",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3653,9 +3449,7 @@
             "tags": [],
             "label": "sampledDocuments",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3667,9 +3461,7 @@
             "tags": [],
             "label": "sampledValues",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3893,9 +3685,7 @@
             "tags": [],
             "label": "totalDocuments",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3907,9 +3697,7 @@
             "tags": [],
             "label": "sampledDocuments",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3921,9 +3709,7 @@
             "tags": [],
             "label": "sampledValues",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4032,9 +3818,7 @@
             "tags": [],
             "label": "fieldValue",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_top_values_bucket.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4046,9 +3830,7 @@
             "tags": [],
             "label": "formattedFieldValue",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_top_values_bucket.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4104,9 +3886,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"other\" | \"normal\" | undefined"
-            ],
+            "signature": ["\"other\" | \"normal\" | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_top_values_bucket.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4180,13 +3960,8 @@
             "type": "Function",
             "tags": [],
             "label": "overrideFieldTopValueBar",
-            "description": [
-              "\nOptional callback to allow overriding props on bucket level"
-            ],
-            "signature": [
-              "OverrideFieldTopValueBarCallback",
-              " | undefined"
-            ],
+            "description": ["\nOptional callback to allow overriding props on bucket level"],
+            "signature": ["OverrideFieldTopValueBarCallback", " | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_top_values_bucket.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4372,9 +4147,7 @@
             "tags": [],
             "label": "contextualFields",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/field_visualize_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4400,9 +4173,7 @@
                 "tags": [],
                 "label": "metricType",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/field_visualize_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4415,9 +4186,7 @@
                 "tags": [],
                 "label": "eventName",
                 "description": [],
-                "signature": [
-                  "string | string[]"
-                ],
+                "signature": ["string | string[]"],
                 "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/field_visualize_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4433,11 +4202,7 @@
             "tags": [],
             "label": "buttonProps",
             "description": [],
-            "signature": [
-              "Partial<",
-              "EuiButtonProps",
-              "> | undefined"
-            ],
+            "signature": ["Partial<", "EuiButtonProps", "> | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/field_visualize_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4494,9 +4259,7 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4508,9 +4271,7 @@
             "tags": [],
             "label": "allFields",
             "description": [],
-            "signature": [
-              "T[] | null"
-            ],
+            "signature": ["T[] | null"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4552,9 +4313,7 @@
             "tags": [],
             "label": "isAffectedByGlobalFilter",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4566,9 +4325,7 @@
             "tags": [],
             "label": "popularFieldsLimit",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4580,9 +4337,7 @@
             "tags": [],
             "label": "sortedSelectedFields",
             "description": [],
-            "signature": [
-              "T[] | undefined"
-            ],
+            "signature": ["T[] | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4615,10 +4370,7 @@
             "tags": [],
             "label": "onOverrideFieldGroupDetails",
             "description": [],
-            "signature": [
-              "OverrideFieldGroupDetails",
-              " | undefined"
-            ],
+            "signature": ["OverrideFieldGroupDetails", " | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4630,9 +4382,7 @@
             "tags": [],
             "label": "onSupportedFieldFilter",
             "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
+            "signature": ["((field: T) => boolean) | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4644,9 +4394,7 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4662,9 +4410,7 @@
             "tags": [],
             "label": "onSelectedFieldFilter",
             "description": [],
-            "signature": [
-              "((field: T) => boolean) | undefined"
-            ],
+            "signature": ["((field: T) => boolean) | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4676,9 +4422,7 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4724,9 +4468,7 @@
             "tags": [],
             "label": "additionalFieldGroups",
             "description": [],
-            "signature": [
-              "{ smartFields?: T[] | undefined; } | undefined"
-            ],
+            "signature": ["{ smartFields?: T[] | undefined; } | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4813,9 +4555,7 @@
             "tags": [],
             "label": "allFieldsModified",
             "description": [],
-            "signature": [
-              "T[] | null"
-            ],
+            "signature": ["T[] | null"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4852,9 +4592,7 @@
             "tags": [],
             "label": "minValue",
             "description": [],
-            "signature": [
-              "number | null"
-            ],
+            "signature": ["number | null"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4866,9 +4604,7 @@
             "tags": [],
             "label": "maxValue",
             "description": [],
-            "signature": [
-              "number | null"
-            ],
+            "signature": ["number | null"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4882,9 +4618,7 @@
         "type": "Interface",
         "tags": [],
         "label": "QuerySubscriberParams",
-        "description": [
-          "\nHook params"
-        ],
+        "description": ["\nHook params"],
         "path": "packages/kbn-unified-field-list/src/hooks/use_query_subscriber.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4918,10 +4652,7 @@
             "description": [
               "\nPass `timefilter` only if you are not using search sessions for the global search"
             ],
-            "signature": [
-              "TimeRangeUpdatesType",
-              " | undefined"
-            ],
+            "signature": ["TimeRangeUpdatesType", " | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_query_subscriber.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4935,9 +4666,7 @@
         "type": "Interface",
         "tags": [],
         "label": "QuerySubscriberResult",
-        "description": [
-          "\nResult from the hook"
-        ],
+        "description": ["\nResult from the hook"],
         "path": "packages/kbn-unified-field-list/src/hooks/use_query_subscriber.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4999,9 +4728,7 @@
             "tags": [],
             "label": "fromDate",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_query_subscriber.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5013,9 +4740,7 @@
             "tags": [],
             "label": "toDate",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/hooks/use_query_subscriber.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5072,9 +4797,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5086,9 +4809,7 @@
             "tags": [],
             "label": "hideDetails",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5142,9 +4863,7 @@
             "tags": [],
             "label": "fieldSearchHighlight",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5170,9 +4889,7 @@
             "tags": [],
             "label": "sidebarVisibility",
             "description": [],
-            "signature": [
-              "SidebarVisibility"
-            ],
+            "signature": ["SidebarVisibility"],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5184,9 +4901,7 @@
             "tags": [],
             "label": "refetchFieldsExistenceInfo",
             "description": [],
-            "signature": [
-              "(dataViewId?: string | undefined) => Promise<void>"
-            ],
+            "signature": ["(dataViewId?: string | undefined) => Promise<void>"],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -5199,9 +4914,7 @@
                 "tags": [],
                 "label": "dataViewId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5215,9 +4928,7 @@
             "tags": [],
             "label": "closeFieldListFlyout",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -5231,9 +4942,7 @@
             "tags": [],
             "label": "createField",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5245,9 +4954,7 @@
             "tags": [],
             "label": "editField",
             "description": [],
-            "signature": [
-              "((fieldName: string) => void) | undefined"
-            ],
+            "signature": ["((fieldName: string) => void) | undefined"],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5259,9 +4966,7 @@
             "tags": [],
             "label": "deleteField",
             "description": [],
-            "signature": [
-              "((fieldName: string) => void) | undefined"
-            ],
+            "signature": ["((fieldName: string) => void) | undefined"],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5307,9 +5012,7 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5396,9 +5099,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5410,9 +5111,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"+\" | \"-\""
-            ],
+            "signature": ["\"+\" | \"-\""],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5502,11 +5201,7 @@
         "tags": [],
         "label": "FieldStatsProps",
         "description": [],
-        "signature": [
-          "FieldStatsWithKbnQuery",
-          " | ",
-          "FieldStatsWithDslQuery"
-        ],
+        "signature": ["FieldStatsWithKbnQuery", " | ", "FieldStatsWithDslQuery"],
         "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -5519,9 +5214,7 @@
         "tags": [],
         "label": "GetCustomFieldType",
         "description": [],
-        "signature": [
-          "(field: T) => string"
-        ],
+        "signature": ["(field: T) => string"],
         "path": "packages/kbn-unified-field-list/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5534,9 +5227,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5551,9 +5242,7 @@
         "tags": [],
         "label": "SearchMode",
         "description": [],
-        "signature": [
-          "\"documents\" | \"text-based\""
-        ],
+        "signature": ["\"documents\" | \"text-based\""],
         "path": "packages/kbn-unified-field-list/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

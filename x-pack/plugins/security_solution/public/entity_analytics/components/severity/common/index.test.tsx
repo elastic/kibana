@@ -14,8 +14,8 @@ import type { EuiHealthProps } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '.';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 
 jest.mock('@elastic/eui', () => {

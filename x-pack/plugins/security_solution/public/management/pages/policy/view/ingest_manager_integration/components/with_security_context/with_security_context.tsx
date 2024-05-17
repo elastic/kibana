@@ -7,9 +7,9 @@
 
 import type { ComponentType } from 'react';
 import React, { memo } from 'react';
-import { createFleetContextReduxStore } from './store';
-import { RenderContextProviders } from './render_context_providers';
 import type { FleetUiExtensionGetterOptions } from '../../types';
+import { RenderContextProviders } from './render_context_providers';
+import { createFleetContextReduxStore } from './store';
 
 interface WithSecurityContextProps<P extends {}> extends FleetUiExtensionGetterOptions {
   WrappedComponent: ComponentType<P>;

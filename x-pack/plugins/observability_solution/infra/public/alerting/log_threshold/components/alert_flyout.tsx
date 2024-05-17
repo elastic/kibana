@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
+import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 
 interface Props {
   visible?: boolean;

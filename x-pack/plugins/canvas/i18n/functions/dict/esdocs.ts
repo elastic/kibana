@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { esdocs } from '../../../canvas_plugin_src/functions/browser/esdocs';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { ELASTICSEARCH, LUCENE } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
   help: i18n.translate('xpack.canvas.functions.esdocsHelpText', {

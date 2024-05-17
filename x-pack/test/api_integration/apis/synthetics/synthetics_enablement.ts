@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   syntheticsApiKeyID,
   syntheticsApiKeyObjectType,
 } from '@kbn/synthetics-plugin/server/saved_objects/service_api_key';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

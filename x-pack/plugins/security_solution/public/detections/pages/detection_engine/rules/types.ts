@@ -7,6 +7,9 @@
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import type {
   RiskScoreMapping,
   Severity,
@@ -16,35 +19,32 @@ import type {
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
-import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
-import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
+import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../../../../../common/api/detection_engine/model/rule_response_actions';
+import type {
+  AlertSuppression,
+  AlertSuppressionMissingFieldsStrategy,
   BuildingBlockType,
+  InvestigationFields,
+  RelatedIntegration,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RuleAction,
   RuleAuthorArray,
   RuleLicense,
   RuleNameOverride,
   SetupGuide,
-  TimestampOverride,
-  AlertSuppressionMissingFieldsStrategy,
-  InvestigationFields,
-  RuleAction,
-  AlertSuppression,
   ThresholdAlertSuppression,
-  RelatedIntegration,
+  TimestampOverride,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
-import type {
-  RuleResponseAction,
-  ResponseAction,
-} from '../../../../../common/api/detection_engine/model/rule_response_actions';
+import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -72,7 +72,7 @@ export type RuleStepsOrder = [
   RuleStep.defineRule,
   RuleStep.aboutRule,
   RuleStep.scheduleRule,
-  RuleStep.ruleActions
+  RuleStep.ruleActions,
 ];
 
 export interface RuleStepProps {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { findListItems, ApiParams } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { ApiParams, findListItems } from '@kbn/securitysolution-list-api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { useCursor } from '../use_cursor';
 
 const findListItemsWithOptionalSignal = withOptionalSignal(findListItems);

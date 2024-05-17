@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
 import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
-import { getSecurityIndexPatterns, IndexPatternMeta } from './security_index_pattern_utils';
+import React, { ChangeEvent, Component } from 'react';
 import { getDataViewLabel } from '../../../../../../common/i18n_getters';
+import { IndexPatternMeta, getSecurityIndexPatterns } from './security_index_pattern_utils';
 
 interface Props {
   value: string;

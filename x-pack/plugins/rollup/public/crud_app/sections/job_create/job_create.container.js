@@ -8,9 +8,9 @@
 import { connect } from 'react-redux';
 import { JobCreate as JobCreateView } from './job_create';
 
-import { isSaving, getCreateJobError, getCloneJobConfig } from '../../store/selectors';
+import { getCloneJobConfig, getCreateJobError, isSaving } from '../../store/selectors';
 
-import { createJob, clearCreateJobErrors, clearCloneJob } from '../../store/actions';
+import { clearCloneJob, clearCreateJobErrors, createJob } from '../../store/actions';
 
 const mapStateToProps = (state) => {
   return {

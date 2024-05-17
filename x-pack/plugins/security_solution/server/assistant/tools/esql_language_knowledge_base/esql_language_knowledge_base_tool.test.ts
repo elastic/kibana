@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { RetrievalQAChain } from 'langchain/chains';
-import type { DynamicTool } from '@langchain/core/tools';
-import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base_tool';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { DynamicTool } from '@langchain/core/tools';
+import type { RetrievalQAChain } from 'langchain/chains';
+import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base_tool';
 
 describe('EsqlLanguageKnowledgeBaseTool', () => {
   const chain = {} as RetrievalQAChain;

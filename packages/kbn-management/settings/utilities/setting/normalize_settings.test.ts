@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { normalizeSettings } from './normalize_settings';
 import { UiSettingsType } from '@kbn/core-ui-settings-common';
+import { normalizeSettings } from './normalize_settings';
 
 describe('normalizeSettings', () => {
   describe('adds a missing type if there is a value', () => {

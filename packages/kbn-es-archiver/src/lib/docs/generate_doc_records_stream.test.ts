@@ -9,15 +9,15 @@
 import { ToolingLog } from '@kbn/tooling-log';
 
 import {
-  createListStream,
-  createPromiseFromStreams,
   createConcatStream,
+  createListStream,
   createMapStream,
+  createPromiseFromStreams,
 } from '@kbn/utils';
 
-import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';
 import { createStats } from '../stats';
+import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 
 const log = new ToolingLog();
 

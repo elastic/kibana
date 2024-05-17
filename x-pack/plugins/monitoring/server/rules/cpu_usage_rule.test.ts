@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CpuUsageRule } from './cpu_usage_rule';
-import { RULE_CPU_USAGE } from '../../common/constants';
-import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_CPU_USAGE } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
+import { CpuUsageRule } from './cpu_usage_rule';
 
 const RealDate = Date;
 

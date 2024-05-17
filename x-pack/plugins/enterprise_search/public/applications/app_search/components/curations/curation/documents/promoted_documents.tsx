@@ -7,20 +7,20 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiEmptyPrompt,
+  DropResult,
+  EuiBadge,
   EuiButtonEmpty,
   EuiDragDropContext,
-  DropResult,
-  EuiDroppable,
   EuiDraggable,
-  euiDragDropReorder,
-  EuiBadge,
+  EuiDroppable,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiText,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

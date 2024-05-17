@@ -1,3 +1,5 @@
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +7,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import { METRICS_TOOLTIP, KPI_CHART_HEIGHT } from '../../../../common/visualizations';
+import { KPI_CHART_HEIGHT, METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../lens';
 
 export const Kpi = ({

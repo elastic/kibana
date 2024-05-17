@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageBody } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React, { useEffect } from 'react';
 
 import { useAppContext } from '../management_app/management_context';
 

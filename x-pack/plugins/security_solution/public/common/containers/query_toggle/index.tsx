@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '../../lib/kibana';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 

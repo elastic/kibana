@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import '../../../../common/mock/formatted_relative';
 
 import { NoteCards } from '.';

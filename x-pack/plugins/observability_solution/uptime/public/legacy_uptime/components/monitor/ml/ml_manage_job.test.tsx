@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import { screen, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
-import { ManageMLJobComponent } from './manage_ml_job';
+import React from 'react';
 import {
-  render,
-  makeUptimePermissionsCore,
   forNearestButton,
+  makeUptimePermissionsCore,
+  render,
 } from '../../../lib/helper/rtl_helpers';
+import { ManageMLJobComponent } from './manage_ml_job';
 import * as labels from './translations';
 
 describe('Manage ML Job', () => {

@@ -6,14 +6,14 @@
  */
 
 import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Validation } from '../../../../../../../common/types';
+import React from 'react';
 import {
   ConfigKey,
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
+import { Validation } from '../../../../../../../common/types';
 import { OptionalLabel } from '../optional_label';
 
 export const ThrottlingLatencyField = ({

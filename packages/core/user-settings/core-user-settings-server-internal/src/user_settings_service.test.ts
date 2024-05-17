@@ -8,8 +8,8 @@
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { UserSettingsService } from './user_settings_service';
 
 describe('#setup', () => {

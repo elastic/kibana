@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { randomBytes, createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 
 import { chunk } from 'lodash';
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResult,
-} from '@kbn/core-saved-objects-api-server';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTopHitsAggregate,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsClientContract,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { asyncForEach, asyncMap } from '@kbn/std';
 
 import type {
-  AggregationsTermsInclude,
   AggregationsTermsExclude,
+  AggregationsTermsInclude,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isResponseError } from '@kbn/es-errors';
@@ -44,12 +44,12 @@ import type {
 } from '../../../../common/types/models/uninstall_token';
 
 import {
-  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../../constants';
-import { appContextService } from '../../app_context';
 import { agentPolicyService } from '../../agent_policy';
+import { appContextService } from '../../app_context';
 
 interface UninstallTokenSOAttributes {
   policy_id: string;
@@ -279,10 +279,13 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       ignoreMissing: true,
     });
 
-    return agentPolicies.reduce((dict, policy) => {
-      dict[policy.id] = policy.name;
-      return dict;
-    }, {} as Record<string, string>);
+    return agentPolicies.reduce(
+      (dict, policy) => {
+        dict[policy.id] = policy.name;
+        return dict;
+      },
+      {} as Record<string, string>
+    );
   }
 
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
@@ -461,12 +464,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
     const tokens = await this.getDecryptedTokensForPolicyIds(policyIds);
-    return tokens.reduce((acc, { policy_id: policyId, token }) => {
-      if (policyId && token) {
-        acc[policyId] = this.hashToken(token);
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    return tokens.reduce(
+      (acc, { policy_id: policyId, token }) => {
+        if (policyId && token) {
+          acc[policyId] = this.hashToken(token);
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
   }
 
   public async getAllHashedTokens(): Promise<Record<string, string>> {
@@ -499,13 +505,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       ? policyIds
       : policyIds.filter((policyId) => !existingTokens.has(policyId));
 
-    const newTokensMap = missingTokenPolicyIds.reduce((acc, policyId) => {
-      const token = this.generateToken();
-      return {
-        ...acc,
-        [policyId]: token,
-      };
-    }, {} as Record<string, string>);
+    const newTokensMap = missingTokenPolicyIds.reduce(
+      (acc, policyId) => {
+        const token = this.generateToken();
+        return {
+          ...acc,
+          [policyId]: token,
+        };
+      },
+      {} as Record<string, string>
+    );
     await this.persistTokens(missingTokenPolicyIds, newTokensMap);
     if (force) {
       const config = appContextService.getConfig();

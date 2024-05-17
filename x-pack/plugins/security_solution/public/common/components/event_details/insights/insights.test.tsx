@@ -11,10 +11,10 @@ import React from 'react';
 import { TestProviders } from '../../../mock';
 
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
+import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { licenseService } from '../../../hooks/use_license';
-import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
+import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { Insights } from './insights';
 import * as i18n from './translations';
 

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { getFavoritedTimeline, getTimeline } from '../../../objects/timeline';
 import {
-  TIMELINES_OVERVIEW_TABLE,
   TIMELINES_OVERVIEW_ONLY_FAVORITES,
   TIMELINES_OVERVIEW_SEARCH,
+  TIMELINES_OVERVIEW_TABLE,
 } from '../../../screens/timelines';
-import { getFavoritedTimeline, getTimeline } from '../../../objects/timeline';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
-import { TIMELINES_URL } from '../../../urls/navigation';
 import {
   closeTimeline,
   markAsFavorite,
@@ -22,6 +21,7 @@ import {
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
 import { clearSearchBar, searchForTimeline, toggleFavoriteFilter } from '../../../tasks/timelines';
+import { TIMELINES_URL } from '../../../urls/navigation';
 
 const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();

@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import {
   FormulaColumn,
-  getIndexPatternIds,
   StaticValueColumn,
+  getIndexPatternIds,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { v4 as uuidv4 } from 'uuid';
 import { PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../common/enums';
 import { Metric } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
-import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
-import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForGauge as getConfiguration } from '../lib/configurations/metric';
 import {
+  Column,
+  Layer as ExtendedLayer,
+  createFormulaColumnWithoutMeta,
+  createStaticValueColumn,
+} from '../lib/convert';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import {
+  SUPPORTED_METRICS,
   getFormulaFromMetric,
   getReducedTimeRange,
   isValidMetrics,
-  SUPPORTED_METRICS,
 } from '../lib/metrics';
+import { getBucketsColumns, getMetricsColumns } from '../lib/series';
 import { ConvertTsvbToLensVisualization } from '../types';
-import {
-  Column,
-  createFormulaColumnWithoutMeta,
-  createStaticValueColumn,
-  Layer as ExtendedLayer,
-} from '../lib/convert';
 import { excludeMetaFromLayers, findMetricColumn, getMetricWithCollapseFn } from '../utils';
 
 const getMaxFormula = (metric: Metric, column?: Column) => {

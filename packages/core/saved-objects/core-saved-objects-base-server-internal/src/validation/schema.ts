@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema, type Type } from '@kbn/config-schema';
+import { type Type, schema } from '@kbn/config-schema';
 import type {
-  SavedObjectsValidationSpec,
   SavedObjectSanitizedDoc,
+  SavedObjectsValidationSpec,
 } from '@kbn/core-saved-objects-server';
 
 // We convert `SavedObjectSanitizedDoc` to its validation schema representation

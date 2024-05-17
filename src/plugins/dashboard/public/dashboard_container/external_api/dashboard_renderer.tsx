@@ -38,8 +38,8 @@ import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
 import {
   AwaitingDashboardAPI,
-  buildApiFromDashboardContainer,
   DashboardAPI,
+  buildApiFromDashboardContainer,
 } from './dashboard_api';
 
 export interface DashboardRendererProps {

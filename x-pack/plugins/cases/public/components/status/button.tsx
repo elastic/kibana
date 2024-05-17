@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
 
 import type { CaseStatuses } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';

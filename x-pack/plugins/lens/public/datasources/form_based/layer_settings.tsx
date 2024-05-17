@@ -7,15 +7,15 @@
 
 import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
+import React from 'react';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { ExperimentalBadge } from '../../shared_components';
+import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
-import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { ExperimentalBadge } from '../../shared_components';
 
 const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 

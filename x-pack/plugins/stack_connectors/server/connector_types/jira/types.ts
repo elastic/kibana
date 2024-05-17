@@ -7,21 +7,21 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetCapabilitiesParamsSchema,
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
-  ExecutorSubActionGetIssuesParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionGetIssueParamsSchema,
-  ExecutorSubActionCommonFieldsParamsSchema,
+  ExecutorSubActionGetIssuesParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;

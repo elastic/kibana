@@ -1,3 +1,16 @@
+import type {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleAction,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { DISABLE_FLAPPING_SETTINGS, parseDuration } from '@kbn/alerting-plugin/common';
+import type { Alert } from '@kbn/alerting-plugin/server';
+import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,63 +19,50 @@
  */
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, StartServicesAccessor, IKibanaResponse } from '@kbn/core/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleAction,
-  RuleTypeState,
-} from '@kbn/alerting-plugin/common';
-import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
-import type { Alert } from '@kbn/alerting-plugin/server';
 
-import {
-  DEFAULT_PREVIEW_INDEX,
-  DETECTION_ENGINE_RULES_PREVIEW,
-} from '../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
-import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   PreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
 import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
+import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
+import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import {
+  DEFAULT_PREVIEW_INDEX,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../../common/constants';
 
-import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
+import { buildMlAuthz } from '../../../../machine_learning/authz';
+import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
-import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
 import { parseInterval } from '../../../rule_types/utils/utils';
-import { buildMlAuthz } from '../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
-import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import type { ConfigType } from '../../../../../config';
-import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
-import type {
-  CreateRuleOptions,
-  CreateSecurityRuleTypeWrapperProps,
-} from '../../../rule_types/types';
 import {
   createEqlAlertType,
   createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
+  createNewTermsAlertType,
   createQueryAlertType,
   createThresholdAlertType,
-  createNewTermsAlertType,
 } from '../../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../../rule_types/create_security_rule_type_wrapper';
-import { assertUnreachable } from '../../../../../../common/utility_types';
+import type {
+  CreateRuleOptions,
+  CreateSecurityRuleTypeWrapperProps,
+} from '../../../rule_types/types';
+import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
@@ -184,7 +184,7 @@ export const previewRulesRoute = (
             TState extends RuleTypeState,
             TInstanceState extends AlertInstanceState,
             TInstanceContext extends AlertInstanceContext,
-            TActionGroupIds extends string = ''
+            TActionGroupIds extends string = '',
           >(
             executor: ExecutorType<
               TParams,

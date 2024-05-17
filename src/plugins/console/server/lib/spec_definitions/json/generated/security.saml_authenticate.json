@@ -6,12 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "_security/saml/authenticate"
-    ],
+    "methods": ["POST"],
+    "patterns": ["_security/saml/authenticate"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-authenticate.html",
     "availability": {
       "stack": true,

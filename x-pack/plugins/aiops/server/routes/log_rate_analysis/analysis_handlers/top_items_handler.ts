@@ -7,28 +7,28 @@
 
 import { queue } from 'async';
 
-import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
+import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 
 import {
   addSignificantItemsAction,
   updateLoadingStateAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import { fetchTopCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_top_categories';
 import { fetchTopTerms } from '@kbn/aiops-log-rate-analysis/queries/fetch_top_terms';
 
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 import {
   LOADED_FIELD_CANDIDATES,
   MAX_CONCURRENT_QUERIES,
   PROGRESS_STEP_P_VALUES,
 } from '../response_stream_utils/constants';
-import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const topItemsHandlerFactory =
   <T extends ApiVersion>({

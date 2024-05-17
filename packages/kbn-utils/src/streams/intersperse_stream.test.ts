@@ -7,10 +7,10 @@
  */
 
 import {
-  createPromiseFromStreams,
-  createListStream,
-  createIntersperseStream,
   createConcatStream,
+  createIntersperseStream,
+  createListStream,
+  createPromiseFromStreams,
 } from '.';
 
 describe('intersperseStream', () => {

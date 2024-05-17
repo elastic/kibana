@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ACCOUNT_SETTINGS_TITLE, ACCOUNT_SETTINGS_DESCRIPTION } from '../../../constants';
+import { ACCOUNT_SETTINGS_DESCRIPTION, ACCOUNT_SETTINGS_TITLE } from '../../../constants';
 import { ViewContentHeader } from '../../shared/view_content_header';
 
 export const AccountSettingsSidebar = () => {

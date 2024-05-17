@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
+import React from 'react';
 import { ExtensionsService } from '../../../services/extensions_service';
+import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
 
 export const NoMatch = ({
   loadIndices,

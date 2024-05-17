@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesPermissions, CasesCapabilities } from '@kbn/cases-plugin/common';
+import type { CasesCapabilities, CasesPermissions } from '@kbn/cases-plugin/common';
 
 export const noCasesCapabilities = (): CasesCapabilities => ({
   create_cases: false,

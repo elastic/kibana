@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import {
+  EuiBadge,
   EuiButton,
-  EuiPopover,
   EuiListGroup,
   EuiListGroupItem,
-  EuiBadge,
+  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback } from 'react';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
-import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
   seriesId: number;

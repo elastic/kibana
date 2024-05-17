@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
-import { createWizardContext, Step } from '../../../context/create_wizard_context';
+import React from 'react';
+import { Step, createWizardContext } from '../../../context/create_wizard_context';
 import { InstallElasticAgent } from './install_elastic_agent';
 
 interface WizardState {

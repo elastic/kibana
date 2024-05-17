@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
 import { DimensionTrigger } from './trigger';
 
 export const EmptyDimensionButton = ({

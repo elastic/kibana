@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { MlFeatures } from '../../common/constants/app';
 import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,

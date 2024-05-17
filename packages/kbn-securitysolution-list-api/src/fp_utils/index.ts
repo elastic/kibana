@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { fold } from 'fp-ts/lib/Either';
+import { TaskEither } from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 // TODO: This is copied in a few other spots and probably should live within its own kbn package
 // rather than living here. A package such as kbn-security-solution-fp-utils

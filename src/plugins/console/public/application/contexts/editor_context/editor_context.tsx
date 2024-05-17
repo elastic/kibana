@@ -7,8 +7,8 @@
  */
 
 import React, { createContext, Dispatch, useReducer } from 'react';
-import * as editor from '../../stores/editor';
 import { DevToolsSettings } from '../../../services';
+import * as editor from '../../stores/editor';
 import { createUseContext } from '../create_use_context';
 
 const EditorReadContext = createContext<editor.Store>(editor.initialValue);

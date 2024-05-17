@@ -6,8 +6,8 @@
  */
 
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
-import * as rt from 'io-ts';
 import { MetricsUIAggregationRT } from '@kbn/metrics-data-access-plugin/common';
+import * as rt from 'io-ts';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
 
 const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);

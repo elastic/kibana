@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import { Dataset, PartialConfig, cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
   Comparator,
   InfraRuleType,
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
-import {
-  waitForDocumentInIndex,
-  waitForAlertInIndex,
-  waitForRuleStatus,
-} from './helpers/alerting_wait_for_helpers';
+import moment from 'moment';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
+import {
+  waitForAlertInIndex,
+  waitForDocumentInIndex,
+  waitForRuleStatus,
+} from './helpers/alerting_wait_for_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

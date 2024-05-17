@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import { EuiDescribedFormGroup, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
+import { TRANSFORM_HEALTH_CHECK_NAMES } from '../../../common/constants';
 import type {
   TransformHealthRuleTestsConfig,
   TransformHealthTests,
 } from '../../../common/types/alerting';
 import { getResultTestConfig } from '../../../common/utils/alerts';
-import { TRANSFORM_HEALTH_CHECK_NAMES } from '../../../common/constants';
 
 interface TestsSelectionControlProps {
   config: TransformHealthRuleTestsConfig;
@@ -51,7 +51,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
         <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
           {(
             Object.entries(uiConfig) as Array<
-              [TransformHealthTests, typeof uiConfig[TransformHealthTests]]
+              [TransformHealthTests, (typeof uiConfig)[TransformHealthTests]]
             >
           )
             .filter(([name]) => !disabledChecks.has(name) || initConfig[name].enabled)

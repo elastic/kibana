@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedVisState } from './types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

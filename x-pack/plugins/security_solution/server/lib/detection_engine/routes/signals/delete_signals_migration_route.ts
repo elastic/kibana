@@ -6,15 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { SetupPlugins } from '../../../../plugin';
-import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { deleteSignalsMigrationSchema } from '../../../../../common/api/detection_engine/signals_migration';
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
+import type { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 
-import { signalsMigrationService } from '../../migrations/migration_service';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
+import { signalsMigrationService } from '../../migrations/migration_service';
 
 export const deleteSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,

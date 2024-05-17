@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateSearchApplicationApiKeyLogic } from '../../../api/search_applications/generate_search_application_api_key_logic';

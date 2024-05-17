@@ -7,7 +7,7 @@
 
 import { bisector } from 'd3-array';
 
-import { compareToTimeKey, TimeKey } from '../time';
+import { TimeKey, compareToTimeKey } from '../time';
 
 export interface SearchResult {
   gid: string;
@@ -24,7 +24,7 @@ export const getSearchResultKey = (result: SearchResult) =>
     gid: result.gid,
     tiebreaker: result.fields.tiebreaker,
     time: result.fields.time,
-  } as TimeKey);
+  }) as TimeKey;
 
 const searchResultTimeBisector = bisector(compareToTimeKey(getSearchResultKey));
 export const getSearchResultIndexBeforeTime = searchResultTimeBisector.left;

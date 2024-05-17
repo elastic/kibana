@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useRef } from 'react';
 
 import { DevToolsSettings } from '../../../services';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
 import * as InputMode from '../../models/legacy_core_editor/mode/input';
 const inputMode = new InputMode.Mode();
+import { formatRequestBodyDoc } from '../../../lib/utils';
 import * as editor from '../../models/legacy_core_editor';
 import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_editor_settings';
-import { formatRequestBodyDoc } from '../../../lib/utils';
 
 interface Props {
   settings: DevToolsSettings;

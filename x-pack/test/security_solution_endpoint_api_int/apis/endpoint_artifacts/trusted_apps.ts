@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
+import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {

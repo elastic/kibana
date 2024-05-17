@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
 
 export interface AppPluginDependenciesSetup {
   navigation: NavigationPublicPluginSetup;

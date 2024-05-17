@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 const fields = [
   {

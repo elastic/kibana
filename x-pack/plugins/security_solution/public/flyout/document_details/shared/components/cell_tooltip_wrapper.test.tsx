@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { CellTooltipWrapper } from './cell_tooltip_wrapper';
 
 const TEST_ID = 'test-id';

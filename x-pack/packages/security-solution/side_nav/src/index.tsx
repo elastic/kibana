@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import type { SolutionSideNavProps } from './solution_side_nav';
 
 export type { SolutionSideNavProps };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
 import type { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core/public';
+import { action } from '@storybook/addon-actions';
 
 const BASE_PATH = '';
 

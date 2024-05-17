@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { getPieVisualization } from './visualization';
-import { PieVisualizationState } from '../../../common/types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { PaletteOutput } from '@kbn/coloring';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { cloneDeep } from 'lodash';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
 } from '../../../common/constants';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { CollapseFunction } from '../../../common/expressions';
+import { PieVisualizationState } from '../../../common/types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { CollapseFunction } from '../../../common/expressions';
-import { PaletteOutput } from '@kbn/coloring';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedPieVisualizationState } from './persistence';
+import { getPieVisualization } from './visualization';
 
 jest.mock('../../id_generator');
 
@@ -292,7 +292,7 @@ describe('pie_visualization', () => {
       frame.datasourceLayers[LAYER_ID]!.getOperationForColumnId = (colId) =>
         ({
           label: `Label for ${colId}`,
-        } as OperationDescriptor);
+        }) as OperationDescriptor;
 
       it('applies palette and collapse icons for single slice-by group', () => {
         const state = getExampleState();
@@ -547,7 +547,9 @@ describe('pie_visualization', () => {
       const frame = mockFrame();
       frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
         // reverse the column IDs in the datasource
-        colIds.reverse().map((id) => ({ columnId: id, fields: [] }));
+        colIds
+          .reverse()
+          .map((id) => ({ columnId: id, fields: [] }));
 
       // this is to make sure the accessors get sorted before palette colors are applied
       const palette = paletteServiceMock.get('default');

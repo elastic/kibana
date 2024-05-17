@@ -1,3 +1,6 @@
+import { Filter, buildQueryFromFilters } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FindSLOGroupsResponse } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,24 +8,21 @@
  * 2.0.
  */
 import {
-  useQuery,
-  RefetchOptions,
   QueryObserverResult,
+  RefetchOptions,
   RefetchQueryFilters,
+  useQuery,
 } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { FindSLOGroupsResponse } from '@kbn/slo-schema';
-import { useKibana } from '../utils/kibana_react';
-import { useCreateDataView } from './use_create_data_view';
-import { sloKeys } from './query_key_factory';
 import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { GroupByField } from '../pages/slos/components/slo_list_group_by';
+import { SearchState } from '../pages/slos/hooks/use_url_search_state';
+import { useKibana } from '../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
+import { useCreateDataView } from './use_create_data_view';
 
 interface SLOGroupsParams {
   page?: number;

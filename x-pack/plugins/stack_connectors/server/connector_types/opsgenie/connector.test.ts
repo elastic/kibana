@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
+import axios, { AxiosInstance } from 'axios';
 import { OpsgenieConnectorTypeId } from '../../../common';
 import { OpsgenieConnector } from './connector';
-import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 
 jest.mock('axios');
 

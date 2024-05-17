@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../../common/constants';
 import { createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMaxCallback, registerCaseFileKinds } from '.';
+import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../../common/constants';
 import { ConfigSchema } from '../config';
 
 describe('server files', () => {

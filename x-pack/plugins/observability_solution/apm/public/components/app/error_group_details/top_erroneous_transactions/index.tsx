@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiSpacer,
   EuiTitle,
   RIGHT_ALIGNMENT,
-  EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { ValuesType } from 'utility-types';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { useFetcher, FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { asInteger } from '../../../../../common/utils/formatters';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
 type ErroneousTransactions =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions'>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { ALLOWED_JOB_CONTENT_TYPES } from '@kbn/reporting-common';
 import { getCounters } from '..';
@@ -26,7 +26,7 @@ interface HandlerOpts {
   path: string;
   user: ReportingUser;
   context: ReportingRequestHandlerContext;
-  req: KibanaRequest<TypeOf<typeof validate['params']>>;
+  req: KibanaRequest<TypeOf<(typeof validate)['params']>>;
   res: KibanaResponseFactory;
 }
 

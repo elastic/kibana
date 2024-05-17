@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { toasts, fatalError } from '../../services/notification';
+import { fatalError, toasts } from '../../services/notification';
 import { loadClusters } from './load_clusters';
 
 import { extractQueryParams } from '../../../shared_imports';
-import { editCluster as sendEditClusterRequest, getRouter, redirect } from '../../services';
+import { getRouter, redirect, editCluster as sendEditClusterRequest } from '../../services';
 
 import {
+  CLEAR_EDIT_CLUSTER_ERRORS,
+  EDIT_CLUSTER_FAILURE,
+  EDIT_CLUSTER_SAVE,
   EDIT_CLUSTER_START,
   EDIT_CLUSTER_STOP,
-  EDIT_CLUSTER_SAVE,
   EDIT_CLUSTER_SUCCESS,
-  EDIT_CLUSTER_FAILURE,
-  CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
 
 export const editCluster = (cluster) => async (dispatch) => {

@@ -6,9 +6,6 @@
     "id": "eso",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "encryptedSavedObjects",
-      "spaces"
-    ]
+    "requiredPlugins": ["encryptedSavedObjects", "spaces"]
   }
 }

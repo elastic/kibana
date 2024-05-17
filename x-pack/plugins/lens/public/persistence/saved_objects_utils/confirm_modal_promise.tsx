@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 import type { StartServices } from '../../types';
 
 export function confirmModalPromise(

@@ -10,8 +10,8 @@ import ChildProcess from 'child_process';
 import Readline from 'readline';
 
 import { createCliError } from './cli_error.mjs';
-import { REPO_ROOT } from './paths.mjs';
 import { indent } from './indent.mjs';
+import { REPO_ROOT } from './paths.mjs';
 
 /** @typedef {{ cwd?: string, env?: Record<string, string> }} SpawnOpts */
 

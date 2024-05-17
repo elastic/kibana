@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { ErrorEmbeddable } from './error_embeddable';
+import { EmbeddableStateWithType } from '../../../common/types';
 import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
-import { EmbeddableStateWithType } from '../../../common/types';
+import { ErrorEmbeddable } from './error_embeddable';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;
@@ -46,7 +46,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes extends FinderAttributes = FinderAttributes
+  TSavedObjectAttributes extends FinderAttributes = FinderAttributes,
 > extends PersistableState<EmbeddableStateWithType> {
   /**
    * The version of this Embeddable factory. This will be used in the client side migration system

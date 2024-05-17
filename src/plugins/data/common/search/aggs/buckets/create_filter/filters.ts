@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { buildQueryFilter } from '@kbn/es-query';
+import { get } from 'lodash';
 import { IBucketAggConfig } from '../bucket_agg_type';
 
 export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {

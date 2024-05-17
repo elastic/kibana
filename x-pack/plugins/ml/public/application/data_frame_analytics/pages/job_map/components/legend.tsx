@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroupItem,
   EuiListGroup,
+  EuiListGroupItem,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (

@@ -17,8 +17,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UnsavedCount } from './unsaved_count';
 import { useFormStyles } from '../form.styles';
+import { UnsavedCount } from './unsaved_count';
 
 export const DATA_TEST_SUBJ_SAVE_BUTTON = 'settings-save-button';
 export const DATA_TEST_SUBJ_CANCEL_BUTTON = 'settings-cancel-button';

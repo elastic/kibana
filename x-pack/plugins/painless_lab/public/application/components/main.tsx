@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatRequestPayload, formatJson } from '../lib/format';
+import React, { useState, useEffect } from 'react';
 import { exampleScript } from '../constants';
-import { PayloadFormat } from '../types';
-import { useSubmitCode } from '../hooks';
 import { useAppContext } from '../context';
-import { OutputPane } from './output_pane';
-import { MainControls } from './main_controls';
+import { useSubmitCode } from '../hooks';
+import { formatJson, formatRequestPayload } from '../lib/format';
+import { PayloadFormat } from '../types';
 import { Editor } from './editor';
+import { MainControls } from './main_controls';
+import { OutputPane } from './output_pane';
 import { RequestFlyout } from './request_flyout';
 
 export const Main: React.FunctionComponent = () => {

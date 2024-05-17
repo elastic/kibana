@@ -6,17 +6,17 @@
  */
 
 import type {
-  CasesTelemetrySchema,
-  TypeLong,
-  CountSchema,
-  StatusSchema,
-  LatestDatesSchema,
-  TypeString,
-  SolutionTelemetrySchema,
   AssigneesSchema,
   AttachmentFrameworkSchema,
   AttachmentItemsSchema,
+  CasesTelemetrySchema,
+  CountSchema,
   CustomFieldsSolutionTelemetrySchema,
+  LatestDatesSchema,
+  SolutionTelemetrySchema,
+  StatusSchema,
+  TypeLong,
+  TypeString,
 } from './types';
 
 const long: TypeLong = { type: 'long' };

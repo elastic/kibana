@@ -10,8 +10,8 @@ jest.mock('../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ScopeExpression } from './scope_expression';
 

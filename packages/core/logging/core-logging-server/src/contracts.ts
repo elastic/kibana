@@ -7,8 +7,8 @@
  */
 
 import { Observable } from 'rxjs';
-import type { LoggerConfigType } from './logger';
 import type { AppenderConfigType } from './appenders';
+import type { LoggerConfigType } from './logger';
 
 /**
  * Provides APIs to plugins for customizing the plugin's logger.

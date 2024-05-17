@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 import { Direction } from '../../search_strategy';
 
 export const getLiveQueryResultsRequestQuerySchema = t.type({

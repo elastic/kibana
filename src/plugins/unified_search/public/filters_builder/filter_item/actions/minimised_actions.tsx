@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import React, { FC, useState } from 'react';
 import { strings } from './action_strings';
-import { FilterItemActionsProps } from './types';
 import { FilterItemActions } from './actions';
+import { FilterItemActionsProps } from './types';
 
 export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

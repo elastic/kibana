@@ -6,14 +6,14 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { KbnClient } from '@kbn/test';
 import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
-import { usageTracker } from './usage_tracker';
-import type { HostMetadata } from '../types';
+import type { KbnClient } from '@kbn/test';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
+import type { HostMetadata } from '../types';
+import { usageTracker } from './usage_tracker';
 import { wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();

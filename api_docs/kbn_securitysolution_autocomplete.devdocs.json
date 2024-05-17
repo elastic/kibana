@@ -40,9 +40,7 @@
             "tags": [],
             "label": "{\n  placeholder,\n  rowLabel,\n  'aria-label': ariaLabel,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<AutocompleteFieldExistsProps>"
-            ],
+            "signature": ["React.PropsWithChildren<AutocompleteFieldExistsProps>"],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,9 +71,7 @@
             "tags": [],
             "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  allowLargeValueLists = false,\n  'aria-label': ariaLabel,\n  showValueListModal,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<AutocompleteFieldListsProps>"
-            ],
+            "signature": ["React.PropsWithChildren<AutocompleteFieldListsProps>"],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -106,9 +102,7 @@
             "tags": [],
             "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  onChange,\n  onError,\n  autocompleteService,\n  'aria-label': ariaLabel,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<AutocompleteFieldMatchAnyProps>"
-            ],
+            "signature": ["React.PropsWithChildren<AutocompleteFieldMatchAnyProps>"],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -139,9 +133,7 @@
             "tags": [],
             "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n  onWarning,\n  warning,\n  'aria-label': ariaLabel,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<AutocompleteFieldMatchProps>"
-            ],
+            "signature": ["React.PropsWithChildren<AutocompleteFieldMatchProps>"],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -158,9 +150,7 @@
         "tags": [],
         "label": "AutocompleteFieldWildcardComponent",
         "description": [],
-        "signature": [
-          "React.FunctionComponent<AutocompleteFieldWildcardProps>"
-        ],
+        "signature": ["React.FunctionComponent<AutocompleteFieldWildcardProps>"],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_wildcard/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -173,9 +163,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
+            "signature": ["P & { children?: React.ReactNode; }"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -187,9 +175,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -203,9 +189,7 @@
         "type": "Function",
         "tags": [],
         "label": "checkEmptyValue",
-        "description": [
-          "\nDetermines if empty value is ok"
-        ],
+        "description": ["\nDetermines if empty value is ok"],
         "signature": [
           "(param: string | undefined, field: ",
           {
@@ -228,9 +212,7 @@
             "tags": [],
             "label": "param",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -265,9 +247,7 @@
             "tags": [],
             "label": "isRequired",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -280,9 +260,7 @@
             "tags": [],
             "label": "touched",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -315,11 +293,7 @@
             "tags": [],
             "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n  'aria-label': ariaLabel,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "FieldProps",
-              ">"
-            ],
+            "signature": ["React.PropsWithChildren<", "FieldProps", ">"],
             "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -374,9 +348,7 @@
             "type": "Object",
             "tags": [],
             "label": "lists",
-            "description": [
-              "The lists to match against the field"
-            ],
+            "description": ["The lists to match against the field"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-autocomplete",
@@ -397,9 +369,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "field",
-            "description": [
-              "The field to check against the list to see if they are compatible"
-            ],
+            "description": ["The field to check against the list to see if they are compatible"],
             "signature": [
               "(",
               {
@@ -461,9 +431,7 @@
                 "tags": [],
                 "label": "getLabel",
                 "description": [],
-                "signature": [
-                  "(value: T) => string"
-                ],
+                "signature": ["(value: T) => string"],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -475,9 +443,7 @@
                     "tags": [],
                     "label": "value",
                     "description": [],
-                    "signature": [
-                      "T"
-                    ],
+                    "signature": ["T"],
                     "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -493,9 +459,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "T[]"
-                ],
+                "signature": ["T[]"],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -507,9 +471,7 @@
                 "tags": [],
                 "label": "selectedOptions",
                 "description": [],
-                "signature": [
-                  "T[]"
-                ],
+                "signature": ["T[]"],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -521,9 +483,7 @@
                 "tags": [],
                 "label": "disabledOptions",
                 "description": [],
-                "signature": [
-                  "T[] | undefined"
-                ],
+                "signature": ["T[] | undefined"],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -540,9 +500,7 @@
         "type": "Function",
         "tags": [],
         "label": "getOperators",
-        "description": [
-          "\nReturns the appropriate operators given a field type\n"
-        ],
+        "description": ["\nReturns the appropriate operators given a field type\n"],
         "signature": [
           "(field: ",
           {
@@ -572,9 +530,7 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "DataViewFieldBase selected field"
-            ],
+            "description": ["DataViewFieldBase selected field"],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -615,9 +571,7 @@
             "tags": [],
             "label": "{\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  operator,\n  operatorOptions,\n  operatorInputWidth = 150,\n  placeholder,\n  selectedField,\n  'aria-label': ariaLabel,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<OperatorState>"
-            ],
+            "signature": ["React.PropsWithChildren<OperatorState>"],
             "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -634,9 +588,7 @@
         "tags": [],
         "label": "paramContainsSpace",
         "description": [],
-        "signature": [
-          "(param: string) => boolean | \"\""
-        ],
+        "signature": ["(param: string) => boolean | \"\""],
         "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -648,9 +600,7 @@
             "tags": [],
             "label": "param",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -666,9 +616,7 @@
         "type": "Function",
         "tags": [],
         "label": "paramIsValid",
-        "description": [
-          "\nVery basic validation for values"
-        ],
+        "description": ["\nVery basic validation for values"],
         "signature": [
           "(param: string | undefined, field: ",
           {
@@ -690,12 +638,8 @@
             "type": "string",
             "tags": [],
             "label": "param",
-            "description": [
-              "the value being checked"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["the value being checked"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -707,9 +651,7 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "the selected field"
-            ],
+            "description": ["the selected field"],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -731,12 +673,8 @@
             "type": "boolean",
             "tags": [],
             "label": "isRequired",
-            "description": [
-              "whether or not an empty value is allowed"
-            ],
-            "signature": [
-              "boolean"
-            ],
+            "description": ["whether or not an empty value is allowed"],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -748,21 +686,15 @@
             "type": "boolean",
             "tags": [],
             "label": "touched",
-            "description": [
-              "has field been touched by user"
-            ],
-            "signature": [
-              "boolean"
-            ],
+            "description": ["has field been touched by user"],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "undefined if valid, string with error message if invalid"
-        ],
+        "returnComment": ["undefined if valid, string with error message if invalid"],
         "initialIsOpen": false
       },
       {
@@ -771,9 +703,7 @@
         "type": "Function",
         "tags": [],
         "label": "useFieldValueAutocomplete",
-        "description": [
-          "\nHook for using the field value autocomplete service"
-        ],
+        "description": ["\nHook for using the field value autocomplete service"],
         "signature": [
           "({ selectedField, operatorType, fieldValue, query, indexPattern, autocompleteService, }: ",
           {
@@ -883,10 +813,7 @@
             "tags": [],
             "label": "comboOptions",
             "description": [],
-            "signature": [
-              "EuiComboBoxOptionOption",
-              "<string | number | string[] | undefined>[]"
-            ],
+            "signature": ["EuiComboBoxOptionOption", "<string | number | string[] | undefined>[]"],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -898,9 +825,7 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -912,10 +837,7 @@
             "tags": [],
             "label": "selectedComboOptions",
             "description": [],
-            "signature": [
-              "EuiComboBoxOptionOption",
-              "<string | number | string[] | undefined>[]"
-            ],
+            "signature": ["EuiComboBoxOptionOption", "<string | number | string[] | undefined>[]"],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -941,9 +863,7 @@
             "tags": [],
             "label": "autocompleteService",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -955,9 +875,7 @@
             "tags": [],
             "label": "fieldValue",
             "description": [],
-            "signature": [
-              "string | string[] | undefined"
-            ],
+            "signature": ["string | string[] | undefined"],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1048,9 +966,7 @@
         "tags": [],
         "label": "UseFieldValueAutocompleteReturn",
         "description": [],
-        "signature": [
-          "[boolean, boolean, string[], Func | null]"
-        ],
+        "signature": ["[boolean, boolean, string[], Func | null]"],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
         "trackAdoption": false,

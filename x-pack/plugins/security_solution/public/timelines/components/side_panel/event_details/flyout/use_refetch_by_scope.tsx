@@ -7,9 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { isActiveTimeline } from '../../../../../helpers';
 import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
+import { isActiveTimeline } from '../../../../../helpers';
 
 export interface UseRefetchScopeQueryParams {
   /**

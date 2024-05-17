@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { useValuesList } from '../../hooks/use_values_list';
+import { FieldValueCombobox } from './field_value_combobox';
 import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';
-import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({
   fullWidth,

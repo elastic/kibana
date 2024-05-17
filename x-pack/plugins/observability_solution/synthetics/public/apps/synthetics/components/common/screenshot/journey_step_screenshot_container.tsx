@@ -8,11 +8,11 @@
 import React, { useContext } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
-import { getScreenshotUrl } from './journey_screenshot_dialog';
 import { SyntheticsSettingsContext } from '../../../contexts';
+import { getScreenshotUrl } from './journey_screenshot_dialog';
 
-import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screenshot_preview';
+import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
 interface Props {

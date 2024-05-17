@@ -1,3 +1,4 @@
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,39 +6,38 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPanelKey } from '../../../flyout/entity_details/host_right';
-import { EnableRiskScore } from '../enable_risk_score';
-import { getRiskScoreColumns } from './columns';
-import { LastUpdatedAt } from '../../../common/components/last_updated_at';
-import { HeaderSection } from '../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../common/components/inspect';
+import { LastUpdatedAt } from '../../../common/components/last_updated_at';
+import { Loader } from '../../../common/components/loader';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { Panel } from '../../../common/components/panel';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { StyledBasicTable } from '../styled_basic_table';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
+import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import { useRefetchQueries } from '../../../common/hooks/use_refetch_queries';
+import { useKibana } from '../../../common/lib/kibana';
+import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
+import { HostPanelKey } from '../../../flyout/entity_details/host_right';
+import { UserPanelKey } from '../../../flyout/entity_details/user_right';
+import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
+import { EnableRiskScore } from '../enable_risk_score';
+import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
-import { useRefetchQueries } from '../../../common/hooks/use_refetch_queries';
-import { Loader } from '../../../common/components/loader';
-import { Panel } from '../../../common/components/panel';
-import { useEntityInfo } from './use_entity';
-import { RiskScoreHeaderContent } from './header_content';
+import { StyledBasicTable } from '../styled_basic_table';
 import { ChartContent } from './chart_content';
-import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import { getRiskScoreColumns } from './columns';
+import { RiskScoreHeaderContent } from './header_content';
 import { getRiskEntityTranslation } from './translations';
-import { useKibana } from '../../../common/lib/kibana';
-import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
-import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
-import { useRiskScore } from '../../api/hooks/use_risk_score';
-import { UserPanelKey } from '../../../flyout/entity_details/user_right';
-import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
-import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
+import { useEntityInfo } from './use_entity';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 

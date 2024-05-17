@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions/actions';
+import { type CellActionTemplate, createCellActionFactory } from '@kbn/cell-actions/actions';
 import {
+  filterOutNullableValues,
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
-  filterOutNullableValues,
   valueToArray,
 } from '@kbn/cell-actions/actions/utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
-import { timelineActions } from '../../../../timelines/store';
-import { addProvider, showTimeline } from '../../../../timelines/store/actions';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { TimelineId } from '../../../../../common/types';
 import type { SecurityAppStore } from '../../../../common/store';
+import { timelineActions } from '../../../../timelines/store';
+import { addProvider, showTimeline } from '../../../../timelines/store/actions';
+import { timelineDefaults } from '../../../../timelines/store/defaults';
+import type { StartServices } from '../../../../types';
+import { SecurityCellActionType } from '../../constants';
+import type { SecurityCellAction } from '../../types';
 import { fieldHasCellActions } from '../../utils';
 import {
   ADD_TO_TIMELINE_FAILED_TEXT,
@@ -26,10 +30,6 @@ import {
   INVESTIGATE_IN_TIMELINE,
 } from '../constants';
 import { createDataProviders, isValidDataProviderField } from '../data_provider';
-import { SecurityCellActionType } from '../../constants';
-import type { StartServices } from '../../../../types';
-import type { SecurityCellAction } from '../../types';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
 
 export const createInvestigateInNewTimelineCellActionFactory = createCellActionFactory(
   ({

@@ -16,7 +16,6 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
-import { initGetShareableReferencesApi } from './get_shareable_references';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -28,6 +27,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
+import { initGetShareableReferencesApi } from './get_shareable_references';
 
 describe('get shareable references', () => {
   const spacesSavedObjects = createSpaces();

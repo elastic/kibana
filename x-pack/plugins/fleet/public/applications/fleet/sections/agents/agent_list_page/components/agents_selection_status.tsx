@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { Agent } from '../../../../types';

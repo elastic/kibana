@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { isError } from 'lodash';
-import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { Logger, LogMeta } from '@kbn/logging';
-import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { set } from '@kbn/safer-lodash-set';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { Alert } from '@kbn/alerts-as-data-utils';
-import type { Group } from '../../../../common/custom_threshold_rule/types';
+import { schema } from '@kbn/config-schema';
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import { LogMeta, Logger } from '@kbn/logging';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import { set } from '@kbn/safer-lodash-set';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { isError } from 'lodash';
 import { ObservabilityConfig } from '../../..';
+import type { Group } from '../../../../common/custom_threshold_rule/types';
 import { AlertExecutionDetails } from './types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
@@ -185,7 +185,7 @@ export const flattenAdditionalContext = (
 };
 
 export const getContextForRecoveredAlerts = <
-  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields),
 >(
   alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {

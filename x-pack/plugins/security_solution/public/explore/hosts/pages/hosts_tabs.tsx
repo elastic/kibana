@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { HostsTabsProps } from './types';
-import { HostsTableType } from '../store/model';
-import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
-import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
-import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { HOSTS_PATH, SecurityPageName } from '../../../../common/constants';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
+import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
+import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { HostsTableType } from '../store/model';
+import type { HostsTabsProps } from './types';
 
-import {
-  HostsQueryTabBody,
-  HostRiskScoreQueryTabBody,
-  UncommonProcessQueryTabBody,
-  SessionsTabBody,
-} from './navigation';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
+import {
+  HostRiskScoreQueryTabBody,
+  HostsQueryTabBody,
+  SessionsTabBody,
+  UncommonProcessQueryTabBody,
+} from './navigation';
 
 export const HostsTabs = React.memo<HostsTabsProps>(
   ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {

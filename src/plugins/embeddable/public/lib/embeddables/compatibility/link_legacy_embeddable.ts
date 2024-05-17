@@ -7,15 +7,15 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { core } from '../../../kibana_services';
+import { IContainer } from '../../containers';
 import { PanelNotFoundError } from '../../errors';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import { isReferenceOrValueEmbeddable } from '../../reference_or_value_embeddable';
 import { isErrorEmbeddable } from '../is_error_embeddable';
 import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
-import { IContainer } from '../../containers';
 
 export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {
   // linking and unlinking legacy embeddables is only supported on Dashboard

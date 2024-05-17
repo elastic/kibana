@@ -8,9 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import { i18n } from '@kbn/i18n';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 

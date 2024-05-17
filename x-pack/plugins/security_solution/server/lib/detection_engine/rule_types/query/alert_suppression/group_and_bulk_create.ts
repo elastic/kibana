@@ -9,29 +9,29 @@ import type moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import { buildTimeRangeFilter } from '../../utils/build_events_query';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
+import { buildTimeRangeFilter } from '../../utils/build_events_query';
+import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
+import { createEnrichEventsFunction } from '../../utils/enrichments';
+import type { BuildReasonMessage } from '../../utils/reason_formatters';
+import { singleSearchAfter } from '../../utils/single_search_after';
 import {
   addToSearchAfterReturn,
-  getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getUnprocessedExceptionsWarnings,
   mergeReturns,
 } from '../../utils/utils';
-import type { SuppressionBucket } from './wrap_suppressed_alerts';
-import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
-import { singleSearchAfter } from '../../utils/single_search_after';
-import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
-import type { UnifiedQueryRuleParams } from '../../../rule_schema';
-import type { BuildReasonMessage } from '../../utils/reason_formatters';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
-import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { createEnrichEventsFunction } from '../../utils/enrichments';
+import type { SuppressionBucket } from './wrap_suppressed_alerts';
+import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -197,9 +197,8 @@ export const groupAndBulkCreate = async ({
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
       };
-      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
-        eventsSearchParams
-      );
+      const { searchResult, searchDuration, searchErrors } =
+        await singleSearchAfter(eventsSearchParams);
 
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);

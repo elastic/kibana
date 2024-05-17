@@ -6,14 +6,14 @@
  */
 
 import createContainer from 'constate';
-import { useMemo, useState, useEffect } from 'react';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import {
-  getMlCapabilitiesResponsePayloadRT,
-  GetMlCapabilitiesResponsePayload,
-} from './api/ml_api_types';
+import { useEffect, useMemo, useState } from 'react';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import {
+  GetMlCapabilitiesResponsePayload,
+  getMlCapabilitiesResponsePayloadRT,
+} from './api/ml_api_types';
 
 export const useLogAnalysisCapabilities = () => {
   const { services } = useKibanaContextForPlugin();

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 import { cloneDeep } from 'lodash';
 import { isEqual } from 'lodash';
 
 import {
   clearFlashMessages,
-  flashSuccessToast,
   flashAPIErrors,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 // @ts-ignore
 import { ValidatedRange } from './validated_range';
 

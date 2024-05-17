@@ -5,33 +5,38 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
 import {
-  clickSavedObjectTagsFilter,
-  goToSavedObjectSettings,
-} from '../../../../tasks/stack_management';
+  GET_SAVED_OBJECTS_TAGS_OPTION,
+  SAVED_OBJECTS_ROW_TITLES,
+} from '../../../../screens/common/stack_management';
 import {
-  navigateFromKibanaCollapsibleTo,
-  openKibanaNavigation,
-} from '../../../../tasks/kibana_navigation';
+  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
+  GET_LOCAL_SHOW_DATES_BUTTON,
+} from '../../../../screens/date_picker';
+import {
+  DISCOVER_CONTAINER,
+  DISCOVER_DATA_VIEW_SWITCHER,
+  GET_DISCOVER_DATA_GRID_CELL_HEADER,
+} from '../../../../screens/discover';
+import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
+import { LOADING_INDICATOR } from '../../../../screens/security_header';
+import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import {
   addDiscoverEsqlQuery,
   addFieldToTable,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
 import {
-  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GET_LOCAL_SHOW_DATES_BUTTON,
-} from '../../../../screens/date_picker';
-import { ALERTS_URL } from '../../../../urls/navigation';
-import {
-  DISCOVER_CONTAINER,
-  DISCOVER_DATA_VIEW_SWITCHER,
-  GET_DISCOVER_DATA_GRID_CELL_HEADER,
-} from '../../../../screens/discover';
-import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
+  navigateFromKibanaCollapsibleTo,
+  openKibanaNavigation,
+} from '../../../../tasks/kibana_navigation';
 import { login } from '../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
+import {
+  clickSavedObjectTagsFilter,
+  goToSavedObjectSettings,
+} from '../../../../tasks/stack_management';
 import {
   addNameToTimelineAndSave,
   createNewTimeline,
@@ -40,12 +45,7 @@ import {
   openTimelineById,
   openTimelineFromSettings,
 } from '../../../../tasks/timeline';
-import { LOADING_INDICATOR } from '../../../../screens/security_header';
-import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
-import {
-  GET_SAVED_OBJECTS_TAGS_OPTION,
-  SAVED_OBJECTS_ROW_TITLES,
-} from '../../../../screens/common/stack_management';
+import { ALERTS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiLoadingChart } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { EuiLoadingChart } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common';
-import { MapEmbeddable } from '../embeddable';
+import type { LayerDescriptor } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
+import { MapEmbeddable } from '../embeddable';
 
 export interface Props {
   passiveLayer: LayerDescriptor;

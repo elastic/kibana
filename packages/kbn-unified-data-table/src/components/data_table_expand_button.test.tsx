@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ExpandButton } from './data_table_expand_button';
-import { UnifiedDataTableContext } from '../table_context';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { dataTableContextMock } from '../../__mocks__/table_context';
+import { UnifiedDataTableContext } from '../table_context';
+import { ExpandButton } from './data_table_expand_button';
 
 describe('Data table view button ', function () {
   it('when no document is expanded, setExpanded is called with current document', async () => {

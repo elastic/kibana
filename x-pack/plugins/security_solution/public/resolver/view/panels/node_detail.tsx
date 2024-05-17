@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  htmlIdGenerator,
+  EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
-  EuiTitle,
   EuiText,
   EuiTextColor,
-  EuiLink,
-  EuiInMemoryTable,
+  EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { StyledTitle } from './styles';
-import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
-import { GeneratedText } from '../generated_text';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
-import { Breadcrumbs } from './breadcrumbs';
-import { processPath, processPID } from '../../models/process_event';
-import * as nodeDataModel from '../../models/node_data';
-import { CubeForProcess } from './cube_for_process';
-import type { SafeResolverEvent } from '../../../../common/endpoint/types';
-import { useCubeAssets } from '../use_cube_assets';
-import { PanelLoading } from './panel_loading';
-import { StyledPanel } from '../styles';
-import { useLinkProps } from '../use_link_props';
-import { useFormattedDate } from './use_formatted_date';
-import { PanelContentError } from './panel_content_error';
 import type { State } from '../../../common/store/types';
+import { getSourcererScopeId } from '../../../helpers';
+import * as nodeDataModel from '../../models/node_data';
+import { processPID, processPath } from '../../models/process_event';
+import * as selectors from '../../store/selectors';
+import { GeneratedText } from '../generated_text';
+import { StyledPanel } from '../styles';
+import { useCubeAssets } from '../use_cube_assets';
+import { useLinkProps } from '../use_link_props';
+import { Breadcrumbs } from './breadcrumbs';
+import { CubeForProcess } from './cube_for_process';
+import { PanelContentError } from './panel_content_error';
+import { PanelLoading } from './panel_loading';
+import { StyledTitle } from './styles';
+import { useFormattedDate } from './use_formatted_date';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;

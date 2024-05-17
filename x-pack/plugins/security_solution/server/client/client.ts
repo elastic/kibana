@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../config';
 import {
   DEFAULT_ALERTS_INDEX,
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_PREVIEW_INDEX,
 } from '../../common/constants';
+import type { ConfigType } from '../config';
 
 export class AppClient {
   private readonly alertsIndex: string;

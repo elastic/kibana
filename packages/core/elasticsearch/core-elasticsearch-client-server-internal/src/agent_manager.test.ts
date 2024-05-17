@@ -9,9 +9,9 @@
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { getAgentsSocketsStatsMock } from './get_agents_sockets_stats.test.mocks';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { AgentManager } from './agent_manager';
+import { getAgentsSocketsStatsMock } from './get_agents_sockets_stats.test.mocks';
 
 jest.mock('http');
 jest.mock('https');

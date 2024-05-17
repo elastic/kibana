@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { every } from 'lodash';
 import { parse } from 'url';
+import { every } from 'lodash';
 
 interface NetworkPolicyRule {
   allow: boolean;

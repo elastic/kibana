@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { CodeEditor } from '@kbn/code-editor';
 import React, { useEffect, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { CodeEditor } from '@kbn/code-editor';
 
 import { monaco } from '@kbn/monaco';
 

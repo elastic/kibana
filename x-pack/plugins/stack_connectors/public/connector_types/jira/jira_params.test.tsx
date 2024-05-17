@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import JiraParamsFields from './jira_params';
-import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { act, fireEvent, render, waitFor, within, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('./use_get_issue_types');

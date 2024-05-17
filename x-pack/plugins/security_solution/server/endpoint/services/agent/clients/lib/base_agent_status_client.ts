@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
+import type { Logger } from '@kbn/logging';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
-import type { AgentStatusClientInterface } from './types';
 import { AgentStatusNotSupportedError } from '../errors';
+import type { AgentStatusClientInterface } from './types';
 
 export interface AgentStatusClientOptions {
   endpointService: EndpointAppContextService;

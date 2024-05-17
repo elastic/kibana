@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { search, UI_SETTINGS } from '@kbn/data-plugin/server';
+import { UI_SETTINGS, search } from '@kbn/data-plugin/server';
+import { validateField } from '../../../../../common/fields_utils';
 import { overwrite } from '../../helpers';
 import { getBucketSize, getTimerange } from '../../helpers';
-import { validateField } from '../../../../../common/fields_utils';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';
 

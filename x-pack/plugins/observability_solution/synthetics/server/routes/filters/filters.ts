@@ -1,3 +1,6 @@
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 type Buckets = Array<{
   key: string;

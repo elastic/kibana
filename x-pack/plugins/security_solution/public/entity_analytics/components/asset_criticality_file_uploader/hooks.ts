@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { ParseConfig } from 'papaparse';
-import { unparse, parse } from 'papaparse';
-import { useCallback, useMemo } from 'react';
 import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
+import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
+import type { ParseConfig } from 'papaparse';
+import { parse, unparse } from 'papaparse';
+import { useCallback, useMemo } from 'react';
 import { useFormatBytes } from '../../../common/components/formatted_bytes';
-import { validateParsedContent, validateFile } from './validations';
 import { useKibana } from '../../../common/lib/kibana';
-import type { OnCompleteParams } from './types';
-import type { ReducerState } from './reducer';
 import { getStepStatus, isValidationStep } from './helpers';
+import type { ReducerState } from './reducer';
+import type { OnCompleteParams } from './types';
+import { validateFile, validateParsedContent } from './validations';
 
 interface UseFileChangeCbParams {
   onError: (errorMessage: string, file: File) => void;

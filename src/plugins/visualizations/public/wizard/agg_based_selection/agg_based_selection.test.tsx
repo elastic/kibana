@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
-import { AggBasedSelection } from './agg_based_selection';
+import React from 'react';
 import { VisParams } from '../../../common';
+import { BaseVisType, TypesStart, VisGroups } from '../../vis_types';
+import { AggBasedSelection } from './agg_based_selection';
 
 describe('AggBasedSelection', () => {
   const defaultVisTypeParams = {

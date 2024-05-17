@@ -9,8 +9,8 @@
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from './constants';
 
 import {
-  indexNameBeginsWithPeriod,
   findIllegalCharactersInIndexName,
+  indexNameBeginsWithPeriod,
   indexNameContainsSpaces,
 } from './validate';
 

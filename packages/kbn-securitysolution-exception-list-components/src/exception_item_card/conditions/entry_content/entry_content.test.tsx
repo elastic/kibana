@@ -1,3 +1,4 @@
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +7,10 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
-import { includedListTypeEntry } from '../../../mocks/entry.mock';
-import * as i18n from '../../translations';
 import { EntryContent } from '.';
+import { includedListTypeEntry } from '../../../mocks/entry.mock';
 import { MockedShowValueListModal } from '../../../mocks/value_list_modal.mock';
+import * as i18n from '../../translations';
 
 describe('EntryContent', () => {
   it('should render a single value without AND when index is 0', () => {

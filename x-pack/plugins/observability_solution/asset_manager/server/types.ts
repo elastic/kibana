@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 
 export interface ElasticsearchAccessorOptions {

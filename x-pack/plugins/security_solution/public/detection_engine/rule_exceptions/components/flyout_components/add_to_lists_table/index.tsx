@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiInMemoryTable, EuiPanel, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiSkeletonText } from '@elastic/eui';
 
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import type { ExceptionsAddToListsComponentProps } from './use_add_to_lists_table';

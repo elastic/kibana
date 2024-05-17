@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

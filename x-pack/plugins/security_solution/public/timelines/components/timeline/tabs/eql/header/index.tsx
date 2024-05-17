@@ -8,15 +8,15 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 
-import { InputsModelId } from '../../../../../../common/store/inputs/constants';
 import { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
+import { Sourcerer } from '../../../../../../common/components/sourcerer';
 import { SuperDatePicker } from '../../../../../../common/components/super_date_picker';
+import type { TimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
+import { InputsModelId } from '../../../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { TimelineDatePickerLock } from '../../../date_picker_lock';
-import type { TimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { EqlQueryBarTimeline } from '../../../query_bar/eql';
-import { Sourcerer } from '../../../../../../common/components/sourcerer';
 import { StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
 
 export type EqlTabHeaderProps = {

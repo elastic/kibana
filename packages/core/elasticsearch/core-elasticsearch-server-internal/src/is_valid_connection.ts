@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { filter } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
+import { filter } from 'rxjs';
 import { Observable, firstValueFrom } from 'rxjs';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 

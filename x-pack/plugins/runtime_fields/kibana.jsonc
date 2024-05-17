@@ -6,13 +6,7 @@
     "id": "runtimeFields",
     "server": false,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "runtime_fields"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
-    ]
+    "configPath": ["xpack", "runtime_fields"],
+    "requiredBundles": ["kibanaReact", "esUiShared"]
   }
 }

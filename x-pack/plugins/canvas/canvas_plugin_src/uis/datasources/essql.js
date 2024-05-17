@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { SQLLang } from '@kbn/monaco';
 import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { CodeEditorField } from '@kbn/code-editor';
+import { SQLLang } from '@kbn/monaco';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
+import { DataSourceStrings, SQL_URL } from '../../../i18n';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { DataSourceStrings, SQL_URL } from '../../../i18n';
 
 const { Essql: strings } = DataSourceStrings;
 

@@ -8,8 +8,8 @@
 import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
 import { UptimeEsClient } from '../../lib';
 import { SyntheticsServerSetup } from '../../types';
-import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 import { getServiceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
+import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 
 export const checkHasPrivileges = (
   server: SyntheticsServerSetup,

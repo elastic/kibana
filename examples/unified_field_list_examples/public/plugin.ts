@@ -7,13 +7,13 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   UnifiedFieldListExamplesPluginSetup,
   UnifiedFieldListExamplesPluginStart,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import image from './unified_field_list.png';
 
 export class UnifiedFieldListExamplesPlugin

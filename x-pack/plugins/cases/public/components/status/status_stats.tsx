@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import type { CaseStatuses } from '../../../common/types/domain';
 import { statuses } from './config';
 

@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
-import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { set, unset } from 'lodash';
-import { createConnectorObject } from '../../test_utils';
-import { UserActionPersister } from './create';
-import { createUserActionSO } from '../test_utils';
-import type {
-  BuilderParameters,
-  BulkCreateAttachmentUserAction,
-  CreateUserActionArgs,
-} from '../types';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
+import { AttachmentType } from '../../../../common/types/domain';
+import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
+import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
+import { createConnectorObject } from '../../test_utils';
 import {
   getAssigneesAddedRemovedUserActions,
   getAssigneesAddedUserActions,
   getAssigneesRemovedUserActions,
   getBuiltUserActions,
   getTagsAddedRemovedUserActions,
+  patchAddCustomFieldsToOriginalCasesRequest,
   patchAddRemoveAssigneesCasesRequest,
   patchAssigneesCasesRequest,
   patchCasesRequest,
-  patchAddCustomFieldsToOriginalCasesRequest,
-  patchUpdateCustomFieldsCasesRequest,
+  patchCustomFieldConfRemoved,
+  patchNewCustomFieldConfAdded,
   patchRemoveAssigneesCasesRequest,
   patchTagsCasesRequest,
+  patchUpdateCustomFieldsCasesRequest,
   patchUpdateResetCustomFieldsCasesRequest,
-  patchNewCustomFieldConfAdded,
-  patchCustomFieldConfRemoved,
 } from '../mocks';
-import { AttachmentType } from '../../../../common/types/domain';
+import { createUserActionSO } from '../test_utils';
+import type {
+  BuilderParameters,
+  BulkCreateAttachmentUserAction,
+  CreateUserActionArgs,
+} from '../types';
+import { UserActionPersister } from './create';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -81,7 +81,7 @@ describe('UserActionPersister', () => {
         user: { email: '', full_name: '', username: '' },
         ...overrides,
       },
-    } as CreateUserActionArgs<T>);
+    }) as CreateUserActionArgs<T>;
 
   const getBulkCreateAttachmentRequest = (): BulkCreateAttachmentUserAction => ({
     caseId: 'test',

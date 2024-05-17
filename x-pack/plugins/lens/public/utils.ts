@@ -1,3 +1,12 @@
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { i18n } from '@kbn/i18n';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,38 +14,29 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { uniq, cloneDeep } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { cloneDeep, uniq } from 'lodash';
+import moment from 'moment-timezone';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
+import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+import type { DatasourceStates, VisualizationState } from './state_management';
 import {
   Datasource,
   DatasourceMap,
-  Visualization,
+  DragDropOperation,
+  DraggedField,
   IndexPatternMap,
   IndexPatternRef,
-  DraggedField,
-  DragDropOperation,
-  isOperation,
-  UserMessage,
   TriggerEvent,
+  UserMessage,
+  Visualization,
   isLensBrushEvent,
-  isLensMultiFilterEvent,
   isLensFilterEvent,
+  isLensMultiFilterEvent,
+  isOperation,
 } from './types';
-import type { DatasourceStates, VisualizationState } from './state_management';
-import type { IndexPatternServiceAPI } from './data_views_service/service';
-import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {

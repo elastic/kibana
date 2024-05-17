@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { promises } from 'fs';
 import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { promises } from 'fs';
 import yaml from 'js-yaml';
-import { Config, ConfigRT, DatasetRT, Schedule, PartialConfig, PartialConfigRT } from '../types';
 import { DEFAULTS } from '../constants';
+import { Config, ConfigRT, DatasetRT, PartialConfig, PartialConfigRT, Schedule } from '../types';
 
 export async function readConfig(filePath: string): Promise<PartialConfig> {
   const data = await promises.readFile(filePath);

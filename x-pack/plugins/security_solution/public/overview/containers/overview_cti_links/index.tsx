@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { useEffect, useMemo } from 'react';
-import type { TiDataSources } from './use_ti_data_sources';
-import { useKibana } from '../../../common/lib/kibana';
-import { getDashboardsByTagIds } from '../../../common/containers/dashboards/api';
-import { getTagsByName } from '../../../common/containers/tags/api';
-import { useFetch, REQUEST_NAMES } from '../../../common/hooks/use_fetch';
 import { SecurityPageName } from '../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
+import { getDashboardsByTagIds } from '../../../common/containers/dashboards/api';
+import { getTagsByName } from '../../../common/containers/tags/api';
+import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
+import { useKibana } from '../../../common/lib/kibana';
+import type { TiDataSources } from './use_ti_data_sources';
 
 const CTI_TAG_NAME = 'threat intel';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { TelemetryService } from './services';
+import React from 'react';
 import { TelemetryConstants } from './plugin';
+import type { TelemetryService } from './services';
 
 export function renderWelcomeTelemetryNotice(
   telemetryService: TelemetryService,

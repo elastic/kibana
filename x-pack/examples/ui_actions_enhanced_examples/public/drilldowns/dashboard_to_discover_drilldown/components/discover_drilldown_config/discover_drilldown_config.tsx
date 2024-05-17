@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiCallOut, EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import React from 'react';
-import { EuiFormRow, EuiSelect, EuiSwitch, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { txtChooseDestinationIndexPattern } from './i18n';
 
 export interface IndexPatternItem {

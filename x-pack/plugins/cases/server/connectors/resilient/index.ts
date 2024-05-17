@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getMapping } from './mapping';
 import { format } from './format';
+import { getMapping } from './mapping';
 import type { ResilientCaseConnector } from './types';
 
 export const getCaseConnector = (): ResilientCaseConnector => ({

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
-import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common/constants';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 import { countDownTest } from '../count_down_test';
 
 /**

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import { EuiFieldText, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { VisualizationToolbarProps } from '../../types';
+import React, { useCallback } from 'react';
 import { ToolbarPopover } from '../../shared_components';
+import { VisualizationToolbarProps } from '../../types';
 import { MetricVisualizationState } from './visualization';
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {

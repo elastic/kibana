@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
+import React, { useMemo } from 'react';
 import { CaseStatuses } from '../../../common/types/domain';
 
 import type { MultiSelectFilterOption } from './multi_select_filter';

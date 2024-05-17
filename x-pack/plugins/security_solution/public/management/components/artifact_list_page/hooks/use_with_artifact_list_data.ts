@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../../common/types';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import { useListArtifact } from '../../../hooks/artifacts';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import type { ArtifactListPageUrlParams } from '../types';
-import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
-import { useListArtifact } from '../../../hooks/artifacts';
-import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
   /**

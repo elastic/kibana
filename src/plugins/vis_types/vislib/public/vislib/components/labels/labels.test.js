@@ -8,10 +8,10 @@
 
 import _ from 'lodash';
 
-import { labels } from './labels';
 import { dataArray } from './data_array';
-import { uniqLabels } from './uniq_labels';
 import { flattenSeries as getSeries } from './flatten_series';
+import { labels } from './labels';
+import { uniqLabels } from './uniq_labels';
 
 let seriesLabels;
 let rowsLabels;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { last } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 function getMax(handler, config, isGauge) {

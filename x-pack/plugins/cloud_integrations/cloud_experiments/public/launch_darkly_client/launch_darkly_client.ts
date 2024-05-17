@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import {
   type LDClient,
-  type LDSingleKindContext,
   type LDLogLevel,
+  type LDSingleKindContext,
 } from 'launchdarkly-js-client-sdk';
 import { BehaviorSubject, filter, firstValueFrom, switchMap } from 'rxjs';
-import type { Logger } from '@kbn/logging';
 
 export interface LaunchDarklyClientConfig {
   client_id: string;

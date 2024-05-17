@@ -6,15 +6,7 @@
     "id": "thirdPartyLensNavigationPrompt",
     "server": false,
     "browser": true,
-    "configPath": [
-      "third_party_lens_navigation_prompt"
-    ],
-    "requiredPlugins": [
-      "lens",
-      "data",
-      "dataViews",
-      "embeddable",
-      "developerExamples"
-    ]
+    "configPath": ["third_party_lens_navigation_prompt"],
+    "requiredPlugins": ["lens", "data", "dataViews", "embeddable", "developerExamples"]
   }
 }

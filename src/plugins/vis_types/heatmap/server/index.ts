@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, HeatmapConfig } from '../config';
+import { HeatmapConfig, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<HeatmapConfig> = {
   exposeToBrowser: {

@@ -11,7 +11,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
 import { Translation } from '../translation';
-import { Formats, formats as EN_FORMATS } from './formats';
+import { formats as EN_FORMATS, Formats } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 

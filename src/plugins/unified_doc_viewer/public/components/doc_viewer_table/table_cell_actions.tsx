@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import React, { useCallback, useState } from 'react';
 
 interface TableActionsProps {
   mode?: 'inline' | 'as_popover';

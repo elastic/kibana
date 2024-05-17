@@ -6,13 +6,13 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import { API_BASE_PATH } from '../../common/constants';
-import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
+import { ML_UPGRADE_OP_TYPE, MlOperation } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 

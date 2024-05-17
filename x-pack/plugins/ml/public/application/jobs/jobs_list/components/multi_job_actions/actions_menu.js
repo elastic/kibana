@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 
-import {
-  closeJobs,
-  stopDatafeeds,
-  isStartable,
-  isStoppable,
-  isClosable,
-  isResettable,
-} from '../utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isManagedJob } from '../../../jobs_utils';
+import {
+  closeJobs,
+  isClosable,
+  isResettable,
+  isStartable,
+  isStoppable,
+  stopDatafeeds,
+} from '../utils';
 
 class MultiJobActionsMenuUI extends Component {
   constructor(props) {

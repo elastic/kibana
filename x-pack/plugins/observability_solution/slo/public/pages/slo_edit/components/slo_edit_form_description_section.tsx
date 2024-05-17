@@ -20,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
-import { OptionalText } from './common/optional_text';
 import { CreateSLOForm } from '../types';
+import { OptionalText } from './common/optional_text';
 import { maxWidth } from './slo_edit_form';
 
 export function SloEditFormDescriptionSection() {

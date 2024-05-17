@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getPolicySettingsFormTestSubjects } from '../../../pages/policy/view/policy_settings_form/mocks';
 import { ProtectionModes } from '../../../../../common/endpoint/types';
+import { getPolicySettingsFormTestSubjects } from '../../../pages/policy/view/policy_settings_form/mocks';
 import {
   PackagePolicyBackupHelper,
   savePolicyForm,

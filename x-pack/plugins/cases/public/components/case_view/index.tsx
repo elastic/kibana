@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 
-import { useGetCase } from '../../containers/use_get_case';
-import * as i18n from './translations';
-import { CasesTimelineIntegrationProvider } from '../timeline_context';
-import { DoesNotExist } from './does_not_exist';
 import { useKibana } from '../../common/lib/kibana';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
+import { useGetCase } from '../../containers/use_get_case';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { CaseViewPage } from './case_view_page';
+import { DoesNotExist } from './does_not_exist';
+import * as i18n from './translations';
 import type { CaseViewProps } from './types';
 
 export const CaseViewLoading = () => (

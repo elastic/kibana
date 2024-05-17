@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
+import React from 'react';
 
 export const FakeDimensionButton = ({ label }: { label: string }) => (
   <div

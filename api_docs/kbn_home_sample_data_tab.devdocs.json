@@ -25,12 +25,8 @@
         "type": "Function",
         "tags": [],
         "label": "SampleDataTab",
-        "description": [
-          "\nThe content for the Sample Data Tab in the `home` plugin."
-        ],
-        "signature": [
-          "() => JSX.Element"
-        ],
+        "description": ["\nThe content for the Sample Data Tab in the `home` plugin."],
+        "signature": ["() => JSX.Element"],
         "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -44,9 +40,7 @@
         "type": "Function",
         "tags": [],
         "label": "SampleDataTabKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
-        ],
+        "description": ["\nKibana-specific Provider that maps dependencies to services."],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           "SampleDataTabKibanaDependencies",
@@ -126,12 +120,8 @@
         "type": "string",
         "tags": [],
         "label": "DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
-        "description": [
-          "\nTest Subject name for the Demo Environment button."
-        ],
-        "signature": [
-          "\"goToDemoEnvButton\""
-        ],
+        "description": ["\nTest Subject name for the Demo Environment button."],
+        "signature": ["\"goToDemoEnvButton\""],
         "path": "packages/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -143,12 +133,8 @@
         "type": "string",
         "tags": [],
         "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
-        "description": [
-          "\nTest Subject name for the sample data accordion button."
-        ],
-        "signature": [
-          "\"showSampleDataAccordion\""
-        ],
+        "description": ["\nTest Subject name for the sample data accordion button."],
+        "signature": ["\"showSampleDataAccordion\""],
         "path": "packages/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -160,12 +146,8 @@
         "type": "string",
         "tags": [],
         "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
-        "description": [
-          "\nTest Subject name for the sample data accordion button."
-        ],
-        "signature": [
-          "\"showSampleDataButton\""
-        ],
+        "description": ["\nTest Subject name for the sample data accordion button."],
+        "signature": ["\"showSampleDataButton\""],
         "path": "packages/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

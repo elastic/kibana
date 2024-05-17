@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import type { FramePublicAPI } from '../../../../../types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { CountIndexPatternColumn } from '..';
-import type { TermsIndexPatternColumn } from './types';
+import type { FramePublicAPI } from '../../../../../types';
 import type { GenericIndexPatternColumn } from '../../../form_based';
 import { createMockedIndexPattern } from '../../../mocks';
-import {
-  getDisallowedTermsMessage,
-  getMultiTermsScriptedFieldErrorMessage,
-  isSortableByColumn,
-  getOtherBucketSwitchDefault,
-} from './helpers';
+import { MovingAverageIndexPatternColumn } from '../calculations';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
-import { MovingAverageIndexPatternColumn } from '../calculations';
+import {
+  getDisallowedTermsMessage,
+  getMultiTermsScriptedFieldErrorMessage,
+  getOtherBucketSwitchDefault,
+  isSortableByColumn,
+} from './helpers';
+import type { TermsIndexPatternColumn } from './types';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

@@ -8,8 +8,8 @@
 
 import React, { useState } from 'react';
 
-import { action } from '@storybook/addon-actions';
 import { monaco as monacoEditor } from '@kbn/monaco';
+import { action } from '@storybook/addon-actions';
 
 import { CodeEditorStorybookMock, CodeEditorStorybookParams } from './mocks/storybook';
 

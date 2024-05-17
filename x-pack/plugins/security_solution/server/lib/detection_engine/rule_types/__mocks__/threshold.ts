@@ -6,34 +6,34 @@
  */
 
 import {
-  SPACE_IDS,
-  ALERT_RULE_CONSUMER,
+  ALERT_INSTANCE_ID,
   ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
-  ALERT_WORKFLOW_STATUS,
-  ALERT_RULE_NAMESPACE,
   ALERT_URL,
   ALERT_UUID,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_PARAMETERS,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import type { RulesFieldMap } from '../../../../../common/field_maps';
 import {
   ALERT_ANCESTORS,
-  ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../../common/field_maps/field_names';
 import type { ThresholdSignalHistory } from '../threshold/types';

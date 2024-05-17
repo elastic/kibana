@@ -8,8 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TestProviders } from '../../../../../common/mock';
+import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { ArgsComponent } from './args';
 
 jest.mock('../../../../../common/lib/kibana');

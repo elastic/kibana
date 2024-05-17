@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 import { RegisterRuleDependencies } from '../register_apm_rule_types';
 

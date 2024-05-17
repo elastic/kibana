@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React from 'react';
 
-import { TabSummary, TabTerms, TabMetrics, TabJson, TabHistogram, TabRequest } from './tabs';
+import { TabHistogram, TabJson, TabMetrics, TabRequest, TabSummary, TabTerms } from './tabs';
 
 export const JOB_DETAILS_TAB_SUMMARY = 'JOB_DETAILS_TAB_SUMMARY';
 export const JOB_DETAILS_TAB_TERMS = 'JOB_DETAILS_TAB_TERMS';

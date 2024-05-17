@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import { TestSubjects, WithAppDependencies, services } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),

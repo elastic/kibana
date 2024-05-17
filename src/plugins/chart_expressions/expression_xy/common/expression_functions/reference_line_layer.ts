@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { REFERENCE_LINE_LAYER, REFERENCE_LINE_DECORATION_CONFIG } from '../constants';
-import { ReferenceLineLayerFn } from '../types';
+import { REFERENCE_LINE_DECORATION_CONFIG, REFERENCE_LINE_LAYER } from '../constants';
 import { strings } from '../i18n';
+import { ReferenceLineLayerFn } from '../types';
 
 export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   name: REFERENCE_LINE_LAYER,

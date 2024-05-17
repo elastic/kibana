@@ -7,8 +7,8 @@
 
 import { TileMetaFeature } from '../../../common/descriptor_types';
 import {
-  getAggsMeta,
   getAggRange,
+  getAggsMeta,
   getHitsMeta,
   hasIncompleteResults,
 } from './tile_meta_feature_utils';

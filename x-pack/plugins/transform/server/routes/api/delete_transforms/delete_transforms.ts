@@ -10,15 +10,15 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 import type { DeleteDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_delete_response_schema';
 
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
-import { TRANSFORM_STATE } from '../../../../common/constants';
 import type { ResponseStatus } from '../../../../common/api_schemas/common';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../../common/api_schemas/delete_transforms';
+import { TRANSFORM_STATE } from '../../../../common/constants';
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { fillResultsWithTimeouts, isRequestTimeout } from '../../utils/error_utils';
 
 export async function deleteTransforms(
   reqBody: DeleteTransformsRequestSchema,

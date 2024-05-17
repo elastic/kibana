@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { Logger } from '@kbn/core/server';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 // @ts-expect-error missing type def
 import stringify from 'json-stringify-safe';
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
-import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { SendEmailOptions } from './send_email';
 
 interface SendEmailGraphApiOptions {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createCasesClientMock } from '../mocks';
-import type { CasesClientArgs } from '../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createUserActionServiceMock } from '../../services/mocks';
+import { createCasesClientMock } from '../mocks';
+import type { CasesClientArgs } from '../types';
 import { Connectors } from './connectors';
 
 describe('Connectors', () => {

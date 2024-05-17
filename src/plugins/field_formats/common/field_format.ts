@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { transform, size, cloneDeep, get, defaults } from 'lodash';
+import { cloneDeep, defaults, get, size, transform } from 'lodash';
+import { TEXT_CONTEXT_TYPE, htmlContentTypeSetup, textContentTypeSetup } from './content_types';
 import { createCustomFieldFormat } from './converters/custom';
 import {
-  FieldFormatsGetConfigFn,
-  FieldFormatsContentType,
-  FieldFormatInstanceType,
   FieldFormatConvert,
   FieldFormatConvertFunction,
-  HtmlContextTypeOptions,
-  TextContextTypeOptions,
+  FieldFormatInstanceType,
   FieldFormatMetaParams,
   FieldFormatParams,
+  FieldFormatsContentType,
+  FieldFormatsGetConfigFn,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
 } from './types';
-import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;

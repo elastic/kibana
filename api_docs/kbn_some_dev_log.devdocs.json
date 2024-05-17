@@ -39,12 +39,8 @@
             "type": "Function",
             "tags": [],
             "label": "info",
-            "description": [
-              "\nLog an info message"
-            ],
-            "signature": [
-              "(msg: string, ...rest: any[]) => void"
-            ],
+            "description": ["\nLog an info message"],
+            "signature": ["(msg: string, ...rest: any[]) => void"],
             "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -56,9 +52,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -71,9 +65,7 @@
                 "tags": [],
                 "label": "rest",
                 "description": [],
-                "signature": [
-                  "any[]"
-                ],
+                "signature": ["any[]"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -88,12 +80,8 @@
             "type": "Function",
             "tags": [],
             "label": "warning",
-            "description": [
-              "\nLog a warning message"
-            ],
-            "signature": [
-              "(msg: string, ...rest: any[]) => void"
-            ],
+            "description": ["\nLog a warning message"],
+            "signature": ["(msg: string, ...rest: any[]) => void"],
             "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,9 +93,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -120,9 +106,7 @@
                 "tags": [],
                 "label": "rest",
                 "description": [],
-                "signature": [
-                  "any[]"
-                ],
+                "signature": ["any[]"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -137,12 +121,8 @@
             "type": "Function",
             "tags": [],
             "label": "error",
-            "description": [
-              "\nLog an error message"
-            ],
-            "signature": [
-              "(msg: string, ...rest: any[]) => void"
-            ],
+            "description": ["\nLog an error message"],
+            "signature": ["(msg: string, ...rest: any[]) => void"],
             "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -154,9 +134,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -169,9 +147,7 @@
                 "tags": [],
                 "label": "rest",
                 "description": [],
-                "signature": [
-                  "any[]"
-                ],
+                "signature": ["any[]"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -186,12 +162,8 @@
             "type": "Function",
             "tags": [],
             "label": "success",
-            "description": [
-              "\nLog a success message"
-            ],
-            "signature": [
-              "(msg: string, ...rest: any[]) => void"
-            ],
+            "description": ["\nLog a success message"],
+            "signature": ["(msg: string, ...rest: any[]) => void"],
             "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -203,9 +175,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -218,9 +188,7 @@
                 "tags": [],
                 "label": "rest",
                 "description": [],
-                "signature": [
-                  "any[]"
-                ],
+                "signature": ["any[]"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -238,9 +206,7 @@
             "description": [
               "\nLog a debug message. Only printed to the terminal when --debug or --verbose are passed"
             ],
-            "signature": [
-              "(msg: string, ...rest: any[]) => void"
-            ],
+            "signature": ["(msg: string, ...rest: any[]) => void"],
             "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -252,9 +218,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -267,9 +231,7 @@
                 "tags": [],
                 "label": "rest",
                 "description": [],
-                "signature": [
-                  "any[]"
-                ],
+                "signature": ["any[]"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -287,9 +249,7 @@
             "description": [
               "\nLog a verbose message. Only printed to the terminal when --verbose is passed"
             ],
-            "signature": [
-              "(msg: string, ...rest: any[]) => void"
-            ],
+            "signature": ["(msg: string, ...rest: any[]) => void"],
             "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -301,9 +261,7 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -316,9 +274,7 @@
                 "tags": [],
                 "label": "rest",
                 "description": [],
-                "signature": [
-                  "any[]"
-                ],
+                "signature": ["any[]"],
                 "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -342,9 +298,7 @@
         "description": [
           "\nBasic set of log-level flags, the common levels implemented between\nthe ToolingLog and the kbn_pm logger"
         ],
-        "signature": [
-          "\"info\" | \"debug\" | \"verbose\" | \"quiet\""
-        ],
+        "signature": ["\"info\" | \"debug\" | \"verbose\" | \"quiet\""],
         "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
         "deprecated": false,
         "trackAdoption": false,

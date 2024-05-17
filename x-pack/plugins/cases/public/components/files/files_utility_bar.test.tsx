@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
+import React from 'react';
 
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import userEvent from '@testing-library/user-event';
 import { FilesUtilityBar } from './files_utility_bar';
 
 const defaultProps = {

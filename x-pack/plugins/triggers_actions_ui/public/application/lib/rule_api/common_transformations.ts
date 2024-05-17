@@ -1,3 +1,4 @@
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +6,7 @@
  * 2.0.
  */
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import type { Rule, RuleUiAction, ResolvedRule, RuleLastRun } from '../../../types';
+import type { ResolvedRule, Rule, RuleLastRun, RuleUiAction } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
   const { uuid, id, connector_type_id: actionTypeId, params } = action;

@@ -9,8 +9,8 @@
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 

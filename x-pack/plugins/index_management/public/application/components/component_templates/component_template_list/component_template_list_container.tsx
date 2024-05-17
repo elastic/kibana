@@ -9,11 +9,11 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import qs from 'query-string';
-import { useExecutionContext } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import { useExecutionContext } from '../shared_imports';
 import { ComponentTemplatesAuthProvider } from './auth_provider';
-import { ComponentTemplatesWithPrivileges } from './with_privileges';
 import { ComponentTemplateList } from './component_template_list';
+import { ComponentTemplatesWithPrivileges } from './with_privileges';
 
 interface MatchParams {
   componentTemplateName?: string;

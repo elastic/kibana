@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { AnalyticsClient } from '@kbn/analytics-client';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/analytics-client';
 import type { ILicense } from './types';
 
 export function registerAnalyticsContextProvider(

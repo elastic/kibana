@@ -6,23 +6,23 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import {
-  getClockSkew,
-  getOrderedWaterfallItems,
-  getWaterfall,
-  IWaterfallItem,
-  IWaterfallTransaction,
-  IWaterfallError,
-  IWaterfallSpanOrTransaction,
-  getOrphanTraceItemsCount,
-} from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import {
+  IWaterfallError,
+  IWaterfallItem,
+  IWaterfallSpanOrTransaction,
+  IWaterfallTransaction,
+  getClockSkew,
+  getOrderedWaterfallItems,
+  getOrphanTraceItemsCount,
+  getWaterfall,
+} from './waterfall_helpers';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {

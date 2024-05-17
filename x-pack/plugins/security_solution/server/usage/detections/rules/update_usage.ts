@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RulesTypeUsage, RuleMetric } from './types';
+import type { RuleMetric, RulesTypeUsage } from './types';
 import { updateQueryUsage } from './usage_utils/update_query_usage';
 import { updateTotalUsage } from './usage_utils/update_total_usage';
 

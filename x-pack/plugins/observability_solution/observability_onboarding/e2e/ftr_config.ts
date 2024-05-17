@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
 import path from 'path';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 

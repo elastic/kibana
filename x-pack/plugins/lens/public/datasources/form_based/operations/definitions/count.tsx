@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
-import { TimeScaleUnit } from '../../../../../common/expressions';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import { TimeScaleUnit } from '../../../../../common/expressions';
 import type { IndexPatternField } from '../../../../types';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { updateColumnParam } from '../layer_helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import { getGroupByKey } from './get_group_by_key';
 import {
-  getInvalidFieldMessage,
-  getFilter,
   combineErrorMessages,
+  getFilter,
   getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
   isColumnOfType,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { updateColumnParam } from '../layer_helpers';
-import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { getGroupByKey } from './get_group_by_key';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',

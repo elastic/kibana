@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
 import classnames from 'classnames';
-import { PagePreview } from './page_preview';
+import React, { FC } from 'react';
 import { useCanvasShareableState } from '../../context';
+import { PagePreview } from './page_preview';
 
-import css from './scrubber.module.scss';
 import { CanvasRenderedPage } from '../../types';
+import css from './scrubber.module.scss';
 
 interface Props {
   /**

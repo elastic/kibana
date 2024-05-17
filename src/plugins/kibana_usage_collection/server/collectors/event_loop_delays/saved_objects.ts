@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsServiceSetup, ISavedObjectsRepository } from '@kbn/core/server';
-import moment from 'moment';
+import type { ISavedObjectsRepository, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { IntervalHistogram } from '@kbn/core/server';
+import moment from 'moment';
 export const SAVED_OBJECTS_DAILY_TYPE = 'event_loop_delays_daily';
 
 export interface EventLoopDelaysDaily extends IntervalHistogram {

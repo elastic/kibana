@@ -10,9 +10,9 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
-import * as timelineMarkdownPlugin from './timeline';
-import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
+import * as osqueryMarkdownPlugin from './osquery';
+import * as timelineMarkdownPlugin from './timeline';
 
 export const nonStatefulUiPlugins = getDefaultEuiMarkdownUiPlugins();
 export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();

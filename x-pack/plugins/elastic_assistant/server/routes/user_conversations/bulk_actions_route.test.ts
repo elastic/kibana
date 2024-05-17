@@ -6,22 +6,22 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { bulkActionConversationsRoute } from './bulk_actions_route';
-import { serverMock } from '../../__mocks__/server';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { getConversationsBulkActionRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
-import {
-  getFindConversationsResultWithSingleHit,
-  getEmptyFindResult,
-} from '../../__mocks__/response';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   getConversationMock,
   getCreateConversationSchemaMock,
   getPerformBulkActionSchemaMock,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { getConversationsBulkActionRequest, requestMock } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import {
+  getEmptyFindResult,
+  getFindConversationsResultWithSingleHit,
+} from '../../__mocks__/response';
+import { serverMock } from '../../__mocks__/server';
+import { bulkActionConversationsRoute } from './bulk_actions_route';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiLink, EuiText } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { EQL_OVERVIEW_LINK_TEXT } from './translations';

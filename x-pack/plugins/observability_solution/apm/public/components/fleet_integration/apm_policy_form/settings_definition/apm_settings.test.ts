@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getApmSettings } from './apm_settings';
 import { isSettingsFormValid } from '../settings_form/utils';
+import { getApmSettings } from './apm_settings';
 
 describe('apm_settings', () => {
   describe('isAPMFormValid', () => {

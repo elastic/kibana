@@ -6,10 +6,10 @@
  */
 
 import { omit } from 'lodash/fp';
+import { HOSTS_PATH } from '../../../../../common/constants';
+import { HostsTableType } from '../../store/model';
 import * as i18n from '../translations';
 import type { HostDetailsNavTab } from './types';
-import { HostsTableType } from '../../store/model';
-import { HOSTS_PATH } from '../../../../../common/constants';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
   `${HOSTS_PATH}/name/${hostName}/${tabName}`;

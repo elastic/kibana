@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { CustomRequestHandlerContext, CoreRequestHandlerContext } from '@kbn/core/server';
+import type { CoreRequestHandlerContext, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 /**
  * @internal

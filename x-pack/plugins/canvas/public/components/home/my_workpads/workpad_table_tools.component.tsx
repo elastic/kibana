@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import React, { useState, Fragment } from 'react';
 
-import { ConfirmModal } from '../../confirm_modal';
 import { FoundWorkpad } from '../../../services/workpad';
+import { ConfirmModal } from '../../confirm_modal';
 
 export interface Props {
   workpads: FoundWorkpad[];

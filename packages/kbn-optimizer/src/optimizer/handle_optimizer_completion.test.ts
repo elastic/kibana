@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import * as Rx from 'rxjs';
 
 import { Update, allValuesFrom } from '../common';
 
-import { OptimizerState } from './optimizer_state';
-import { OptimizerConfig } from './optimizer_config';
 import { handleOptimizerCompletion } from './handle_optimizer_completion';
+import { OptimizerConfig } from './optimizer_config';
+import { OptimizerState } from './optimizer_state';
 
 const createUpdate$ = (phase: OptimizerState['phase']) =>
   Rx.of<Update<any, OptimizerState>>({

@@ -7,10 +7,10 @@
 
 // common properties on time_series_query and alert_type_params
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
 
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { MAX_GROUPS } from '..';
 
 export const CoreQueryParamsSchemaProperties = {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { useInspectorContext, FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS, useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { AutoAbortedAPMClient, callApmApi } from '../services/rest/create_call_apm_api';
 
 export interface FetcherResult<Data> {

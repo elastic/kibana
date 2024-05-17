@@ -22,21 +22,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { Features, FeatureIds } from '../../../../types';
+import { FeatureIds, Features } from '../../../../types';
 
 import {
   INCLUDED_FEATURES_TITLE,
-  SOURCE_FEATURES_SYNC_FREQUENCY_TITLE,
-  SOURCE_FEATURES_SYNC_FREQUENCY_TIME,
-  SOURCE_FEATURES_SYNCED_ITEMS_TITLE,
-  SOURCE_FEATURES_SEARCHABLE_TITLE,
-  SOURCE_FEATURES_SEARCHABLE_DESCRIPTION,
-  SOURCE_FEATURES_REMOTE_FEATURE_TITLE,
-  SOURCE_FEATURES_REMOTE_FEATURE_DESCRIPTION,
-  SOURCE_FEATURES_PRIVATE_FEATURE_TITLE,
-  SOURCE_FEATURES_PRIVATE_FEATURE_DESCRIPTION,
-  SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_TITLE,
   SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_DESCRIPTION,
+  SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_TITLE,
+  SOURCE_FEATURES_PRIVATE_FEATURE_DESCRIPTION,
+  SOURCE_FEATURES_PRIVATE_FEATURE_TITLE,
+  SOURCE_FEATURES_REMOTE_FEATURE_DESCRIPTION,
+  SOURCE_FEATURES_REMOTE_FEATURE_TITLE,
+  SOURCE_FEATURES_SEARCHABLE_DESCRIPTION,
+  SOURCE_FEATURES_SEARCHABLE_TITLE,
+  SOURCE_FEATURES_SYNCED_ITEMS_TITLE,
+  SOURCE_FEATURES_SYNC_FREQUENCY_TIME,
+  SOURCE_FEATURES_SYNC_FREQUENCY_TITLE,
 } from './constants';
 
 interface SourceFeatureProps {
@@ -165,7 +165,7 @@ export const SourceFeatures: React.FC<SourceFeatureProps> = ({ features, objType
       [FeatureIds.Remote]: RemoteFeature,
       [FeatureIds.Private]: PrivateFeature,
       [FeatureIds.GlobalAccessPermissions]: GlobalAccessPermissionsFeature,
-    }[featureId]);
+    })[featureId];
 
   const IncludedFeatureIds = () => {
     let includedFeatures: FeatureIds[] | undefined;

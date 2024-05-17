@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../../types';
+import { getFieldByNameFactory } from './pure_helpers';
 
 export const createMockedIndexPattern = (
   someProps?: Partial<IndexPattern>,

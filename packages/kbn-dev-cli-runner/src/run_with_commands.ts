@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
-import { withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
-import { RunContext, RunOptions } from './run';
-import { getFlags, FlagOptions, mergeFlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
-import { FlagsReader } from './flags_reader';
 import { Cleanup } from './cleanup';
-import { getHelpForAllCommands, getCommandLevelHelp } from './help';
+import { DEFAULT_FLAG_ALIASES, FlagOptions, getFlags, mergeFlagOptions } from './flags';
+import { FlagsReader } from './flags_reader';
+import { getCommandLevelHelp, getHelpForAllCommands } from './help';
 import { Metrics } from './metrics';
+import { RunContext, RunOptions } from './run';
 
 export type CommandRunFn<T> = (context: RunContext & T) => Promise<void> | void;
 

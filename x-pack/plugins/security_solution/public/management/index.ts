@@ -6,13 +6,13 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Reducer, CombinedState } from 'redux';
-import { routes } from './routes';
-import type { StartPlugins } from '../types';
+import type { CombinedState, Reducer } from 'redux';
 import type { SecuritySubPluginWithStore } from '../app/types';
-import { managementReducer } from './store/reducer';
 import type { AppAction } from '../common/store/actions';
+import type { StartPlugins } from '../types';
+import { routes } from './routes';
 import { managementMiddlewareFactory } from './store/middleware';
+import { managementReducer } from './store/reducer';
 import type { ManagementState } from './types';
 
 /**

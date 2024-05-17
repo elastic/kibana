@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { EuiSuperSelect } from '@elastic/eui';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { MissingValuesOptions } from './missing_values_option';
 
 describe('Missing values option', () => {

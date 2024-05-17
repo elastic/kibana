@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from '../../common/lib/kibana';
-import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
-import { DashboardContextProvider } from '../context/dashboard_context';
-import { getTagsByName } from '../../common/containers/tags/api';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { getTagsByName } from '../../common/containers/tags/api';
+import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
+import { DashboardContextProvider } from '../context/dashboard_context';
+import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 
 jest.mock('@kbn/security-solution-navigation/src/context');
 jest.mock('../../common/lib/kibana', () => ({

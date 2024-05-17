@@ -8,8 +8,8 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { IconButtonGroup as Component } from './icon_button_group';
 import mdx from '../../../README.mdx';
+import { IconButtonGroup as Component } from './icon_button_group';
 
 export default {
   title: 'Button Toolbar/Buttons',

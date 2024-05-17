@@ -9,8 +9,8 @@
 import { parse } from 'url';
 
 import { UnsupportedProtocolError } from '../lib/errors';
-import { downloadHttpFile } from './downloaders/http';
 import { downloadLocalFile } from './downloaders/file';
+import { downloadHttpFile } from './downloaders/http';
 
 function _isWindows() {
   return /^win/.test(process.platform);

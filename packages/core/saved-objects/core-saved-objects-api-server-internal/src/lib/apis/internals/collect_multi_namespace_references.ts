@@ -8,29 +8,29 @@
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
+  SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
+import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
-  type SavedObject,
+  type ISavedObjectsSecurityExtension,
   type ISavedObjectsSerializer,
+  type SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
-import { findLegacyUrlAliases } from './find_legacy_url_aliases';
-import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
+import { getRootFields } from '../../utils';
 import {
   findSharedOriginObjects,
   getSavedObjectFromSource,
   rawDocExistsInNamespace,
 } from '../utils';
+import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 
 /**
  * When we collect an object's outbound references, we will only go a maximum of this many levels deep before we throw an error.

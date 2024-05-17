@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { act } from 'react-dom/test-utils';
 import { EuiButtonIcon, EuiPopover, EuiProgress } from '@elastic/eui';
-import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { getServicesMock } from '../../../__mocks__/services.mock';
-import { UnifiedFieldListItem, UnifiedFieldListItemProps } from './field_list_item';
 import { FieldItemButton } from '../../components/field_item_button';
 import { createStateService } from '../services/state_service';
+import { UnifiedFieldListItem, UnifiedFieldListItemProps } from './field_list_item';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

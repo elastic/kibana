@@ -10,9 +10,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FilesClient",
-        "description": [
-          "\nA client that can be used to manage a specific {@link FileKind}."
-        ],
+        "description": ["\nA client that can be used to manage a specific {@link FileKind}."],
         "signature": [
           "FilesClient",
           "<M> extends ",
@@ -35,9 +33,7 @@
             "type": "Function",
             "tags": [],
             "label": "getMetrics",
-            "description": [
-              "\nGet metrics of file system, like storage usage.\n"
-            ],
+            "description": ["\nGet metrics of file system, like storage usage.\n"],
             "signature": [
               "() => Promise<",
               {
@@ -64,9 +60,7 @@
             "description": [
               "\nDownload a file, bypassing regular security by way of a\nsecret share token.\n"
             ],
-            "signature": [
-              "(args: { token: string; fileName?: string | undefined; }) => any"
-            ],
+            "signature": ["(args: { token: string; fileName?: string | undefined; }) => any"],
             "path": "src/plugins/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -100,9 +94,7 @@
                     "tags": [],
                     "label": "fileName",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "src/plugins/files/common/files_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -121,9 +113,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FilesClientFactory",
-        "description": [
-          "\nA factory for creating a {@link ScopedFilesClient}"
-        ],
+        "description": ["\nA factory for creating a {@link ScopedFilesClient}"],
         "path": "src/plugins/files/common/files_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -134,14 +124,8 @@
             "type": "Function",
             "tags": [],
             "label": "asUnscoped",
-            "description": [
-              "\nCreate a files client."
-            ],
-            "signature": [
-              "<M = unknown>() => ",
-              "FilesClient",
-              "<M>"
-            ],
+            "description": ["\nCreate a files client."],
+            "signature": ["<M = unknown>() => ", "FilesClient", "<M>"],
             "path": "src/plugins/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -154,14 +138,8 @@
             "type": "Function",
             "tags": [],
             "label": "asScoped",
-            "description": [
-              "\nCreate a {@link ScopedFileClient} for a given {@link FileKind}.\n"
-            ],
-            "signature": [
-              "<M = unknown>(fileKind: string) => ",
-              "ScopedFilesClient",
-              "<M>"
-            ],
+            "description": ["\nCreate a {@link ScopedFileClient} for a given {@link FileKind}.\n"],
+            "signature": ["<M = unknown>(fileKind: string) => ", "ScopedFilesClient", "<M>"],
             "path": "src/plugins/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -172,12 +150,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "fileKind",
-                "description": [
-                  "- The {@link FileKind } to create a client for."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- The {@link FileKind } to create a client for."],
+                "signature": ["string"],
                 "path": "src/plugins/files/common/files_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -528,9 +502,7 @@
       "type": "Interface",
       "tags": [],
       "label": "FilesPublicSetup",
-      "description": [
-        "\nPublic setup-phase contract"
-      ],
+      "description": ["\nPublic setup-phase contract"],
       "path": "src/plugins/files/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -539,16 +511,12 @@
           "parentPluginId": "files",
           "id": "def-public.FilesPublicSetup.filesClientFactory",
           "type": "Object",
-          "tags": [
-            "track-adoption"
-          ],
+          "tags": ["track-adoption"],
           "label": "filesClientFactory",
           "description": [
             "\nA factory for creating an {@link FilesClient} instance. This requires a\nregistered {@link FileKindBrowser}.\n"
           ],
-          "signature": [
-            "FilesClientFactory"
-          ],
+          "signature": ["FilesClientFactory"],
           "path": "src/plugins/files/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": true,
@@ -629,9 +597,7 @@
               "type": "Object",
               "tags": [],
               "label": "fileKind",
-              "description": [
-                "- the file kind to register"
-              ],
+              "description": ["- the file kind to register"],
               "signature": [
                 {
                   "pluginId": "@kbn/shared-ux-file-types",
@@ -701,9 +667,7 @@
         "parentPluginId": "files",
         "id": "def-server.createEsFileClient",
         "type": "Function",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "createEsFileClient",
         "description": [
           "\nA utility function for creating an instance of {@link FileClient}\nthat will speak with ES indices only for file functionality.\n"
@@ -736,9 +700,7 @@
             "type": "Object",
             "tags": [],
             "label": "arg",
-            "description": [
-              "- See {@link CreateEsFileClientArgs }"
-            ],
+            "description": ["- See {@link CreateEsFileClientArgs }"],
             "signature": [
               {
                 "pluginId": "files",
@@ -780,9 +742,7 @@
             "tags": [],
             "label": "algorithm",
             "description": [],
-            "signature": [
-              "\"sha256\" | \"md5\" | \"sha1\" | \"sha512\""
-            ],
+            "signature": ["\"sha256\" | \"md5\" | \"sha1\" | \"sha512\""],
             "path": "src/plugins/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -800,9 +760,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CreateEsFileClientArgs",
-        "description": [
-          "\nArguments to create an ES file client."
-        ],
+        "description": ["\nArguments to create an ES file client."],
         "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -813,9 +771,7 @@
             "type": "string",
             "tags": [],
             "label": "metadataIndex",
-            "description": [
-              "\nThe name of the ES index that will store file metadata."
-            ],
+            "description": ["\nThe name of the ES index that will store file metadata."],
             "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -826,9 +782,7 @@
             "type": "string",
             "tags": [],
             "label": "blobStorageIndex",
-            "description": [
-              "\nThe name of the ES index that will store file contents."
-            ],
+            "description": ["\nThe name of the ES index that will store file contents."],
             "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2080,9 +2034,7 @@
             "description": [
               "\nTreat the indices provided as Aliases/Datastreams.\nWhen set to `true`:\n- additional ES calls will be made to get the real backing indexes\n- will not check if indexes exists and attempt to create them if not\n- an additional `@timestamp` property will be written to all documents (at root of document)"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2093,12 +2045,8 @@
             "type": "number",
             "tags": [],
             "label": "maxSizeBytes",
-            "description": [
-              "\nThe maximum file size to be written."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nThe maximum file size to be written."],
+            "signature": ["number | undefined"],
             "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2109,9 +2057,7 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [
-              "\nA logger for debugging purposes."
-            ],
+            "description": ["\nA logger for debugging purposes."],
             "signature": [
               {
                 "pluginId": "@kbn/logging",
@@ -2134,9 +2080,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CreateFileArgs",
-        "description": [
-          "\nArguments to create a new file."
-        ],
+        "description": ["\nArguments to create a new file."],
         "signature": [
           {
             "pluginId": "files",
@@ -2157,9 +2101,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nFile name"
-            ],
+            "description": ["\nFile name"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2170,9 +2112,7 @@
             "type": "string",
             "tags": [],
             "label": "fileKind",
-            "description": [
-              "\nFile kind, must correspond to a registered {@link FileKind}."
-            ],
+            "description": ["\nFile kind, must correspond to a registered {@link FileKind}."],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2183,12 +2123,8 @@
             "type": "string",
             "tags": [],
             "label": "alt",
-            "description": [
-              "\nAlternate text for accessibility and display purposes."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nAlternate text for accessibility and display purposes."],
+            "signature": ["string | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2199,12 +2135,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "meta",
-            "description": [
-              "\nCustom metadata like tags or identifiers for the file."
-            ],
-            "signature": [
-              "Meta | undefined"
-            ],
+            "description": ["\nCustom metadata like tags or identifiers for the file."],
+            "signature": ["Meta | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2215,12 +2147,8 @@
             "type": "string",
             "tags": [],
             "label": "mime",
-            "description": [
-              "\nThe MIME type of the file."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe MIME type of the file."],
+            "signature": ["string | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2231,12 +2159,8 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nUser data associated with this file"
-            ],
-            "signature": [
-              "{ name?: string | undefined; id?: string | undefined; } | undefined"
-            ],
+            "description": ["\nUser data associated with this file"],
+            "signature": ["{ name?: string | undefined; id?: string | undefined; } | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2250,9 +2174,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CreateShareArgs",
-        "description": [
-          "\nArguments for a creating a file share"
-        ],
+        "description": ["\nArguments for a creating a file share"],
         "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2263,12 +2185,8 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nOptionally provide a name for this file share instance"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptionally provide a name for this file share instance"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2277,16 +2195,12 @@
             "parentPluginId": "files",
             "id": "def-server.CreateShareArgs.validUntil",
             "type": "number",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "validUntil",
             "description": [
               "\nOptionally set an expiration date as unix timestamp for this file share instance\n"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2297,9 +2211,7 @@
             "type": "Object",
             "tags": [],
             "label": "file",
-            "description": [
-              "\nThe file object to create the share for"
-            ],
+            "description": ["\nThe file object to create the share for"],
             "signature": [
               {
                 "pluginId": "files",
@@ -2332,13 +2244,9 @@
             "parentPluginId": "files",
             "id": "def-server.DeleteArg.id",
             "type": "string",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "id",
-            "description": [
-              "\nUnique ID of file metadata to delete\n"
-            ],
+            "description": ["\nUnique ID of file metadata to delete\n"],
             "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2352,9 +2260,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DeleteFileArgs",
-        "description": [
-          "\nArguments to delete a file."
-        ],
+        "description": ["\nArguments to delete a file."],
         "path": "src/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2365,9 +2271,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nFile ID."
-            ],
+            "description": ["\nFile ID."],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2381,9 +2285,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DeleteForFileArgs",
-        "description": [
-          "\nDelete file shares for file arguments."
-        ],
+        "description": ["\nDelete file shares for file arguments."],
         "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2394,9 +2296,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nThe file id to delete the shares for."
-            ],
+            "description": ["\nThe file id to delete the shares for."],
             "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2423,9 +2323,7 @@
             "type": "string",
             "tags": [],
             "label": "fileKind",
-            "description": [
-              "See {@link FileMetadata.FileKind}."
-            ],
+            "description": ["See {@link FileMetadata.FileKind}."],
             "path": "src/plugins/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2436,9 +2334,7 @@
             "type": "Function",
             "tags": [],
             "label": "create",
-            "description": [
-              "\nSee {@link FileMetadataClient.create}.\n"
-            ],
+            "description": ["\nSee {@link FileMetadataClient.create}.\n"],
             "signature": [
               "<M = unknown>(arg: ",
               "CreateArgs",
@@ -2462,13 +2358,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Arg to create a file."
-                ],
-                "signature": [
-                  "CreateArgs",
-                  "<M>"
-                ],
+                "description": ["- Arg to create a file."],
+                "signature": ["CreateArgs", "<M>"],
                 "path": "src/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2483,9 +2374,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nSee {@link FileMetadataClient.get}\n"
-            ],
+            "description": ["\nSee {@link FileMetadataClient.get}\n"],
             "signature": [
               "<M = unknown>(arg: ",
               {
@@ -2515,9 +2404,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Argument to get a file"
-                ],
+                "description": ["- Argument to get a file"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -2541,9 +2428,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\n{@link FileMetadataClient.update}\n"
-            ],
+            "description": ["\n{@link FileMetadataClient.update}\n"],
             "signature": [
               "<M = unknown>(id: string, metadata: ",
               {
@@ -2565,12 +2450,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "- File id"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- File id"],
+                "signature": ["string"],
                 "path": "src/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2582,9 +2463,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "metadata",
-                "description": [
-                  "- new file metadata"
-                ],
+                "description": ["- new file metadata"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -2609,9 +2488,7 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [
-              "\nDelete a file."
-            ],
+            "description": ["\nDelete a file."],
             "signature": [
               "(arg: ",
               {
@@ -2633,9 +2510,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Argument to delete a file"
-                ],
+                "description": ["- Argument to delete a file"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -2659,9 +2534,7 @@
             "type": "Function",
             "tags": [],
             "label": "find",
-            "description": [
-              "\nSee {@link FileMetadataClient.find}.\n"
-            ],
+            "description": ["\nSee {@link FileMetadataClient.find}.\n"],
             "signature": [
               "(arg?: ",
               {
@@ -2691,9 +2564,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Argument to find files"
-                ],
+                "description": ["- Argument to find files"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -2716,13 +2587,9 @@
             "parentPluginId": "files",
             "id": "def-server.FileClient.share",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "share",
-            "description": [
-              "\nCreate a file share instance for this file.\n"
-            ],
+            "description": ["\nCreate a file share instance for this file.\n"],
             "signature": [
               "(args: ",
               "ShareArgs",
@@ -2746,12 +2613,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- Arguments to create a file share"
-                ],
-                "signature": [
-                  "ShareArgs"
-                ],
+                "description": ["- Arguments to create a file share"],
+                "signature": ["ShareArgs"],
                 "path": "src/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2764,16 +2627,10 @@
             "parentPluginId": "files",
             "id": "def-server.FileClient.unshare",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "unshare",
-            "description": [
-              "\nCreate a file share instance for this file.\n"
-            ],
-            "signature": [
-              "(args: IdArg) => Promise<void>"
-            ],
+            "description": ["\nCreate a file share instance for this file.\n"],
+            "signature": ["(args: IdArg) => Promise<void>"],
             "path": "src/plugins/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2785,12 +2642,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- Arguments to remove a file share"
-                ],
-                "signature": [
-                  "IdArg"
-                ],
+                "description": ["- Arguments to remove a file share"],
+                "signature": ["IdArg"],
                 "path": "src/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2801,13 +2654,9 @@
             "parentPluginId": "files",
             "id": "def-server.FileClient.listShares",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "listShares",
-            "description": [
-              "\nCreate a file share instance for this file.\n"
-            ],
+            "description": ["\nCreate a file share instance for this file.\n"],
             "signature": [
               "(arg: ",
               {
@@ -2838,9 +2687,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Arguments to remove a file share"
-                ],
+                "description": ["- Arguments to remove a file share"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -2865,9 +2712,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileDescriptor",
-        "description": [
-          "\nMeta description of a file."
-        ],
+        "description": ["\nMeta description of a file."],
         "signature": [
           {
             "pluginId": "files",
@@ -2888,9 +2733,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique ID of a file, used to locate a file."
-            ],
+            "description": ["\nUnique ID of a file, used to locate a file."],
             "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2901,9 +2744,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "metadata",
-            "description": [
-              "\nThe file's metadata."
-            ],
+            "description": ["\nThe file's metadata."],
             "signature": [
               "Required<Pick<",
               {
@@ -2949,9 +2790,7 @@
             "type": "Function",
             "tags": [],
             "label": "create",
-            "description": [
-              "\nCreate an instance of file metadata\n"
-            ],
+            "description": ["\nCreate an instance of file metadata\n"],
             "signature": [
               "(arg: ",
               {
@@ -2981,9 +2820,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Provide an ID and metadata"
-                ],
+                "description": ["- Provide an ID and metadata"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3008,9 +2845,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nGet file metadata\n"
-            ],
+            "description": ["\nGet file metadata\n"],
             "signature": [
               "(arg: ",
               {
@@ -3040,9 +2875,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Arguments to retrieve file metadata"
-                ],
+                "description": ["- Arguments to retrieve file metadata"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3066,9 +2899,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
-            "description": [
-              "\nBulk get file metadata\n"
-            ],
+            "description": ["\nBulk get file metadata\n"],
             "signature": [
               "{ (arg: { ids: string[]; throwIfNotFound?: true | undefined; }): Promise<",
               {
@@ -3112,9 +2943,7 @@
                     "tags": [],
                     "label": "ids",
                     "description": [],
-                    "signature": [
-                      "string[]"
-                    ],
+                    "signature": ["string[]"],
                     "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3126,9 +2955,7 @@
                     "tags": [],
                     "label": "throwIfNotFound",
                     "description": [],
-                    "signature": [
-                      "true | undefined"
-                    ],
+                    "signature": ["true | undefined"],
                     "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3177,10 +3004,7 @@
                 "tags": [],
                 "label": "arg",
                 "description": [],
-                "signature": [
-                  "BulkGetArg",
-                  " | { ids: string[]; throwIfNotFound: false; }"
-                ],
+                "signature": ["BulkGetArg", " | { ids: string[]; throwIfNotFound: false; }"],
                 "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3195,9 +3019,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\nThe file metadata to update\n"
-            ],
+            "description": ["\nThe file metadata to update\n"],
             "signature": [
               "(arg: ",
               {
@@ -3227,9 +3049,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Arguments to update file metadata"
-                ],
+                "description": ["- Arguments to update file metadata"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3254,9 +3074,7 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [
-              "\nDelete an instance of file metadata\n"
-            ],
+            "description": ["\nDelete an instance of file metadata\n"],
             "signature": [
               "(arg: ",
               {
@@ -3278,9 +3096,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Arguments to delete file metadata"
-                ],
+                "description": ["- Arguments to delete file metadata"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3304,9 +3120,7 @@
             "type": "Function",
             "tags": [],
             "label": "find",
-            "description": [
-              "\nSearch for a set of file kind instances that match the filters.\n"
-            ],
+            "description": ["\nSearch for a set of file kind instances that match the filters.\n"],
             "signature": [
               "(arg?: ",
               {
@@ -3336,9 +3150,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Filters and other settings to match against"
-                ],
+                "description": ["- Filters and other settings to match against"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3363,9 +3175,7 @@
             "type": "Function",
             "tags": [],
             "label": "getUsageMetrics",
-            "description": [
-              "\nPrepare a set of metrics based on the file metadata.\n"
-            ],
+            "description": ["\nPrepare a set of metrics based on the file metadata.\n"],
             "signature": [
               "(arg: ",
               {
@@ -3395,9 +3205,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- Argument to get usage metrics"
-                ],
+                "description": ["- Argument to get usage metrics"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3424,9 +3232,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileServiceFactory",
-        "description": [
-          "\nA simple interface for getting an instance of {@link FileServiceStart}"
-        ],
+        "description": ["\nA simple interface for getting an instance of {@link FileServiceStart}"],
         "path": "src/plugins/files/server/file_service/file_service_factory.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3468,9 +3274,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "req",
-                "description": [
-                  "- the Kibana request to scope the service to"
-                ],
+                "description": ["- the Kibana request to scope the service to"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -3493,13 +3297,9 @@
             "parentPluginId": "files",
             "id": "def-server.FileServiceFactory.asInternal",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "asInternal",
-            "description": [
-              "\nGet a file service instance that is scoped to the internal user.\n"
-            ],
+            "description": ["\nGet a file service instance that is scoped to the internal user.\n"],
             "signature": [
               "() => ",
               {
@@ -3525,9 +3325,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileServiceStart",
-        "description": [
-          "\nPublic file service interface."
-        ],
+        "description": ["\nPublic file service interface."],
         "path": "src/plugins/files/server/file_service/file_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3570,9 +3368,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- create file arg"
-                ],
+                "description": ["- create file arg"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3597,9 +3393,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\nUpdate updatable file attributes like name and meta.\n"
-            ],
+            "description": ["\nUpdate updatable file attributes like name and meta.\n"],
             "signature": [
               "(args: ",
               {
@@ -3621,9 +3415,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- update file args"
-                ],
+                "description": ["- update file args"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3647,9 +3439,7 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [
-              "\nDelete a file.\n"
-            ],
+            "description": ["\nDelete a file.\n"],
             "signature": [
               "(args: ",
               {
@@ -3671,9 +3461,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- delete file args"
-                ],
+                "description": ["- delete file args"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3697,9 +3485,7 @@
             "type": "Function",
             "tags": [],
             "label": "bulkDelete",
-            "description": [
-              "\nDelete multiple files at once.\n"
-            ],
+            "description": ["\nDelete multiple files at once.\n"],
             "signature": [
               "(args: ",
               "BulkDeleteFilesArgs",
@@ -3715,12 +3501,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- delete files args"
-                ],
-                "signature": [
-                  "BulkDeleteFilesArgs"
-                ],
+                "description": ["- delete files args"],
+                "signature": ["BulkDeleteFilesArgs"],
                 "path": "src/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3735,9 +3517,7 @@
             "type": "Function",
             "tags": [],
             "label": "getById",
-            "description": [
-              "\nGet a file by ID. Will throw if file cannot be found.\n"
-            ],
+            "description": ["\nGet a file by ID. Will throw if file cannot be found.\n"],
             "signature": [
               "<M>(args: ",
               {
@@ -3767,9 +3547,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- get file by ID args"
-                ],
+                "description": ["- get file by ID args"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -3867,9 +3645,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- bulk get files by IDs args"
-                ],
+                "description": ["- bulk get files by IDs args"],
                 "signature": [
                   "Pick<",
                   "BulkGetByIdArgs",
@@ -4238,9 +4014,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": [
-                  "BulkGetByIdArgs"
-                ],
+                "signature": ["BulkGetByIdArgs"],
                 "path": "src/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4255,9 +4029,7 @@
             "type": "Function",
             "tags": [],
             "label": "find",
-            "description": [
-              "\nFind files given a set of parameters.\n"
-            ],
+            "description": ["\nFind files given a set of parameters.\n"],
             "signature": [
               "<M>(args: ",
               {
@@ -4287,9 +4059,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- find files args"
-                ],
+                "description": ["- find files args"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -4313,9 +4083,7 @@
             "type": "Function",
             "tags": [],
             "label": "getShareObject",
-            "description": [
-              "\nGet an instance of a share object\n"
-            ],
+            "description": ["\nGet an instance of a share object\n"],
             "signature": [
               "(arg: IdArg) => Promise<",
               {
@@ -4338,12 +4106,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- get share args"
-                ],
-                "signature": [
-                  "IdArg"
-                ],
+                "description": ["- get share args"],
+                "signature": ["IdArg"],
                 "path": "src/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4356,9 +4120,7 @@
             "type": "Function",
             "tags": [],
             "label": "listShareObjects",
-            "description": [
-              "\nList share objects\n"
-            ],
+            "description": ["\nList share objects\n"],
             "signature": [
               "(arg: ",
               {
@@ -4389,9 +4151,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- list share objects args"
-                ],
+                "description": ["- list share objects args"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -4413,9 +4173,7 @@
             "type": "Function",
             "tags": [],
             "label": "updateShareObject",
-            "description": [
-              "\nUpdate an instance of a share object\n"
-            ],
+            "description": ["\nUpdate an instance of a share object\n"],
             "signature": [
               "(args: ",
               {
@@ -4446,9 +4204,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- update share args"
-                ],
+                "description": ["- update share args"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -4470,12 +4226,8 @@
             "type": "Function",
             "tags": [],
             "label": "deleteShareObject",
-            "description": [
-              "\nDelete a share instance\n"
-            ],
-            "signature": [
-              "(args: IdArg) => Promise<void>"
-            ],
+            "description": ["\nDelete a share instance\n"],
+            "signature": ["(args: IdArg) => Promise<void>"],
             "path": "src/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4487,12 +4239,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- delete share args"
-                ],
-                "signature": [
-                  "IdArg"
-                ],
+                "description": ["- delete share args"],
+                "signature": ["IdArg"],
                 "path": "src/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4531,9 +4279,7 @@
             "type": "Function",
             "tags": [],
             "label": "getByToken",
-            "description": [
-              "\nGet a file by a secret token.\n"
-            ],
+            "description": ["\nGet a file by a secret token.\n"],
             "signature": [
               "<M>(token: string) => Promise<",
               {
@@ -4555,12 +4301,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "token",
-                "description": [
-                  "- secret token"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["- secret token"],
+                "signature": ["string"],
                 "path": "src/plugins/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4591,9 +4333,7 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nGet a share instance\n"
-            ],
+            "description": ["\nGet a share instance\n"],
             "signature": [
               "(arg: IdArg) => Promise<",
               {
@@ -4615,12 +4355,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- the arguments to get the share instance"
-                ],
-                "signature": [
-                  "IdArg"
-                ],
+                "description": ["- the arguments to get the share instance"],
+                "signature": ["IdArg"],
                 "path": "src/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4635,9 +4371,7 @@
             "type": "Function",
             "tags": [],
             "label": "list",
-            "description": [
-              "\nList share objects\n"
-            ],
+            "description": ["\nList share objects\n"],
             "signature": [
               "(arg: ",
               {
@@ -4667,9 +4401,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [
-                  "- the arguments to list share objects"
-                ],
+                "description": ["- the arguments to list share objects"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -4693,9 +4425,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\nUpdate a share instance.\n"
-            ],
+            "description": ["\nUpdate a share instance.\n"],
             "signature": [
               "(args: ",
               {
@@ -4725,9 +4455,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- the arguments to update a share instance"
-                ],
+                "description": ["- the arguments to update a share instance"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -4751,12 +4479,8 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": [
-              "\nDelete a share instance.\n"
-            ],
-            "signature": [
-              "(args: IdArg) => Promise<void>"
-            ],
+            "description": ["\nDelete a share instance.\n"],
+            "signature": ["(args: IdArg) => Promise<void>"],
             "path": "src/plugins/files/server/file_share_service/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4767,12 +4491,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [
-                  "- the arguments to delete a share instance"
-                ],
-                "signature": [
-                  "IdArg"
-                ],
+                "description": ["- the arguments to delete a share instance"],
+                "signature": ["IdArg"],
                 "path": "src/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4818,12 +4538,8 @@
             "type": "string",
             "tags": [],
             "label": "fileKind",
-            "description": [
-              "\nThe file kind to scope this query to"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe file kind to scope this query to"],
+            "signature": ["string | undefined"],
             "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4835,13 +4551,9 @@
         "parentPluginId": "files",
         "id": "def-server.FindFileArgs",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "FindFileArgs",
-        "description": [
-          "\nArguments to filter for files.\n"
-        ],
+        "description": ["\nArguments to filter for files.\n"],
         "signature": [
           {
             "pluginId": "files",
@@ -4869,12 +4581,8 @@
             "type": "Array",
             "tags": [],
             "label": "kind",
-            "description": [
-              "\nFile kind(s), see {@link FileKind}."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFile kind(s), see {@link FileKind}."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4885,12 +4593,8 @@
             "type": "Array",
             "tags": [],
             "label": "kindToExclude",
-            "description": [
-              "\nFile kind(s) to exclude from search, see {@link FileKind}."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFile kind(s) to exclude from search, see {@link FileKind}."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4901,12 +4605,8 @@
             "type": "Array",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nFile name(s)."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFile name(s)."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4917,12 +4617,8 @@
             "type": "Array",
             "tags": [],
             "label": "extension",
-            "description": [
-              "\nFile extension(s)."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFile extension(s)."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4933,12 +4629,8 @@
             "type": "Array",
             "tags": [],
             "label": "mimeType",
-            "description": [
-              "\nFile mime type(s)."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFile mime type(s)."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4949,12 +4641,8 @@
             "type": "Array",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nFile status(es)."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nFile status(es)."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4965,12 +4653,8 @@
             "type": "Array",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nID of user who created the file."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "description": ["\nID of user who created the file."],
+            "signature": ["string[] | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4981,12 +4665,8 @@
             "type": "Object",
             "tags": [],
             "label": "meta",
-            "description": [
-              "\nFile metadata values. These values are governed by the consumer."
-            ],
-            "signature": [
-              "Record<string, string | string[]> | undefined"
-            ],
+            "description": ["\nFile metadata values. These values are governed by the consumer."],
+            "signature": ["Record<string, string | string[]> | undefined"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5000,9 +4680,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetArg",
-        "description": [
-          "\nGet a file"
-        ],
+        "description": ["\nGet a file"],
         "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5013,9 +4691,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique ID of file metadata"
-            ],
+            "description": ["\nUnique ID of file metadata"],
             "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5029,9 +4705,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetByIdArgs",
-        "description": [
-          "\nArguments to get a file by ID."
-        ],
+        "description": ["\nArguments to get a file by ID."],
         "path": "src/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5042,9 +4716,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nFile ID."
-            ],
+            "description": ["\nFile ID."],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5058,9 +4730,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetUsageMetricsArgs",
-        "description": [
-          "\nArgs to get usage metrics"
-        ],
+        "description": ["\nArgs to get usage metrics"],
         "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5071,12 +4741,8 @@
             "type": "Object",
             "tags": [],
             "label": "[ES_FIXED_SIZE_INDEX_BLOB_STORE]",
-            "description": [
-              "\nThe ES backed fixed size storage"
-            ],
-            "signature": [
-              "{ capacity: number; }"
-            ],
+            "description": ["\nThe ES backed fixed size storage"],
+            "signature": ["{ capacity: number; }"],
             "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5090,9 +4756,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ListArgs",
-        "description": [
-          "\nArguments for listing file shares."
-        ],
+        "description": ["\nArguments for listing file shares."],
         "signature": [
           {
             "pluginId": "files",
@@ -5120,12 +4784,8 @@
             "type": "string",
             "tags": [],
             "label": "fileId",
-            "description": [
-              "\nThe file ID for scope the list to."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe file ID for scope the list to."],
+            "signature": ["string | undefined"],
             "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5139,9 +4799,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UpdateArgs",
-        "description": [
-          "\nUpdate a file args"
-        ],
+        "description": ["\nUpdate a file args"],
         "signature": [
           {
             "pluginId": "files",
@@ -5162,9 +4820,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nA unique file ID."
-            ],
+            "description": ["\nA unique file ID."],
             "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5175,9 +4831,7 @@
             "type": "Object",
             "tags": [],
             "label": "metadata",
-            "description": [
-              "\nThe file's metadata."
-            ],
+            "description": ["\nThe file's metadata."],
             "signature": [
               "{ name?: string | undefined; created?: string | undefined; Status?: \"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\" | undefined; Updated?: string | undefined; mime_type?: string | undefined; size?: number | undefined; hash?: { [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; user?: { name?: string | undefined; id?: string | undefined; } | undefined; extension?: string | undefined; Alt?: string | undefined; ChunkSize?: number | undefined; Compression?: ",
               {
@@ -5202,9 +4856,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UpdateArgs",
-        "description": [
-          "\nUpdate file share arguments."
-        ],
+        "description": ["\nUpdate file share arguments."],
         "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5215,9 +4867,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nThe file share ID."
-            ],
+            "description": ["\nThe file share ID."],
             "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5228,12 +4878,8 @@
             "type": "Object",
             "tags": [],
             "label": "attributes",
-            "description": [
-              "\nThe updated attributes to store."
-            ],
-            "signature": [
-              "{ name?: string | undefined; }"
-            ],
+            "description": ["\nThe updated attributes to store."],
+            "signature": ["{ name?: string | undefined; }"],
             "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5247,9 +4893,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UpdateFileArgs",
-        "description": [
-          "\nArguments to update a file"
-        ],
+        "description": ["\nArguments to update a file"],
         "path": "src/plugins/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5260,9 +4904,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nFile ID."
-            ],
+            "description": ["\nFile ID."],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5273,12 +4915,8 @@
             "type": "Object",
             "tags": [],
             "label": "attributes",
-            "description": [
-              "\nAttributes to update."
-            ],
-            "signature": [
-              "{ name: string; meta: unknown; alt: string | undefined; }"
-            ],
+            "description": ["\nAttributes to update."],
+            "signature": ["{ name: string; meta: unknown; alt: string | undefined; }"],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5295,12 +4933,8 @@
         "type": "Type",
         "tags": [],
         "label": "DeleteArgs",
-        "description": [
-          "\nDelete file share arguments."
-        ],
-        "signature": [
-          "IdArg"
-        ],
+        "description": ["\nDelete file share arguments."],
+        "signature": ["IdArg"],
         "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5312,12 +4946,8 @@
         "type": "Type",
         "tags": [],
         "label": "GetArgs",
-        "description": [
-          "\nGet file share arguments."
-        ],
-        "signature": [
-          "IdArg"
-        ],
+        "description": ["\nGet file share arguments."],
+        "signature": ["IdArg"],
         "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5331,9 +4961,7 @@
       "type": "Interface",
       "tags": [],
       "label": "FilesServerSetup",
-      "description": [
-        "\nFiles plugin setup contract"
-      ],
+      "description": ["\nFiles plugin setup contract"],
       "path": "src/plugins/files/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -5342,9 +4970,7 @@
           "parentPluginId": "files",
           "id": "def-server.FilesServerSetup.registerFileKind",
           "type": "Function",
-          "tags": [
-            "track-adoption"
-          ],
+          "tags": ["track-adoption"],
           "label": "registerFileKind",
           "description": [
             "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
@@ -5412,9 +5038,7 @@
               "type": "Object",
               "tags": [],
               "label": "fileKind",
-              "description": [
-                "- the file kind to register"
-              ],
+              "description": ["- the file kind to register"],
               "signature": [
                 {
                   "pluginId": "files",
@@ -5442,9 +5066,7 @@
       "type": "Interface",
       "tags": [],
       "label": "FilesServerStart",
-      "description": [
-        "\nFiles plugin start contract"
-      ],
+      "description": ["\nFiles plugin start contract"],
       "path": "src/plugins/files/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -5453,13 +5075,9 @@
           "parentPluginId": "files",
           "id": "def-server.FilesServerStart.fileServiceFactory",
           "type": "Object",
-          "tags": [
-            "track-adoption"
-          ],
+          "tags": ["track-adoption"],
           "label": "fileServiceFactory",
-          "description": [
-            "\nCreate an instance of {@link FileServiceStart}.\n"
-          ],
+          "description": ["\nCreate an instance of {@link FileServiceStart}.\n"],
           "signature": [
             {
               "pluginId": "files",
@@ -5511,12 +5129,8 @@
             "type": "Object",
             "tags": [],
             "label": "[ES_FIXED_SIZE_INDEX_BLOB_STORE]",
-            "description": [
-              "\nSingle index that supports up to 50GB of blobs"
-            ],
-            "signature": [
-              "{ index: string; } | undefined"
-            ],
+            "description": ["\nSingle index that supports up to 50GB of blobs"],
+            "signature": ["{ index: string; } | undefined"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5553,9 +5167,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nThe file ID"
-            ],
+            "description": ["\nThe file ID"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5566,9 +5178,7 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": [
-              "\nFile metadata in camelCase form."
-            ],
+            "description": ["\nFile metadata in camelCase form."],
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-file-types",
@@ -5589,9 +5199,7 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": [
-              "\nUpdate a file object's metadata that can be updated.\n"
-            ],
+            "description": ["\nUpdate a file object's metadata that can be updated.\n"],
             "signature": [
               "(attr: Partial<",
               {
@@ -5621,9 +5229,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "attr",
-                "description": [
-                  "- The of attributes to update."
-                ],
+                "description": ["- The of attributes to update."],
                 "signature": [
                   "Partial<",
                   {
@@ -5649,9 +5255,7 @@
             "type": "Function",
             "tags": [],
             "label": "uploadContent",
-            "description": [
-              "\nStream file content to storage.\n"
-            ],
+            "description": ["\nStream file content to storage.\n"],
             "signature": [
               "(content: ",
               "Readable",
@@ -5679,12 +5283,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "content",
-                "description": [
-                  "- The content to stream to storage."
-                ],
-                "signature": [
-                  "Readable"
-                ],
+                "description": ["- The content to stream to storage."],
+                "signature": ["Readable"],
                 "path": "src/plugins/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5699,10 +5299,7 @@
                 "description": [
                   "- An observable that can be used to abort the upload at any time."
                 ],
-                "signature": [
-                  "Observable",
-                  "<unknown> | undefined"
-                ],
+                "signature": ["Observable", "<unknown> | undefined"],
                 "path": "src/plugins/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5714,14 +5311,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "- additional options."
-                ],
-                "signature": [
-                  "Partial<Pick<",
-                  "UploadOptions",
-                  ", \"transforms\">> | undefined"
-                ],
+                "description": ["- additional options."],
+                "signature": ["Partial<Pick<", "UploadOptions", ", \"transforms\">> | undefined"],
                 "path": "src/plugins/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5736,14 +5327,8 @@
             "type": "Function",
             "tags": [],
             "label": "downloadContent",
-            "description": [
-              "\nStream file content from storage."
-            ],
-            "signature": [
-              "() => Promise<",
-              "Readable",
-              ">"
-            ],
+            "description": ["\nStream file content from storage."],
+            "signature": ["() => Promise<", "Readable", ">"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5754,16 +5339,10 @@
             "parentPluginId": "files",
             "id": "def-common.File.delete",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "delete",
-            "description": [
-              "\nDelete a file.\n"
-            ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "description": ["\nDelete a file.\n"],
+            "signature": ["() => Promise<void>"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5774,9 +5353,7 @@
             "parentPluginId": "files",
             "id": "def-common.File.share",
             "type": "Function",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "share",
             "description": [
               "\nGenerate a secure token that can be used to access a file's content.\n"
@@ -5810,9 +5387,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
-                "description": [
-                  "- Share file options."
-                ],
+                "description": ["- Share file options."],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -5887,9 +5462,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
-                "description": [
-                  "- Unshare file options"
-                ],
+                "description": ["- Unshare file options"],
                 "signature": [
                   {
                     "pluginId": "files",
@@ -5942,9 +5515,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileJSON",
-        "description": [
-          "\nAttributes of a file that represent a serialised version of the file."
-        ],
+        "description": ["\nAttributes of a file that represent a serialised version of the file."],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-file-types",
@@ -5965,9 +5536,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique file ID."
-            ],
+            "description": ["\nUnique file ID."],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5978,9 +5547,7 @@
             "type": "string",
             "tags": [],
             "label": "created",
-            "description": [
-              "\nISO string of when this file was created"
-            ],
+            "description": ["\nISO string of when this file was created"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5991,9 +5558,7 @@
             "type": "string",
             "tags": [],
             "label": "updated",
-            "description": [
-              "\nISO string of when the file was updated"
-            ],
+            "description": ["\nISO string of when the file was updated"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6002,13 +5567,9 @@
             "parentPluginId": "files",
             "id": "def-common.FileJSON.name",
             "type": "string",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "name",
-            "description": [
-              "\nFile name.\n"
-            ],
+            "description": ["\nFile name.\n"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6019,12 +5580,8 @@
             "type": "string",
             "tags": [],
             "label": "mimeType",
-            "description": [
-              "\nMIME type of the file's contents."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nMIME type of the file's contents."],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6035,12 +5592,8 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": [
-              "\nThe size, in bytes, of the file content."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nThe size, in bytes, of the file content."],
+            "signature": ["number | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6049,16 +5602,10 @@
             "parentPluginId": "files",
             "id": "def-common.FileJSON.extension",
             "type": "string",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "extension",
-            "description": [
-              "\nThe file extension (dot suffix).\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nThe file extension (dot suffix).\n"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6072,9 +5619,7 @@
             "description": [
               "\nA consumer defined set of attributes.\n\nConsumers of the file service can add their own tags and identifiers to\na file using the \"meta\" object."
             ],
-            "signature": [
-              "Meta | undefined"
-            ],
+            "signature": ["Meta | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6088,9 +5633,7 @@
             "description": [
               "\nUse this text to describe the file contents for display and accessibility."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6099,9 +5642,7 @@
             "parentPluginId": "files",
             "id": "def-common.FileJSON.fileKind",
             "type": "string",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "fileKind",
             "description": [
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
@@ -6132,12 +5673,8 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nUser data associated with this file"
-            ],
-            "signature": [
-              "{ name?: string | undefined; id?: string | undefined; } | undefined"
-            ],
+            "description": ["\nUser data associated with this file"],
+            "signature": ["{ name?: string | undefined; id?: string | undefined; } | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6148,9 +5685,7 @@
             "type": "Object",
             "tags": [],
             "label": "hash",
-            "description": [
-              "\nFile hash information"
-            ],
+            "description": ["\nFile hash information"],
             "signature": [
               "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
@@ -6193,9 +5728,7 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.maxSizeBytes",
             "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
+            "tags": ["default"],
             "label": "maxSizeBytes",
             "description": [
               "\nMax file contents size, in bytes. Can be customized per file using the\n{@link FileJSON} object. This is enforced on the server-side as well as\nin the upload React component.\n"
@@ -6242,9 +5775,7 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.http",
             "type": "Object",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "http",
             "description": [
               "\nSpecify which HTTP routes to create for the file kind.\n\nYou can always create your own HTTP routes for working with files but\nthis interface allows you to expose basic CRUD operations, upload, download\nand sharing of files over a RESTful-like interface.\n"
@@ -6265,9 +5796,7 @@
             "description": [
               "\nA list of hashes to compute for this file kind. The hashes will be computed\nduring the file upload process and stored in the file metadata."
             ],
-            "signature": [
-              "(\"sha256\" | \"md5\" | \"sha1\" | \"sha512\")[] | undefined"
-            ],
+            "signature": ["(\"sha256\" | \"md5\" | \"sha1\" | \"sha512\")[] | undefined"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6307,16 +5836,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileKindBrowser.maxSizeBytes",
             "type": "number",
-            "tags": [
-              "default"
-            ],
+            "tags": ["default"],
             "label": "maxSizeBytes",
             "description": [
               "\nMax file contents size, in bytes, enforced for this file kind in the upload\ncomponent.\n"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6346,9 +5871,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileShareJSON",
-        "description": [
-          "\nAttributes of a file that represent a serialised version of the file."
-        ],
+        "description": ["\nAttributes of a file that represent a serialised version of the file."],
         "path": "packages/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6359,9 +5882,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nUnique ID share instance"
-            ],
+            "description": ["\nUnique ID share instance"],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6372,9 +5893,7 @@
             "type": "string",
             "tags": [],
             "label": "created",
-            "description": [
-              "\nISO timestamp the share was created"
-            ],
+            "description": ["\nISO timestamp the share was created"],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6385,9 +5904,7 @@
             "type": "number",
             "tags": [],
             "label": "validUntil",
-            "description": [
-              "\nUnix timestamp (in milliseconds) of when this share expires"
-            ],
+            "description": ["\nUnix timestamp (in milliseconds) of when this share expires"],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6398,12 +5915,8 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nA user-friendly name for the file share"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nA user-friendly name for the file share"],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6414,9 +5927,7 @@
             "type": "string",
             "tags": [],
             "label": "fileId",
-            "description": [
-              "\nThe ID of the file this share is linked to"
-            ],
+            "description": ["\nThe ID of the file this share is linked to"],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6430,9 +5941,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileShareOptions",
-        "description": [
-          "\nArguments to pass to share a file"
-        ],
+        "description": ["\nArguments to pass to share a file"],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6443,12 +5952,8 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nOptional name for the file share, should be human-friendly."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional name for the file share, should be human-friendly."],
+            "signature": ["string | undefined"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6457,16 +5962,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileShareOptions.validUntil",
             "type": "number",
-            "tags": [
-              "note"
-            ],
+            "tags": ["note"],
             "label": "validUntil",
             "description": [
               "\nUnix timestamp (in milliseconds) when the file share will expire.\n"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6480,9 +5981,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FilesMetrics",
-        "description": [
-          "\nA collection of generally useful metrics about files."
-        ],
+        "description": ["\nA collection of generally useful metrics about files."],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6493,9 +5992,7 @@
             "type": "Object",
             "tags": [],
             "label": "storage",
-            "description": [
-              "\nMetrics about all storage media."
-            ],
+            "description": ["\nMetrics about all storage media."],
             "signature": [
               "{ esFixedSizeIndex: { capacity: number; used: number; available: number; }; }"
             ],
@@ -6509,9 +6006,7 @@
             "type": "Object",
             "tags": [],
             "label": "countByStatus",
-            "description": [
-              "\nA count of all files grouped by status"
-            ],
+            "description": ["\nA count of all files grouped by status"],
             "signature": [
               "{ AWAITING_UPLOAD: number; UPLOADING: number; READY: number; UPLOAD_ERROR: number; DELETED: number; }"
             ],
@@ -6525,12 +6020,8 @@
             "type": "Object",
             "tags": [],
             "label": "countByExtension",
-            "description": [
-              "\nA count of all files grouped by extension"
-            ],
-            "signature": [
-              "{ [x: string]: number; }"
-            ],
+            "description": ["\nA count of all files grouped by extension"],
+            "signature": ["{ [x: string]: number; }"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6544,9 +6035,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FileUnshareOptions",
-        "description": [
-          "\nArguments for unsharing a file"
-        ],
+        "description": ["\nArguments for unsharing a file"],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6557,9 +6046,7 @@
             "type": "string",
             "tags": [],
             "label": "shareId",
-            "description": [
-              "\nSpecify the share instance to remove"
-            ],
+            "description": ["\nSpecify the share instance to remove"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6573,9 +6060,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Pagination",
-        "description": [
-          "\nValues for paginating through results."
-        ],
+        "description": ["\nValues for paginating through results."],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6586,12 +6071,8 @@
             "type": "number",
             "tags": [],
             "label": "page",
-            "description": [
-              "\nPage of results."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nPage of results."],
+            "signature": ["number | undefined"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6602,12 +6083,8 @@
             "type": "number",
             "tags": [],
             "label": "perPage",
-            "description": [
-              "\nNumber of results per page."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nNumber of results per page."],
+            "signature": ["number | undefined"],
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6657,12 +6134,8 @@
         "type": "string",
         "tags": [],
         "label": "ES_FIXED_SIZE_INDEX_BLOB_STORE",
-        "description": [
-          "\nThe name of the fixed size ES-backed blob store"
-        ],
-        "signature": [
-          "\"esFixedSizeIndex\""
-        ],
+        "description": ["\nThe name of the fixed size ES-backed blob store"],
+        "signature": ["\"esFixedSizeIndex\""],
         "path": "src/plugins/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6674,12 +6147,8 @@
         "type": "string",
         "tags": [],
         "label": "FILE_SO_TYPE",
-        "description": [
-          "\nUnique type name of the file saved object"
-        ],
-        "signature": [
-          "\"file\""
-        ],
+        "description": ["\nUnique type name of the file saved object"],
+        "signature": ["\"file\""],
         "path": "src/plugins/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6691,12 +6160,8 @@
         "type": "Type",
         "tags": [],
         "label": "FileCompression",
-        "description": [
-          "\nSupported file compression algorithms"
-        ],
-        "signature": [
-          "\"none\" | \"br\" | \"gzip\" | \"deflate\""
-        ],
+        "description": ["\nSupported file compression algorithms"],
+        "signature": ["\"none\" | \"br\" | \"gzip\" | \"deflate\""],
         "path": "packages/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6708,9 +6173,7 @@
         "type": "Type",
         "tags": [],
         "label": "FileMetadata",
-        "description": [
-          "\nExtra metadata on a file object specific to Kibana implementation."
-        ],
+        "description": ["\nExtra metadata on a file object specific to Kibana implementation."],
         "signature": [
           "Required<Pick<",
           {
@@ -6741,9 +6204,7 @@
         "type": "Type",
         "tags": [],
         "label": "FileSavedObject",
-        "description": [
-          "\nAn {@link SavedObject} containing a file object (i.e., metadata only)."
-        ],
+        "description": ["\nAn {@link SavedObject} containing a file object (i.e., metadata only)."],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -6773,9 +6234,7 @@
         "type": "Type",
         "tags": [],
         "label": "FileShare",
-        "description": [
-          "\nData stored with a file share object"
-        ],
+        "description": ["\nData stored with a file share object"],
         "signature": [
           "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
         ],
@@ -6788,13 +6247,9 @@
         "parentPluginId": "files",
         "id": "def-common.FileShareJSONWithToken",
         "type": "Type",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "FileShareJSONWithToken",
-        "description": [
-          "\nA version of the file share with a token included.\n"
-        ],
+        "description": ["\nA version of the file share with a token included.\n"],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-file-types",
@@ -6831,12 +6286,8 @@
         "type": "string",
         "tags": [],
         "label": "PLUGIN_ID",
-        "description": [
-          "\nThe files plugin ID"
-        ],
-        "signature": [
-          "\"files\""
-        ],
+        "description": ["\nThe files plugin ID"],
+        "signature": ["\"files\""],
         "path": "src/plugins/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6848,12 +6299,8 @@
         "type": "string",
         "tags": [],
         "label": "PLUGIN_NAME",
-        "description": [
-          "\nThe files plugin name"
-        ],
-        "signature": [
-          "\"files\""
-        ],
+        "description": ["\nThe files plugin name"],
+        "signature": ["\"files\""],
         "path": "src/plugins/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6865,12 +6312,8 @@
         "type": "Type",
         "tags": [],
         "label": "UpdatableFileMetadata",
-        "description": [
-          "\nThe set of file metadata that can be updated."
-        ],
-        "signature": [
-          "{ name: string; meta: Meta | undefined; alt: string | undefined; }"
-        ],
+        "description": ["\nThe set of file metadata that can be updated."],
+        "signature": ["{ name: string; meta: Meta | undefined; alt: string | undefined; }"],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6882,12 +6325,8 @@
         "type": "Type",
         "tags": [],
         "label": "UpdatableFileShareMetadata",
-        "description": [
-          "\nSet of attributes that can be updated in a file share."
-        ],
-        "signature": [
-          "{ name?: string | undefined; }"
-        ],
+        "description": ["\nSet of attributes that can be updated in a file share."],
+        "signature": ["{ name?: string | undefined; }"],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

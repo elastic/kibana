@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
+import { handleActions } from 'redux-actions';
+import { removeElements } from '../actions/elements';
 import { restoreHistory } from '../actions/history';
 import * as pageActions from '../actions/pages';
 import * as transientActions from '../actions/transient';
-import { removeElements } from '../actions/elements';
-import { setRefreshInterval, enableAutoplay, setAutoplayInterval } from '../actions/workpad';
+import { enableAutoplay, setAutoplayInterval, setRefreshInterval } from '../actions/workpad';
 
 const { set, del } = immutable;
 

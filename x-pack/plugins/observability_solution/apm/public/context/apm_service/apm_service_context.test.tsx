@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getOrRedirectToTransactionType } from './apm_service_context';
 import { createMemoryHistory } from 'history';
+import { getOrRedirectToTransactionType } from './apm_service_context';
 
 describe('getOrRedirectToTransactionType', () => {
   const history = createMemoryHistory();

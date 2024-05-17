@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { omit, uniqBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
-import { formatLocation } from '../../../../common/utils/location_formatter';
+import { i18n } from '@kbn/i18n';
+import { omit, uniqBy } from 'lodash';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   BrowserFields,
-  ConfigKey,
   CommonFields,
-  MonitorTypeEnum,
+  ConfigKey,
   Locations,
+  MonitorFields,
+  MonitorTypeEnum,
   ProjectMonitor,
   ScheduleUnit,
   SourceType,
-  MonitorFields,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { formatLocation } from '../../../../common/utils/location_formatter';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {

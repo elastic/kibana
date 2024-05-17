@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { NodeDimensions } from '../../common/types';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LazyDebugComponent } from '.';
+import { NodeDimensions } from '../../common/types';
 
 const Debug = withSuspense(LazyDebugComponent);
 

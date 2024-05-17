@@ -7,14 +7,14 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { chunk } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { chunk } from 'lodash';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../common/constants/categorization';
 import type {
-  Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
+  Token,
 } from '../common/types/categories';
 import { ValidationResults } from './validation_results';
 

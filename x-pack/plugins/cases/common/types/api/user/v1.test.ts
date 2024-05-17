@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MAX_SUGGESTED_PROFILES } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { MAX_SUGGESTED_PROFILES } from '../../../constants';
 import { GetCaseUsersResponseRt, SuggestUserProfilesRequestRt } from './v1';
 
 describe('User', () => {

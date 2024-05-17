@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ResponseError } from '../../../../../../common/types';
 import { ApiService } from '../../../../lib/api';

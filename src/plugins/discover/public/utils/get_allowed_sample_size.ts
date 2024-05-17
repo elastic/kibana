@@ -8,8 +8,8 @@
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import {
-  MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  MIN_SAVED_SEARCH_SAMPLE_SIZE,
 } from '@kbn/saved-search-plugin/common';
 
 export const getMaxAllowedSampleSize = (uiSettings: IUiSettingsClient): number => {

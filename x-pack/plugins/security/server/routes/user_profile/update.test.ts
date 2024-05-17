@@ -12,7 +12,6 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { defineUpdateUserProfileDataRoute } from './update';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
@@ -22,6 +21,7 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import type { UserProfileServiceStartInternal } from '../../user_profile';
 import { userProfileServiceMock } from '../../user_profile/user_profile_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineUpdateUserProfileDataRoute } from './update';
 
 function getMockContext() {
   return {

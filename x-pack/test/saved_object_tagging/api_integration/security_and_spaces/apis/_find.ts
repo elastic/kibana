@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { USERS, User, ExpectedResponse } from '../../../common/lib';
+import { ExpectedResponse, USERS, User } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
 import { createTags, createTestSpaces, deleteTags, deleteTestSpaces } from './test_utils';
 

@@ -6,10 +6,10 @@
  */
 
 import {
+  createPersistableStateAttachmentTypeRegistryMock,
   externalReferenceAttachmentESAttributes,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../attachment_framework/mocks';

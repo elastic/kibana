@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getCurrentUserAnonymizationFieldsRequest, requestMock } from '../../__mocks__/request';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND } from '@kbn/elastic-assistant-common';
-import { serverMock } from '../../__mocks__/server';
+import { getCurrentUserAnonymizationFieldsRequest, requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
+import { serverMock } from '../../__mocks__/server';
 import { findAnonymizationFieldsRoute } from './find_route';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('Find user anonymization fields route', () => {
   let server: ReturnType<typeof serverMock.create>;

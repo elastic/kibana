@@ -7,11 +7,11 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { CreateTagOptions, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
-import { TagSavedObject, TagAttributes, ITagsClient } from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
+import { ITagsClient, TagAttributes, TagSavedObject } from '../../../common/types';
 import { TagValidationError } from './errors';
-import { validateTag } from './validate_tag';
 import { savedObjectToTag } from './utils';
+import { validateTag } from './validate_tag';
 
 interface TagsClientOptions {
   client: SavedObjectsClientContract;

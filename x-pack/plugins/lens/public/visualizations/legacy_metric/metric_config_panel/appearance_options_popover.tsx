@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { ToolbarPopover } from '../../../shared_components';
-import { TitlePositionOptions } from './title_position_option';
-import { FramePublicAPI } from '../../../types';
+import React from 'react';
 import type { LegacyMetricState } from '../../../../common/types';
+import { ToolbarPopover } from '../../../shared_components';
+import { FramePublicAPI } from '../../../types';
 import { TextFormattingOptions } from './text_formatting_options';
+import { TitlePositionOptions } from './title_position_option';
 
 export interface VisualOptionsPopoverProps {
   state: LegacyMetricState;

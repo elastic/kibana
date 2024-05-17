@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../../common/constants';
+import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import type { AssigneeWithProfile } from '../../user_profiles/types';
-import * as i18n from '../translations';
-import { bringCurrentUserToFrontAndSort } from '../../user_profiles/sort';
+import type { CurrentUserProfile } from '../../types';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
-import type { CurrentUserProfile } from '../../types';
+import { bringCurrentUserToFrontAndSort } from '../../user_profiles/sort';
+import type { AssigneeWithProfile } from '../../user_profiles/types';
+import * as i18n from '../translations';
 
 const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }> = ({
   togglePopover,

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { Comparators } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import type { ISearchOptions } from '@kbn/search-types';
+import { cloneDeep, last } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
-import { combineLatest, from, Subject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { last, cloneDeep } from 'lodash';
+import { Subject, combineLatest, from } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs';
-import { Comparators } from '@elastic/eui';
-import type { ISearchOptions } from '@kbn/search-types';
-import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import type { FieldRequestConfig } from '../../../../common/types';
 import type {
   DataStatsFetchProgress,
+  Field,
+  FieldStatsCommonRequestParams,
   FieldStatsSearchStrategyReturnBase,
   OverallStatsSearchStrategyParams,
-  FieldStatsCommonRequestParams,
-  Field,
 } from '../../../../common/types/field_stats';
-import { useDataVisualizerKibana } from '../../kibana_context';
-import type { FieldRequestConfig } from '../../../../common/types';
-import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
+import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
+import { useDataVisualizerKibana } from '../../kibana_context';
+import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
 import { getFieldsStats } from '../search_strategy/requests/get_fields_stats';
-import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
-import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
+import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { AggParamsDateHistogram } from '@kbn/data-plugin/common';
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataType } from '../../types';
 import { convertToDateHistogramColumn } from './date_histogram';
 import { DateHistogramColumn } from './types';
-import { DataType } from '../../types';
 
 describe('convertToDateHistogramColumn', () => {
   const aggId = `some-id`;

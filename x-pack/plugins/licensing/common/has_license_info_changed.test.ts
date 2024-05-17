@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { hasLicenseInfoChanged } from './has_license_info_changed';
 import { License } from './license';
 import { PublicLicense } from './types';
-import { hasLicenseInfoChanged } from './has_license_info_changed';
 
 function license({ error, ...customLicense }: { error?: string; [key: string]: any } = {}) {
   const defaultLicense: PublicLicense = {

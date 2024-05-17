@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { extractDocumentation } from './schema_extractor';
 import * as path from 'path';
+import { extractDocumentation } from './schema_extractor';
 
 describe('schema_extractor', () => {
   it('should serialize schema definition', () => {

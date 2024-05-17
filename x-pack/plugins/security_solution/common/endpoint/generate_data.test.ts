@@ -8,10 +8,10 @@
 import _ from 'lodash';
 import type { Event, Tree, TreeNode } from './generate_data';
 import {
+  ANCESTRY_LIMIT,
+  ECSCategory,
   EndpointDocGenerator,
   RelatedEventCategory,
-  ECSCategory,
-  ANCESTRY_LIMIT,
 } from './generate_data';
 import { firstNonNullValue, values } from './models/ecs_safety_helpers';
 import {
@@ -475,7 +475,6 @@ describe('data generator', () => {
         for (
           ;
           --i >= -1 && (events[i].event?.kind !== 'event' || !isCategoryProcess(events[i]));
-
         ) {
           // related event - skip it
         }

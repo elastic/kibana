@@ -8,45 +8,45 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { GeoJsonProperties } from 'geojson';
-import { i18n } from '@kbn/i18n';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { GeoJsonProperties } from 'geojson';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
   DataFilters,
   ESGeoLineSourceDescriptor,
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
+import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
-import { DataRequest } from '../../util/data_request';
-import { convertToGeoJson } from './convert_to_geojson';
-import { ESDocField } from '../../fields/es_doc_field';
-import { InlineField } from '../../fields/inline_field';
-import { UpdateSourceEditor } from './update_source_editor';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
-import { isValidStringConfig } from '../../util/valid_string_config';
-import { IField } from '../../fields/field';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { ESDocField } from '../../fields/es_doc_field';
+import { IField } from '../../fields/field';
+import { InlineField } from '../../fields/inline_field';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { DataRequest } from '../../util/data_request';
+import { isValidStringConfig } from '../../util/valid_string_config';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { mergeExecutionContext } from '../execution_context_utils';
-import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './geo_line_form';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
 import {
   DEFAULT_LINE_SIMPLIFICATION_SIZE,
   MAX_TERMS_TRACKS,
   TIME_SERIES_ID_FIELD_NAME,
 } from './constants';
+import { convertToGeoJson } from './convert_to_geojson';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './geo_line_form';
+import { UpdateSourceEditor } from './update_source_editor';
 
 type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
   Pick<

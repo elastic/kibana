@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { isFiniteNumber } from '../../utils/is_finite_number';
 import { amountAndUnitToObject } from '../amount_and_unit';
 import { getRangeTypeMessage } from './get_range_type_message';
-import { isFiniteNumber } from '../../utils/is_finite_number';
 
 const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
 

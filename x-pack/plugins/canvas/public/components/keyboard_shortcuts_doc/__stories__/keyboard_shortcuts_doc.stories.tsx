@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { action } from '@storybook/addon-actions';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 
 storiesOf('components/KeyboardShortcutsDoc', module).add('default', () => (

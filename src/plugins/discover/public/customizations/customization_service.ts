@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { filter, map, Observable, startWith, Subject } from 'rxjs';
+import { Observable, Subject, filter, map, startWith } from 'rxjs';
 import {
   DataTableCustomization,
+  FieldListCustomization,
   FlyoutCustomization,
   SearchBarCustomization,
   TopNavCustomization,
   UnifiedHistogramCustomization,
-  FieldListCustomization,
 } from './customization_types';
 
 export type DiscoverCustomization =

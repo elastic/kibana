@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { memo, useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,18 +9,26 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
-import { getFleetManagedIndexTemplates } from '../api/api';
-import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { memo, useEffect, useState } from 'react';
 import {
   getPolicyConfigValueFromRouteEntries,
   getRouteEntriesFromPolicyConfig,
 } from '../../../../common/security_integrations/cribl/translator';
+import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
+import { getFleetManagedIndexTemplates } from '../api/api';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {

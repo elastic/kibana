@@ -7,15 +7,15 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
+import type { UpdateMappingModelVersionState } from '../../state';
 import {
+  type MockedMigratorContext,
   createContextMock,
   createPostInitState,
-  type MockedMigratorContext,
 } from '../../test_helpers';
-import type { UpdateMappingModelVersionState } from '../../state';
+import { setMetaMappingMigrationComplete } from '../../utils';
 import type { StateActionResponse } from '../types';
 import { updateMappingModelVersion } from './update_mapping_model_version';
-import { setMetaMappingMigrationComplete } from '../../utils';
 
 describe('Stage: updateMappingModelVersion', () => {
   let context: MockedMigratorContext;

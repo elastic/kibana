@@ -9,10 +9,10 @@
 import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
-import ResizableLayout from './resizable_layout';
+import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
-import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
+import ResizableLayout from './resizable_layout';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
+import { AdvancedSettings, WorkspaceField, WorkspaceNode } from '../types';
 import { syncSettingsSaga, updateSettings } from './advanced_settings';
 import {
-  updateSaveButtonSaga,
+  selectField,
   syncFieldsSaga,
   syncNodeStyleSaga,
-  selectField,
   updateFieldProperties,
+  updateSaveButtonSaga,
 } from './fields';
-import { AdvancedSettings, WorkspaceField, WorkspaceNode } from '../types';
+import { MockedGraphEnvironment, createMockGraphStore } from './mocks';
 import { loadTemplates, syncTemplatesSaga } from './url_templates';
 
 /**

@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { get } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { get } from 'lodash';
 
 import {
-  buildServerWatchStatusModel,
   buildClientWatchStatusModel,
+  buildServerWatchStatusModel,
 } from '../../../../models/watch_status_model';
 import { RouteDependencies } from '../../../../types';
 

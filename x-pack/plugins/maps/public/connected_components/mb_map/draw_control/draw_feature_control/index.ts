@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { Geometry, Position } from 'geojson';
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { Geometry, Position } from 'geojson';
-import {
-  DrawFeatureControl,
-  ReduxDispatchProps,
-  ReduxStateProps,
-  OwnProps,
-} from './draw_feature_control';
 import { addNewFeatureToIndex, deleteFeatureFromIndex } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { getEditState, getLayerById } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
+import {
+  DrawFeatureControl,
+  OwnProps,
+  ReduxDispatchProps,
+  ReduxStateProps,
+} from './draw_feature_control';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   const editState = getEditState(state);

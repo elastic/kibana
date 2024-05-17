@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../common/utility_types';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
+import { assertUnreachable } from '../../../../../common/utility_types';
 
 export const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest => {
   switch (flowTarget) {

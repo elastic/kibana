@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
-import { variableSet } from '../var_set';
+import { firstValueFrom } from 'rxjs';
 import { ExecutionContext } from '../../../execution/types';
 import { createUnitTestExecutor } from '../../../test_helpers';
-import { firstValueFrom } from 'rxjs';
+import { variableSet } from '../var_set';
+import { functionWrapper } from './utils';
 
 describe('expression_functions', () => {
   describe('var_set', () => {

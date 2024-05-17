@@ -11,18 +11,18 @@ import type { FC } from 'react';
 import React from 'react';
 
 import {
-  EuiFieldText,
-  EuiSpacer,
-  EuiFormRow,
   EuiCheckbox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { CombinedField } from '../../../common/components/combined_fields';
 import { CombinedFieldsForm } from '../../../common/components/combined_fields';
-import { JsonEditor, EDITOR_MODE } from '../json_editor';
+import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';
 

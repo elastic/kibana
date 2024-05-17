@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { Query, Filter } from '@kbn/es-query';
-import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { Filter, Query } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useAsync from 'react-use/lib/useAsync';
 import {
   LensAttributes,
   LensAttributesBuilder,
+  XYByValueAnnotationsLayer,
   XYChart,
   XYDataLayer,
   XYLayerOptions,
   XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
+import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import React, { useState, useEffect } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { EventsAsUnit } from '../../../../../common/constants';
 import {
   Comparator,
@@ -32,14 +32,14 @@ import {
 } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
-import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 import {
-  lensFieldFormatter,
+  LensFieldFormat,
   getBufferThreshold,
   getLensOperationFromRuleMetric,
   isRate,
-  LensFieldFormat,
+  lensFieldFormatter,
 } from './helpers';
+import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 
 interface ChartOptions {
   seriesType?: SeriesType;
@@ -338,8 +338,8 @@ export function RuleConditionChart({
                   Object.keys(error?.metrics || {}).length !== 0
                     ? 'aggregation fields'
                     : error?.equation
-                    ? 'equation'
-                    : 'conditions',
+                      ? 'equation'
+                      : 'conditions',
               }}
             />
           }

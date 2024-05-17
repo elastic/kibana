@@ -126,16 +126,8 @@
         "architecture": "wtnozeqvub",
         "hostname": "Host-fwarau82er",
         "id": "4260adf9-5e63-445d-92c6-e03359bcd342",
-        "ip": [
-          "10.249.37.72",
-          "10.150.39.243",
-          "10.186.17.170"
-        ],
-        "mac": [
-          "f5-f-97-dc-20-67",
-          "b5-56-ca-98-81-ca",
-          "22-86-39-4c-87-33"
-        ],
+        "ip": ["10.249.37.72", "10.150.39.243", "10.186.17.170"],
+        "mac": ["f5-f-97-dc-20-67", "b5-56-ca-98-81-ca", "22-86-39-4c-87-33"],
         "name": "Host-fwarau82er",
         "os": {
           "Ext": {
@@ -172,11 +164,8 @@
       "kibana.alert.original_time": "2023-04-29T07:17:32.103Z",
       "kibana.alert.reason": "malware event with process malware writer, file fake_malware.exe, on Host-fwarau82er created medium alert Endpoint Security.",
       "kibana.alert.risk_score": 47,
-      "kibana.alert.rule.actions": [
-      ],
-      "kibana.alert.rule.author": [
-        "Elastic"
-      ],
+      "kibana.alert.rule.actions": [],
+      "kibana.alert.rule.author": ["Elastic"],
       "kibana.alert.rule.category": "Custom Query Rule",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.rule.created_at": "2023-04-27T10:58:27.546Z",
@@ -192,21 +181,16 @@
         }
       ],
       "kibana.alert.rule.execution.uuid": "ebf843ff-e0e1-47f8-9ed2-cc8066afbcef",
-      "kibana.alert.rule.false_positives": [
-      ],
+      "kibana.alert.rule.false_positives": [],
       "kibana.alert.rule.from": "now-10m",
       "kibana.alert.rule.immutable": true,
-      "kibana.alert.rule.indices": [
-        "logs-endpoint.alerts-*"
-      ],
+      "kibana.alert.rule.indices": ["logs-endpoint.alerts-*"],
       "kibana.alert.rule.interval": "5m",
       "kibana.alert.rule.license": "Elastic License v2",
       "kibana.alert.rule.max_signals": 10000,
       "kibana.alert.rule.name": "Endpoint Security",
       "kibana.alert.rule.parameters": {
-        "author": [
-          "Elastic"
-        ],
+        "author": ["Elastic"],
         "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
         "exceptions_list": [
           {
@@ -216,19 +200,15 @@
             "type": "endpoint"
           }
         ],
-        "false_positives": [
-        ],
+        "false_positives": [],
         "from": "now-10m",
         "immutable": true,
-        "index": [
-          "logs-endpoint.alerts-*"
-        ],
+        "index": ["logs-endpoint.alerts-*"],
         "language": "kuery",
         "license": "Elastic License v2",
         "max_signals": 10000,
         "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
-        "references": [
-        ],
+        "references": [],
         "related_integrations": [
           {
             "package": "endpoint",
@@ -285,16 +265,14 @@
             "value": "99"
           }
         ],
-        "threat": [
-        ],
+        "threat": [],
         "timestamp_override": "event.ingested",
         "to": "now",
         "type": "query",
         "version": 101
       },
       "kibana.alert.rule.producer": "siem",
-      "kibana.alert.rule.references": [
-      ],
+      "kibana.alert.rule.references": [],
       "kibana.alert.rule.revision": 0,
       "kibana.alert.rule.risk_score": 47,
       "kibana.alert.rule.risk_score_mapping": [
@@ -334,12 +312,8 @@
           "value": "99"
         }
       ],
-      "kibana.alert.rule.tags": [
-        "Elastic",
-        "Endpoint Security"
-      ],
-      "kibana.alert.rule.threat": [
-      ],
+      "kibana.alert.rule.tags": ["Elastic", "Endpoint Security"],
+      "kibana.alert.rule.threat": [],
       "kibana.alert.rule.timestamp_override": "event.ingested",
       "kibana.alert.rule.to": "now",
       "kibana.alert.rule.type": "query",
@@ -353,16 +327,11 @@
       "kibana.alert.url": "http://localhost:5601/app/security/alerts/redirect/eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.906Z",
       "kibana.alert.uuid": "eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1",
       "kibana.alert.workflow_status": "open",
-      "kibana.space_ids": [
-        "default"
-      ],
+      "kibana.space_ids": ["default"],
       "kibana.version": "8.8.0",
       "process": {
         "Ext": {
-          "ancestry": [
-            "qa5jgw1wr7",
-            "5k1hclygc6"
-          ],
+          "ancestry": ["qa5jgw1wr7", "5k1hclygc6"],
           "code_signature": [
             {
               "subject_name": "bad signer",

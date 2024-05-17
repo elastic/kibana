@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 

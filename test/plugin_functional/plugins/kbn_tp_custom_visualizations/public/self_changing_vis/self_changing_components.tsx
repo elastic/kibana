@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
 import { EuiBadge } from '@elastic/eui';
+import React, { useEffect } from 'react';
 
 import { SelfChangingVisParams } from '../self_changing_vis_fn';
 

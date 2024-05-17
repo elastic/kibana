@@ -28,10 +28,10 @@ jest.mock('./dependency_cache', () => {
 import { getTimefilter } from './dependency_cache';
 const timefilter = getTimefilter();
 
+import { render } from '@testing-library/react';
 import d3 from 'd3';
 import moment from 'moment';
 import React from 'react';
-import { render } from '@testing-library/react';
 
 import {
   getChartType,

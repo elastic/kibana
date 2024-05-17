@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -14,15 +12,17 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   Replacements,
 } from '@kbn/elastic-assistant-common';
+import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { getAssistantToolParams } from './helpers';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { getLangSmithTracer } from '../evaluate/utils';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLlmType } from '../utils';
+import { getAssistantToolParams } from './helpers';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds

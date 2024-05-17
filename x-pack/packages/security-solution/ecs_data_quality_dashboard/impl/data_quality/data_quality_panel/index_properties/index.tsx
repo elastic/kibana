@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@elastic/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -16,35 +15,36 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
+import { EcsFlat, EcsVersion } from '@elastic/ecs';
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { formatStorageResult, getSizeInBytes, postStorageResult } from '../../helpers';
+import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import { useAddToNewCase } from '../../use_add_to_new_case';
+import { useMappings } from '../../use_mappings';
+import { useUnallowedValues } from '../../use_unallowed_values';
 import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
+import { useDataQualityContext } from '../data_quality_context';
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
-import {
-  EMPTY_METADATA,
-  getMappingsProperties,
-  getSortedPartitionedFieldMetadata,
-  hasAllDataFetchingCompleted,
-  INCOMPATIBLE_TAB_ID,
-} from './helpers';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
 import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
 import {
   getAllIncompatibleMarkdownComments,
-  getIncompatibleValuesFields,
   getIncompatibleMappingsFields,
+  getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../tabs/incompatible_tab/helpers';
+import {
+  EMPTY_METADATA,
+  INCOMPATIBLE_TAB_ID,
+  getMappingsProperties,
+  getSortedPartitionedFieldMetadata,
+  hasAllDataFetchingCompleted,
+} from './helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
-import { useAddToNewCase } from '../../use_add_to_new_case';
-import { useMappings } from '../../use_mappings';
-import { useUnallowedValues } from '../../use_unallowed_values';
-import { useDataQualityContext } from '../data_quality_context';
-import { formatStorageResult, postStorageResult, getSizeInBytes } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 

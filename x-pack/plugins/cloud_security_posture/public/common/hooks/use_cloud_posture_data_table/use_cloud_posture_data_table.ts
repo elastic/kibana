@@ -1,3 +1,6 @@
+import { CriteriaWithPagination } from '@elastic/eui';
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { BoolQuery, Filter } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +8,13 @@
  * 2.0.
  */
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { BoolQuery, Filter } from '@kbn/es-query';
-import { CriteriaWithPagination } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import { useUrlQuery } from '../use_url_query';
-import { usePageSize } from '../use_page_size';
-import { getDefaultQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 import { FindingsBaseURLQuery } from '../../types';
+import { usePageSize } from '../use_page_size';
+import { useUrlQuery } from '../use_url_query';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
+import { getDefaultQuery } from './utils';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 

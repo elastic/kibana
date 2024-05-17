@@ -7,11 +7,11 @@
 
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../constants';
-import { getMaxPackageName } from '../../../../../../../../common/services';
 import { SO_SEARCH_LIMIT } from '../../../../../../../../common/constants';
-import { packageToPackagePolicy } from '../../../../../services';
+import { getMaxPackageName } from '../../../../../../../../common/services';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../constants';
 import { sendGetPackagePolicies } from '../../../../../hooks';
+import { packageToPackagePolicy } from '../../../../../services';
 
 export const sendGeneratePackagePolicy = async (
   agentPolicyId: string,

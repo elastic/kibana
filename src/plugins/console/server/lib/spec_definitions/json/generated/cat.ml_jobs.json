@@ -1,9 +1,7 @@
 {
   "cat.ml_jobs": {
     "url_params": {
-      "format": [
-        "text"
-      ],
+      "format": ["text"],
       "h": [
         "assignment_explanation",
         "buckets.count",
@@ -68,11 +66,7 @@
       ],
       "help": "__flag__",
       "local": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
+      "master_timeout": ["30s", "-1", "0"],
       "s": [
         "assignment_explanation",
         "buckets.count",
@@ -141,31 +135,11 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "bytes": [
-        "b",
-        "kb",
-        "mb",
-        "gb",
-        "tb",
-        "pb"
-      ],
-      "time": [
-        "nanos",
-        "micros",
-        "ms",
-        "s",
-        "m",
-        "h",
-        "d"
-      ]
+      "bytes": ["b", "kb", "mb", "gb", "tb", "pb"],
+      "time": ["nanos", "micros", "ms", "s", "m", "h", "d"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_cat/ml/anomaly_detectors",
-      "_cat/ml/anomaly_detectors/{job_id}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_cat/ml/anomaly_detectors", "_cat/ml/anomaly_detectors/{job_id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-anomaly-detectors.html",
     "availability": {
       "stack": true,

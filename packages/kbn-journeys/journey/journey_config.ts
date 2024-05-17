@@ -10,10 +10,10 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
 import { Readable } from 'stream';
-import { BaseStepCtx } from './journey';
+import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
 import { SynthtraceClientType } from '../services/synthtrace';
+import { BaseStepCtx } from './journey';
 
 interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }, O = any> {
   type: SynthtraceClientType;
@@ -200,7 +200,7 @@ export class JourneyConfig<CtxExt extends object> {
   }
 
   getExtendedStepCtx(ctx: BaseStepCtx): BaseStepCtx & CtxExt {
-    const ext = this.#opts.extendContext ?? (() => ({} as CtxExt));
+    const ext = this.#opts.extendContext ?? (() => ({}) as CtxExt);
 
     return {
       ...ctx,

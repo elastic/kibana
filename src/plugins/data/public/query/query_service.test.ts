@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from './filter_manager';
-import { QueryStringContract } from './query_string';
-import { getFilter } from './filter_manager/test_helpers/get_stub_filter';
-import { UI_SETTINGS } from '../../common';
 import { coreMock } from '@kbn/core/public/mocks';
+import { FilterStateStore } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { QueryService, QueryStart } from './query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { TimefilterContract } from './timefilter';
+import { UI_SETTINGS } from '../../common';
 import { createNowProviderMock } from '../now_provider/mocks';
+import { FilterManager } from './filter_manager';
+import { getFilter } from './filter_manager/test_helpers/get_stub_filter';
+import { QueryService, QueryStart } from './query_service';
+import { QueryStringContract } from './query_string';
+import { TimefilterContract } from './timefilter';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();

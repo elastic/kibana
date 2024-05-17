@@ -16,8 +16,8 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useEffect } from 'react';
 import {
-  logsExplorerAppTitle,
   logsAppTitle,
+  logsExplorerAppTitle,
   observabilityAppTitle,
 } from '../../common/translations';
 

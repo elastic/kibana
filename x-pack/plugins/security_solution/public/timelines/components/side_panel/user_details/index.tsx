@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import type { UserDetailsProps } from './types';
 import { UserDetailsFlyout } from './user_details_flyout';
 import { UserDetailsSidePanel } from './user_details_side_panel';
-import type { UserDetailsProps } from './types';
 
 const UserDetailsPanelComponent = ({
   contextID,

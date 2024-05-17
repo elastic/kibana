@@ -6,8 +6,8 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export function CrossClusterSearchCompatibilityWarning({ version }: { version: string }) {
   return (

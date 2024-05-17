@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useWorkpadService, usePlatformService } from '../../../services';
-import { getWorkpad } from '../../../state/selectors/workpad';
-import { setWorkpad } from '../../../state/actions/workpad';
+import { CanvasWorkpad } from '../../../../types';
+import { usePlatformService, useWorkpadService } from '../../../services';
+import type { ResolveWorkpadResponse } from '../../../services/workpad';
 // @ts-expect-error
 import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
-import { CanvasWorkpad } from '../../../../types';
-import type { ResolveWorkpadResponse } from '../../../services/workpad';
+import { setWorkpad } from '../../../state/actions/workpad';
+import { getWorkpad } from '../../../state/selectors/workpad';
 
 const getWorkpadLabel = () =>
   i18n.translate('xpack.canvas.workpadResolve.redirectLabel', {

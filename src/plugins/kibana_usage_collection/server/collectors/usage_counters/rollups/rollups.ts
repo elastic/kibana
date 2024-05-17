@@ -10,8 +10,8 @@ import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import moment from 'moment';
 
 import {
-  UsageCountersSavedObject,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  UsageCountersSavedObject,
 } from '@kbn/usage-collection-plugin/server';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 

@@ -9,15 +9,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 import { render, screen } from '@testing-library/react';
 
+import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
-import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 describe('AnalyticsNoDataPageComponent', () => {
   const services = getAnalyticsNoDataPageServicesMock();

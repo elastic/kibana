@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { CasesContextFeatures } from '../../common/ui';
-import type { UseCasesFeatures } from './use_cases_features';
-import { useCasesFeatures } from './use_cases_features';
-import { TestProviders } from './mock/test_providers';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 import { CaseMetricsFeature } from '../../common/types/api';
+import type { CasesContextFeatures } from '../../common/ui';
+import { TestProviders } from './mock/test_providers';
+import type { UseCasesFeatures } from './use_cases_features';
+import { useCasesFeatures } from './use_cases_features';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts

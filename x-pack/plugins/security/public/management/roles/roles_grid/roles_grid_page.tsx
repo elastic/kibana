@@ -29,8 +29,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ConfirmDelete } from './confirm_delete';
-import { PermissionDenied } from './permission_denied';
 import type { StartServices } from '../../..';
 import type { Role } from '../../../../common';
 import {
@@ -42,6 +40,8 @@ import {
 } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import type { RolesAPIClient } from '../roles_api_client';
+import { ConfirmDelete } from './confirm_delete';
+import { PermissionDenied } from './permission_denied';
 
 export interface Props extends StartServices {
   notifications: NotificationsStart;

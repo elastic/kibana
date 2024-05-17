@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { toastAPIErrors } from '../../flash_messages';
 import { getErrorsFromHttpResponse } from '../../flash_messages/handle_api_errors';

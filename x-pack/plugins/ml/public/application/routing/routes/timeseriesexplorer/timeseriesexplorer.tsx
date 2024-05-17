@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlApiContext, useUiSettings } from '../../../contexts/kibana';
-import { getDateFormatTz } from '../../../explorer/explorer_utils';
-import { mlJobService } from '../../../services/job_service';
-import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
-import { useRouteResolver } from '../../use_resolver';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { AnnotationUpdatesService } from '../../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import { getDateFormatTz } from '../../../explorer/explorer_utils';
+import { AnnotationUpdatesService } from '../../../services/annotations_service';
+import { mlJobService } from '../../../services/job_service';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
+import type { MlRoute, PageProps } from '../../router';
+import { PageLoader, createPath } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 
 const TimeSeriesExplorerUrlStateManager = dynamic(async () => ({
   default: (await import('./state_manager')).TimeSeriesExplorerUrlStateManager,

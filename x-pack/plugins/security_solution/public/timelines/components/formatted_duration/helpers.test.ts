@@ -7,8 +7,6 @@
 
 import { getEmptyValue } from '../../../common/components/empty_value';
 import {
-  getFormattedDurationString,
-  getHumanizedDuration,
   ONE_DAY,
   ONE_HOUR,
   ONE_MILLISECOND_AS_NANOSECONDS,
@@ -16,6 +14,8 @@ import {
   ONE_MONTH,
   ONE_SECOND,
   ONE_YEAR,
+  getFormattedDurationString,
+  getHumanizedDuration,
 } from './helpers';
 import * as i18n from './translations';
 

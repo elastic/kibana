@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/protection_notice_supported_endpoint_version';
 import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
+import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/protection_notice_supported_endpoint_version';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { targetTags } from '../../target_tags';
@@ -106,8 +106,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe(`on the ${protection} protections card`, () => {
         let policyInfo: PolicyTestResourceInfo;
         const cardTestSubj:
-          | typeof formTestSubjects['ransomware']
-          | typeof formTestSubjects['malware'] =
+          | (typeof formTestSubjects)['ransomware']
+          | (typeof formTestSubjects)['malware'] =
           formTestSubjects[
             protection as keyof Pick<typeof formTestSubjects, 'malware' | 'ransomware'>
           ];

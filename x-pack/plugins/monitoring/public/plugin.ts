@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   App,
   AppMountParameters,
@@ -16,8 +15,9 @@ import {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
@@ -34,9 +34,9 @@ import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_reject
 import { setConfig } from './external_config';
 import { Legacy } from './legacy_shims';
 import {
+  LegacyMonitoringStartPluginDependencies,
   MonitoringConfig,
   MonitoringStartPluginDependencies,
-  LegacyMonitoringStartPluginDependencies,
 } from './types';
 
 interface MonitoringSetupPluginDependencies {

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import {
   PROCESS_NAME_FIELD,
   UNCOMMON_PROCESSES_TABLE,
 } from '../../../screens/hosts/uncommon_processes';
 import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../screens/table_pagination';
+import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { refreshPage } from '../../../tasks/security_header';
-import { hostsUrl, usersUrl } from '../../../urls/navigation';
-import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
-import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
+import { hostsUrl, usersUrl } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165968
 describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {

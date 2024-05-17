@@ -6,9 +6,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';
 
 export const getProtectionUpdatesNoteQueryKey = (packagePolicyId: string) =>
   `protection-updates-note-${packagePolicyId}`;

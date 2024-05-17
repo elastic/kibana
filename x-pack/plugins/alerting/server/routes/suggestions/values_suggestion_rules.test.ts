@@ -7,8 +7,8 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
-import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
+import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { Observable } from 'rxjs';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { rulesClientMock } from '../../rules_client.mock';

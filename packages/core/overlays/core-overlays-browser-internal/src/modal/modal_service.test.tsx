@@ -8,15 +8,15 @@
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
-import React from 'react';
-import { mount } from 'enzyme';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { ModalService } from './modal_service';
-import type { OverlayModalStart } from '@kbn/core-overlays-browser';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { OverlayModalStart } from '@kbn/core-overlays-browser';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { mount } from 'enzyme';
+import React from 'react';
+import { ModalService } from './modal_service';
 
 const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
 const i18nMock = i18nServiceMock.createStartContract();

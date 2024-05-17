@@ -9,8 +9,8 @@ import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
-import { updateListItem } from './update_list_item';
 import { getListItem } from './get_list_item';
+import { updateListItem } from './update_list_item';
 import { getUpdateListItemOptionsMock } from './update_list_item.mock';
 
 jest.mock('../utils/check_version_conflict', () => ({

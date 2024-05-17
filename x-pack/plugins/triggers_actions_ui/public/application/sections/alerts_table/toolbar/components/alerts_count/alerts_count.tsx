@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 
 const translateUnit = (totalCount: number) =>
   i18n.translate('xpack.triggersActionsUI.alertsTable.alertsCountUnit', {

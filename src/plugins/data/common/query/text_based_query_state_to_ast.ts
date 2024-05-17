@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
   QueryState,
   aggregateQueryToAst,
-  queryToAst,
   filtersToAst,
+  queryToAst,
   timerangeToAst,
 } from '..';
 

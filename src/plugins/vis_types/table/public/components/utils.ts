@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { AggTypes } from '../../common';
 
 const totalAggregations = [

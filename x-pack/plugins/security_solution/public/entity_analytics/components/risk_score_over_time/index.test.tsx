@@ -8,9 +8,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreOverTime } from '.';
-import { TestProviders } from '../../../common/mock';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { TestProviders } from '../../../common/mock';
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 jest.mock('@elastic/charts', () => {

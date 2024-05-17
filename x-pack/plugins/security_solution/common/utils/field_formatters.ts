@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { isEmpty } from 'lodash/fp';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPopover, EuiCopy, EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiCopy, EuiPopover } from '@elastic/eui';
 
 import { StatusItem } from '.';
 

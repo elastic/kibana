@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { ApiKeyBtn } from './api_key_btn';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { render } from '../../../utils/testing';
+import { ApiKeyBtn } from './api_key_btn';
 
 describe('<APIKeyButton />', () => {
   const setLoadAPIKey = jest.fn();

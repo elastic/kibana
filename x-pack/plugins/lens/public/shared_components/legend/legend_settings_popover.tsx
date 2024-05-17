@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import {
-  EuiFormRow,
   EuiButtonGroup,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiFieldNumber,
-  EuiFlexItem,
-  EuiFlexGroup,
 } from '@elastic/eui';
-import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import React from 'react';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
-import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
+import { LegendLocationSettings } from './location/legend_location_settings';
 import { LegendSizeSettings } from './size/legend_size_settings';
 
 export interface LegendSettingsPopoverProps<S = XYLegendValue> {

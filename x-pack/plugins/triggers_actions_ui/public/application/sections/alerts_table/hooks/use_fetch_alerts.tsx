@@ -9,23 +9,23 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { set } from '@kbn/safer-lodash-set';
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
-import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isRunningResponse } from '@kbn/data-plugin/common';
-import type {
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchRequestPagination,
-  RuleRegistrySearchResponse,
-} from '@kbn/rule-registry-plugin/common/search_strategy';
 import type {
   MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type {
+  RuleRegistrySearchRequest,
+  RuleRegistrySearchRequestPagination,
+  RuleRegistrySearchResponse,
+} from '@kbn/rule-registry-plugin/common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
 import { DefaultSort } from './constants';
 
 export interface FetchAlertsArgs {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import url from 'url';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { IBasePath } from '@kbn/core/public';
 import { pick } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import url from 'url';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';

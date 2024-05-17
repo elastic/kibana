@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
+import React, { useState } from 'react';
 
-import { TextStylePicker, StyleProps } from '../text_style_picker';
+import { StyleProps, TextStylePicker } from '../text_style_picker';
 
 const Interactive = () => {
   const [style, setStyle] = useState<StyleProps>({});

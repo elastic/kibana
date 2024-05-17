@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { RenderResult, act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { act, render, RenderResult, screen } from '@testing-library/react';
-import { FormTestProvider } from './test_utils';
 import {
   ConfigFieldSchema,
   SecretsFieldSchema,
   SimpleConnectorForm,
 } from './simple_connector_form';
-import userEvent from '@testing-library/user-event';
+import { FormTestProvider } from './test_utils';
 
 const fillForm = async ({ getByTestId }: RenderResult) => {
   await act(async () => {

@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { timefilter } from '../../../canvas_plugin_src/functions/common/timefilter';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { ISO8601, ELASTICSEARCH, DATEMATH } from '../../constants';
+import { DATEMATH, ELASTICSEARCH, ISO8601 } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {

@@ -7,15 +7,15 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, takeUntil } from 'rxjs';
+import { takeUntil, toArray } from 'rxjs';
 
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 
-import { ToolingLog } from './tooling_log';
-import { Writer } from './writer';
-import { ToolingLogTextWriter } from './tooling_log_text_writer';
-import { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
 import { lastValueFrom } from 'rxjs';
+import { ToolingLog } from './tooling_log';
+import { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
+import { Writer } from './writer';
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 

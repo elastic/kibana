@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
 import {
-  EuiInMemoryTable,
   EuiButton,
+  EuiHealth,
+  EuiInMemoryTable,
   EuiLink,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiHealth,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
-  AutoFollowPatternDeleteProvider,
   AutoFollowPatternActionMenu,
+  AutoFollowPatternDeleteProvider,
 } from '../../../../../components';
+import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectUnsanitizedDoc,
   type AuthorizationTypeMap,
   type SavedObject,
+  type SavedObjectUnsanitizedDoc,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IEncryptionHelper } from './encryption';
 
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;

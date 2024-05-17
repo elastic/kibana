@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { v4 as uuidv4 } from 'uuid';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
+import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
   loadActionErrorLog: jest.fn(),

@@ -9,14 +9,14 @@
  * React popover for adding items to a filter list.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPopover,

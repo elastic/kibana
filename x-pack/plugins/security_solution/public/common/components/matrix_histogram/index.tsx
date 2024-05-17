@@ -8,26 +8,26 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
+import * as i18n from './translations';
 
-import type {
-  MatrixHistogramOption,
-  MatrixHistogramQueryProps,
-  MatrixHistogramConfigs,
-} from './types';
+import { useQueryToggle } from '../../containers/query_toggle';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import type { VisualizationResponse } from '../visualization_actions/types';
-import { useQueryToggle } from '../../containers/query_toggle';
+import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
-import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type {
+  MatrixHistogramConfigs,
+  MatrixHistogramOption,
+  MatrixHistogramQueryProps,
+} from './types';
 
 export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
   MatrixHistogramConfigs & {

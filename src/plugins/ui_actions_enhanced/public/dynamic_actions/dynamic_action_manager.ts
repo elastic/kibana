@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { createStateContainer, StateContainer } from '@kbn/kibana-utils-plugin/common';
+import { StateContainer, createStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { StartContract } from '../plugin';
 import { dynamicActionGrouping } from './dynamic_action_grouping';
-import { defaultState, selectors, State, transitions } from './dynamic_action_manager_state';
+import { State, defaultState, selectors, transitions } from './dynamic_action_manager_state';
 import { ActionStorage } from './dynamic_action_storage';
 import { SerializedAction, SerializedEvent } from './types';
 

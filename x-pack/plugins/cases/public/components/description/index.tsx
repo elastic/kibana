@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
-import * as i18n from '../user_actions/translations';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
-import type { EditableMarkdownRefObject, EuiMarkdownEditorRef } from '../markdown_editor';
-import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import type { EditableMarkdownRefObject, EuiMarkdownEditorRef } from '../markdown_editor';
+import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
+import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import * as i18n from '../user_actions/translations';
 import { schema } from './schema';
 
 const DESCRIPTION_ID = 'description';
@@ -49,21 +49,25 @@ const getFlexGroupCss = ({
 }) => css`
   padding: ${euiTheme.size.s};
   align-items: center;
-  ${!isCollapsed
-    ? css`
+  ${
+    !isCollapsed
+      ? css`
         border-bottom: ${euiTheme.border.thin};
         border-radius: none;
       `
-    : css`
+      : css`
         background: ${euiTheme.colors.lightestShade};
         border-radius: ${euiTheme.border.radius.medium};
-        ${hasUnsavedChanges
-          ? css`
+        ${
+          hasUnsavedChanges
+            ? css`
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
             `
-          : css``}
-      `}
+            : css``
+        }
+      `
+  }
 `;
 
 const getDraftDescription = (

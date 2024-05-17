@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { ObservabilityStatusBoxes } from './observability_status_boxes';
+import { useKibana } from '../../../../utils/kibana_react';
 import { getContent } from './content';
+import { ObservabilityStatusBoxes } from './observability_status_boxes';
 
 export function ObservabilityStatus() {
   const { http, docLinks } = useKibana().services;

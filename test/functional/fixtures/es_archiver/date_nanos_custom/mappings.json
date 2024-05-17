@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "date_nanos_custom_timestamp",
     "mappings": {
       "properties": {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import type { SectionConfig } from './expanded_row_column_view';
 import { ExpandedRowColumnView, Section } from './expanded_row_column_view';

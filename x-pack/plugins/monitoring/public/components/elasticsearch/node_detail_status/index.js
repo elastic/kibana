@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { AlertsStatus } from '../../../alerts/status';
+import { formatMetric } from '../../../lib/format_number';
 import { SummaryStatus } from '../../summary_status';
 import { NodeStatusIcon } from '../node';
-import { formatMetric } from '../../../lib/format_number';
-import { i18n } from '@kbn/i18n';
-import { AlertsStatus } from '../../../alerts/status';
 
 export function NodeDetailStatus({ stats, alerts = {} }) {
   const {

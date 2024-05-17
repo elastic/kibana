@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { unmountComponentAtNode } from 'react-dom';
 import type { SaveProps } from '@kbn/lens-plugin/public/plugin';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import React, { useCallback, useMemo } from 'react';
+import { unmountComponentAtNode } from 'react-dom';
+import { APP_UI_ID, SecurityPageName } from '../../../../common';
 import { useKibana } from '../../lib/kibana';
+import { useGetSecuritySolutionUrl } from '../link_to';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
-import { APP_UI_ID, SecurityPageName } from '../../../../common';
-import { useGetSecuritySolutionUrl } from '../link_to';
 
 export const useSaveToLibrary = ({
   attributes,

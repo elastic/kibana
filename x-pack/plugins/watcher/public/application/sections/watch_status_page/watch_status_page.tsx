@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
-  EuiSpacer,
-  EuiToolTip,
   EuiBadge,
   EuiButtonEmpty,
   EuiPageHeader,
   EuiPageTemplate,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 
-import { listBreadcrumb, statusBreadcrumb } from '../../lib/breadcrumbs';
-import { useLoadWatchDetail, deactivateWatch, activateWatch } from '../../lib/api';
-import { goToWatchList } from '../../lib/navigation';
 import { useAppContext } from '../../app_context';
-import { getPageErrorCode, PageError, SectionLoading, DeleteWatchesModal } from '../../components';
+import { DeleteWatchesModal, PageError, SectionLoading, getPageErrorCode } from '../../components';
+import { activateWatch, deactivateWatch, useLoadWatchDetail } from '../../lib/api';
+import { listBreadcrumb, statusBreadcrumb } from '../../lib/breadcrumbs';
+import { goToWatchList } from '../../lib/navigation';
 
 import { ActionStatusesPanel, ExecutionHistoryPanel } from './components';
 import { WatchDetailsContext } from './watch_details_context';

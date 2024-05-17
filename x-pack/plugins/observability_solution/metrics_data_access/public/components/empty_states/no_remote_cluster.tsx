@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { NoIndices } from './no_indices';
 
 export const NoRemoteCluster = () => {

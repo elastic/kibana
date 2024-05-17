@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import React from 'react';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 

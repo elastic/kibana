@@ -8,16 +8,16 @@
 import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../../types';
-import { ConfigType } from '../../config';
+import { getListClient } from '..';
 import { importListItemRequestQuery, importListItemResponse } from '../../../common/api';
+import { ConfigType } from '../../config';
+import type { ListsPluginRouter } from '../../types';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
-import { getListClient } from '..';
 
 const validFileExtensions = ['.csv', '.txt'];
 

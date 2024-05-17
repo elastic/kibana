@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
-  EuiCode,
   EuiButton,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiSpacer,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { WhatIs } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
+import { WhatIs } from '../../blurbs';
 
 export class ExplainCollectionInterval extends React.Component {
   constructor(props) {
@@ -113,11 +113,7 @@ export class ExplainCollectionInterval extends React.Component {
     );
 
     // prettier-ignore
-    return (
-      <Fragment>
-        {isCollectionIntervalUpdated ? renderSuccess() : renderButton()}
-      </Fragment>
-    );
+    return <Fragment>{isCollectionIntervalUpdated ? renderSuccess() : renderButton()}</Fragment>;
   }
 }
 

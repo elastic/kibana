@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { syntheticsServiceApiKey } from '../saved_objects/service_api_key';
 import {
   getAPIKeyForSyntheticsService,
   getServiceApiKeyPrivileges,
   syntheticsIndex,
 } from './get_api_key';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
-import { syntheticsServiceApiKey } from '../saved_objects/service_api_key';
-import { KibanaRequest } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
 
-import * as authUtils from './authentication/check_has_privilege';
-import { SyntheticsServerSetup } from '../types';
 import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
+import { SyntheticsServerSetup } from '../types';
+import * as authUtils from './authentication/check_has_privilege';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();

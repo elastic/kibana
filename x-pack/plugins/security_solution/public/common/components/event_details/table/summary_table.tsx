@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiInMemoryTable } from '@elastic/eui';
 import type { AnyStyledComponent } from 'styled-components';
 import styled from 'styled-components';
-import { EuiInMemoryTable } from '@elastic/eui';
 
 export const SummaryTable = styled(EuiInMemoryTable as unknown as AnyStyledComponent)`
   .inlineActions {

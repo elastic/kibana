@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { once } from 'lodash';
 
 import type { DocLinksStart } from '@kbn/core/public';
 

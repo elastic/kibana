@@ -8,23 +8,23 @@
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
-  serverMock,
-  requestContextMock,
   createMockConfig,
+  requestContextMock,
+  serverMock,
 } from '../../../../detection_engine/routes/__mocks__';
 
 import {
   mockGetCurrentUser,
-  mockGetTimelineValue,
   mockGetTemplateTimelineValue,
+  mockGetTimelineValue,
 } from '../../../__mocks__/import_timelines';
 import {
+  createTemplateTimelineWithTimelineId,
+  createTemplateTimelineWithoutTimelineId,
+  createTimelineWithTimelineId,
+  createTimelineWithoutTimelineId,
   getCreateTimelinesRequest,
   inputTimeline,
-  createTimelineWithoutTimelineId,
-  createTimelineWithTimelineId,
-  createTemplateTimelineWithoutTimelineId,
-  createTemplateTimelineWithTimelineId,
   updateTemplateTimelineWithTimelineId,
 } from '../../../__mocks__/request_responses';
 import {

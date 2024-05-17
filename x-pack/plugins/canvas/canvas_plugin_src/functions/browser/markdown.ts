@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { compileFnName } from '@kbn/handlebars';
 import {
   Datatable,
+  ExpressionFunctionDefinition,
   Render,
   Style,
-  ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
+import { compileFnName } from '@kbn/handlebars';
 import { getFunctionHelp } from '../../../i18n';
 
 type Context = Datatable | null;

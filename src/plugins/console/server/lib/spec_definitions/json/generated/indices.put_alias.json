@@ -5,25 +5,11 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ]
+      "master_timeout": ["30s", "-1", "0"],
+      "timeout": ["30s", "-1", "0"]
     },
-    "methods": [
-      "PUT",
-      "POST"
-    ],
-    "patterns": [
-      "{index}/_alias/{name}",
-      "{index}/_aliases/{name}"
-    ],
+    "methods": ["PUT", "POST"],
+    "patterns": ["{index}/_alias/{name}", "{index}/_aliases/{name}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html",
     "availability": {
       "stack": true,

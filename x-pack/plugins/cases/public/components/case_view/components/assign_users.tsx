@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
-  EuiHorizontalRule,
+  EuiText,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { CaseAssignees } from '../../../../common/types/domain';
 import type { CasesPermissions } from '../../../../common';
+import type { CaseAssignees } from '../../../../common/types/domain';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import type { CurrentUserProfile } from '../../types';
+import { RemovableUser } from '../../user_profiles/removable_user';
+import type { Assignee } from '../../user_profiles/types';
 import * as i18n from '../translations';
 import { SidebarTitle } from './sidebar_title';
-import { RemovableUser } from '../../user_profiles/removable_user';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import type { Assignee } from '../../user_profiles/types';
 import { SuggestUsersPopover } from './suggest_users_popover';
-import type { CurrentUserProfile } from '../../types';
 
 interface AssigneesListProps {
   assignees: Assignee[];

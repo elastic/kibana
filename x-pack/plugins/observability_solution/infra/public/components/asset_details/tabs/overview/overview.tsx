@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useRef } from 'react';
+import { MetadataErrorCallout } from '../../components/metadata_error_callout';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useDataViewsContext } from '../../hooks/use_data_views';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
+import { AlertsSummaryContent } from './alerts/alerts';
+import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
+import { KPIGrid } from './kpis/kpi_grid';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
 } from './metadata_summary/metadata_summary_list';
-import { AlertsSummaryContent } from './alerts/alerts';
-import { KPIGrid } from './kpis/kpi_grid';
-import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useMetadataStateContext } from '../../hooks/use_metadata_state';
-import { useDataViewsContext } from '../../hooks/use_data_views';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { MetadataErrorCallout } from '../../components/metadata_error_callout';
-import { useIntersectingState } from '../../hooks/use_intersecting_state';
-import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
-import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
+import { ServicesContent } from './services';
 
 export const Overview = () => {
   const ref = useRef<HTMLDivElement>(null);

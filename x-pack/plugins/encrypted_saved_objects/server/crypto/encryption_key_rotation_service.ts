@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
@@ -13,13 +14,12 @@ import type {
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
-import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 
 interface EncryptionKeyRotationServiceOptions {
   logger: Logger;

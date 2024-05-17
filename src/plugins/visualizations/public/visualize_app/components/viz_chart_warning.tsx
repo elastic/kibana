@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { FC } from 'react';
 import { VisualizeServices } from '../types';
 import {
-  CHARTS_WITHOUT_SMALL_MULTIPLES,
   CHARTS_TO_BE_DEPRECATED,
+  CHARTS_WITHOUT_SMALL_MULTIPLES,
 } from '../utils/split_chart_warning_helpers';
 import type {
-  CHARTS_WITHOUT_SMALL_MULTIPLES as CHART_WITHOUT_SMALL_MULTIPLES,
   CHARTS_TO_BE_DEPRECATED as CHART_TO_BE_DEPRECATED,
+  CHARTS_WITHOUT_SMALL_MULTIPLES as CHART_WITHOUT_SMALL_MULTIPLES,
 } from '../utils/split_chart_warning_helpers';
 
 interface Props {

@@ -8,8 +8,8 @@
 /* eslint-disable no-console */
 import fs from 'fs';
 import path from 'path';
-import yargs from 'yargs';
 import { sampleSize } from 'lodash';
+import yargs from 'yargs';
 
 const generateMapping = (fieldsCount: number, numberOfMappedFieldsPerIndex: number) => {
   const properties: { [key: string]: {} } = {

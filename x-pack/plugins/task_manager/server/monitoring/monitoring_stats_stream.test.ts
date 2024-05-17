@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TaskManagerConfig } from '../config';
-import { of, Subject } from 'rxjs';
-import { take, bufferCount } from 'rxjs';
-import { createMonitoringStatsStream } from './monitoring_stats_stream';
 import { JsonValue } from '@kbn/utility-types';
+import { Subject, of } from 'rxjs';
+import { bufferCount, take } from 'rxjs';
+import { TaskManagerConfig } from '../config';
 import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { createMonitoringStatsStream } from './monitoring_stats_stream';
 
 beforeEach(() => {
   jest.resetAllMocks();

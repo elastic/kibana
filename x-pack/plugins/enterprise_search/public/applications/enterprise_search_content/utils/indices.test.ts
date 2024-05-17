@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { connectorIndex, crawlerIndex, apiIndex } from '../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex, crawlerIndex } from '../__mocks__/view_index.mock';
 
 import moment from 'moment';
 
 import {
   ConnectorStatus,
-  SyncStatus,
-  IngestionStatus,
   IngestionMethod,
+  IngestionStatus,
+  SyncStatus,
 } from '@kbn/search-connectors';
 
 import {
@@ -21,12 +21,12 @@ import {
   getIngestionStatus,
   getLastUpdated,
   indexToViewIndex,
-  isConnectorIndex,
-  isCrawlerIndex,
   isApiIndex,
-  isConnectorViewIndex,
-  isCrawlerViewIndex,
   isApiViewIndex,
+  isConnectorIndex,
+  isConnectorViewIndex,
+  isCrawlerIndex,
+  isCrawlerViewIndex,
 } from './indices';
 
 describe('Indices util functions', () => {

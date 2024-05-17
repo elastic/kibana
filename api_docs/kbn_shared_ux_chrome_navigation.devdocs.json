@@ -33,9 +33,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
+            "signature": ["P & { children?: React.ReactNode; }"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -47,9 +45,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -63,9 +59,7 @@
         "type": "Function",
         "tags": [],
         "label": "NavigationKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
-        ],
+        "description": ["\nKibana-specific Provider that maps dependencies to services."],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {
@@ -252,9 +246,7 @@
         "type": "Interface",
         "tags": [],
         "label": "NavigationServices",
-        "description": [
-          "\nA list of services that are consumed by this component."
-        ],
+        "description": ["\nA list of services that are consumed by this component."],
         "path": "packages/shared-ux/chrome/navigation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -266,9 +258,7 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": [
-              "{ prepend: (url: string) => string; }"
-            ],
+            "signature": ["{ prepend: (url: string) => string; }"],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -418,12 +408,8 @@
             "type": "Function",
             "tags": [],
             "label": "closePanel",
-            "description": [
-              "Handler to close the panel"
-            ],
-            "signature": [
-              "() => void"
-            ],
+            "description": ["Handler to close the panel"],
+            "signature": ["() => void"],
             "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -436,9 +422,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "selectedNode",
-            "description": [
-              "The node in the main panel that opens the secondary panel"
-            ],
+            "description": ["The node in the main panel that opens the secondary panel"],
             "signature": [
               "Pick<",
               {
@@ -460,9 +444,7 @@
             "type": "Array",
             "tags": [],
             "label": "activeNodes",
-            "description": [
-              "Jagged array of active nodes that match the current URL location"
-            ],
+            "description": ["Jagged array of active nodes that match the current URL location"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -571,9 +553,7 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
             "deprecated": false,
             "trackAdoption": false

@@ -6,12 +6,12 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { actionsConfigMock } from '../actions_config.mock';
+import { Services } from '../types';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
-import { actionsConfigMock } from '../actions_config.mock';
-import { loggerMock } from '@kbn/logging-mocks';
-import { Services } from '../types';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');

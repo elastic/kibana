@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
+import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
-import { suggest, getSuggestion } from './timelion_expression_input_helpers';
-import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
+import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import { getSuggestion, suggest } from './timelion_expression_input_helpers';
 
 const LANGUAGE_ID = 'timelion_expression';
 monaco.languages.register({ id: LANGUAGE_ID });

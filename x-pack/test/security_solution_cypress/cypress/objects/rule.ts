@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
 import type {
   EqlRuleCreateProps,
   EsqlRuleCreateProps,
@@ -18,6 +16,8 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
+import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { CreateRulePropsRewrites } from './types';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');

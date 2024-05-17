@@ -6,40 +6,40 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
-import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { isEqual, omit } from 'lodash';
+import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
+import { createRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { getRuleNotifyWhenType, validateRuleTypeParams } from '../../../../lib';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
 import {
-  RulesClientContext,
-  NormalizedAlertActionWithGeneratedValues,
-} from '../../../../rules_client/types';
-import {
-  validateActions,
-  extractReferences,
   addGeneratedActionValues,
-  incrementRevision,
   createNewAPIKeySet,
+  extractReferences,
+  incrementRevision,
   migrateLegacyActions,
   updateMetaAttributes,
+  validateActions,
 } from '../../../../rules_client/lib';
+import {
+  NormalizedAlertActionWithGeneratedValues,
+  RulesClientContext,
+} from '../../../../rules_client/types';
+import { RawRule, SanitizedRule } from '../../../../types';
 import { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
-import { createRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 
-import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { updateRuleDataSchema } from './schemas';
 import { RuleAttributes } from '../../../../data/rule/types';
-import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ruleDomainSchema } from '../../schemas';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { ValidateScheduleLimitResult, validateScheduleLimit } from '../get_schedule_frequency';
+import { updateRuleDataSchema } from './schemas';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 

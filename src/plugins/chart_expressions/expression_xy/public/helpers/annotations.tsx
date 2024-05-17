@@ -1,3 +1,5 @@
+import { Position } from '@elastic/charts';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,16 +8,14 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import type {
   IconPosition,
-  ReferenceLineDecorationConfig,
   MergedAnnotation,
+  ReferenceLineDecorationConfig,
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
-import { hasIcon, iconSet } from './icon';
 import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
+import { hasIcon, iconSet } from './icon';
 
 export const LINES_MARKER_SIZE = 20;
 

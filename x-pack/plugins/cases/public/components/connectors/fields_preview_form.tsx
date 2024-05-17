@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo, Suspense } from 'react';
 
+import { getCaseConnectors } from '.';
 import type { ConnectorTypeFields } from '../../../common/types/domain';
 import type { CaseActionConnector } from '../types';
-import { getCaseConnectors } from '.';
 
 interface Props {
   connector: CaseActionConnector | null;

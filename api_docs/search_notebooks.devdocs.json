@@ -85,9 +85,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"searchNotebooks\""
-        ],
+        "signature": ["\"searchNotebooks\""],
         "path": "x-pack/plugins/search_notebooks/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -100,9 +98,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"searchNotebooks\""
-        ],
+        "signature": ["\"searchNotebooks\""],
         "path": "x-pack/plugins/search_notebooks/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

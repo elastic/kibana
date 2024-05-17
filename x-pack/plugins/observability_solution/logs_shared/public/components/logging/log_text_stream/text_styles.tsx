@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 
-import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
+import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TextScale } from '../../../../common/log_text_scale';
 
 export type WrapMode = 'none' | 'pre-wrapped' | 'long';
@@ -77,12 +77,11 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
   }, []);
 
   const CharacterDimensionsProbe = useMemo(
-    () => () =>
-      (
-        <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
-          X
-        </MonospaceCharacterDimensionsProbe>
-      ),
+    () => () => (
+      <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
+        X
+      </MonospaceCharacterDimensionsProbe>
+    ),
     [measureElement, scale]
   );
 

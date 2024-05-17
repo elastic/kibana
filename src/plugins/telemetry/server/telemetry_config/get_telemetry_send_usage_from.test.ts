@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 import type { TelemetrySavedObject } from '../saved_objects';
+import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 
 describe('getTelemetrySendUsageFrom', () => {
   it('returns kibana.yml config when saved object not found', () => {

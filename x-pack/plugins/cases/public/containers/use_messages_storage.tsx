@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useCallback, useMemo } from 'react';
 
 export interface UseMessagesStorage {
   getMessages: (plugin: string) => string[];

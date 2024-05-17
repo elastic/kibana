@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import {
-  EuiToolTip,
-  EuiPopover,
+  EuiBadge,
   EuiButton,
   EuiListGroup,
   EuiListGroupItem,
-  EuiBadge,
-  EuiText,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback } from 'react';
+import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
-import { useAppDataViewContext } from '../hooks/use_app_data_view';
-import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
 interface Props {
   seriesId: number;

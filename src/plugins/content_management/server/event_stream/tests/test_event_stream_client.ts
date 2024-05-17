@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { until } from './util';
 import { EventStreamClient, EventStreamEvent } from '../types';
+import { until } from './util';
 
 export const testEventStreamClient = (clientPromise: Promise<EventStreamClient>) => {
   let now = Date.now();

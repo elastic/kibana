@@ -1,3 +1,16 @@
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,19 +19,6 @@
  * Side Public License, v 1.
  */
 import React, { useState, type FC } from 'react';
-import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiCopy,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiLink,
-  EuiPopover,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
 const LearnMoreLink: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => (
   <EuiLink href={learnMoreUrl}>

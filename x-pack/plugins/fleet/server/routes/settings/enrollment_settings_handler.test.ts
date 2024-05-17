@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { packagePolicyService, agentPolicyService } from '../../services';
+import { agentPolicyService, packagePolicyService } from '../../services';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 
 import {
+  getDownloadSource,
   getFleetServerPolicies,
   hasActiveFleetServersForPolicies,
-  getDownloadSource,
 } from './enrollment_settings_handler';
 
 jest.mock('../../services', () => ({

@@ -1,3 +1,4 @@
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { MaybePromise } from '@kbn/utility-types';
 
 /** @public */

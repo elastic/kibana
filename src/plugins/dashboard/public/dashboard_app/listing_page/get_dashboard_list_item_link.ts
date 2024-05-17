@@ -11,8 +11,8 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   DASHBOARD_APP_ID,
-  createDashboardEditUrl,
   GLOBAL_STATE_STORAGE_KEY,
+  createDashboardEditUrl,
 } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
 

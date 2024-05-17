@@ -48,13 +48,13 @@ import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import { PlaintextStacktrace } from './plaintext_stacktrace';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
+import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { ExceptionStacktrace } from './exception_stacktrace';
+import { PlaintextStacktrace } from './plaintext_stacktrace';
 import { SampleSummary } from './sample_summary';
-import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};

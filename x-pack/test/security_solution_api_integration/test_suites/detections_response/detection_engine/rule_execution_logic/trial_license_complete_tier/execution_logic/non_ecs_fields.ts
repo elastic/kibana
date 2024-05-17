@@ -7,17 +7,17 @@
 
 import expect from 'expect';
 import {
-  getPreviewAlerts,
-  previewRule,
-  dataGeneratorFactory,
-  enhanceDocument,
-} from '../../../../utils';
-import {
-  deleteAllRules,
   deleteAllAlerts,
+  deleteAllRules,
   getRuleForAlertTesting,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import {
+  dataGeneratorFactory,
+  enhanceDocument,
+  getPreviewAlerts,
+  previewRule,
+} from '../../../../utils';
 
 const getQueryRule = (docIdToQuery: string) => ({
   ...getRuleForAlertTesting(['ecs_non_compliant']),

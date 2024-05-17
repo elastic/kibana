@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import clearAllApiKeys from './api_keys_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import clearAllApiKeys from './api_keys_helpers';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');

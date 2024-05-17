@@ -7,8 +7,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 
 interface UseAlertByIdsOptions {
   alertIds: string[];

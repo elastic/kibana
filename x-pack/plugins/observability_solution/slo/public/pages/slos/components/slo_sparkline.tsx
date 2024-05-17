@@ -16,8 +16,8 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
-import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';

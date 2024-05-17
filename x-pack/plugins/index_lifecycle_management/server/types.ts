@@ -8,10 +8,10 @@
 import { IRouter } from '@kbn/core/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
-import { License } from './services';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { IndexLifecycleManagementConfig } from './config';
+import { License } from './services';
 import { handleEsError } from './shared_imports';
 
 export interface Dependencies {

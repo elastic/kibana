@@ -1,3 +1,4 @@
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,22 +6,21 @@
  * 2.0.
  */
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AgentPolicy,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
-import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
 import { AGENTLESS_POLICY_ID } from '@kbn/fleet-plugin/common/constants';
+import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
+import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import type {
-  CloudbeatConfigKeyType,
   CloudSecurityInstallationStats,
+  CloudbeatConfigKeyType,
   SetupAccessOption,
 } from './types';
-import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
 
 interface CredentialMappings {
   'gcp.credentials.file': 'credentials file';

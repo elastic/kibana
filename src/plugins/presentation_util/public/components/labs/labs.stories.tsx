@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { action } from '@storybook/addon-actions';
+import React from 'react';
 
 import { LabsBeakerButton } from './labs_beaker_button';
 import { LabsFlyout } from './labs_flyout';

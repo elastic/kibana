@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   KibanaThemeProvider as KbnThemeProvider,
   KibanaThemeProviderProps as KbnThemeProviderProps,
   wrapWithTheme as kbnWrapWithTheme,
 } from '@kbn/react-kibana-context-theme';
+import React from 'react';
 
 /** @deprecated Use `KibanaThemeProviderProps` from `@kbn/react-kibana-context-theme`  */
 export type KibanaThemeProviderProps = Pick<KbnThemeProviderProps, 'children' | 'modify'> &

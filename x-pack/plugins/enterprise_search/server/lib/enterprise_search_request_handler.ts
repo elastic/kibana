@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import fetch, { Response } from 'node-fetch';
 import querystring from 'querystring';
+import fetch, { Response } from 'node-fetch';
 
 import {
-  RequestHandler,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  RequestHandler,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 
 import { ConfigType } from '..';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
-  JSON_HEADER,
   ERROR_CONNECTING_HEADER,
+  JSON_HEADER,
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 

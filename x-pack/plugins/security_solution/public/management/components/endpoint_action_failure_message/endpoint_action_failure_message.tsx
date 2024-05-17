@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo } from 'react';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
+import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
 
 interface EndpointActionFailureMessageProps {
   action: MaybeImmutable<ActionDetails>;

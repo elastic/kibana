@@ -12,13 +12,13 @@ import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '.';
 import {
-  ElasticsearchConnectionStatus,
   ERROR_COMPATIBILITY_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
   ERROR_ENROLL_FAILURE,
   ERROR_KIBANA_CONFIG_FAILURE,
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
+  ElasticsearchConnectionStatus,
 } from '../../common';
 import { CompatibilityError } from '../compatibility_error';
 import { ElasticsearchService } from '../elasticsearch_service';

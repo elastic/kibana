@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import {
-  EuiSpacer,
-  EuiTitle,
+  EuiCodeBlock,
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
-  EuiCodeBlock,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { Fragment } from 'react';
 
-import { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
-import { replaceTokens } from './lib/replace_tokens';
-import { isInSetupMode } from '../lib/setup_mode';
+import { AlertMessage, CommonAlert, CommonAlertState } from '../../common/types/alerts';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
+import { isInSetupMode } from '../lib/setup_mode';
 import { AlertConfiguration } from './configuration';
+import { replaceTokens } from './lib/replace_tokens';
 
 interface Props {
   alert: CommonAlert;

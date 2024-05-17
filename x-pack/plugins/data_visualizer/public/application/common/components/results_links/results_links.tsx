@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import { flatten } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
+import { flatten } from 'lodash';
+import moment from 'moment';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ResultLinks } from '../../../../../common/app';
-import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { LinkCardProps } from '../link_card/link_card';
 
 type LinkType = 'file' | 'index';
 

@@ -6,36 +6,36 @@
  */
 
 import 'cypress-real-events/support';
-import { checkA11y } from '../../support/commands';
-import { FLEET, navigateTo } from '../../tasks/navigation';
 import {
-  AGENT_FLYOUT,
-  GENERATE_FLEET_SERVER_POLICY_BUTTON,
-  PLATFORM_TYPE_LINUX_BUTTON,
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
-  AGENT_POLICIES_TAB,
+  AGENT_FLYOUT,
   AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT,
-  AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD,
   AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER,
+  AGENT_POLICIES_TAB,
+  AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD,
   AGENT_POLICY_FLYOUT_CREATE_BUTTON,
-  ENROLLMENT_TOKENS_TAB,
-  ENROLLMENT_TOKENS,
   DATA_STREAMS_TAB,
-  SETTINGS_TAB,
-  SETTINGS_FLEET_SERVER_HOST_HEADING,
+  ENROLLMENT_TOKENS,
+  ENROLLMENT_TOKENS_TAB,
   FLEET_SERVER_SETUP,
+  GENERATE_FLEET_SERVER_POLICY_BUTTON,
   LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
-  UNINSTALL_TOKENS_TAB,
+  PLATFORM_TYPE_LINUX_BUTTON,
+  SETTINGS_FLEET_SERVER_HOST_HEADING,
+  SETTINGS_TAB,
   UNINSTALL_TOKENS,
+  UNINSTALL_TOKENS_TAB,
 } from '../../screens/fleet';
 import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
+import { checkA11y } from '../../support/commands';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 import { setFleetServerHost } from '../../tasks/fleet_server';
+import { FLEET, navigateTo } from '../../tasks/navigation';
 
 import { API_VERSIONS } from '../../../common/constants';
-import { login } from '../../tasks/login';
 import { request } from '../../tasks/common';
+import { login } from '../../tasks/login';
 
 describe('Home page', () => {
   before(() => {

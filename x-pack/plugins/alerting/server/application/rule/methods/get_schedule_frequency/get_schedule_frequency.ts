@@ -1,3 +1,5 @@
+import { convertDurationToFrequency } from '../../../../../common/parse_duration';
+import { RulesClientContext } from '../../../../rules_client/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +7,9 @@
  * 2.0.
  */
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain } from '../../types';
-import { convertDurationToFrequency } from '../../../../../common/parse_duration';
-import { GetScheduleFrequencyResult } from './types';
 import { getSchemaFrequencyResultSchema } from './schema';
+import { GetScheduleFrequencyResult } from './types';
 
 export interface SchedulesIntervalAggregationResult {
   schedule_intervals: {

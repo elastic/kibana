@@ -14,10 +14,10 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 
-import { InputResetLink } from './reset_link';
 import { ChangeImageLink } from './change_image_link';
-import { FieldOverriddenMessage } from './overridden_message';
 import { useInputFooterStyles } from './input_footer.styles';
+import { FieldOverriddenMessage } from './overridden_message';
+import { InputResetLink } from './reset_link';
 
 export const DATA_TEST_SUBJ_FOOTER_PREFIX = 'field-row-input-footer';
 

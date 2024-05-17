@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import React, { FC, PropsWithChildren } from 'react';
 
 interface IndexHeaderProps {
   indexPattern: DataView;

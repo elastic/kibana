@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiBadge, EuiInMemoryTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { i18n } from '@kbn/i18n';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { HelpIcon } from '../../components/help_icon';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import type { IngestStatsResponse } from './pipelines';
-import { HelpIcon } from '../../components/help_icon';
 
 interface ProcessorsStatsProps {
   stats: Exclude<IngestStatsResponse, undefined>['pipelines'][string]['processors'];

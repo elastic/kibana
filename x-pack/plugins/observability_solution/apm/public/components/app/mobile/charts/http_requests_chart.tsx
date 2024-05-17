@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
-import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 
 const INITIAL_STATE = {
   currentPeriod: { timeseries: [] },

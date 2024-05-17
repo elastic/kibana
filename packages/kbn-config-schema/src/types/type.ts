@@ -7,8 +7,8 @@
  */
 
 import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
+import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 import { Reference } from '../references';
 
 /**

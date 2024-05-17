@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 
-import { Tooltip } from './tooltip';
 import { CaseStatuses } from '../status/types';
+import { Tooltip } from './tooltip';
 import type { CaseTooltipContentProps, CaseTooltipProps } from './types';
 
 const elasticUser = {

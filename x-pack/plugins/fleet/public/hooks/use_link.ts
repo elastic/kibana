@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { pagePathGetters, PLUGIN_ID } from '../constants';
-import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
+import { PLUGIN_ID, pagePathGetters } from '../constants';
+import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../constants';
 
 import { useStartServices } from '.';
 

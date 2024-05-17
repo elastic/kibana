@@ -5,43 +5,35 @@
  * 2.0.
  */
 
-import {
-  SENTINELONE_CONNECTOR_ID,
-  SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { groupBy } from 'lodash';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type {
-  SentinelOneGetActivitiesParams,
-  SentinelOneGetActivitiesResponse,
-  SentinelOneGetAgentsParams,
-  SentinelOneGetAgentsResponse,
-  SentinelOneDownloadAgentFileParams,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { Readable } from 'stream';
 import type {
   QueryDslQueryContainer,
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Readable } from 'stream';
-import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type {
-  NormalizedExternalConnectorClient,
-  NormalizedExternalConnectorClientExecuteOptions,
-} from '../lib/normalized_external_connector_client';
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetActivitiesResponse,
+  SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import { groupBy } from 'lodash';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
-import { catchAndWrapError } from '../../../../utils';
 import type {
-  CommonResponseActionMethodOptions,
-  GetFileDownloadMethodResponse,
-  ProcessPendingActionsMethodOptions,
-} from '../lib/types';
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { stringify } from '../../../../utils/stringify';
-import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
@@ -59,17 +51,25 @@ import type {
   SentinelOneIsolationResponseMeta,
   UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
-import type {
-  IsolationRouteRequestBody,
-  ResponseActionGetFileRequestBody,
-} from '../../../../../../common/api/endpoint';
+import { catchAndWrapError } from '../../../../utils';
+import { stringify } from '../../../../utils/stringify';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
+import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
-import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  NormalizedExternalConnectorClient,
+  NormalizedExternalConnectorClientExecuteOptions,
+} from '../lib/normalized_external_connector_client';
+import type {
+  CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
+  ProcessPendingActionsMethodOptions,
+} from '../lib/types';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -88,7 +88,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async handleResponseActionCreation<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -130,7 +130,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,

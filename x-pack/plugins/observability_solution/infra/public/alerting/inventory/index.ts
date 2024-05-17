@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import React from 'react';
 import {
   InventoryMetricConditions,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,

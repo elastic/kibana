@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import {
   UseEuiTheme,
+  euiBackgroundColor,
+  euiFontSize,
+  euiScrollBarStyles,
   logicalCSS,
   mathWithUnits,
-  euiScrollBarStyles,
-  euiFontSize,
-  euiBackgroundColor,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 // Note that these are globally-set styles, due to vega_base_view being vanilla JS/non-React
 export const vegaBaseViewStyles = (euiThemeContext: UseEuiTheme) => {

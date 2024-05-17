@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import type {
   PackagePolicyResponseExtensionComponent,
   PackagePolicyResponseExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
+import { lazy } from 'react';
 import type { FleetUiExtensionGetterOptions } from './types';
 
 export const getLazyEndpointPolicyResponseExtension = ({

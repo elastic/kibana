@@ -9,6 +9,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import type { Props } from '.';
+import { AlertsTreemapPanel } from '.';
 import { SecurityPageName } from '../../../../common/constants';
 import {
   DEFAULT_STACK_BY_FIELD,
@@ -19,8 +21,6 @@ import { ChartContextMenu } from '../../../detections/pages/detection_engine/cha
 import { ChartSelect } from '../../../detections/pages/detection_engine/chart_panels/chart_select';
 import { TREEMAP } from '../../../detections/pages/detection_engine/chart_panels/chart_select/translations';
 import { TestProviders } from '../../mock/test_providers';
-import type { Props } from '.';
-import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from '../alerts_treemap/lib/mocks/mock_alert_search_response';
 
 const from = '2022-07-28T08:20:18.966Z';

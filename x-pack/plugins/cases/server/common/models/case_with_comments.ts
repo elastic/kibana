@@ -19,31 +19,31 @@ import type {
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
+  AttachmentType,
   CaseRt,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
-  AttachmentType,
 } from '../../../common/types/domain';
 
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import type { AttachmentPatchRequest, AttachmentRequest } from '../../../common/types/api';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
 import { AttachmentLimitChecker } from '../limiter_checker';
+import { decodeOrThrow } from '../runtime_types';
 import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
-  transformNewComment,
-  getOrUpdateLensReferences,
-  isCommentRequestTypeAlert,
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
+  getOrUpdateLensReferences,
+  isCommentRequestTypeAlert,
+  transformNewComment,
 } from '../utils';
-import { decodeOrThrow } from '../runtime_types';
-import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;

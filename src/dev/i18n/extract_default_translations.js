@@ -10,7 +10,7 @@ import path from 'path';
 import globby from 'globby';
 
 import { extractCodeMessages } from './extractors';
-import { readFileAsync, normalizePath } from './utils';
+import { normalizePath, readFileAsync } from './utils';
 
 import { createFailError, isFailError } from '@kbn/dev-cli-errors';
 

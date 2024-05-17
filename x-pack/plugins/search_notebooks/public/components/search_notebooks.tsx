@@ -1,3 +1,5 @@
+import { EuiFlexGroup, EuiFlexItem, EuiResizableContainer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +7,14 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { INTRODUCTION_NOTEBOOK } from '../../common/constants';
 import { useNotebooksCatalog } from '../hooks/use_notebook_catalog';
 import { NotebooksList } from './notebooks_list';
+import { SearchLabsButtonPanel } from './search_labs_button_panel';
+import { SearchNotebook } from './search_notebook';
 import { SelectionPanel } from './selection_panel';
 import { TitlePanel } from './title_panel';
-import { SearchNotebook } from './search_notebook';
-import { SearchLabsButtonPanel } from './search_labs_button_panel';
 
 const LIST_PANEL_ID = 'notebooksList';
 const OUTPUT_PANEL_ID = 'notebooksOutput';

@@ -7,9 +7,9 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { getAllEndpointPackagePolicies } from './endpoint_package_policies';
 
 describe('endpoint_package_policies', () => {

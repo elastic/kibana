@@ -8,8 +8,8 @@ import React from 'react';
 
 import { EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { MonitorStatus, STATUS_LABEL } from '../common/components/monitor_status';
-import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
+import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export const MonitorDetailsStatus = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();

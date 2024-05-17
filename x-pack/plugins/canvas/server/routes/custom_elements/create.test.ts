@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { AwaitedProperties } from '@kbn/utility-types';
-import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
-import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
-import { initializeCreateCustomElementRoute } from './create';
 import {
-  kibanaResponseFactory,
-  RequestHandlerContext,
   RequestHandler,
+  RequestHandlerContext,
   SavedObjectsErrorHelpers,
+  kibanaResponseFactory,
 } from '@kbn/core/server';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { AwaitedProperties } from '@kbn/utility-types';
+import sinon from 'sinon';
+import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { getMockedRouterDeps } from '../test_helpers';
+import { initializeCreateCustomElementRoute } from './create';
 
 const mockRouteContext = {
   core: {

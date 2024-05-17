@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback } from 'react';
 
-import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
+import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 
 const aggFilter = [
   '!top_hits',

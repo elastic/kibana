@@ -15,8 +15,8 @@ import type { TransformConfigUnion } from '../../../../../../common/types/transf
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import { getTransformConfigQuery } from '../../../../common';
-import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import type { SearchItems } from '../../../../hooks/use_search_items';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 
 import {
   applyTransformConfigToDefineState,

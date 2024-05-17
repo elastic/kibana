@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { getApmConfig } from './get_apm_config';
 import {
-  getConfigurationMock,
   agentMock,
+  getConfigurationMock,
   shouldInstrumentClientMock,
 } from './get_apm_config.test.mocks';
-import { getApmConfig } from './get_apm_config';
 
 const defaultApmConfig = {
   active: true,

@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { set } from '@kbn/safer-lodash-set';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { set } from '@kbn/safer-lodash-set';
 import { ContentStream } from './content_stream';
 
 describe('ContentStream', () => {

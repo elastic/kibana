@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
+import React from 'react';
 
-import { TestProviders } from '../../common/mock';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CasesTimelineIntegrationProvider } from '../timeline_context';
-import { timelineIntegrationMock } from '../__mock__/timeline';
-import { getFormMock } from '../__mock__/form';
 import { InsertTimeline } from '.';
+import { TestProviders } from '../../common/mock';
+import { getFormMock } from '../__mock__/form';
+import { timelineIntegrationMock } from '../__mock__/timeline';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');

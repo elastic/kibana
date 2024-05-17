@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import _ from 'lodash';
 import sinon from 'sinon';
-import { Filter, FilterStateStore } from '@kbn/es-query';
 
 import { Subscription } from 'rxjs';
-import { FilterManager } from './filter_manager';
-import { getFilter } from './test_helpers/get_stub_filter';
-import { getFiltersArray } from './test_helpers/get_filters_array';
 import { UI_SETTINGS } from '../../../common';
+import { FilterManager } from './filter_manager';
+import { getFiltersArray } from './test_helpers/get_filters_array';
+import { getFilter } from './test_helpers/get_stub_filter';
 
 import { coreMock } from '@kbn/core/public/mocks';
 const setupMock = coreMock.createSetup();

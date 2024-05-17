@@ -7,17 +7,17 @@
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../constants';
 import type {
+  EqlRuleCreateProps,
+  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   MachineLearningRuleUpdateProps,
+  NewTermsRuleCreateProps,
+  NewTermsRuleUpdateProps,
   QueryRuleCreateProps,
   QueryRuleUpdateProps,
-  EsqlRuleCreateProps,
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-  NewTermsRuleCreateProps,
-  NewTermsRuleUpdateProps,
-  EqlRuleCreateProps,
 } from './rule_schemas.gen';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({

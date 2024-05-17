@@ -7,11 +7,11 @@
 
 import { EcsFlat, EcsVersion } from '@elastic/ecs';
 
-import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { EMPTY_STAT } from '../../../../helpers';
 import { mockMappingsResponse } from '../../../../mock/mappings_response/mock_mappings_response';
 import { mockUnallowedValuesResponse } from '../../../../mock/unallowed_values/mock_unallowed_values';
 import { EcsMetadata, UnallowedValueRequestItem } from '../../../../types';
+import { EMPTY_PARTITIONED_FIELD_METADATA, checkIndex } from './check_index';
 
 const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;
 

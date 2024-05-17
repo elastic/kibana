@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
+import { formatSingleValue, kibanaFieldFormat } from '../../../utils';
 import type { FieldVisConfig } from '../../types';
-import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
+import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 100;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 10;

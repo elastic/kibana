@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 describe('TelemetrySavedObjectsClient', () => {
   test("find requests are extended with `namespaces:['*']`", async () => {

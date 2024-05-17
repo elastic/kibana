@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { KbnClient } from '@kbn/test';
-import type { AxiosError } from 'axios';
-import pMap from 'p-map';
 import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
@@ -23,9 +20,12 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
+import { KbnClient } from '@kbn/test';
+import type { AxiosError } from 'axios';
+import pMap from 'p-map';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { isArtifactByPolicy } from '../../../common/endpoint/service/artifacts';
+import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
 export const cli = () => {
   run(
@@ -56,7 +56,10 @@ export const cli = () => {
 };
 
 class EventFilterDataLoaderError extends Error {
-  constructor(message: string, public readonly meta: unknown) {
+  constructor(
+    message: string,
+    public readonly meta: unknown
+  ) {
     super(message);
   }
 }

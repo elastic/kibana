@@ -641,9 +641,7 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": [
-                  "{ routerPath?: string | undefined; }"
-                ],
+                "signature": ["{ routerPath?: string | undefined; }"],
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -682,10 +680,7 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": [
-                  "RequestFixtureOptions",
-                  "<P, Q, B>"
-                ],
+                "signature": ["RequestFixtureOptions", "<P, Q, B>"],
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
-import type { Location } from 'history';
 import type { EuiThemeSizes, IconType } from '@elastic/eui';
-import type { Observable } from 'rxjs';
-import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
   DeepLinkId as AnalyticsDeepLink,
 } from '@kbn/deeplinks-analytics';
-import type { AppId as MlApp, DeepLinkId as MlLink } from '@kbn/deeplinks-ml';
+import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
+import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type {
   AppId as ManagementApp,
   DeepLinkId as ManagementLink,
 } from '@kbn/deeplinks-management';
-import type {
-  EnterpriseSearchApp,
-  EnterpriseSearchContentApp,
-  EnterpriseSearchApplicationsApp,
-  EnterpriseSearchAnalyticsApp,
-  EnterpriseSearchAppsearchApp,
-  EnterpriseSearchWorkplaceSearchApp,
-  ServerlessSearchApp,
-  DeepLinkId as SearchLink,
-} from '@kbn/deeplinks-search';
+import type { AppId as MlApp, DeepLinkId as MlLink } from '@kbn/deeplinks-ml';
 import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
+import type {
+  EnterpriseSearchAnalyticsApp,
+  EnterpriseSearchApp,
+  EnterpriseSearchApplicationsApp,
+  EnterpriseSearchAppsearchApp,
+  EnterpriseSearchContentApp,
+  EnterpriseSearchWorkplaceSearchApp,
+  DeepLinkId as SearchLink,
+  ServerlessSearchApp,
+} from '@kbn/deeplinks-search';
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
-import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
+import type { Location } from 'history';
+import type { ComponentType } from 'react';
+import type { Observable } from 'rxjs';
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
@@ -104,7 +104,10 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
-export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
+export type EuiThemeSize = Exclude<
+  (typeof EuiThemeSizes)[number],
+  'base' | 'xxs' | 'xxxl' | 'xxxxl'
+>;
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -266,7 +269,7 @@ export interface ChromeSetProjectBreadcrumbsParams {
 export interface NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id?: Id;
@@ -289,7 +292,7 @@ export interface NodeDefinition<
 export type NodeDefinitionWithChildren<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenID extends string = Id
+  ChildrenID extends string = Id,
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
@@ -324,7 +327,7 @@ export interface RecentlyAccessedDefinition {
 export interface GroupDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navGroup';
   children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
@@ -338,7 +341,7 @@ export interface GroupDefinition<
 export interface PresetDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
   type: 'preset';
   preset: NavigationGroupPreset;
@@ -352,7 +355,7 @@ export interface PresetDefinition<
 export interface ItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navItem';
 }
@@ -365,7 +368,7 @@ export interface ItemDefinition<
 export type RootNavigationItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > =
   | RecentlyAccessedDefinition
   | GroupDefinition<LinkId, Id, ChildrenId>
@@ -380,7 +383,7 @@ export type RootNavigationItemDefinition<
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > {
   /**
    * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"

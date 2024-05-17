@@ -8,9 +8,9 @@
 import { createAction } from 'redux-actions';
 import {
   GetPingHistogramParams,
+  GetPingsParams,
   HistogramResult,
   PingsResponse,
-  GetPingsParams,
 } from '../../../../common/runtime_types';
 import { createAsyncAction } from './utils';
 

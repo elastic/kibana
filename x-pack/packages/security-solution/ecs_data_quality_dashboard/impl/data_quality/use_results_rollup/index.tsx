@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@elastic/ecs';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { isEmpty } from 'lodash/fp';
 import {
@@ -19,24 +19,24 @@ import {
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type { DataQualityCheckResult, OnCheckCompleted, PatternRollup } from '../types';
-import {
-  getDocsCount,
-  getIndexId,
-  getStorageResults,
-  getSizeInBytes,
-  getTotalPatternSameFamily,
-  postStorageResult,
-  formatStorageResult,
-  formatResultFromStorage,
-} from '../helpers';
-import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
+import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../data_quality_panel/tabs/incompatible_tab/helpers';
+import {
+  formatResultFromStorage,
+  formatStorageResult,
+  getDocsCount,
+  getIndexId,
+  getSizeInBytes,
+  getStorageResults,
+  getTotalPatternSameFamily,
+  postStorageResult,
+} from '../helpers';
+import type { DataQualityCheckResult, OnCheckCompleted, PatternRollup } from '../types';
 
 interface Props {
   ilmPhases: string[];

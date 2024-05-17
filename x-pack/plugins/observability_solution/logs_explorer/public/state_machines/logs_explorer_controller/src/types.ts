@@ -8,17 +8,17 @@
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type {
+  DataDocumentsMsg,
   DiscoverAppState,
   DiscoverStateContainer,
-  DataDocumentsMsg,
 } from '@kbn/discover-plugin/public';
-import { DoneInvokeEvent } from 'xstate';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { DoneInvokeEvent } from 'xstate';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
-  DatasetSelection,
   DataSourceSelection,
   DataViewSelection,
+  DatasetSelection,
 } from '../../../../common/data_source_selection';
 
 export interface WithDataSourceSelection {

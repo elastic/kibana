@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { Location } from 'history';
 import { EuiFlexItem } from '@elastic/eui';
+import type { Location } from 'history';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import * as i18nIp from '../details/translations';
 
-import { FlowTargetSelect } from '../flow_controls/flow_target_select';
-import { IpOverviewId } from '../../../../timelines/components/field_renderers/field_renderers';
 import type { FlowTarget, FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { FlowDirection } from '../../../../../common/search_strategy';
+import { IpOverviewId } from '../../../../timelines/components/field_renderers/field_renderers';
+import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CasesClientMock } from '../../mocks';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { AlertDetails } from './details';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { mockAlertsService } from '../test_utils/alerts';
 import type { SingleCaseBaseHandlerCommonOptions } from '../types';
-import { CaseMetricsFeature } from '../../../../common/types/api';
+import { AlertDetails } from './details';
 
 describe('AlertDetails', () => {
   let client: CasesClientMock;

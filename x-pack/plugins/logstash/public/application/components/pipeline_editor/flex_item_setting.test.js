@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { FlexItemSetting } from './flex_item_setting';
 
 describe('FlexItemSetting component', () => {

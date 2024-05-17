@@ -1,22 +1,22 @@
+import { Rule } from '@kbn/alerting-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect } from 'react';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getTransactionType } from '../../context/apm_service/apm_service_context';
-import { useServiceTransactionTypesFetcher } from '../../context/apm_service/use_service_transaction_types_fetcher';
-import { useServiceAgentFetcher } from '../../context/apm_service/use_service_agent_fetcher';
-import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
-import { useTimeRange } from '../../hooks/use_time_range';
-import { getComparisonChartTheme } from '../../components/shared/time_comparison/get_comparison_chart_theme';
-import { getAggsTypeFromRule } from '../../components/alerting/ui_components/alert_details_app_section/helpers';
-import { getTimeZone } from '../../components/shared/charts/helper/timezone';
+import { useEffect, useState } from 'react';
 import { ApmDocumentType } from '../../../common/document_type';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { getAggsTypeFromRule } from '../../components/alerting/ui_components/alert_details_app_section/helpers';
+import { getTimeZone } from '../../components/shared/charts/helper/timezone';
+import { getComparisonChartTheme } from '../../components/shared/time_comparison/get_comparison_chart_theme';
+import { getTransactionType } from '../../context/apm_service/apm_service_context';
+import { useServiceAgentFetcher } from '../../context/apm_service/use_service_agent_fetcher';
+import { useServiceTransactionTypesFetcher } from '../../context/apm_service/use_service_transaction_types_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 export function useAlertingProps({
   rule,

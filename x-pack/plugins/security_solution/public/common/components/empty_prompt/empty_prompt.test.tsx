@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { EmptyPromptComponent } from './empty_prompt';
+import React from 'react';
 import { SecurityPageName } from '../../../../common';
 import { useNavigateTo } from '../../lib/kibana';
 import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
+import { EmptyPromptComponent } from './empty_prompt';
 
 const mockNavigateTo = jest.fn();
 const mockUseNavigateTo = useNavigateTo as jest.Mock;

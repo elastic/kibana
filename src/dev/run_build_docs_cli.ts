@@ -8,10 +8,10 @@
 
 import Path from 'path';
 
-import dedent from 'dedent';
-import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import dedent from 'dedent';
 
 const DEFAULT_DOC_REPO_PATH = Path.resolve(REPO_ROOT, '..', 'docs');
 

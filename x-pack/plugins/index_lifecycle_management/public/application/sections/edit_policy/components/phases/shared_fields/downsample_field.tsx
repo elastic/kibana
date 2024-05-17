@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor } from '@elastic/eui';
-import { UnitField } from './unit_field';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { PhaseWithDownsample } from '../../../../../../../common/types';
+import { NumericField } from '../../../../../../shared_imports';
 import { timeUnits } from '../../../constants';
 import { UseField } from '../../../form';
-import { NumericField } from '../../../../../../shared_imports';
-import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
 // import { LearnMoreLink } from '../../learn_more_link';
 import { i18nTexts } from '../../../i18n_texts';
-import { PhaseWithDownsample } from '../../../../../../../common/types';
+import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
+import { UnitField } from './unit_field';
 
 interface Props {
   phase: PhaseWithDownsample;

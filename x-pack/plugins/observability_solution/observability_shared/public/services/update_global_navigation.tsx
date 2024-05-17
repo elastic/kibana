@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import { AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
+import { AppDeepLink, AppUpdater, ApplicationStart } from '@kbn/core/public';
+import { Subject } from 'rxjs';
 import { casesFeatureId } from '../../common';
 
 export function updateGlobalNavigation({

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

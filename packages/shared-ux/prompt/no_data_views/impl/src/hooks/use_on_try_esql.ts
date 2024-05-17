@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState } from 'react';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { useEffect, useState } from 'react';
 
-import { NavigateToAppFn, LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { LocatorClient, NavigateToAppFn } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 export interface UseOnTryEsqlParams {
   locatorClient?: LocatorClient;

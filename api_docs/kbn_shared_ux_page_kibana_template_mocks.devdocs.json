@@ -53,9 +53,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -67,9 +65,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -260,9 +256,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -453,9 +447,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -644,9 +636,7 @@
                 "tags": [],
                 "label": "Unnamed",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -672,9 +662,7 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": [
-              "never[]"
-            ],
+            "signature": ["never[]"],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -786,10 +774,7 @@
         "tags": [],
         "label": "getKibanaDependenciesMock",
         "description": [],
-        "signature": [
-          "() => ",
-          "NoDataCardKibanaDependencies"
-        ],
+        "signature": ["() => ", "NoDataCardKibanaDependencies"],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -804,10 +789,7 @@
         "tags": [],
         "label": "getServicesMock",
         "description": [],
-        "signature": [
-          "() => ",
-          "NoDataCardServices"
-        ],
+        "signature": ["() => ", "NoDataCardServices"],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,

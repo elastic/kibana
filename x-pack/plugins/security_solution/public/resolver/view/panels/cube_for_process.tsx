@@ -14,9 +14,9 @@ import React, { memo } from 'react';
 interface StyledSVGCube {
   readonly isOrigin?: boolean;
 }
+import type { NodeDataStatus } from '../../types';
 import { useCubeAssets } from '../use_cube_assets';
 import { useSymbolIDs } from '../use_symbol_ids';
-import type { NodeDataStatus } from '../../types';
 
 /**
  * Icon representing a process node.

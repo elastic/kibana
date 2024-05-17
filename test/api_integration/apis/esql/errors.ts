@@ -8,12 +8,12 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-import uniqBy from 'lodash/uniqBy';
+import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { groupBy, mapValues } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 function getConfigPath() {

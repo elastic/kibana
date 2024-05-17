@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { PromptContextSelector } from './prompt_context_selector';
+import React from 'react';
 import { mockPromptContexts } from '../../../mock/prompt_context';
+import { PromptContextSelector } from './prompt_context_selector';
 
 const onPromptContextSelectionChange = jest.fn();
 const testProps = {

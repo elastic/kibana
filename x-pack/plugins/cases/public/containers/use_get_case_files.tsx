@@ -16,9 +16,9 @@ import type { ServerError } from '../types';
 
 import { constructFileKindIdByOwner } from '../../common/files';
 import { useCasesToast } from '../common/use_cases_toast';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 export interface CaseFilesFilteringOptions {
   page: number;

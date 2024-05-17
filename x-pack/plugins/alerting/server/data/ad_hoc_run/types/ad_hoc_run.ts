@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleDomain } from '../../../application/rule/types';
 import { AdHocRunStatus } from '../../../../common/constants';
+import { RuleDomain } from '../../../application/rule/types';
 
 export interface AdHocRunSchedule extends Record<string, unknown> {
   interval: string;

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelAccordion } from '.';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 
 const TEST_ID = 'test';
 const TEST_LIST_ITEM = [

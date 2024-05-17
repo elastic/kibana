@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButton, EuiListGroup, EuiListGroupItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NonEmptyString } from '@kbn/io-ts-utils';
 import { useBoolean } from '@kbn/react-hooks';
+import React from 'react';
 import {
-  SavedViewState,
-  SavedViewOperations,
-  SavedViewItem,
   BasicAttributes,
+  SavedViewItem,
+  SavedViewOperations,
+  SavedViewState,
 } from '../../../common/saved_views';
 import { ManageViewsFlyout } from './manage_views_flyout';
 import { UpsertViewModal } from './upsert_modal';

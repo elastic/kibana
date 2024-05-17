@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   cleanupCase,
@@ -17,17 +16,18 @@ import {
   packFixture,
 } from '../../tasks/api_fixtures';
 import {
+  closeAlertsStepTourIfVisible,
+  generateRandomStringName,
+  interceptCaseId,
+} from '../../tasks/integrations';
+import {
   addToCase,
   checkActionItemsInResults,
   loadRuleAlerts,
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import {
-  closeAlertsStepTourIfVisible,
-  generateRandomStringName,
-  interceptCaseId,
-} from '../../tasks/integrations';
+import { initializeDataViews } from '../../tasks/login';
 
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;

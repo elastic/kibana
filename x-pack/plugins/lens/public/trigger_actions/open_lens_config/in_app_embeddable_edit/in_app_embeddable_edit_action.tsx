@@ -1,3 +1,4 @@
+import type { CoreStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { InlineEditLensEmbeddableContext } from './types';

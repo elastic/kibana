@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { SavedObject } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { saveApmIndices } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import { SavedObject } from '@kbn/core/server';
+import * as t from 'io-ts';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getApmIndexSettings, ApmIndexSettingsResponse } from './get_apm_indices';
+import { ApmIndexSettingsResponse, getApmIndexSettings } from './get_apm_indices';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({

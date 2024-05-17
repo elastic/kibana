@@ -6,14 +6,14 @@
  */
 
 import { getNewRule } from '../../../../objects/rule';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
+import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { ALERTS_URL } from '../../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { closeFlyout } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expandable_flyout/alert_details_right_panel';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();

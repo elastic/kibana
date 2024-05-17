@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexItem, EuiText, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import type { ChartSeriesData } from './common';
 import { checkIfAllValuesAreZero } from './common';

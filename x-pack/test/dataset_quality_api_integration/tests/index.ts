@@ -1,3 +1,4 @@
+import path from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import globby from 'globby';
-import path from 'path';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);

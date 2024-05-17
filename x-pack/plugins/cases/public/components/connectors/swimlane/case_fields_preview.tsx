@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import * as i18n from './translations';
 
 import type { SwimlaneFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
-import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
+import type { ConnectorFieldsPreviewProps } from '../types';
 import { connectorValidator } from './validator';
 
 const SwimlaneFieldsPreviewComponent: React.FunctionComponent<

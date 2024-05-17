@@ -8,8 +8,8 @@
 import { EcsFlat } from '@elastic/ecs';
 import { omit } from 'lodash/fp';
 
-import { getUnallowedValueRequestItems, getValidValues, hasAllowedValues } from './helpers';
 import { AllowedValue, EcsMetadata } from '../../types';
+import { getUnallowedValueRequestItems, getValidValues, hasAllowedValues } from './helpers';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 

@@ -9,7 +9,7 @@ import { getNavigationPropsFromId } from '@kbn/security-solution-navigation';
 import { useCallback, useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import { APP_PATH } from '../../../common';
-import { useBasePath, useAppUrl } from '../lib/kibana';
+import { useAppUrl, useBasePath } from '../lib/kibana';
 import type { NavigationLink } from './types';
 
 /**

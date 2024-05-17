@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
@@ -19,6 +18,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.

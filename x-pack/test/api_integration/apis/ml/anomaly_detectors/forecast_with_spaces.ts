@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/ml/security_common';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

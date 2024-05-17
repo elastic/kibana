@@ -16,10 +16,10 @@ import {
   useDiscoverCustomizationService,
 } from './customization_provider';
 import {
-  createCustomizationService,
   DiscoverCustomization,
   DiscoverCustomizationId,
   DiscoverCustomizationService,
+  createCustomizationService,
 } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {

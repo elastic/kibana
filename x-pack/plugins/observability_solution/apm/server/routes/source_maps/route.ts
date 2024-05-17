@@ -14,11 +14,11 @@ import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_sa
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
+  ListSourceMapArtifactsResponse,
   createFleetSourceMapArtifact,
   deleteFleetSourcemapArtifact,
   getCleanedBundleFilePath,
   listSourceMapArtifacts,
-  ListSourceMapArtifactsResponse,
   updateSourceMapsOnFleetPolicies,
 } from '../fleet/source_maps';
 import { createApmSourceMap } from './create_apm_source_map';

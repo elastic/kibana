@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IndexSettings } from './indices';
+import { DataRetention, DataStream } from '.';
 import { Aliases } from './aliases';
+import { IndexSettings } from './indices';
 import { Mappings } from './mappings';
-import { DataStream, DataRetention } from '.';
 
 export interface ComponentTemplateSerialized {
   template: {

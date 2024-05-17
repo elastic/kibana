@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams } from 'antlr4';
 import {
-  getAstAndSyntaxErrors,
-  getParser,
-  ROOT_STATEMENT,
   ESQLErrorListener,
   type EditorError,
+  ROOT_STATEMENT,
+  getAstAndSyntaxErrors,
+  getParser,
 } from '@kbn/esql-ast';
+import { CharStreams } from 'antlr4';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 

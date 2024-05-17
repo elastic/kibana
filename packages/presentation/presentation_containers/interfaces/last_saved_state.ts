@@ -28,7 +28,7 @@ export const apiPublishesLastSavedState = (api: unknown): api is PublishesLastSa
 
 export const getLastSavedStateSubjectForChild = <
   SerializedState extends object = object,
-  RuntimeState extends object = object
+  RuntimeState extends object = object,
 >(
   parentApi: unknown,
   childId: string,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
+import { getNewRule, getUnmappedRule } from '../../../objects/rule';
+import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import {
   ALERT_FLYOUT,
   CELL_TEXT,
@@ -16,6 +17,8 @@ import {
   TABLE_CONTAINER,
   TABLE_ROWS,
 } from '../../../screens/alerts_details';
+import { tablePageSelector } from '../../../screens/table_pagination';
+import { ALERTS_TABLE_COUNT } from '../../../screens/timeline';
 import { closeAlertFlyout, expandFirstAlert } from '../../../tasks/alerts';
 import {
   changeAlertStatusTo,
@@ -23,20 +26,17 @@ import {
   openJsonView,
   openTable,
 } from '../../../tasks/alerts_details';
-import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
-import { getNewRule, getUnmappedRule } from '../../../objects/rule';
-import { ALERTS_URL } from '../../../urls/navigation';
-import { tablePageSelector } from '../../../screens/table_pagination';
-import { ALERTS_TABLE_COUNT } from '../../../screens/timeline';
-import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import {
   visitRuleDetailsPage,
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
 } from '../../../tasks/rule_details';
+import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {

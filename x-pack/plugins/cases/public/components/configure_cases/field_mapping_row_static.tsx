@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
 import type {
-  ConnectorMappingSource,
   ConnectorMappingActionType,
+  ConnectorMappingSource,
   ConnectorMappingTarget,
 } from '../../containers/configure/types';
 

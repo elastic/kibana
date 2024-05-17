@@ -9,11 +9,11 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { basicCase } from './mock';
 
-import type { AppMockRenderer } from '../common/mock';
-import { mockedTestProvidersOwner, createAppMockRenderer } from '../common/mock';
-import { useToasts } from '../common/lib/kibana';
-import { useGetCaseFileStats } from './use_get_case_file_stats';
 import { constructFileKindIdByOwner } from '../../common/files';
+import { useToasts } from '../common/lib/kibana';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer, mockedTestProvidersOwner } from '../common/mock';
+import { useGetCaseFileStats } from './use_get_case_file_stats';
 
 jest.mock('../common/lib/kibana');
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { parseUsageCollection } from '../ts_parser';
 import { loadFixtureProgram } from '../test_utils';
+import { parseUsageCollection } from '../ts_parser';
 
 describe('createKibanaProgram', () => {
   it('parses files with @kbn/* imports', () => {

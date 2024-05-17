@@ -9,10 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 import {
-  actionSchemaV1,
   actionFrequencySchemaV1,
-  updateParamsSchemaV1,
+  actionSchemaV1,
   updateBodySchemaV1,
+  updateParamsSchemaV1,
 } from '..';
 
 export type UpdateRuleAction = TypeOf<typeof actionSchemaV1>;

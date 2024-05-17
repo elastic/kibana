@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
 
-import { ScriptedFieldsTable } from '.';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { ScriptedFieldsTable } from '.';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -40,7 +40,7 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as DataView;
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: DataView;

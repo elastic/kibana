@@ -11,9 +11,9 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 
-import { filterEventsAgainstList } from './filter_events_against_list';
-import { repeatedHitsWithSortId } from '../../__mocks__/es_results';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
+import { repeatedHitsWithSortId } from '../../__mocks__/es_results';
+import { filterEventsAgainstList } from './filter_events_against_list';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuidv4());
 

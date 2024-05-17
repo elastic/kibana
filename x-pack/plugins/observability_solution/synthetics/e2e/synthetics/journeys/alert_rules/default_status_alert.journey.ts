@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { after, before, expect, journey, step } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '../../../../server/alert_rules/status_rule/message_utils';
 import { recordVideo } from '../../../helpers/record_video';

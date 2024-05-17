@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
+import React from 'react';
 
+import { TestProviders } from '../../common/mock';
 import type { ClosureOptionsProps } from './closure_options';
 import { ClosureOptions } from './closure_options';
-import { TestProviders } from '../../common/mock';
 import { ClosureOptionsRadio } from './closure_options_radio';
 
 describe('ClosureOptions', () => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ExpViewActionMenuContent } from './action_menu';
+import React from 'react';
 import { useExploratoryView } from '../../contexts/exploratory_view_config';
+import { ExpViewActionMenuContent } from './action_menu';
 
 interface Props {
   timeRange?: { from: string; to: string };

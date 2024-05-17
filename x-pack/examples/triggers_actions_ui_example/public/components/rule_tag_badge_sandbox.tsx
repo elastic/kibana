@@ -11,8 +11,8 @@
  * the triggers_actions_ui plugin
  */
 
-import React, { useState } from 'react';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useState } from 'react';
 
 interface SandboxProps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

@@ -10,17 +10,17 @@ import { flatten } from 'lodash';
 import type { FC } from 'react';
 import React, { Fragment, useState, useEffect } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { useEuiBreakpoint, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiBreakpoint } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useUrlState } from '@kbn/ml-url-state';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useUrlState } from '@kbn/ml-url-state';
 
-import type { LinkCardProps } from '../../../common/components/link_card/link_card';
-import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/link_card';
+import type { LinkCardProps } from '../../../common/components/link_card/link_card';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   dataView: DataView;

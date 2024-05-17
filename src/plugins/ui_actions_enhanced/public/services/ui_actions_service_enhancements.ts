@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { createElement } from 'react';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
 import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import { createElement } from 'react';
 import { DrilldownDefinition } from '../drilldowns';
 import {
   ActionFactory,
@@ -51,7 +51,7 @@ export class UiActionsServiceEnhancements
   public readonly registerActionFactory = <
     Config extends BaseActionConfig = BaseActionConfig,
     ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
   >(
     definition: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>
   ) => {
@@ -102,7 +102,7 @@ export class UiActionsServiceEnhancements
   public readonly registerDrilldown = <
     Config extends BaseActionConfig = BaseActionConfig,
     ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
   >({
     id: factoryId,
     isBeta,

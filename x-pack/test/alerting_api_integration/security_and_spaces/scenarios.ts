@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
-  ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
-} from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import {
+  ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+  READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+} from '@kbn/alerting-plugin/common';
 import { Space, User } from '../common/types';
 
 const NoKibanaPrivileges: User = {
@@ -308,7 +308,7 @@ export const UserAtSpaceScenarios: [
   Space1AllAtSpace1,
   Space1AllAtSpace2,
   Space1AllWithRestrictedFixtureAtSpace1,
-  Space1AllAlertingNoneActionsAtSpace1
+  Space1AllAlertingNoneActionsAtSpace1,
 ] = [
   NoKibanaPrivilegesAtSpace1,
   SuperuserAtSpace1,

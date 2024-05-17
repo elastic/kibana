@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { NewsfeedApiEndpoint } from '@kbn/newsfeed-plugin/public';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { AppPluginStartDependencies } from './types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { KibanaOverviewApp } from './components/app';
+import { AppPluginStartDependencies } from './types';
 
 export const renderApp = (
   core: CoreStart,

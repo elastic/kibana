@@ -20,7 +20,7 @@ const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any>>
  */
 export const registerReactEmbeddableFactory = <
   StateType extends object = object,
-  APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>,
 >(
   type: string,
   getFactory: () => Promise<ReactEmbeddableFactory<StateType, APIType>>
@@ -39,7 +39,7 @@ export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== 
 
 export const getReactEmbeddableFactory = async <
   StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>,
 >(
   key: string
 ): Promise<ReactEmbeddableFactory<StateType, ApiType>> => {

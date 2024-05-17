@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AgentGrouper } from './agent_grouper';
-import type { Group, GroupedAgent, GroupOptionValue } from './types';
-import { AGENT_GROUP_KEY } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import { AgentGrouper } from './agent_grouper';
 import { ALL_AGENTS_LABEL } from './translations';
+import type { Group, GroupOptionValue, GroupedAgent } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 type GroupData = {
   [key in Exclude<AGENT_GROUP_KEY, AGENT_GROUP_KEY.All | AGENT_GROUP_KEY.Agent>]: Group[];

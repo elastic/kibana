@@ -9,10 +9,10 @@
 import path from 'path';
 import chalk from 'chalk';
 
-import { BASE_PATH } from '../paths';
-import { installArchive } from './install_archive';
-import { log as defaultLog } from '../utils/log';
 import { Artifact } from '../artifact';
+import { BASE_PATH } from '../paths';
+import { log as defaultLog } from '../utils/log';
+import { installArchive } from './install_archive';
 import { DownloadSnapshotOptions, InstallSnapshotOptions } from './types';
 
 /**

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
-import { Props, NewChat } from '.';
+import { NewChat, Props } from '.';
 
 const mockUseAssistantOverlay = {
   showAssistantOverlay: jest.fn(),

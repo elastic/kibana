@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, pickBy, mapValues, pick, assign, chain } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import { AbstractDataView } from './abstract_data_views';
+import { assign, chain, each, mapValues, pick, pickBy } from 'lodash';
 import { DataViewField } from '../fields';
+import { AbstractDataView } from './abstract_data_views';
 import { fieldMatchesFieldsRequested, fieldsMatchFieldsRequested } from './data_view_lazy_util';
 
 import type {
   DataViewFieldMap as DataViewFieldSpecMap,
   DataViewSpec,
   FieldConfiguration,
+  FieldSpec,
+  IDataViewsApiClient,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeType,
-  FieldSpec,
-  IDataViewsApiClient,
 } from '../types';
 import { removeFieldAttrs } from './utils';
 

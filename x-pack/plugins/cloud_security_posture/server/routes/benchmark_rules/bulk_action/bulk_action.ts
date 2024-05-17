@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
-  cspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesBulkActionResponse,
+  cspBenchmarkRulesBulkActionRequestSchema,
 } from '../../../../common/types/rules/v4';
 import { CspRouter } from '../../../types';
 

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
-import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
-import { BatchedFunc } from './batching/types';
 import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
+import { StreamingBatchedFunctionParams, createStreamingBatchedFunction } from './batching';
+import { BatchedFunc } from './batching/types';
+import { FetchStreamingParams, fetchStreaming as fetchStreamingStatic } from './streaming';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchPublicSetupDependencies {}

@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 

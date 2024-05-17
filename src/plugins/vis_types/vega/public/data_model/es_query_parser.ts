@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { dateHistogramInterval } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import { Assign } from 'utility-types';
-import { dateHistogramInterval } from '@kbn/data-plugin/common';
-import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';
+import { TimeCache } from './time_cache';
 import {
-  Opts,
-  Type,
-  Data,
-  UrlObject,
   Bool,
-  EsQueryRequest,
-  Query,
   ContextVarsObject,
+  Data,
+  EsQueryRequest,
+  Opts,
+  Query,
+  Type,
+  UrlObject,
 } from './types';
 
 const TIMEFILTER: string = '%timefilter%';

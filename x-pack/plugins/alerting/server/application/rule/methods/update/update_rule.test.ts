@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
-  savedObjectsClientMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, RuleNotifyWhen } from '../../../../types';
-import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { RuleDomain } from '../../types';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { v4 as uuidv4 } from 'uuid';
+import { RecoveredActionGroup } from '../../../../../common';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { IntervalSchedule, RuleNotifyWhen } from '../../../../types';
+import { RuleDomain } from '../../types';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {

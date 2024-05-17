@@ -7,21 +7,21 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiText, EuiSpacer, EuiButton, EuiCallOut, EuiSkeletonText, EuiCode } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCallOut, EuiCode, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 
 import {
-  DEPRECATION_LOGS_INDEX,
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
+  DEPRECATION_LOGS_INDEX,
 } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
+import { MissingPrivileges, WithPrivileges } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
-import type { OverviewStepProps } from '../../types';
 import { useDeprecationLogging } from '../../es_deprecation_logs';
+import type { OverviewStepProps } from '../../types';
 
 const i18nTexts = {
   logsStepTitle: i18n.translate('xpack.upgradeAssistant.overview.logsStep.title', {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ESQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { ESQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EsqlRuleParams } from '../../rule_schema';
-import { esqlExecutor } from './esql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { esqlExecutor } from './esql';
 
 export const createEsqlAlertType = (
   createOptions: CreateRuleOptions

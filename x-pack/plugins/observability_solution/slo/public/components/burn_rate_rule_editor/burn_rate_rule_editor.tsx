@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
 
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
+import { BurnRateRuleParams, Dependency, WindowSchema } from '../../typings';
+import { getGroupKeysProse } from '../../utils/slo/groupings';
+import { AlertTimeTable } from './alert_time_table';
+import { BURN_RATE_DEFAULTS } from './constants';
+import { Dependencies } from './dependencies';
 import { SloSelector } from './slo_selector';
 import { ValidationBurnRateRuleResult } from './validation';
-import { createNewWindow, Windows } from './windows';
-import { BURN_RATE_DEFAULTS } from './constants';
-import { AlertTimeTable } from './alert_time_table';
-import { getGroupKeysProse } from '../../utils/slo/groupings';
-import { Dependencies } from './dependencies';
+import { Windows, createNewWindow } from './windows';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,

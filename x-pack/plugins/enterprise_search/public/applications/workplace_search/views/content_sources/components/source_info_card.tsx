@@ -21,7 +21,7 @@ import {
 
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { ContentSourceFullData } from '../../../types';
-import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
+import { CREATED_LABEL, READY_TEXT, REMOTE_SOURCE_LABEL, STATUS_LABEL } from '../constants';
 
 interface SourceInfoCardProps {
   contentSource: ContentSourceFullData;

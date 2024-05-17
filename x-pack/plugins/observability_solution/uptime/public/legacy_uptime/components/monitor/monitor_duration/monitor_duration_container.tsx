@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { JobStat } from '@kbn/ml-plugin/public';
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { JobStat } from '@kbn/ml-plugin/public';
+import { getMLJobId } from '../../../../../common/lib';
+import { MonitorIdParam } from '../../../../../common/types';
+import { UptimeRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
@@ -20,10 +23,7 @@ import {
   hasMLJobSelector,
   selectDurationLines,
 } from '../../../state/selectors';
-import { UptimeRefreshContext } from '../../../contexts';
 import { MonitorDurationComponent } from './monitor_duration';
-import { MonitorIdParam } from '../../../../../common/types';
-import { getMLJobId } from '../../../../../common/lib';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { dateRangeStart, dateRangeEnd, absoluteDateRangeStart, absoluteDateRangeEnd } =

@@ -1,5 +1,3 @@
 {
-  "vocabulary": [
-    "[UNK]", "[PAD]", "there", "is", "no", "spoon"
-  ]
+  "vocabulary": ["[UNK]", "[PAD]", "there", "is", "no", "spoon"]
 }

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { FieldParamEditor } from './field';
 import { AggParamEditorProps } from '../agg_param_props';
+import { FieldParamEditor } from './field';
 
 function TopSortFieldParamEditor(props: AggParamEditorProps<DataViewField>) {
   const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {

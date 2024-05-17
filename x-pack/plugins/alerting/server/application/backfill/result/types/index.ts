@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { backfillSchema, backfillScheduleSchema } from '../schemas';
+import { backfillScheduleSchema, backfillSchema } from '../schemas';
 
 export type BackfillSchedule = TypeOf<typeof backfillScheduleSchema>;
 export type Backfill = TypeOf<typeof backfillSchema>;

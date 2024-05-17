@@ -6,8 +6,8 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
+import { KIBANA_LOADING_ICON } from '../screens/security_header';
 
 const primaryButton = 0;
 

@@ -13,11 +13,11 @@ jest.mock('./util/load_index_settings', () => ({
   },
 }));
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { UpdateSourceEditor } from './update_source_editor';
 import { SCALING_TYPES } from '../../../../common/constants';
+import { UpdateSourceEditor } from './update_source_editor';
 
 const defaultProps = {
   indexPatternId: 'indexPattern1',

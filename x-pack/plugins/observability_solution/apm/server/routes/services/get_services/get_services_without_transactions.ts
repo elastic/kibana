@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { ServiceGroup } from '../../../../common/service_groups';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
+import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
+import { ServiceGroup } from '../../../../common/service_groups';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
 export interface ServicesWithoutTransactionsResponse {

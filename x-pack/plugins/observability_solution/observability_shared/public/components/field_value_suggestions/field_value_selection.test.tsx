@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount, render } from 'enzyme';
-import { FieldValueSelection } from './field_value_selection';
 import { EuiSelectableList } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { mount, render } from 'enzyme';
+import React from 'react';
+import { FieldValueSelection } from './field_value_selection';
 
 const values = [
   { label: 'elastic co frontend', count: 1 },

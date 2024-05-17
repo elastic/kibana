@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
+import * as rt from 'io-ts';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../common/infra_ml';
 import { decodeOrThrow } from '../../../../common/runtime_types';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { LogMeta, Logger } from '@kbn/core/server';
 import deepMerge from 'deepmerge';
-import type { Logger, LogMeta } from '@kbn/core/server';
 import type { IReportingEventLogger } from './logger';
 
 /** @internal */
@@ -23,7 +23,10 @@ export class EcsLogAdapter implements IReportingEventLogger {
    * @param {Logger} logger - Reporting's wrapper of the core logger
    * @param {Partial<LogMeta>} properties - initial ECS data with template for Reporting metrics
    */
-  constructor(logger: Logger, private properties: Partial<LogMeta>) {
+  constructor(
+    logger: Logger,
+    private properties: Partial<LogMeta>
+  ) {
     this.logger = logger.get('events');
   }
 

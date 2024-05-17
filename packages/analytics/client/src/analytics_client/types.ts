@@ -12,9 +12,9 @@ import type { Observable } from 'rxjs';
 // we'll need to revisit this import.
 import type { Logger } from '@kbn/logging';
 
-import type { IShipper } from '../shippers';
 import type { EventType, TelemetryCounter } from '../events';
 import type { RootSchema } from '../schema';
+import type { IShipper } from '../shippers';
 
 /**
  * General settings of the analytics client

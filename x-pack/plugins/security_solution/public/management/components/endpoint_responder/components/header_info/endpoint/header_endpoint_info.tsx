@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
+import React, { memo } from 'react';
 import { EndpointAgentStatus } from '../../../../../../common/components/agents/agent_status';
-import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointDetails } from '../../../../../hooks';
+import { HeaderAgentInfo } from '../header_agent_info';
 import type { Platform } from '../platforms';
 
 interface HeaderEndpointInfoProps {

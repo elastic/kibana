@@ -15,7 +15,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
+import { AttributeSelector, RoleMappingFlyout, RoleSelector } from '../../../shared/role_mapping';
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { STANDARD_ROLE_TYPES } from './constants';

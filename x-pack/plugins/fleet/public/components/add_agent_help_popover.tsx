@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { NoArgCallback } from '@elastic/eui';
-import { EuiTourStep, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import { useTheme } from 'styled-components';
 
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';

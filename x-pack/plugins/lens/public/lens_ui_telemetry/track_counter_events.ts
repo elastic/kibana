@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { groupBy } from 'lodash';
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);

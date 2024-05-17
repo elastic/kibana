@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { installPackage, IntegrationPackage, uninstallPackage } from './package_utils';
+import { IntegrationPackage, installPackage, uninstallPackage } from './package_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

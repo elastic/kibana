@@ -20,12 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { StepDefineFormHook } from '../step_define';
-import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
-import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
 import type { PivotAggsConfigWithUiSupport } from '../../../../common';
 import { isPivotGroupByConfigWithUiSupport } from '../../../../common';
 import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
+import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
+import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
+import type { StepDefineFormHook } from '../step_define';
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(

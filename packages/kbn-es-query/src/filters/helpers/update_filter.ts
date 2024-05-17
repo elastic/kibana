@@ -7,8 +7,8 @@
  */
 
 import { get } from 'lodash';
-import { isRangeFilterParams } from '../build_filters/range_filter';
 import type { Filter, FilterMeta } from '..';
+import { isRangeFilterParams } from '../build_filters/range_filter';
 
 export const updateFilter = (
   filter: Filter,

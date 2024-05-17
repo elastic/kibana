@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
+import React from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';

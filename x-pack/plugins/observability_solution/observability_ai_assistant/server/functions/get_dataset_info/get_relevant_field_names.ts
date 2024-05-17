@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { MessageRole, type Message } from '../../../common';
+import { type Message, MessageRole } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { FunctionCallChatFunction } from '../../service/types';
 

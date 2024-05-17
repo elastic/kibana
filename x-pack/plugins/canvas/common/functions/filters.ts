@@ -6,8 +6,8 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
-import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
+import { ExpressionValueFilter } from '../../types';
 
 export interface Arguments {
   group: string[];

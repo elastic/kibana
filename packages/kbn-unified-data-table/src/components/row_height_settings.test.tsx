@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { RowHeightSettings, RowHeightSettingsProps } from '../..';

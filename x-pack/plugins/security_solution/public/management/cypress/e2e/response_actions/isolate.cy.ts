@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { openAlertDetailsView } from '../../screens/alerts';
-import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
-import { closeAllToasts } from '../../tasks/toasts';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { openAlertDetailsView } from '../../screens/alerts';
+import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
@@ -21,15 +28,8 @@ import {
   visitRuleAlerts,
   waitForReleaseOption,
 } from '../../tasks/isolate';
-import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
-import { createEndpointHost } from '../../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import { closeAllToasts } from '../../tasks/toasts';
 
 describe.skip(
   'Isolate command',

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams, observabilityPaths } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 

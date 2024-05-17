@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
-import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import expect from '@kbn/expect';
+import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { expectResponses, getTestTitle, getUrlPrefix } from '../lib/saved_object_test_utils';
 import { SPACES } from '../lib/spaces';
-import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface DeleteTestDefinition extends TestDefinition {

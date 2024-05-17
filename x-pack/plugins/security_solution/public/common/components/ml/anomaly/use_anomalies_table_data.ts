@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useEffect, useMemo } from 'react';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
-import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
+import type { Anomalies, CriteriaFields, InfluencerInput } from '../types';
 
-import * as i18n from './translations';
-import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useFetch, REQUEST_NAMES } from '../../../hooks/use_fetch';
-import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { REQUEST_NAMES, useFetch } from '../../../hooks/use_fetch';
+import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
+import * as i18n from './translations';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -114,7 +114,9 @@ export const useAnomaliesTableData = ({
     isMlUser,
     aggregationInterval,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    jobIds.sort().join(),
+    jobIds
+      .sort()
+      .join(),
   ]);
 
   return [isLoading, data];

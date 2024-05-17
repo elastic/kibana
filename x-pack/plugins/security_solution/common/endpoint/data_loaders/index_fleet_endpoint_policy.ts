@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
 import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
@@ -18,16 +16,18 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
-  PACKAGE_POLICY_API_ROUTES,
   API_VERSIONS,
+  PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
-import { memoize } from 'lodash';
+import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosResponse } from 'axios';
+import { memoize } from 'lodash';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
-import { usageTracker } from './usage_tracker';
-import { getEndpointPackageInfo } from '../utils/package';
-import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
+import type { PolicyData } from '../types';
+import { getEndpointPackageInfo } from '../utils/package';
+import { usageTracker } from './usage_tracker';
 import { RETRYABLE_TRANSIENT_ERRORS, retryOnError, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedFleetEndpointPolicyResponse {

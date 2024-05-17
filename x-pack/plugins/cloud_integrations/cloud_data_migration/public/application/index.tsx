@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { BreadcrumbService } from './services/breadcrumbs';
 import { CloudDataMigrationApp } from './components/app';
+import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
   core: CoreStart,

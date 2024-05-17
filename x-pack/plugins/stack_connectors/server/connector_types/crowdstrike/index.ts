@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { CROWDSTRIKE_CONNECTOR_ID, CROWDSTRIKE_TITLE } from '../../../common/crowdstrike/constants';
 import {
   CrowdstrikeConfigSchema,

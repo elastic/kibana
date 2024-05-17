@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
+import { safeElementFromExpression, toExpression } from '@kbn/interpreter';
+import { cloneDeep, get, last, pick, without } from 'lodash';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without, last } from 'lodash';
-import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
-import { createThunk } from '../../lib/create_thunk';
-import { isGroupId } from '../../lib/workpad';
-import {
-  getPages,
-  getWorkpadVariablesAsObject,
-  getNodeById,
-  getNodes,
-  getSelectedPageIndex,
-  getElementById,
-} from '../selectors/workpad';
-import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
-import { getDefaultElement } from '../defaults';
+import { createAction } from 'redux-actions';
 import { ErrorStrings } from '../../../i18n';
 import { subMultitree } from '../../lib/aeroelastic/functional';
+import { createThunk } from '../../lib/create_thunk';
+import { isGroupId } from '../../lib/workpad';
 import { pluginServices } from '../../services';
-import { selectToplevelNodes } from './transient';
+import { getDefaultElement } from '../defaults';
+import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
+import {
+  getElementById,
+  getNodeById,
+  getNodes,
+  getPages,
+  getSelectedPageIndex,
+  getWorkpadVariablesAsObject,
+} from '../selectors/workpad';
 import * as args from './resolved_args';
+import { selectToplevelNodes } from './transient';
 
 const { actionsElements: strings } = ErrorStrings;
 

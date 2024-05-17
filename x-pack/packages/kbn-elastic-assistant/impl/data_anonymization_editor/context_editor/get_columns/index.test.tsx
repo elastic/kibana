@@ -9,9 +9,9 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { getColumns } from '.';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { ContextEditorRow } from '../types';
-import { getColumns } from '.';
 
 interface ColumnWithRender {
   render: (_: unknown, row: ContextEditorRow) => React.ReactNode;

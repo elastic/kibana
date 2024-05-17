@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { FieldDefinition, UnsavedFieldChange, SettingType } from '@kbn/management-settings-types';
+import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import { useFieldStyles } from '../field_row.styles';
 import { FieldTitleCustomIcon } from './icon_custom';

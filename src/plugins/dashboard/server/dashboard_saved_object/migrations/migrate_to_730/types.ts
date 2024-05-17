@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/server';
+import type { Serializable } from '@kbn/utility-types';
 
 import type {
-  GridData,
   DashboardAttributes as CurrentDashboardAttributes, // Dashboard attributes from common are the source of truth for the current version.
+  GridData,
 } from '../../../../common/content_management';
 
 interface KibanaAttributes {

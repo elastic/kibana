@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObject, isArray } from 'lodash';
+import { isArray, isObject } from 'lodash';
 import {
   MetricsAPIRequest,
   MetricsExplorerRequestBody,

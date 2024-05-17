@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { sampleIndexPatterns } from '../../data_views_service/mocks';
 import {
-  loadInitialState,
   changeIndexPattern,
   changeLayerIndexPattern,
   extractReferences,
   injectReferences,
+  loadInitialState,
 } from './loader';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
 import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import { sampleIndexPatterns } from '../../data_views_service/mocks';
+import { FormBasedPersistedState, FormBasedPrivateState } from './types';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {

@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExperimentalFeatures } from '../../../../../../common';
-import { getFieldAsString, getSupportedSchemas } from './supported_schemas';
 import type { ResolverEntityIndex } from '../../../../../../common/endpoint/types';
+import { getFieldAsString, getSupportedSchemas } from './supported_schemas';
 
 const toArray = <T>(input: T | T[]) => ([] as T[]).concat(input);
 

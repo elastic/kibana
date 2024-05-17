@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { WithGuidedOnboardingTour } from '../../../../../../../components';
 import { useIsGuidedOnboardingActive } from '../../../../../../../hooks';

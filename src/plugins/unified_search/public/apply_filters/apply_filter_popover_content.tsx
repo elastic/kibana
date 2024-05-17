@@ -9,24 +9,24 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiCheckbox,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import React, { Component } from 'react';
 import {
   getDisplayValueFromFilter,
-  mapAndFlattenFilters,
   getFieldDisplayValueFromFilter,
+  mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 import { FilterContent } from '../filter_badge';
 
 interface Props {

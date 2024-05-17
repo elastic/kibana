@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { isDeepEqual } from 'react-use/lib/util';
-import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
 import {
   Connector,
   ConnectorConfigProperties,
@@ -29,6 +28,7 @@ import {
   ConnectorStatus,
   FeatureName,
 } from '../..';
+import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 
@@ -81,151 +81,155 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: FC<
-  PropsWithChildren<ConnectorConfigurationProps>
-> = ({
-  children,
-  connector,
-  hasPlatinumLicense,
-  isLoading,
-  saveConfig,
-  subscriptionLink,
-  stackManagementLink,
-}) => {
-  const configurationRef = useRef<ConnectorConfiguration>({});
-  const {
-    configuration,
-    error,
-    status: connectorStatus,
-    is_native: isNative,
-    features,
-  } = connector;
-  const hasDocumentLevelSecurity = Boolean(
-    features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled
-  );
-  const [isEditing, setIsEditing] = useState(false);
+export const ConnectorConfigurationComponent: FC<PropsWithChildren<ConnectorConfigurationProps>> =
+  ({
+    children,
+    connector,
+    hasPlatinumLicense,
+    isLoading,
+    saveConfig,
+    subscriptionLink,
+    stackManagementLink,
+  }) => {
+    const configurationRef = useRef<ConnectorConfiguration>({});
+    const {
+      configuration,
+      error,
+      status: connectorStatus,
+      is_native: isNative,
+      features,
+    } = connector;
+    const hasDocumentLevelSecurity = Boolean(
+      features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled
+    );
+    const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    if (!isDeepEqual(configuration, configurationRef.current)) {
-      configurationRef.current = configuration;
-      setIsEditing(false);
-    }
-  }, [configuration]);
+    useEffect(() => {
+      if (!isDeepEqual(configuration, configurationRef.current)) {
+        configurationRef.current = configuration;
+        setIsEditing(false);
+      }
+    }, [configuration]);
 
-  useEffect(() => {
-    if (
-      Object.keys(configuration || {}).length > 0 &&
-      (connectorStatus === ConnectorStatus.CREATED ||
-        connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION)
-    ) {
-      // Only start in edit mode if we haven't configured yet
-      // Necessary to prevent a race condition between saving config and getting updated connector
-      setIsEditing(true);
-    }
-  }, [configuration, connectorStatus]);
+    useEffect(() => {
+      if (
+        Object.keys(configuration || {}).length > 0 &&
+        (connectorStatus === ConnectorStatus.CREATED ||
+          connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION)
+      ) {
+        // Only start in edit mode if we haven't configured yet
+        // Necessary to prevent a race condition between saving config and getting updated connector
+        setIsEditing(true);
+      }
+    }, [configuration, connectorStatus]);
 
-  const configView = sortAndFilterConnectorConfiguration(configuration, isNative);
+    const configView = sortAndFilterConnectorConfiguration(configuration, isNative);
 
-  const uncategorizedDisplayList = configView.unCategorizedItems.map(entryToDisplaylistItem);
+    const uncategorizedDisplayList = configView.unCategorizedItems.map(entryToDisplaylistItem);
 
-  return (
-    <LicenseContext.Provider value={{ hasPlatinumLicense, stackManagementLink, subscriptionLink }}>
-      <EuiFlexGroup direction="column">
-        {children && <EuiFlexItem>{children}</EuiFlexItem>}
-        {!uncategorizedDisplayList.length && (
+    return (
+      <LicenseContext.Provider
+        value={{ hasPlatinumLicense, stackManagementLink, subscriptionLink }}
+      >
+        <EuiFlexGroup direction="column">
+          {children && <EuiFlexItem>{children}</EuiFlexItem>}
+          {!uncategorizedDisplayList.length && (
+            <EuiFlexItem>
+              <EuiCallOut
+                color="warning"
+                title={i18n.translate(
+                  'searchConnectors.configurationConnector.config.noConfigCallout.title',
+                  {
+                    defaultMessage: 'No configuration fields',
+                  }
+                )}
+              >
+                {i18n.translate(
+                  'searchConnectors.configurationConnector.config.noConfigCallout.description',
+                  {
+                    defaultMessage:
+                      'This connector has no configuration fields. Has your connector connected successfully to Elasticsearch and set its configuration?',
+                  }
+                )}
+              </EuiCallOut>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
-            <EuiCallOut
-              color="warning"
-              title={i18n.translate(
-                'searchConnectors.configurationConnector.config.noConfigCallout.title',
-                {
-                  defaultMessage: 'No configuration fields',
-                }
-              )}
-            >
-              {i18n.translate(
-                'searchConnectors.configurationConnector.config.noConfigCallout.description',
-                {
-                  defaultMessage:
-                    'This connector has no configuration fields. Has your connector connected successfully to Elasticsearch and set its configuration?',
-                }
-              )}
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          {isEditing ? (
-            <ConnectorConfigurationForm
-              cancelEditing={() => setIsEditing(false)}
-              configuration={configuration}
-              hasDocumentLevelSecurity={hasDocumentLevelSecurity}
-              isLoading={isLoading}
-              isNative={isNative}
-              saveConfig={(config) => {
-                saveConfig(config);
-                setIsEditing(false);
-              }}
-            />
-          ) : (
-            uncategorizedDisplayList.length > 0 && (
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <EuiDescriptionList
-                    listItems={uncategorizedDisplayList}
-                    className="eui-textBreakWord"
-                  />
-                </EuiFlexItem>
-                {configView.categories.length > 0 &&
-                  configView.categories.map((category) => (
-                    <EuiFlexGroup direction="column" key={category.key}>
-                      <EuiFlexItem>
-                        <EuiTitle size="s">
-                          <h3>{category.label}</h3>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiDescriptionList
-                          listItems={category.configEntries.map(entryToDisplaylistItem)}
-                          className="eui-textBreakWord"
-                        />
+            {isEditing ? (
+              <ConnectorConfigurationForm
+                cancelEditing={() => setIsEditing(false)}
+                configuration={configuration}
+                hasDocumentLevelSecurity={hasDocumentLevelSecurity}
+                isLoading={isLoading}
+                isNative={isNative}
+                saveConfig={(config) => {
+                  saveConfig(config);
+                  setIsEditing(false);
+                }}
+              />
+            ) : (
+              uncategorizedDisplayList.length > 0 && (
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiDescriptionList
+                      listItems={uncategorizedDisplayList}
+                      className="eui-textBreakWord"
+                    />
+                  </EuiFlexItem>
+                  {configView.categories.length > 0 &&
+                    configView.categories.map((category) => (
+                      <EuiFlexGroup direction="column" key={category.key}>
+                        <EuiFlexItem>
+                          <EuiTitle size="s">
+                            <h3>{category.label}</h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiDescriptionList
+                            listItems={category.configEntries.map(entryToDisplaylistItem)}
+                            className="eui-textBreakWord"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ))}
+                  <EuiFlexItem>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="entSearchContent-connector-configuration-editConfiguration"
+                          data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
+                          onClick={() => setIsEditing(!isEditing)}
+                        >
+                          {i18n.translate(
+                            'searchConnectors.configurationConnector.config.editButton.title',
+                            {
+                              defaultMessage: 'Edit configuration',
+                            }
+                          )}
+                        </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  ))}
-                <EuiFlexItem>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="entSearchContent-connector-configuration-editConfiguration"
-                        data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
-                        onClick={() => setIsEditing(!isEditing)}
-                      >
-                        {i18n.translate(
-                          'searchConnectors.configurationConnector.config.editButton.title',
-                          {
-                            defaultMessage: 'Edit configuration',
-                          }
-                        )}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )
-          )}
-        </EuiFlexItem>
-        {!!error && (
-          <EuiFlexItem>
-            <EuiCallOut
-              color="danger"
-              title={i18n.translate('searchConnectors.configurationConnector.config.error.title', {
-                defaultMessage: 'Connector error',
-              })}
-            >
-              <EuiText size="s">{error}</EuiText>
-            </EuiCallOut>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )
+            )}
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </LicenseContext.Provider>
-  );
-};
+          {!!error && (
+            <EuiFlexItem>
+              <EuiCallOut
+                color="danger"
+                title={i18n.translate(
+                  'searchConnectors.configurationConnector.config.error.title',
+                  {
+                    defaultMessage: 'Connector error',
+                  }
+                )}
+              >
+                <EuiText size="s">{error}</EuiText>
+              </EuiCallOut>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </LicenseContext.Provider>
+    );
+  };

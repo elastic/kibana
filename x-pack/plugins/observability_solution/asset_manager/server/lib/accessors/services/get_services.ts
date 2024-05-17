@@ -7,13 +7,13 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Asset } from '../../../../common/types_api';
-import { collectServices } from '../../collectors/services';
-import { parseEan } from '../../parse_ean';
 import { GetServicesOptionsPublic } from '../../../../common/types_client';
 import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
+import { collectServices } from '../../collectors/services';
+import { parseEan } from '../../parse_ean';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 
 export type GetServicesOptions = GetServicesOptionsPublic & AssetClientDependencies;

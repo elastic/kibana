@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import moment from 'moment';
-import { findIndex } from 'lodash';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -20,11 +17,14 @@ import {
   EuiText,
   formatDate,
 } from '@elastic/eui';
-import * as i18n from '../translations';
+import { findIndex } from 'lodash';
+import moment from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
 import { MAINTENANCE_WINDOW_DATE_FORMAT, MaintenanceWindow } from '../../../../common';
-import { recurringSummary } from '../helpers/recurring_summary';
-import { getPresets } from '../helpers/get_presets';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
+import { getPresets } from '../helpers/get_presets';
+import { recurringSummary } from '../helpers/recurring_summary';
+import * as i18n from '../translations';
 
 interface UpcomingEventsPopoverProps {
   maintenanceWindowFindResponse: MaintenanceWindow;

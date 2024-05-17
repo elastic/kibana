@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiCallOut } from '@elastic/eui';
 
-import { JobCreatorContext } from '../../../job_creator_context';
 import type { RareJobCreator } from '../../../../../common/job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { RARE_DETECTOR_TYPE } from './rare_view';
 
 interface Props {

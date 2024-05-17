@@ -7,12 +7,12 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { createStartServicesGetter, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { StartServicesGetter, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
+  mosaicVisFunction,
   partitionLabelsFunction,
   pieVisFunction,
   treemapVisFunction,
-  mosaicVisFunction,
   waffleVisFunction,
 } from '../common';
 import { getPartitionVisRenderer } from './expression_renderers';

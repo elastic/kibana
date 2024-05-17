@@ -7,10 +7,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { TextField, UseField, FieldConfig } from '../../../shared_imports';
-import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
+import { validateUniqueName } from '../../../lib';
 import { useMappingsState } from '../../../mappings_state_context';
+import { FieldConfig, TextField, UseField } from '../../../shared_imports';
 
 const { validations, ...rest } = PARAMETERS_DEFINITION.name.fieldConfig as FieldConfig;
 

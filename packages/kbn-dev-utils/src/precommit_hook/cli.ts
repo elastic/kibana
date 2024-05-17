@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import { chmod, writeFile } from 'fs';
+import Path from 'path';
 import { promisify } from 'util';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { SCRIPT_SOURCE } from './script_source';
+import { run } from '@kbn/dev-cli-runner';
 import { getGitDir, isCorrectGitVersionInstalled } from './git_utils';
+import { SCRIPT_SOURCE } from './script_source';
 
 const chmodAsync = promisify(chmod);
 const writeFileAsync = promisify(writeFile);

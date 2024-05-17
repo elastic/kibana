@@ -6,15 +6,15 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { getEditPath } from '../../common/constants';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
-import type { LensAppState } from '../state_management';
-import type { LensAppServices } from './types';
 import type { Document } from '../persistence/saved_object_store';
+import type { LensAppState } from '../state_management';
 import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
-import { getEditPath } from '../../common/constants';
+import type { LensAppServices } from './types';
 
 interface ShareableConfiguration
   extends Pick<

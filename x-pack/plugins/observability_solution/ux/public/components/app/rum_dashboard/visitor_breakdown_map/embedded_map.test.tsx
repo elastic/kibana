@@ -8,8 +8,8 @@
 import { render } from 'enzyme';
 import React from 'react';
 
-import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EmbeddedMap } from './embedded_map';
 
 describe('Embedded Map', () => {
   test('it renders', () => {

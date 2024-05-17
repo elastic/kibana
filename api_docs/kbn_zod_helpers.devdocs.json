@@ -41,21 +41,15 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "schema",
-            "description": [
-              "Array items schema"
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["Array items schema"],
+            "signature": ["T"],
             "path": "packages/kbn-zod-helpers/src/array_from_string.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "Array schema that accepts a comma-separated string as input"
-        ],
+        "returnComment": ["Array schema that accepts a comma-separated string as input"],
         "initialIsOpen": false
       },
       {
@@ -65,9 +59,7 @@
         "tags": [],
         "label": "expectParseError",
         "description": [],
-        "signature": [
-          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
-        ],
+        "signature": ["(result: Zod.SafeParseReturnType<Input, Output>) => void"],
         "path": "packages/kbn-zod-helpers/src/expect_parse_error.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -79,9 +71,7 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": [
-              "Zod.SafeParseReturnType<Input, Output>"
-            ],
+            "signature": ["Zod.SafeParseReturnType<Input, Output>"],
             "path": "packages/kbn-zod-helpers/src/expect_parse_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -98,9 +88,7 @@
         "tags": [],
         "label": "expectParseSuccess",
         "description": [],
-        "signature": [
-          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
-        ],
+        "signature": ["(result: Zod.SafeParseReturnType<Input, Output>) => void"],
         "path": "packages/kbn-zod-helpers/src/expect_parse_success.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -112,9 +100,7 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": [
-              "Zod.SafeParseReturnType<Input, Output>"
-            ],
+            "signature": ["Zod.SafeParseReturnType<Input, Output>"],
             "path": "packages/kbn-zod-helpers/src/expect_parse_success.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -131,9 +117,7 @@
         "tags": [],
         "label": "isValidDateMath",
         "description": [],
-        "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => void"
-        ],
+        "signature": ["(input: string, ctx: Zod.RefinementCtx) => void"],
         "path": "packages/kbn-zod-helpers/src/is_valid_date_math.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -145,9 +129,7 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-zod-helpers/src/is_valid_date_math.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -160,9 +142,7 @@
             "tags": [],
             "label": "ctx",
             "description": [],
-            "signature": [
-              "Zod.RefinementCtx"
-            ],
+            "signature": ["Zod.RefinementCtx"],
             "path": "packages/kbn-zod-helpers/src/is_valid_date_math.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -202,21 +182,15 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "schema",
-            "description": [
-              "Zod schema"
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["Zod schema"],
+            "signature": ["T"],
             "path": "packages/kbn-zod-helpers/src/required_optional.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "The same schema but with all optional fields required."
-        ],
+        "returnComment": ["The same schema but with all optional fields required."],
         "initialIsOpen": false
       },
       {
@@ -228,9 +202,7 @@
         "description": [
           "\nSafely parse a payload against a schema, returning the output or undefined.\nThis method does not throw validation errors and is useful for validating\noptional objects when we don't care about errors.\n"
         ],
-        "signature": [
-          "(payload: unknown, schema: T) => T[\"_output\"] | undefined"
-        ],
+        "signature": ["(payload: unknown, schema: T) => T[\"_output\"] | undefined"],
         "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -241,12 +213,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "payload",
-            "description": [
-              "Schema payload"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["Schema payload"],
+            "signature": ["unknown"],
             "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -258,21 +226,15 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "schema",
-            "description": [
-              "Validation schema"
-            ],
-            "signature": [
-              "T"
-            ],
+            "description": ["Validation schema"],
+            "signature": ["T"],
             "path": "packages/kbn-zod-helpers/src/safe_parse_result.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "Schema output or undefined"
-        ],
+        "returnComment": ["Schema output or undefined"],
         "initialIsOpen": false
       },
       {
@@ -282,9 +244,7 @@
         "tags": [],
         "label": "stringifyZodError",
         "description": [],
-        "signature": [
-          "(err: Zod.ZodError<any>) => string"
-        ],
+        "signature": ["(err: Zod.ZodError<any>) => string"],
         "path": "packages/kbn-zod-helpers/src/stringify_zod_error.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -296,9 +256,7 @@
             "tags": [],
             "label": "err",
             "description": [],
-            "signature": [
-              "Zod.ZodError<any>"
-            ],
+            "signature": ["Zod.ZodError<any>"],
             "path": "packages/kbn-zod-helpers/src/stringify_zod_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -316,9 +274,7 @@
         "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.RequiredOptional",
         "type": "Type",
-        "tags": [
-          "note"
-        ],
+        "tags": ["note"],
         "label": "RequiredOptional",
         "description": [
           "\nMake any optional fields required, but add `| undefined` to their type.\n\nThis bit of logic is to force all fields to be accounted for in conversions\nfrom the internal rule schema to the response schema. Rather than use\npartial, which makes each field optional, we make each field required but\npossibly undefined. The result is that if a field is forgotten in the\nconversion from internal schema to response schema TS will report an error.\nIf we just used partial instead, then optional fields can be accidentally\nomitted from the conversion - and any actual values in those fields\ninternally will be stripped in the response.\n"

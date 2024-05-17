@@ -10,14 +10,14 @@ import React from 'react';
 import { css } from '@emotion/react';
 
 import {
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  EuiPopoverFooter,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverProps,
+  EuiPopoverTitle,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 

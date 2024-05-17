@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { DataViewSelection } from '@kbn/logs-explorer-plugin/common';
 import {
-  ObsLogsExplorerDataViewLocatorParams,
   OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID,
+  ObsLogsExplorerDataViewLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { constructLocatorPath } from './utils';
+import { DataViewSelection } from '@kbn/logs-explorer-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { ObsLogsExplorerLocatorDependencies } from './types';
+import { constructLocatorPath } from './utils';
 
 export type DataViewLocator = LocatorPublic<ObsLogsExplorerDataViewLocatorParams>;
 

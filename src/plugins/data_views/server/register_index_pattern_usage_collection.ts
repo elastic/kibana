@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { StartServicesAccessor } from '@kbn/core/server';
 import { SavedObjectsClient, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   DataViewAttributes,
   FieldSpec,
   RuntimeField,
 } from '../common';
-import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
+import { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
 
 interface CountSummary {
   min?: number;

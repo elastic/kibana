@@ -17,9 +17,9 @@ jest.mock('fs', () => ({
 
 import * as prompt from '../cli/keystore/utils/prompt';
 
+import fs from 'fs';
 import { Keystore } from '../cli/keystore';
 import { passwd } from './passwd';
-import fs from 'fs';
 
 describe('Kibana keystore', () => {
   describe('has_passwd', () => {

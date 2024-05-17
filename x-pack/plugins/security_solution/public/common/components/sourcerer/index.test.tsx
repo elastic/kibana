@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
+import React from 'react';
 
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { Sourcerer } from '.';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
-import { fireEvent, waitFor, render } from '@testing-library/react';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { Sourcerer } from '.';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
+import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const mockDispatch = jest.fn();
 

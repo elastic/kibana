@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
+import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
-import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
-import { processDistributionData } from '../../utils/process_distribution_data';
-import { PERCENTILE_SPACING } from '../requests/constants';
-import { getESQLPercentileQueryArray, getSafeESQLName, PERCENTS } from '../requests/esql_utils';
-import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
-import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
-import { handleError } from './handle_error';
 import type {
   FieldStatsError,
   NonSampledNumericFieldStats,
 } from '../../../../../common/types/field_stats';
+import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
+import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
+import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
+import { processDistributionData } from '../../utils/process_distribution_data';
+import { PERCENTILE_SPACING } from '../requests/constants';
+import { PERCENTS, getESQLPercentileQueryArray, getSafeESQLName } from '../requests/esql_utils';
+import { handleError } from './handle_error';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];

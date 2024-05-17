@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { sloFeatureId } from '@kbn/observability-plugin/common';
-import { registerSloUsageCollector } from './lib/collectors/register';
-import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
-import { slo, SO_SLO_TYPE } from './saved_objects';
-import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
-import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { SloConfig } from '.';
-import { registerRoutes } from './routes/register_routes';
+import { registerSloUsageCollector } from './lib/collectors/register';
+import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
-import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings';
+import { registerRoutes } from './routes/register_routes';
+import { SO_SLO_TYPE, slo } from './saved_objects';
+import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
+import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
+import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 
 export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
 

@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 import { BedrockSimulator } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { postActionsClientExecute } from '../utils/post_actions_client_execute';
-import { ObjectRemover } from '../utils/object_remover';
 import { createConnector } from '../utils/create_connector';
+import { ObjectRemover } from '../utils/object_remover';
+import { postActionsClientExecute } from '../utils/post_actions_client_execute';
 
 const mockRequest = {
   message: 'Do you know my name?',

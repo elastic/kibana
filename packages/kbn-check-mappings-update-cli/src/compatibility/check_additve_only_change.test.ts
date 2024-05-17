@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import { cloneDeep } from 'lodash';
 import { checkAdditiveOnlyChange } from './check_additive_only_change';
 import { createSomeDevLogMock } from './mocks';
 

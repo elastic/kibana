@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
-import { RuleEdit } from '../application/sections/rule_form';
-import type { ConnectorServices, RuleEditProps, RuleTypeParams, RuleTypeMetaData } from '../types';
 import { queryClient } from '../application/query_client';
+import { RuleEdit } from '../application/sections/rule_form';
+import type { ConnectorServices, RuleEditProps, RuleTypeMetaData, RuleTypeParams } from '../types';
 
 export const getEditRuleFlyoutLazy = <
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 >(
   props: RuleEditProps<Params, MetaData> & { connectorServices: ConnectorServices }
 ) => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { Observable } from 'rxjs';
 
 /** @public */
 export interface ChromeNavControl {

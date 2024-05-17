@@ -21,11 +21,11 @@ import { createTestEnv } from '@kbn/config-mocks';
 import type { HttpConfig } from './http_config';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 
-import {
-  createVersionCheckPostAuthHandler,
-  createBuildNrMismatchLoggerPreResponseHandler,
-} from './lifecycle_handlers';
 import { loggerMock } from '@kbn/logging-mocks';
+import {
+  createBuildNrMismatchLoggerPreResponseHandler,
+  createVersionCheckPostAuthHandler,
+} from './lifecycle_handlers';
 
 describe('registerCoreHandlers', () => {
   it('will not register client version checking if disabled via config', () => {

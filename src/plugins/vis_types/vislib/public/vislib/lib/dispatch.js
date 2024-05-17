@@ -7,8 +7,8 @@
  */
 
 import d3 from 'd3';
-import { get, pull, rest, size, reduce } from 'lodash';
 import $ from 'jquery';
+import { get, pull, reduce, rest, size } from 'lodash';
 
 /**
  * Handles event responses

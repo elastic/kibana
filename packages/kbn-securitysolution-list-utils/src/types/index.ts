@@ -17,9 +17,9 @@ import type {
   EntryMatchWildcard,
   EntryNested,
   ExceptionListItemSchema,
+  NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
-  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_NAMESPACE,

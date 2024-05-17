@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactChild, useState, useLayoutEffect } from 'react';
-import ReactDOM from 'react-dom';
-import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { History } from 'history';
+import React, { ReactChild, useState, useLayoutEffect } from 'react';
+import ReactDOM from 'react-dom';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
+import type { IBasePath } from '@kbn/core-http-browser';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { UrlOverflowUi } from './url_overflow_ui';
 
 interface Props {

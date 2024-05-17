@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
+import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import type { LogLevel } from '../../model';
 
 // -------------------------------------------------------------------------------------------------

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { EnableMonitorAlert } from './enable_alert';
-import { fireEvent } from '@testing-library/react';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 import { makePing } from '../../../../../../common/runtime_types/ping';
-import { render } from '../../../../lib/helper/rtl_helpers';
-import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
 import { mockState } from '../../../../lib/__mocks__/uptime_store.mock';
+import { render } from '../../../../lib/helper/rtl_helpers';
 import { AlertsResult } from '../../../../state/actions/types';
+import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
 
 describe('EnableAlertComponent', () => {
   it('it displays define connectors when there is none', () => {

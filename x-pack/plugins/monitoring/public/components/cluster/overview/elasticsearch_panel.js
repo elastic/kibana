@@ -5,57 +5,57 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import moment from 'moment-timezone';
-import { get, capitalize } from 'lodash';
-import { formatNumber } from '../../../lib/format_number';
 import {
-  ClusterItemContainer,
-  BytesPercentageUsage,
-  DisabledIfNoDataAndInSetupModeLink,
-  HealthLabel,
-} from './helpers';
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLink,
-  EuiTitle,
-  EuiPanel,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiHorizontalRule,
   EuiBadge,
-  EuiToolTip,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiHealth,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiPanel,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Reason } from '../../logs/reason';
-import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { capitalize, get } from 'lodash';
+import moment from 'moment-timezone';
+import React, { Fragment } from 'react';
 import {
   ELASTICSEARCH_SYSTEM_ID,
-  RULE_LICENSE_EXPIRATION,
+  RULE_CCR_READ_EXCEPTIONS,
   RULE_CLUSTER_HEALTH,
   RULE_CPU_USAGE,
   RULE_DISK_USAGE,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_LARGE_SHARD_SIZE,
+  RULE_LICENSE_EXPIRATION,
+  RULE_MEMORY_USAGE,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_NODES_CHANGED,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
-  RULE_MEMORY_USAGE,
-  RULE_NODES_CHANGED,
-  RULE_ELASTICSEARCH_VERSION_MISMATCH,
-  RULE_MISSING_MONITORING_DATA,
-  RULE_CCR_READ_EXCEPTIONS,
-  RULE_LARGE_SHARD_SIZE,
 } from '../../../../common/constants';
+import { SetupModeFeature } from '../../../../common/enums';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
-import { SetupModeFeature } from '../../../../common/enums';
+import { formatNumber } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { Reason } from '../../logs/reason';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import {
+  BytesPercentageUsage,
+  ClusterItemContainer,
+  DisabledIfNoDataAndInSetupModeLink,
+  HealthLabel,
+} from './helpers';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { StaticTextProperty } from './static_text_property';
-import { VECTOR_STYLES } from '../../../../../common/constants';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { VECTOR_STYLES } from '../../../../../common/constants';
+import { StaticTextProperty } from './static_text_property';
 
 export class MockMbMap {
   _paintPropertyCalls: unknown[];

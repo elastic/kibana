@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
-import { css } from '@emotion/react';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import {
-  EuiFormRow,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { forwardRef, useMemo } from 'react';
 import * as i18n from '../../common/translations';
+import { CommentEditorContext } from './context';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
-import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 
 /* eslint-disable react/no-unused-prop-types */

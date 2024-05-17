@@ -16,12 +16,12 @@ import { EuiDescriptionList, EuiLink, EuiPanel } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ml } from '../../../services/ml_api_service';
+import { buildRuleDescription } from '../utils';
 import { AddToFilterListLink } from './add_to_filter_list_link';
 import { DeleteRuleModal } from './delete_rule_modal';
 import { EditConditionLink } from './edit_condition_link';
-import { buildRuleDescription } from '../utils';
-import { ml } from '../../../services/ml_api_service';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export class RuleActionPanel extends Component {
   constructor(props) {

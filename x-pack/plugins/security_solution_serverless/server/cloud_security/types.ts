@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CSPM, KSPM, CNVM, CLOUD_DEFEND } from './constants';
 import type { MeteringCallbackInput, Tier } from '../types';
+import type { CLOUD_DEFEND, CNVM, CSPM, KSPM } from './constants';
 
 export interface CloudDefendAssetCountAggregation {
   asset_count_groups: AssetCountAggregationBucket;

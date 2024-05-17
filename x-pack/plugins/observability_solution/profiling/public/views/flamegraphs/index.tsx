@@ -10,8 +10,8 @@ import React from 'react';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const { query } = useProfilingParams('/flamegraphs/*');

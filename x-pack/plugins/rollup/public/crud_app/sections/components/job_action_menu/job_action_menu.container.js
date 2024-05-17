@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 
 import { isUpdating } from '../../../store/selectors';
 
-import { startJobs, stopJobs, deleteJobs, cloneJob } from '../../../store/actions';
+import { cloneJob, deleteJobs, startJobs, stopJobs } from '../../../store/actions';
 
 import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
-import { ServiceNowITSMActionParams } from './types';
+import { lazy } from 'react';
 import {
   DEFAULT_CORRELATION_ID,
   getConnectorDescriptiveTitle,
   getSelectedConnectorIcon,
 } from '../lib/servicenow/helpers';
+import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
+import { ServiceNowITSMActionParams } from './types';
 
 export const SERVICENOW_ITSM_DESC = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITSM.selectMessageText',

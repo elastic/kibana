@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import styled from 'styled-components';
-import { EuiFlexItem, EuiLink, EuiFlexGroup } from '@elastic/eui';
-import { Router } from '@kbn/shared-ux-router';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  fetch$,
   initializeTitles,
   useBatchedPublishingSubjects,
-  fetch$,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createBrowserHistory } from 'history';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createBrowserHistory } from 'history';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import styled from 'styled-components';
+import { OverviewEmbeddableContext } from '../../../context/plugin_context';
+import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
-import { SloCardChartList } from './slo_overview_grid';
-import { SloOverview } from './slo_overview';
 import { GroupSloView } from './group_view/group_view';
+import { SloOverview } from './slo_overview';
+import { SloCardChartList } from './slo_overview_grid';
 import {
-  SloOverviewEmbeddableState,
+  GroupSloCustomInput,
   SloEmbeddableDeps,
   SloOverviewApi,
-  GroupSloCustomInput,
+  SloOverviewEmbeddableState,
 } from './types';
-import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
-import { OverviewEmbeddableContext } from '../../../context/plugin_context';
 
 const queryClient = new QueryClient();
 export const getOverviewPanelTitle = () =>

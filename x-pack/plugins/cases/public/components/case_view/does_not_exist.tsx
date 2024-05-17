@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import * as i18n from './translations';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useAllCasesNavigation } from '../../common/navigation';
+import * as i18n from './translations';
 
 interface Props {
   caseId: string;

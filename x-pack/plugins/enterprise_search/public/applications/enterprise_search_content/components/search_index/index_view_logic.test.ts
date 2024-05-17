@@ -12,7 +12,7 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_index.mock';
 
-import { SyncStatus, IngestionMethod, IngestionStatus } from '@kbn/search-connectors';
+import { IngestionMethod, IngestionStatus, SyncStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';

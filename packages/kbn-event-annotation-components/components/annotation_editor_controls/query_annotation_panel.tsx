@@ -8,19 +8,19 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import type { Query } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import {
   FieldOption,
   FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
-  isFieldLensCompatible,
   type QueryInputServices,
+  isFieldLensCompatible,
 } from '@kbn/visualization-ui-components';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import React from 'react';
 
 export const defaultQuery: Query = {
   query: '',

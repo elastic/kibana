@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { AttachmentType } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useCreateAttachments } from './use_create_attachments';
-import { basicCaseId } from './mock';
-import * as api from './api';
+import { AttachmentType } from '../../common/types/domain';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
+import * as api from './api';
+import { basicCaseId } from './mock';
+import { useCreateAttachments } from './use_create_attachments';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

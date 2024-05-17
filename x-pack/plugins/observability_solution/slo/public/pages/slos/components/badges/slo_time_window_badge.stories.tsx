@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import { SloTimeWindowBadge as Component, Props } from './slo_time_window_badge';
 import { buildSlo } from '../../../../data/slo/slo';
+import { SloTimeWindowBadge as Component, Props } from './slo_time_window_badge';
 
 export default {
   component: Component,

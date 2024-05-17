@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { HttpHandler } from '@kbn/core/public';
-import MemoryJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
+import { i18n } from '@kbn/i18n';
 import MemoryDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_memory_usage.json';
-import NetworkInJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
 import NetworkInDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_in.json';
-import NetworkOutJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
 import NetworkOutDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_out.json';
-import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
-import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
+import MemoryJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
+import NetworkInJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
+import NetworkOutJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import {
+  MetricsHostsJobType,
+  bucketSpan,
+  getJobId,
+  metricsHostsJobTypes,
+} from '../../../../../common/infra_ml';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
-import {
-  metricsHostsJobTypes,
-  getJobId,
-  MetricsHostsJobType,
-  bucketSpan,
-} from '../../../../../common/infra_ml';
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
+import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
 
 type JobType = 'hosts_memory_usage' | 'hosts_network_in' | 'hosts_network_out';
 const moduleId = 'metrics_ui_hosts';

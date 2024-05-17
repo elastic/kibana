@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { compose, withProps } from 'react-recompose';
-import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter';
-import { pluginServices } from '../../services';
+import { get } from 'lodash';
+import { compose, withProps } from 'react-recompose';
 import { getArgTypeDef } from '../../lib/args';
+import { pluginServices } from '../../services';
 import { FunctionFormList as Component } from './function_form_list';
 
 function normalizeContext(chain) {

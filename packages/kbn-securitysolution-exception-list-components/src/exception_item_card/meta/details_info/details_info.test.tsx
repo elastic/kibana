@@ -1,3 +1,4 @@
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
 import { MetaInfoDetails } from '.';
 
 describe('MetaInfoDetails', () => {

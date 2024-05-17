@@ -7,10 +7,12 @@
 
 /* global jest */
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
+import { MountRendererProps, ReactWrapper, mount } from 'enzyme';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
@@ -18,8 +20,6 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 

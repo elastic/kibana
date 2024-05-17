@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
-import { takeLatest, select, call, put } from 'redux-saga/effects';
-import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
-import { GraphStoreDependencies, GraphState, fillWorkspace } from '.';
-import { reset } from './global';
-import { datasourceSelector } from './datasource';
-import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { GraphState, GraphStoreDependencies, fillWorkspace } from '.';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { Workspace } from '../types';
 import type { ServerResultNode } from '../types';
+import { datasourceSelector } from './datasource';
+import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
+import { reset } from './global';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/workspace');
 

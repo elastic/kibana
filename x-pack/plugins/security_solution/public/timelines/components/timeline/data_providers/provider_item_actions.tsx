@@ -12,13 +12,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/api/timeline';
-import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 
+import { StatefulEditDataProvider } from '../../edit_data_provider';
 import type { OnDataProviderEdited } from '../events';
 import type { QueryOperator } from './data_provider';
 import { DataProviderType, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
-import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';
 

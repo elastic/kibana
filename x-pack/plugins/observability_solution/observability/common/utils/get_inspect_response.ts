@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '../../typings/common';
 import { WrappedElasticsearchClientError } from './unwrap_es_response';

@@ -7,9 +7,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { inspect } from 'util';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import { inspect } from 'util';
 
 /**
  * Capture and return the calling stack for the context that called this utility.

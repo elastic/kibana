@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import expect from '@kbn/expect';
-import { adminTestUser } from '@kbn/test';
-import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import {
   AggregateName,
   AggregationsMultiTermsAggregate,
@@ -17,10 +12,15 @@ import {
   AggregationsTopHitsAggregate,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
+import expect from '@kbn/expect';
 import {
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
+import { adminTestUser } from '@kbn/test';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { Cookie, parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

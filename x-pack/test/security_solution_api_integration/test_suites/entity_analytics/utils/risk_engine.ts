@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { v4 as uuidv4 } from 'uuid';
-import SuperTest from 'supertest';
-import type { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { EcsRiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
-import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
-import type { KbnClient } from '@kbn/test';
-import {
-  RISK_ENGINE_INIT_URL,
-  RISK_ENGINE_DISABLE_URL,
-  RISK_ENGINE_ENABLE_URL,
-  RISK_ENGINE_STATUS_URL,
-  RISK_ENGINE_PRIVILEGES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import {
+  RISK_ENGINE_DISABLE_URL,
+  RISK_ENGINE_ENABLE_URL,
+  RISK_ENGINE_INIT_URL,
+  RISK_ENGINE_PRIVILEGES_URL,
+  RISK_ENGINE_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import type { EcsRiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
+import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
+import type { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import SuperTest from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  countDownTest,
   createRule,
+  getRuleForAlertTesting,
+  routeWithNamespace,
+  waitFor,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-  getRuleForAlertTesting,
-  countDownTest,
-  waitFor,
-  routeWithNamespace,
 } from '../../../../common/utils/security_solution';
 
 const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {

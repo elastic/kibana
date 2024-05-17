@@ -163,8 +163,9 @@ describe('without randomness', () => {
     const phase = new LifecyclePhase(new Rx.Subscription(), { singular: true });
     await phase.trigger();
 
-    await expect(phase.before$.pipe(materialize(), toArray()).toPromise()).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      phase.before$.pipe(materialize(), toArray()).toPromise()
+    ).resolves.toMatchInlineSnapshot(`
             Array [
               Notification {
                 "error": undefined,
@@ -180,8 +181,9 @@ describe('without randomness', () => {
     const phase = new LifecyclePhase(new Rx.Subscription(), { singular: true });
     await phase.trigger();
 
-    await expect(phase.after$.pipe(materialize(), toArray()).toPromise()).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      phase.after$.pipe(materialize(), toArray()).toPromise()
+    ).resolves.toMatchInlineSnapshot(`
             Array [
               Notification {
                 "error": undefined,

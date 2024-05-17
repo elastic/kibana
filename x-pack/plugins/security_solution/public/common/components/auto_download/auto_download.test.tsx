@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
 import { globalNode } from '../../mock';
 import { AutoDownload } from './auto_download';

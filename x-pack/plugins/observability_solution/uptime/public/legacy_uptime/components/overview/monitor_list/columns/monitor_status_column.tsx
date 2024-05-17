@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment, { Moment } from 'moment';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiSpacer,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { parseTimestamp } from '../parse_timestamp';
-import { Ping, PingError } from '../../../../../../common/runtime_types';
+import moment, { Moment } from 'moment';
+import React from 'react';
+import styled from 'styled-components';
 import {
-  STATUS,
   SHORT_TIMESPAN_LOCALE,
-  UNNAMED_LOCATION,
   SHORT_TS_LOCALE,
+  STATUS,
+  UNNAMED_LOCATION,
 } from '../../../../../../common/constants';
+import { Ping, PingError } from '../../../../../../common/runtime_types';
+import { parseTimestamp } from '../parse_timestamp';
 
 import {
   STATUS_DOWN_LABEL,

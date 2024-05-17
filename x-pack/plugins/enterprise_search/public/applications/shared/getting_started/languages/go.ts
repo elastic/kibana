@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
@@ -84,8 +84,8 @@ if err != nil {
 ingestResult, err := es.Bulk(
   bytes.NewReader(buf.Bytes()),
   es.Bulk.WithIndex("${indexName}"),${
-      ingestPipeline ? `\n  es.Bulk.WithPipeline("${ingestPipeline}"),` : ''
-    }
+    ingestPipeline ? `\n  es.Bulk.WithPipeline("${ingestPipeline}"),` : ''
+  }
 )
 
 fmt.Println(ingestResult, err)`;

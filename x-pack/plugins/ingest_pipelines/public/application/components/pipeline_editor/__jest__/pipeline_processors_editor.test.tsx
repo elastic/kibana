@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { setup, SetupResult } from './pipeline_processors_editor.helpers';
+import { act } from 'react-dom/test-utils';
 import { Pipeline } from '../../../../../common/types';
 import {
   extractProcessorDetails,
@@ -15,6 +14,7 @@ import {
   groupProcessorsByCategory,
 } from '../components/processor_form/processors/common_fields/processor_type_field';
 import { mapProcessorTypeToDescriptor } from '../components/shared/map_processor_type_to_form';
+import { SetupResult, setup } from './pipeline_processors_editor.helpers';
 
 const testProcessors: Pick<Pipeline, 'processors'> = {
   processors: [

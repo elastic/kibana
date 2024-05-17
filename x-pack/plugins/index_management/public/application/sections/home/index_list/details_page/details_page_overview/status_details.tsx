@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
+  EuiBadgeProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
   EuiTextColor,
-  EuiBadgeProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { FunctionComponent } from 'react';
 
-import { useAppContext } from '../../../../../app_context';
 import { Index } from '../../../../../../../common';
+import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
 
 type NormalizedHealth = 'green' | 'red' | 'yellow';

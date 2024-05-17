@@ -18,9 +18,7 @@
         "tags": [],
         "label": "bootstrap",
         "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
+        "signature": ["() => Promise<void>"],
         "path": "packages/kbn-health-gateway-server/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,

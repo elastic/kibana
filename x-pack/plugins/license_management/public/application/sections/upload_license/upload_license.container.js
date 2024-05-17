@@ -6,17 +6,17 @@
  */
 
 import { connect } from 'react-redux';
+import { addUploadErrorMessage } from '../../store/actions/add_error_message';
 import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 import { uploadLicense, uploadLicenseStatus } from '../../store/actions/upload_license';
-import { addUploadErrorMessage } from '../../store/actions/add_error_message';
 
 import {
-  getUploadErrorMessage,
   getLicenseType,
-  isInvalid,
+  getUploadErrorMessage,
   isApplying,
-  uploadNeedsAcknowledgement,
+  isInvalid,
   uploadMessages,
+  uploadNeedsAcknowledgement,
 } from '../../store/reducers/license_management';
 import { UploadLicense as PresentationComponent } from './upload_license';
 

@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { timelineSelectors } from '../../../../store';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { timelineSelectors } from '../../../../store';
 import { GraphOverlay } from '../../../graph_overlay';
-import { useSessionViewNavigation, useSessionView } from '../session/use_session_view';
+import { useSessionView, useSessionViewNavigation } from '../session/use_session_view';
 import { ScrollableFlexItem, VerticalRule } from '../shared/layout';
 
 interface GraphTabContentProps {

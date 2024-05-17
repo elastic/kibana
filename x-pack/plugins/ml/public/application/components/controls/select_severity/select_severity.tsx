@@ -16,8 +16,8 @@ import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_ANOMALY_THRESHOLD, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
 const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',

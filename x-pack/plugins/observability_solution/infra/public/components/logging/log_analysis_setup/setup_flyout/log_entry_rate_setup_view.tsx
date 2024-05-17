@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiSpacer, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
-import { EuiTitle, EuiText, EuiSpacer, EuiSteps } from '@elastic/eui';
+import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { createInitialConfigurationStep } from '../initial_configuration_step';
 import { createProcessStep } from '../process_step';
-import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 
 export const LogEntryRateSetupView: React.FC<{
   onClose: () => void;

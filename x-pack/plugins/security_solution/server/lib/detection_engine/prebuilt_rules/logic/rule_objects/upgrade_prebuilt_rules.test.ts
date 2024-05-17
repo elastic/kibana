@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { omit } from 'lodash';
 import {
-  getRuleMock,
-  getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getFindResultWithSingleHit,
+  getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
-import { upgradePrebuiltRules } from './upgrade_prebuilt_rules';
-import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { createRules } from '../../../rule_management/logic/crud/create_rules';
 import { deleteRules } from '../../../rule_management/logic/crud/delete_rules';
-import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from '../../mocks';
+import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { getQueryRuleParams, getThreatRuleParams } from '../../../rule_schema/mocks';
+import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from '../../mocks';
+import { upgradePrebuiltRules } from './upgrade_prebuilt_rules';
 
 jest.mock('../../../rule_management/logic/crud/patch_rules');
 jest.mock('../../../rule_management/logic/crud/create_rules');

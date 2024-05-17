@@ -7,14 +7,14 @@
 
 import type {
   EncryptedObjectDescriptor,
-  ISavedObjectsEncryptionExtension,
   ISavedObjectTypeRegistry,
+  ISavedObjectsEncryptionExtension,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import { getDescriptorNamespace } from './get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from '../crypto';
+import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 /**
  * @internal Only exported for unit testing.

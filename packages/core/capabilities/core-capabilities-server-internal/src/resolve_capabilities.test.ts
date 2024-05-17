@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { splitIntoBucketsMock } from './resolve_capabilities.test.mocks';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getCapabilitiesResolver } from './resolve_capabilities';
+import { splitIntoBucketsMock } from './resolve_capabilities.test.mocks';
 import type { SwitcherWithOptions } from './types';
 
 describe('resolveCapabilities', () => {

@@ -6,11 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ITaskMetricsService, TaskMetric } from './task_metrics.types';
-import { TaskMetricsService } from './task_metrics';
 import { createMockTelemetryEventsSender } from './__mocks__';
-import type { ITelemetryEventsSender } from './sender';
 import { telemetryConfiguration } from './configuration';
+import type { ITelemetryEventsSender } from './sender';
+import { TaskMetricsService } from './task_metrics';
+import type { ITaskMetricsService, TaskMetric } from './task_metrics.types';
 
 describe('task metrics', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

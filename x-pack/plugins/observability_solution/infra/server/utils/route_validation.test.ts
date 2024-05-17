@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import type { RouteValidationResultFactory } from '@kbn/core/server';
+import * as rt from 'io-ts';
 
 import { buildRouteValidationWithExcess } from './route_validation';
 

@@ -12,8 +12,8 @@ import { ConnectorAPIListConnectorsResponse } from '..';
 
 import { Connector } from '../types/connectors';
 
-import { isNotFoundException } from '../utils/identify_exceptions';
 import { CRAWLER_SERVICE_TYPE } from '..';
+import { isNotFoundException } from '../utils/identify_exceptions';
 
 export const fetchConnectorById = async (
   client: ElasticsearchClient,
@@ -65,10 +65,10 @@ export const fetchConnectors = async (
         query: q,
       }
     : indexNames
-    ? {
-        index_name: indexNames.join(','),
-      }
-    : {};
+      ? {
+          index_name: indexNames.join(','),
+        }
+      : {};
 
   let hits: Connector[] = [];
   let accumulator: Connector[] = [];

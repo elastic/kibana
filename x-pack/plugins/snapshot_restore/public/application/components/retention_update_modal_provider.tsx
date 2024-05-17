@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { Fragment, useRef, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiLink,
-  EuiFormRow,
-  EuiFieldText,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useRef, useState } from 'react';
 
+import { CronEditor, Frequency } from '../../shared_imports';
 import { useCore, useServices, useToastNotifications } from '../app_context';
-import { Frequency, CronEditor } from '../../shared_imports';
-import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
+import { DEFAULT_RETENTION_FREQUENCY, DEFAULT_RETENTION_SCHEDULE } from '../constants';
 import { updateRetentionSchedule } from '../services/http';
 
 interface Props {

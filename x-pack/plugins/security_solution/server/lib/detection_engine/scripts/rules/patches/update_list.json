@@ -1,7 +1,7 @@
 {
   "rule_id": "query-with-exceptions",
   "exceptions_list": [
-    { 
+    {
       "id": "ID_HERE",
       "namespace_type": "single",
       "type": "endpoint"

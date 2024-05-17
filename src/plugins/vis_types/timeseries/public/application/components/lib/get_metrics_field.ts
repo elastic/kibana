@@ -7,8 +7,8 @@
  */
 
 import { last } from 'lodash';
-import { Metric } from '../../../../common/types';
 import { getAggByPredicate, isBasicAgg } from '../../../../common/agg_utils';
+import { Metric } from '../../../../common/types';
 
 export const getMetricsField = (metrics: Metric[]) => {
   const selectedMetric = last(metrics);

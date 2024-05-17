@@ -1,3 +1,4 @@
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
 export const useDataView = ({ index }: { index: string | DataViewSpec }) => {

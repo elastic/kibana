@@ -6,10 +6,6 @@
     "id": "actionsSimulators",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "actions",
-      "features",
-      "encryptedSavedObjects"
-    ]
+    "requiredPlugins": ["actions", "features", "encryptedSavedObjects"]
   }
 }

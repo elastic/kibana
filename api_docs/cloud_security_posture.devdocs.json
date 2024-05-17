@@ -35,12 +35,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "cloudSecurityPosturePage",
-            "description": [
-              "the name of the cloud posture page."
-            ],
-            "signature": [
-              "CspPage"
-            ],
+            "description": ["the name of the cloud posture page."],
+            "signature": ["CspPage"],
             "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -74,9 +70,7 @@
             "description": [
               "Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
             ],
-            "signature": [
-              "() => React.ComponentType<{ children: React.ReactNode; }>"
-            ],
+            "signature": ["() => React.ComponentType<{ children: React.ReactNode; }>"],
             "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -121,12 +115,8 @@
         "type": "string",
         "tags": [],
         "label": "CLOUD_SECURITY_POSTURE_BASE_PATH",
-        "description": [
-          "The base path for all cloud security posture pages."
-        ],
-        "signature": [
-          "\"/cloud_security_posture\""
-        ],
+        "description": ["The base path for all cloud security posture pages."],
+        "signature": ["\"/cloud_security_posture\""],
         "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -157,9 +147,7 @@
       "type": "Interface",
       "tags": [],
       "label": "CspClientPluginSetup",
-      "description": [
-        "\nThe cloud security posture's public plugin setup interface."
-      ],
+      "description": ["\nThe cloud security posture's public plugin setup interface."],
       "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -173,9 +161,7 @@
       "type": "Interface",
       "tags": [],
       "label": "CspClientPluginStart",
-      "description": [
-        "\nThe cloud security posture's public plugin start interface."
-      ],
+      "description": ["\nThe cloud security posture's public plugin start interface."],
       "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -189,11 +175,7 @@
           "description": [
             "Gets the cloud security posture router component for embedding in the security solution."
           ],
-          "signature": [
-            "() => React.ComponentType<",
-            "CspRouterProps",
-            ">"
-          ],
+          "signature": ["() => React.ComponentType<", "CspRouterProps", ">"],
           "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -253,12 +235,8 @@
         "type": "string",
         "tags": [],
         "label": "PLUGIN_ID",
-        "description": [
-          "ID of the cloud security posture plugin."
-        ],
-        "signature": [
-          "\"csp\""
-        ],
+        "description": ["ID of the cloud security posture plugin."],
+        "signature": ["\"csp\""],
         "path": "x-pack/plugins/cloud_security_posture/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -270,12 +248,8 @@
         "type": "string",
         "tags": [],
         "label": "PLUGIN_NAME",
-        "description": [
-          "Display name of the cloud security posture application."
-        ],
-        "signature": [
-          "\"Cloud Security\""
-        ],
+        "description": ["Display name of the cloud security posture application."],
+        "signature": ["\"Cloud Security\""],
         "path": "x-pack/plugins/cloud_security_posture/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

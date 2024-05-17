@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSelect } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import React from 'react';
 
 export const NO_SELECTION = '__NO_SELECTION__';
 const DEFAULT_PLACEHOLDER = i18n.translate('xpack.apm.selectPlaceholder', {

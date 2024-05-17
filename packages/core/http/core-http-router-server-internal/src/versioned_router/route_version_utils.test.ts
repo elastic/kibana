@@ -10,8 +10,8 @@ import { hapiMocks } from '@kbn/hapi-mocks';
 import { CoreKibanaRequest } from '../request';
 import { passThroughValidation } from './core_versioned_route';
 import {
-  isValidRouteVersion,
   isAllowedPublicVersion,
+  isValidRouteVersion,
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';

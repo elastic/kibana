@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import * as i18n from './translations';
-import { updateCases } from './api';
-import type { CaseUpdateRequest } from './types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
-import { casesQueriesKeys, casesMutationsKeys } from './constants';
+import { updateCases } from './api';
+import { casesMutationsKeys, casesQueriesKeys } from './constants';
+import * as i18n from './translations';
+import type { CaseUpdateRequest } from './types';
 
 interface MutationArgs {
   cases: CaseUpdateRequest[];

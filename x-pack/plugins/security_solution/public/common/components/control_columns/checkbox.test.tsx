@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
-import { HeaderCheckBox, RowCheckBox } from './checkbox';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import type { ActionProps, HeaderActionProps } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
+import { HeaderCheckBox, RowCheckBox } from './checkbox';
 
 describe('checkbox control column', () => {
   describe('RowCheckBox', () => {

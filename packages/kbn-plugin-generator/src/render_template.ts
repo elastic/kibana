@@ -10,15 +10,15 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import vfs from 'vinyl-fs';
-import prettier from 'prettier';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { transformFileStream } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
+import prettier from 'prettier';
+import vfs from 'vinyl-fs';
 
-import { snakeCase, camelCase, upperCamelCase } from './casing';
 import { Answers } from './ask_questions';
+import { camelCase, snakeCase, upperCamelCase } from './casing';
 
 const asyncPipeline = promisify(pipeline);
 

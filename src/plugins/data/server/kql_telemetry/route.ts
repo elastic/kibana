@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor, IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '../../common/constants';
 
 export function registerKqlTelemetryRoute(

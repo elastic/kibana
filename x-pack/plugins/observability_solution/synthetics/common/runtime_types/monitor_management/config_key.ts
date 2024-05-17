@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { tEnum } from '../../utils/t_enum';
 import { ConfigKey } from '../../constants/monitor_management';
+import { tEnum } from '../../utils/t_enum';
 export { ConfigKey } from '../../constants/monitor_management';
 
 export const ConfigKeyCodec = tEnum<ConfigKey>('ConfigKey', ConfigKey);

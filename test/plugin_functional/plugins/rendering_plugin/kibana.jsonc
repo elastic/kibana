@@ -6,8 +6,6 @@
     "id": "renderingPlugin",
     "server": true,
     "browser": true,
-    "configPath": [
-      "rendering_plugin"
-    ]
+    "configPath": ["rendering_plugin"]
   }
 }

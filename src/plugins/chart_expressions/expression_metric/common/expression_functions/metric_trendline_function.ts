@@ -8,16 +8,16 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { MetricWTrend } from '@elastic/charts';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 import {
-  validateAccessor,
+  Dimension,
   getColumnByAccessor,
   prepareLogTable,
-  Dimension,
+  validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { MetricWTrend } from '@elastic/charts';
-import type { TrendlineExpressionFunctionDefinition } from '../types';
 import { DEFAULT_TRENDLINE_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
+import type { TrendlineExpressionFunctionDefinition } from '../types';
 
 export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_TRENDLINE_NAME,

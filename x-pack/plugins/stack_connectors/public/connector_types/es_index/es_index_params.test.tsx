@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
-import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { act } from '@testing-library/react';
+import React from 'react';
+import ParamsFields from './es_index_params';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

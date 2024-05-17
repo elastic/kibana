@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
-import { CustomIntegrationRegistry } from '../custom_integration_registry';
+import { i18n } from '@kbn/i18n';
 import { CustomIntegrationIcon, IntegrationCategory, PLUGIN_ID } from '../../common';
+import { CustomIntegrationRegistry } from '../custom_integration_registry';
 
 interface ExternalIntegration {
   id: string;

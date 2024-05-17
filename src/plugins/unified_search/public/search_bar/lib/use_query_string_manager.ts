@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import { Subscription } from 'rxjs';
-import { Query, AggregateQuery } from '@kbn/es-query';
 import type { QueryStringContract } from '@kbn/data-plugin/public';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { useEffect, useMemo, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
   return Boolean(arg && 'query' in arg);

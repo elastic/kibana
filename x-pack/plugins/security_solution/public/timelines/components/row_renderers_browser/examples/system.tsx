@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { TERMINATED_PROCESS } from '../../timeline/body/renderers/system/translations';
-import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { demoEndgameTerminationEvent } from '../../../../common/demo_data/endgame_ecs/termination';
+import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+import { TERMINATED_PROCESS } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemExampleComponent: React.FC = () => {

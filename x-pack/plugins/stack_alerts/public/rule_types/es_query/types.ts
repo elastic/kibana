@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery } from '@kbn/es-query';
 
@@ -47,8 +47,8 @@ export interface EsQueryRuleMetaData {
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
   ? CommonEsQueryRuleParams & OnlySearchSourceRuleParams
   : T extends SearchType.esqlQuery
-  ? CommonEsQueryRuleParams & OnlyEsqlQueryRuleParams
-  : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
+    ? CommonEsQueryRuleParams & OnlyEsqlQueryRuleParams
+    : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
 
 export interface OnlyEsQueryRuleParams {
   esQuery: string;

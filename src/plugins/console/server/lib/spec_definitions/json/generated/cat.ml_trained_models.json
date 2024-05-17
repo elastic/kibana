@@ -1,9 +1,7 @@
 {
   "cat.ml_trained_models": {
     "url_params": {
-      "format": [
-        "text"
-      ],
+      "format": ["text"],
       "h": [
         "create_time",
         "created_by",
@@ -22,11 +20,7 @@
       ],
       "help": "__flag__",
       "local": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
+      "master_timeout": ["30s", "-1", "0"],
       "s": [
         "create_time",
         "created_by",
@@ -49,24 +43,12 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "bytes": [
-        "b",
-        "kb",
-        "mb",
-        "gb",
-        "tb",
-        "pb"
-      ],
+      "bytes": ["b", "kb", "mb", "gb", "tb", "pb"],
       "from": "",
       "size": ""
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_cat/ml/trained_models",
-      "_cat/ml/trained_models/{model_id}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_cat/ml/trained_models", "_cat/ml/trained_models/{model_id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-trained-model.html",
     "availability": {
       "stack": true,

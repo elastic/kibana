@@ -8,8 +8,8 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import {
-  getPredictedFieldName,
   getDependentVar,
+  getPredictedFieldName,
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,

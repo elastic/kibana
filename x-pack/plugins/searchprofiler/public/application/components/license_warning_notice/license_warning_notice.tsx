@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCallOut, EuiText, EuiLink, EuiCode } from '@elastic/eui';
+import { EuiCallOut, EuiCode, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const LicenseWarningNotice = () => {
   const registerLicenseLinkLabel = i18n.translate('xpack.searchProfiler.registerLicenseLinkLabel', {

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
-  MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
-  RULES_TAGS_POPOVER_BTN,
+  MODAL_CONFIRMATION_BTN,
   MODAL_ERROR_BODY,
+  RULES_TAGS_POPOVER_BTN,
 } from '../../../../../screens/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 
 import {
+  APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
+  INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
+  RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING,
   TAGS_RULE_BULK_MENU_ITEM,
-  INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
-  APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
-  RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING,
 } from '../../../../../screens/rules_bulk_actions';
 
 import {
@@ -31,78 +31,78 @@ import {
 import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
 
 import {
-  selectAllRules,
-  goToRuleDetailsOf,
-  testAllTagsBadges,
-  testTagsBadge,
-  testMultipleSelectedRulesLabel,
-  filterByElasticRules,
-  clickErrorToastBtn,
   cancelConfirmationModal,
-  selectRulesByName,
-  getRulesManagementTableRows,
-  selectAllRulesOnPage,
-  getRuleRow,
+  clickErrorToastBtn,
   disableAutoRefresh,
+  filterByElasticRules,
+  getRuleRow,
+  getRulesManagementTableRows,
+  goToRuleDetailsOf,
+  selectAllRules,
+  selectAllRulesOnPage,
+  selectRulesByName,
+  testAllTagsBadges,
+  testMultipleSelectedRulesLabel,
+  testTagsBadge,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
-  typeIndexPatterns,
-  waitForBulkEditActionToFinish,
-  submitBulkEditForm,
-  clickAddIndexPatternsMenuItem,
-  checkPrebuiltRulesCannotBeModified,
-  checkMachineLearningRulesCannotBeModified,
-  checkEsqlRulesCannotBeModified,
-  waitForMixedRulesBulkEditModal,
-  openBulkEditAddTagsForm,
-  openBulkEditDeleteTagsForm,
-  typeTags,
-  openTagsSelect,
-  openBulkActionsMenu,
-  clickApplyTimelineTemplatesMenuItem,
-  clickAddTagsMenuItem,
-  checkOverwriteTagsCheckbox,
-  checkOverwriteIndexPatternsCheckbox,
-  openBulkEditAddIndexPatternsForm,
-  openBulkEditDeleteIndexPatternsForm,
-  selectTimelineTemplate,
-  checkTagsInTagsFilter,
-  clickUpdateScheduleMenuItem,
-  typeScheduleInterval,
-  typeScheduleLookback,
-  setScheduleLookbackTimeUnit,
-  setScheduleIntervalTimeUnit,
+  assertDefaultValuesAreAppliedToScheduleFields,
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
-  assertDefaultValuesAreAppliedToScheduleFields,
-  openBulkEditAddInvestigationFieldsForm,
-  typeInvestigationFields,
+  checkEsqlRulesCannotBeModified,
+  checkMachineLearningRulesCannotBeModified,
+  checkOverwriteIndexPatternsCheckbox,
   checkOverwriteInvestigationFieldsCheckbox,
+  checkOverwriteTagsCheckbox,
+  checkPrebuiltRulesCannotBeModified,
+  checkTagsInTagsFilter,
+  clickAddIndexPatternsMenuItem,
+  clickAddTagsMenuItem,
+  clickApplyTimelineTemplatesMenuItem,
+  clickUpdateScheduleMenuItem,
+  openBulkActionsMenu,
+  openBulkEditAddIndexPatternsForm,
+  openBulkEditAddInvestigationFieldsForm,
+  openBulkEditAddTagsForm,
+  openBulkEditDeleteIndexPatternsForm,
   openBulkEditDeleteInvestigationFieldsForm,
+  openBulkEditDeleteTagsForm,
+  openTagsSelect,
+  selectTimelineTemplate,
+  setScheduleIntervalTimeUnit,
+  setScheduleLookbackTimeUnit,
+  submitBulkEditForm,
+  typeIndexPatterns,
+  typeInvestigationFields,
+  typeScheduleInterval,
+  typeScheduleLookback,
+  typeTags,
+  waitForBulkEditActionToFinish,
+  waitForMixedRulesBulkEditModal,
 } from '../../../../../tasks/rules_bulk_actions';
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import {
-  hasIndexPatterns,
-  getDetails,
-  hasInvestigationFields,
-  assertDetailsNotExist,
-} from '../../../../../tasks/rule_details';
-import { login } from '../../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
 import { resetRulesTableState } from '../../../../../tasks/common';
+import { login } from '../../../../../tasks/login';
+import {
+  assertDetailsNotExist,
+  getDetails,
+  hasIndexPatterns,
+  hasInvestigationFields,
+} from '../../../../../tasks/rule_details';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import {
   getEqlRule,
   getEsqlRule,
-  getNewThreatIndicatorRule,
-  getNewRule,
-  getNewThresholdRule,
   getMachineLearningRule,
+  getNewRule,
   getNewTermsRule,
+  getNewThreatIndicatorRule,
+  getNewThresholdRule,
 } from '../../../../../objects/rule';
 
 import {

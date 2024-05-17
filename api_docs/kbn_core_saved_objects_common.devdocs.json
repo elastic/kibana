@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "LegacyUrlAliasTarget",
-        "description": [
-          "\nClient interface for interacting with legacy URL aliases."
-        ],
+        "description": ["\nClient interface for interacting with legacy URL aliases."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -39,9 +37,7 @@
             "type": "string",
             "tags": [],
             "label": "targetSpace",
-            "description": [
-              "\nThe namespace that the object existed in when it was converted."
-            ],
+            "description": ["\nThe namespace that the object existed in when it was converted."],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -52,9 +48,7 @@
             "type": "string",
             "tags": [],
             "label": "targetType",
-            "description": [
-              "\nThe type of the object when it was converted."
-            ],
+            "description": ["\nThe type of the object when it was converted."],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -65,9 +59,7 @@
             "type": "string",
             "tags": [],
             "label": "sourceId",
-            "description": [
-              "\nThe original ID of the object, before it was converted."
-            ],
+            "description": ["\nThe original ID of the object, before it was converted."],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -126,9 +118,7 @@
             "tags": [],
             "label": "metadata",
             "description": [],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -156,9 +146,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"action_required\""
-            ],
+            "signature": ["\"action_required\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,9 +157,7 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [
-              "The translated message to display to the user."
-            ],
+            "description": ["The translated message to display to the user."],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -198,9 +184,7 @@
             "description": [
               "An optional label to use for the link button. If unspecified, a default label will be used."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -228,9 +212,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"ambiguous_conflict\""
-            ],
+            "signature": ["\"ambiguous_conflict\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -258,9 +240,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportConflictError",
-        "description": [
-          "\nRepresents a failure to import due to a conflict."
-        ],
+        "description": ["\nRepresents a failure to import due to a conflict."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -272,9 +252,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"conflict\""
-            ],
+            "signature": ["\"conflict\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -286,9 +264,7 @@
             "tags": [],
             "label": "destinationId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -302,9 +278,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportFailure",
-        "description": [
-          "\nRepresents a failure to import."
-        ],
+        "description": ["\nRepresents a failure to import."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -338,9 +312,7 @@
             "tags": [],
             "label": "meta",
             "description": [],
-            "signature": [
-              "{ title?: string | undefined; icon?: string | undefined; }"
-            ],
+            "signature": ["{ title?: string | undefined; icon?: string | undefined; }"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -354,9 +326,7 @@
             "description": [
               "\nIf `overwrite` is specified, an attempt was made to overwrite an existing object."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -368,9 +338,7 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -436,9 +404,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportMissingReferencesError",
-        "description": [
-          "\nRepresents a failure to import due to missing references."
-        ],
+        "description": ["\nRepresents a failure to import due to missing references."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -450,9 +416,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"missing_references\""
-            ],
+            "signature": ["\"missing_references\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -464,9 +428,7 @@
             "tags": [],
             "label": "references",
             "description": [],
-            "signature": [
-              "{ type: string; id: string; }[]"
-            ],
+            "signature": ["{ type: string; id: string; }[]"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -480,9 +442,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportResponse",
-        "description": [
-          "\nThe response describing the result of an import."
-        ],
+        "description": ["\nThe response describing the result of an import."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -581,9 +541,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportRetry",
-        "description": [
-          "\nDescribes a retry operation for importing a saved object."
-        ],
+        "description": ["\nDescribes a retry operation for importing a saved object."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -630,9 +588,7 @@
             "description": [
               "\nThe object ID that will be created or overwritten. If not specified, the `id` field will be used."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -644,9 +600,7 @@
             "tags": [],
             "label": "replaceReferences",
             "description": [],
-            "signature": [
-              "{ type: string; from: string; to: string; }[]"
-            ],
+            "signature": ["{ type: string; from: string; to: string; }[]"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -660,9 +614,7 @@
             "description": [
               "\nIf `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where\n`createNewCopies` mode is disabled and ambiguous source conflicts are detected."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -676,9 +628,7 @@
             "description": [
               "\nIf `ignoreMissingReferences` is specified, reference validation will be skipped for this object."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -692,9 +642,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportSimpleWarning",
-        "description": [
-          "\nA simple informative warning that will be displayed to the user.\n"
-        ],
+        "description": ["\nA simple informative warning that will be displayed to the user.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -706,9 +654,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"simple\""
-            ],
+            "signature": ["\"simple\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -719,9 +665,7 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [
-              "The translated message to display to the user"
-            ],
+            "description": ["The translated message to display to the user"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -735,9 +679,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportSuccess",
-        "description": [
-          "\nRepresents a successful import."
-        ],
+        "description": ["\nRepresents a successful import."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -773,9 +715,7 @@
             "description": [
               "\nIf `destinationId` is specified, the new object has a new ID that is different from the import ID."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -784,14 +724,10 @@
             "parentPluginId": "@kbn/core-saved-objects-common",
             "id": "def-common.SavedObjectsImportSuccess.createNewCopy",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "createNewCopy",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -813,9 +749,7 @@
             "tags": [],
             "label": "meta",
             "description": [],
-            "signature": [
-              "{ title?: string | undefined; icon?: string | undefined; }"
-            ],
+            "signature": ["{ title?: string | undefined; icon?: string | undefined; }"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -829,9 +763,7 @@
             "description": [
               "\nIf `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution)."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -845,9 +777,7 @@
             "description": [
               "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -861,9 +791,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportUnknownError",
-        "description": [
-          "\nRepresents a failure to import due to an unknown reason."
-        ],
+        "description": ["\nRepresents a failure to import due to an unknown reason."],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -875,9 +803,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"unknown\""
-            ],
+            "signature": ["\"unknown\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -927,9 +853,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"unsupported_type\""
-            ],
+            "signature": ["\"unsupported_type\""],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -956,12 +880,8 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[pluginName: string]: string",
-            "description": [
-              "The plugin name and version string"
-            ],
-            "signature": [
-              "[pluginName: string]:  string"
-            ],
+            "description": ["The plugin name and version string"],
+            "signature": ["[pluginName: string]:  string"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -975,9 +895,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectTypeIdTuple",
-        "description": [
-          "\nAn identifier for a saved object within a space.\n"
-        ],
+        "description": ["\nAn identifier for a saved object within a space.\n"],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -988,9 +906,7 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "The id of the saved object"
-            ],
+            "description": ["The id of the saved object"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1001,9 +917,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "The type of the saved object"
-            ],
+            "description": ["The type of the saved object"],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1018,9 +932,7 @@
         "parentPluginId": "@kbn/core-saved-objects-common",
         "id": "def-common.SavedObject",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObject",
         "description": [],
         "signature": [
@@ -1500,9 +1412,7 @@
         "parentPluginId": "@kbn/core-saved-objects-common",
         "id": "def-common.SavedObjectAttribute",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectAttribute",
         "description": [],
         "signature": [
@@ -1566,9 +1476,7 @@
         "parentPluginId": "@kbn/core-saved-objects-common",
         "id": "def-common.SavedObjectAttributes",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectAttributes",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
@@ -1762,9 +1670,7 @@
         "parentPluginId": "@kbn/core-saved-objects-common",
         "id": "def-common.SavedObjectAttributeSingle",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectAttributeSingle",
         "description": [],
         "signature": [
@@ -1797,9 +1703,7 @@
         "parentPluginId": "@kbn/core-saved-objects-common",
         "id": "def-common.SavedObjectReference",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectReference",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
@@ -2709,9 +2613,7 @@
         "description": [
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
-        "signature": [
-          "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
-        ],
+        "signature": ["\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,

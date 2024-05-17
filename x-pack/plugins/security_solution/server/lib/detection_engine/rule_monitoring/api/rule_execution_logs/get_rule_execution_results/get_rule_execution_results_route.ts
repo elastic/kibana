@@ -13,9 +13,9 @@ import { buildSiemResponse } from '../../../../routes/utils';
 
 import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
+  GET_RULE_EXECUTION_RESULTS_URL,
   GetRuleExecutionResultsRequestParams,
   GetRuleExecutionResultsRequestQuery,
-  GET_RULE_EXECUTION_RESULTS_URL,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**

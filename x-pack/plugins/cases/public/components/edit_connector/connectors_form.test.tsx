@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
+import React from 'react';
 
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, connectorsMock } from '../../containers/mock';
-import { ConnectorsForm } from './connectors_form';
 import type { CaseConnectors } from '../../containers/types';
-import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { choices, resilientIncidentTypes, resilientSeverity } from '../connectors/mock';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetChoices } from '../connectors/servicenow/use_get_choices';
+import { ConnectorsForm } from './connectors_form';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../connectors/resilient/use_get_incident_types');

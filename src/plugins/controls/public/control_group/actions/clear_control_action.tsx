@@ -13,8 +13,8 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_CLEAR_CONTROL } from '.';
-import { ControlGroupStrings } from '../control_group_strings';
 import { ControlEmbeddable, DataControlInput, isClearableControl } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import { isControlGroup } from '../embeddable/control_group_helpers';
 
 export interface ClearControlActionContext {

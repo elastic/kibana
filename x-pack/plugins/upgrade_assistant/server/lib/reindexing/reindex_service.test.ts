@@ -6,20 +6,20 @@
  */
 
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
-import { BehaviorSubject } from 'rxjs';
 import { TransportResult } from '@elastic/elasticsearch';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { BehaviorSubject } from 'rxjs';
 
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
@@ -30,7 +30,7 @@ import { ReindexService, reindexServiceFactory } from './reindex_service';
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
-  } as TransportResult<T>);
+  }) as TransportResult<T>;
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 

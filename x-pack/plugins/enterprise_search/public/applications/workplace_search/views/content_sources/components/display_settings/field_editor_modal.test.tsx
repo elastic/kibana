@@ -7,14 +7,14 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiModal, EuiSelect, EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiModal, EuiSelect } from '@elastic/eui';
 
 import { FieldEditorModal } from './field_editor_modal';
 

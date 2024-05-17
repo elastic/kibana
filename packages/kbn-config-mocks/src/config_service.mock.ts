@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IConfigService, ObjectToConfigAdapter } from '@kbn/config';
 import { BehaviorSubject } from 'rxjs';
-import { ObjectToConfigAdapter, IConfigService } from '@kbn/config';
 
 export type IConfigServiceMock = jest.Mocked<IConfigService>;
 

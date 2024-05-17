@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { applyEnrichmentsToEvents, mergeEnrichments } from './transforms';
+import { set } from '@kbn/safer-lodash-set';
 import { ruleExecutionLogMock } from '../../../../rule_monitoring/mocks';
 import { createAlert } from '../__mocks__/alerts';
 import type { EnrichmentFunction } from '../types';
-import { set } from '@kbn/safer-lodash-set';
+import { applyEnrichmentsToEvents, mergeEnrichments } from './transforms';
 
 const createEnrichment =
   (field: string, value: string): EnrichmentFunction =>

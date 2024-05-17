@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getEventAnnotationService } from './event_annotation_service/service';
 
 // not really mocking but avoiding async loading

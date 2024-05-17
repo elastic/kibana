@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
 import { exportExceptionListRequestQuery } from '../../common/api';
+import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 

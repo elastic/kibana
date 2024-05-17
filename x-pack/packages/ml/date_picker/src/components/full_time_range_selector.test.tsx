@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { act, fireEvent, render } from '@testing-library/react';
 import moment from 'moment';
 import React from 'react';
-import { act, render, fireEvent } from '@testing-library/react';
 
-import type { Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import {

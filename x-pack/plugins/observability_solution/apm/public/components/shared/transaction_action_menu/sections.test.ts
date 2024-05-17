@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { getSections } from './sections';
-import { apmRouter as apmRouterBase, ApmRouter } from '../../routing/apm_route_config';
-import { logsLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { createMemoryHistory } from 'history';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { logsLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmRouter, apmRouter as apmRouterBase } from '../../routing/apm_route_config';
+import { getSections } from './sections';
 
 const apmRouter = {
   ...apmRouterBase,

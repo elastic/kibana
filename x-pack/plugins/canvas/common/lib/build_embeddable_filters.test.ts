@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildEmbeddableFilters } from './build_embeddable_filters';
 import { ExpressionValueFilter } from '../../types';
+import { buildEmbeddableFilters } from './build_embeddable_filters';
 
 const columnFilter: ExpressionValueFilter = {
   type: 'filter',

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import * as reactTestingLibrary from '@testing-library/react';
+import React from 'react';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 
-import { eventFiltersListQueryHttpMock } from '../../../../../event_filters/test_utils';
-import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
-import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
-import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
-import type { PolicyData } from '../../../../../../../../common/endpoint/types';
 import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
-import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
+import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
+import type { PolicyData } from '../../../../../../../../common/endpoint/types';
+import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
 import { SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
+import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
+import { eventFiltersListQueryHttpMock } from '../../../../../event_filters/test_utils';
 import { EVENT_FILTERS_LABELS } from '../translations';
+import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 

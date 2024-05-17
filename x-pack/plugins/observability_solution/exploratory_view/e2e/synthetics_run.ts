@@ -1,3 +1,4 @@
+import path from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import path from 'path';
-import { SyntheticsRunner } from './synthetics_runner';
 import { argv } from './parse_args_params';
+import { SyntheticsRunner } from './synthetics_runner';
 
 const { headless, grep, bail: pauseOnError } = argv;
 

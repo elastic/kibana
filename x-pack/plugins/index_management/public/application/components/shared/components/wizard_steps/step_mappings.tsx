@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState } from 'react';
 
 import { Forms } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
+  IndexSettings,
+  LoadMappingsFromJsonButton,
   MappingsEditor,
   OnUpdateHandler,
-  LoadMappingsFromJsonButton,
-  IndexSettings,
 } from '../../../mappings_editor';
 
 import { documentationService } from '../../../mappings_editor/shared_imports';

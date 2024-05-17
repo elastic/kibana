@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
 import type {
-  EuiDataGridSorting,
-  EuiDataGridProps,
-  EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
   EuiDataGridControlColumn,
+  EuiDataGridProps,
+  EuiDataGridSorting,
 } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCode,
   EuiDataGrid,
-  EuiPanel,
-  EuiLink,
-  EuiSkeletonText,
-  EuiProgress,
   EuiIconTip,
+  EuiLink,
+  EuiPanel,
+  EuiProgress,
+  EuiSkeletonText,
 } from '@elastic/eui';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
-import { useAllResults } from './use_all_results';
+import { get, isArray, isEmpty, isEqual, isObject, keys, map, reduce } from 'lodash/fp';
+import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
-import { useKibana } from '../common/lib/kibana';
+import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage } from './translations';
+import { AddToCaseWrapper } from '../cases/add_to_cases';
+import { useKibana } from '../common/lib/kibana';
 import {
+  ViewResultsActionButtonType,
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
-  ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
-import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
-import { AddToCaseWrapper } from '../cases/add_to_cases';
+import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
+import { generateEmptyDataMessage } from './translations';
+import { useAllResults } from './use_all_results';
 
 const DataContext = createContext<ResultEdges>([]);
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { getService, register as registerDataService } from './data';
-import { createHealthRoute, createConfigRoute } from './routes';
 import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../common';
+import { getService, register as registerDataService } from './data';
+import { createConfigRoute, createHealthRoute } from './routes';
 
 export interface PluginStartContract {
   data: ReturnType<typeof getService>;

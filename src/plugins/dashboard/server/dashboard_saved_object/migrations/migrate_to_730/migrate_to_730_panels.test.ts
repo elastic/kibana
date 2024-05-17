@@ -8,12 +8,12 @@
 
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import {
-  SavedDashboardPanel730ToLatest,
-  RawSavedDashboardPanel640To720,
-  RawSavedDashboardPanelTo60,
-  RawSavedDashboardPanel630,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
+  RawSavedDashboardPanel630,
+  RawSavedDashboardPanel640To720,
+  RawSavedDashboardPanelTo60,
+  SavedDashboardPanel730ToLatest,
   SavedDashboardPanelTo60,
 } from './types';
 

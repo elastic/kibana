@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger, IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 
 import { registerRoute as registerRouteCpuProfile } from './cpu_profile';
 import { registerRoute as registerRouteHeapProfile } from './heap_profile';

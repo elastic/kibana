@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';

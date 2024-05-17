@@ -9,14 +9,14 @@
 import Path from 'path';
 import { inspect } from 'util';
 
-import { run } from '@kbn/dev-cli-runner';
-import { createFlagError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
 import exitHook from 'exit-hook';
 
-import { readConfigFile, EsVersion } from './lib';
 import { FunctionalTestRunner } from './functional_test_runner';
+import { EsVersion, readConfigFile } from './lib';
 
 export function runFtrCli() {
   const runStartTime = Date.now();

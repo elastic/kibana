@@ -9,8 +9,8 @@
 import { parse } from '@babel/parser';
 import { isCallExpression } from '@babel/types';
 
-import { extractI18nCallMessages } from './i18n_call';
 import { traverseNodes } from '../utils';
+import { extractI18nCallMessages } from './i18n_call';
 
 const i18nCallMessageSource = `
 i18n('message-id-1', { defaultMessage: 'Default message 1', description: 'Message description 1' });

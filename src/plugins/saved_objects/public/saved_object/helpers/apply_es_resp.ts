@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, defaults, forOwn, assign } from 'lodash';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { assign, cloneDeep, defaults, forOwn } from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { expandShorthand } from './field_mapping';
 
@@ -63,9 +63,8 @@ export async function applyESResp(
           searchSourceValues as any,
           resp.references
         );
-        savedObject.searchSource = await dependencies.search.searchSource.create(
-          searchSourceValues
-        );
+        savedObject.searchSource =
+          await dependencies.search.searchSource.create(searchSourceValues);
       } else {
         savedObject.searchSourceFields = searchSourceValues;
       }

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { fold, map } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { getOr } from 'lodash/fp';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   BarePinnedEvent,
+  BarePinnedEventWithoutExternalRefs,
   PinnedEvent,
   PinnedEventResponse,
-  BarePinnedEventWithoutExternalRefs,
 } from '../../../../../common/api/timeline';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';
 import { pinnedEventFieldsMigrator } from './field_migrator';
-import { timelineSavedObjectType } from '../../saved_object_mappings';
 
 export const deletePinnedEventOnTimeline = async (
   request: FrameworkRequest,
@@ -185,9 +185,8 @@ const getAllSavedPinnedEvents = async (
   options: SavedObjectsFindOptions
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObjects = await savedObjectsClient.find<SavedObjectPinnedEventWithoutExternalRefs>(
-    options
-  );
+  const savedObjects =
+    await savedObjectsClient.find<SavedObjectPinnedEventWithoutExternalRefs>(options);
 
   return savedObjects.saved_objects.map((savedObject) => {
     const populatedPinnedEvent =

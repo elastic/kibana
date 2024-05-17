@@ -27,7 +27,7 @@
     }
   ],
   "rule_name_override": "event.message",
-  "severity_mapping":[
+  "severity_mapping": [
     {
       "field": "event.severity",
       "operator": "equals",

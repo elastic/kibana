@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../../types';
-import { decodeCursor } from '../../services/utils';
 import {
   FindListItemRequestQueryDecoded,
   findListItemRequestQuery,
   findListItemResponse,
 } from '../../../common/api';
+import { decodeCursor } from '../../services/utils';
+import type { ListsPluginRouter } from '../../types';
 import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
 
 export const findListItemRoute = (router: ListsPluginRouter): void => {

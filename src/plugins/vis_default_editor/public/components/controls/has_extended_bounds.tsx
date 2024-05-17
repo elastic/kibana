@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useRef } from 'react';
 
 import { search } from '@kbn/data-plugin/public';
-import { SwitchParamEditor } from './switch';
 import { AggParamEditorProps } from '../agg_param_props';
+import { SwitchParamEditor } from './switch';
 
 const { isType } = search.aggs;
 

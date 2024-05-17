@@ -6,8 +6,8 @@
  */
 
 import 'jest-canvas-mock';
-import React from 'react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { JourneyScreenshotDialog } from './journey_screenshot_dialog';
 

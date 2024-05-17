@@ -22,7 +22,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
 import { SloConfig } from '..';
-import { getHTTPResponseCode, ObservabilityError } from '../errors';
+import { ObservabilityError, getHTTPResponseCode } from '../errors';
 import { SloRequestHandlerContext } from '../types';
 import { AbstractSloServerRouteRepository } from './types';
 

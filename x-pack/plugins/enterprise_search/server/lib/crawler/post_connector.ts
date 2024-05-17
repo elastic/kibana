@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { createConnectorDocument, CONNECTORS_INDEX, ConnectorStatus } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, ConnectorStatus, createConnectorDocument } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';

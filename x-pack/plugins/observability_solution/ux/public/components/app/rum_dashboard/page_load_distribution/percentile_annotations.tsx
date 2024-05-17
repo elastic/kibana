@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as React from 'react';
 import {
   AnnotationDomainType,
   LineAnnotation,
@@ -13,8 +12,9 @@ import {
   LineAnnotationStyle,
   Position,
 } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-theme';
 import { EuiToolTip } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
+import * as React from 'react';
 
 interface Props {
   percentiles?: Record<string, number | null>;

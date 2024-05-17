@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
+import { Readable } from 'stream';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { SavedObjectsFileMetadataClient } from '../..';
 import { createFileHashTransform } from '../../..';
 import { File as IFile } from '../../../../common';
-import { Readable } from 'stream';
 import {
   FileKindsRegistryImpl,
   getFileKindsRegistry,
   setFileKindsRegistry,
 } from '../../../../common/file_kinds_registry';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { SavedObjectsFileMetadataClient } from '../..';
 import { BlobStorageService } from '../../../blob_storage_service';
-import { InternalFileShareService } from '../../../file_share_service';
 import { InternalFileService } from '../../../file_service/internal_file_service';
+import { InternalFileShareService } from '../../../file_share_service';
+import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 
 describe('When using the FileHashTransform', () => {
   let file: IFile;

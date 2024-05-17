@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, ChangeEvent, PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import immutable from 'object-path-immutable';
+import { EuiFormRow, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
-import { ExpressionAstExpression } from '../../../../types';
+import immutable from 'object-path-immutable';
+import PropTypes from 'prop-types';
+import React, { Fragment, ChangeEvent, PureComponent } from 'react';
 import { ArgumentStrings } from '../../../../i18n/ui';
+import { ExpressionAstExpression } from '../../../../types';
 
 const { AxisConfig: strings } = ArgumentStrings;
 

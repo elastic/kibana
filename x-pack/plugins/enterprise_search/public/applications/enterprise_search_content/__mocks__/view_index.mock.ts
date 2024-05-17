@@ -7,13 +7,13 @@
 
 import {
   ConnectorStatus,
+  ConnectorViewIndex,
   DisplayType,
   FieldType,
   FilteringValidationState,
-  SyncStatus,
-  ConnectorViewIndex,
-  IngestionStatus,
   IngestionMethod,
+  IngestionStatus,
+  SyncStatus,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';

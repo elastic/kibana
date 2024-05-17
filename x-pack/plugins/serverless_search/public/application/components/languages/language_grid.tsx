@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiFlexGroup,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiImage,
+  EuiPanel,
   EuiText,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
+import React from 'react';
 
 import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 

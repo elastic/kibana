@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { MutableRefObject } from 'react';
-import type { CasesTimelineIntegration } from '../timeline_context';
-import type { CasesNavigation } from '../links';
-import type { CaseViewRefreshPropInterface, CaseUI } from '../../../common';
+import type { CaseUI, CaseViewRefreshPropInterface } from '../../../common';
 import type { UseFetchAlertData } from '../../../common/ui';
+import type { CasesNavigation } from '../links';
+import type { CasesTimelineIntegration } from '../timeline_context';
 
 export interface CaseViewBaseProps {
   onComponentInitialized?: () => void;

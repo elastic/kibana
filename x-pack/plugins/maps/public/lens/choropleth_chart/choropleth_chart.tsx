@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
 import { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import {
+  COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
-  COLOR_MAP_TYPE,
   VECTOR_STYLES,
 } from '../../../common';
 import { emsWorldLayerId } from '../../../common/constants';
-import { ChoroplethChartProps } from './types';
-import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
+import { getEmsSuggestion } from './get_ems_suggestion';
+import { ChoroplethChartProps } from './types';
 
 interface Props extends ChoroplethChartProps {
   formatFactory: FormatFactory;

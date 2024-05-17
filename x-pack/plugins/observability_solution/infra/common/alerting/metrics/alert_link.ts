@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { encode } from '@kbn/rison';
-import { stringify } from 'query-string';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { encode } from '@kbn/rison';
+import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { stringify } from 'query-string';
 import {
-  fifteenMinutesInMilliseconds,
   HOST_FIELD,
   LINK_TO_INVENTORY,
   METRICS_EXPLORER_URL,
+  fifteenMinutesInMilliseconds,
 } from '../../constants';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
-  return Object.entries(params).reduce((acc, [key, field]) => {
-    const objectKey = pKey.length ? `${pKey}.${key}` : key;
-    if (typeof field === 'object' && field != null) {
-      if (Array.isArray(field) && field.length > 0) {
-        return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
-      } else {
-        return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
+  return Object.entries(params).reduce(
+    (acc, [key, field]) => {
+      const objectKey = pKey.length ? `${pKey}.${key}` : key;
+      if (typeof field === 'object' && field != null) {
+        if (Array.isArray(field) && field.length > 0) {
+          return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
+        } else {
+          return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
+        }
       }
-    }
-    acc[objectKey] = Array.isArray(field) ? field : [field];
-    return acc;
-  }, {} as Record<string, unknown[]>);
+      acc[objectKey] = Array.isArray(field) ? field : [field];
+      return acc;
+    },
+    {} as Record<string, unknown[]>
+  );
 };
 
 export const getInventoryViewInAppUrl = (

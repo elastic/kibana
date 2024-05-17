@@ -9,14 +9,14 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import styled from '@emotion/styled';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { useAssistantContext } from '../../assistant_context';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
 import * as i18n from './translations';
 import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './types';
-import { useAssistantContext } from '../../assistant_context';
 
 export const DEFAULT_PAGE_SIZE = 10;
 

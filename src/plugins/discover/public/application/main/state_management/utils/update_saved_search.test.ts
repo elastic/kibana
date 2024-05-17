@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { updateSavedSearch } from './update_saved_search';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('updateSavedSearch', () => {
   const query: Query = {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 import { proxySettingsUrl } from '../../../../services/documentation';
 import { Props } from './connection_mode';
 

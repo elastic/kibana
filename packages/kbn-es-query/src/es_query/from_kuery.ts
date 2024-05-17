@@ -8,11 +8,11 @@
 
 import { Query } from '../filters';
 import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
   KueryNode,
   KueryQueryOptions,
+  fromKueryExpression,
+  nodeTypes,
+  toElasticsearchQuery,
 } from '../kuery';
 import { BoolQuery, DataViewBase } from './types';
 

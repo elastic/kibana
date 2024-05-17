@@ -9,9 +9,9 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 import {
   getBeatDataset,
   getElasticsearchDataset,
+  getEntsearchDataset,
   getKibanaDataset,
   getLogstashDataset,
-  getEntsearchDataset,
 } from '../../../../../lib/cluster/get_index_patterns';
 
 const MAX_BUCKET_SIZE = 100;

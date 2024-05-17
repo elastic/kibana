@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   type SearchResponseWarning,
   SearchResponseWarningsBadge,
 } from '@kbn/search-response-warnings';
+import React, { FC, PropsWithChildren } from 'react';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
 const containerStyles = css`

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
-import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
-import { PublishesViewMode } from '@kbn/presentation-publishing';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
+import { PublishesViewMode } from '@kbn/presentation-publishing';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;

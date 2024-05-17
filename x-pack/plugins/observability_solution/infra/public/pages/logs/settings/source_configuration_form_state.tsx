@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { LogViewAttributes } from '@kbn/logs-shared-plugin/common';
+import { useMemo } from 'react';
 import { useCompositeFormElement } from './form_elements';
 import { useLogIndicesFormElement } from './indices_configuration_form_state';
 import { useLogColumnsFormElement } from './log_columns_configuration_form_state';

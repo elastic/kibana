@@ -7,7 +7,7 @@
 
 import { createFleetTestRendererMock } from '../mock';
 
-import { useGetAgentPolicies, useAgentEnrollmentFlyoutData } from '.';
+import { useAgentEnrollmentFlyoutData, useGetAgentPolicies } from '.';
 
 jest.mock('./use_request', () => {
   return {

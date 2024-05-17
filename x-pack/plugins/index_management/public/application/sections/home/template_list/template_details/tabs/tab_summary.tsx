@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiCodeBlock,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiLink,
-  EuiText,
-  EuiTitle,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCodeBlock,
+  EuiLink,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
-import { getLifecycleValue } from '../../../../../lib/data_streams';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { TemplateDeserialized } from '../../../../../../../common';
-import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
-import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
+import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
+import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
+import { getLifecycleValue } from '../../../../../lib/data_streams';
+import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 
 interface Props {
   templateDetails: TemplateDeserialized;

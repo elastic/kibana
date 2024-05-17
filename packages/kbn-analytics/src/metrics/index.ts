@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ApplicationUsageMetric } from './application_usage';
 import type { UiCounterMetric } from './ui_counter';
 import type { UserAgentMetric } from './user_agent';
-import type { ApplicationUsageMetric } from './application_usage';
 
 // Export types separately to the actual run-time objects
 export type { ApplicationUsageMetric } from './application_usage';

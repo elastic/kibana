@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import type { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { set } from '@kbn/safer-lodash-set';
 import type { KbnClient } from '@kbn/test';
-import { sendEndpointActionResponse, sendFleetActionResponse } from '../../common/response_actions';
-import { BaseRunningService } from '../../common/base_running_service';
-import { fetchEndpointActionList } from './endpoint_response_actions';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ActionDetails } from '../../../../common/endpoint/types';
+import { BaseRunningService } from '../../common/base_running_service';
+import { sendEndpointActionResponse, sendFleetActionResponse } from '../../common/response_actions';
+import { fetchEndpointActionList } from './endpoint_response_actions';
 
 /**
  * Base class for start/stopping background services

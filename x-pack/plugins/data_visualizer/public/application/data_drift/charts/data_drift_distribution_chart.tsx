@@ -7,30 +7,30 @@
 
 import type { PartialTheme } from '@elastic/charts';
 import {
+  AreaSeries,
   Axis,
   BarSeries,
   Chart,
-  Tooltip,
+  CurveType,
   Position,
   ScaleType,
   Settings,
-  AreaSeries,
-  CurveType,
+  Tooltip,
 } from '@elastic/charts';
-import React, { useMemo } from 'react';
+import { EuiButtonGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useStorage } from '@kbn/ml-local-storage';
-import { EuiButtonGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { NoChartsData } from './no_charts_data';
-import type { Feature } from '../types';
-import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
-import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
-import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
+import React, { useMemo } from 'react';
+import { DATA_DRIFT_COMPARISON_CHART_TYPE } from '../../index_data_visualizer/types/data_drift';
 import type { DVKey, DVStorageMapped } from '../../index_data_visualizer/types/storage';
 import { DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE } from '../../index_data_visualizer/types/storage';
-import { DATA_DRIFT_COMPARISON_CHART_TYPE } from '../../index_data_visualizer/types/data_drift';
 import { useDataVisualizerKibana } from '../../kibana_context';
+import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
+import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
+import type { Feature } from '../types';
+import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
+import { NoChartsData } from './no_charts_data';
 
 const CHART_HEIGHT = 150;
 
@@ -109,7 +109,7 @@ export const DataDriftDistributionChart = ({
           idSelected={comparisonChartType}
           onChange={(id: string) =>
             setComparisonChartType(
-              id as typeof DATA_DRIFT_COMPARISON_CHART_TYPE[keyof typeof DATA_DRIFT_COMPARISON_CHART_TYPE]
+              id as (typeof DATA_DRIFT_COMPARISON_CHART_TYPE)[keyof typeof DATA_DRIFT_COMPARISON_CHART_TYPE]
             )
           }
           isIconOnly

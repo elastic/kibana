@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import {
-  MAIN_SAVED_OBJECT_INDEX,
-  ALERTING_CASES_SAVED_OBJECT_INDEX,
-} from '@kbn/core-saved-objects-server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
@@ -17,13 +12,18 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
+  ALERTING_CASES_SAVED_OBJECT_INDEX,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
   deleteAllCaseItems,
   getCaseCommentSavedObjectsFromES,
   getCaseSavedObjectsFromES,
   getCaseUserActionsSavedObjectsFromES,
   getConfigureSavedObjectsFromES,
 } from '../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

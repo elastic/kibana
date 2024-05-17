@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { transformBulkEnableResponse } from './v1';
 import { RuleAction, RuleSystemAction } from '../../../../../../../common';
+import { transformBulkEnableResponse } from './v1';
 
 describe('transformBulkEnableResponse', () => {
   const defaultAction: RuleAction = {

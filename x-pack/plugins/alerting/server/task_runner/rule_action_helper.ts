@@ -8,10 +8,10 @@
 import { Logger } from '@kbn/logging';
 import {
   IntervalSchedule,
-  parseDuration,
   RuleAction,
   RuleNotifyWhenTypeValues,
   ThrottledActions,
+  parseDuration,
 } from '../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {

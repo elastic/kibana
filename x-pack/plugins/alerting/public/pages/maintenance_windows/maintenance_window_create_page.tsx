@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
+import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
-import * as i18n from './translations';
-import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
-import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
+import { PageHeader } from './components/page_header';
 import { IS_SCOPED_QUERY_ENABLED } from './constants';
+import * as i18n from './translations';
 
 export const MaintenanceWindowsCreatePage = React.memo(() => {
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate);

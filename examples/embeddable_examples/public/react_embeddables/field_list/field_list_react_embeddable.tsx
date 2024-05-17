@@ -23,9 +23,9 @@ import {
 } from '@kbn/unified-field-list';
 import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, skip, switchMap } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import { FieldListApi, Services, FieldListSerializedStateState } from './types';
+import { FieldListApi, FieldListSerializedStateState, Services } from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 

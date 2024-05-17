@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
 import type {
-  QueryDslQueryContainer,
   AggregationsCardinalityAggregate,
+  QueryDslQueryContainer,
   SearchResponseBody,
 } from '@elastic/elasticsearch/lib/api/types';
+import { useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
 /**
  * Gets the cardinality of the selected split field

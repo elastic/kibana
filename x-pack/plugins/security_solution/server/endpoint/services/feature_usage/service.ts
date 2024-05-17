@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Values } from '@kbn/utility-types';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { Values } from '@kbn/utility-types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type { FeatureKeys } from './feature_keys';
-import { getResponseActionFeatureKey, FEATURE_KEYS } from './feature_keys';
+import { FEATURE_KEYS, getResponseActionFeatureKey } from './feature_keys';
 
 export class FeatureUsageService {
   private licensingPluginStart: LicensingPluginStart | undefined;

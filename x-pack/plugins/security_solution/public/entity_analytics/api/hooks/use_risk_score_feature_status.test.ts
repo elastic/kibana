@@ -7,11 +7,11 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 
-import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { useFetch } from '../../../common/hooks/use_fetch';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useFetch } from '../../../common/hooks/use_fetch';
 import { useHasSecurityCapability } from '../../../helper_hooks';
+import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 
 jest.mock('../../../common/hooks/use_fetch');
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');

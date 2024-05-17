@@ -13,13 +13,13 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiSpacer,
-  EuiPanel,
-  EuiConfirmModal,
 } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../shared/licensing';
@@ -27,18 +27,18 @@ import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
 import { LicenseCallout } from '../../components/shared/license_callout';
 import {
-  SECURITY_UNSAVED_CHANGES_MESSAGE,
-  RESET_BUTTON,
-  SAVE_SETTINGS_BUTTON,
-  SAVE_CHANGES_BUTTON,
+  CONFIRM_CHANGES_TEXT,
   KEEP_EDITING_BUTTON,
+  NAV,
+  PRIVATE_PLATINUM_LICENSE_CALLOUT,
   PRIVATE_SOURCES,
   PRIVATE_SOURCES_DESCRIPTION,
   PRIVATE_SOURCES_TOGGLE_DESCRIPTION,
-  PRIVATE_PLATINUM_LICENSE_CALLOUT,
-  CONFIRM_CHANGES_TEXT,
   PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
-  NAV,
+  RESET_BUTTON,
+  SAVE_CHANGES_BUTTON,
+  SAVE_SETTINGS_BUTTON,
+  SECURITY_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 
 import { PrivateSourcesTable } from './components/private_sources_table';

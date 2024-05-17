@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { isNumber, isEmpty } from 'lodash/fp';
+import { isEmpty, isNumber } from 'lodash/fp';
 import styled from 'styled-components';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';

@@ -9,17 +9,17 @@
 import React, { Component } from 'react';
 
 import {
-  keys,
   EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiFieldText,
   EuiButtonIcon,
+  EuiFieldText,
+  EuiInMemoryTable,
   RIGHT_ALIGNMENT,
+  keys,
 } from '@elastic/eui';
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createMockStore } from '../../../../common/mock';
-import { createFilterOutDiscoverCellActionFactory } from './filter_out';
-import type { SecurityCellActionExecutionContext } from '../../types';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { BehaviorSubject } from 'rxjs';
 import { APP_UI_ID } from '../../../../../common';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createMockStore } from '../../../../common/mock';
+import type { SecurityCellActionExecutionContext } from '../../types';
+import { createFilterOutDiscoverCellActionFactory } from './filter_out';
 
 const services = createStartServicesMock();
 const mockGlobalFilterManager = services.data.query.filterManager;

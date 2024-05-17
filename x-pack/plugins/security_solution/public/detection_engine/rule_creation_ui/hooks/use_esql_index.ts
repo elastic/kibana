@@ -1,3 +1,5 @@
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexListFromIndexString } from '@kbn/securitysolution-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { getIndexListFromIndexString } from '@kbn/securitysolution-utils';
 
 import type { Query } from '@kbn/es-query';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';

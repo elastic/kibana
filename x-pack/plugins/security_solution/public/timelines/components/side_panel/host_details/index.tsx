@@ -6,13 +6,13 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlexItem,
   EuiButtonIcon,
-  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';

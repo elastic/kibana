@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreSetup",
-        "description": [
-          "\nCore services exposed to the `Plugin` setup lifecycle\n"
-        ],
+        "description": ["\nCore services exposed to the `Plugin` setup lifecycle\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-lifecycle-browser",
@@ -49,9 +47,7 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": [
-              "{@link AnalyticsServiceSetup}"
-            ],
+            "description": ["{@link AnalyticsServiceSetup}"],
             "signature": [
               "{ optIn: (optInConfig: ",
               {
@@ -123,9 +119,7 @@
             "type": "Object",
             "tags": [],
             "label": "application",
-            "description": [
-              "{@link ApplicationSetup}"
-            ],
+            "description": ["{@link ApplicationSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -145,9 +139,7 @@
             "type": "Object",
             "tags": [],
             "label": "customBranding",
-            "description": [
-              "{@link CustomBrandingSetup}"
-            ],
+            "description": ["{@link CustomBrandingSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-custom-branding-browser",
@@ -167,9 +159,7 @@
             "type": "Object",
             "tags": [],
             "label": "fatalErrors",
-            "description": [
-              "{@link FatalErrorsSetup}"
-            ],
+            "description": ["{@link FatalErrorsSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
@@ -189,9 +179,7 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": [
-              "{@link HttpSetup}"
-            ],
+            "description": ["{@link HttpSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -211,9 +199,7 @@
             "type": "Object",
             "tags": [],
             "label": "notifications",
-            "description": [
-              "{@link NotificationsSetup}"
-            ],
+            "description": ["{@link NotificationsSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -231,13 +217,9 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.uiSettings",
             "type": "Object",
-            "tags": [
-              "Deprecated"
-            ],
+            "tags": ["Deprecated"],
             "label": "uiSettings",
-            "description": [
-              "{@link IUiSettingsClient}\n"
-            ],
+            "description": ["{@link IUiSettingsClient}\n"],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -257,9 +239,7 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "{@link SettingsStart}"
-            ],
+            "description": ["{@link SettingsStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -279,9 +259,7 @@
             "type": "Object",
             "tags": [],
             "label": "executionContext",
-            "description": [
-              "{@link ExecutionContextSetup}"
-            ],
+            "description": ["{@link ExecutionContextSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-browser",
@@ -301,9 +279,7 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": [
-              "{@link ThemeServiceSetup}"
-            ],
+            "description": ["{@link ThemeServiceSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
@@ -323,9 +299,7 @@
             "type": "Object",
             "tags": [],
             "label": "plugins",
-            "description": [
-              "{@link PluginsServiceSetup}"
-            ],
+            "description": ["{@link PluginsServiceSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
@@ -345,9 +319,7 @@
             "type": "Object",
             "tags": [],
             "label": "security",
-            "description": [
-              "{@link SecurityServiceSetup}"
-            ],
+            "description": ["{@link SecurityServiceSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-browser",
@@ -367,9 +339,7 @@
             "type": "Object",
             "tags": [],
             "label": "userProfile",
-            "description": [
-              "{@link UserProfileServiceSetup}"
-            ],
+            "description": ["{@link UserProfileServiceSetup}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-browser",
@@ -389,9 +359,7 @@
             "type": "Function",
             "tags": [],
             "label": "getStartServices",
-            "description": [
-              "{@link StartServicesAccessor}"
-            ],
+            "description": ["{@link StartServicesAccessor}"],
             "signature": [
               "() => Promise<[",
               {
@@ -418,9 +386,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreStart",
-        "description": [
-          "\nCore services exposed to the `Plugin` start lifecycle\n"
-        ],
+        "description": ["\nCore services exposed to the `Plugin` start lifecycle\n"],
         "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -431,9 +397,7 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": [
-              "{@link AnalyticsServiceStart}"
-            ],
+            "description": ["{@link AnalyticsServiceStart}"],
             "signature": [
               "{ optIn: (optInConfig: ",
               {
@@ -465,9 +429,7 @@
             "type": "Object",
             "tags": [],
             "label": "application",
-            "description": [
-              "{@link ApplicationStart}"
-            ],
+            "description": ["{@link ApplicationStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -487,9 +449,7 @@
             "type": "Object",
             "tags": [],
             "label": "chrome",
-            "description": [
-              "{@link ChromeStart}"
-            ],
+            "description": ["{@link ChromeStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
@@ -509,9 +469,7 @@
             "type": "Object",
             "tags": [],
             "label": "customBranding",
-            "description": [
-              "{@link CustomBrandingStart}"
-            ],
+            "description": ["{@link CustomBrandingStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-custom-branding-browser",
@@ -531,9 +489,7 @@
             "type": "Object",
             "tags": [],
             "label": "docLinks",
-            "description": [
-              "{@link DocLinksStart}"
-            ],
+            "description": ["{@link DocLinksStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-browser",
@@ -553,9 +509,7 @@
             "type": "Object",
             "tags": [],
             "label": "executionContext",
-            "description": [
-              "{@link ExecutionContextStart}"
-            ],
+            "description": ["{@link ExecutionContextStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-browser",
@@ -575,9 +529,7 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": [
-              "{@link HttpStart}"
-            ],
+            "description": ["{@link HttpStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -595,13 +547,9 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreStart.savedObjects",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "savedObjects",
-            "description": [
-              "\n{@link SavedObjectsStart}"
-            ],
+            "description": ["\n{@link SavedObjectsStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
@@ -695,9 +643,7 @@
             "type": "Object",
             "tags": [],
             "label": "i18n",
-            "description": [
-              "{@link I18nStart}"
-            ],
+            "description": ["{@link I18nStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -717,9 +663,7 @@
             "type": "Object",
             "tags": [],
             "label": "notifications",
-            "description": [
-              "{@link NotificationsStart}"
-            ],
+            "description": ["{@link NotificationsStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -739,9 +683,7 @@
             "type": "Object",
             "tags": [],
             "label": "overlays",
-            "description": [
-              "{@link OverlayStart}"
-            ],
+            "description": ["{@link OverlayStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -759,13 +701,9 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreStart.uiSettings",
             "type": "Object",
-            "tags": [
-              "Deprecated"
-            ],
+            "tags": ["Deprecated"],
             "label": "uiSettings",
-            "description": [
-              "{@link IUiSettingsClient}\n"
-            ],
+            "description": ["{@link IUiSettingsClient}\n"],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -785,9 +723,7 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "{@link SettingsStart}"
-            ],
+            "description": ["{@link SettingsStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -807,9 +743,7 @@
             "type": "Object",
             "tags": [],
             "label": "fatalErrors",
-            "description": [
-              "{@link FatalErrorsStart}"
-            ],
+            "description": ["{@link FatalErrorsStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
@@ -829,9 +763,7 @@
             "type": "Object",
             "tags": [],
             "label": "deprecations",
-            "description": [
-              "{@link DeprecationsServiceStart}"
-            ],
+            "description": ["{@link DeprecationsServiceStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-browser",
@@ -851,9 +783,7 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": [
-              "{@link ThemeServiceStart}"
-            ],
+            "description": ["{@link ThemeServiceStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
@@ -873,9 +803,7 @@
             "type": "Object",
             "tags": [],
             "label": "plugins",
-            "description": [
-              "{@link PluginsServiceStart}"
-            ],
+            "description": ["{@link PluginsServiceStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
@@ -895,9 +823,7 @@
             "type": "Object",
             "tags": [],
             "label": "security",
-            "description": [
-              "{@link SecurityServiceStart}"
-            ],
+            "description": ["{@link SecurityServiceStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-browser",
@@ -917,9 +843,7 @@
             "type": "Object",
             "tags": [],
             "label": "userProfile",
-            "description": [
-              "{@link UserProfileServiceStart}"
-            ],
+            "description": ["{@link UserProfileServiceStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-browser",

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isoToEpochSecsRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
+import { isoToEpochSecsRt } from '.';
 
 describe('isoToEpochSecsRt', () => {
   it('validates whether its input is a valid ISO timestamp', () => {

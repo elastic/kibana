@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import request from 'superagent';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import expect from '@kbn/expect';
+import request from 'superagent';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';

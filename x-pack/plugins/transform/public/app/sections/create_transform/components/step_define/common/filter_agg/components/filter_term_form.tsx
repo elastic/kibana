@@ -14,13 +14,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 
+import { useToastNotifications } from '../../../../../../../app_dependencies';
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { useToastNotifications } from '../../../../../../../app_dependencies';
 
 import type { FilterAggConfigTerm } from '../types';
 

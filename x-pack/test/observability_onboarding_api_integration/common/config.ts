@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
-  ObservabilityOnboardingUsername,
-  OBSERVABILITY_ONBOARDING_TEST_PASSWORD,
-} from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
+import { UrlObject, format } from 'url';
+import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
 import { createObservabilityOnboardingUsers } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users';
+import {
+  OBSERVABILITY_ONBOARDING_TEST_PASSWORD,
+  ObservabilityOnboardingUsername,
+} from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ObservabilityOnboardingFtrConfigName } from '../configs';
 import {
   FtrProviderContext,

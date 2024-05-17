@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
-  EuiFormControlLayout,
   EuiFieldText,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
   EuiFocusTrap,
-  keys,
+  EuiFormControlLayout,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSelectable,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component, Fragment } from 'react';
 import {
   DEFAULT_CUSTOM_ICON_CUTOFF,
   DEFAULT_CUSTOM_ICON_RADIUS,
 } from '../../../../../../common/constants';
-import { SymbolIcon } from '../legend/symbol_icon';
-import { SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
+import { SYMBOL_OPTIONS } from '../../symbol_utils';
+import { SymbolIcon } from '../legend/symbol_icon';
 import { CustomIconModal } from './custom_icon_modal';
 
 function isKeyboardEvent(event) {

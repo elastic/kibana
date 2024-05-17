@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { type ModelItem } from '../models_list';
 import { TestTrainedModelContent } from './test_trained_model_content';

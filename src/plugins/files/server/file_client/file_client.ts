@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { Readable } from 'stream';
-import mimeType from 'mime';
-import { createId } from '@paralleldrive/cuid2';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { createId } from '@paralleldrive/cuid2';
+import mimeType from 'mime';
+import moment from 'moment';
 
 import type {
   File,
@@ -22,27 +22,27 @@ import type {
   FileShareJSONWithToken,
   UpdatableFileMetadata,
 } from '../../common/types';
-import type { FileMetadataClient } from './file_metadata_client';
+import { createAuditEvent } from '../audit_events';
 import type {
   BlobStorageClient,
   UploadOptions as BlobUploadOptions,
 } from '../blob_storage_service';
-import { getCounters, Counters } from '../usage';
 import { File as FileImpl } from '../file';
-import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
-import { enforceMaxByteSizeTransform } from './stream_transforms';
-import { createAuditEvent } from '../audit_events';
-import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
-import { createDefaultFileAttributes } from './utils';
+import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import {
+  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
   PerfArgs,
   withReportPerformanceMetric,
-  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
 } from '../performance';
+import { SupportedFileHashAlgorithm } from '../saved_objects/file';
+import { Counters, getCounters } from '../usage';
+import type { FileMetadataClient } from './file_metadata_client';
+import { enforceMaxByteSizeTransform } from './stream_transforms';
 import { createFileHashTransform } from './stream_transforms/file_hash_transform';
 import { isFileHashTransform } from './stream_transforms/file_hash_transform/file_hash_transform';
-import { SupportedFileHashAlgorithm } from '../saved_objects/file';
+import type { CreateArgs, DeleteArgs, FileClient, P1, ShareArgs } from './types';
+import { createDefaultFileAttributes } from './utils';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 

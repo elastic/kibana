@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { HTTPError } from '../../../../../common/detection_engine/types';
 import type {
   BulkActionEditPayload,
   BulkActionType,
@@ -14,6 +13,7 @@ import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
 } from '../../../../../common/api/detection_engine/rule_management';
+import type { HTTPError } from '../../../../../common/detection_engine/types';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 

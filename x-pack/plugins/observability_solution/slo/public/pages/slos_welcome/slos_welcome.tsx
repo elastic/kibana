@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import {
-  EuiPageTemplate,
   EuiButton,
-  EuiTitle,
-  EuiLink,
-  EuiImage,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
+  EuiLink,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 
-import { useKibana } from '../../utils/kibana_react';
+import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
-import { paths } from '../../../common/locators/paths';
+import { useKibana } from '../../utils/kibana_react';
 import illustration from './assets/illustration.svg';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
-import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
 
 export function SlosWelcomePage() {
   const {

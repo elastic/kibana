@@ -8,10 +8,10 @@ import type { Logger, SavedObjectsFindResponse } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import {
-  serverMock,
-  requestContextMock,
   mockGetCurrentUser,
+  requestContextMock,
   requestMock,
+  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetDashboardsResult } from '../__mocks__';
 import { getDashboardsByTagsRoute } from './get_dashboards_by_tags';

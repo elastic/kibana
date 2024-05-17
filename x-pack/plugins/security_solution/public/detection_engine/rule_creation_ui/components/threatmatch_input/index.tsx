@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
-import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
+import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import type { BrowserField } from '../../../../common/containers/source';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
-  getUseField,
   UseField,
   getFieldValidityAndErrorMessage,
+  getUseField,
 } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
-import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
+import { schema } from '../step_define_rule/schema';
+import * as i18n from '../step_define_rule/translations';
 
 const CommonUseField = getUseField({ component: Field });
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { FixedWidthLastUpdatedContainer } from './last_updated';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { FixedWidthLastUpdatedContainer } from './last_updated';
 
 jest.mock('../../../../common/components/events_viewer/event_details_width_context');
 jest.mock('../../../../common/lib/kibana');

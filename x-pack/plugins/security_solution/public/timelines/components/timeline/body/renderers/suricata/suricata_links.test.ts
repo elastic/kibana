@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLinksFromSignature, getBeginningTokens } from './suricata_links';
+import { getBeginningTokens, getLinksFromSignature } from './suricata_links';
 
 describe('SuricataLinks', () => {
   describe('#getLinksFromSignature', () => {

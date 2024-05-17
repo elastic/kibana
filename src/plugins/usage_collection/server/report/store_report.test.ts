@@ -8,11 +8,11 @@
 
 import { storeApplicationUsageMock } from './store_report.test.mocks';
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { storeReport } from './store_report';
-import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
+import { ReportSchemaType } from './schema';
+import { storeReport } from './store_report';
 
 describe('store_report', () => {
   const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
@@ -95,8 +95,9 @@ describe('store_report', () => {
         ],
       ]
     `);
-    expect((uiCountersUsageCounter.incrementCounter as jest.Mock).mock.calls)
-      .toMatchInlineSnapshot(`
+    expect(
+      (uiCountersUsageCounter.incrementCounter as jest.Mock).mock.calls
+    ).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {

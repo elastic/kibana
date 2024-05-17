@@ -26,9 +26,7 @@
         "tags": [],
         "label": "Fonts",
         "description": [],
-        "signature": [
-          "({ url }: React.PropsWithChildren<Props>) => JSX.Element"
-        ],
+        "signature": ["({ url }: React.PropsWithChildren<Props>) => JSX.Element"],
         "path": "packages/core/rendering/core-rendering-server-internal/src/views/fonts.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,9 +38,7 @@
             "tags": [],
             "label": "{ url }",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
+            "signature": ["React.PropsWithChildren<Props>"],
             "path": "packages/core/rendering/core-rendering-server-internal/src/views/fonts.tsx",
             "deprecated": false,
             "trackAdoption": false,

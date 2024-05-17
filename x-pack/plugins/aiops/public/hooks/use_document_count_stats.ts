@@ -8,12 +8,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 
-import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from '@kbn/core/public';
-import { stringHash } from '@kbn/ml-string-hash';
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
+import type { ToastsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import type { DocumentCountStats, DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';

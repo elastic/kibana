@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 import queryString from 'query-string';
 
 import { flashAPIErrors } from '../../../shared/flash_messages';
@@ -13,7 +13,7 @@ import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EngineLogic } from '../engine';
 
-import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
+import { DEFAULT_END_DATE, DEFAULT_START_DATE } from './constants';
 import { AnalyticsData, QueryDetails } from './types';
 
 interface AnalyticsValues extends AnalyticsData, QueryDetails {

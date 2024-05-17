@@ -10,16 +10,16 @@ import 'jest-canvas-mock';
 
 import { createVegaVisualization } from './vega_visualization';
 
-import vegaliteGraph from './test_utils/vegalite_graph.json';
 import vegaGraph from './test_utils/vega_graph.json';
+import vegaliteGraph from './test_utils/vegalite_graph.json';
 
-import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
+import { VegaParser } from './data_model/vega_parser';
 
-import { setInjectedVars, setData, setNotifications } from './services';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { setData, setInjectedVars, setNotifications } from './services';
 
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),

@@ -6,9 +6,6 @@
     "id": "kbnTpCustomVisualizations",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "expressions",
-      "visualizations"
-    ]
+    "requiredPlugins": ["expressions", "visualizations"]
   }
 }

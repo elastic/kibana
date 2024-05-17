@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { useUrlParams } from '../../common/navigation/hooks';
+import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { CaseViewPage } from './case_view_page';
 import { caseData, caseViewProps } from './mocks';
 import type { CaseViewPageProps } from './types';
-import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../use_breadcrumbs');

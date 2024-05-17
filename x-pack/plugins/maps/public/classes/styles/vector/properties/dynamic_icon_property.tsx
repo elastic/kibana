@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { DynamicStyleProperty } from './dynamic_style_property';
-import { IVectorStyle } from '../vector_style';
-import { getIconPalette, getMakiSymbolAnchor } from '../symbol_utils';
+import React from 'react';
+import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { OTHER_CATEGORY_LABEL, assignCategoriesToPalette } from '../style_util';
+import { getIconPalette, getMakiSymbolAnchor } from '../symbol_utils';
+import { IVectorStyle } from '../vector_style';
+import { DynamicStyleProperty } from './dynamic_style_property';
 import { LegendProps } from './style_property';
-import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 
 export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions> {
   isOrdinal() {

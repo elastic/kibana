@@ -9,15 +9,15 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 import {
+  ReducerStreamApiAction,
+  addToEntityAction,
+  deleteEntityAction,
   errorAction,
   reducerStreamRequestBodySchema,
   updateProgressAction,
-  addToEntityAction,
-  deleteEntityAction,
-  ReducerStreamApiAction,
 } from '../../common/api/reducer_stream';
-import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned

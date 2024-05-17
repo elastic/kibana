@@ -13,9 +13,7 @@
         "tags": [],
         "label": "IMAGE_CLICK_TRIGGER",
         "description": [],
-        "signature": [
-          "\"IMAGE_CLICK_TRIGGER\""
-        ],
+        "signature": ["\"IMAGE_CLICK_TRIGGER\""],
         "path": "src/plugins/image_embeddable/public/actions/image_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,

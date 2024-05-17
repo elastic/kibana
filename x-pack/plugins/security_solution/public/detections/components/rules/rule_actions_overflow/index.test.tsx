@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useBulkExport } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
 
 import { RuleActionsOverflow } from '.';
-import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { TestProviders } from '../../../../common/mock';
+import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 

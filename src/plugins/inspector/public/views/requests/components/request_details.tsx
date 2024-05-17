@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import type { DetailViewData } from './types';
-import { getNextTab } from './get_next_tab';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { Request } from '../../../../common/adapters/request/types';
+import { getNextTab } from './get_next_tab';
+import type { DetailViewData } from './types';
 
 import {
   ClustersView,

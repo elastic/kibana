@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, EuiLink } from '@elastic/eui';
+import React, { FunctionComponent, useEffect } from 'react';
 
-import { DocumentationService } from '../../../../../services';
 import {
   ComboBoxField,
   FIELD_TYPES,
-  UseField,
   Field,
+  UseField,
   fieldValidators,
-  useFormData,
   useFormContext,
+  useFormData,
   useKibana,
 } from '../../../../../../shared_imports';
+import { DocumentationService } from '../../../../../services';
 
-import { FieldsConfig, to, from } from './shared';
+import { FieldsConfig, from, to } from './shared';
 
 const { maxLengthField } = fieldValidators;
 

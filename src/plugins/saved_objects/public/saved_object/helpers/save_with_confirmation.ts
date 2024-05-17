@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
-  SavedObjectAttributes,
-  SavedObjectsCreateOptions,
   OverlayStart,
+  SavedObjectAttributes,
   SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { OVERWRITE_REJECTED } from '../../constants';
 import type { StartServices } from '../../types';
 import { confirmModalPromise } from './confirm_modal_promise';

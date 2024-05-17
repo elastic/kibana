@@ -11,10 +11,10 @@ import type { BuildFlavor } from '@kbn/config';
 import { coreMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { ElasticsearchPrivileges } from './elasticsearch_privileges';
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
+import { ElasticsearchPrivileges } from './elasticsearch_privileges';
 
 function getProps() {
   const license = licenseMock.create();

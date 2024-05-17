@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type {
   SavedObject,
   SavedObjectReference,
@@ -12,21 +13,20 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ExternalService, CaseAttributes, CaseConnector } from '../../common/types/domain';
-import { CaseStatuses, CaseSeverity, ConnectorTypes } from '../../common/types/domain';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
   CASE_SAVED_OBJECT,
   NONE_CONNECTOR_ID,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
-import { getNoneCaseConnector } from '../common/utils';
-import type { ConnectorPersistedFields } from '../common/types/connectors';
+import type { CaseAttributes, CaseConnector, ExternalService } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../common/types/domain';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
+import type { SOWithErrors } from '../common/types';
 import type { CasePersistedAttributes } from '../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
+import type { ConnectorPersistedFields } from '../common/types/connectors';
 import type { ExternalServicePersisted } from '../common/types/external_service';
-import type { SOWithErrors } from '../common/types';
+import { getNoneCaseConnector } from '../common/utils';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer

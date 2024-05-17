@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
+import { Dataset } from '../../../../common/datasets';
 import type { IHashedCache } from '../../../../common/hashed_cache';
 import { FindDatasetValue, SortOrder } from '../../../../common/latest';
-import { Dataset } from '../../../../common/datasets';
 
 export interface DatasetsSearchParams {
   datasetQuery?: string;

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common-internal';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { StatusTable } from './status_table';
 
 const state = {

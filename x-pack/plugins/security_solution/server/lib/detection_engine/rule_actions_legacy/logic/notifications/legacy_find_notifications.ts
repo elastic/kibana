@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleTypeParams, FindResult } from '@kbn/alerting-plugin/server';
+import type { FindResult, RuleTypeParams } from '@kbn/alerting-plugin/server';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyFindNotificationParams } from './legacy_types';

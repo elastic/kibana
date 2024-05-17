@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
+import React from 'react';
 import { ExceptionStacktraceTitle } from './exception_stacktrace_title';
 
 interface PlaintextStacktraceProps {

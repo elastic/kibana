@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ContainerNameRow } from './container_name_row';
-import { fireEvent } from '@testing-library/react';
 
 const TEST_NAME = 'TEST ROW';
 const TEST_BUTTON_FILTER = <div>Filter In</div>;

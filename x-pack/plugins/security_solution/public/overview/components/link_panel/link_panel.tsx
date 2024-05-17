@@ -1,3 +1,6 @@
+import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { chunk } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +9,8 @@
  */
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { chunk } from 'lodash';
-import type { EuiTableFieldDataColumnType, CriteriaWithPagination } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
+import { InspectButtonContainer } from '../../../common/components/inspect';
 import type { LinkPanelListItem } from './types';
 
 // @ts-expect-error TS2769

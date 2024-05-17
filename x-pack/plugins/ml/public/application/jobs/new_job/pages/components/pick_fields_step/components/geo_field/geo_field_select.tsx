@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
 interface DropDownLabel {
@@ -34,7 +34,7 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
             label: f.name,
             field: f,
             css: optionCss,
-          } as DropDownLabel)
+          }) as DropDownLabel
       ),
     [fields, optionCss]
   );

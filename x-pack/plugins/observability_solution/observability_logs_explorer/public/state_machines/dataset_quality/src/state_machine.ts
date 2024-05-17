@@ -8,7 +8,7 @@
 import { IToasts } from '@kbn/core-notifications-browser';
 import { CreateDatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { actions, createMachine, InterpreterFrom } from 'xstate';
+import { InterpreterFrom, actions, createMachine } from 'xstate';
 import {
   createController,
   openDatasetFlyout,

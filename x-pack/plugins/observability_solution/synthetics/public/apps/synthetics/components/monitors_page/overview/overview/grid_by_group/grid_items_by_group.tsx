@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFocusTrap, EuiLoadingSpinner, EuiOverlayMask, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { get, invert, orderBy } from 'lodash';
 import React, { useRef, useState, FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
-import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
-import { OverviewLoader } from '../overview_loader';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
+import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
 import {
   getSyntheticsFilterDisplayValues,
   monitorTypeKeyLabelMap,
 } from '../../../../../utils/filters/filter_fields';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
-import { GroupGridItem } from './grid_group_item';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
 import { FlyoutParamProps } from '../overview_grid_item';
-import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
+import { OverviewLoader } from '../overview_loader';
+import { GroupGridItem } from './grid_group_item';
 
 export const GridItemsByGroup = ({
   loaded,

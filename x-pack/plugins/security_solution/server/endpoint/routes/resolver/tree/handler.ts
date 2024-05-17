@@ -7,10 +7,10 @@
 
 import { firstValueFrom } from 'rxjs';
 
-import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 import type { ConfigType } from '../../../../config';
 

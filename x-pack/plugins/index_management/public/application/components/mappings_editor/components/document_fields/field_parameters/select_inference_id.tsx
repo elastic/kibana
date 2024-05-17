@@ -24,21 +24,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
+import { ModelConfig } from '@kbn/inference_integration_flyout/types';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import {
   InferenceAPIConfigResponse,
   SUPPORTED_PYTORCH_TASKS,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout/types';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
-import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
+import { getFieldConfig } from '../../../lib';
+import { Form, UseField, useForm } from '../../../shared_imports';
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;

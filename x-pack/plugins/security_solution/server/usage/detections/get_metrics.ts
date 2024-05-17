@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { DetectionMetrics } from './types';
 
-import { getMlJobMetrics } from './ml_jobs/get_metrics';
-import { getRuleMetrics } from './rules/get_metrics';
-import { getInitialEventLogUsage, getInitialRulesUsage } from './rules/get_initial_usage';
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
+import { getMlJobMetrics } from './ml_jobs/get_metrics';
+import { getInitialEventLogUsage, getInitialRulesUsage } from './rules/get_initial_usage';
+import { getRuleMetrics } from './rules/get_metrics';
 
 export interface GetDetectionsMetricsOptions {
   signalsIndex: string;

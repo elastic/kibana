@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { FC } from 'react';
+import React from 'react';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
-import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import type { MlRoute } from '../../router';
+import { PageLoader, createPath } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 
 const DatavisualizerSelector = dynamic(async () => ({
   default: (await import('../../../datavisualizer')).DatavisualizerSelector,

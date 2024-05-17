@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "getTopNavUnsavedChangesBadge",
-        "description": [
-          "\nReturns a badge object suitable for the top nav `badges` prop"
-        ],
+        "description": ["\nReturns a badge object suitable for the top nav `badges` prop"],
         "signature": [
           "({ onRevert, onSave, onSaveAs, }: ",
           {
@@ -79,13 +77,9 @@
         "parentPluginId": "@kbn/unsaved-changes-badge",
         "id": "def-common.UnsavedChangesBadge",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": ["constructor"],
         "label": "UnsavedChangesBadge",
-        "description": [
-          "\nBadge component. It opens a menu panel with actions once pressed."
-        ],
+        "description": ["\nBadge component. It opens a menu panel with actions once pressed."],
         "signature": [
           "({ badgeText, onRevert, onSave, onSaveAs, }: React.PropsWithChildren<",
           {
@@ -136,9 +130,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TopNavUnsavedChangesBadgeParams",
-        "description": [
-          "\nParams for getTopNavUnsavedChangesBadge"
-        ],
+        "description": ["\nParams for getTopNavUnsavedChangesBadge"],
         "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -150,9 +142,7 @@
             "tags": [],
             "label": "onRevert",
             "description": [],
-            "signature": [
-              "() => Promise<unknown>"
-            ],
+            "signature": ["() => Promise<unknown>"],
             "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,9 +156,7 @@
             "tags": [],
             "label": "onSave",
             "description": [],
-            "signature": [
-              "(() => Promise<unknown>) | undefined"
-            ],
+            "signature": ["(() => Promise<unknown>) | undefined"],
             "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -180,9 +168,7 @@
             "tags": [],
             "label": "onSaveAs",
             "description": [],
-            "signature": [
-              "(() => Promise<unknown>) | undefined"
-            ],
+            "signature": ["(() => Promise<unknown>) | undefined"],
             "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -196,9 +182,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UnsavedChangesBadgeProps",
-        "description": [
-          "\nProps for UnsavedChangesBadge"
-        ],
+        "description": ["\nProps for UnsavedChangesBadge"],
         "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -210,9 +194,7 @@
             "tags": [],
             "label": "onRevert",
             "description": [],
-            "signature": [
-              "() => Promise<unknown>"
-            ],
+            "signature": ["() => Promise<unknown>"],
             "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -226,9 +208,7 @@
             "tags": [],
             "label": "onSave",
             "description": [],
-            "signature": [
-              "(() => Promise<unknown>) | undefined"
-            ],
+            "signature": ["(() => Promise<unknown>) | undefined"],
             "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -242,9 +222,7 @@
             "tags": [],
             "label": "onSaveAs",
             "description": [],
-            "signature": [
-              "(() => Promise<unknown>) | undefined"
-            ],
+            "signature": ["(() => Promise<unknown>) | undefined"],
             "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, AnyAction } from 'redux';
-import type { DataAccessLayer } from '../../types';
-import { ResolverTreeFetcher } from './resolver_tree_fetcher';
+import type { AnyAction, Dispatch, MiddlewareAPI } from 'redux';
 import type { State } from '../../../common/store/types';
-import { RelatedEventsFetcher } from './related_events_fetcher';
+import type { DataAccessLayer } from '../../types';
+import * as Actions from '../actions';
+import * as CameraActions from '../camera/action';
+import * as DataActions from '../data/action';
 import { CurrentRelatedEventFetcher } from './current_related_event_fetcher';
 import { NodeDataFetcher } from './node_data_fetcher';
-import * as Actions from '../actions';
-import * as DataActions from '../data/action';
-import * as CameraActions from '../camera/action';
+import { RelatedEventsFetcher } from './related_events_fetcher';
+import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 
 type MiddlewareFactory<S = State> = (
   dataAccessLayer: DataAccessLayer

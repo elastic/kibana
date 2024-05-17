@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UptimeEsClient } from '../lib';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
+import { UptimeEsClient } from '../lib';
 
 export const getIndexStatus = async ({
   uptimeEsClient,

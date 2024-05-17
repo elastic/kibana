@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiOutsideClickDetector,
+  EuiProgress,
+  EuiText,
+  useEuiTheme,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, {
   MouseEvent,
   useContext,
@@ -13,21 +28,6 @@ import React, {
   useCallback,
   KeyboardEvent,
 } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
-  useEuiTheme,
-  EuiProgress,
-  EuiOutsideClickDetector,
-  useIsWithinMaxBreakpoint,
-} from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';

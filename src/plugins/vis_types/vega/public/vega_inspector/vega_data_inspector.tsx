@@ -8,13 +8,13 @@
 
 import './vega_data_inspector.scss';
 
+import { EuiCallOut, EuiTabbedContent } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { EuiTabbedContent, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { InspectorViewProps } from '@kbn/inspector-plugin/public';
-import { VegaInspectorAdapters } from './vega_inspector';
 import { DataViewer, SignalViewer, SpecViewer } from './components';
+import { VegaInspectorAdapters } from './vega_inspector';
 
 export type VegaDataInspectorProps = InspectorViewProps<VegaInspectorAdapters>;
 

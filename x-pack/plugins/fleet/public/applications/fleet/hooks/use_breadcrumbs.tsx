@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
-import type { Page, DynamicPagePathValues } from '../constants';
+import type { DynamicPagePathValues, Page } from '../constants';
 import { FLEET_BASE_PATH, INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
 import { useStartServices } from '.';

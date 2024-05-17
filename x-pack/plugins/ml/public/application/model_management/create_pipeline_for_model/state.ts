@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getDefaultOnFailureConfiguration } from '../../components/ml_inference/state';
 import type { ModelItem } from '../models_list';
 

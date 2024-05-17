@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import expect from '@kbn/expect';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { generateMobileData, SERVICE_VERSIONS } from './generate_mobile_data';
+import { SERVICE_VERSIONS, generateMobileData } from './generate_mobile_data';
 
 type MobileDetailedStatisticsResponse =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics'>;

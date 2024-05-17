@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isGreaterOrEqualRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
+import { isGreaterOrEqualRt } from '.';
 
 describe('inRangeRT', () => {
   test('passes if value is a positive number', () => {

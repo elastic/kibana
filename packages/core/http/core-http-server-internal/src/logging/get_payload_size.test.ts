@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
+import type { Request } from '@hapi/hapi';
 
-import mockFs from 'mock-fs';
 import { createReadStream } from 'fs';
 import { PassThrough } from 'stream';
 import { createGunzip, createGzip } from 'zlib';
+import mockFs from 'mock-fs';
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import { getResponsePayloadBytes } from './get_payload_size';
 

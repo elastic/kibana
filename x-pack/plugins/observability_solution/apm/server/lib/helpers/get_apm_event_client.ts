@@ -6,9 +6,9 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { APMEventClient } from './create_es_client/create_apm_event_client';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { withApmSpan } from '../../utils/with_apm_span';
+import { APMEventClient } from './create_es_client/create_apm_event_client';
 
 export async function getApmEventClient({
   context,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { has, get } from 'lodash/fp';
+import { get, has } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 
 import type { BrowserFields } from '../../../../../common/containers/source';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as apmApi from '../../../../../services/rest/create_call_apm_api';
 import { DeleteButton } from './delete_button';

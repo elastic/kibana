@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { Story } from '@storybook/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -18,9 +16,11 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { ExpandableFlyout } from '.';
-import { TestProvider } from './test/provider';
 import { State } from './state';
+import { TestProvider } from './test/provider';
 
 export default {
   component: ExpandableFlyout,

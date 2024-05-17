@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { sendGetAgentPolicies, sendGetAgents } from '../../../hooks';
 import type { Output } from '../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 
 export async function getAgentAndPolicyCountForOutput(output: Output) {
   let kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${output.id}" or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${output.id}"`;

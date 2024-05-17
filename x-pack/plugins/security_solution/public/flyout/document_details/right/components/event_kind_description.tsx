@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
-import { startCase } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { startCase } from 'lodash';
+import React, { useMemo } from 'react';
+import { getFieldArray } from '../../shared/utils';
 import { useRightPanelContext } from '../context';
 import { getEcsAllowedValueDescription } from '../utils/event_utils';
-import { getFieldArray } from '../../shared/utils';
 import {
+  EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID,
   EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_KIND_DESCRIPTION_TEXT_TEST_ID,
-  EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID,
 } from './test_ids';
 
 export interface EventKindDescriptionProps {

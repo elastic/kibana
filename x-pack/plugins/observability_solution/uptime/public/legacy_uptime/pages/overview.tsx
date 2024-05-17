@@ -10,13 +10,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
-import { IntegrationDeprecation } from '../components/overview/integration_deprecation';
-import { StatusPanel } from '../components/overview/status_panel';
-import { QueryBar } from '../components/overview/query_bar/query_bar';
-import { MONITORING_OVERVIEW_LABEL } from '../routes';
 import { FilterGroup } from '../components/overview/filter_group/filter_group';
+import { IntegrationDeprecation } from '../components/overview/integration_deprecation';
+import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
+import { QueryBar } from '../components/overview/query_bar/query_bar';
+import { StatusPanel } from '../components/overview/status_panel';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { MONITORING_OVERVIEW_LABEL } from '../routes';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {

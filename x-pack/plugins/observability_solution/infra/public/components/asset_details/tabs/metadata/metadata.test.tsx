@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Metadata } from './metadata';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { render } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { ContextProviders } from '../../context_providers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { ContextProviders } from '../../context_providers';
+import { useMetadata } from '../../hooks/use_metadata';
+import { Metadata } from './metadata';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');

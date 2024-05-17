@@ -9,8 +9,8 @@ import type {
   AGENT_TYPE_EPHEMERAL,
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
-  FleetServerAgentComponentStatuses,
   AgentStatuses,
+  FleetServerAgentComponentStatuses,
 } from '../../constants';
 
 export type AgentType =

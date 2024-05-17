@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  getUrlPrefix,
-  getTestRuleData,
   ObjectRemover,
+  getTestRuleData,
   getUnauthorizedErrorMessage,
+  getUrlPrefix,
 } from '../../../../common/lib';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,

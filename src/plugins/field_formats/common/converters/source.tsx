@@ -8,7 +8,7 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
 
 /** @public */
 export class SourceFormat extends FieldFormat {

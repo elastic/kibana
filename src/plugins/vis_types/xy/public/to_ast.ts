@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { ScaleType as ECScaleType, Position } from '@elastic/charts';
+import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
-  VisToExpressionAst,
-  getVisSchemas,
   DateHistogramParams,
   HistogramParams,
   LegendSize,
+  VisToExpressionAst,
+  getVisSchemas,
 } from '@kbn/visualizations-plugin/public';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { BUCKET_TYPES } from '@kbn/data-plugin/public';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import moment from 'moment';
+import { ChartType } from '../common';
 import {
-  Dimensions,
-  Dimension,
-  VisParams,
   CategoryAxis,
+  ChartMode,
+  Dimension,
+  Dimensions,
+  Scale,
+  ScaleType,
   SeriesParam,
   ThresholdLine,
   ValueAxis,
-  Scale,
-  ChartMode,
-  ScaleType,
+  VisParams,
 } from './types';
-import { ChartType } from '../common';
-import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
 import { Bounds, getCurveType, getLineStyle, getMode, getYAxisPosition } from './utils/common';
+import { getSeriesParams } from './utils/get_series_params';
 
 type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
 

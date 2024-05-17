@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
-import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import {
   Axis,
   Chart,
-  Settings,
-  Position,
-  niceTimeFormatter,
   ElementClickListener,
+  Position,
   RectAnnotation,
   RectAnnotationDatum,
-  XYChartElementEvent,
-  TooltipProps,
+  Settings,
   Tooltip,
+  TooltipProps,
+  XYChartElementEvent,
+  niceTimeFormatter,
 } from '@elastic/charts';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTimelineChartTheme } from '../../../../../utils/use_timeline_chart_theme';
-import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
+import { first, last } from 'lodash';
+import moment from 'moment';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
-import { colorTransformer, Color } from '../../../../../../common/color_palette';
+import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { useTimeline } from '../../hooks/use_timeline';
-import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
-import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
-import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
+import { InfraFormatter } from '../../../../../lib/lib';
+import { useTimelineChartTheme } from '../../../../../utils/use_timeline_chart_theme';
+import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
-import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { useTimeline } from '../../hooks/use_timeline';
+import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
   interval: string;

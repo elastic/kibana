@@ -8,12 +8,12 @@
 
 import { action } from '@storybook/addon-actions';
 
-import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import type {
-  KibanaNoDataPageServices,
   KibanaNoDataPageProps,
+  KibanaNoDataPageServices,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 
 import {
   NoDataViewsPromptStorybookMock,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 import {
-  catchError,
-  timeout,
-  mergeMap,
-  last,
-  map,
-  toArray,
-  of,
-  from,
   type Observable,
+  catchError,
+  from,
+  last,
   lastValueFrom,
+  map,
+  mergeMap,
+  of,
+  timeout,
+  toArray,
 } from 'rxjs';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 

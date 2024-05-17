@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { UserItem } from '../../../../../common/search_strategy';
+import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 
 const anomaly = mockAnomalies.anomalies[0];

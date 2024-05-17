@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerFactory } from './task_runner_factory';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { schema } from '@kbn/config-schema';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  savedObjectsServiceMock,
   elasticsearchServiceMock,
+  httpServiceMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import sinon from 'sinon';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { schema } from '@kbn/config-schema';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { rulesClientMock } from '../mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { TaskRunnerFactory } from './task_runner_factory';
+import { TaskRunnerContext } from './types';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const backfillClient = backfillClientMock.create();

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
+import moment from 'moment';
+import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';

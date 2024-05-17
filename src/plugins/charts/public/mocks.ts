@@ -7,10 +7,10 @@
  */
 
 import { ChartsPlugin } from './plugin';
-import { themeServiceMock } from './services/theme/mock';
 import { activeCursorMock } from './services/active_cursor/mock';
 import { colorsServiceMock } from './services/legacy_colors/mock';
 import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';
+import { themeServiceMock } from './services/theme/mock';
 
 export { MOCK_SPARKLINE_THEME } from './services/theme/mock';
 

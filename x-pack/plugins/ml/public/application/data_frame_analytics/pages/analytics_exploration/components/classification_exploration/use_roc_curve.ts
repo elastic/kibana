@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
-  getDependentVar,
-  getPredictionFieldName,
   ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalyticsConfig,
   type RocCurveItem,
+  getDependentVar,
+  getPredictionFieldName,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
+import { loadEvalData } from '../../../../common';
 import type { ResultsSearchQuery } from '../../../../common/analytics';
 import { isClassificationEvaluateResponse } from '../../../../common/analytics';
-import { loadEvalData } from '../../../../common';
 
 import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
 

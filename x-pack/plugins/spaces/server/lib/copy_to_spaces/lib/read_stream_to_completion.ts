@@ -6,7 +6,7 @@
  */
 
 import type { Readable } from 'stream';
-import { pipeline, Writable } from 'stream';
+import { Writable, pipeline } from 'stream';
 
 export const readStreamToCompletion = <T = any>(stream: Readable) => {
   return new Promise<T[]>((resolve, reject) => {

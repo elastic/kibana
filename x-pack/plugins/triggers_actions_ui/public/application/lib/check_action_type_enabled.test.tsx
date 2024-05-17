@@ -7,8 +7,8 @@
 
 import { ActionType, PreConfiguredActionConnector } from '../../types';
 import {
-  checkActionTypeEnabled,
   checkActionFormActionTypeEnabled,
+  checkActionTypeEnabled,
 } from './check_action_type_enabled';
 
 describe('checkActionTypeEnabled', () => {
@@ -133,8 +133,9 @@ describe('checkActionFormActionTypeEnabled', () => {
       isSystemActionType: false,
     };
 
-    expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
-      .toMatchInlineSnapshot(`
+    expect(
+      checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors)
+    ).toMatchInlineSnapshot(`
           Object {
             "isEnabled": true,
           }
@@ -152,8 +153,9 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInLicense: true,
       isSystemActionType: false,
     };
-    expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
-      .toMatchInlineSnapshot(`
+    expect(
+      checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors)
+    ).toMatchInlineSnapshot(`
           Object {
             "isEnabled": false,
             "message": "This connector is disabled by the Kibana configuration.",

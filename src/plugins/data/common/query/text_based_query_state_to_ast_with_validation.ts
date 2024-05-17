@@ -1,3 +1,4 @@
+import type { DataView } from '@kbn/data-views-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +6,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType, Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { Query, isOfAggregateQueryType } from '@kbn/es-query';
 import type { QueryState } from '..';
 import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 

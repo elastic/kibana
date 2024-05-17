@@ -28,8 +28,9 @@ throttled_time 666
       `,
     });
 
-    expect(await gatherV1CgroupMetrics({ cpuAcctPath: '/groupname', cpuPath: '/groupname' }))
-      .toMatchInlineSnapshot(`
+    expect(
+      await gatherV1CgroupMetrics({ cpuAcctPath: '/groupname', cpuPath: '/groupname' })
+    ).toMatchInlineSnapshot(`
       Object {
         "cpu": Object {
           "cfs_period_micros": 222,

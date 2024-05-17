@@ -6,24 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { defer, lastValueFrom } from 'rxjs';
-import { partition } from 'lodash';
 import {
+  AggConfigs,
   AggsStart,
   DataView,
   DataViewSpec,
   ExpressionValueSearchContext,
   parseEsInterval,
-  AggConfigs,
 } from '@kbn/data-plugin/common';
+import { partition } from 'lodash';
+import { defer, lastValueFrom } from 'rxjs';
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
-import { Adapters } from '@kbn/inspector-plugin/common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import moment from 'moment';
+import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
+import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
 import { handleRequest } from './handle_request';
+import { FetchEventAnnotationsArgs, FetchEventAnnotationsStartDependencies } from './types';
 import {
   ANNOTATIONS_PER_BUCKET,
   getCalculatedInterval,
@@ -34,9 +37,6 @@ import {
   sortByTime,
   wrapRowsInDatatable,
 } from './utils';
-import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
-import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import { FetchEventAnnotationsArgs, FetchEventAnnotationsStartDependencies } from './types';
 
 interface ManualGroup {
   type: 'manual';

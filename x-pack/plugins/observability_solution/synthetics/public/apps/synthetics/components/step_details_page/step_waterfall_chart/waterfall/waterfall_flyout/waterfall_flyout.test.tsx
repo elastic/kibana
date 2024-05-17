@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
+import { render } from '../../../../../utils/testing';
+import { WaterfallMetadataEntry } from '../../../common/network_data/types';
 import {
-  WaterfallFlyout,
-  DETAILS,
   CERTIFICATES,
+  DETAILS,
   REQUEST_HEADERS,
   RESPONSE_HEADERS,
+  WaterfallFlyout,
 } from './waterfall_flyout';
-import { WaterfallMetadataEntry } from '../../../common/network_data/types';
-import { render } from '../../../../../utils/testing';
 
 describe('WaterfallFlyout', () => {
   const flyoutData: WaterfallMetadataEntry = {

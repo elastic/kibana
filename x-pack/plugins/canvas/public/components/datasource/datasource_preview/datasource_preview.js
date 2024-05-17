@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiEmptyPrompt,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPanel,
-  EuiText,
-  EuiEmptyPrompt,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { LazyErrorComponent } from '@kbn/expression-error-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { LazyErrorComponent } from '@kbn/expression-error-plugin/public';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { Datatable } from '../../datatable';
 
 const Error = withSuspense(LazyErrorComponent);
@@ -71,7 +71,7 @@ export const DatasourcePreview = ({ done, datatable }) => (
       ) : (
         <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
           {datatable.rows.length > 0 ? (
-            <Datatable datatable={datatable} showHeader paginate />
+            <Datatable datatable={datatable} showHeader={true} paginate={true} />
           ) : (
             <EuiEmptyPrompt
               title={<h2>{strings.getEmptyTitle()}</h2>}

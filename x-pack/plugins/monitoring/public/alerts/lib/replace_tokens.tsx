@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
-import {
-  AlertMessage,
-  AlertMessageTimeToken,
-  AlertMessageLinkToken,
-  AlertMessageDocLinkToken,
-} from '../../../common/types/alerts';
+import moment from 'moment';
+import React, { Fragment } from 'react';
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { AlertMessageTokenType } from '../../../common/enums';
+import {
+  AlertMessage,
+  AlertMessageDocLinkToken,
+  AlertMessageLinkToken,
+  AlertMessageTimeToken,
+} from '../../../common/types/alerts';
 import { Legacy } from '../../legacy_shims';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 

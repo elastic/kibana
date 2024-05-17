@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createMockStore, mockGlobalState } from '../../../../common/mock';
-import { createFilterOutCellActionFactory } from './filter_out';
-import type { SecurityCellActionExecutionContext } from '../../types';
-import { TimelineId } from '../../../../../common/types';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { TimelineId } from '../../../../../common/types';
+import { createMockStore, mockGlobalState } from '../../../../common/mock';
+import type { SecurityCellActionExecutionContext } from '../../types';
+import { createFilterOutCellActionFactory } from './filter_out';
 
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 

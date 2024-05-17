@@ -6,10 +6,10 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import type { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
-import type { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
+import type { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import type { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
+import type { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
 import type { initFunctions as initClientFunctions } from '../public/functions';
 
 /**
@@ -71,9 +71,12 @@ import type { initFunctions as initClientFunctions } from '../public/functions';
  * in Kibana and Canvas.
  */
 // prettier-ignore
-export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> =
-  // @ts-expect-error upgrade typescript v4.9.5
-  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>
+export type ExpressionFunctionFactory<
+  Name extends string,
+  Input,
+  Arguments,
+  Output,
+> = () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>; // @ts-expect-error upgrade typescript v4.9.5
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
@@ -82,15 +85,19 @@ export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Out
  * with a shorter name).
  */
 // prettier-ignore
-export type FunctionFactory<FnFactory> =
-  FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
-    // @ts-expect-error upgrade typescript v4.9.5
-    ExpressionFunctionDefinition<Name, Input, Arguments, Awaited<Output>> :
-    never;
+export type FunctionFactory<FnFactory> = FnFactory extends ExpressionFunctionFactory<
+  infer Name,
+  infer Input,
+  infer Arguments,
+  infer Output
+>
+  ? // @ts-expect-error upgrade typescript v4.9.5
+    ExpressionFunctionDefinition<Name, Input, Arguments, Awaited<Output>>
+  : never;
 
-type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
-type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
-type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type CommonFunction = FunctionFactory<(typeof commonFunctions)[number]>;
+type BrowserFunction = FunctionFactory<(typeof browserFunctions)[number]>;
+type ServerFunction = FunctionFactory<(typeof serverFunctions)[number]>;
 type ExternalFunction = FunctionFactory<
   ReturnType<typeof initExternalFunctions> extends Array<infer U> ? U : never
 >;

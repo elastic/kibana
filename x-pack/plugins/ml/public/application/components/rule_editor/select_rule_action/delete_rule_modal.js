@@ -9,11 +9,11 @@
  * React component for rendering a modal to confirm deletion of a rule.
  */
 
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 
-import { EuiConfirmModal, EuiLink, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export class DeleteRuleModal extends Component {

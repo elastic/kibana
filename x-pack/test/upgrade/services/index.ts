@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { services as apiIntegrationServices } from '../../api_integration/services';
 import { services as functionalServices } from '../../functional/services';
 import { services as mapsUpgradeServices } from './maps_upgrade_services';
 import { services as rulesUpgradeServices } from './rules_upgrade_services';
-import { services as apiIntegrationServices } from '../../api_integration/services';
 
 export const services = {
   ...functionalServices,

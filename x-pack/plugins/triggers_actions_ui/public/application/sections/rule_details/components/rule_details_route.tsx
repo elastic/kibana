@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
+import { ToastsApi } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ToastsApi } from '@kbn/core/public';
-import { EuiSpacer } from '@elastic/eui';
-import { RuleType, ActionType, ResolvedRule } from '../../../../types';
-import { RuleDetailsWithApi as RuleDetails } from './rule_details';
+import { useKibana } from '../../../../common/lib/kibana';
+import { ActionType, ResolvedRule, RuleType } from '../../../../types';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
 import {
   ComponentOpts as ActionApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import {
+  ComponentOpts as RuleApis,
+  withBulkRuleOperations,
+} from '../../common/components/with_bulk_rule_api_operations';
+import { RuleDetailsWithApi as RuleDetails } from './rule_details';
 
 type RuleDetailsRouteProps = RouteComponentProps<{
   ruleId: string;

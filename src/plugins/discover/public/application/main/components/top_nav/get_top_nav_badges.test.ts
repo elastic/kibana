@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getTopNavBadges } from './get_top_nav_badges';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getTopNavBadges } from './get_top_nav_badges';
 
 const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 const discoverServiceMock = createDiscoverServicesMock();

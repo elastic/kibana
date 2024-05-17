@@ -1,3 +1,9 @@
+import {
+  AsApiContract,
+  BASE_ACTION_API_PATH,
+  INTERNAL_BASE_ACTION_API_PATH,
+  RewriteRequestCase,
+} from '@kbn/actions-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +11,6 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import {
-  AsApiContract,
-  BASE_ACTION_API_PATH,
-  INTERNAL_BASE_ACTION_API_PATH,
-  RewriteRequestCase,
-} from '@kbn/actions-plugin/common';
 import type { ActionConnector, ActionConnectorProps } from '../../../types';
 
 const rewriteResponseRes = (

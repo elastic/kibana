@@ -1,3 +1,5 @@
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';

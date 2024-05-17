@@ -22,7 +22,7 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { Loading } from '../../../../../shared/loading';
 
 import { AddSourceLogic } from './add_source_logic';
-import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
+import { CONFIG_OAUTH_BUTTON, CONFIG_OAUTH_LABEL } from './constants';
 
 interface ConfigureOauthProps {
   header: React.ReactNode;

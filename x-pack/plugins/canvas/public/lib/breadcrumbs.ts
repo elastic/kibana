@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MouseEvent } from 'react';
-import { History } from 'history';
 import { ChromeBreadcrumb } from '@kbn/core/public';
+import { History } from 'history';
+import { MouseEvent } from 'react';
 import { getUntitledWorkpadLabel } from './doc_title';
 
 const isModifiedEvent = (event: MouseEvent) =>

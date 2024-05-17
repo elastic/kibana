@@ -6,16 +6,16 @@
  */
 
 import {
+  type DefaultItemAction,
   EuiBadge,
+  type EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
-  type DefaultItemAction,
-  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FilterStateStore, type Filter } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
@@ -24,8 +24,8 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
 import {
-  useChangePointDetectionContext,
   type ChangePointAnnotation,
+  useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
 import { NoChangePointsWarning } from './no_change_points_warning';

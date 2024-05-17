@@ -10,80 +10,80 @@
 import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import dateMath from '@kbn/datemath';
 
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import {
+  ALERT_RULE_CREATED_BY,
   ALERT_RULE_FROM,
-  ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
-  ALERT_RULE_CREATED_BY,
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_END,
+  ALERT_RULE_TYPE,
   ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
-import { lastValueFrom } from 'rxjs';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
+import { lastValueFrom } from 'rxjs';
+import type { TimelineResult } from '../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
+import { isEqlRule } from '../../../../common/detection_engine/utils';
 import {
-  ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
+  ALERT_NEW_TERMS,
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_INDICES,
   ALERT_RULE_TIMELINE_ID,
   ALERT_THRESHOLD_RESULT,
-  ALERT_NEW_TERMS,
-  ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import { isEqlRule } from '../../../../common/detection_engine/utils';
-import type { TimelineResult } from '../../../../common/api/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import type {
-  SendAlertToTimelineActionProps,
-  ThresholdAggregationData,
-  UpdateAlertStatusActionProps,
-  CreateTimelineProps,
-  GetExceptionFilter,
-  CreateTimeline,
-} from './types';
 import type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
-import { timelineDefaults } from '../../../timelines/store/defaults';
-import {
-  omitTypenameInTimeline,
-  formatTimelineResultToModel,
-} from '../../../timelines/components/open_timeline/helpers';
-import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
-import { getField, getFieldKey } from '../../../helpers';
-import {
-  replaceTemplateFieldFromQuery,
-  replaceTemplateFieldFromMatchFilters,
-  replaceTemplateFieldFromDataProviders,
-} from './helpers';
-import type {
-  DataProvider,
-  QueryOperator,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
-import { getTimelineTemplate } from '../../../timelines/containers/api';
+import { TimelineId } from '../../../../common/types/timeline';
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
+import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../../common/utils/alerts';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
+import { getField, getFieldKey } from '../../../helpers';
+import {
+  formatTimelineResultToModel,
+  omitTypenameInTimeline,
+} from '../../../timelines/components/open_timeline/helpers';
+import type {
+  DataProvider,
+  QueryOperator,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
+import { getTimelineTemplate } from '../../../timelines/containers/api';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import {
+  replaceTemplateFieldFromDataProviders,
+  replaceTemplateFieldFromMatchFilters,
+  replaceTemplateFieldFromQuery,
+} from './helpers';
+import type {
+  CreateTimeline,
+  CreateTimelineProps,
+  GetExceptionFilter,
+  SendAlertToTimelineActionProps,
+  ThresholdAggregationData,
+  UpdateAlertStatusActionProps,
+} from './types';
 
 export const updateAlertStatusAction = async ({
   query,

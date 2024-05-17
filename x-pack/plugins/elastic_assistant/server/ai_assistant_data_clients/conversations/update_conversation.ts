@@ -8,11 +8,11 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConversationResponse,
-  Reader,
-  ConversationUpdateProps,
-  Provider,
-  MessageRole,
   ConversationSummary,
+  ConversationUpdateProps,
+  MessageRole,
+  Provider,
+  Reader,
   UUID,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';

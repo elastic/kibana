@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { buildOSSFeatures } from './oss_features';
-import { featurePrivilegeIterator } from './feature_privilege_iterator';
+import { LICENSE_TYPE, LicenseType } from '@kbn/licensing-plugin/server';
 import { KibanaFeature } from '.';
-import { LicenseType, LICENSE_TYPE } from '@kbn/licensing-plugin/server';
+import { featurePrivilegeIterator } from './feature_privilege_iterator';
+import { buildOSSFeatures } from './oss_features';
 
 describe('buildOSSFeatures', () => {
   it('returns features including reporting subfeatures', () => {

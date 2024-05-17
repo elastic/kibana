@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { join, isAbsolute } from 'path';
+import { isAbsolute, join } from 'path';
 
 /**
  * Transforms a path to absolute path. If an absolute path passed to the function it's returned without

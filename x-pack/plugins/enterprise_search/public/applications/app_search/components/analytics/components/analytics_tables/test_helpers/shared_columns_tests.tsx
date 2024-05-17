@@ -6,9 +6,9 @@
  */
 
 import {
+  mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-  mockFlashMessageHelpers,
 } from '../../../../../../__mocks__/kea_logic';
 import '../../../../../__mocks__/engine_logic.mock';
 

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { isPromise } from '@kbn/std';
 import { MaybePromise } from '@kbn/utility-types';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { EmbeddableErrorHandler } from './embeddable_error_handler';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 interface Props {
   embeddable?: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;

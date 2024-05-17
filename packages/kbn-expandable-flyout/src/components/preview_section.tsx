@@ -11,20 +11,20 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSplitPanel,
   EuiText,
   useEuiTheme,
-  EuiSplitPanel,
 } from '@elastic/eui';
-import React from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
+import React from 'react';
+import { useExpandableFlyoutApi } from '../..';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_HEADER_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { useExpandableFlyoutApi } from '../..';
 import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
 
 export interface PreviewBanner {

@@ -75,9 +75,7 @@
         "type": "Interface",
         "tags": [],
         "label": "HttpFetchOptions",
-        "description": [
-          "\nAll options that may be used with a {@link HttpHandler}."
-        ],
+        "description": ["\nAll options that may be used with a {@link HttpHandler}."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
@@ -105,9 +103,7 @@
             "type": "Object",
             "tags": [],
             "label": "query",
-            "description": [
-              "\nThe query string for an HTTP request. See {@link HttpFetchQuery}."
-            ],
+            "description": ["\nThe query string for an HTTP request. See {@link HttpFetchQuery}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -131,9 +127,7 @@
             "description": [
               "\nWhether or not the request should automatically prepend the basePath. Defaults to `true`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -144,9 +138,7 @@
             "type": "Object",
             "tags": [],
             "label": "headers",
-            "description": [
-              "\nHeaders to send with the request. See {@link HttpHeadersInit}."
-            ],
+            "description": ["\nHeaders to send with the request. See {@link HttpHeadersInit}."],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -170,9 +162,7 @@
             "description": [
               "\nWhether or not the request should include the \"system request\" header to differentiate an end user request from\nKibana internal request.\nCan be read on the server-side using KibanaRequest#isSystemRequest. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -186,9 +176,7 @@
             "description": [
               "\nWhen `true` the return type of {@link HttpHandler} will be an {@link HttpResponse} with detailed request and\nresponse information. When `false`, the return type will just be the parsed response body. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -202,9 +190,7 @@
             "description": [
               "\nWhen true, the response from the `fetch` call will be returned as is, without being awaited or processed.\nDefaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -234,14 +220,10 @@
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.HttpFetchOptions.version",
             "type": "string",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "version",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -255,9 +237,7 @@
         "type": "Interface",
         "tags": [],
         "label": "HttpFetchOptionsWithPath",
-        "description": [
-          "\nSimilar to {@link HttpFetchOptions} but with the URL path included."
-        ],
+        "description": ["\nSimilar to {@link HttpFetchOptions} but with the URL path included."],
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
@@ -343,9 +323,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -357,9 +335,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -371,9 +347,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -385,9 +359,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -415,9 +387,7 @@
             "tags": [],
             "label": "[name: string]: any",
             "description": [],
-            "signature": [
-              "[name: string]:  any"
-            ],
+            "signature": ["[name: string]:  any"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -444,9 +414,7 @@
             "type": "Function",
             "tags": [],
             "label": "request",
-            "description": [
-              "\nDefine an interceptor to be executed before a request is sent."
-            ],
+            "description": ["\nDefine an interceptor to be executed before a request is sent."],
             "signature": [
               "((fetchOptions: Readonly<",
               {
@@ -515,9 +483,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
-                "description": [
-                  "{@link IHttpInterceptController }"
-                ],
+                "description": ["{@link IHttpInterceptController }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -589,9 +555,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "httpErrorRequest",
-                "description": [
-                  "{@link HttpInterceptorRequestError }"
-                ],
+                "description": ["{@link HttpInterceptorRequestError }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -612,9 +576,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
-                "description": [
-                  "{@link IHttpInterceptController }"
-                ],
+                "description": ["{@link IHttpInterceptController }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -638,9 +600,7 @@
             "type": "Function",
             "tags": [],
             "label": "response",
-            "description": [
-              "\nDefine an interceptor to be executed after a response is received."
-            ],
+            "description": ["\nDefine an interceptor to be executed after a response is received."],
             "signature": [
               "((httpResponse: ",
               {
@@ -686,9 +646,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "httpResponse",
-                "description": [
-                  "{@link HttpResponse }"
-                ],
+                "description": ["{@link HttpResponse }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -710,9 +668,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
-                "description": [
-                  "{@link IHttpInterceptController }"
-                ],
+                "description": ["{@link IHttpInterceptController }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -784,9 +740,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "httpErrorResponse",
-                "description": [
-                  "{@link HttpInterceptorResponseError }"
-                ],
+                "description": ["{@link HttpInterceptorResponseError }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -807,9 +761,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
-                "description": [
-                  "{@link IHttpInterceptController }"
-                ],
+                "description": ["{@link IHttpInterceptController }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -886,9 +838,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "Error"
-            ],
+            "signature": ["Error"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -970,9 +920,7 @@
         "type": "Interface",
         "tags": [],
         "label": "HttpRequestInit",
-        "description": [
-          "\nFetch API options available to {@link HttpHandler}s.\n"
-        ],
+        "description": ["\nFetch API options available to {@link HttpHandler}s.\n"],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -983,12 +931,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "body",
-            "description": [
-              "\nA BodyInit object or null to set request's body."
-            ],
-            "signature": [
-              "BodyInit | null | undefined"
-            ],
+            "description": ["\nA BodyInit object or null to set request's body."],
+            "signature": ["BodyInit | null | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1002,9 +946,7 @@
             "description": [
               "\nThe cache mode associated with request, which is a string indicating how the request will interact with the\nbrowser's cache when fetching."
             ],
-            "signature": [
-              "RequestCache | undefined"
-            ],
+            "signature": ["RequestCache | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1018,9 +960,7 @@
             "description": [
               "\nThe credentials mode associated with request, which is a string indicating whether credentials will be sent with\nthe request always, never, or only when sent to a same-origin URL."
             ],
-            "signature": [
-              "RequestCredentials | undefined"
-            ],
+            "signature": ["RequestCredentials | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1031,9 +971,7 @@
             "type": "Object",
             "tags": [],
             "label": "headers",
-            "description": [
-              "{@link HttpHeadersInit}"
-            ],
+            "description": ["{@link HttpHeadersInit}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -1057,9 +995,7 @@
             "description": [
               "\nSubresource integrity metadata, which is a cryptographic hash of the resource being fetched. Its value consists of\nmultiple hashes separated by whitespace."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1073,9 +1009,7 @@
             "description": [
               "Whether or not request can outlive the global in which it was created."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1086,12 +1020,8 @@
             "type": "string",
             "tags": [],
             "label": "method",
-            "description": [
-              "HTTP method, which is \"GET\" by default."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["HTTP method, which is \"GET\" by default."],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1105,9 +1035,7 @@
             "description": [
               "\nThe mode associated with request, which is a string indicating whether the request will use CORS, or will be\nrestricted to same-origin URLs."
             ],
-            "signature": [
-              "RequestMode | undefined"
-            ],
+            "signature": ["RequestMode | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1121,9 +1049,7 @@
             "description": [
               "\nThe redirect mode associated with request, which is a string indicating how redirects for the request will be\nhandled during fetching. A request will follow redirects by default."
             ],
-            "signature": [
-              "RequestRedirect | undefined"
-            ],
+            "signature": ["RequestRedirect | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1137,9 +1063,7 @@
             "description": [
               "\nThe referrer of request. Its value can be a same-origin URL if explicitly set in init, the empty string to\nindicate no referrer, and \"about:client\" when defaulting to the global's default. This is used during fetching to\ndetermine the value of the `Referer` header of the request being made."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1153,9 +1077,7 @@
             "description": [
               "\nThe referrer policy associated with request. This is used during fetching to compute the value of the request's\nreferrer."
             ],
-            "signature": [
-              "ReferrerPolicy | undefined"
-            ],
+            "signature": ["ReferrerPolicy | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1169,9 +1091,7 @@
             "description": [
               "\nReturns the signal associated with request, which is an AbortSignal object indicating whether or not request has\nbeen aborted, and its abort event handler."
             ],
-            "signature": [
-              "AbortSignal | null | undefined"
-            ],
+            "signature": ["AbortSignal | null | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1182,12 +1102,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "window",
-            "description": [
-              "\nCan only be null. Used to disassociate request from any Window."
-            ],
-            "signature": [
-              "null | undefined"
-            ],
+            "description": ["\nCan only be null. Used to disassociate request from any Window."],
+            "signature": ["null | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1262,9 +1178,7 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": [
-              "Raw request sent to Kibana server."
-            ],
+            "description": ["Raw request sent to Kibana server."],
             "signature": [
               "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
             ],
@@ -1278,12 +1192,8 @@
             "type": "Object",
             "tags": [],
             "label": "response",
-            "description": [
-              "Raw response received, may be undefined if there was an error."
-            ],
-            "signature": [
-              "Readonly<Response> | undefined"
-            ],
+            "description": ["Raw response received, may be undefined if there was an error."],
+            "signature": ["Readonly<Response> | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1294,12 +1204,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "Parsed body received, may be undefined if there was an error."
-            ],
-            "signature": [
-              "TResponseBody | undefined"
-            ],
+            "description": ["Parsed body received, may be undefined if there was an error."],
+            "signature": ["TResponseBody | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1368,9 +1274,7 @@
             "type": "Object",
             "tags": [],
             "label": "anonymousPaths",
-            "description": [
-              "\nAPIs for denoting certain paths for not requiring authentication"
-            ],
+            "description": ["\nAPIs for denoting certain paths for not requiring authentication"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -1410,9 +1314,7 @@
             "type": "Function",
             "tags": [],
             "label": "intercept",
-            "description": [
-              "\nAdds a new {@link HttpInterceptor} to the global HTTP client."
-            ],
+            "description": ["\nAdds a new {@link HttpInterceptor} to the global HTTP client."],
             "signature": [
               "(interceptor: ",
               {
@@ -1434,9 +1336,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "interceptor",
-                "description": [
-                  "a {@link HttpInterceptor }"
-                ],
+                "description": ["a {@link HttpInterceptor }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
@@ -1452,9 +1352,7 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "a function for removing the attached interceptor."
-            ]
+            "returnComment": ["a function for removing the attached interceptor."]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1641,11 +1539,7 @@
             "description": [
               "\nAdds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are\nmore than 0."
             ],
-            "signature": [
-              "(countSource$: ",
-              "Observable",
-              "<number>) => void"
-            ],
+            "signature": ["(countSource$: ", "Observable", "<number>) => void"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1656,13 +1550,8 @@
                 "type": "Object",
                 "tags": [],
                 "label": "countSource$",
-                "description": [
-                  "an Observable to subscribe to for loading count updates."
-                ],
-                "signature": [
-                  "Observable",
-                  "<number>"
-                ],
+                "description": ["an Observable to subscribe to for loading count updates."],
+                "signature": ["Observable", "<number>"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1677,14 +1566,8 @@
             "type": "Function",
             "tags": [],
             "label": "getLoadingCount$",
-            "description": [
-              "\nGet the sum of all loading count sources as a single Observable."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<number>"
-            ],
+            "description": ["\nGet the sum of all loading count sources as a single Observable."],
+            "signature": ["() => ", "Observable", "<number>"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1700,9 +1583,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IAnonymousPaths",
-        "description": [
-          "\nAPIs for denoting paths as not requiring authentication"
-        ],
+        "description": ["\nAPIs for denoting paths as not requiring authentication"],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1716,9 +1597,7 @@
             "description": [
               "\nDetermines whether the provided path doesn't require authentication. `path` should include the current basePath."
             ],
-            "signature": [
-              "(path: string) => boolean"
-            ],
+            "signature": ["(path: string) => boolean"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1730,9 +1609,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1750,9 +1627,7 @@
             "description": [
               "\nRegister `path` as not requiring authentication. `path` should not include the current basePath."
             ],
-            "signature": [
-              "(path: string) => void"
-            ],
+            "signature": ["(path: string) => void"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1764,9 +1639,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1784,9 +1657,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IBasePath",
-        "description": [
-          "\nAPIs for manipulating the basePath on URL segments."
-        ],
+        "description": ["\nAPIs for manipulating the basePath on URL segments."],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1797,12 +1668,8 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [
-              "\nGets the `basePath` string."
-            ],
-            "signature": [
-              "() => string"
-            ],
+            "description": ["\nGets the `basePath` string."],
+            "signature": ["() => string"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1815,12 +1682,8 @@
             "type": "Function",
             "tags": [],
             "label": "prepend",
-            "description": [
-              "\nPrepends `path` with the basePath."
-            ],
-            "signature": [
-              "(url: string) => string"
-            ],
+            "description": ["\nPrepends `path` with the basePath."],
+            "signature": ["(url: string) => string"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1832,9 +1695,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1849,12 +1710,8 @@
             "type": "Function",
             "tags": [],
             "label": "remove",
-            "description": [
-              "\nRemoves the prepended basePath from the `path`."
-            ],
-            "signature": [
-              "(url: string) => string"
-            ],
+            "description": ["\nRemoves the prepended basePath from the `path`."],
+            "signature": ["(url: string) => string"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1866,9 +1723,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1912,9 +1767,7 @@
             "description": [
               "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link IBasePath.serverBasePath}.\n"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1928,9 +1781,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IExternalUrl",
-        "description": [
-          "\nAPIs for working with external URLs.\n"
-        ],
+        "description": ["\nAPIs for working with external URLs.\n"],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1941,12 +1792,8 @@
             "type": "Function",
             "tags": [],
             "label": "isInternalUrl",
-            "description": [
-              "\nDetermines if the provided URL is an internal url.\n"
-            ],
-            "signature": [
-              "(relativeOrAbsoluteUrl: string) => boolean"
-            ],
+            "description": ["\nDetermines if the provided URL is an internal url.\n"],
+            "signature": ["(relativeOrAbsoluteUrl: string) => boolean"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1958,9 +1805,7 @@
                 "tags": [],
                 "label": "relativeOrAbsoluteUrl",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1978,9 +1823,7 @@
             "description": [
               "\nDetermines if the provided URL is a valid location to send users.\nValidation is based on the configured allow list in kibana.yml.\n\nIf the URL is valid, then a URL will be returned.\nOtherwise, this will return null.\n"
             ],
-            "signature": [
-              "(relativeOrAbsoluteUrl: string) => URL | null"
-            ],
+            "signature": ["(relativeOrAbsoluteUrl: string) => URL | null"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1992,9 +1835,7 @@
                 "tags": [],
                 "label": "relativeOrAbsoluteUrl",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2045,9 +1886,7 @@
             "tags": [],
             "label": "request",
             "description": [],
-            "signature": [
-              "Request"
-            ],
+            "signature": ["Request"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2059,9 +1898,7 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "signature": [
-              "Response | undefined"
-            ],
+            "signature": ["Response | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2073,9 +1910,7 @@
             "tags": [],
             "label": "body",
             "description": [],
-            "signature": [
-              "TResponseBody | undefined"
-            ],
+            "signature": ["TResponseBody | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2089,9 +1924,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IHttpInterceptController",
-        "description": [
-          "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
-        ],
+        "description": ["\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2102,9 +1935,7 @@
             "type": "boolean",
             "tags": [],
             "label": "halted",
-            "description": [
-              "Whether or not this chain has been halted."
-            ],
+            "description": ["Whether or not this chain has been halted."],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2118,9 +1949,7 @@
             "description": [
               "Halt the request Promise chain and do not process further interceptors or response handlers."
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2159,12 +1988,8 @@
             "type": "Object",
             "tags": [],
             "label": "response",
-            "description": [
-              "Raw response received, may be undefined if there was an error."
-            ],
-            "signature": [
-              "Readonly<Response> | undefined"
-            ],
+            "description": ["Raw response received, may be undefined if there was an error."],
+            "signature": ["Readonly<Response> | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2175,12 +2000,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [
-              "Parsed body received, may be undefined if there was an error."
-            ],
-            "signature": [
-              "TResponseBody | undefined"
-            ],
+            "description": ["Parsed body received, may be undefined if there was an error."],
+            "signature": ["TResponseBody | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2194,9 +2015,7 @@
         "type": "Interface",
         "tags": [],
         "label": "IStaticAssets",
-        "description": [
-          "\nAPIs for creating hrefs to static assets.\n"
-        ],
+        "description": ["\nAPIs for creating hrefs to static assets.\n"],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2210,9 +2029,7 @@
             "description": [
               "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
             ],
-            "signature": [
-              "(assetPath: string) => string"
-            ],
+            "signature": ["(assetPath: string) => string"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2224,9 +2041,7 @@
                 "tags": [],
                 "label": "assetPath",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2278,9 +2093,7 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
+            "signature": ["Record<string, unknown> | undefined"],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2297,9 +2110,7 @@
         "type": "Type",
         "tags": [],
         "label": "HttpStart",
-        "description": [
-          "\nSee {@link HttpSetup}"
-        ],
+        "description": ["\nSee {@link HttpSetup}"],
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ResolverNode } from '../../../common/endpoint/types';
 import type { TreeNode } from '../../../common/endpoint/generate_data';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { calculateGenerationsAndDescendants } from './tree_sequencers';
 import { nodeID } from '../../../common/endpoint/models/node';
-import { genResolverNode, generateTree, convertEventToResolverNode } from '../mocks/generator';
+import type { ResolverNode } from '../../../common/endpoint/types';
+import { convertEventToResolverNode, genResolverNode, generateTree } from '../mocks/generator';
+import { calculateGenerationsAndDescendants } from './tree_sequencers';
 
 describe('calculateGenerationsAndDescendants', () => {
   const childrenOfNode = (childrenByParent: Map<string, Map<string, TreeNode>>) => {

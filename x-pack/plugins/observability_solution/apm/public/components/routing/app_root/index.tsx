@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   HeaderMenuPortal,
   InspectorContextProvider,
 } from '@kbn/observability-shared-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -28,6 +27,7 @@ import {
 } from '../../../context/apm_plugin/apm_plugin_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../../context/breadcrumbs/context';
+import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
 import { LicenseProvider } from '../../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';

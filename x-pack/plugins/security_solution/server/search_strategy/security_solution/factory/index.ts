@@ -8,13 +8,13 @@
 import type { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
 import type { SecuritySolutionFactory } from './types';
 
-import { hostsFactory } from './hosts';
-import { networkFactory } from './network';
 import { ctiFactoryTypes } from './cti';
+import { hostsFactory } from './hosts';
+import { firstLastSeenFactory } from './last_first_seen';
+import { networkFactory } from './network';
+import { relatedEntitiesFactory } from './related_entities';
 import { riskScoreFactory } from './risk_score';
 import { usersFactory } from './users';
-import { firstLastSeenFactory } from './last_first_seen';
-import { relatedEntitiesFactory } from './related_entities';
 
 export const securitySolutionFactory: Record<
   FactoryQueryTypes,

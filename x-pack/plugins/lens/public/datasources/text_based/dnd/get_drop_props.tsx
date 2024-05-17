@@ -7,11 +7,11 @@
 
 import { DropType } from '@kbn/dom-drag-drop';
 import { isOperation } from '../../../types';
-import type { TextBasedPrivateState } from '../types';
 import type { GetDropPropsArgs } from '../../../types';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
-import { canColumnBeDroppedInMetricDimension, isNotNumeric } from '../utils';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
+import type { TextBasedPrivateState } from '../types';
+import { canColumnBeDroppedInMetricDimension, isNotNumeric } from '../utils';
 
 export const getDropProps = (
   props: GetDropPropsArgs<TextBasedPrivateState>

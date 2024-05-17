@@ -7,7 +7,7 @@
  */
 
 import type { OpenAPIConverter } from '../../type';
-import { is, convert, convertQuery, convertPathParameters } from './lib';
+import { convert, convertPathParameters, convertQuery, is } from './lib';
 
 export const kbnConfigSchemaConverter: OpenAPIConverter = {
   is,

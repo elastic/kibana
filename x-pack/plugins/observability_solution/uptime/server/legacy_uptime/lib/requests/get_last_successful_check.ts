@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../../common/runtime_types/ping';
+import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
@@ -80,27 +80,25 @@ export const getLastSuccessfulStepParams = ({
   };
 };
 
-export const getLastSuccessfulCheck: UMElasticsearchQueryFn<
-  GetStepScreenshotParams,
-  Ping | null
-> = async ({ uptimeEsClient, monitorId, timestamp, location }) => {
-  const lastSuccessCheckParams = getLastSuccessfulStepParams({
-    monitorId,
-    timestamp,
-    location,
-  });
+export const getLastSuccessfulCheck: UMElasticsearchQueryFn<GetStepScreenshotParams, Ping | null> =
+  async ({ uptimeEsClient, monitorId, timestamp, location }) => {
+    const lastSuccessCheckParams = getLastSuccessfulStepParams({
+      monitorId,
+      timestamp,
+      location,
+    });
 
-  const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
+    const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
 
-  if (result.hits.total.value < 1) {
-    return null;
-  }
+    if (result.hits.total.value < 1) {
+      return null;
+    }
 
-  const check = result.hits.hits[0]._source as Ping & { '@timestamp': string };
+    const check = result.hits.hits[0]._source as Ping & { '@timestamp': string };
 
-  return {
-    ...check,
-    timestamp: check['@timestamp'],
-    docId: result.hits.hits[0]._id,
+    return {
+      ...check,
+      timestamp: check['@timestamp'],
+      docId: result.hits.hits[0]._id,
+    };
   };
-};

@@ -8,7 +8,7 @@
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { type Transform, TransformType } from './types';
-import { transformComparator, downgradeRequired } from './utils';
+import { downgradeRequired, transformComparator } from './utils';
 
 describe('transformComparator', () => {
   const core1 = { version: '1.0.0', transformType: TransformType.Core } as Transform;

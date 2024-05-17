@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
-import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
+import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { validateEsqlQuery } from './query/validate_esql_query';
 
 const getMessageForLLM = (

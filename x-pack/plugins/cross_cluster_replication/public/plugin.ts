@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { firstValueFrom } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
-import { init as initUiMetric } from './app/services/track_ui_metric';
+import { MANAGEMENT_ID, PLUGIN } from '../common/constants';
 import { init as initNotification } from './app/services/notifications';
-import { PluginDependencies, ClientConfigType } from './types';
+import { init as initUiMetric } from './app/services/track_ui_metric';
+import { ClientConfigType, PluginDependencies } from './types';
 
 // @ts-ignore;
 import { setHttpClient } from './app/services/api';

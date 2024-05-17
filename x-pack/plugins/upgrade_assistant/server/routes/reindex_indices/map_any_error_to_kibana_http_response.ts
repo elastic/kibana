@@ -7,6 +7,7 @@
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 
+import { ReindexError } from '../../lib/reindexing/error';
 import {
   AccessForbidden,
   CannotCreateIndex,
@@ -17,7 +18,6 @@ import {
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
 } from '../../lib/reindexing/error_symbols';
-import { ReindexError } from '../../lib/reindexing/error';
 
 export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
   if (e instanceof ReindexError) {

@@ -11,10 +11,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type { SavedObjectsClientContract, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
+import { getIsoDateString } from './helpers';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import type { SignalsMigrationSOUpdateAttributes } from './saved_objects_schema';
 import { signalsMigrationSOUpdateAttributes } from './saved_objects_schema';
-import { getIsoDateString } from './helpers';
 
 export const updateMigrationSavedObject = async ({
   attributes,

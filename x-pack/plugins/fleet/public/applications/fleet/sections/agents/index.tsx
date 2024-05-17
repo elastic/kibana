@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { Error, Loading } from '../../components';
 import { FLEET_ROUTING_PATHS } from '../../constants';
-import { Loading, Error } from '../../components';
-import { useConfig, useFleetStatus, useBreadcrumbs, useAuthz, useFlyoutContext } from '../../hooks';
+import { useAuthz, useBreadcrumbs, useConfig, useFleetStatus, useFlyoutContext } from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
+import { AgentDetailsPage } from './agent_details_page';
 import { AgentListPage } from './agent_list_page';
 import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
-import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 
 export const AgentsApp: React.FunctionComponent = () => {

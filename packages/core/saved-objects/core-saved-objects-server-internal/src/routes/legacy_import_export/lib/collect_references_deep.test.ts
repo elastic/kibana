@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectAttributes } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core-saved-objects-server';
 import { collectReferencesDeep } from './collect_references_deep';
 
 const data: Array<SavedObject<SavedObjectAttributes>> = [

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { registerBootstrapRoute } from './register_bootstrap_route';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { registerBootstrapRoute } from './register_bootstrap_route';
 
 describe('registerBootstrapRoute', () => {
   test('register with expected options', () => {

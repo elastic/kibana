@@ -8,8 +8,8 @@
 import { takeLatest } from 'redux-saga/effects';
 import {
   getMonitorStatusAction,
-  getMonitorStatusActionSuccess,
   getMonitorStatusActionFail,
+  getMonitorStatusActionSuccess,
 } from '../actions';
 import { fetchMonitorStatus } from '../api';
 import { fetchEffectFactory } from './fetch_effect';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
 import {
-  type LegacyUrlAlias,
   LEGACY_URL_ALIAS_TYPE,
+  type LegacyUrlAlias,
   getObjectKey,
 } from '@kbn/core-saved-objects-base-server-internal';
+import * as esKuery from '@kbn/es-query';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 
 interface FindLegacyUrlAliasesObject {

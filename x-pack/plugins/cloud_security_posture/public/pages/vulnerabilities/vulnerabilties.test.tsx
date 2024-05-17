@@ -1,3 +1,6 @@
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { render } from '@testing-library/react';
+import Chance from 'chance';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,28 +8,25 @@
  * 2.0.
  */
 import React from 'react';
-import Chance from 'chance';
-import { Vulnerabilities } from './vulnerabilities';
 import {
   CSP_LATEST_FINDINGS_DATA_VIEW,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   VULNERABILITIES_CONTAINER_TEST_SUBJ,
 } from '../../components/test_subjects';
-import { render } from '@testing-library/react';
-import { expectIdsInDoc } from '../../test/utils';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { expectIdsInDoc } from '../../test/utils';
+import { Vulnerabilities } from './vulnerabilities';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { getAutocompleteInfo, ENTITIES } from '../../../services';
+import { ENTITIES, getAutocompleteInfo } from '../../../services';
 import { ListComponent } from './list_component';
 
 function nonValidIndexType(token) {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import { LicenseStatus, PLUGIN } from '../common';
-import { AppServerPluginDependencies } from './types';
 import * as profileRoute from './routes/profile';
+import { AppServerPluginDependencies } from './types';
 
 export class SearchProfilerServerPlugin implements Plugin {
   licenseStatus: LicenseStatus;

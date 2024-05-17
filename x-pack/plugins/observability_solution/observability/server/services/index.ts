@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import {
   IScopedClusterClient,
   IUiSettingsClient,
@@ -13,6 +12,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import * as t from 'io-ts';
 import { flatten } from 'lodash';
 
 export const alertDetailsContextRt = t.intersection([

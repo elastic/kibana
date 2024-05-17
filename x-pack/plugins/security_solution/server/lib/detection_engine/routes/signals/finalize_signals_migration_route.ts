@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { SetupPlugins } from '../../../../plugin';
-import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
+import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/api/detection_engine/signals_migration';
+import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
+import type { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { isMigrationFailed, isMigrationPending } from '../../migrations/helpers';
 import { signalsMigrationService } from '../../migrations/migration_service';

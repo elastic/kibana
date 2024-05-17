@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { checkActionItemsInResults, loadRuleAlerts } from '../../tasks/live_query';
+import { initializeDataViews } from '../../tasks/login';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 

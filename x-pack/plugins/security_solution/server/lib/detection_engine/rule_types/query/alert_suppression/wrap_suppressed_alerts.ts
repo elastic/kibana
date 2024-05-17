@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
-  ALERT_SUPPRESSION_TERMS,
+  ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
-  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import objectHash from 'object-hash';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../../config';
-import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { SignalSource } from '../../types';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { buildBulkBody } from '../../factories/utils/build_bulk_body';
+import type { SignalSource } from '../../types';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 
 export interface SuppressionBucket {

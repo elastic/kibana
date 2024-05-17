@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { PacksPage } from './list';
-import { AddPackPage } from './add';
-import { EditPackPage } from './edit';
-import { PackDetailsPage } from './details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useKibana } from '../../common/lib/kibana';
 import { MissingPrivileges } from '../components';
+import { AddPackPage } from './add';
+import { PackDetailsPage } from './details';
+import { EditPackPage } from './edit';
+import { PacksPage } from './list';
 
 const PacksComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;

@@ -8,8 +8,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
 import { nestedProcessorsErrorFixture } from './fixtures';

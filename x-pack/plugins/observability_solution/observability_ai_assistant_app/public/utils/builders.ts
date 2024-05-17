@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { merge, uniqueId } from 'lodash';
-import type { DeepPartial } from 'utility-types';
 import {
   type Conversation,
   type Message,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
+import { merge, uniqueId } from 'lodash';
+import type { DeepPartial } from 'utility-types';
 
 type BuildMessageProps = DeepPartial<Message> & {
   message: {

@@ -7,8 +7,8 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { TablesAdapter } from './tables_adapter';
 import { ExpressionsInspectorAdapter } from './expressions_inspector_adapter';
+import { TablesAdapter } from './tables_adapter';
 
 import type { DefaultInspectorAdapters } from '../execution';
 

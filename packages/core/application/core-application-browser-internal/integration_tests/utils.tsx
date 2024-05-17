@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { AppMountParameters } from '@kbn/core-application-browser';
+import { I18nProvider } from '@kbn/i18n-react';
+import { mount } from 'enzyme';
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { AppMountParameters } from '@kbn/core-application-browser';
 
 import { MockedMounterTuple, Mountable } from '../src/test_helpers/test_types';
 

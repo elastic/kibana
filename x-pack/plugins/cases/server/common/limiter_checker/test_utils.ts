@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
 import type {
-  UserCommentAttachmentPayload,
-  FileAttachmentMetadata,
   AlertAttachmentPayload,
-  PersistableStateAttachmentPayload,
   ExternalReferenceAttachmentPayload,
+  FileAttachmentMetadata,
+  PersistableStateAttachmentPayload,
+  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type { FileAttachmentRequest } from '../types';
 
 export const createUserRequests = (num: number): UserCommentAttachmentPayload[] => {

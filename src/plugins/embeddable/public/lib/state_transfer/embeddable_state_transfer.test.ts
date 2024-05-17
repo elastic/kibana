@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateTransfer } from '.';
-import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
-import { EMBEDDABLE_EDITOR_STATE_KEY, EMBEDDABLE_PACKAGE_STATE_KEY } from './types';
-import { EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY } from './embeddable_state_transfer';
 import { Subject } from 'rxjs';
+import { EmbeddableStateTransfer } from '.';
+import { EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY } from './embeddable_state_transfer';
+import { EMBEDDABLE_EDITOR_STATE_KEY, EMBEDDABLE_PACKAGE_STATE_KEY } from './types';
 
 const createStorage = (): Storage => {
   const createMockStore = () => {

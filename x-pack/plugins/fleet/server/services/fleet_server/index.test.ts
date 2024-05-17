@@ -14,8 +14,8 @@ import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock } from '../../mocks';
 
 import { agentPolicyService } from '../agent_policy';
+import { getAgentStatusById, getAgentsByKuery } from '../agents';
 import { packagePolicyService } from '../package_policy';
-import { getAgentsByKuery, getAgentStatusById } from '../agents';
 
 import { checkFleetServerVersionsForSecretsStorage } from '.';
 

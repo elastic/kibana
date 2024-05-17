@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { useBehaviorSubject } from './hooks/use_behavior_subject';
 import { TabID } from './types';

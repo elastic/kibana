@@ -7,11 +7,11 @@
 
 import {
   AIMessage,
+  AnnotationDoc,
+  AnnotationTokens,
   Message,
   MessageRole,
   UseChatHelpers,
-  AnnotationDoc,
-  AnnotationTokens,
 } from '../types';
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 

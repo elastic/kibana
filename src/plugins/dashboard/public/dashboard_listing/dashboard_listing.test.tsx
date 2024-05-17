@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { I18nProvider } from '@kbn/i18n-react';
+import { ReactWrapper, mount } from 'enzyme';
 import React, { PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n-react';
 
 import { pluginServices } from '../services/plugin_services';
 import { DashboardListing } from './dashboard_listing';

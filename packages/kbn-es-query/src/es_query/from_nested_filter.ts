@@ -7,9 +7,9 @@
  */
 
 import { EsQueryFiltersConfig } from '../..';
-import { getFilterField, cleanFilter, Filter } from '../filters';
-import { DataViewBase } from './types';
+import { Filter, cleanFilter, getFilterField } from '../filters';
 import { getDataViewFieldSubtypeNested } from '../utils';
+import { DataViewBase } from './types';
 
 /** @internal */
 export const fromNestedFilter = (

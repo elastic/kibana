@@ -8,8 +8,8 @@
 import { EuiCallOut, EuiLoadingElastic } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
@@ -22,7 +22,7 @@ export function DiagnosticsIndexTemplates() {
   }
 
   const items = diagnosticsBundle?.apmIndexTemplates ?? [];
-  const columns: Array<EuiBasicTableColumn<typeof items[0]>> = [
+  const columns: Array<EuiBasicTableColumn<(typeof items)[0]>> = [
     {
       name: 'Index template name',
       field: 'name',

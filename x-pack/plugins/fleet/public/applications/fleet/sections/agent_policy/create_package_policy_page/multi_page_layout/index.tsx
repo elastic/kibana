@@ -1,3 +1,4 @@
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +7,13 @@
  */
 import React, { useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
 import {
+  useFleetServerHostsForPolicy,
   useGetPackageInfoByKeyQuery,
   useLink,
-  useFleetServerHostsForPolicy,
 } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
@@ -22,10 +22,10 @@ import { useGetAgentPolicyOrDefault } from './hooks';
 
 import {
   AddFirstIntegrationSplashScreen,
-  MultiPageStepsLayout,
-  InstallElasticAgentPageStep,
   AddIntegrationPageStep,
   ConfirmDataPageStep,
+  InstallElasticAgentPageStep,
+  MultiPageStepsLayout,
 } from './components';
 
 const installAgentStep = {

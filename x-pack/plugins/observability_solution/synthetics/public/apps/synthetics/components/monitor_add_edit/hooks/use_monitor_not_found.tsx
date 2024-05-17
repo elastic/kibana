@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useEffect } from 'react';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
 
 export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>, id?: string) => {

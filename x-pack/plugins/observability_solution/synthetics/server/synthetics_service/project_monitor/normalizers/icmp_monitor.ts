@@ -8,20 +8,20 @@
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
-  MonitorTypeEnum,
   FormMonitorType,
   ICMPFields,
+  MonitorTypeEnum,
 } from '../../../../common/runtime_types/monitor_management';
 import {
-  NormalizerResult,
   NormalizedProjectProps,
-  normalizeYamlConfig,
+  NormalizerResult,
+  getInvalidUrlsOrHostsError,
   getNormalizeCommonFields,
-  getValueInSeconds,
   getOptionalArrayField,
   getOptionalListField,
-  getInvalidUrlsOrHostsError,
   getUnsupportedKeysError,
+  getValueInSeconds,
+  normalizeYamlConfig,
 } from './common_fields';
 
 export const getNormalizeICMPFields = ({

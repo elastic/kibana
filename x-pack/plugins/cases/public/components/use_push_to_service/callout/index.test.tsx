@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
-import { TestProviders } from '../../../common/mock';
-import { createCalloutId } from './helpers';
 import type { CaseCallOutProps } from '.';
 import { CaseCallOut } from '.';
+import { TestProviders } from '../../../common/mock';
+import { createCalloutId } from './helpers';
 
 describe('CaseCallOut ', () => {
   beforeEach(() => {

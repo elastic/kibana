@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import * as uuid from 'uuid';
-import { ToolingLog } from '@kbn/tooling-log';
-import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
 import {
   AgentPolicy,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
-import { KbnClient } from '@kbn/test';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
+import { KbnClient } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
 import { SuperTest, Test } from 'supertest';
+import * as uuid from 'uuid';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {

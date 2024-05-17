@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
 
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
-import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { PLUGIN_ID } from '../../common/constants/app';
 import type { MlAnomalyDetectionAlertRule } from '../../common/types/alerts';
+import type { JobId } from '../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../application/contexts/kibana';
 
 interface MlAnomalyAlertFlyoutProps {
   initialAlert?: MlAnomalyDetectionAlertRule & Rule;

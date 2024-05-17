@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import React, { type FC, type PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ReplaySubject, first } from 'rxjs';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { ChatVariant, GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
-import { ChatConfig, ServicesProvider } from './services';
+import type { ChatVariant, GetChatUserDataResponseBody } from '../common/types';
 import { isTodayInDateWindow } from '../common/util';
 import { ChatExperimentSwitcher } from './components/chat_experiment_switcher';
+import { ChatConfig, ServicesProvider } from './services';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;

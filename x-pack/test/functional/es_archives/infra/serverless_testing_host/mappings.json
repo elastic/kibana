@@ -7,9 +7,7 @@
         "allow_custom_routing": false,
         "hidden": false
       },
-      "index_patterns": [
-        "metricbeat-8.5.0"
-      ],
+      "index_patterns": ["metricbeat-8.5.0"],
       "name": "metricbeat-8.5.0",
       "priority": 150,
       "template": {

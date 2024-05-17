@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import { reactRouterNavigate } from '../shared_imports';
 
 interface Props {
   history: RouteComponentProps['history'];

@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useCallback } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
+  CLOUD_INSTANCE_NAME,
+  CONTAINER_IMAGE_NAME,
+  COUNT_WIDGET_KEY_CLUSTERS,
+  COUNT_WIDGET_KEY_CONTAINER_IMAGES,
+  COUNT_WIDGET_KEY_NAMESPACE,
+  COUNT_WIDGET_KEY_NODES,
+  ENTRY_LEADER_ENTITY_ID,
+  ENTRY_LEADER_INTERACTIVE,
+  ENTRY_LEADER_USER_ID,
   KUBERNETES_PATH,
   KUBERNETES_TITLE,
   LOCAL_STORAGE_HIDE_WIDGETS_KEY,
-  ENTRY_LEADER_INTERACTIVE,
-  ENTRY_LEADER_USER_ID,
-  ENTRY_LEADER_ENTITY_ID,
   ORCHESTRATOR_CLUSTER_ID,
   ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
-  CONTAINER_IMAGE_NAME,
-  CLOUD_INSTANCE_NAME,
-  COUNT_WIDGET_KEY_CLUSTERS,
-  COUNT_WIDGET_KEY_NAMESPACE,
-  COUNT_WIDGET_KEY_NODES,
-  COUNT_WIDGET_KEY_CONTAINER_IMAGES,
 } from '../../../common/constants';
-import { PercentWidget } from '../percent_widget';
-import { CountWidget } from '../count_widget';
-import { KubernetesSecurityDeps } from '../../types';
-import { AggregateResult } from '../../../common/types';
-import { useLastUpdated } from '../../hooks';
-import { useStyles } from './styles';
-import { TreeViewContainer } from '../tree_view_container';
-import { ChartsToggle } from '../charts_toggle';
 import {
   COUNT_WIDGET_CLUSTERS,
+  COUNT_WIDGET_CONTAINER_IMAGES,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
   COUNT_WIDGET_PODS,
-  COUNT_WIDGET_CONTAINER_IMAGES,
 } from '../../../common/translations';
+import { AggregateResult } from '../../../common/types';
+import { useLastUpdated } from '../../hooks';
+import { KubernetesSecurityDeps } from '../../types';
+import { ChartsToggle } from '../charts_toggle';
 import { ContainerNameWidget } from '../container_name_widget';
+import { CountWidget } from '../count_widget';
+import { PercentWidget } from '../percent_widget';
+import { TreeViewContainer } from '../tree_view_container';
+import { useStyles } from './styles';
 
 const KubernetesSecurityRoutesComponent = ({
   dataViewId,
@@ -61,25 +61,31 @@ const KubernetesSecurityRoutesComponent = ({
   const lastUpdated = useLastUpdated(globalFilter);
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
-      result.buckets.reduce((groupedByKeyValue, aggregate) => {
-        groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
-          aggregate.count_by_aggs?.value ?? 0;
-        return groupedByKeyValue;
-      }, {} as Record<string, number>),
+      result.buckets.reduce(
+        (groupedByKeyValue, aggregate) => {
+          groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
+            aggregate.count_by_aggs?.value ?? 0;
+          return groupedByKeyValue;
+        },
+        {} as Record<string, number>
+      ),
     []
   );
 
   const onReduceRootAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
-      result.buckets.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key.toString() === '0') {
-          groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs?.value ?? 0;
-        } else {
-          groupedByKeyValue.nonRoot =
-            (groupedByKeyValue.nonRoot || 0) + (aggregate.count_by_aggs?.value ?? 0);
-        }
-        return groupedByKeyValue;
-      }, {} as Record<string, number>),
+      result.buckets.reduce(
+        (groupedByKeyValue, aggregate) => {
+          if (aggregate.key.toString() === '0') {
+            groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs?.value ?? 0;
+          } else {
+            groupedByKeyValue.nonRoot =
+              (groupedByKeyValue.nonRoot || 0) + (aggregate.count_by_aggs?.value ?? 0);
+          }
+          return groupedByKeyValue;
+        },
+        {} as Record<string, number>
+      ),
     []
   );
 

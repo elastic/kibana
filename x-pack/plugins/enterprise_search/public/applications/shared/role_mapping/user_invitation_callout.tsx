@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { EuiCopy, EuiButtonIcon, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import {
-  INVITATION_DESCRIPTION,
-  NEW_INVITATION_LABEL,
   EXISTING_INVITATION_LABEL,
+  INVITATION_DESCRIPTION,
   INVITATION_LINK,
+  NEW_INVITATION_LABEL,
 } from './constants';
 
 interface Props {

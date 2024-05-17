@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
-import { login, ROLE } from '../../../tasks/login';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   getEndpointManagementPageMap,
   getFleetAgentListTable,
   visitFleetAgentList,
 } from '../../../screens';
+import { ROLE, login } from '../../../tasks/login';
+import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 
 describe(
   'App Features for Security Essentials PLI with Endpoint Essentials Addon',

@@ -11,15 +11,15 @@ import React, { Component } from 'react';
 import { NotificationsSetup } from '@kbn/core/public';
 
 import {
-  EuiIcon,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiPopover,
+  EuiContextMenuPanel,
+  EuiIcon,
   EuiLink,
+  EuiPopover,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   getCurl: () => Promise<string>;

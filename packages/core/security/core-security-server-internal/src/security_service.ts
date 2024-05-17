@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { Logger } from '@kbn/logging';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import { convertSecurityApi, getDefaultSecurityImplementation } from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>

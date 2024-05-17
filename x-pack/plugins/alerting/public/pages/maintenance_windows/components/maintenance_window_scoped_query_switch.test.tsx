@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { screen, fireEvent, render } from '@testing-library/react';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 
 const mockOnEnabledChange = jest.fn();

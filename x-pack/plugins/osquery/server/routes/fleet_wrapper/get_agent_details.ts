@@ -6,12 +6,12 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { GetAgentDetailsRequestParamsSchema } from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { GetAgentDetailsRequestParamsSchema } from '../../../common/api';
 import { getAgentDetailsRequestParamsSchema } from '../../../common/api';
+import { API_VERSIONS } from '../../../common/constants';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 
 export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

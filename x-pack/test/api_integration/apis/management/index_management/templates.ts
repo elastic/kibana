@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 
 import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getRandomString } from './lib/random';
 import { templatesApi } from './lib/templates.api';
 import { templatesHelpers } from './lib/templates.helpers';
-import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');

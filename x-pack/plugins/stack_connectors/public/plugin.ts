@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { registerConnectorTypes } from './connector_types';
-import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { StackConnectorsConfigType } from '../common/types';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import { registerConnectorTypes } from './connector_types';
 
 export type Setup = void;
 export type Start = void;

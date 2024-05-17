@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { backOff } from 'exponential-backoff';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { filter, take } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
@@ -26,25 +20,31 @@ import type {
   ServiceStatus,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { backOff } from 'exponential-backoff';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { filter, take } from 'rxjs';
 
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   AuditLogger,
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
@@ -54,7 +54,6 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
-import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import {
   INTEGRATIONS_PLUGIN_ID,
@@ -63,68 +62,69 @@ import {
 } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { FleetConfigType } from '../common/types';
 
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
+  MessageSigningService,
   calculateRouteAuthz,
   getAuthzFromRequest,
   getRouteRequiredAuthz,
   makeRouterWithFleetAuthz,
-  MessageSigningService,
 } from './services/security';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   OUTPUT_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PLUGIN_ID,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from './constants';
-import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
+import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 
-import type { ExternalCallback, FleetRequestHandlerContext } from './types';
-import type { AgentPolicyServiceInterface, AgentService, PackageService } from './services';
-import {
-  agentPolicyService,
-  AgentServiceImpl,
-  appContextService,
-  FleetUsageSender,
-  licenseService,
-  packagePolicyService,
-  PackageServiceImpl,
-} from './services';
 import {
   fetchAgentsUsage,
   fetchFleetUsage,
   registerFleetUsageCollector,
 } from './collectors/register';
-import { FleetArtifactsClient } from './services/artifacts';
-import type { FleetRouter } from './types/request_context';
-import { TelemetryEventsSender } from './telemetry/sender';
-import { setupFleet } from './services/setup';
+import type { AgentPolicyServiceInterface, AgentService, PackageService } from './services';
+import {
+  AgentServiceImpl,
+  FleetUsageSender,
+  PackageServiceImpl,
+  agentPolicyService,
+  appContextService,
+  licenseService,
+  packagePolicyService,
+} from './services';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
+import { PolicyWatcher } from './services/agent_policy_watch';
 import { BulkActionsResolver } from './services/agents';
-import type { PackagePolicyService } from './services/package_policy_service';
-import { PackagePolicyServiceImpl } from './services/package_policy';
+import { FleetArtifactsClient } from './services/artifacts';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import type { FilesClientFactory } from './services/files/types';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
-import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
+import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
+import { PackagePolicyServiceImpl } from './services/package_policy';
+import type { PackagePolicyService } from './services/package_policy_service';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
-import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
-import type { FilesClientFactory } from './services/files/types';
-import { PolicyWatcher } from './services/agent_policy_watch';
-import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
-import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
-import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
+import { setupFleet } from './services/setup';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { TelemetryEventsSender } from './telemetry/sender';
+import type { ExternalCallback, FleetRequestHandlerContext } from './types';
+import type { FleetRouter } from './types/request_context';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import { ConnectorForm } from './connector_form';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React, { lazy } from 'react';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
+import { ConnectorForm } from './connector_form';
 
 describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;

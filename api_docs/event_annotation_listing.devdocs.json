@@ -10,11 +10,7 @@
         "tags": [],
         "label": "AnnotationEditorControls",
         "description": [],
-        "signature": [
-          "(props: ",
-          "Props",
-          ") => JSX.Element"
-        ],
+        "signature": ["(props: ", "Props", ") => JSX.Element"],
         "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -26,9 +22,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -303,9 +297,7 @@
         "tags": [],
         "label": "defaultAnnotationRangeColor",
         "description": [],
-        "signature": [
-          "\"#F04E981A\""
-        ],
+        "signature": ["\"#F04E981A\""],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -320,9 +312,7 @@
       "tags": [],
       "label": "EventAnnotationListingPluginStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "src/plugins/event_annotation_listing/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,

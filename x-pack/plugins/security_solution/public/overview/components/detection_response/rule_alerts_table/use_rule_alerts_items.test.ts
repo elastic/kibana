@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import {
   from,
   mockSeverityRuleAlertsResponse,
@@ -17,7 +18,6 @@ import {
 } from './mock_data';
 import type { UseRuleAlertsItems, UseRuleAlertsItemsProps } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);

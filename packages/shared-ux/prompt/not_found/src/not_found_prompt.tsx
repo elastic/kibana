@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -15,6 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 const NOT_FOUND_TITLE = i18n.translate('sharedUXPackages.prompt.errors.notFound.title', {
   defaultMessage: 'Page not found',

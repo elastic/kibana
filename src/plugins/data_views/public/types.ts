@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { DataViewsServicePublicMethods } from './data_views';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { HasDataService } from '../common';
+import { DataViewsServicePublicMethods } from './data_views';
 
 export enum INDEX_PATTERN_TYPE {
   ROLLUP = 'rollup',

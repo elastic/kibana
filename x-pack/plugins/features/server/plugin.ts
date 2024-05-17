@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
 import {
   CoreSetup,
   CoreStart,
-  SavedObjectsServiceStart,
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsServiceStart,
   Capabilities as UICapabilities,
 } from '@kbn/core/server';
-import { FeatureRegistry } from './feature_registry';
-import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
-import { buildOSSFeatures } from './oss_features';
-import { defineRoutes } from './routes';
+import { deepFreeze } from '@kbn/std';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
-  ElasticsearchFeatureConfig,
   ElasticsearchFeature,
+  ElasticsearchFeatureConfig,
   KibanaFeature,
   KibanaFeatureConfig,
 } from '../common';
@@ -34,6 +30,10 @@ import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
 } from './feature_privilege_iterator';
+import { FeatureRegistry } from './feature_registry';
+import { buildOSSFeatures } from './oss_features';
+import { defineRoutes } from './routes';
+import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.

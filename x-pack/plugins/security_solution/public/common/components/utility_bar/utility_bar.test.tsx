@@ -8,7 +8,6 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -16,6 +15,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '.';
+import { TestProviders } from '../../mock';
 
 describe('UtilityBar', () => {
   test('it renders', () => {

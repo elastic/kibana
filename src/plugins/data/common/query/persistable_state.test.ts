@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { extract, inject, getAllMigrations } from './persistable_state';
-import { Filter } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
+import { extract, getAllMigrations, inject } from './persistable_state';
 import { QueryState } from './query_state';
 
 describe('query service persistable state tests', () => {

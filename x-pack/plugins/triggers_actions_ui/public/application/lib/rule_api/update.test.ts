@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Rule } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { Rule } from '../../../types';
 import { updateRule } from './update';
 
 const http = httpServiceMock.createStartContract();

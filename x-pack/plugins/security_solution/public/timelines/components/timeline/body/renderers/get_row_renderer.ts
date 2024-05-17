@@ -6,9 +6,9 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RowRenderer } from '../../../../../../common/types';
 import { alertRenderer } from './alert_renderer';
 import { combineRenderers } from './combine_renderers';
-import type { RowRenderer } from '../../../../../../common/types';
 
 /**
  * This function may be used by both Timeline and the `Event Rendered view` in

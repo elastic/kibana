@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -14,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { AssistantAvatar } from '@kbn/elastic-assistant';
 import React, { useMemo } from 'react';
 
 import * as i18n from './translations';

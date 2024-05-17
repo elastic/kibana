@@ -9,7 +9,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs';
-import { EmbeddableOutput, isErrorEmbeddable, SavedObjectEmbeddableInput, ViewMode } from '../lib';
+import { EmbeddableOutput, SavedObjectEmbeddableInput, ViewMode, isErrorEmbeddable } from '../lib';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import {
   ContactCardEmbeddable,
@@ -23,13 +23,13 @@ import {
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
 import {
+  FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
-  FILTERABLE_EMBEDDABLE,
   MockFilter,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
-import { HelloWorldEmbeddableFactoryDefinition, HELLO_WORLD_EMBEDDABLE } from './fixtures';
+import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './fixtures';
 import { createHelloWorldContainerAndEmbeddable, of } from './helpers';
 import { testPlugin } from './test_plugin';
 

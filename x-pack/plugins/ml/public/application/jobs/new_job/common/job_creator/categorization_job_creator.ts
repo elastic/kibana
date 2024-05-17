@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  type Field,
   type Aggregation,
-  mlCategory,
+  type Field,
   ML_JOB_AGGREGATION,
+  mlCategory,
 } from '@kbn/ml-anomaly-utils';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
   type CategorizationAnalyzer,
   type CategoryFieldExample,
   type FieldExampleCheck,
   VALIDATION_RESULT,
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '@kbn/ml-category-validator';
-import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import { createBasicDetector } from './util/default_configs';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { isEqual } from 'lodash';
 import {
-  JOB_TYPE,
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
+  JOB_TYPE,
 } from '../../../../../../common/constants/new_job';
+import type {
+  Datafeed,
+  Detector,
+  Job,
+} from '../../../../../../common/types/anomaly_detection_jobs';
+import { JobCreator } from './job_creator';
+import { createBasicDetector } from './util/default_configs';
 
-import { getRichDetectors } from './util/general';
-import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { isCcsIndexPattern } from '../../../../util/index_utils';
+import { CategorizationExamplesLoader } from '../results_loader';
+import { getRichDetectors } from './util/general';
 
 type DetectorType =
   | ML_JOB_AGGREGATION.COUNT

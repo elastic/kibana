@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { HttpSetup } from '@kbn/core/public';
-import { sendRequest, SendRequestConfig } from './send_request';
+import { SendRequestConfig, sendRequest } from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;

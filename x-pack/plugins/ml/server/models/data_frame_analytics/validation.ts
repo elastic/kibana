@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { i18n } from '@kbn/i18n';
 import {
-  getAnalysisType,
-  getDependentVar,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
   type AnalysisConfig,
   type DataFrameAnalyticsConfig,
+  getAnalysisType,
+  getDependentVar,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   ALL_CATEGORIES,
   FRACTION_EMPTY_LIMIT,

@@ -1,3 +1,4 @@
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,32 +8,31 @@
  */
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
-import type { DiscoverAppState } from '../state_management/discover_app_state_container';
-import { updateVolatileSearchSource } from './update_search_source';
-import { getRawRecordType } from '../utils/get_raw_record_type';
+import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { DiscoverServices } from '../../../build_services';
+import { FetchStatus } from '../../types';
 import {
   checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
-  sendLoadingMsg,
-  sendLoadingMoreMsg,
   sendLoadingMoreFinishedMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
-import { fetchDocuments } from './fetch_documents';
-import { FetchStatus } from '../../types';
+import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import {
   DataMsg,
   RecordRawType,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
-import { DiscoverServices } from '../../../build_services';
-import { fetchTextBased } from './fetch_text_based';
 import { InternalState } from '../state_management/discover_internal_state_container';
+import { getRawRecordType } from '../utils/get_raw_record_type';
+import { fetchDocuments } from './fetch_documents';
+import { fetchTextBased } from './fetch_text_based';
+import { updateVolatileSearchSource } from './update_search_source';
 
 export interface FetchDeps {
   abortController: AbortController;

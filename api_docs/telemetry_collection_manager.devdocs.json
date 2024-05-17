@@ -1413,9 +1413,7 @@
             "tags": [],
             "label": "cacheDetails",
             "description": [],
-            "signature": [
-              "CacheDetails"
-            ],
+            "signature": ["CacheDetails"],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1629,11 +1627,7 @@
         "tags": [],
         "label": "StatsGetterConfig",
         "description": [],
-        "signature": [
-          "UnencryptedStatsGetterConfig",
-          " | ",
-          "EncryptedStatsGetterConfig"
-        ],
+        "signature": ["UnencryptedStatsGetterConfig", " | ", "EncryptedStatsGetterConfig"],
         "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1647,9 +1641,7 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryCollectionManagerPluginSetup",
-      "description": [
-        "\nPublic contract coming from the setup method."
-      ],
+      "description": ["\nPublic contract coming from the setup method."],
       "signature": [
         {
           "pluginId": "telemetryCollectionManager",
@@ -1696,10 +1688,7 @@
               "tags": [],
               "label": "collectionConfig",
               "description": [],
-              "signature": [
-                "CollectionStrategyConfig",
-                "<T>"
-              ],
+              "signature": ["CollectionStrategyConfig", "<T>"],
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1718,9 +1707,7 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryCollectionManagerPluginStart",
-      "description": [
-        "\nPublic contract coming from the start method."
-      ],
+      "description": ["\nPublic contract coming from the start method."],
       "path": "src/plugins/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1731,9 +1718,7 @@
           "type": "Function",
           "tags": [],
           "label": "getOptInStats",
-          "description": [
-            "\nFetches the minimum piece of data to report when Opting IN or OUT."
-          ],
+          "description": ["\nFetches the minimum piece of data to report when Opting IN or OUT."],
           "signature": [
             "{ (optInStatus: boolean, config: ",
             "UnencryptedStatsGetterConfig",
@@ -1753,9 +1738,7 @@
           "type": "Function",
           "tags": [],
           "label": "getStats",
-          "description": [
-            "\nFetches the Snapshot telemetry report."
-          ],
+          "description": ["\nFetches the Snapshot telemetry report."],
           "signature": [
             "{ (config: ",
             "UnencryptedStatsGetterConfig",
@@ -1784,9 +1767,7 @@
           "description": [
             "\nIs it OK to fetch telemetry?\n\nIt should be called before calling `getStats` or `getOptInStats` to validate that Kibana is in a healthy state\nto attempt to fetch the Telemetry report."
           ],
-          "signature": [
-            "() => Promise<boolean>"
-          ],
+          "signature": ["() => Promise<boolean>"],
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1823,9 +1804,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"telemetryCollectionManager\""
-        ],
+        "signature": ["\"telemetryCollectionManager\""],
         "path": "src/plugins/telemetry_collection_manager/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1838,9 +1817,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"telemetry_collection_manager\""
-        ],
+        "signature": ["\"telemetry_collection_manager\""],
         "path": "src/plugins/telemetry_collection_manager/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -12,7 +12,7 @@ import { PluginOrPackage } from '@kbn/docs-utils/src/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { getPluginClasses } from '../lib/get_plugin_classes';
-import { PluginInfo, PluginLifecycle, PluginLayer, Lifecycle, Dependencies } from '../types';
+import { Dependencies, Lifecycle, PluginInfo, PluginLayer, PluginLifecycle } from '../types';
 
 /**
  * Derive and return information about a plugin and its dependencies.

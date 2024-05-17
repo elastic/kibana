@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   addEndpointExceptionList,
   addExceptionList,
@@ -20,15 +21,14 @@ import {
   updateExceptionList,
   updateExceptionListItem,
 } from '@kbn/securitysolution-list-api';
-import { coreMock } from '@kbn/core/public/mocks';
 
-import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
-import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
-import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
+import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getUpdateExceptionListSchemaMock } from '../../common/schemas/request/update_exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/found_exception_list_schema.mock';
 
 // TODO: These tests are left here until we move the mocks including the coreMock above into a location where we can consume them in a kbn package

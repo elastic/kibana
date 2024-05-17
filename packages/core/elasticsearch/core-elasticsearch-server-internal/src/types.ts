@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
+import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 import type {
   ElasticsearchServicePreboot,
-  ElasticsearchServiceStart,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server';
-import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 import type { ServiceStatus } from '@kbn/core-status-common';
-import type { NodesVersionCompatibility, NodeInfo } from './version_check/ensure_es_version';
+import type { Observable } from 'rxjs';
 import type { ClusterInfo } from './get_cluster_info';
+import type { NodeInfo, NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /** @internal */
 export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;

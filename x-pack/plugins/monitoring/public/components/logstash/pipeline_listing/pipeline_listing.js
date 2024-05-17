@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import moment from 'moment';
-import { partialRight } from 'lodash';
 import {
-  EuiPage,
-  EuiLink,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPanel,
   EuiScreenReaderOnly,
+  EuiSpacer,
 } from '@elastic/eui';
-import { formatMetric } from '../../../lib/format_number';
-import { ClusterStatus } from '../cluster_status';
-import { Sparkline } from '../../sparkline';
-import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { partialRight } from 'lodash';
+import moment from 'moment';
+import React, { Component } from 'react';
+import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { Sparkline } from '../../sparkline';
+import { EuiMonitoringSSPTable } from '../../table';
+import { ClusterStatus } from '../cluster_status';
 
 export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {

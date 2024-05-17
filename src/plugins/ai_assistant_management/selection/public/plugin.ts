@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { type CoreSetup, Plugin, type CoreStart } from '@kbn/core/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import { type CoreSetup, type CoreStart, Plugin } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AIAssistantType } from '../common/ai_assistant_type';

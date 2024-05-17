@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  getAnalysisType,
-  type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
+  type DataFrameAnalysisConfigType,
+  getAnalysisType,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../../../services/ml_api_service';
 import type {
@@ -18,6 +18,7 @@ import type {
 } from '../../../../../services/ml_api_service/data_frame_analytics';
 import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 import {
   DATA_FRAME_MODE,
@@ -26,7 +27,6 @@ import {
   isDataFrameAnalyticsStats,
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
-import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as path from 'path';
 import fs from 'fs';
+import * as path from 'path';
 import type { StorybookConfig } from '@storybook/core-common';
 import webpack, { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
-import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
+import { REPO_ROOT } from './constants';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js'];

@@ -7,7 +7,7 @@
 
 import dedent from 'dedent';
 
-import { getDateString, getStatusColor, attemptToFormatJson } from './utils';
+import { attemptToFormatJson, getDateString, getStatusColor } from './utils';
 
 describe('getDateString', () => {
   const mockDate = jest
@@ -37,8 +37,9 @@ describe('getStatusColor', () => {
 
 describe('attemptToFormatJson', () => {
   it('takes an unformatted JSON string and correctly newlines/indents it', () => {
-    expect(attemptToFormatJson('{"hello":"world","lorem":{"ipsum":"dolor","sit":"amet"}}'))
-      .toEqual(dedent`{
+    expect(
+      attemptToFormatJson('{"hello":"world","lorem":{"ipsum":"dolor","sit":"amet"}}')
+    ).toEqual(dedent`{
         "hello": "world",
         "lorem": {
           "ipsum": "dolor",

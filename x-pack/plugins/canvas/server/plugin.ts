@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from '@kbn/core/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { ReportingServerPluginSetup } from '@kbn/reporting-server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { registerCanvasUsageCollector } from './collectors';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
-import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
-import { setupInterpreter } from './setup_interpreter';
-import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
+import { customElementType, workpadTemplateType, workpadTypeFactory } from './saved_objects';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
+import { setupInterpreter } from './setup_interpreter';
 import { initializeTemplates } from './templates';
 import { getUISettings } from './ui_settings';
 import { CanvasRouteHandlerContext, createWorkpadRouteContext } from './workpad_route_context';

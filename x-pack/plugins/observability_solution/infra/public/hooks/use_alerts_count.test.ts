@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { useAlertsCount } from './use_alerts_count';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { InfraClientStartDeps } from '../types';
-import { coreMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
+import { useAlertsCount } from './use_alerts_count';
 
 const mockedAlertsCountResponse = {
   aggregations: {

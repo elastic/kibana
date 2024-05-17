@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
 import {
   AnyExpressionFunctionDefinition,
-  ExpressionFunctionDefinition,
   ExecutionContext,
+  ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
+import { mapValues } from 'lodash';
 
 /**
  * Takes a function spec and passes in default args,

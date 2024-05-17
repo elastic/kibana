@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { unlinkMock, renameMock, copyFileMock } from './utils.test.mocks';
 import { moveFile } from './utils';
+import { copyFileMock, renameMock, unlinkMock } from './utils.test.mocks';
 
 describe('moveFile', () => {
   beforeEach(() => {

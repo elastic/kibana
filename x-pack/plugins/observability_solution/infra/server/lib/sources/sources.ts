@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { fold, map } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { failure } from 'io-ts/lib/PathReporter';
-import { inRange } from 'lodash';
 import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
+import { fold, map } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { failure } from 'io-ts/lib/PathReporter';
+import { inRange } from 'lodash';
+import { SourceConfigurationSavedObjectRT } from '.';
+import { InfraConfig } from '../..';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,
   InfraSourceConfiguration,
   InfraStaticSourceConfiguration,
 } from '../../../common/source_configuration/source_configuration';
-import { SourceConfigurationSavedObjectRT } from '.';
-import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError } from './errors';
 import {

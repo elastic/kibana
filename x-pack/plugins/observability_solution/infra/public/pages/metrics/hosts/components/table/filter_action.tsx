@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButtonEmpty, EuiPopover, euiCanAnimate, useEuiTheme } from '@elastic/eui';
+import { css, cx } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty, useEuiTheme, euiCanAnimate } from '@elastic/eui';
-import { cx, css } from '@emotion/css';
 import { useBoolean } from '@kbn/react-hooks';
+import React from 'react';
 
 const selectedHostsLabel = (selectedHostsCount: number) => {
   return i18n.translate('xpack.infra.hostsViewPage.table.selectedHostsButton', {

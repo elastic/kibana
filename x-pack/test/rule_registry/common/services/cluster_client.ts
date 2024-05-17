@@ -6,12 +6,12 @@
  */
 
 import { Client, Transport } from '@elastic/elasticsearch';
-import { createEsClientForFtrConfig } from '@kbn/test';
 import type {
-  TransportRequestParams,
   TransportRequestOptions,
+  TransportRequestParams,
   TransportResult,
 } from '@elastic/elasticsearch';
+import { createEsClientForFtrConfig } from '@kbn/test';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 

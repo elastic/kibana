@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import stripAnsi from 'strip-ansi';
 import { blue } from 'chalk';
-import { DataFormatter } from './data_formatter';
+import stripAnsi from 'strip-ansi';
 import { SCREEN_ROW_MAX_WIDTH } from './constants';
+import { DataFormatter } from './data_formatter';
 
 interface ColumnLayoutFormatterOptions {
   /**

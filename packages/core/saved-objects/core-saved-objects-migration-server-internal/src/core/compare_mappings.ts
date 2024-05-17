@@ -10,9 +10,9 @@ import equals from 'fast-deep-equal';
 import Semver from 'semver';
 
 import type {
+  IndexMapping,
   IndexMappingMeta,
   VirtualVersionMap,
-  IndexMapping,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
 

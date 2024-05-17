@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CLONE_JOB_START, CLONE_JOB_CLEAR } from '../action_types';
+import { CLONE_JOB_CLEAR, CLONE_JOB_START } from '../action_types';
 
 export const cloneJob = (jobToClone) => (dispatch) => {
   dispatch({

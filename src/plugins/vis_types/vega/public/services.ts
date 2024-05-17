@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { NotificationsStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import type { DocLinksStart, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';

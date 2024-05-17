@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { exportTestSuiteFactory, getTestCases } from '../../common/suites/export';
 
 const createTestCases = (spaceId: string) => {

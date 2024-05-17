@@ -1,3 +1,24 @@
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_TAGS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  EVENT_ACTION,
+  SPACE_IDS,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+} from '@kbn/rule-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,40 +26,19 @@
  * 2.0.
  */
 import deepmerge from 'deepmerge';
-import type { Alert } from '@kbn/alerts-as-data-utils';
-import {
-  ALERT_RULE_TAGS,
-  SPACE_IDS,
-  ALERT_ACTION_GROUP,
-  ALERT_DURATION,
-  ALERT_FLAPPING,
-  ALERT_FLAPPING_HISTORY,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_STATUS,
-  EVENT_ACTION,
-  TAGS,
-  TIMESTAMP,
-  VERSION,
-  ALERT_END,
-  ALERT_TIME_RANGE,
-  ALERT_START,
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-} from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
-import { stripFrameworkFields } from './strip_framework_fields';
-import { nanosToMicros } from './nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import { nanosToMicros } from './nanos_to_micros';
+import { stripFrameworkFields } from './strip_framework_fields';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
@@ -60,7 +60,7 @@ export const buildRecoveredAlert = <
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   alert,
   legacyAlert,

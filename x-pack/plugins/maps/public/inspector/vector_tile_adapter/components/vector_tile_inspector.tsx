@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
-import { XJsonLang } from '@kbn/monaco';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiSpacer,
-  EuiTabs,
   EuiTab,
+  EuiTabs,
   EuiText,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { EmptyPrompt } from './empty_prompt';
+import { i18n } from '@kbn/i18n';
+import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
+import { XJsonLang } from '@kbn/monaco';
+import _ from 'lodash';
+import React, { Component } from 'react';
 import type { TileRequest } from '../types';
-import { TileRequestTab } from './tile_request_tab';
+import { EmptyPrompt } from './empty_prompt';
 import { RequestsViewCallout } from './requests_view_callout';
+import { TileRequestTab } from './tile_request_tab';
 
 const REQUEST_VIEW_ID = 'request_view';
 export const RESPONSE_VIEW_ID = 'response_view';

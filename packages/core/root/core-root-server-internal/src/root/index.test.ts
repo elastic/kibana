@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
+import { configService, logger, mockServer, rawConfigService } from './index.test.mocks';
 
-import { BehaviorSubject } from 'rxjs';
-import { filter, first } from 'rxjs';
-import { CriticalError } from '@kbn/core-base-server-internal';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { CriticalError } from '@kbn/core-base-server-internal';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { BehaviorSubject } from 'rxjs';
+import { filter, first } from 'rxjs';
 import { Root } from '.';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

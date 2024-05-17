@@ -6,8 +6,6 @@
     "id": "fooPlugin",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "features"
-    ]
+    "requiredPlugins": ["features"]
   }
 }

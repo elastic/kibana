@@ -7,14 +7,14 @@
  */
 
 import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
-import {
-  WithLayerId,
-  ExtendedDataLayerConfig,
-  XYExtendedLayerConfigResult,
-  ExtendedDataLayerArgs,
-  DataLayerArgs,
-} from '../types';
 import { LayerTypes, SeriesTypes } from '../constants';
+import {
+  DataLayerArgs,
+  ExtendedDataLayerArgs,
+  ExtendedDataLayerConfig,
+  WithLayerId,
+  XYExtendedLayerConfigResult,
+} from '../types';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
@@ -46,7 +46,7 @@ export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
 
 export function getAccessors<
   T,
-  U extends { splitAccessors?: T[]; xAccessor?: T; accessors: T[]; markSizeAccessor?: T }
+  U extends { splitAccessors?: T[]; xAccessor?: T; accessors: T[]; markSizeAccessor?: T },
 >(args: U, table: Datatable) {
   let splitAccessors: Array<T | string> | undefined = args.splitAccessors;
   let xAccessor: T | string | undefined = args.xAccessor;

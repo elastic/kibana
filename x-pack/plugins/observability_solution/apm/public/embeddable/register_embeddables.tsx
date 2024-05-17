@@ -6,7 +6,7 @@
  */
 import { CoreSetup } from '@kbn/core/public';
 
-import { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
+import { ApmPluginStart, ApmPluginStartDeps } from '../plugin';
 import { EmbeddableDeps } from './types';
 
 export async function registerEmbeddables(

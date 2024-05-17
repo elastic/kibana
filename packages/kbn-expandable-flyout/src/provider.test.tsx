@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProvider } from './test/provider';
-import { UrlSynchronizer } from './provider';
-import * as actions from './actions';
-import { State } from './state';
+import React from 'react';
 import { of } from 'rxjs';
+import * as actions from './actions';
+import { UrlSynchronizer } from './provider';
+import { State } from './state';
+import { TestProvider } from './test/provider';
 
 const mockGet = jest.fn();
 const mockSet = jest.fn();

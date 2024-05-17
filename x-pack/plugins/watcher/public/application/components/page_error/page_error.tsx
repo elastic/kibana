@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { PageErrorNotExist } from './page_error_not_exist';
 import { PageErrorForbidden } from './page_error_forbidden';
+import { PageErrorNotExist } from './page_error_not_exist';
 
 export function getPageErrorCode(errorOrErrors: any) {
   const errors = Array.isArray(errorOrErrors) ? errorOrErrors : [errorOrErrors];

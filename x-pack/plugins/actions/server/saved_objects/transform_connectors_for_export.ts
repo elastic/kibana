@@ -8,7 +8,7 @@
 import { SavedObject } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { validateSecrets } from '../lib';
-import { RawAction, ActionType, ActionTypeRegistryContract } from '../types';
+import { ActionType, ActionTypeRegistryContract, RawAction } from '../types';
 
 export function transformConnectorsForExport(
   connectors: SavedObject[],

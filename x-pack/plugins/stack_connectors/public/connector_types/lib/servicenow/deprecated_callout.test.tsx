@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { DeprecatedCallout } from './deprecated_callout';
 

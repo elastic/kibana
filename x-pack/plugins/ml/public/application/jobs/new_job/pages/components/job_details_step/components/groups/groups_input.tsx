@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState, useContext, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobCreatorContext } from '../../../job_creator_context';
+import type { FC } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { tabColor } from '../../../../../../../../../common/util/group_color_utils';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const GroupsInput: FC = () => {

@@ -7,14 +7,14 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
+  CrowdstrikeActionParamsSchema,
   CrowdstrikeBaseApiResponseSchema,
   CrowdstrikeConfigSchema,
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeGetAgentsResponseSchema,
+  CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeSecretsSchema,
-  CrowdstrikeActionParamsSchema,
-  CrowdstrikeGetTokenResponseSchema,
 } from './schema';
 
 export type CrowdstrikeConfig = TypeOf<typeof CrowdstrikeConfigSchema>;

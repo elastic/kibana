@@ -1,3 +1,4 @@
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +7,8 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { CloudDefendPodsStats } from './types';
 import { LOGS_CLOUD_DEFEND_PATTERN } from '../../../../common/constants';
+import type { CloudDefendPodsStats } from './types';
 
 interface PodsStats {
   accounts: {

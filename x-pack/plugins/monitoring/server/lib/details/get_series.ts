@@ -7,23 +7,23 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Bucket } from '../../types';
-import { checkParam } from '../error_missing_required';
-import { metrics } from '../metrics';
-import { createQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
 import {
-  NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL,
-  INDEX_PATTERN_TYPES,
-  STANDALONE_CLUSTER_CLUSTER_UUID,
-  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
   DS_INDEX_PATTERN_METRICS,
+  INDEX_PATTERN_TYPES,
+  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
+  NORMALIZED_DERIVATIVE_UNIT,
+  STANDALONE_CLUSTER_CLUSTER_UUID,
 } from '../../../common/constants';
-import { formatUTCTimestampForTimezone } from '../format_timezone';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
+import { Bucket, LegacyRequest } from '../../types';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { checkParam } from '../error_missing_required';
+import { formatUTCTimestampForTimezone } from '../format_timezone';
+import { metrics } from '../metrics';
 import type { Metric } from '../metrics/metrics';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } } & {

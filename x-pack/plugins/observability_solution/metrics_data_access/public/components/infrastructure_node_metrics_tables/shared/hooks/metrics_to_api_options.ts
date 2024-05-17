@@ -6,11 +6,11 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ObjectValues } from '../../../../../common/utility_types';
 import type {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
 } from '../../../../../common/metrics_explorer_views/types';
+import { ObjectValues } from '../../../../../common/utility_types';
 
 /*
 They key part of this file is the function 'createFieldLookup'.

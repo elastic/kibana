@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IContainer, EmbeddableFactoryDefinition } from '../../..';
+import { EmbeddableFactoryDefinition, IContainer } from '../../..';
 import {
+  EmbeddableTimeRangeInput,
   TIME_RANGE_EMBEDDABLE,
   TimeRangeEmbeddable,
-  EmbeddableTimeRangeInput,
 } from './time_range_embeddable';
 
 export class TimeRangeEmbeddableFactory

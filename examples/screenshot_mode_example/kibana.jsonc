@@ -7,11 +7,6 @@
     "id": "screenshotModeExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "navigation",
-      "screenshotMode",
-      "usageCollection",
-      "developerExamples"
-    ]
+    "requiredPlugins": ["navigation", "screenshotMode", "usageCollection", "developerExamples"]
   }
 }

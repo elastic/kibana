@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../../common/constants';
 import { ColumnHeaderOptions, defaultColumnHeaderType } from '../../../../common/types';

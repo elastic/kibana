@@ -1,3 +1,9 @@
+import {
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPervCPUWattX86,
+} from '@kbn/observability-plugin/common';
+import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +11,6 @@
  * 2.0.
  */
 import { useCalculateImpactEstimate } from './use_calculate_impact_estimates';
-import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import {
-  profilingCo2PerKWH,
-  profilingDatacenterPUE,
-  profilingPervCPUWattX86,
-} from '@kbn/observability-plugin/common';
 
 jest.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
 

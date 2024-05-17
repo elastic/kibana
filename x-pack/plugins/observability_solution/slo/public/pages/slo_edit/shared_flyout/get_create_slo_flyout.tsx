@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { RecursivePartial } from '@kbn/utility-types';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { QueryClient } from '@tanstack/react-query';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { RecursivePartial } from '@kbn/utility-types';
-import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import React from 'react';
 import { ExperimentalFeatures } from '../../../../common/config';
-import { CreateSLOForm } from '../types';
 import { PluginContext } from '../../../context/plugin_context';
 import { SloPublicPluginsStart } from '../../../types';
+import { CreateSLOForm } from '../types';
 import { SloAddFormFlyout } from './slo_form';
 
 export const getCreateSLOFlyoutLazy = ({

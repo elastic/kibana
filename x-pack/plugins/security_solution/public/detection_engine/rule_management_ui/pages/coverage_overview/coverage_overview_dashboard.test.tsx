@@ -9,8 +9,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 
-import { getMockCoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/__mocks__';
 import { TestProviders } from '../../../../common/mock';
+import { getMockCoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/__mocks__';
 import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 

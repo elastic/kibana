@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { EventsQueryTabBody } from '../../../../common/components/events_tab/events_query_tab_body';
+import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
 
 import { NETWORK_DETAILS_PAGE_PATH } from '../constants';
 
+import { networkModel } from '../../store';
 import {
   CountriesQueryTabBody,
   HttpQueryTabBody,
@@ -28,7 +29,6 @@ import {
   UsersQueryTabBody,
 } from '../navigation';
 import { ConditionalFlexGroup } from '../navigation/conditional_flex_group';
-import { networkModel } from '../../store';
 import { NetworkDetailsRouteType } from './types';
 
 interface NetworkDetailTabsProps {

@@ -1,3 +1,4 @@
+import { Route } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +7,11 @@
  */
 import React, { useContext } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
 
-import { useClusters } from './hooks/use_clusters';
-import { GlobalStateContext } from './contexts/global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';
 import { isInSetupMode } from '../lib/setup_mode';
+import { GlobalStateContext } from './contexts/global_state_context';
+import { useClusters } from './hooks/use_clusters';
 import { LoadingPage } from './pages/loading_page';
 
 export interface ComponentProps {

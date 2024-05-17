@@ -5,74 +5,26 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  RuleExecutorOptions,
-  RuleTypeParams,
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  Rule,
-  RuleAlertData,
-} from '../types';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './types';
-import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import {
+  elasticsearchServiceMock,
+  executionContextServiceMock,
+  httpServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
-  executionContextServiceMock,
   savedObjectsServiceMock,
-  elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
-import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import {
-  mockDate,
-  mockedRuleTypeSavedObject,
-  ruleType,
-  RULE_NAME,
-  generateRunnerResult,
-  RULE_ACTIONS,
-  generateSavedObjectParams,
-  mockTaskInstance,
-  DATE_1970,
-  DATE_1970_5_MIN,
-  mockedRawRuleSO,
-} from './fixtures';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { alertsClientMock } from '../alerts_client/alerts_client.mock';
-import * as LegacyAlertsClientModule from '../alerts_client/legacy_alerts_client';
-import * as RuleRunMetricsStoreModule from '../lib/rule_run_metrics_store';
-import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mock';
-import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { AlertsService } from '../alerts_service';
-import { ReplaySubject } from 'rxjs';
-import { IAlertsClient } from '../alerts_client/types';
-import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import {
-  TIMESTAMP,
-  EVENT_ACTION,
-  EVENT_KIND,
   ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
@@ -80,27 +32,75 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
-  ALERT_RULE_TYPE_ID,
   ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
   SPACE_IDS,
   TAGS,
+  TIMESTAMP,
   VERSION,
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { ReplaySubject } from 'rxjs';
+import sinon from 'sinon';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import * as LegacyAlertsClientModule from '../alerts_client/legacy_alerts_client';
+import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mock';
+import { IAlertsClient } from '../alerts_client/types';
+import { AlertsService } from '../alerts_service';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import * as RuleRunMetricsStoreModule from '../lib/rule_run_metrics_store';
+import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { alertsMock, rulesClientMock } from '../mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  Rule,
+  RuleAlertData,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
+} from '../types';
+import {
+  DATE_1970,
+  DATE_1970_5_MIN,
+  RULE_ACTIONS,
+  RULE_NAME,
+  generateRunnerResult,
+  generateSavedObjectParams,
+  mockDate,
+  mockTaskInstance,
+  mockedRawRuleSO,
+  mockedRuleTypeSavedObject,
+  ruleType,
+} from './fixtures';
+import { TaskRunner } from './task_runner';
+import { TaskRunnerContext } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -777,7 +777,7 @@ describe('Task Runner', () => {
       State extends AlertInstanceState = never,
       Context extends AlertInstanceContext = never,
       ActionGroupIds extends string = 'default',
-      RecoveryActionGroupId extends string = 'recovered'
+      RecoveryActionGroupId extends string = 'recovered',
     >({
       alertsClientToUse,
       alertsClientNotToUse,

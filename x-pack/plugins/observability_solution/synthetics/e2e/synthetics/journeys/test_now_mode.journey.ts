@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after, expect } from '@elastic/synthetics';
+import { after, before, expect, journey, step } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '../../helpers/record_video';
 import { byTestId } from '../../helpers/utils';

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { type MlAnomaliesTableRecordExtended, getSeverity } from '@kbn/ml-anomaly-utils';
 import { capitalize } from 'lodash';
-import { getSeverity, type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 
 export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): {
   anomalyDescription: string;

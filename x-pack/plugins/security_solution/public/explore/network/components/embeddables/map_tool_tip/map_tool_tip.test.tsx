@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { TooltipFeature } from '@kbn/maps-plugin/common';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { MapToolTipComponent } from './map_tool_tip';
-import type { TooltipFeature } from '@kbn/maps-plugin/common';
 
 describe('MapToolTip', () => {
   test('placeholder component renders correctly against snapshot', () => {

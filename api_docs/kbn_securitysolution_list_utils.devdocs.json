@@ -370,9 +370,7 @@
                 "tags": [],
                 "label": "selectedField",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -515,9 +513,7 @@
         "type": "Function",
         "tags": [],
         "label": "getEntryOnFieldChange",
-        "description": [
-          "\nDetermines proper entry update when user selects new field\n"
-        ],
+        "description": ["\nDetermines proper entry update when user selects new field\n"],
         "signature": [
           "(item: ",
           {
@@ -555,9 +551,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "- current exception item entry values"
-            ],
+            "description": ["- current exception item entry values"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -578,9 +572,7 @@
             "type": "Object",
             "tags": [],
             "label": "newField",
-            "description": [
-              "- newly selected field"
-            ],
+            "description": ["- newly selected field"],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -637,9 +629,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "- current exception item entry values"
-            ],
+            "description": ["- current exception item entry values"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -660,9 +650,7 @@
             "type": "Object",
             "tags": [],
             "label": "newField",
-            "description": [
-              "- newly selected list"
-            ],
+            "description": ["- newly selected list"],
             "signature": [
               "{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }"
             ],
@@ -713,9 +701,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "- current exception item entry values"
-            ],
+            "description": ["- current exception item entry values"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -736,12 +722,8 @@
             "type": "Array",
             "tags": [],
             "label": "newField",
-            "description": [
-              "- newly entered value"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["- newly entered value"],
+            "signature": ["string[]"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -789,9 +771,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "- current exception item entry values"
-            ],
+            "description": ["- current exception item entry values"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -812,12 +792,8 @@
             "type": "string",
             "tags": [],
             "label": "newField",
-            "description": [
-              "- newly entered value"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["- newly entered value"],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -833,9 +809,7 @@
         "type": "Function",
         "tags": [],
         "label": "getEntryOnOperatorChange",
-        "description": [
-          "\nDetermines proper entry update when user selects new operator\n"
-        ],
+        "description": ["\nDetermines proper entry update when user selects new operator\n"],
         "signature": [
           "(item: ",
           {
@@ -873,9 +847,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "- current exception item entry values"
-            ],
+            "description": ["- current exception item entry values"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -896,9 +868,7 @@
             "type": "Object",
             "tags": [],
             "label": "newOperator",
-            "description": [
-              "- newly selected operator"
-            ],
+            "description": ["- newly selected operator"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -955,9 +925,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "- current exception item entry values"
-            ],
+            "description": ["- current exception item entry values"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -978,12 +946,8 @@
             "type": "string",
             "tags": [],
             "label": "newField",
-            "description": [
-              "- newly entered value"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["- newly entered value"],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -999,9 +963,7 @@
         "type": "Function",
         "tags": [],
         "label": "getEntryValue",
-        "description": [
-          "\nReturns the fields corresponding value for an entry\n"
-        ],
+        "description": ["\nReturns the fields corresponding value for an entry\n"],
         "signature": [
           "(item: ",
           {
@@ -1023,9 +985,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "item",
-            "description": [
-              "a single ExceptionItem entry"
-            ],
+            "description": ["a single ExceptionItem entry"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -1123,9 +1083,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "item",
-            "description": [
-              "a single ExceptionItem entry"
-            ],
+            "description": ["a single ExceptionItem entry"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -1189,9 +1147,7 @@
             "type": "Object",
             "tags": [],
             "label": "patterns",
-            "description": [
-              "DataViewBase containing available fields on rule index"
-            ],
+            "description": ["DataViewBase containing available fields on rule index"],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -1212,9 +1168,7 @@
             "type": "Object",
             "tags": [],
             "label": "item",
-            "description": [
-              "exception item entry\nset to add a nested field"
-            ],
+            "description": ["exception item entry\nset to add a nested field"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -1347,9 +1301,7 @@
             "type": "Array",
             "tags": [],
             "label": "entries",
-            "description": [
-              "exception item entries"
-            ],
+            "description": ["exception item entries"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -1371,12 +1323,8 @@
             "type": "boolean",
             "tags": [],
             "label": "allowCustomFieldOptions",
-            "description": [
-              "determines if field must be found to match in indexPattern or not"
-            ],
-            "signature": [
-              "boolean"
-            ],
+            "description": ["determines if field must be found to match in indexPattern or not"],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1388,9 +1336,7 @@
             "type": "Object",
             "tags": [],
             "label": "parent",
-            "description": [
-              "nested entries hold copy of their parent for use in various logic"
-            ],
+            "description": ["nested entries hold copy of their parent for use in various logic"],
             "signature": [
               "{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | undefined"
             ],
@@ -1408,9 +1354,7 @@
             "description": [
               "corresponds to the entry index, this might seem obvious, but\nwas added to ensure that nested items could be identified with their parent entry"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1486,9 +1430,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "item",
-            "description": [
-              "exception item entry"
-            ],
+            "description": ["exception item entry"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -1509,12 +1451,8 @@
             "type": "number",
             "tags": [],
             "label": "itemIndex",
-            "description": [
-              "entry index"
-            ],
-            "signature": [
-              "number"
-            ],
+            "description": ["entry index"],
+            "signature": ["number"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1526,9 +1464,7 @@
             "type": "Object",
             "tags": [],
             "label": "parent",
-            "description": [
-              "nested entries hold copy of their parent for use in various logic"
-            ],
+            "description": ["nested entries hold copy of their parent for use in various logic"],
             "signature": [
               "{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | undefined"
             ],
@@ -1546,9 +1482,7 @@
             "description": [
               "corresponds to the entry index, this might seem obvious, but\nwas added to ensure that nested items could be identified with their parent entry"
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1560,12 +1494,8 @@
             "type": "boolean",
             "tags": [],
             "label": "allowCustomFieldOptions",
-            "description": [
-              "determines if field must be found to match in indexPattern or not"
-            ],
-            "signature": [
-              "boolean"
-            ],
+            "description": ["determines if field must be found to match in indexPattern or not"],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1828,9 +1758,7 @@
                 "tags": [],
                 "label": "listId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1842,9 +1770,7 @@
                 "tags": [],
                 "label": "namespaceType",
                 "description": [],
-                "signature": [
-                  "\"single\" | \"agnostic\" | undefined"
-                ],
+                "signature": ["\"single\" | \"agnostic\" | undefined"],
                 "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1872,9 +1798,7 @@
         "type": "Function",
         "tags": [],
         "label": "getOperatorOptions",
-        "description": [
-          "\nDetermines which operators to make available\n"
-        ],
+        "description": ["\nDetermines which operators to make available\n"],
         "signature": [
           "(item: ",
           {
@@ -1941,9 +1865,7 @@
             "tags": [],
             "label": "isBoolean",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1958,9 +1880,7 @@
             "description": [
               "whether or not to include the 'is in list' and 'is not in list' operators"
             ],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1976,9 +1896,7 @@
         "type": "Function",
         "tags": [],
         "label": "getOperatorType",
-        "description": [
-          "\nReturns the operator type, may not need this if using io-ts types\n"
-        ],
+        "description": ["\nReturns the operator type, may not need this if using io-ts types\n"],
         "signature": [
           "(item: ",
           {
@@ -2007,9 +1925,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "item",
-            "description": [
-              "a single ExceptionItem entry"
-            ],
+            "description": ["a single ExceptionItem entry"],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-list-utils",
@@ -2067,9 +1983,7 @@
                 "tags": [],
                 "label": "namespaceType",
                 "description": [],
-                "signature": [
-                  "\"single\" | \"agnostic\""
-                ],
+                "signature": ["\"single\" | \"agnostic\""],
                 "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2120,9 +2034,7 @@
                 "tags": [],
                 "label": "namespaceType",
                 "description": [],
-                "signature": [
-                  "(\"single\" | \"agnostic\")[]"
-                ],
+                "signature": ["(\"single\" | \"agnostic\")[]"],
                 "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2194,9 +2106,7 @@
             "description": [
               "index of given entry, for nested entries, this will correspond\nto their parent index"
             ],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2209,9 +2119,7 @@
             "tags": [],
             "label": "nestedParentIndex",
             "description": [],
-            "signature": [
-              "number | null"
-            ],
+            "signature": ["number | null"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2308,9 +2216,7 @@
         "tags": [],
         "label": "isKibanaStringType",
         "description": [],
-        "signature": [
-          "(type: string) => boolean"
-        ],
+        "signature": ["(type: string) => boolean"],
         "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2322,9 +2228,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2371,9 +2275,7 @@
             "tags": [],
             "label": "conflictDescriptions",
             "description": [],
-            "signature": [
-              "Record<string, string[]> | undefined"
-            ],
+            "signature": ["Record<string, string[]> | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2410,9 +2312,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2481,9 +2381,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string | string[] | undefined"
-            ],
+            "signature": ["string | string[] | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2520,9 +2418,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2575,9 +2471,7 @@
             "tags": [],
             "label": "list",
             "description": [],
-            "signature": [
-              "{ id: string | undefined; type: string | undefined; }"
-            ],
+            "signature": ["{ id: string | undefined; type: string | undefined; }"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2614,9 +2508,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2676,9 +2568,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nKibana field type"
-            ],
+            "description": ["\nKibana field type"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2689,9 +2579,7 @@
             "type": "number",
             "tags": [],
             "label": "totalIndexCount",
-            "description": [
-              "\nTotal count of the indices of this type"
-            ],
+            "description": ["\nTotal count of the indices of this type"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2702,12 +2590,8 @@
             "type": "Array",
             "tags": [],
             "label": "groupedIndices",
-            "description": [
-              "\nGrouped indices info"
-            ],
-            "signature": [
-              "{ name: string; count: number; }[]"
-            ],
+            "description": ["\nGrouped indices info"],
+            "signature": ["{ name: string; count: number; }[]"],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2785,9 +2669,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "string | string[] | undefined"
-            ],
+            "signature": ["string | string[] | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2799,9 +2681,7 @@
             "tags": [],
             "label": "nested",
             "description": [],
-            "signature": [
-              "\"child\" | \"parent\" | undefined"
-            ],
+            "signature": ["\"child\" | \"parent\" | undefined"],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2901,9 +2781,7 @@
             "tags": [],
             "label": "namespaceTypes",
             "description": [],
-            "signature": [
-              "(\"single\" | \"agnostic\")[]"
-            ],
+            "signature": ["(\"single\" | \"agnostic\")[]"],
             "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2915,9 +2793,7 @@
             "tags": [],
             "label": "hideLists",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3205,9 +3081,7 @@
         "tags": [],
         "label": "exceptionListAgnosticSavedObjectType",
         "description": [],
-        "signature": [
-          "\"exception-list-agnostic\""
-        ],
+        "signature": ["\"exception-list-agnostic\""],
         "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3243,9 +3117,7 @@
         "tags": [],
         "label": "exceptionListSavedObjectType",
         "description": [],
-        "signature": [
-          "\"exception-list\""
-        ],
+        "signature": ["\"exception-list\""],
         "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3302,9 +3174,7 @@
         "tags": [],
         "label": "SavedObjectType",
         "description": [],
-        "signature": [
-          "\"exception-list\" | \"exception-list-agnostic\""
-        ],
+        "signature": ["\"exception-list\" | \"exception-list-agnostic\""],
         "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,

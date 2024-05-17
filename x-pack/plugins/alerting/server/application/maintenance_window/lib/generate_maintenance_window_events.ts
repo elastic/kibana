@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { RRule, Weekday } from '@kbn/rrule';
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { RRule, Weekday } from '@kbn/rrule';
-import { RRuleParams, DateRange } from '../../../../common';
+import { DateRange, RRuleParams } from '../../../../common';
 import { MaintenanceWindow } from '../types';
 
 export interface GenerateMaintenanceWindowEventsParams {

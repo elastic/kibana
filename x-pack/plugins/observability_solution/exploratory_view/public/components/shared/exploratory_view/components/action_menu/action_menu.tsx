@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { EmbedAction } from '../../header/embed_action';
+import React, { useState } from 'react';
 import { AddToCaseAction } from '../../header/add_to_case_action';
+import { EmbedAction } from '../../header/embed_action';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function ExpViewActionMenuContent({

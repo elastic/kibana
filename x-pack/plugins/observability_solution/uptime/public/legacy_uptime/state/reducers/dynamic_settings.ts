@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
+import { Action, handleActions } from 'redux-actions';
+import { DynamicSettings } from '../../../../common/runtime_types';
 import {
   getDynamicSettings,
-  getDynamicSettingsSuccess,
   getDynamicSettingsFail,
+  getDynamicSettingsSuccess,
   setDynamicSettings,
-  setDynamicSettingsSuccess,
   setDynamicSettingsFail,
+  setDynamicSettingsSuccess,
 } from '../actions/dynamic_settings';
-import { DynamicSettings } from '../../../../common/runtime_types';
 
 export interface DynamicSettingsState {
   settings?: DynamicSettings;

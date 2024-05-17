@@ -13,10 +13,10 @@ import type { HistogramCharts } from '../../../../services/transform/wizard';
 
 import {
   GroupByEntry,
-  isLatestTransformTestData,
-  isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
+  isLatestTransformTestData,
+  isPivotTransformTestData,
 } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {

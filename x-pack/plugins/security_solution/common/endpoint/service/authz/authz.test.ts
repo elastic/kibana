@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
@@ -15,6 +14,7 @@ import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   type ResponseConsoleRbacControls,
 } from '../response_actions/constants';
+import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
 
 describe('Endpoint Authz service', () => {
   let licenseService: ReturnType<typeof createLicenseServiceMock>;

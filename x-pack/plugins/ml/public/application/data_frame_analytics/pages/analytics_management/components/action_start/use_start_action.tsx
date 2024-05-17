@@ -7,6 +7,8 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+import { startAnalytics } from '../../services/analytics_service';
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
@@ -16,10 +18,8 @@ import {
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
 } from '../analytics_list/common';
-import { startAnalytics } from '../../services/analytics_service';
-import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
-import { startActionNameText, StartActionName } from './start_action_name';
+import { StartActionName, startActionNameText } from './start_action_name';
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {

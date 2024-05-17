@@ -8,8 +8,8 @@
 
 import { mockLoadConfiguration } from './init_apm.test.mocks';
 
-import { initApm } from './init_apm';
 import apm from 'elastic-apm-node';
+import { initApm } from './init_apm';
 
 describe('initApm', () => {
   let apmAddFilterMock: jest.Mock;

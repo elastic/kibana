@@ -1,3 +1,5 @@
+import { withSpan } from '@kbn/apm-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +8,10 @@
  */
 import type {
   ConcreteTaskInstance,
-  TaskManagerStartContract,
   TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 
 import { uniq } from 'lodash';
 

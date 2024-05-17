@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EcsFlat } from '@elastic/ecs';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { useEffect, useMemo, useState } from 'react';
-import { EcsFlat } from '@elastic/ecs';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import { isEmpty } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
 
 export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) => {
   let ecsField = ecsFlat[fieldName];

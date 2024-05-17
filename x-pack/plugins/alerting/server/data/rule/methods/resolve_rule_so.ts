@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsResolveResponse } from '@kbn/core/server';
 import { SavedObjectsResolveOptions } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsClientContract, SavedObjectsResolveResponse } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAttributes } from '../types';
 

@@ -7,17 +7,17 @@
  */
 
 import type { Reducer, RefObject } from 'react';
-import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
   isExpressionValueError,
 } from '../../common';
 import { ExpressionLoader } from '../loader';
-import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
+import { ExpressionRenderError, ExpressionRendererEvent, IExpressionLoaderParams } from '../types';
 import { useDebouncedValue } from './use_debounced_value';
 import { useShallowMemo } from './use_shallow_memo';
 

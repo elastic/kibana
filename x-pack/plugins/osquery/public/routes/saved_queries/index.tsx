@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
+import { useKibana } from '../../common/lib/kibana';
+import { MissingPrivileges } from '../components';
+import { EditSavedQueryPage } from './edit';
 import { QueriesPage } from './list';
 import { NewSavedQueryPage } from './new';
-import { EditSavedQueryPage } from './edit';
-import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
-import { MissingPrivileges } from '../components';
-import { useKibana } from '../../common/lib/kibana';
 
 const SavedQueriesComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;

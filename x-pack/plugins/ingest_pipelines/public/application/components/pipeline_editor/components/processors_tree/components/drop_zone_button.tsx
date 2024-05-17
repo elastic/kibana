@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import classNames from 'classnames';
 import { EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import React, { FunctionComponent } from 'react';
 
 export interface Props {
   isVisible: boolean;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import type { Batch } from '@loaders.gl/schema';
-import { JSONLoader, type JSONLoaderOptions } from '@loaders.gl/json';
 import { loadInBatches } from '@loaders.gl/core';
+import { JSONLoader, type JSONLoaderOptions } from '@loaders.gl/json';
+import type { Batch } from '@loaders.gl/schema';
+import { Feature } from 'geojson';
 import type { ImportFailure } from '../../../../common/types';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 

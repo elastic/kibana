@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { CustomIntegration, IntegrationCategory } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import { IntegrationCategory, CustomIntegration } from '../common';
 
 describe('CustomIntegrationsRegistry', () => {
   let mockLogger: MockedLogger;

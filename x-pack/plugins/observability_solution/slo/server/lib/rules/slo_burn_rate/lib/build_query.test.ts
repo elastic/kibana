@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createBurnRateRule } from '../fixtures/rule';
-import { buildQuery } from './build_query';
 import {
   createKQLCustomIndicator,
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
 } from '../../../../services/fixtures/slo';
+import { createBurnRateRule } from '../fixtures/rule';
+import { buildQuery } from './build_query';
 
 const STARTED_AT = new Date('2023-01-01T00:00:00.000Z');
 

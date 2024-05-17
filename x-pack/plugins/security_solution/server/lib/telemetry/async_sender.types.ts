@@ -6,8 +6,8 @@
  */
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { type TelemetryChannel } from './types';
 import type { ITelemetryReceiver } from './receiver';
+import { type TelemetryChannel } from './types';
 
 /**
  * This service sends telemetry events to the telemetry service asynchronously. Managing

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import type { UserRepresentationProps } from './removable_user';
-import { RemovableUser } from './removable_user';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
+import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+import type { UserRepresentationProps } from './removable_user';
+import { RemovableUser } from './removable_user';
 
 describe('UserRepresentation', () => {
   const dataTestSubjGroup = `user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`;

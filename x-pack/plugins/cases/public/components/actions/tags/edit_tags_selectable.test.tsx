@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { EditTagsSelectable } from './edit_tags_selectable';
 import { basicCase } from '../../../containers/mock';
-import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import { EditTagsSelectable } from './edit_tags_selectable';
 
 describe('EditTagsSelectable', () => {
   let appMock: AppMockRenderer;

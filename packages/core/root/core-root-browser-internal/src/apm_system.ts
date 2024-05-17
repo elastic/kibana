@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum';
-import { modifyUrl } from '@kbn/std';
-import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import type { AgentConfigOptions, ApmBase, Transaction } from '@elastic/apm-rum';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import { modifyUrl } from '@kbn/std';
 import { CachedResourceObserver } from './apm_resource_counter';
 
 /** "GET protocol://hostname:port/pathname" */
@@ -42,7 +42,10 @@ export class ApmSystem {
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
    */
-  constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
+  constructor(
+    private readonly apmConfig?: ApmConfig,
+    private readonly basePath = ''
+  ) {
     this.enabled = apmConfig != null && !!apmConfig.active;
     this.resourceObserver = new CachedResourceObserver();
   }

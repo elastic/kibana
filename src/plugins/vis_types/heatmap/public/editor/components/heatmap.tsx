@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
+import { colorSchemas } from '@kbn/charts-plugin/public';
 import {
   BasicOptions,
-  SelectOption,
-  SwitchOption,
   ColorRanges,
-  SetColorRangeValue,
-  SetColorSchemaOptionsValue,
   ColorSchemaOptions,
+  LegendSizeSettings,
+  LongLegendOptions,
   NumberInputOption,
   PercentageModeOption,
-  LongLegendOptions,
-  LegendSizeSettings,
+  SelectOption,
+  SetColorRangeValue,
+  SetColorSchemaOptionsValue,
+  SwitchOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { colorSchemas } from '@kbn/charts-plugin/public';
 import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
-import { LabelsPanel } from './labels_panel';
+import { HeatmapTypeProps, HeatmapVisParams, ValueAxis } from '../../types';
 import { legendPositions, scaleTypes } from '../collections';
+import { LabelsPanel } from './labels_panel';
 
 export interface HeatmapOptionsProps
   extends VisEditorOptionsProps<HeatmapVisParams>,

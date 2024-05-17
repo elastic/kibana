@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { CellActions } from './cell_actions';
-import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
+import { useRightPanelContext } from '../context';
+import { CellActions } from './cell_actions';
+import { HighlightedFieldsCell } from './highlighted_fields_cell';
+import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 
 export interface HighlightedFieldsTableRow {
   /**

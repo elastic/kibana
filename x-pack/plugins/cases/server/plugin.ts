@@ -6,22 +6,37 @@
  */
 
 import type {
+  CoreSetup,
+  CoreStart,
   IContextProvider,
   KibanaRequest,
   Logger,
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
   Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { APP_ID } from '../common/constants';
 
+import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import type { CasesClient } from './client';
+import { CasesClientFactory } from './client/factory';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import type { ConfigType } from './config';
+import { registerConnectorTypes } from './connectors';
+import { getCasesKibanaFeature } from './features';
+import { registerCaseFileKinds } from './files';
+import { registerInternalAttachments } from './internal_attachments';
+import { getExternalRoutes } from './routes/api/get_external_routes';
+import { getInternalRoutes } from './routes/api/get_internal_routes';
+import { registerRoutes } from './routes/api/register_routes';
+import { registerSavedObjects } from './saved_object_types';
+import { UserProfileService } from './services';
+import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import type {
   CasesRequestHandlerContext,
   CasesServerSetup,
@@ -29,21 +44,6 @@ import type {
   CasesServerStart,
   CasesServerStartDependencies,
 } from './types';
-import { CasesClientFactory } from './client/factory';
-import { getCasesKibanaFeature } from './features';
-import { registerRoutes } from './routes/api/register_routes';
-import { getExternalRoutes } from './routes/api/get_external_routes';
-import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
-import { getInternalRoutes } from './routes/api/get_internal_routes';
-import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
-import { UserProfileService } from './services';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
-import { registerInternalAttachments } from './internal_attachments';
-import { registerCaseFileKinds } from './files';
-import type { ConfigType } from './config';
-import { registerConnectorTypes } from './connectors';
-import { registerSavedObjects } from './saved_object_types';
 
 export class CasePlugin
   implements

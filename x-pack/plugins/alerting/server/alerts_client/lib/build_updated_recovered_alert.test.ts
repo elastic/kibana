@@ -1,3 +1,25 @@
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  SPACE_IDS,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+} from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,31 +29,9 @@
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import {
-  SPACE_IDS,
-  ALERT_ACTION_GROUP,
-  ALERT_DURATION,
-  ALERT_FLAPPING,
-  ALERT_FLAPPING_HISTORY,
-  ALERT_INSTANCE_ID,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
-  EVENT_ACTION,
-  EVENT_KIND,
-  TAGS,
-  TIMESTAMP,
-  VERSION,
-  ALERT_TIME_RANGE,
-  ALERT_END,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_CONSECUTIVE_MATCHES,
-} from '@kbn/rule-data-utils';
-import {
   alertRule,
-  existingFlattenedRecoveredAlert,
   existingExpandedRecoveredAlert,
+  existingFlattenedRecoveredAlert,
 } from './test_fixtures';
 
 describe('buildUpdatedRecoveredAlert', () => {

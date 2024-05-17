@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, LogMeta } from '@kbn/core/server';
+import { LogMeta, Logger } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { CaptureResult } from '..';
@@ -150,7 +150,10 @@ export class EventLogger {
   private logEvent: LogAdapter;
   private timings: Partial<Record<Actions | Transactions, Date>> = {};
 
-  constructor(private readonly logger: Logger, private readonly config: ConfigType) {
+  constructor(
+    private readonly logger: Logger,
+    private readonly config: ConfigType
+  ) {
     this.sessionId = uuidv4();
     this.logEvent = logAdapter(logger.get('events'), this.sessionId);
   }

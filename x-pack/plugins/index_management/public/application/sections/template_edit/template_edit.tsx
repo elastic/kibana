@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, Fragment } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { EuiCallOut, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import React, { useEffect, useState, Fragment } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { TemplateDeserialized } from '../../../../common';
-import { PageError, PageLoading, attemptToURIDecode, Error } from '../../../shared_imports';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
-import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
-import { getTemplateDetailsLink } from '../../services/routing';
+import { Error, PageError, PageLoading, attemptToURIDecode } from '../../../shared_imports';
+import { useAppContext } from '../../app_context';
 import { TemplateForm } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
-import { useAppContext } from '../../app_context';
+import { updateTemplate, useLoadIndexTemplate } from '../../services/api';
+import { IndexManagementBreadcrumb, breadcrumbService } from '../../services/breadcrumbs';
+import { getTemplateDetailsLink } from '../../services/routing';
 
 interface MatchParams {
   name: string;

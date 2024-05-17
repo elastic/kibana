@@ -9,17 +9,17 @@
 import React from 'react';
 
 import {
-  // eslint-disable-next-line no-restricted-imports
-  Router as ReactRouter,
-  MemoryRouter as ReactMemoryRouter,
   BrowserRouter as ReactBrowserRouter,
   HashRouter as ReactHashRouter,
+  MemoryRouter as ReactMemoryRouter,
+  // eslint-disable-next-line no-restricted-imports
+  Router as ReactRouter,
 } from 'react-router-dom';
 import type {
-  RouterProps,
-  MemoryRouterProps,
   BrowserRouterProps,
   HashRouterProps,
+  MemoryRouterProps,
+  RouterProps,
 } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 

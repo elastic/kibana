@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import React, { createContext } from 'react';
 import type { StartDependencies } from '../plugin';
 
 export interface ContextValue extends StartDependencies {

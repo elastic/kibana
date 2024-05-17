@@ -7,8 +7,8 @@
  */
 
 import type { VisualizationSavedObject } from '../../common/content_management';
-import { registerReadOnlyVisType } from './read_only_vis_type_registry';
 import { getInAppUrl } from './get_in_app_url';
+import { registerReadOnlyVisType } from './read_only_vis_type_registry';
 
 registerReadOnlyVisType('myLegacyVis');
 

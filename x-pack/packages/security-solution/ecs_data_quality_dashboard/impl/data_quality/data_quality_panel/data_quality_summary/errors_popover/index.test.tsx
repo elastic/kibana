@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
 import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { ErrorsPopover } from '.';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
 
 const mockCopyToClipboard = jest.fn((value) => true);
 jest.mock('@elastic/eui', () => {

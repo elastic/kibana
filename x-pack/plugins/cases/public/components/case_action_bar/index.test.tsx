@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { mount } from 'enzyme';
+import React from 'react';
 
-import { basicCase, basicCaseClosed } from '../../containers/mock';
 import type { CaseActionBarProps } from '.';
 import { CaseActionBar } from '.';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import {
+  TestProviders,
   allCasesPermissions,
   noDeleteCasesPermissions,
   noUpdateCasesPermissions,
-  TestProviders,
 } from '../../common/mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { basicCase, basicCaseClosed } from '../../containers/mock';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import { CaseMetricsFeature } from '../../../common/types/api';
 
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../case_view/use_on_refresh_case_view_page');

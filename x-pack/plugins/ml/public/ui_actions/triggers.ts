@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';

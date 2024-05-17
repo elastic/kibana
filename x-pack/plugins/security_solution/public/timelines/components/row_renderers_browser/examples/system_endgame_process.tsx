@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { createEndgameProcessRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { demoEndgameCreationEvent } from '../../../../common/demo_data/endgame_ecs/creation';
+import { createEndgameProcessRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { PROCESS_STARTED } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { keys, isFunction, difference, filter, union, pick, each, assign, isEqual } from 'lodash';
+import { assign, difference, each, filter, isEqual, isFunction, keys, pick, union } from 'lodash';
 
 export interface IDiffObject {
   removed: string[];

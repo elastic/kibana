@@ -9,11 +9,11 @@
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '../shared_imports';
 
-import { Form, UseField } from '../components';
 import React from 'react';
 import { useForm } from '.';
+import { FieldConfig, FieldHook, FieldValidateResponse, VALIDATION_TYPES } from '..';
 import { emptyField } from '../../helpers/field_validators';
-import { FieldHook, FieldValidateResponse, VALIDATION_TYPES, FieldConfig } from '..';
+import { Form, UseField } from '../components';
 
 describe('useField() hook', () => {
   beforeAll(() => {

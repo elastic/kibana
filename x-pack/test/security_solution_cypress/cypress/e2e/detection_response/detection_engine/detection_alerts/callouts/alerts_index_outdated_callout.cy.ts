@@ -7,19 +7,19 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { ALERTS_URL } from '../../../../../urls/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
-import { ruleDetailsUrl } from '../../../../../urls/rule_details';
 import { getNewRule } from '../../../../../objects/rule';
 import { PAGE_TITLE } from '../../../../../screens/common/page';
+import { ALERTS_URL } from '../../../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../../../urls/rule_details';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
 
 import { createRule, deleteCustomRule } from '../../../../../tasks/api_calls/rules';
 import {
-  getCallOut,
   NEED_ADMIN_FOR_UPDATE_CALLOUT,
+  getCallOut,
   waitForCallOutToBeShown,
 } from '../../../../../tasks/common/callouts';
 

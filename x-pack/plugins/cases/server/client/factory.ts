@@ -5,54 +5,54 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  SavedObjectsServiceStart,
-  Logger,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  IBasePath,
-} from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
-  AuditLogger,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/server';
+  ElasticsearchClient,
+  IBasePath,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { KIBANA_SYSTEM_USERNAME, SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
-  CaseConfigureService,
-  CasesService,
-  CaseUserActionService,
-  ConnectorMappingsService,
-  AttachmentService,
   AlertService,
+  AttachmentService,
+  CaseConfigureService,
+  CaseUserActionService,
+  CasesService,
+  ConnectorMappingsService,
 } from '../services';
 
-import { AuthorizationAuditLogger } from '../authorization';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
-import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { CasesServices } from './types';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import { AuthorizationAuditLogger } from '../authorization';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import type { CasesServices } from './types';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { AllSeries } from '@kbn/exploratory-view-plugin/public';
-import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
-import { useExpViewAttributes } from './use_exp_view_attrs';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
-import { useDataView } from '../local_uifilters/use_data_view';
-import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import React, { useCallback } from 'react';
 import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
+import { useDataView } from '../local_uifilters/use_data_view';
+import { useExpViewAttributes } from './use_exp_view_attrs';
 
 interface Props {
   breakdown: BreakdownItem | null;

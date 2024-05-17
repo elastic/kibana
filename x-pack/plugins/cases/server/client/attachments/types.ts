@@ -6,9 +6,9 @@
  */
 
 import type {
-  BulkCreateAttachmentsRequest,
   AttachmentPatchRequest,
   AttachmentRequest,
+  BulkCreateAttachmentsRequest,
   FindAttachmentsQueryParams,
 } from '../../../common/types/api';
 

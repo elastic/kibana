@@ -10,10 +10,7 @@
         "tags": [],
         "label": "getEditPanelAction",
         "description": [],
-        "signature": [
-          "() => ",
-          "EditPanelAction"
-        ],
+        "signature": ["() => ", "EditPanelAction"],
         "path": "src/plugins/presentation_panel/public/panel_actions/panel_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -153,10 +150,7 @@
                 "tags": [],
                 "label": "api",
                 "description": [],
-                "signature": [
-                  "DefaultPresentationPanelApi",
-                  " | undefined"
-                ],
+                "signature": ["DefaultPresentationPanelApi", " | undefined"],
                 "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -178,9 +172,7 @@
         "tags": [],
         "label": "ACTION_CUSTOMIZE_PANEL",
         "description": [],
-        "signature": [
-          "\"ACTION_CUSTOMIZE_PANEL\""
-        ],
+        "signature": ["\"ACTION_CUSTOMIZE_PANEL\""],
         "path": "src/plugins/presentation_panel/public/panel_actions/customize_panel_action/customize_panel_action.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -237,9 +229,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"presentationPanel\""
-        ],
+        "signature": ["\"presentationPanel\""],
         "path": "src/plugins/presentation_panel/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -252,9 +242,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"presentationPanel\""
-        ],
+        "signature": ["\"presentationPanel\""],
         "path": "src/plugins/presentation_panel/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

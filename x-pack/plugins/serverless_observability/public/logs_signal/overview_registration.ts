@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ISearchGeneric } from '@kbn/search-types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type {
   DataHandler,
   InfraLogsHasDataResponse,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import * as rt from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
 
 type InfraLogsDashboardAppName = 'infra_logs';
 
@@ -43,9 +43,7 @@ const hasObservabilityDashboardData =
   ({ search }: { search: Promise<ISearchGeneric> }) =>
   async (): Promise<InfraLogsHasDataResponse> => {
     const hasData: boolean = await lastValueFrom(
-      (
-        await search
-      )({
+      (await search)({
         params: {
           ignore_unavailable: true,
           allow_no_indices: true,

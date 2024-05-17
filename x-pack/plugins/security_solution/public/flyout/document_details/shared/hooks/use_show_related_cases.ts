@@ -6,8 +6,8 @@
  */
 
 import { APP_ID } from '../../../../../common';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { getField } from '../utils';
 
 export interface UseShowRelatedCasesParams {

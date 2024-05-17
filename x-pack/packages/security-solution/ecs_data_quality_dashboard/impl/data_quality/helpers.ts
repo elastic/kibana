@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
-import { has, sortBy } from 'lodash/fp';
+import type { HttpHandler } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { has, sortBy } from 'lodash/fp';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 

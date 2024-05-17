@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
 import url from 'url';
-import { curry } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { getOrElse, map, mapNullable, tryCatch } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { curry } from 'lodash';
 
+import {
+  ValidateEmailAddressesOptions,
+  invalidEmailsAsMessage,
+  validateEmailAddresses,
+} from '../common';
 import {
   ActionsConfig,
   AllowedHosts,
-  EnabledActionTypes,
   CustomHostSettings,
   DEFAULT_QUEUED_MAX,
+  EnabledActionTypes,
 } from './config';
-import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
-import {
-  ValidateEmailAddressesOptions,
-  validateEmailAddresses,
-  invalidEmailsAsMessage,
-} from '../common';
+import { ProxySettings, ResponseSettings, SSLSettings } from './types';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {

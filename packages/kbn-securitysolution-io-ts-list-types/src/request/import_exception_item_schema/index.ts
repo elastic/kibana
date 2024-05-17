@@ -8,29 +8,29 @@
 
 import * as t from 'io-ts';
 
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { Tags } from '../../common/tags';
-import { NamespaceType } from '../../common/default_namespace';
-import { name } from '../../common/name';
-import { description } from '../../common/description';
-import { namespace_type } from '../../common/namespace_type';
-import { tags } from '../../common/tags';
-import { meta } from '../../common/meta';
-import { list_id } from '../../common/list_id';
-import { item_id } from '../../common/item_id';
-import { id } from '../../common/id';
+import { ExpireTimeOrUndefined, ImportCommentsArray, expireTimeOrUndefined } from '../../common';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
+import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
+import { NamespaceType } from '../../common/default_namespace';
+import { description } from '../../common/description';
+import { EntriesArray } from '../../common/entries';
+import { exceptionListItemType } from '../../common/exception_list_item_type';
+import { id } from '../../common/id';
+import { item_id } from '../../common/item_id';
+import { ItemId } from '../../common/item_id';
+import { list_id } from '../../common/list_id';
+import { meta } from '../../common/meta';
+import { name } from '../../common/name';
+import { namespace_type } from '../../common/namespace_type';
+import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
+import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
+import { Tags } from '../../common/tags';
+import { tags } from '../../common/tags';
+import { tie_breaker_id } from '../../common/tie_breaker_id';
+import { _version } from '../../common/underscore_version';
 import { updated_at } from '../../common/updated_at';
 import { updated_by } from '../../common/updated_by';
-import { _version } from '../../common/underscore_version';
-import { tie_breaker_id } from '../../common/tie_breaker_id';
-import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
-import { exceptionListItemType } from '../../common/exception_list_item_type';
-import { ItemId } from '../../common/item_id';
-import { EntriesArray } from '../../common/entries';
-import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
-import { ExpireTimeOrUndefined, expireTimeOrUndefined, ImportCommentsArray } from '../../common';
 
 /**
  * Differences from this and the createExceptionsListItemSchema are

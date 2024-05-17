@@ -7,8 +7,8 @@
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
 import { Job } from '@kbn/reporting-public/job';
+import React, { FunctionComponent } from 'react';
 
 interface Props {
   job: Job;

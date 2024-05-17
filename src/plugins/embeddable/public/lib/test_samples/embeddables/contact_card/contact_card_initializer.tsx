@@ -7,15 +7,15 @@
  */
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
+  EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiButton,
-  EuiModalFooter,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 

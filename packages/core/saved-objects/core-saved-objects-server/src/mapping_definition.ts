@@ -7,8 +7,8 @@
  */
 
 import type {
-  PropertyName as EsPropertyName,
   MappingProperty as EsMappingProperty,
+  PropertyName as EsPropertyName,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**

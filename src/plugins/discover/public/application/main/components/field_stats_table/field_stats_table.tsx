@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { of, map } from 'rxjs';
+import { map, of } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
+import type { FieldStatisticsTableProps, NormalSamplingOption } from './types';
 export type { FieldStatisticsTableProps };
 
 const statsTableCss = css({
@@ -73,7 +73,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         mode: 'normal_sampling',
         shardSize: 5000,
         seed: searchSessionId,
-      } as NormalSamplingOption),
+      }) as NormalSamplingOption,
     [searchSessionId]
   );
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../cli/logger';
 import { confirm, question } from '../cli/keystore/utils';
+import { Logger } from '../cli/logger';
 
 export async function create(keystore, options = {}) {
   const logger = new Logger(options);

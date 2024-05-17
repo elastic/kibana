@@ -9,12 +9,12 @@ import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/res
 
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
+import { requestContextMock, requestMock, serverMock } from '../../../routes/__mocks__';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../../../routes/__mocks__';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { findRuleExceptionReferencesRoute } from './route';
 

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { unitSuffixesLong } from '../../../../common/suffix_formatter';
 import type { TimeScaleUnit } from '../../../../common/expressions';
+import { unitSuffixesLong } from '../../../../common/suffix_formatter';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 

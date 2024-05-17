@@ -6,26 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
-import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import {
+  EuiButton,
+  EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
-  EuiSpacer,
-  EuiFieldSearch,
-  EuiFilterSelectItem,
-  FilterChecked,
   EuiToolTip,
-  EuiButton,
+  FilterChecked,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
   DataView,
   DataViewField,
@@ -33,25 +28,30 @@ import {
   META_FIELDS,
   RuntimeField,
 } from '@kbn/data-views-plugin/public';
-import {
-  SavedObjectRelation,
-  SavedObjectManagementTypeInfo,
-} from '@kbn/saved-objects-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
+import {
+  SavedObjectManagementTypeInfo,
+  SavedObjectRelation,
+} from '@kbn/saved-objects-management-plugin/public';
+import { uniq } from 'lodash';
+import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { IndexPatternManagmentContext } from '../../../types';
-import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
+import { getFieldInfo } from '../../utils';
 import {
   TAB_INDEXED_FIELDS,
+  TAB_RELATIONSHIPS,
   TAB_SCRIPTED_FIELDS,
   TAB_SOURCE_FILTERS,
-  TAB_RELATIONSHIPS,
 } from '../constants';
-import { SourceFiltersTable } from '../source_filters_table';
+import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { IndexedFieldsTable } from '../indexed_fields_table';
-import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { RelationshipsTable } from '../relationships_table';
-import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
-import { getFieldInfo } from '../../utils';
+import { ScriptedFieldsTable } from '../scripted_fields_table';
+import { SourceFiltersTable } from '../source_filters_table';
+import { convertToEuiFilterOptions, getPath, getTabs } from './utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: DataView;

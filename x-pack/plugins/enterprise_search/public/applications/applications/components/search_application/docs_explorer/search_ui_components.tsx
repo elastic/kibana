@@ -35,13 +35,13 @@ import type {
 } from '@elastic/react-search-ui-views';
 import type { SearchContextState } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
+import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
+import { ConvertedResult, FieldValue, convertResultToFieldsAndIndex } from './convert_results';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
 

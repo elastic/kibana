@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
-import { ExceptionsConditions } from '.';
-import { TestProviders, mockIndexPattern } from '../../../../../common/mock';
-import { getRulesEqlSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import type { Rule } from '../../../../rule_management/logic/types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsConditions } from '.';
+import { getRulesEqlSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { TestProviders, mockIndexPattern } from '../../../../../common/mock';
+import type { Rule } from '../../../../rule_management/logic/types';
 import * as i18n from './translations';
 
 jest.mock('@kbn/lists-plugin/public');

@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiText, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiToolTip } from '@elastic/eui';
 
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_SCHEMA_PATH } from '../../../routes';

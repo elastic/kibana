@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { Story } from '@storybook/react';
+import React from 'react';
 
 import { AndOrBadge, AndOrBadgeProps } from '.';
 

@@ -8,8 +8,8 @@
 
 import { RuleTester } from 'eslint';
 import {
-  StringsShouldBeTranslatedWithI18n,
   RULE_WARNING_MESSAGE,
+  StringsShouldBeTranslatedWithI18n,
 } from './strings_should_be_translated_with_i18n';
 
 const tsTester = [

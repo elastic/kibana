@@ -39,9 +39,7 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": [
-              "is dark mode enabled or not"
-            ],
+            "description": ["is dark mode enabled or not"],
             "path": "packages/core/theme/core-theme-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

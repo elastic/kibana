@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
+import * as React from 'react';
+import { CoreVitalItem } from './core_vital_item';
+import { ServiceName } from './service_name';
 import {
   CLS_HELP_LABEL,
   CLS_LABEL,
@@ -16,9 +18,7 @@ import {
   LCP_HELP_LABEL,
   LCP_LABEL,
 } from './translations';
-import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
-import { ServiceName } from './service_name';
 
 export interface CoreVitalProps {
   loading: boolean;

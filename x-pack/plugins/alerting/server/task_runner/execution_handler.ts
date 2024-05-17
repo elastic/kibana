@@ -5,58 +5,58 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger } from '@kbn/core/server';
-import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import {
-  createTaskRunError,
-  isEphemeralTaskRejectedDueToCapacityError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
+import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import {
   ExecuteOptions as EnqueueExecutionOptions,
   ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { chunk } from 'lodash';
-import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { injectActionParams } from './inject_action_params';
-import { Executable, ExecutionHandlerOptions, RuleTaskInstance, TaskRunnerContext } from './types';
+import { Logger } from '@kbn/core/server';
+import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import {
-  transformActionParams,
-  TransformActionParamsOptions,
-  transformSummaryActionParams,
-} from './transform_action_params';
-import { Alert } from '../alert';
-import { NormalizedRuleType } from '../rule_type_registry';
+  TaskErrorSource,
+  createTaskRunError,
+  isEphemeralTaskRejectedDueToCapacityError,
+} from '@kbn/task-manager-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { chunk } from 'lodash';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleAction,
-  RuleTypeParams,
-  RuleTypeState,
-  SanitizedRule,
   RuleAlertData,
   RuleNotifyWhen,
   RuleSystemAction,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
 } from '../../common';
+import { Alert } from '../alert';
+import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
+import { ConnectorAdapter } from '../connector_adapters/types';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { NormalizedRuleType } from '../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AlertHit, CombinedSummarizedAlerts, ThrottledActions, parseDuration } from '../types';
+import { injectActionParams } from './inject_action_params';
 import {
   generateActionHash,
-  getSummaryActionsFromTaskState,
   getSummaryActionTimeBounds,
+  getSummaryActionsFromTaskState,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { ConnectorAdapter } from '../connector_adapters/types';
+import {
+  TransformActionParamsOptions,
+  transformActionParams,
+  transformSummaryActionParams,
+} from './transform_action_params';
+import { Executable, ExecutionHandlerOptions, RuleTaskInstance, TaskRunnerContext } from './types';
 
 enum Reasons {
   MUTED = 'muted',
@@ -97,7 +97,7 @@ interface RunActionArgs<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   action: RuleAction;
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
@@ -126,7 +126,7 @@ export class ExecutionHandler<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;

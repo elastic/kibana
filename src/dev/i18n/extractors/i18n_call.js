@@ -8,17 +8,17 @@
 
 import { isObjectExpression } from '@babel/types';
 
+import { createFailError } from '@kbn/dev-cli-errors';
+import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
 import {
-  isPropertyWithKey,
-  formatJSString,
   checkValuesProperty,
+  extractDescriptionValueFromNode,
   extractMessageIdFromNode,
   extractMessageValueFromNode,
-  extractDescriptionValueFromNode,
   extractValuesKeysFromNode,
+  formatJSString,
+  isPropertyWithKey,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
-import { createFailError } from '@kbn/dev-cli-errors';
 
 /**
  * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { mountWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { renderWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
+import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
+import { getMockDataSet, getMockServices } from './mocks';
 import { SampleDataCard } from './sample_data_card';
 import { SampleDataCardProvider } from './services';
-import { getMockServices, getMockDataSet } from './mocks';
 import { Services } from './services';
-import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
 
 describe('SampleDataCard', () => {
   const onStatusChange = jest.fn();

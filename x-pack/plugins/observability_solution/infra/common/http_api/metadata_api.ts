@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import * as rt from 'io-ts';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,

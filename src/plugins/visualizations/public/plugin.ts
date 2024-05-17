@@ -6,122 +6,122 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs';
-import { createHashHistory } from 'history';
-import { BehaviorSubject } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
   ScopedHistory,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { createHashHistory } from 'history';
+import { filter, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import {
+  Storage,
   createKbnUrlStateStorage,
   createKbnUrlTracker,
   createStartServicesGetter,
-  Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  ApplicationStart,
-  SavedObjectsClientContract,
-} from '@kbn/core/public';
-import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type {
-  Setup as InspectorSetup,
-  Start as InspectorStart,
-} from '@kbn/inspector-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type {
+  ApplicationStart,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '@kbn/inspector-plugin/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { TypesSetup, TypesStart } from './vis_types';
-import type { VisualizeServices } from './visualize_app/types';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { SerializedVisData } from '../common';
+import { VisualizeConstants } from '../common/constants';
+import {
+  CONTENT_ID,
+  LATEST_VERSION,
+  VisualizationSavedObjectAttributes,
+} from '../common/content_management';
+import { range as rangeExpressionFunction } from '../common/expression_functions/range';
+import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
+import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
+import { VisualizeLocatorDefinition } from '../common/locator';
+import { EditInLensAction } from './actions/edit_in_lens_action';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeEmbeddableFactory,
+  createVisEmbeddableFromObject,
+} from './embeddable';
+import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
+import {
+  setAggs,
+  setAnalytics,
+  setApplication,
+  setCapabilities,
+  setChrome,
+  setContentManagement,
+  setDocLinks,
+  setEmbeddable,
+  setExecutionContext,
+  setExpressions,
+  setFieldFormats,
+  setHttp,
+  setI18n,
+  setOverlays,
+  setSavedObjectTagging,
+  setSavedObjects,
+  setSavedObjectsManagement,
+  setSavedSearch,
+  setSearch,
+  setSpaces,
+  setTheme,
+  setTimeFilter,
+  setTypes,
+  setUISettings,
+  setUiActions,
+  setUsageCollection,
+} from './services';
 import {
   aggBasedVisualizationTrigger,
   dashboardVisualizationPanelTrigger,
   visualizeEditorTrigger,
 } from './triggers';
-import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { showNewVisModal } from './wizard';
-import { VisualizeLocatorDefinition } from '../common/locator';
-import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
-import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
-import { range as rangeExpressionFunction } from '../common/expression_functions/range';
-import { TypesService } from './vis_types/types_service';
-import {
-  createVisEmbeddableFromObject,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-} from './embeddable';
-import {
-  setUISettings,
-  setTypes,
-  setApplication,
-  setCapabilities,
-  setHttp,
-  setSearch,
-  setSavedObjects,
-  setExpressions,
-  setUiActions,
-  setTimeFilter,
-  setAggs,
-  setChrome,
-  setOverlays,
-  setEmbeddable,
-  setDocLinks,
-  setSpaces,
-  setAnalytics,
-  setI18n,
-  setTheme,
-  setExecutionContext,
-  setFieldFormats,
-  setSavedObjectTagging,
-  setUsageCollection,
-  setSavedObjectsManagement,
-  setContentManagement,
-  setSavedSearch,
-} from './services';
-import { VisualizeConstants } from '../common/constants';
-import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry, SerializedVis } from './types';
-import {
-  LATEST_VERSION,
-  CONTENT_ID,
-  VisualizationSavedObjectAttributes,
-} from '../common/content_management';
-import { SerializedVisData } from '../common';
-import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
+import { VisEditorsRegistry, createVisEditorsRegistry } from './vis_editors_registry';
+import type { TypesSetup, TypesStart } from './vis_types';
+import { TypesService } from './vis_types/types_service';
+import type { VisualizeServices } from './visualize_app/types';
+import { showNewVisModal } from './wizard';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

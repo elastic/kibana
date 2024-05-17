@@ -18,13 +18,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import styled from 'styled-components';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
-import { PopoverItems } from '../../popover_items';
 import { useBasePath, useKibana } from '../../../lib/kibana';
-import * as i18n from './translations';
-import { JobSwitch } from './job_switch';
+import { PopoverItems } from '../../popover_items';
 import type { SecurityJob } from '../types';
+import { JobSwitch } from './job_switch';
+import * as i18n from './translations';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;

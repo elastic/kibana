@@ -7,38 +7,20 @@
       "pretty": "__flag__",
       "allow_no_indices": "__flag__",
       "ccs_minimize_roundtrips": "__flag__",
-      "expand_wildcards": [
-        "all",
-        "open",
-        "closed",
-        "hidden",
-        "none"
-      ],
+      "expand_wildcards": ["all", "open", "closed", "hidden", "none"],
       "explain": "__flag__",
       "ignore_throttled": "__flag__",
       "ignore_unavailable": "__flag__",
       "preference": "",
       "profile": "__flag__",
       "routing": "",
-      "scroll": [
-        "-1",
-        "0"
-      ],
-      "search_type": [
-        "query_then_fetch",
-        "dfs_query_then_fetch"
-      ],
+      "scroll": ["-1", "0"],
+      "search_type": ["query_then_fetch", "dfs_query_then_fetch"],
       "rest_total_hits_as_int": "__flag__",
       "typed_keys": "__flag__"
     },
-    "methods": [
-      "GET",
-      "POST"
-    ],
-    "patterns": [
-      "_search/template",
-      "{index}/_search/template"
-    ],
+    "methods": ["GET", "POST"],
+    "patterns": ["_search/template", "{index}/_search/template"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html",
     "availability": {
       "stack": true,

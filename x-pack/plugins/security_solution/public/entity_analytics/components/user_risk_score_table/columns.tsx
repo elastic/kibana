@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
+import type { UserRiskScoreColumns } from '.';
+import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../../common/search_strategy';
 import {
+  CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
-  CellActionsMode,
 } from '../../../common/components/cell_actions';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import type { UserRiskScoreColumns } from '.';
-import * as i18n from './translations';
-import { RiskScoreLevel } from '../severity/common';
-import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../../common/search_strategy';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../common/components/links';
 import { UsersTableType } from '../../../explore/users/store/model';
-import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
-import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
+import { RiskScoreLevel } from '../severity/common';
+import * as i18n from './translations';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,

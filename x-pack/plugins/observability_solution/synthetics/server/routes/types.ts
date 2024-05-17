@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { Subject } from 'rxjs';
 import { ObjectType } from '@kbn/config-schema';
 import {
+  HttpResponsePayload,
+  ResponseError,
+  VersionedRouteValidation,
+} from '@kbn/core-http-server';
+import {
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
   RouteMethod,
   SavedObjectsClientContract,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
 } from '@kbn/core/server';
-import {
-  VersionedRouteValidation,
-  HttpResponsePayload,
-  ResponseError,
-} from '@kbn/core-http-server';
+import type { Subject } from 'rxjs';
 import { UptimeEsClient } from '../lib';
-import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,
   Record<string, any>,
@@ -67,14 +67,14 @@ export type SyntheticsRestApiRouteFactory<
   ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = any,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > = () => SyntheticsRoute<ClientContract, Params, Query, Body>;
 
 export type SyntheticsRoute<
   ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = Record<string, any>,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, Params, Query, Body>>;
 
 export type SyntheticsRouteWrapper = (
@@ -96,7 +96,7 @@ export interface UptimeRouteContext {
 export interface RouteContext<
   Params = Record<string, any>,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > {
   uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
@@ -113,7 +113,7 @@ export type SyntheticsRouteHandler<
   ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = Record<string, any>,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > = ({
   uptimeEsClient,
   context,

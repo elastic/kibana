@@ -7,12 +7,12 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { PercentileRanksParams, isFieldValid } from '../..';
 import { SchemaConfig } from '../../..';
-import { isFieldValid, PercentileRanksParams } from '../..';
 import { getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
-import { PercentileRanksColumn, CommonColumnConverterArgs } from './types';
 import { SUPPORTED_METRICS } from './supported_metrics';
+import { CommonColumnConverterArgs, PercentileRanksColumn } from './types';
 
 export const convertToPercentileRankParams = (value: number): PercentileRanksParams => ({
   value: Number(value),

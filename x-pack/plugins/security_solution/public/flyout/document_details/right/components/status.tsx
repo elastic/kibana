@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { find } from 'lodash/fp';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { find } from 'lodash/fp';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
+import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
 import type {
   EnrichedFieldInfo,
   EnrichedFieldInfoWithValues,
 } from '../../../../common/components/event_details/types';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
 import { useRightPanelContext } from '../context';
-import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
 import { CellActions } from './cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 

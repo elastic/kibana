@@ -1,4 +1,5 @@
-{ "default":  {
+{
+  "default": {
     "anomalies": [
       {
         "time": 1486018800000,
@@ -17,15 +18,9 @@
           "by_field_value": "1",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.012071679592192066
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "1"
-          ]
+          "typical": [0.012071679592192066],
+          "actual": [1],
+          "mlcategory": ["1"]
         },
         "rowId": "1546553208554_0",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -33,20 +28,14 @@
         "severity": 25.662,
         "entityName": "mlcategory",
         "entityValue": "1",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.012071679592192066
-        ],
+        "typical": [0.012071679592192066],
         "typicalSort": 0.012071679592192066,
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-          "influencers": [
-            "mockInfluencer"
-          ]
+        "influencers": ["mockInfluencer"]
       },
       {
         "time": 1486018800000,
@@ -65,15 +54,9 @@
           "by_field_value": "3",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.02575857847964643
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "3"
-          ]
+          "typical": [0.02575857847964643],
+          "actual": [1],
+          "mlcategory": ["3"]
         },
         "rowId": "1546553208554_1",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -81,20 +64,14 @@
         "severity": 10.4834,
         "entityName": "mlcategory",
         "entityValue": "3",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.02575857847964643
-        ],
+        "typical": [0.02575857847964643],
         "typicalSort": 0.02575857847964643,
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-          "influencers": [
-            "mockInfluencer"
-          ]
+        "influencers": ["mockInfluencer"]
       }
     ],
     "jobIds": ["it-ops-count-by-mlcategory-one"],
@@ -134,35 +111,23 @@
           "by_field_value": "1",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.012071679592192066
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "1"
-          ]
+          "typical": [0.012071679592192066],
+          "actual": [1],
+          "mlcategory": ["1"]
         },
         "rowId": "1546553208554_0",
         "jobId": "it-ops-count-by-mlcategory-one",
         "detectorIndex": 0,
         "severity": 25.662,
         "entityName": "mlcategory",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.012071679592192066
-        ],
+        "typical": [0.012071679592192066],
         "typicalSort": 0.012071679592192066,
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-        "influencers": [
-          "mockInfluencer"
-        ]
+        "influencers": ["mockInfluencer"]
       },
       {
         "time": 1486018800000,
@@ -181,40 +146,26 @@
           "by_field_value": "3",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.02575857847964643
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "3"
-          ]
+          "typical": [0.02575857847964643],
+          "actual": [1],
+          "mlcategory": ["3"]
         },
         "rowId": "1546553208554_1",
         "jobId": "it-ops-count-by-mlcategory-one",
         "detectorIndex": 0,
         "severity": 10.4834,
         "entityName": "mlcategory",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.02575857847964643
-        ],
+        "typical": [0.02575857847964643],
         "typicalSort": 0.02575857847964643,
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-        "influencers": [
-          "mockInfluencer"
-        ]
+        "influencers": ["mockInfluencer"]
       }
     ],
-    "jobIds": [
-      "it-ops-count-by-mlcategory-one"
-    ],
+    "jobIds": ["it-ops-count-by-mlcategory-one"],
     "interval": "day",
     "examplesByJobId": {
       "it-ops-count-by-mlcategory-one": {
@@ -251,15 +202,9 @@
           "by_field_value": "1",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.012071679592192066
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "1"
-          ]
+          "typical": [0.012071679592192066],
+          "actual": [1],
+          "mlcategory": ["1"]
         },
         "rowId": "1546553208554_0",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -267,13 +212,9 @@
         "severity": 25.662,
         "entityName": "mlcategory",
         "entityValue": "1",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.012071679592192066
-        ],
+        "typical": [0.012071679592192066],
         "typicalSort": 0.012071679592192066,
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
@@ -296,15 +237,9 @@
           "by_field_value": "3",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.02575857847964643
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "3"
-          ]
+          "typical": [0.02575857847964643],
+          "actual": [1],
+          "mlcategory": ["3"]
         },
         "rowId": "1546553208554_1",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -312,22 +247,16 @@
         "severity": 10.4834,
         "entityName": "mlcategory",
         "entityValue": "3",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.02575857847964643
-        ],
+        "typical": [0.02575857847964643],
         "typicalSort": 0.02575857847964643,
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false
       }
     ],
-    "jobIds": [
-      "it-ops-count-by-mlcategory-one"
-    ],
+    "jobIds": ["it-ops-count-by-mlcategory-one"],
     "interval": "day",
     "examplesByJobId": {
       "it-ops-count-by-mlcategory-one": {
@@ -364,15 +293,9 @@
           "by_field_value": "1",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.012071679592192066
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "1"
-          ]
+          "typical": [0.012071679592192066],
+          "actual": [1],
+          "mlcategory": ["1"]
         },
         "rowId": "1546553208554_0",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -381,9 +304,7 @@
         "entityName": "mlcategory",
         "entityValue": "1",
         "actualSort": 1,
-        "typical": [
-          0.012071679592192066
-        ],
+        "typical": [0.012071679592192066],
         "typicalSort": 0.012071679592192066,
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
@@ -406,15 +327,9 @@
           "by_field_value": "3",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.02575857847964643
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "3"
-          ]
+          "typical": [0.02575857847964643],
+          "actual": [1],
+          "mlcategory": ["3"]
         },
         "rowId": "1546553208554_1",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -423,18 +338,14 @@
         "entityName": "mlcategory",
         "entityValue": "3",
         "actualSort": 1,
-        "typical": [
-          0.02575857847964643
-        ],
+        "typical": [0.02575857847964643],
         "typicalSort": 0.02575857847964643,
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false
       }
     ],
-    "jobIds": [
-      "it-ops-count-by-mlcategory-one"
-    ],
+    "jobIds": ["it-ops-count-by-mlcategory-one"],
     "interval": "day",
     "examplesByJobId": {
       "it-ops-count-by-mlcategory-one": {
@@ -471,15 +382,9 @@
           "by_field_value": "1",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.012071679592192066
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "1"
-          ]
+          "typical": [0.012071679592192066],
+          "actual": [1],
+          "mlcategory": ["1"]
         },
         "rowId": "1546553208554_0",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -487,17 +392,13 @@
         "severity": 25.662,
         "entityName": "mlcategory",
         "entityValue": "1",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
         "typicalSort": 0.012071679592192066,
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-        "influencers": [
-          "mockInfluencer"
-        ]
+        "influencers": ["mockInfluencer"]
       },
       {
         "time": 1486018800000,
@@ -516,15 +417,9 @@
           "by_field_value": "3",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.02575857847964643
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "3"
-          ]
+          "typical": [0.02575857847964643],
+          "actual": [1],
+          "mlcategory": ["3"]
         },
         "rowId": "1546553208554_1",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -532,22 +427,16 @@
         "severity": 10.4834,
         "entityName": "mlcategory",
         "entityValue": "3",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
         "typicalSort": 0.02575857847964643,
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false,
-        "influencers": [
-          "mockInfluencer"
-        ]
+        "influencers": ["mockInfluencer"]
       }
     ],
-    "jobIds": [
-      "it-ops-count-by-mlcategory-one"
-    ],
+    "jobIds": ["it-ops-count-by-mlcategory-one"],
     "interval": "day",
     "examplesByJobId": {
       "it-ops-count-by-mlcategory-one": {
@@ -584,15 +473,9 @@
           "by_field_value": "1",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.012071679592192066
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "1"
-          ]
+          "typical": [0.012071679592192066],
+          "actual": [1],
+          "mlcategory": ["1"]
         },
         "rowId": "1546553208554_0",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -600,13 +483,9 @@
         "severity": 25.662,
         "entityName": "mlcategory",
         "entityValue": "1",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.012071679592192066
-        ],
+        "typical": [0.012071679592192066],
         "typicalSort": 0.012071679592192066,
         "metricDescriptionSort": 82.83851409101328,
         "detector": "count by mlcategory",
@@ -629,15 +508,9 @@
           "by_field_value": "3",
           "function": "count",
           "function_description": "count",
-          "typical": [
-            0.02575857847964643
-          ],
-          "actual": [
-            1
-          ],
-          "mlcategory": [
-            "3"
-          ]
+          "typical": [0.02575857847964643],
+          "actual": [1],
+          "mlcategory": ["3"]
         },
         "rowId": "1546553208554_1",
         "jobId": "it-ops-count-by-mlcategory-one",
@@ -645,23 +518,16 @@
         "severity": 10.4834,
         "entityName": "mlcategory",
         "entityValue": "3",
-        "actual": [
-          1
-        ],
+        "actual": [1],
         "actualSort": 1,
-        "typical": [
-          0.02575857847964643
-        ],
+        "typical": [0.02575857847964643],
         "typicalSort": 0.02575857847964643,
         "metricDescriptionSort": 38.82201810127708,
         "detector": "count by mlcategory",
         "isTimeSeriesViewDetector": false
       }
     ],
-    "jobIds": [
-      "it-ops-count-by-mlcategory-one",
-      "second-job-id"
-    ],
+    "jobIds": ["it-ops-count-by-mlcategory-one", "second-job-id"],
     "interval": "day",
     "examplesByJobId": {
       "it-ops-count-by-mlcategory-one": {

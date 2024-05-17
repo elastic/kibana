@@ -26,11 +26,7 @@
         "tags": [],
         "label": "BrowserRouter",
         "description": [],
-        "signature": [
-          "({ children, ...props }: ",
-          "BrowserRouterProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["({ children, ...props }: ", "BrowserRouterProps", ") => JSX.Element"],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +38,7 @@
             "tags": [],
             "label": "{ children, ...props }",
             "description": [],
-            "signature": [
-              "BrowserRouterProps"
-            ],
+            "signature": ["BrowserRouterProps"],
             "path": "packages/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -61,11 +55,7 @@
         "tags": [],
         "label": "HashRouter",
         "description": [],
-        "signature": [
-          "({ children, ...props }: ",
-          "HashRouterProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["({ children, ...props }: ", "HashRouterProps", ") => JSX.Element"],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -77,9 +67,7 @@
             "tags": [],
             "label": "{ children, ...props }",
             "description": [],
-            "signature": [
-              "HashRouterProps"
-            ],
+            "signature": ["HashRouterProps"],
             "path": "packages/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -96,11 +84,7 @@
         "tags": [],
         "label": "MemoryRouter",
         "description": [],
-        "signature": [
-          "({ children, ...props }: ",
-          "MemoryRouterProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["({ children, ...props }: ", "MemoryRouterProps", ") => JSX.Element"],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -112,9 +96,7 @@
             "tags": [],
             "label": "{ children, ...props }",
             "description": [],
-            "signature": [
-              "MemoryRouterProps"
-            ],
+            "signature": ["MemoryRouterProps"],
             "path": "packages/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -149,10 +131,7 @@
             "tags": [],
             "label": "{\n  children,\n  component: Component,\n  render,\n  ...rest\n}",
             "description": [],
-            "signature": [
-              "RouteProps",
-              "<string, { [K: string]: string; } & T>"
-            ],
+            "signature": ["RouteProps", "<string, { [K: string]: string; } & T>"],
             "path": "packages/shared-ux/router/impl/route.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -169,11 +148,7 @@
         "tags": [],
         "label": "Router",
         "description": [],
-        "signature": [
-          "({ children, ...props }: ",
-          "RouterProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["({ children, ...props }: ", "RouterProps", ") => JSX.Element"],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -185,9 +160,7 @@
             "tags": [],
             "label": "{ children, ...props }",
             "description": [],
-            "signature": [
-              "RouterProps"
-            ],
+            "signature": ["RouterProps"],
             "path": "packages/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -229,9 +202,7 @@
                 "tags": [],
                 "label": "legacySwitch",
                 "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "signature": ["boolean | undefined"],
                 "path": "packages/shared-ux/router/impl/routes.tsx",
                 "deprecated": false,
                 "trackAdoption": false

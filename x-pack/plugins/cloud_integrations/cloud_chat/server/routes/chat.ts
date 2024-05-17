@@ -6,11 +6,11 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import type { SecurityPluginSetup, AuthenticatedUser } from '@kbn/security-plugin/server';
+import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../../common/constants';
-import type { GetChatUserDataResponseBody, ChatVariant } from '../../common/types';
-import { generateSignedJwt } from '../util/generate_jwt';
+import type { ChatVariant, GetChatUserDataResponseBody } from '../../common/types';
 import { isTodayInDateWindow } from '../../common/util';
+import { generateSignedJwt } from '../util/generate_jwt';
 
 type MetaWithSaml = AuthenticatedUser['metadata'] & {
   saml_name: [string];

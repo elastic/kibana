@@ -8,8 +8,8 @@
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { AggTypesDependencies, getAggTypes } from '../agg_types';
+import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
 
 // Mocked uiSettings shared among aggs unit tests

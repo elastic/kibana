@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { StatefulTopN } from '../../../common/components/top_n';

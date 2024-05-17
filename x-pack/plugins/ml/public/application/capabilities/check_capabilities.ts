@@ -6,29 +6,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
+import { useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   BehaviorSubject,
-  combineLatest,
-  from,
   type Subscription,
-  timer,
+  combineLatest,
   firstValueFrom,
+  from,
+  timer,
 } from 'rxjs';
 import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs';
-import { isEqual } from 'lodash';
-import useObservable from 'react-use/lib/useObservable';
-import { useMemo, useRef } from 'react';
 import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
 import {
-  getDefaultCapabilities,
   type MlCapabilities,
   type MlCapabilitiesKey,
+  getDefaultCapabilities,
 } from '../../../common/types/capabilities';
-import { getCapabilities } from './get_capabilities';
-import type { MlApiServices } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
+import type { MlApiServices } from '../services/ml_api_service';
+import { getCapabilities } from './get_capabilities';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTimeInterval, createTimeInterval, isValidTimeInterval } from './time_interval';
+import { createTimeInterval, getTimeInterval, isValidTimeInterval } from './time_interval';
 
 describe('time_interval', () => {
   test('getTimeInterval', () => {

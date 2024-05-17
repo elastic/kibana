@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { expressionsPluginMock } from './mocks';
 import { add } from '../common/test_helpers/expression_functions/add';
+import { expressionsPluginMock } from './mocks';
 
 describe('ExpressionsServerPlugin', () => {
   test('can instantiate from mocks', async () => {

@@ -7,8 +7,8 @@
  */
 
 import {
-  createModelVersionTestMigrator,
   type ModelVersionTestMigrator,
+  createModelVersionTestMigrator,
 } from '@kbn/core-test-helpers-model-versions';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 

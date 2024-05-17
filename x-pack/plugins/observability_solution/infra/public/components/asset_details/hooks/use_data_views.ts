@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import useAsync from 'react-use/lib/useAsync';
-import createContainer from 'constate';
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { useLogViewReference } from '../../../hooks/use_log_view_reference';
+import createContainer from 'constate';
+import useAsync from 'react-use/lib/useAsync';
 import { useDataView } from '../../../hooks/use_data_view';
+import { useLogViewReference } from '../../../hooks/use_log_view_reference';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 
 const useDataViews = ({ metricAlias }: { metricAlias: string }) => {

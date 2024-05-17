@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { Type } from '@kbn/config-schema';
-import type { RecursiveReadonly, MaybePromise } from '@kbn/utility-types';
-import type { PathConfigType } from '@kbn/utils';
-import type { LoggerFactory } from '@kbn/logging';
 import type {
+  ConfigDeprecationProvider,
   ConfigPath,
   EnvironmentMode,
   PackageInfo,
-  ConfigDeprecationProvider,
 } from '@kbn/config';
+import { Type } from '@kbn/config-schema';
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
-import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { NodeInfo } from '@kbn/core-node-server';
+import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
+import type { LoggerFactory } from '@kbn/logging';
+import type { MaybePromise, RecursiveReadonly } from '@kbn/utility-types';
+import type { PathConfigType } from '@kbn/utils';
+import { Observable } from 'rxjs';
 import { SharedGlobalConfigKeys } from './shared_global_config';
 type Maybe<T> = T | undefined;
 
@@ -43,10 +43,10 @@ export type ExposedToBrowserDescriptor<T> = {
     ? // handles arrays as primitive values
       boolean
     : T[Key] extends Maybe<object>
-    ? // can be nested for objects
-      ExposedToBrowserDescriptor<T[Key]> | boolean
-    : // primitives
-      boolean;
+      ? // can be nested for objects
+        ExposedToBrowserDescriptor<T[Key]> | boolean
+      : // primitives
+        boolean;
 };
 
 /**
@@ -60,10 +60,10 @@ export type DynamicConfigDescriptor<T> = {
     ? // handles arrays as primitive values
       boolean
     : T[Key] extends Maybe<object>
-    ? // can be nested for objects
-      DynamicConfigDescriptor<T[Key]> | boolean
-    : // primitives
-      boolean;
+      ? // can be nested for objects
+        DynamicConfigDescriptor<T[Key]> | boolean
+      : // primitives
+        boolean;
 };
 
 /**
@@ -142,10 +142,10 @@ export type MakeUsageFromSchema<T> = {
     ? // arrays of objects are always redacted
       false
     : T[Key] extends Maybe<any[]>
-    ? boolean
-    : T[Key] extends Maybe<object>
-    ? MakeUsageFromSchema<T[Key]> | boolean
-    : boolean;
+      ? boolean
+      : T[Key] extends Maybe<object>
+        ? MakeUsageFromSchema<T[Key]> | boolean
+        : boolean;
 };
 
 /**
@@ -291,7 +291,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
 
@@ -311,7 +311,7 @@ export interface AsyncPlugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
 
@@ -324,9 +324,12 @@ export interface AsyncPlugin<
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
-  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
+  elasticsearch: Pick<
+    ElasticsearchConfigType,
+    (typeof SharedGlobalConfigKeys.elasticsearch)[number]
+  >;
+  path: Pick<PathConfigType, (typeof SharedGlobalConfigKeys.path)[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, (typeof SharedGlobalConfigKeys.savedObjects)[number]>;
 }>;
 
 /**
@@ -470,7 +473,7 @@ export type PluginInitializer<
   TSetup,
   TStart,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > = (
   core: PluginInitializerContext
 ) => Promise<

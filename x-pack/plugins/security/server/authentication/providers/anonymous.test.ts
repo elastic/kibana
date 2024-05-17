@@ -10,8 +10,6 @@ import { errors } from '@elastic/elasticsearch';
 import type { ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { AnonymousAuthenticationProvider } from './anonymous';
-import { mockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
@@ -20,6 +18,8 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
+import { AnonymousAuthenticationProvider } from './anonymous';
+import { mockAuthenticationProviderOptions } from './base.mock';
 
 function expectAuthenticateCall(
   mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,

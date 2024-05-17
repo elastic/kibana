@@ -9,36 +9,36 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiColorPicker,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSelect,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiTitle,
-  EuiSpacer,
-  EuiLink,
-  EuiEmptyPrompt,
   EuiTextArea,
-  EuiFormRow,
-  EuiSelect,
-  EuiColorPicker,
+  EuiTitle,
   useColorPickerState,
-  EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { FileUpload } from '@kbn/shared-ux-file-upload';
-import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { FilePicker } from '@kbn/shared-ux-file-picker';
+import { FileUpload } from '@kbn/shared-ux-file-upload';
+import React, { useState } from 'react';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
 import { ImageConfig } from '../../types';
+import { DraftImageConfig, validateImageConfig } from '../../utils/validate_image_config';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
-import { validateImageConfig, DraftImageConfig } from '../../utils/validate_image_config';
 import { useImageViewerContext } from '../image_viewer/image_viewer_context';
 
 /**

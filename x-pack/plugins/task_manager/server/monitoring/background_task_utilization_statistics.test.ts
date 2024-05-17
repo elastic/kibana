@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { mean, sum } from 'lodash';
+import { Observable, Subject } from 'rxjs';
+import { bufferCount, map, skip, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Subject, Observable } from 'rxjs';
-import { take, bufferCount, skip, map } from 'rxjs';
+import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
+import { asOk } from '../lib/result_type';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
-  asTaskRunEvent,
-  TaskTiming,
-  TaskPersistence,
-  asTaskManagerStatEvent,
   TaskManagerStats,
+  TaskPersistence,
+  TaskTiming,
+  asTaskManagerStatEvent,
+  asTaskRunEvent,
 } from '../task_events';
-import { asOk } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import {
   BackgroundTaskUtilizationStat,
   createBackgroundTaskUtilizationAggregator,
   summarizeUtilizationStats,
 } from './background_task_utilization_statistics';
-import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-import { sum, mean } from 'lodash';
 
 describe('Task Run Statistics', () => {
   const pollInterval = 3000;

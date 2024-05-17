@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Dictionary, countBy, defaults, uniq } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { Dictionary, countBy, defaults, uniq } from 'lodash';
+import { isRollup } from '../../utils';
 import {
   TAB_INDEXED_FIELDS,
+  TAB_RELATIONSHIPS,
   TAB_SCRIPTED_FIELDS,
   TAB_SOURCE_FILTERS,
-  TAB_RELATIONSHIPS,
 } from '../constants';
-import { isRollup } from '../../utils';
 
 function filterByName(items: DataViewField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();

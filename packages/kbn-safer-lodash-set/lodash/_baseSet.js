@@ -8,11 +8,11 @@
 /* eslint-disable one-var,prettier/prettier,no-var,eqeqeq,no-nested-ternary */
 
 var assignValue = require('lodash/_assignValue'),
-    castPath = require('lodash/_castPath'),
-    isFunction = require('lodash/isFunction'),
-    isIndex = require('lodash/_isIndex'),
-    isObject = require('lodash/isObject'),
-    toKey = require('lodash/_toKey');
+  castPath = require('lodash/_castPath'),
+  isFunction = require('lodash/isFunction'),
+  isIndex = require('lodash/_isIndex'),
+  isObject = require('lodash/isObject'),
+  toKey = require('lodash/_toKey');
 
 /**
  * The base implementation of `_.set`.
@@ -31,25 +31,23 @@ function baseSet(object, path, value, customizer) {
   path = castPath(path, object);
 
   var index = -1,
-      length = path.length,
-      lastIndex = length - 1,
-      nested = object;
+    length = path.length,
+    lastIndex = length - 1,
+    nested = object;
 
   while (nested != null && ++index < length) {
     var key = toKey(path[index]),
-        newValue = value;
+      newValue = value;
 
     if (key == 'prototype' && isFunction(nested)) {
-      throw new Error('Illegal access of function prototype')
+      throw new Error('Illegal access of function prototype');
     }
 
     if (index != lastIndex) {
-      var objValue = hasOwnProperty.call(nested, key) ? nested[key] : undefined
+      var objValue = hasOwnProperty.call(nested, key) ? nested[key] : undefined;
       newValue = customizer ? customizer(objValue, key, nested) : undefined;
       if (newValue === undefined) {
-        newValue = isObject(objValue)
-          ? objValue
-          : (isIndex(path[index + 1]) ? [] : {});
+        newValue = isObject(objValue) ? objValue : isIndex(path[index + 1]) ? [] : {};
       }
     }
     assignValue(nested, key, newValue);

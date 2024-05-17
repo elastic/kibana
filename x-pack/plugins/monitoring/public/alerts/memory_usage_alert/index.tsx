@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 import {
   RULE_DETAILS,
   RULE_MEMORY_USAGE,

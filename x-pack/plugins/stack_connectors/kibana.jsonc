@@ -6,18 +6,8 @@
     "id": "stackConnectors",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "stack_connectors"
-    ],
-    "requiredPlugins": [
-      "actions",
-      "esUiShared",
-      "kibanaReact",
-      "triggersActionsUi"
-    ],
-    "extraPublicDirs": [
-      "public/common"
-    ]
+    "configPath": ["xpack", "stack_connectors"],
+    "requiredPlugins": ["actions", "esUiShared", "kibanaReact", "triggersActionsUi"],
+    "extraPublicDirs": ["public/common"]
   }
 }

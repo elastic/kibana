@@ -1,3 +1,4 @@
+import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { Context } from '../../public/components/field_editor_context';
 import {

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { readFileSync } from 'fs';
+import type { ConfigDeprecationProvider } from '@kbn/config';
+import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type {
+  ElasticsearchApiToRedactInLogs,
+  ElasticsearchSslConfig,
+  IElasticsearchConfig,
+} from '@kbn/core-elasticsearch-server';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
-import { readFileSync } from 'fs';
-import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import type { ConfigDeprecationProvider } from '@kbn/config';
-import type {
-  IElasticsearchConfig,
-  ElasticsearchSslConfig,
-  ElasticsearchApiToRedactInLogs,
-} from '@kbn/core-elasticsearch-server';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });

@@ -8,8 +8,8 @@
 import { RouteDependencies } from '../types';
 
 import { registerAutoFollowPatternRoutes } from './api/auto_follow_pattern';
-import { registerFollowerIndexRoutes } from './api/follower_index';
 import { registerCrossClusterReplicationRoutes } from './api/cross_cluster_replication';
+import { registerFollowerIndexRoutes } from './api/follower_index';
 
 export function registerApiRoutes(dependencies: RouteDependencies) {
   registerAutoFollowPatternRoutes(dependencies);

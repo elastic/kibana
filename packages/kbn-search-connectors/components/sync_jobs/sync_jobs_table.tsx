@@ -22,13 +22,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
+import { ConnectorSyncJob, SyncJobType, SyncStatus, isSyncCancellable } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
-import { SyncJobFlyout } from './sync_job_flyout';
 import { CancelSyncJobModal, CancelSyncModalProps } from './sync_job_cancel_modal';
+import { SyncJobFlyout } from './sync_job_flyout';
 
 interface SyncJobHistoryTableProps {
   isLoading?: boolean;

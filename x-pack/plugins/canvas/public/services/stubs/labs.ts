@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { projectIDs } from '@kbn/presentation-util-plugin/common';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { CanvasLabsService } from '../labs';
 
 type CanvasLabsServiceFactory = PluginServiceFactory<CanvasLabsService>;

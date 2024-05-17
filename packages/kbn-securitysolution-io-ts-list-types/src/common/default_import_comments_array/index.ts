@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { importComment, ImportCommentsArray } from '../import_comment';
+import * as t from 'io-ts';
+import { ImportCommentsArray, importComment } from '../import_comment';
 
 /**
  * Types the DefaultImportCommentsArray as:

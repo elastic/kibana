@@ -7,14 +7,14 @@
  */
 
 import {
-  getLastSavedStateSubjectForChild,
   SerializedPanelState,
+  getLastSavedStateSubjectForChild,
 } from '@kbn/presentation-containers';
 import {
-  getInitialValuesFromComparators,
   PublishingSubject,
-  runComparators,
   StateComparators,
+  getInitialValuesFromComparators,
+  runComparators,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
@@ -29,7 +29,7 @@ const getDefaultDiffingApi = () => {
 
 export const startTrackingEmbeddableUnsavedChanges = <
   SerializedState extends object = object,
-  RuntimeState extends object = object
+  RuntimeState extends object = object,
 >(
   uuid: string,
   parentApi: unknown,
@@ -66,10 +66,13 @@ export const startTrackingEmbeddableUnsavedChanges = <
     .pipe(
       debounceTime(100),
       map((latestStates) =>
-        comparatorKeys.reduce((acc, key, index) => {
-          acc[key] = latestStates[index] as RuntimeState[typeof key];
-          return acc;
-        }, {} as Partial<RuntimeState>)
+        comparatorKeys.reduce(
+          (acc, key, index) => {
+            acc[key] = latestStates[index] as RuntimeState[typeof key];
+            return acc;
+          },
+          {} as Partial<RuntimeState>
+        )
       ),
       combineLatestWith(lastSavedStateSubject)
     )

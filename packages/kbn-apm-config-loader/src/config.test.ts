@@ -7,9 +7,9 @@
  */
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
-  packageMock,
-  mockedRootDir,
   gitRevExecMock,
+  mockedRootDir,
+  packageMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';

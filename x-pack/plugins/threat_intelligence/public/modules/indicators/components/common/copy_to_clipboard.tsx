@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
+import React, { VFC } from 'react';
 import { COPY_TITLE } from './translations';
 
 const COPY_ICON = 'copyClipboard';

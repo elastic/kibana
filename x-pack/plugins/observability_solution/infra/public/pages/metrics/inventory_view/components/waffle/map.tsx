@@ -9,15 +9,15 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
-import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
-import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
 import { AutoSizer } from '../../../../../components/auto_sizer';
+import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
+import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
+import { sortNodes } from '../../lib/sort_nodes';
+import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
-import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
-import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
-import { sortNodes } from '../../lib/sort_nodes';
 
 interface Props {
   nodes: SnapshotNode[];

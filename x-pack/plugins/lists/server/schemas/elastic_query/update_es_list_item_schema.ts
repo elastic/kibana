@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { metaOrUndefined, updated_at, updated_by } from '@kbn/securitysolution-io-ts-list-types';
+import * as t from 'io-ts';
 
 import { esDataTypeUnion } from '../common/schemas';
 

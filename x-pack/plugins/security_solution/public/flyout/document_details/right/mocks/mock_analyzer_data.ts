@@ -1,3 +1,5 @@
+import { EuiToken } from '@elastic/eui';
+import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiToken } from '@elastic/eui';
-import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 
 export const mockStatsNode: StatsNode = {

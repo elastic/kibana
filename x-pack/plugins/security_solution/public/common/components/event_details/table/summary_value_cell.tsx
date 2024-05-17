@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../cell_actions';
-import { FieldValueCell } from './field_value_cell';
-import type { AlertSummaryRow } from '../helpers';
-import { hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
 import { getSourcererScopeId } from '../../../../helpers';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
+import type { AlertSummaryRow } from '../helpers';
+import { hasHoverOrRowActions } from '../helpers';
+import { FieldValueCell } from './field_value_cell';
 
 const style = { flexGrow: 0 };
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { useQuery } from '@tanstack/react-query';
+import React, { useState, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,12 +23,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { sendRequest } from '../../../hooks';
 
 import {
-  OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../common/constants';
 
 import { CodeBlock } from './code_block';

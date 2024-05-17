@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { PanelPath } from '@kbn/expandable-flyout';
+import { useMemo } from 'react';
 import type { RightPanelPaths } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';

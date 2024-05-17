@@ -10,17 +10,18 @@ import {
   GET_LOCAL_SHOW_DATES_BUTTON,
 } from '../../../../screens/date_picker';
 import {
+  DISCOVER_CONTAINER,
+  DISCOVER_ESQL_INPUT_TEXT_CONTAINER,
+  DISCOVER_RESULT_HITS,
+  GET_DISCOVER_DATA_GRID_CELL_HEADER,
+} from '../../../../screens/discover';
+import { deleteTimelines } from '../../../../tasks/api_calls/timelines';
+import {
   setStartDate,
   showStartEndDate,
   updateDateRangeInLocalDatePickers,
   updateDates,
 } from '../../../../tasks/date_picker';
-import {
-  DISCOVER_CONTAINER,
-  DISCOVER_RESULT_HITS,
-  GET_DISCOVER_DATA_GRID_CELL_HEADER,
-  DISCOVER_ESQL_INPUT_TEXT_CONTAINER,
-} from '../../../../screens/discover';
 import {
   addDiscoverEsqlQuery,
   addFieldToTable,
@@ -28,9 +29,8 @@ import {
 } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
+import { createNewTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { deleteTimelines } from '../../../../tasks/api_calls/timelines';
-import { openActiveTimeline, createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 
 const DEFAULT_DATE = '~ 15 minutes ago';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';

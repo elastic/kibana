@@ -6,12 +6,12 @@
  */
 
 import type {
+  CustomRequestHandlerContext,
+  IRouter,
   KibanaResponseFactory,
   RequestHandler,
-  CustomRequestHandlerContext,
   RouteMethod,
   SavedObjectsClientContract,
-  IRouter,
 } from '@kbn/core/server';
 
 import type { FleetAuthz } from '../../common/authz';
@@ -56,7 +56,7 @@ export type FleetRequestHandler<
   Q = unknown,
   B = unknown,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = RequestHandler<P, Q, B, FleetRequestHandlerContext, Method, ResponseFactory>;
 
 /**

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
-import type { ImportFactoryOptions } from '@kbn/file-upload-plugin/public/importer';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { MessageImporter } from '@kbn/file-upload-plugin/public';
+import type { ImportFactoryOptions } from '@kbn/file-upload-plugin/public/importer';
 import type { TestGrokPatternResponse } from '../../../../../common/types/test_grok_pattern';
 
 export const LINE_LIMIT = 5;
@@ -22,7 +22,10 @@ type HighlightedLine = Array<{
 }>;
 
 export class GrokHighlighter extends MessageImporter {
-  constructor(options: ImportFactoryOptions, private http: HttpSetup) {
+  constructor(
+    options: ImportFactoryOptions,
+    private http: HttpSetup
+  ) {
     super(options);
   }
 

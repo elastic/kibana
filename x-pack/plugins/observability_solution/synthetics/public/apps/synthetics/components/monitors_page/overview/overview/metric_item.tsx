@@ -1,3 +1,6 @@
+import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
+import { DARK_THEME } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,23 +8,20 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
-import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
-import { formatDuration } from '../../../../utils/formatting';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
-import { ActionsPopover } from './actions_popover';
+import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
+import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
+import { formatDuration } from '../../../../utils/formatting';
+import { ActionsPopover } from './actions_popover';
 import { MetricItemIcon } from './metric_item_icon';
 
 export const getColor = (

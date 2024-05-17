@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { GaugeSeries } from './series';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 const defaultProps = {
   disableAdd: true,

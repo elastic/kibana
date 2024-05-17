@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import {
   created_at,
   created_by,
@@ -22,6 +21,7 @@ import {
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const indexEsListSchema = t.exact(
   t.type({

@@ -7,22 +7,22 @@
 
 import React, { useCallback } from 'react';
 
-import { ChartLegendItem } from './chart_legend_item';
-import { getEcsCompliantColor } from '../../data_quality_panel/tabs/helpers';
 import {
-  ECS_COMPLIANT_TAB_ID,
   CUSTOM_TAB_ID,
+  ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
 } from '../../data_quality_panel/index_properties/helpers';
+import * as i18n from '../../data_quality_panel/index_properties/translations';
 import { getCustomColor } from '../../data_quality_panel/tabs/custom_tab/helpers';
+import { getEcsCompliantColor } from '../../data_quality_panel/tabs/helpers';
 import {
   getIncompatibleColor,
   getSameFamilyColor,
 } from '../../data_quality_panel/tabs/incompatible_tab/helpers';
-import type { PartitionedFieldMetadata } from '../../types';
-import * as i18n from '../../data_quality_panel/index_properties/translations';
 import { LegendContainer } from '../../data_quality_panel/tabs/styles';
+import type { PartitionedFieldMetadata } from '../../types';
+import { ChartLegendItem } from './chart_legend_item';
 
 const LEGEND_WIDTH = 200; // px
 

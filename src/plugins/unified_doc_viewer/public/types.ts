@@ -11,11 +11,11 @@ export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { UnifiedDocViewerStart } from './plugin';
 
 export interface UnifiedDocViewerServices {

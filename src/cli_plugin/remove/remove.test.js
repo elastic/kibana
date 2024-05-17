@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
-import sinon from 'sinon';
-import globby from 'globby';
 import del from 'del';
+import globby from 'globby';
+import sinon from 'sinon';
 
 import { Logger } from '../../cli/logger';
 import { remove } from './remove';

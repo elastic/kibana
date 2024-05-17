@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { KUBERNETES_PATH, SecurityPageName } from '../../common/constants';
 import { KUBERNETES } from '../app/translations';
-import type { LinkItem } from '../common/links/types';
 import kubernetesPageImg from '../common/images/kubernetes_page.png';
+import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.kubernetes,

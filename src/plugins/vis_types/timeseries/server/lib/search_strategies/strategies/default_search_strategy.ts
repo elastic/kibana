@@ -7,15 +7,15 @@
  */
 
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 
+import { UI_SETTINGS } from '../../../../common/constants';
 import type { FetchedIndexPattern, Panel } from '../../../../common/types';
 import type {
-  VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequest,
+  VisTypeTimeseriesRequestHandlerContext,
 } from '../../../types';
-import { UI_SETTINGS } from '../../../../common/constants';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   async checkForViability(

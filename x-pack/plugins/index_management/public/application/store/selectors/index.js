@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Pager, EuiSearchBar } from '@elastic/eui';
+import { EuiSearchBar, Pager } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';

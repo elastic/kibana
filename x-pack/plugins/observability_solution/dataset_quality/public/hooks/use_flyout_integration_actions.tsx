@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getRouterLinkProps } from '@kbn/router-utils';
-import { useMemo, useCallback } from 'react';
-import useToggle from 'react-use/lib/useToggle';
-import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { useCallback, useMemo } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import { DashboardType } from '../../common/data_streams_stats';
 import { useKibanaContextForPlugin } from '../utils';
 

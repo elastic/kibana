@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React from 'react';
 import { SortOrder } from '../../../../common/latest';
 import { DATA_SOURCE_SELECTOR_WIDTH, sortOptions, sortOrdersLabel } from '../constants';
 import { DataSourceSelectorSearchHandler, DataSourceSelectorSearchParams } from '../types';

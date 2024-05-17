@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
+import {
+  DataViewBase,
+  DataViewFieldBase,
+  getDataViewFieldSubtypeNested,
+  isDataViewFieldSubtypeNested,
+} from '@kbn/es-query';
+import { KBN_FIELD_TYPES, castEsToKbnFieldTypeName } from '@kbn/field-types';
 import {
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   EntriesArray,
   Entry,
   EntryNested,
@@ -20,36 +25,31 @@ import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   createExceptionListItemSchema,
+  createRuleExceptionListItemSchema,
   entriesList,
   entriesNested,
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
-  CreateRuleExceptionListItemSchema,
-  createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  DataViewBase,
-  DataViewFieldBase,
-  getDataViewFieldSubtypeNested,
-  isDataViewFieldSubtypeNested,
-} from '@kbn/es-query';
-import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   ALL_OPERATORS,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
+  doesNotMatchOperator,
   existsOperator,
+  isInListOperator,
+  isNotInListOperator,
+  isNotOneOfOperator,
   isNotOperator,
   isOneOfOperator,
   isOperator,
-  DETECTION_ENGINE_EXCEPTION_OPERATORS,
-  isNotOneOfOperator,
-  isInListOperator,
-  isNotInListOperator,
   matchesOperator,
-  doesNotMatchOperator,
 } from '../autocomplete_operators';
 
 import {

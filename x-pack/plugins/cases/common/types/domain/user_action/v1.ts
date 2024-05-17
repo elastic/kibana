@@ -14,6 +14,7 @@ import type { CommentUserActionPayloadWithoutIdsRt } from './comment/v1';
 import { CommentUserActionRt, CommentUserActionWithoutIdsRt } from './comment/v1';
 import { ConnectorUserActionRt, ConnectorUserActionWithoutConnectorIdRt } from './connector/v1';
 import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './create_case/v1';
+import { CustomFieldsUserActionRt } from './custom_fields/v1';
 import { DeleteCaseUserActionRt } from './delete_case/v1';
 import { DescriptionUserActionRt } from './description/v1';
 import { PushedUserActionRt, PushedUserActionWithoutConnectorIdRt } from './pushed/v1';
@@ -22,7 +23,6 @@ import { SeverityUserActionRt } from './severity/v1';
 import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
-import { CustomFieldsUserActionRt } from './custom_fields/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';

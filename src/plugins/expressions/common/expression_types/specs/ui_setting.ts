@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, DatatableColumnType } from './datatable';
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import { Datatable, DatatableColumnType } from './datatable';
 import { ExpressionValueRender } from './render';
 
 const name = 'ui_setting';

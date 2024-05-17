@@ -53,9 +53,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "- The Kibana data view."
-            ],
+            "description": ["- The Kibana data view."],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -77,13 +75,8 @@
             "type": "Object",
             "tags": [],
             "label": "runtimeMappings",
-            "description": [
-              "- Optional runtime mappings."
-            ],
-            "signature": [
-              "MappingRuntimeFields",
-              " | undefined"
-            ],
+            "description": ["- Optional runtime mappings."],
+            "signature": ["MappingRuntimeFields", " | undefined"],
             "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -99,12 +92,8 @@
         "type": "Function",
         "tags": [],
         "label": "isRuntimeField",
-        "description": [
-          "\nType guard for a runtime field\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for a runtime field\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_field.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -115,12 +104,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "- The item to be checked"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["- The item to be checked"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -136,12 +121,8 @@
         "type": "Function",
         "tags": [],
         "label": "isRuntimeMappings",
-        "description": [
-          "\nType guard for runtime mappings\n"
-        ],
-        "signature": [
-          "(arg: unknown) => boolean"
-        ],
+        "description": ["\nType guard for runtime mappings\n"],
+        "signature": ["(arg: unknown) => boolean"],
         "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -152,12 +133,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": [
-              "- The item to be checked"
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["- The item to be checked"],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -177,14 +154,8 @@
         "type": "Type",
         "tags": [],
         "label": "RuntimeMappings",
-        "description": [
-          "\nAlias for `estypes.MappingRuntimeFields`."
-        ],
-        "signature": [
-          "{ [x: string]: ",
-          "MappingRuntimeField",
-          "; }"
-        ],
+        "description": ["\nAlias for `estypes.MappingRuntimeFields`."],
+        "signature": ["{ [x: string]: ", "MappingRuntimeField", "; }"],
         "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,

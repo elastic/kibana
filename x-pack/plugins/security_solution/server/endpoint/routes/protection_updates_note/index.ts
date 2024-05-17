@@ -6,14 +6,14 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import {
-  GetProtectionUpdatesNoteSchema,
   CreateUpdateProtectionUpdatesNoteSchema,
+  GetProtectionUpdatesNoteSchema,
 } from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
-import { withEndpointAuthz } from '../with_endpoint_authz';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
+import { withEndpointAuthz } from '../with_endpoint_authz';
+import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 
 export function registerProtectionUpdatesNoteRoutes(
   router: IRouter,

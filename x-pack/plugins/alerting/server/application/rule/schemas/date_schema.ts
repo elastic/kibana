@@ -1,3 +1,4 @@
+import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import moment from 'moment';
-import { schema } from '@kbn/config-schema';
 
 const validateDate = (string: Date) => {
   if (moment(string).isValid()) {

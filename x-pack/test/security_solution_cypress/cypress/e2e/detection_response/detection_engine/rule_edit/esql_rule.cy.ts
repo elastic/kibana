@@ -13,18 +13,18 @@ import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { getDetails } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   clearEsqlQueryBar,
+  expandAdvancedSettings,
   expandEsqlQueryBar,
   fillEsqlQueryBar,
   fillOverrideEsqlRuleName,
   goToAboutStepTab,
-  expandAdvancedSettings,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
+import { getDetails } from '../../../../tasks/rule_details';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 

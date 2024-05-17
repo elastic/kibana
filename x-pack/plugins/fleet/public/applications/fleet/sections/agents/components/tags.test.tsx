@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { Tags } from './tags';
 

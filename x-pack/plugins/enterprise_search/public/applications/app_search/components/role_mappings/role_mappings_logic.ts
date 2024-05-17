@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import {
   clearFlashMessages,
@@ -14,18 +14,18 @@ import {
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import {
-  RoleMappingsBaseServerDetails,
   RoleMappingsBaseActions,
+  RoleMappingsBaseServerDetails,
   RoleMappingsBaseValues,
 } from '../../../shared/role_mapping';
-import { AttributeName, SingleUserRoleMapping, ElasticsearchUser } from '../../../shared/types';
+import { AttributeName, ElasticsearchUser, SingleUserRoleMapping } from '../../../shared/types';
 import { ASRoleMapping, RoleTypes } from '../../types';
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
 import {
-  ROLE_MAPPING_DELETED_MESSAGE,
   ROLE_MAPPING_CREATED_MESSAGE,
+  ROLE_MAPPING_DELETED_MESSAGE,
   ROLE_MAPPING_UPDATED_MESSAGE,
 } from './constants';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { Adapters } from '@kbn/inspector-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
 
 export const MapInspectorView = {
   title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {

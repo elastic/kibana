@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ToastInput, ToastOptions, ToastsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { type ErrorType, MLRequestFailure, extractErrorProperties } from '@kbn/ml-error-utils';
 import { useMemo } from 'react';
-import { extractErrorProperties, type ErrorType, MLRequestFailure } from '@kbn/ml-error-utils';
-import { getToastNotifications } from '../../util/dependency_cache';
 import { useNotifications } from '../../contexts/kibana';
+import { getToastNotifications } from '../../util/dependency_cache';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 

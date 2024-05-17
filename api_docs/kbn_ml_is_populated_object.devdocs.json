@@ -42,9 +42,7 @@
             "tags": [],
             "label": "arg",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,9 +55,7 @@
             "tags": [],
             "label": "requiredAttributes",
             "description": [],
-            "signature": [
-              "U[]"
-            ],
+            "signature": ["U[]"],
             "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
             "deprecated": false,
             "trackAdoption": false,

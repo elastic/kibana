@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { firstValueFrom, from } from 'rxjs';
-import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '@kbn/search-types';
+import type { Observable } from 'rxjs';
+import { catchError, tap } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError } from '../../report_search_error';
-import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
-import {
-  getDefaultAsyncGetParams,
-  getDefaultAsyncSubmitParams,
-  getIgnoreThrottled,
-} from './request_utils';
-import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
+import { SearchConfigSchema } from '../../../../config';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
+import { getKbnSearchError } from '../../report_search_error';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
+import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
   shimHitsTotal,
 } from '../es_search';
-import { SearchConfigSchema } from '../../../../config';
-import { sanitizeRequestParams } from '../../sanitize_request_params';
+import {
+  getDefaultAsyncGetParams,
+  getDefaultAsyncSubmitParams,
+  getIgnoreThrottled,
+} from './request_utils';
+import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,

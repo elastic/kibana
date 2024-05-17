@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Observable, fromEvent } from 'rxjs';
 import { scan, startWith } from 'rxjs';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 export interface CountEventArguments {
   event: string;

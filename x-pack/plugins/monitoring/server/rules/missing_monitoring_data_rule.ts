@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -17,23 +13,27 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { BaseRule } from './base_rule';
+import moment from 'moment';
+import { RULE_DETAILS, RULE_MISSING_MONITORING_DATA } from '../../common/constants';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import {
-  AlertData,
   AlertCluster,
-  AlertState,
+  AlertData,
   AlertMessage,
   AlertMessageTimeToken,
-  CommonAlertParams,
-  CommonAlertFilter,
   AlertNodeState,
+  AlertState,
+  CommonAlertFilter,
+  CommonAlertParams,
 } from '../../common/types/alerts';
-import { RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
-import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
+import { AlertingDefaults, createLink } from './alert_helpers';
+import { BaseRule } from './base_rule';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;

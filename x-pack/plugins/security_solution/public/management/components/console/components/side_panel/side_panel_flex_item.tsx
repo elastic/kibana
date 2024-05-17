@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiFlexItem, transparentize } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexItem, transparentize } from '@elastic/eui';
-import { SidePanelContentManager } from './side_panel_content_manager';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
+import { SidePanelContentManager } from './side_panel_content_manager';
 
 const StyledEuiFlexItemWhite = styled(EuiFlexItem)`
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade} !important;

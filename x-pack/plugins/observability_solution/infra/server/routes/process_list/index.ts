@@ -6,21 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { schema } from '@kbn/config-schema';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { schema } from '@kbn/config-schema';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import { pipe } from 'fp-ts/lib/pipeable';
+import {
+  ProcessListAPIChartRequestRT,
+  ProcessListAPIChartResponseRT,
+  ProcessListAPIRequestRT,
+  ProcessListAPIResponseRT,
+} from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { getProcessList } from '../../lib/host_details/process_list';
 import { getProcessListChart } from '../../lib/host_details/process_list_chart';
-import {
-  ProcessListAPIRequestRT,
-  ProcessListAPIResponseRT,
-  ProcessListAPIChartRequestRT,
-  ProcessListAPIChartResponseRT,
-} from '../../../common/http_api';
+import { InfraBackendLibs } from '../../lib/infra_types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fetch$ } from '@kbn/presentation-publishing';
 import { type TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import { combineLatest, BehaviorSubject } from 'rxjs';
+import { fetch$ } from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import type {
   SingleMetricViewerEmbeddableApi,
   SingleMetricViewerEmbeddableUserInput,

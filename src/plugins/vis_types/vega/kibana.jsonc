@@ -16,13 +16,7 @@
       "dataViews",
       "usageCollection"
     ],
-    "optionalPlugins": [
-      "home"
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "visDefaultEditor"
-    ]
+    "optionalPlugins": ["home"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
   }
 }

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Story } from '@storybook/react';
+import React from 'react';
+import { Indicator, generateMockIndicator } from '../../../../../common/types/indicator';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyout } from './flyout';
 
 export default {

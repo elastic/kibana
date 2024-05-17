@@ -7,11 +7,11 @@
 
 import React from 'react';
 
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { CategoryComponentProps } from './category_component';
 import { CategoryComponent } from './category_component';
-import { waitFor, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 const onChange = jest.fn();
 const defaultProps: CategoryComponentProps = {

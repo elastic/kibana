@@ -7,19 +7,19 @@
  */
 
 import {
-  SavedObjectsErrorHelpers,
-  type SavedObject,
-  type SavedObjectSanitizedDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
+  SavedObjectsIncrementCounterField,
+  SavedObjectsIncrementCounterOptions,
+} from '@kbn/core-saved-objects-api-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  SavedObjectsIncrementCounterOptions,
-  SavedObjectsIncrementCounterField,
-} from '@kbn/core-saved-objects-api-server';
+  type SavedObject,
+  type SavedObjectSanitizedDoc,
+  SavedObjectsErrorHelpers,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
-import { getCurrentTime, normalizeNamespace } from '../utils';
 import { ApiExecutionContext } from '../types';
+import { getCurrentTime, normalizeNamespace } from '../utils';
 
 export interface PerformIncrementCounterInternalParams<T = unknown> {
   type: string;
@@ -104,11 +104,14 @@ export const incrementCounterInternal = async <T>(
     ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
     attributes: {
       ...(upsertAttributes ?? {}),
-      ...normalizedCounterFields.reduce((acc, counterField) => {
-        const { fieldName, incrementBy } = counterField;
-        acc[fieldName] = incrementBy;
-        return acc;
-      }, {} as Record<string, number>),
+      ...normalizedCounterFields.reduce(
+        (acc, counterField) => {
+          const { fieldName, incrementBy } = counterField;
+          acc[fieldName] = incrementBy;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
     },
     migrationVersion,
     typeMigrationVersion,

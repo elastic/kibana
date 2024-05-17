@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useContext } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -14,6 +13,7 @@ import {
   EuiI18nNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo, useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 
 export interface AgentsSummaryProps {

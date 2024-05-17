@@ -1,3 +1,5 @@
+import type { ApplicationStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +8,9 @@
  * Side Public License, v 1.
  */
 import { NEVER, lastValueFrom } from 'rxjs';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ApplicationStart } from '@kbn/core/public';
-import { getESQLSearchProvider } from './search_provider';
-import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
 import type { DiscoverAppLocator } from '../../common';
+import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
+import { getESQLSearchProvider } from './search_provider';
 
 describe('ES|QL search provider', () => {
   const uiCapabilitiesMock = new Promise<ApplicationStart['capabilities']>((resolve) => {

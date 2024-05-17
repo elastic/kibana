@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getBucketSumMetricAgg } from './bucket_sum';
 import { getBucketAvgMetricAgg } from './bucket_avg';
-import { getBucketMinMetricAgg } from './bucket_min';
 import { getBucketMaxMetricAgg } from './bucket_max';
+import { getBucketMinMetricAgg } from './bucket_min';
+import { getBucketSumMetricAgg } from './bucket_sum';
 
 import { AggConfigs } from '../agg_configs';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 describe('sibling pipeline aggs', () => {
   const typesRegistry = mockAggTypesRegistry();

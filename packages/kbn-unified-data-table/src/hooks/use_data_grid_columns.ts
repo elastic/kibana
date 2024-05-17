@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Capabilities } from '@kbn/core/public';
 import { isEqual } from 'lodash';

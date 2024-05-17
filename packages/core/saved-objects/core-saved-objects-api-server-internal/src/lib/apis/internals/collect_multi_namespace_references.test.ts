@@ -20,21 +20,21 @@ import type {
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
-  ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
-  type CollectMultiNamespaceReferencesParams,
-} from './collect_multi_namespace_references';
-import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
+  type ISavedObjectsSecurityExtension,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core-saved-objects-server';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 import {
   enforceError,
   setupAuthorizeAndRedactMultiNamespaceReferenencesFailure,
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
 } from '../../../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import {
-  type ISavedObjectsSecurityExtension,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
+  ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
+  type CollectMultiNamespaceReferencesParams,
+} from './collect_multi_namespace_references';
+import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };

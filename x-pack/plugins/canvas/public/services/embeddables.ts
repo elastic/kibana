@@ -15,7 +15,7 @@ import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 export interface CanvasEmbeddablesService {
   reactEmbeddableRegistryHasKey: (key: string) => boolean;
   getReactEmbeddableSavedObjects: <
-    TSavedObjectAttributes extends FinderAttributes
+    TSavedObjectAttributes extends FinderAttributes,
   >() => IterableIterator<[string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]>;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   getStateTransfer: () => EmbeddableStateTransfer;

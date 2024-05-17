@@ -1,3 +1,4 @@
+import type { Logger } from '@kbn/logging';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,17 +8,16 @@
 import { encode } from 'gpt-tokenizer';
 import { first, sum } from 'lodash';
 import OpenAI from 'openai';
-import { filter, map, Observable, tap } from 'rxjs';
+import { Observable, filter, map, tap } from 'rxjs';
 import { v4 } from 'uuid';
-import type { Logger } from '@kbn/logging';
-import { TokenCountEvent } from '../../../../common/conversation_complete';
 import {
   ChatCompletionChunkEvent,
-  createInternalServerError,
-  createTokenLimitReachedError,
   Message,
   StreamingChatResponseEventType,
+  createInternalServerError,
+  createTokenLimitReachedError,
 } from '../../../../common';
+import { TokenCountEvent } from '../../../../common/conversation_complete';
 
 export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
   choices: Array<

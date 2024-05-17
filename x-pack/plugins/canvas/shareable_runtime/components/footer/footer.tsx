@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBottomBar } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
-import { Scrubber } from './scrubber';
-import { Title } from './title';
 import { PageControls } from './page_controls';
+import { Scrubber } from './scrubber';
 import { Settings } from './settings';
+import { Title } from './title';
 
 import css from './footer.module.scss';
 

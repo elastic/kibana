@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { InsightsSummaryRow } from './insights_summary_row';
 
 const testId = 'test';

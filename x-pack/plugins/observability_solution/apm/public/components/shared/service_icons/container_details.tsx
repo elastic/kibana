@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiDescriptionListProps, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiDescriptionListProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../common/utils/formatters';

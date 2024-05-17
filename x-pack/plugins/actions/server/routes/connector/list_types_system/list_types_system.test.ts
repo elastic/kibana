@@ -8,10 +8,10 @@
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { licenseStateMock } from '../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
-import { listTypesWithSystemRoute } from './list_types_system';
-import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../mocks';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { listTypesWithSystemRoute } from './list_types_system';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),

@@ -57,14 +57,14 @@ More detail and specific examples can be found in the included HTML file.
 
 import { i18n } from '@kbn/i18n';
 
-(function($) {
-	// Maximum redraw attempts when fitting labels within the plot
+(function ($) {
+  // Maximum redraw attempts when fitting labels within the plot
 
-	var REDRAW_ATTEMPTS = 10;
+  var REDRAW_ATTEMPTS = 10;
 
-	// Factor by which to shrink the pie when fitting labels within the plot
+  // Factor by which to shrink the pie when fitting labels within the plot
 
-	var REDRAW_SHRINK = 0.95;
+  var REDRAW_SHRINK = 0.95;
 
   function init(plot) {
     let canvas = null;
@@ -326,11 +326,9 @@ import { i18n } from '@kbn/i18n';
       if (attempts >= REDRAW_ATTEMPTS) {
         clear();
         const errorMessage = i18n.translate('flot.pie.unableToDrawLabelsInsideCanvasErrorMessage', {
-					defaultMessage: 'Could not draw pie with labels contained inside canvas',
-				});
-        target.prepend(
-          `<div class='error'>${errorMessage}</div>`
-        );
+          defaultMessage: 'Could not draw pie with labels contained inside canvas',
+        });
+        target.prepend(`<div class='error'>${errorMessage}</div>`);
       }
 
       if (plot.setSeries && plot.insertLegend) {
@@ -509,7 +507,8 @@ import { i18n } from '@kbn/i18n';
 
             const halfAngle = (startAngle + slice.angle + startAngle) / 2;
             const x = centerLeft + Math.round(Math.cos(halfAngle) * radius);
-            const y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt;
+            const y =
+              centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt;
 
             const html =
               "<span class='pieLabel' id='pieLabel" +
@@ -886,11 +885,10 @@ import { i18n } from '@kbn/i18n';
     },
   };
 
-	$.plot.plugins.push({
-		init: init,
-		options: options,
-		name: "pie",
-		version: "1.1"
-	});
-
+  $.plot.plugins.push({
+    init: init,
+    options: options,
+    name: 'pie',
+    version: '1.1',
+  });
 })(jQuery);

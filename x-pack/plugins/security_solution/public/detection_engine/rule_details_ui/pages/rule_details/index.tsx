@@ -21,81 +21,75 @@ import {
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { isTab } from '@kbn/timelines-plugin/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useParams } from 'react-router-dom';
 import type { Dispatch } from 'redux';
-import { isTab } from '@kbn/timelines-plugin/public';
+import styled from 'styled-components';
 
 import {
+  FILTER_OPEN,
+  TableId,
   dataTableActions,
   dataTableSelectors,
-  FILTER_OPEN,
   tableDefaults,
-  TableId,
 } from '@kbn/securitysolution-data-table';
-import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
-import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
-import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
-import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
+import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../app/types';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { StepAboutRuleToggleDetails } from '../../../rule_creation/components/step_about_rule_details';
-import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
-import { useUserData } from '../../../../detections/components/user_info';
-import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';
+import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import {
-  buildAlertsFilter,
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../common/lib/kibana';
+import { inputsSelectors } from '../../../../common/store/inputs';
+import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
+import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
+import {
   buildAlertStatusFilter,
+  buildAlertsFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
+import { RuleActionsOverflow } from '../../../../detections/components/rules/rule_actions_overflow';
+import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { StepPanel } from '../../../rule_creation/components/step_panel';
+import { useUserData } from '../../../../detections/components/user_info';
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import {
   getMachineLearningJobId,
   getStepsData,
   redirectToDetections,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { inputsSelectors } from '../../../../common/store/inputs';
-import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from '../../../../detections/components/rules/rule_actions_overflow';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { SecurityPageName } from '../../../../app/types';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
-import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
+import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
+import { StepAboutRuleToggleDetails } from '../../../rule_creation/components/step_about_rule_details';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
+import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';
 
-import {
-  focusUtilityBarAction,
-  onTimelineTabKeyPressed,
-  resetKeyboardFocus,
-  showGlobalFilters,
-} from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import {
@@ -104,6 +98,12 @@ import {
   hasUserCRUDPermission,
   isBoolean,
 } from '../../../../common/utils/privileges';
+import {
+  focusUtilityBarAction,
+  onTimelineTabKeyPressed,
+  resetKeyboardFocus,
+  showGlobalFilters,
+} from '../../../../timelines/components/timeline/helpers';
 
 import {
   RuleStatus,
@@ -115,29 +115,29 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
-import { RuleDetailsContextProvider } from './rule_details_context';
-// eslint-disable-next-line no-restricted-imports
-import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
-import * as i18n from './translations';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
-import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
-import type { BadgeOptions } from '../../../../common/components/header_page/types';
-import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
-import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
-import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
-import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
-import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
-import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
-import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
+import type { BadgeOptions } from '../../../../common/components/header_page/types';
+import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
+import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
+import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
+import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
+import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
+import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
+import { RuleDetailsContextProvider } from './rule_details_context';
+import * as i18n from './translations';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';

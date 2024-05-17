@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import Url from 'url';
 import Path from 'path';
+import Url from 'url';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { kbnTestConfig } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';

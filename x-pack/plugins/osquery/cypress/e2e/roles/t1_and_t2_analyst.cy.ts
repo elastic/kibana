@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
-import {
-  checkActionItemsInResults,
-  checkResults,
-  selectAllAgents,
-  submitQuery,
-} from '../../tasks/live_query';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import type { ServerlessRoleName } from '../../support/roles';
 import {
   cleanupPack,
   cleanupSavedQuery,
@@ -20,7 +14,13 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import type { ServerlessRoleName } from '../../support/roles';
+import {
+  checkActionItemsInResults,
+  checkResults,
+  selectAllAgents,
+  submitQuery,
+} from '../../tasks/live_query';
+import { navigateTo } from '../../tasks/navigation';
 
 describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {

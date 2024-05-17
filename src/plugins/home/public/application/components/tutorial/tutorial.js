@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { Footer } from './footer';
-import { Introduction } from './introduction';
-import { InstructionSet } from './instruction_set';
-import { SavedObjectsInstaller } from './saved_objects_installer';
-import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiButtonGroup, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../../kibana_services';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
+import { getServices } from '../../kibana_services';
+import { Footer } from './footer';
+import { InstructionSet } from './instruction_set';
+import { Introduction } from './introduction';
+import { SavedObjectsInstaller } from './saved_objects_installer';
+import * as StatusCheckStates from './status_check_states';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',

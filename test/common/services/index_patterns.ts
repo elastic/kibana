@@ -7,8 +7,8 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { DataViewSpec } from '@kbn/data-plugin/common';
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { FtrService } from '../ftr_provider_context';
 
 export class IndexPatternsService extends FtrService {

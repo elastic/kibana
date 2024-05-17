@@ -8,9 +8,9 @@
 import expect from 'expect';
 
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getCustomQueryRuleParams, combineToNdJson } from '../../../utils';
 import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { combineToNdJson, getCustomQueryRuleParams } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

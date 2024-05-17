@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import sinon from 'sinon';
 import fs from 'fs';
 import del from 'del';
+import sinon from 'sinon';
 
-import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { Logger } from '../../cli/logger';
+import { cleanArtifacts, cleanPrevious } from './cleanup';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

@@ -7,8 +7,8 @@
 
 import { mockHttpRequest, pageHelpers } from './helpers';
 
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import { init as initDocumentation, setHttp } from '../../crud_app/services';
 
 const { setup } = pageHelpers.jobCreate;
 

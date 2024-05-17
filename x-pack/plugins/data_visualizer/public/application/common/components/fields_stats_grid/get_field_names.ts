@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import type { SupportedFieldType } from '../../../../../common/types';
+import { difference } from 'lodash';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
+import type { SupportedFieldType } from '../../../../../common/types';
 
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;

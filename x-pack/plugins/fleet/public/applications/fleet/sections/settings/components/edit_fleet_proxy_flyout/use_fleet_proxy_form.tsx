@@ -19,9 +19,9 @@ import {
   validateInputs,
 } from '../../../../hooks';
 
-import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import type { FleetProxy } from '../../../../types';
 import { PROXY_URL_REGEX } from '../../../../../../../common/constants';
+import type { FleetProxy } from '../../../../types';
+import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 const ConfirmTitle = () => (
   <FormattedMessage

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { verifyAccessAndContext } from './lib';
 
 const paramSchema = schema.object({
   id: schema.string(),

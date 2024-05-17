@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { migrationStateActionMachine } from './migrations_state_action_machine';
+import { errors } from '@elastic/elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { LoggerAdapter } from '@kbn/core-logging-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { errors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { migrationStateActionMachine } from './migrations_state_action_machine';
+import type { AllControlStates, State } from './state';
 
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {

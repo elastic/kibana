@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { I18nProvider } from '@kbn/i18n-react';
+import * as reactTestingLibrary from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { I18nProvider } from '@kbn/i18n-react';
-import { ExceptionItemsSummary } from './exception_items_summary';
-import * as reactTestingLibrary from '@testing-library/react';
-import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import type { GetExceptionSummaryResponse } from '../../../../../../../common/endpoint/types';
+import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
+import { ExceptionItemsSummary } from './exception_items_summary';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -25,19 +25,18 @@ const getStatValue = (el: reactTestingLibrary.RenderResult, stat: string) => {
 };
 
 describe('Fleet event filters card', () => {
-  const renderComponent: (
-    stats: GetExceptionSummaryResponse
-  ) => reactTestingLibrary.RenderResult = (stats) => {
-    const Wrapper: React.FC<PropsWithChildren<unknown>> = ({ children }) => (
-      <I18nProvider>
-        <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
-      </I18nProvider>
-    );
-    const component = reactTestingLibrary.render(<ExceptionItemsSummary stats={stats} />, {
-      wrapper: Wrapper,
-    });
-    return component;
-  };
+  const renderComponent: (stats: GetExceptionSummaryResponse) => reactTestingLibrary.RenderResult =
+    (stats) => {
+      const Wrapper: React.FC<PropsWithChildren<unknown>> = ({ children }) => (
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
+        </I18nProvider>
+      );
+      const component = reactTestingLibrary.render(<ExceptionItemsSummary stats={stats} />, {
+        wrapper: Wrapper,
+      });
+      return component;
+    };
   it('should renders correctly', () => {
     const summary: GetExceptionSummaryResponse = {
       windows: 3,

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { isNil, omit, omitBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { isNil, omit, omitBy } from 'lodash';
 import { Query } from '../../query';
 import { KibanaQueryOutput } from './kibana_context_type';
 

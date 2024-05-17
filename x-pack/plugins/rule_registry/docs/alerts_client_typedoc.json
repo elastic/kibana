@@ -1,7 +1,5 @@
 {
-  "entryPoints": [
-    "../server/alert_data_client/alerts_client.ts"
-  ],
+  "entryPoints": ["../server/alert_data_client/alerts_client.ts"],
   "exclude": [
     "**/mock.ts",
     "../server/alert_data_client/+(mock.ts|utils.ts|utils.test.ts|types.ts)"
@@ -14,4 +12,3 @@
   "readme": "none",
   "name": "Alerts as data client API Interface"
 }
-

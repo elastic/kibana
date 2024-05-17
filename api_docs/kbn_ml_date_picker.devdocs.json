@@ -23,13 +23,9 @@
         "parentPluginId": "@kbn/ml-date-picker",
         "id": "def-common.DatePickerContextProvider",
         "type": "Function",
-        "tags": [
-          "type"
-        ],
+        "tags": ["type"],
         "label": "DatePickerContextProvider",
-        "description": [
-          "\nReact Component that acts as a wrapper for DatePickerContext.\n"
-        ],
+        "description": ["\nReact Component that acts as a wrapper for DatePickerContext.\n"],
         "signature": [
           "(props: React.PropsWithChildren<React.PropsWithChildren<",
           {
@@ -51,9 +47,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": [
-              "- The component props"
-            ],
+            "description": ["- The component props"],
             "signature": [
               "React.PropsWithChildren<React.PropsWithChildren<",
               {
@@ -71,22 +65,16 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "The DatePickerContextProvider component."
-        ],
+        "returnComment": ["The DatePickerContextProvider component."],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
         "id": "def-common.DatePickerWrapper",
         "type": "Function",
-        "tags": [
-          "type"
-        ],
+        "tags": ["type"],
         "label": "DatePickerWrapper",
-        "description": [
-          "\nDatePickerWrapper React Component\n"
-        ],
+        "description": ["\nDatePickerWrapper React Component\n"],
         "signature": [
           "(props: React.PropsWithChildren<DatePickerWrapperProps>) => JSX.Element | null"
         ],
@@ -100,30 +88,22 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": [
-              "- `DatePickerWrapper` component props"
-            ],
-            "signature": [
-              "React.PropsWithChildren<DatePickerWrapperProps>"
-            ],
+            "description": ["- `DatePickerWrapper` component props"],
+            "signature": ["React.PropsWithChildren<DatePickerWrapperProps>"],
             "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "The DatePickerWrapper component."
-        ],
+        "returnComment": ["The DatePickerWrapper component."],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
         "id": "def-common.FullTimeRangeSelector",
         "type": "Function",
-        "tags": [
-          "type"
-        ],
+        "tags": ["type"],
         "label": "FullTimeRangeSelector",
         "description": [
           "\nComponent for rendering a button which automatically sets the range of the time filter\nto the time range of data in the index(es) mapped to the supplied Kibana data view or query.\n"
@@ -149,9 +129,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": [
-              "- `FullTimeRangeSelectorProps` component props"
-            ],
+            "description": ["- `FullTimeRangeSelectorProps` component props"],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -169,9 +147,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "The FullTimeRangeSelector component."
-        ],
+        "returnComment": ["The FullTimeRangeSelector component."],
         "initialIsOpen": false
       },
       {
@@ -180,9 +156,7 @@
         "type": "Function",
         "tags": [],
         "label": "getTimeFilterRange",
-        "description": [
-          "\nFunction to get the time filter range as timestamps.\n"
-        ],
+        "description": ["\nFunction to get the time filter range as timestamps.\n"],
         "signature": [
           "(timefilter: ",
           {
@@ -211,9 +185,7 @@
             "type": "Object",
             "tags": [],
             "label": "timefilter",
-            "description": [
-              "- The timefilter"
-            ],
+            "description": ["- The timefilter"],
             "signature": [
               {
                 "pluginId": "data",
@@ -229,9 +201,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "TimeRange"
-        ],
+        "returnComment": ["TimeRange"],
         "initialIsOpen": false
       },
       {
@@ -240,9 +210,7 @@
         "type": "Function",
         "tags": [],
         "label": "useRefresh",
-        "description": [
-          "\nProvides the latest refresh, both manual or auto."
-        ],
+        "description": ["\nProvides the latest refresh, both manual or auto."],
         "signature": [
           "() => ",
           {
@@ -284,9 +252,7 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [
-          "refresh interval update"
-        ],
+        "returnComment": ["refresh interval update"],
         "initialIsOpen": false
       },
       {
@@ -295,9 +261,7 @@
         "type": "Function",
         "tags": [],
         "label": "useTimefilter",
-        "description": [
-          "\nCustom hook to get the timefilter from runtime dependencies.\n"
-        ],
+        "description": ["\nCustom hook to get the timefilter from runtime dependencies.\n"],
         "signature": [
           "(options?: UseTimefilterOptions) => ",
           {
@@ -318,21 +282,15 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "- time filter options"
-            ],
-            "signature": [
-              "UseTimefilterOptions"
-            ],
+            "description": ["- time filter options"],
+            "signature": ["UseTimefilterOptions"],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "timefilter"
-        ],
+        "returnComment": ["timefilter"],
         "initialIsOpen": false
       },
       {
@@ -364,21 +322,15 @@
             "type": "boolean",
             "tags": [],
             "label": "absolute",
-            "description": [
-              "- flag to enforce absolute times"
-            ],
-            "signature": [
-              "boolean"
-            ],
+            "description": ["- flag to enforce absolute times"],
+            "signature": ["boolean"],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "time range update"
-        ],
+        "returnComment": ["time range update"],
         "initialIsOpen": false
       }
     ],
@@ -402,9 +354,7 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": [
-              "\ndata plugin"
-            ],
+            "description": ["\ndata plugin"],
             "signature": [
               {
                 "pluginId": "data",
@@ -424,9 +374,7 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": [
-              "\nhttp service"
-            ],
+            "description": ["\nhttp service"],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -446,9 +394,7 @@
             "type": "Object",
             "tags": [],
             "label": "notifications",
-            "description": [
-              "\nnotifications service"
-            ],
+            "description": ["\nnotifications service"],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -468,9 +414,7 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": [
-              "\nEUI theme"
-            ],
+            "description": ["\nEUI theme"],
             "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
@@ -490,9 +434,7 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": [
-              "\nKibana UI advanced settings"
-            ],
+            "description": ["\nKibana UI advanced settings"],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -512,9 +454,7 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettingsKeys",
-            "description": [
-              "\nKibana UI advanced settings keys."
-            ],
+            "description": ["\nKibana UI advanced settings keys."],
             "signature": [
               "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; readonly DATE_FORMAT: \"dateFormat\"; readonly DATEFORMAT_TZ: \"dateFormat:tz\"; }"
             ],
@@ -528,9 +468,7 @@
             "type": "Object",
             "tags": [],
             "label": "i18n",
-            "description": [
-              "\nInternationalisation service"
-            ],
+            "description": ["\nInternationalisation service"],
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -550,12 +488,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showFrozenDataTierChoice",
-            "description": [
-              "\nOptional flag to disable the frozen data tier choice."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nOptional flag to disable the frozen data tier choice."],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -569,9 +503,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FullTimeRangeSelectorProps",
-        "description": [
-          "\nFullTimeRangeSelectorProps React Component props interface"
-        ],
+        "description": ["\nFullTimeRangeSelectorProps React Component props interface"],
         "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -582,12 +514,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "frozenDataPreference",
-            "description": [
-              "\nFrozen data preference ('exclude-frozen' | 'include-frozen')"
-            ],
-            "signature": [
-              "\"exclude-frozen\" | \"include-frozen\""
-            ],
+            "description": ["\nFrozen data preference ('exclude-frozen' | 'include-frozen')"],
+            "signature": ["\"exclude-frozen\" | \"include-frozen\""],
             "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -598,9 +526,7 @@
             "type": "Function",
             "tags": [],
             "label": "setFrozenDataPreference",
-            "description": [
-              "\nCallback to set frozen data preference."
-            ],
+            "description": ["\nCallback to set frozen data preference."],
             "signature": [
               "(value: ",
               {
@@ -622,9 +548,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
-                "description": [
-                  "- The updated frozen data preference."
-                ],
+                "description": ["- The updated frozen data preference."],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-date-picker",
@@ -649,9 +573,7 @@
             "type": "Object",
             "tags": [],
             "label": "timefilter",
-            "description": [
-              "\ntimefilter service."
-            ],
+            "description": ["\ntimefilter service."],
             "signature": [
               "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
@@ -833,9 +755,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              "\nCurrent data view."
-            ],
+            "description": ["\nCurrent data view."],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -855,9 +775,7 @@
             "type": "boolean",
             "tags": [],
             "label": "disabled",
-            "description": [
-              "\nBoolean flag to enable/disable the full time range button."
-            ],
+            "description": ["\nBoolean flag to enable/disable the full time range button."],
             "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -868,13 +786,8 @@
             "type": "Object",
             "tags": [],
             "label": "query",
-            "description": [
-              "\nOptional DSL query."
-            ],
-            "signature": [
-              "QueryDslQueryContainer",
-              " | undefined"
-            ],
+            "description": ["\nOptional DSL query."],
+            "signature": ["QueryDslQueryContainer", " | undefined"],
             "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -885,9 +798,7 @@
             "type": "Function",
             "tags": [],
             "label": "callback",
-            "description": [
-              "\nOptional callback."
-            ],
+            "description": ["\nOptional callback."],
             "signature": [
               "((value: ",
               {
@@ -909,9 +820,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "value",
-                "description": [
-                  "- The time field range response."
-                ],
+                "description": ["- The time field range response."],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-date-picker",
@@ -935,9 +844,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "apiPath",
-            "description": [
-              "\nOptional API path."
-            ],
+            "description": ["\nOptional API path."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-date-picker",
@@ -961,9 +868,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetTimeFieldRangeResponse",
-        "description": [
-          "\nResponse interface for the `setFullTimeRange` function."
-        ],
+        "description": ["\nResponse interface for the `setFullTimeRange` function."],
         "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -974,9 +879,7 @@
             "type": "boolean",
             "tags": [],
             "label": "success",
-            "description": [
-              "\nSuccess boolean flag."
-            ],
+            "description": ["\nSuccess boolean flag."],
             "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -987,12 +890,8 @@
             "type": "Object",
             "tags": [],
             "label": "start",
-            "description": [
-              "\nStart time of the time range."
-            ],
-            "signature": [
-              "GetTimeFieldRangeResponseTime"
-            ],
+            "description": ["\nStart time of the time range."],
+            "signature": ["GetTimeFieldRangeResponseTime"],
             "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1003,12 +902,8 @@
             "type": "Object",
             "tags": [],
             "label": "end",
-            "description": [
-              "\nEnd time of the time range."
-            ],
-            "signature": [
-              "GetTimeFieldRangeResponseTime"
-            ],
+            "description": ["\nEnd time of the time range."],
+            "signature": ["GetTimeFieldRangeResponseTime"],
             "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1022,9 +917,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Refresh",
-        "description": [
-          "\nState definition of `mlTimefilterRefresh$` observable."
-        ],
+        "description": ["\nState definition of `mlTimefilterRefresh$` observable."],
         "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1035,9 +928,7 @@
             "type": "number",
             "tags": [],
             "label": "lastRefresh",
-            "description": [
-              "\nTimestamp of the last time a refresh got triggered."
-            ],
+            "description": ["\nTimestamp of the last time a refresh got triggered."],
             "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1048,12 +939,8 @@
             "type": "Object",
             "tags": [],
             "label": "timeRange",
-            "description": [
-              "\nThe time range triggered by the refresh."
-            ],
-            "signature": [
-              "{ start: string; end: string; } | undefined"
-            ],
+            "description": ["\nThe time range triggered by the refresh."],
+            "signature": ["{ start: string; end: string; } | undefined"],
             "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1067,9 +954,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TimeRange",
-        "description": [
-          "\nReturn type for the `getTimeFilterRange` function."
-        ],
+        "description": ["\nReturn type for the `getTimeFilterRange` function."],
         "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1080,9 +965,7 @@
             "type": "number",
             "tags": [],
             "label": "from",
-            "description": [
-              "\nFrom timestamp."
-            ],
+            "description": ["\nFrom timestamp."],
             "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1093,9 +976,7 @@
             "type": "number",
             "tags": [],
             "label": "to",
-            "description": [
-              "\nTo timestamp."
-            ],
+            "description": ["\nTo timestamp."],
             "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1112,12 +993,8 @@
         "type": "Type",
         "tags": [],
         "label": "FrozenTierPreference",
-        "description": [
-          "\nUnion type of `FROZEN_TIER_PREFERENCE` options."
-        ],
-        "signature": [
-          "\"exclude-frozen\" | \"include-frozen\""
-        ],
+        "description": ["\nUnion type of `FROZEN_TIER_PREFERENCE` options."],
+        "signature": ["\"exclude-frozen\" | \"include-frozen\""],
         "path": "x-pack/packages/ml/date_picker/src/storage.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1129,9 +1006,7 @@
         "type": "Type",
         "tags": [],
         "label": "SetFullTimeRangeApiPath",
-        "description": [
-          "\nAllowed API paths to be passed to `setFullTimeRange`."
-        ],
+        "description": ["\nAllowed API paths to be passed to `setFullTimeRange`."],
         "signature": [
           "\"/internal/file_upload/time_field_range\" | \"/internal/ml/fields_service/time_field_range\""
         ],
@@ -1148,9 +1023,7 @@
         "type": "Object",
         "tags": [],
         "label": "FROZEN_TIER_PREFERENCE",
-        "description": [
-          "\nLocal storage options to include/exclude frozen tier."
-        ],
+        "description": ["\nLocal storage options to include/exclude frozen tier."],
         "signature": [
           "{ readonly EXCLUDE: \"exclude-frozen\"; readonly INCLUDE: \"include-frozen\"; }"
         ],
@@ -1165,9 +1038,7 @@
         "type": "Object",
         "tags": [],
         "label": "mlTimefilterRefresh$",
-        "description": [
-          "\nObservable to hold `Refresh` state."
-        ],
+        "description": ["\nObservable to hold `Refresh` state."],
         "signature": [
           "Subject",
           "<",

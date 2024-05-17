@@ -12,18 +12,18 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ControlPanelState,
   ControlWidth,
-  OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
+  OptionsListEmbeddableInput,
   TIME_SLIDER_CONTROL,
 } from '../../../common';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
 } from '../../../common/control_group/control_group_constants';
-import { ControlGroupInput } from '../types';
+import { RANGE_SLIDER_CONTROL, RangeValue } from '../../../common/range_slider/types';
 import { ControlInput, DataControlInput } from '../../types';
-import { RangeValue, RANGE_SLIDER_CONTROL } from '../../../common/range_slider/types';
 import { getCompatibleControlType, getNextPanelOrder } from '../embeddable/control_group_helpers';
+import { ControlGroupInput } from '../types';
 
 export interface AddDataControlProps {
   controlId?: string;

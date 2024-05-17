@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { inRangeRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
+import { inRangeRt } from '.';
 
 describe('inRangeRT', () => {
   test('passes if value is within range', () => {

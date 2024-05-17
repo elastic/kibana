@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { pick } from 'lodash';
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;

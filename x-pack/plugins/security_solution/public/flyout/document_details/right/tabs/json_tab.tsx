@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useRef, useState } from 'react';
-import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { useRightPanelContext } from '../context';
+import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 
 const FLYOUT_BODY_PADDING = 24;
 const COPY_TO_CLIPBOARD_BUTTON_HEIGHT = 24;

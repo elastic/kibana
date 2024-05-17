@@ -1,3 +1,4 @@
+import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IKibanaResponse } from '@kbn/core-http-server';
-import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 
 export interface ProjectAPIKeyResponse {
   apiKey: SecurityCreateApiKeyResponse | null;

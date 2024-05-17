@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   Logger,
   SavedObject,
@@ -13,24 +14,23 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
-import { rulesSettingsMappings } from './rules_settings_mappings';
-import { maintenanceWindowMappings } from './maintenance_window_mapping';
-import { getMigrations } from './migrations';
-import { transformRulesForExport } from './transform_rule_for_export';
+import { RuleTypeRegistry } from '../rule_type_registry';
 import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
-import { RuleTypeRegistry } from '../rule_type_registry';
+import { maintenanceWindowMappings } from './maintenance_window_mapping';
+import { getMigrations } from './migrations';
+import { rulesSettingsMappings } from './rules_settings_mappings';
+import { transformRulesForExport } from './transform_rule_for_export';
 export { partiallyUpdateRule } from './partially_update_rule';
 export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
 import {
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../common';
-import { ruleModelVersions } from './rule_model_versions';
 import { adHocRunParamsModelVersions } from './ad_hoc_run_params_model_versions';
+import { ruleModelVersions } from './rule_model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';

@@ -6,13 +6,13 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
 import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import type { SecuritySolutionEssPluginStartDeps } from '../types';
 
 export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;

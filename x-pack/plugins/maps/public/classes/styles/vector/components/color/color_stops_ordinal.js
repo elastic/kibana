@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 
-import { ColorStops } from './color_stops';
 import { EuiFieldNumber } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ColorStops } from './color_stops';
 import {
+  DEFAULT_CUSTOM_COLOR,
   addOrdinalRow,
   isOrdinalStopInvalid,
   isOrdinalStopsInvalid,
-  DEFAULT_CUSTOM_COLOR,
 } from './color_stops_utils';
-import { i18n } from '@kbn/i18n';
 
 export const ColorStopsOrdinal = ({
   colorStops = [{ stop: 0, color: DEFAULT_CUSTOM_COLOR }],

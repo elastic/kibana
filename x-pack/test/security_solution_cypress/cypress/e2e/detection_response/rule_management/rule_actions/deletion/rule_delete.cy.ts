@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { getNewRule } from '../../../../../objects/rule';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
 
@@ -16,10 +16,10 @@ import {
   getRulesManagementTableRows,
   selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
-import { deleteSelectedRules } from '../../../../../tasks/rules_bulk_actions';
-import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
 import { login } from '../../../../../tasks/login';
+import { deleteSelectedRules } from '../../../../../tasks/rules_bulk_actions';
 
 describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {
   const testRules = [

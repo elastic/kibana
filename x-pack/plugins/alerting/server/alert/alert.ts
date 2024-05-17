@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
-import { AADAlert } from '@kbn/alerts-as-data-utils';
-import { get, isEmpty } from 'lodash';
 import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
+import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertHit, CombinedSummarizedAlerts } from '../types';
+import { get, isEmpty } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
 import {
+  AlertInstanceContext,
   AlertInstanceMeta,
   AlertInstanceState,
-  RawAlertInstance,
-  AlertInstanceContext,
   DefaultActionGroupId,
   LastScheduledActions,
+  RawAlertInstance,
 } from '../../common';
+import { AlertHit, CombinedSummarizedAlerts } from '../types';
 
 import { parseDuration } from '../lib';
 
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string = DefaultActionGroupId
+  ActionGroupIds extends string = DefaultActionGroupId,
 > {
   actionGroup: ActionGroupIds;
   context: Context;
@@ -35,7 +35,7 @@ interface ScheduledExecutionOptions<
 export type PublicAlert<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = DefaultActionGroupId
+  ActionGroupIds extends string = DefaultActionGroupId,
 > = Pick<
   Alert<State, Context, ActionGroupIds, AADAlert>,
   | 'getContext'
@@ -52,7 +52,7 @@ export class Alert<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never,
-  AlertAsData extends AADAlert = AADAlert
+  AlertAsData extends AADAlert = AADAlert,
 > {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: MutableAlertInstanceMeta;

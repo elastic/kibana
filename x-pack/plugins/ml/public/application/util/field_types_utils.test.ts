@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import {
-  kbnTypeToMLJobType,
   getMLJobTypeAriaLabel,
+  kbnTypeToMLJobType,
   mlJobTypeAriaLabels,
 } from './field_types_utils';
 

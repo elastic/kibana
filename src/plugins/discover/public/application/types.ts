@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 
 export enum FetchStatus {

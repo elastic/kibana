@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,9 +48,7 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": [
-                  "CoreContext"
-                ],
+                "signature": ["CoreContext"],
                 "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,9 +156,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -193,9 +187,7 @@
             "tags": [],
             "label": "application",
             "description": [],
-            "signature": [
-              "InternalApplicationSetup"
-            ],
+            "signature": ["InternalApplicationSetup"],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -231,9 +223,7 @@
             "tags": [],
             "label": "injectedMetadata",
             "description": [],
-            "signature": [
-              "InternalInjectedMetadataSetup"
-            ],
+            "signature": ["InternalInjectedMetadataSetup"],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -279,9 +269,7 @@
             "tags": [],
             "label": "application",
             "description": [],
-            "signature": [
-              "InternalApplicationStart"
-            ],
+            "signature": ["InternalApplicationStart"],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -385,9 +373,7 @@
         "description": [
           "\nThe max URL length allowed by the current browser. Should be used to display warnings to users when query parameters\ncause URL to exceed this limit."
         ],
-        "signature": [
-          "2000 | 25000"
-        ],
+        "signature": ["2000 | 25000"],
         "path": "packages/core/apps/core-apps-browser-internal/src/errors/url_overflow.tsx",
         "deprecated": false,
         "trackAdoption": false,

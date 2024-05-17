@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-import { getFieldConfig } from '../../../lib';
-import { UseField, RangeField } from '../../../shared_imports';
-import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
+import { getFieldConfig } from '../../../lib';
+import { RangeField, UseField } from '../../../shared_imports';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {
   defaultToggleValue: boolean;

@@ -61,9 +61,7 @@
                 "tags": [],
                 "label": "esClient",
                 "description": [],
-                "signature": [
-                  "default"
-                ],
+                "signature": ["default"],
                 "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -136,9 +134,7 @@
                 "tags": [],
                 "label": "esClient",
                 "description": [],
-                "signature": [
-                  "default"
-                ],
+                "signature": ["default"],
                 "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false

@@ -8,17 +8,17 @@
 
 import {
   ArrowFunction,
-  VariableDeclaration,
+  PropertyAssignment,
   PropertyDeclaration,
   PropertySignature,
   ShorthandPropertyAssignment,
-  PropertyAssignment,
+  VariableDeclaration,
 } from 'ts-morph';
 import { ApiDeclaration, TypeKind } from '../types';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import { getSignature } from './get_signature';
 import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
-import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { BuildApiDecOpts } from './types';
 
 /**

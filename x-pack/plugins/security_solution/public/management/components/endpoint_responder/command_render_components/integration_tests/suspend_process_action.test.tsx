@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import {
-  ConsoleManagerTestComponent,
-  getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../../../console/components/console_manager/mocks';
-import React from 'react';
-import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
-import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
+import React from 'react';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -23,8 +14,17 @@ import type {
   ActionDetailsApiResponse,
   KillProcessActionOutputContent,
 } from '../../../../../../common/endpoint/types';
-import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
+import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
+import {
+  ConsoleManagerTestComponent,
+  getConsoleManagerMockRenderResultQueriesAndActions,
+} from '../../../console/components/console_manager/mocks';
+import { enterConsoleCommand } from '../../../console/mocks';
+import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 jest.mock('../../../../../common/experimental_features_service');
 

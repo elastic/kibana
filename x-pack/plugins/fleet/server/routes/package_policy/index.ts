@@ -12,30 +12,30 @@ import type { FleetAuthzRouter } from '../../services/security';
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
-import {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
-  CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
-  DeletePackagePoliciesRequestSchema,
-  UpgradePackagePoliciesRequestSchema,
-  DryRunPackagePoliciesRequestSchema,
-  DeleteOnePackagePolicyRequestSchema,
-  BulkGetPackagePoliciesRequestSchema,
-} from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
+import {
+  BulkGetPackagePoliciesRequestSchema,
+  CreatePackagePolicyRequestSchema,
+  DeleteOnePackagePolicyRequestSchema,
+  DeletePackagePoliciesRequestSchema,
+  DryRunPackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
+} from '../../types';
 
 import {
-  getPackagePoliciesHandler,
-  getOnePackagePolicyHandler,
-  createPackagePolicyHandler,
-  updatePackagePolicyHandler,
-  deletePackagePolicyHandler,
-  upgradePackagePolicyHandler,
-  dryRunUpgradePackagePolicyHandler,
-  getOrphanedPackagePolicies,
-  deleteOnePackagePolicyHandler,
   bulkGetPackagePoliciesHandler,
+  createPackagePolicyHandler,
+  deleteOnePackagePolicyHandler,
+  deletePackagePolicyHandler,
+  dryRunUpgradePackagePolicyHandler,
+  getOnePackagePolicyHandler,
+  getOrphanedPackagePolicies,
+  getPackagePoliciesHandler,
+  updatePackagePolicyHandler,
+  upgradePackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {

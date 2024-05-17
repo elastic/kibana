@@ -6,30 +6,30 @@
  */
 
 import {
+  type AppDeepLink,
+  AppDeepLinkLocations,
   type AppMountParameters,
   type AppUpdater,
   type CoreStart,
-  type AppDeepLink,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
-  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs';
+import {
+  type InfraLocators,
+  InfraLogsLocatorDefinition,
+  InfraNodeLogsLocatorDefinition,
+} from '../common/locators';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
-import {
-  type InfraLocators,
-  InfraLogsLocatorDefinition,
-  InfraNodeLogsLocatorDefinition,
-} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -353,7 +353,7 @@ export class Plugin implements InfraClientPluginClass {
     startDep$AndHostViewFlag$.subscribe(
       ([_startServices, isInfrastructureHostsViewEnabled]: [
         [CoreStart, InfraClientStartDeps, InfraClientStartExports],
-        boolean
+        boolean,
       ]) => {
         this.appUpdater$.next(() => ({
           deepLinks: getInfraDeepLinks({

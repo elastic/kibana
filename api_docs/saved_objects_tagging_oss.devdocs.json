@@ -26,9 +26,7 @@
             "description": [
               "\nIf set to true, will use the tag's `name` instead of `id` for the tag field clause, which is recommended\nfor a better end-user experience.\n\nDefaults to true.\n"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -42,9 +40,7 @@
             "description": [
               "\nThe tag clause field name to generate the query. Defaults to `tag`.\n"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -74,9 +70,7 @@
             "description": [
               "\nBy default, the `tags` column definition will be automatically sortable\nby tag name.\n\nHowever, when paging is performed on the server, we need to remove the sorting\ncapability from the column to avoid unexpected behavior by triggering fetch request\nwhen sorting by column.\n\nShould be set to `true` when generating the definition for a table that performs\nserver-side paging.\n\nDefaults to false."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -101,9 +95,7 @@
             "type": "Function",
             "tags": [],
             "label": "getState",
-            "description": [
-              "\nReturn the current state of the cache"
-            ],
+            "description": ["\nReturn the current state of the cache"],
             "signature": [
               "() => ",
               {
@@ -165,9 +157,7 @@
                     "tags": [],
                     "label": "waitForInitialization",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -280,9 +270,7 @@
             "description": [
               "\nIf set to true, will assume the tag clause is using tag names instead of ids.\nIn that case, will perform a reverse lookup from the client-side tag cache to resolve tag ids from names.\n\nDefaults to true.\n"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -296,9 +284,7 @@
             "description": [
               "\nThe tag clause field name to extract the tags from. Defaults to `tag`.\n"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -323,9 +309,7 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [
-              "\nThe client to perform tag-related operations on the server-side"
-            ],
+            "description": ["\nThe client to perform tag-related operations on the server-side"],
             "signature": [
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -367,9 +351,7 @@
             "type": "Object",
             "tags": [],
             "label": "ui",
-            "description": [
-              "\nUI API to use to add tagging capabilities to an application"
-            ],
+            "description": ["\nUI API to use to add tagging capabilities to an application"],
             "signature": [
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -392,9 +374,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsTaggingApiUi",
-        "description": [
-          "\nReact components and utility methods to use the SO tagging feature\n"
-        ],
+        "description": ["\nReact components and utility methods to use the SO tagging feature\n"],
         "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -405,9 +385,7 @@
             "type": "Function",
             "tags": [],
             "label": "getTag",
-            "description": [
-              "\nReturn a Tag from an ID\n"
-            ],
+            "description": ["\nReturn a Tag from an ID\n"],
             "signature": [
               "(tagId: string) => ",
               {
@@ -430,9 +408,7 @@
                 "tags": [],
                 "label": "tagId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -447,9 +423,7 @@
             "type": "Function",
             "tags": [],
             "label": "getTagList",
-            "description": [
-              "\nReturn a list of available tags"
-            ],
+            "description": ["\nReturn a list of available tags"],
             "signature": [
               "() => ",
               {
@@ -679,9 +653,7 @@
                 "tags": [],
                 "label": "tagName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -728,12 +700,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "query",
-                "description": [
-                  "The query to parse"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The query to parse"],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -745,9 +713,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "see {@link ParseSearchQueryOptions }"
-                ],
+                "description": ["see {@link ParseSearchQueryOptions }"],
                 "signature": [
                   {
                     "pluginId": "savedObjectsTaggingOss",
@@ -841,9 +807,7 @@
             "description": [
               "\nReturns the id for given tag name. Will return `undefined`\nif the given name does not match any existing tag."
             ],
-            "signature": [
-              "(tagName: string) => string | undefined"
-            ],
+            "signature": ["(tagName: string) => string | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -855,9 +819,7 @@
                 "tags": [],
                 "label": "tagName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -927,9 +889,7 @@
                 "tags": [],
                 "label": "newTagIds",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -982,9 +942,7 @@
             "type": "Function",
             "tags": [],
             "label": "TagList",
-            "description": [
-              "\nDisplays the tags for given saved object."
-            ],
+            "description": ["\nDisplays the tags for given saved object."],
             "signature": [
               "React.FunctionComponent<",
               {
@@ -1008,9 +966,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
+                "signature": ["P & { children?: React.ReactNode; }"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1022,9 +978,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1037,9 +991,7 @@
             "type": "Function",
             "tags": [],
             "label": "TagSelector",
-            "description": [
-              "\nWidget to select tags."
-            ],
+            "description": ["\nWidget to select tags."],
             "signature": [
               "React.FunctionComponent<",
               {
@@ -1063,9 +1015,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
+                "signature": ["P & { children?: React.ReactNode; }"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1077,9 +1027,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1118,9 +1066,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
+                "signature": ["P & { children?: React.ReactNode; }"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1132,9 +1078,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1163,9 +1107,7 @@
             "type": "Object",
             "tags": [],
             "label": "object",
-            "description": [
-              "\nThe object to display tags for."
-            ],
+            "description": ["\nThe object to display tags for."],
             "signature": [
               "{ references: ",
               {
@@ -1187,9 +1129,7 @@
             "type": "Function",
             "tags": [],
             "label": "onClick",
-            "description": [
-              "\nHandler to execute when clicking on a tag"
-            ],
+            "description": ["\nHandler to execute when clicking on a tag"],
             "signature": [
               "((tag: ",
               {
@@ -1235,9 +1175,7 @@
             "type": "Function",
             "tags": [],
             "label": "tagRender",
-            "description": [
-              "\nHandler to render the tag"
-            ],
+            "description": ["\nHandler to render the tag"],
             "signature": [
               "((tag: ",
               {
@@ -1299,12 +1237,8 @@
             "type": "Array",
             "tags": [],
             "label": "selected",
-            "description": [
-              "\nIds of the currently selected tags"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["\nIds of the currently selected tags"],
+            "signature": ["string[]"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1315,12 +1249,8 @@
             "type": "Function",
             "tags": [],
             "label": "onTagsSelected",
-            "description": [
-              "\ntags selection callback"
-            ],
-            "signature": [
-              "(ids: string[]) => void"
-            ],
+            "description": ["\ntags selection callback"],
+            "signature": ["(ids: string[]) => void"],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1332,9 +1262,7 @@
                 "tags": [],
                 "label": "ids",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1571,9 +1499,7 @@
           "description": [
             "\nReturns true if the tagging feature is available (if a provider registered the API)"
           ],
-          "signature": [
-            "() => boolean"
-          ],
+          "signature": ["() => boolean"],
           "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1641,9 +1567,7 @@
             "tags": [],
             "label": "asSystemRequest",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1722,10 +1646,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "CreateTagOptions",
-                  " | undefined"
-                ],
+                "signature": ["CreateTagOptions", " | undefined"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1763,9 +1684,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1858,9 +1777,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1884,9 +1801,7 @@
                     "tags": [],
                     "label": "exact",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1903,9 +1818,7 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
+            "signature": ["(id: string) => Promise<void>"],
             "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1917,9 +1830,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1965,9 +1876,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,

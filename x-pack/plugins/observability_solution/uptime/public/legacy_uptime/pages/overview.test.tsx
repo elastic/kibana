@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
+import { OverviewPageComponent } from './overview';
 
 describe('MonitorPage', () => {
   it('renders expected elements for valid props', async () => {

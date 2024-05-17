@@ -8,9 +8,9 @@
 import React from 'react';
 
 import type { Search } from '@elastic/eui';
-import { EuiSkeletonText, EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable } from '@elastic/eui';
-import { useAddToRulesTable } from './use_add_to_rules_table';
+import { EuiInMemoryTable, EuiPanel, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import { useAddToRulesTable } from './use_add_to_rules_table';
 
 interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: RuleResponse[];

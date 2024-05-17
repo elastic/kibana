@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContextBase, IRouter } from '@kbn/core-http-server';
+import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 
 /**

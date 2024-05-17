@@ -57,9 +57,7 @@
       "description": [
         "\nThese are the interfaces with your public contracts. You should export these\nfor other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces."
       ],
-      "signature": [
-        "CanvasApi"
-      ],
+      "signature": ["CanvasApi"],
       "path": "x-pack/plugins/canvas/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
@@ -73,9 +71,7 @@
       "tags": [],
       "label": "CanvasStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "x-pack/plugins/canvas/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
@@ -104,9 +100,7 @@
         "tags": [],
         "label": "CANVAS_APP_LOCATOR",
         "description": [],
-        "signature": [
-          "\"CANVAS_APP_LOCATOR\""
-        ],
+        "signature": ["\"CANVAS_APP_LOCATOR\""],
         "path": "x-pack/plugins/canvas/common/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -149,9 +143,7 @@
         "tags": [],
         "label": "CanvasAppLocatorParams",
         "description": [],
-        "signature": [
-          "{ view: \"workpadPDF\"; id: string; page: number; }"
-        ],
+        "signature": ["{ view: \"workpadPDF\"; id: string; page: number; }"],
         "path": "x-pack/plugins/canvas/common/locator.ts",
         "deprecated": false,
         "trackAdoption": false,

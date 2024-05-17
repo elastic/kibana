@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
 import { EuiIcon, EuiLink } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { FC } from 'react';
 import tinycolor from 'tinycolor2';
 import { readableColor } from '../../lib/readable_color';
 import { ColorDot } from '../color_dot';

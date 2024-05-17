@@ -6,11 +6,11 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  getSignalsMigrationSavedObjectMock,
-  getSignalsMigrationSavedObjectErrorMock,
-} from './saved_objects_schema.mock';
 import { getMigrationSavedObjectsById } from './get_migration_saved_objects_by_id';
+import {
+  getSignalsMigrationSavedObjectErrorMock,
+  getSignalsMigrationSavedObjectMock,
+} from './saved_objects_schema.mock';
 
 describe('getMigrationSavedObjectsById', () => {
   let ids: string[];

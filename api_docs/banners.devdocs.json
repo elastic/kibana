@@ -38,9 +38,7 @@
             "tags": [],
             "label": "placement",
             "description": [],
-            "signature": [
-              "\"disabled\" | \"top\""
-            ],
+            "signature": ["\"disabled\" | \"top\""],
             "path": "x-pack/plugins/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -136,9 +134,7 @@
         "tags": [],
         "label": "BannerPlacement",
         "description": [],
-        "signature": [
-          "\"disabled\" | \"top\""
-        ],
+        "signature": ["\"disabled\" | \"top\""],
         "path": "x-pack/plugins/banners/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

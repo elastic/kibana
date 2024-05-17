@@ -7,15 +7,15 @@
  */
 
 import type {
-  ChromeStart,
-  SideNavComponent,
-  ChromeProjectBreadcrumb,
-  ChromeSetProjectBreadcrumbsParams,
-  ChromeProjectNavigationNode,
   AppDeepLinkId,
+  ChromeProjectBreadcrumb,
+  ChromeProjectNavigationNode,
+  ChromeSetProjectBreadcrumbsParams,
+  ChromeStart,
+  CloudURLs,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
-  CloudURLs,
+  SideNavComponent,
   SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
@@ -63,7 +63,7 @@ export interface InternalChromeStart extends ChromeStart {
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
-      ChildrenId extends string = Id
+      ChildrenId extends string = Id,
     >(
       id: string,
       navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>

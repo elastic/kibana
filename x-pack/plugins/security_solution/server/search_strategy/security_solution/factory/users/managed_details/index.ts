@@ -15,10 +15,10 @@ import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
-  ManagedUserHits,
+  ManagedUserDatasetKey,
   ManagedUserDetailsStrategyResponse,
   ManagedUserFields,
-  ManagedUserDatasetKey,
+  ManagedUserHits,
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 interface ManagedUserBucket {

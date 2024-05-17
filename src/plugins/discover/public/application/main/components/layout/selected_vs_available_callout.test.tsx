@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 
 describe('SelectedVSAvailableCallout', () => {

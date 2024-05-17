@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { Query, AggregateQuery } from '@kbn/es-query';
 import { CoreStart, DocLinksStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
+import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
 

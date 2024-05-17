@@ -7,16 +7,17 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { compact } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
-  getLatencyAggregationType,
   LatencyAggregationType,
+  getLatencyAggregationType,
 } from '../../../../common/latency_aggregation_types';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -30,7 +31,6 @@ import { ManagedTable, TableSearchBar } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;

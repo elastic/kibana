@@ -8,34 +8,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { indexOf } from 'lodash';
-import { useSelector } from 'react-redux';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { get } from 'lodash/fp';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
-import { isActiveTimeline } from '../../../../helpers';
-import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
-import { OsqueryFlyout } from '../../osquery/osquery_flyout';
-import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
-import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
-import * as i18n from '../translations';
-import type { inputsModel, State } from '../../../../common/store';
-import { inputsSelectors } from '../../../../common/store';
-import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
-import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
-import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
-import { useAlertsActions } from './use_alerts_actions';
-import { useExceptionFlyout } from './use_add_exception_flyout';
-import { useAlertExceptionActions } from './use_add_exception_actions';
-import { useEventFilterModal } from './use_event_filter_modal';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { indexOf } from 'lodash';
+import { get } from 'lodash/fp';
+import { useSelector } from 'react-redux';
 import type {
   DataViewId,
   IndexPatternArray,
@@ -43,14 +21,36 @@ import type {
   RuleSignatureId,
   Status,
 } from '../../../../../common/api/detection_engine';
-import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
-import { useEventFilterAction } from './use_event_filter_action';
-import { useAddToCaseActions } from './use_add_to_case_actions';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { State, inputsModel } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
+import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
+import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { isActiveTimeline } from '../../../../helpers';
+import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
+import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
+import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
+import { OsqueryFlyout } from '../../osquery/osquery_flyout';
+import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
+import * as i18n from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
-import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertExceptionActions } from './use_add_exception_actions';
+import { useExceptionFlyout } from './use_add_exception_flyout';
+import { useAddToCaseActions } from './use_add_to_case_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
+import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertsActions } from './use_alerts_actions';
+import { useEventFilterAction } from './use_event_filter_action';
+import { useEventFilterModal } from './use_event_filter_modal';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;

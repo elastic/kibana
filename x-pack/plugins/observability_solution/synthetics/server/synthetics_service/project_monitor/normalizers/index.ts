@@ -1,3 +1,4 @@
+import { Locations, MonitorTypeEnum, ProjectMonitor } from '../../../../common/runtime_types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +6,11 @@
  * 2.0.
  */
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
-import { MonitorTypeEnum, Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import { getNormalizeBrowserFields } from './browser_monitor';
+import { NormalizedProjectProps } from './common_fields';
+import { getNormalizeHTTPFields } from './http_monitor';
 import { getNormalizeICMPFields } from './icmp_monitor';
 import { getNormalizeTCPFields } from './tcp_monitor';
-import { getNormalizeHTTPFields } from './http_monitor';
-import { NormalizedProjectProps } from './common_fields';
 
 export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
   const { monitor } = props;

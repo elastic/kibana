@@ -26,11 +26,7 @@
         "tags": [],
         "label": "failedStatsToErrorMessage",
         "description": [],
-        "signature": [
-          "(stats: ",
-          "Stats",
-          ") => string"
-        ],
+        "signature": ["(stats: ", "Stats", ") => string"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -42,9 +38,7 @@
             "tags": [],
             "label": "stats",
             "description": [],
-            "signature": [
-              "Stats"
-            ],
+            "signature": ["Stats"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,9 +102,7 @@
         "tags": [],
         "label": "isConcatenatedModule",
         "description": [],
-        "signature": [
-          "(module: any) => boolean"
-        ],
+        "signature": ["(module: any) => boolean"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -122,9 +114,7 @@
             "tags": [],
             "label": "module",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -141,9 +131,7 @@
         "tags": [],
         "label": "isDelegatedModule",
         "description": [],
-        "signature": [
-          "(module: any) => boolean"
-        ],
+        "signature": ["(module: any) => boolean"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -155,9 +143,7 @@
             "tags": [],
             "label": "module",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -174,9 +160,7 @@
         "tags": [],
         "label": "isExternalModule",
         "description": [],
-        "signature": [
-          "(module: any) => boolean"
-        ],
+        "signature": ["(module: any) => boolean"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -188,9 +172,7 @@
             "tags": [],
             "label": "module",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -207,11 +189,7 @@
         "tags": [],
         "label": "isFailureStats",
         "description": [],
-        "signature": [
-          "(stats: ",
-          "Stats",
-          ") => boolean"
-        ],
+        "signature": ["(stats: ", "Stats", ") => boolean"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -223,9 +201,7 @@
             "tags": [],
             "label": "stats",
             "description": [],
-            "signature": [
-              "Stats"
-            ],
+            "signature": ["Stats"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -242,9 +218,7 @@
         "tags": [],
         "label": "isIgnoredModule",
         "description": [],
-        "signature": [
-          "(module: any) => boolean"
-        ],
+        "signature": ["(module: any) => boolean"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -256,9 +230,7 @@
             "tags": [],
             "label": "module",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -275,9 +247,7 @@
         "tags": [],
         "label": "isNormalModule",
         "description": [],
-        "signature": [
-          "(module: any) => boolean"
-        ],
+        "signature": ["(module: any) => boolean"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -289,9 +259,7 @@
             "tags": [],
             "label": "module",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -309,9 +277,7 @@
         "type": "Interface",
         "tags": [],
         "label": "WebpackConcatenatedModule",
-        "description": [
-          "module replacing imports for webpack externals"
-        ],
+        "description": ["module replacing imports for webpack externals"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -345,9 +311,7 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": [
-              "Dependency[]"
-            ],
+            "signature": ["Dependency[]"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -359,9 +323,7 @@
             "tags": [],
             "label": "usedExports",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -373,9 +335,7 @@
             "tags": [],
             "label": "modules",
             "description": [],
-            "signature": [
-              "unknown[]"
-            ],
+            "signature": ["unknown[]"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -389,9 +349,7 @@
         "type": "Interface",
         "tags": [],
         "label": "WebpackDelegatedModule",
-        "description": [
-          "module replacing imports for DLL referenced"
-        ],
+        "description": ["module replacing imports for DLL referenced"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -425,9 +383,7 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": [
-              "unknown[]"
-            ],
+            "signature": ["unknown[]"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -438,9 +394,7 @@
             "type": "string",
             "tags": [],
             "label": "userRequest",
-            "description": [
-              "The ID of the module in the DLL manifest"
-            ],
+            "description": ["The ID of the module in the DLL manifest"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -454,9 +408,7 @@
         "type": "Interface",
         "tags": [],
         "label": "WebpackExternalModule",
-        "description": [
-          "module replacing imports for webpack externals"
-        ],
+        "description": ["module replacing imports for webpack externals"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -489,9 +441,7 @@
             "type": "string",
             "tags": [],
             "label": "request",
-            "description": [
-              "JS used to get instance of External"
-            ],
+            "description": ["JS used to get instance of External"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -502,9 +452,7 @@
             "type": "string",
             "tags": [],
             "label": "userRequest",
-            "description": [
-              "module name that is handled by externals"
-            ],
+            "description": ["module name that is handled by externals"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -518,9 +466,7 @@
         "type": "Interface",
         "tags": [],
         "label": "WebpackIgnoredModule",
-        "description": [
-          "module used for ignored code"
-        ],
+        "description": ["module used for ignored code"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -542,9 +488,7 @@
             "type": "string",
             "tags": [],
             "label": "identifierStr",
-            "description": [
-              "unique string to identify this module with (starts with `ignored`)"
-            ],
+            "description": ["unique string to identify this module with (starts with `ignored`)"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -555,9 +499,7 @@
             "type": "string",
             "tags": [],
             "label": "readableIdentifierStr",
-            "description": [
-              "human readable identifier"
-            ],
+            "description": ["human readable identifier"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -571,9 +513,7 @@
         "type": "Interface",
         "tags": [],
         "label": "WebpackNormalModule",
-        "description": [
-          "used for standard js/ts modules"
-        ],
+        "description": ["used for standard js/ts modules"],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -595,9 +535,7 @@
             "type": "string",
             "tags": [],
             "label": "resource",
-            "description": [
-              "absolute path to file on disk"
-            ],
+            "description": ["absolute path to file on disk"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -609,9 +547,7 @@
             "tags": [],
             "label": "buildInfo",
             "description": [],
-            "signature": [
-              "{ cacheable: boolean; fileDependencies: Set<string>; }"
-            ],
+            "signature": ["{ cacheable: boolean; fileDependencies: Set<string>; }"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -623,9 +559,7 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": [
-              "Dependency[]"
-            ],
+            "signature": ["Dependency[]"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -650,9 +584,7 @@
             "type": "string",
             "tags": [],
             "label": "context",
-            "description": [
-              "compilation context"
-            ],
+            "description": ["compilation context"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -663,9 +595,7 @@
             "type": "string",
             "tags": [],
             "label": "request",
-            "description": [
-              "full request (with loaders)"
-            ],
+            "description": ["full request (with loaders)"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -690,9 +620,7 @@
             "type": "string",
             "tags": [],
             "label": "userRequest",
-            "description": [
-              "absolute path, but probably includes loaders in some cases"
-            ],
+            "description": ["absolute path, but probably includes loaders in some cases"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -703,9 +631,7 @@
             "type": "string",
             "tags": [],
             "label": "rawRequest",
-            "description": [
-              "string from source code"
-            ],
+            "description": ["string from source code"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -717,9 +643,7 @@
             "tags": [],
             "label": "loaders",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -730,9 +654,7 @@
             "type": "string",
             "tags": [],
             "label": "resource",
-            "description": [
-              "absolute path to file, but probablt includes loaders in some cases"
-            ],
+            "description": ["absolute path to file, but probablt includes loaders in some cases"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -743,9 +665,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "module type"
-            ],
+            "description": ["module type"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -757,9 +677,7 @@
             "tags": [],
             "label": "resourceResolveData",
             "description": [],
-            "signature": [
-              "{ context: { issuer: string; }; path: string; }"
-            ],
+            "signature": ["{ context: { issuer: string; }; path: string; }"],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
             "trackAdoption": false

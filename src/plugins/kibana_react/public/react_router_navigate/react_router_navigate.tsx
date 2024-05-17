@@ -7,8 +7,8 @@
  */
 
 import { ScopedHistory } from '@kbn/core/public';
-import { MouseEvent } from 'react';
 import { History, parsePath } from 'history';
+import { MouseEvent } from 'react';
 
 interface LocationObject {
   pathname?: string;

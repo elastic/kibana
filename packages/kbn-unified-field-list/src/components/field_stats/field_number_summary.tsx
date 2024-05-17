@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
 import {
   EuiBasicTable,
   HorizontalAlignment,
@@ -14,9 +13,10 @@ import {
   RIGHT_ALIGNMENT,
   euiScreenReaderOnly,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import React, { ReactNode } from 'react';
 import type { NumberSummary } from '../../types';
 
 interface SummaryTableItem {

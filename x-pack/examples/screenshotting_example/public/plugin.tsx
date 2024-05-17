@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { App, HttpContext } from './app';
 

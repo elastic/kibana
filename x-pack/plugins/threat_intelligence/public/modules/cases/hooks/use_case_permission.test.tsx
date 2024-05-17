@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { KibanaContext } from '../../../hooks/use_kibana';
-import { useCaseDisabled } from './use_case_permission';
-import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { RenderHookResult, Renderer, renderHook } from '@testing-library/react-hooks';
+import React, { FC, ReactNode } from 'react';
 import { EMPTY_VALUE } from '../../../constants/common';
+import { KibanaContext } from '../../../hooks/use_kibana';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { useCaseDisabled } from './use_case_permission';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
-  ({ children }: { children: ReactNode }) =>
-    (
-      <TestProvidersComponent>
-        <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          {children}
-        </KibanaContext.Provider>
-      </TestProvidersComponent>
-    );
+  ({ children }: { children: ReactNode }) => (
+    <TestProvidersComponent>
+      <KibanaContext.Provider value={{ services: mockedServices } as any}>
+        {children}
+      </KibanaContext.Provider>
+    </TestProvidersComponent>
+  );
 
 describe('useCasePermission', () => {
   let hookResult: RenderHookResult<{}, boolean, Renderer<unknown>>;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TIPage, TIPageId } from '../types';
 import { threatIntelligencePages } from '../constants/navigation';
+import { TIPage, TIPageId } from '../types';
 
 /**
  * Properties used in the Security Solution plugin to add links to the navigation.

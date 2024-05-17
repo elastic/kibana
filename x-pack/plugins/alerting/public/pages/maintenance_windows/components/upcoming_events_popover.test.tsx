@@ -6,9 +6,9 @@
  */
 import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
+import { MaintenanceWindowStatus } from '../../../../common';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('rule_actions_popover', () => {
   let appMockRenderer: AppMockRenderer;

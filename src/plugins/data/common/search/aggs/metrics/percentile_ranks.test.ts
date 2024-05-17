@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  IPercentileRanksAggConfig,
-  getPercentileRanksMetricAgg,
-  PercentileRanksMetricAggDependencies,
-} from './percentile_ranks';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
+import {
+  IPercentileRanksAggConfig,
+  PercentileRanksMetricAggDependencies,
+  getPercentileRanksMetricAgg,
+} from './percentile_ranks';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function () {
   let aggConfigs: IAggConfigs;

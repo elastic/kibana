@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Case } from '../../../../common/types/domain';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CaseMetricsFeature } from '../../../../common/types/api';
+import type { Case } from '../../../../common/types/domain';
+import { createCaseServiceMock } from '../../../services/mocks';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createCaseServiceMock } from '../../../services/mocks';
 
 import { MTTR } from './mttr';
 

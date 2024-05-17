@@ -14,9 +14,9 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { appContextService } from '../../app_context';
 
 import {
+  _purgeBundledPackagesCache,
   getBundledPackageByPkgKey,
   getBundledPackages,
-  _purgeBundledPackagesCache,
 } from './bundled_packages';
 
 jest.mock('fs/promises');

@@ -10,9 +10,7 @@
     "ecs_8.0.0_http",
     "ecs_8.0.0_host"
   ],
-  "index_patterns": [
-    "kbn-data-forge-fake_stack.nginx_proxy-*"
-  ],
+  "index_patterns": ["kbn-data-forge-fake_stack.nginx_proxy-*"],
   "priority": 1,
   "template": {
     "mappings": {

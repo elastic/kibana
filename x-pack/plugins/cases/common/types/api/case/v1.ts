@@ -7,26 +7,26 @@
 
 import * as rt from 'io-ts';
 import {
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_BULK_GET_CASES,
+  MAX_CASES_PER_PAGE,
+  MAX_CASES_TO_UPDATE,
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_CATEGORY_LENGTH,
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_DELETE_IDS_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
-  MAX_TAGS_PER_CASE,
-  MAX_TITLE_LENGTH,
-  MAX_CATEGORY_LENGTH,
-  MAX_ASSIGNEES_FILTER_LENGTH,
-  MAX_CASES_PER_PAGE,
-  MAX_DELETE_IDS_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
-  MAX_CASES_TO_UPDATE,
-  MAX_BULK_GET_CASES,
-  MAX_CATEGORY_FILTER_LENGTH,
-  MAX_ASSIGNEES_PER_CASE,
-  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
-  limitedStringSchema,
-  limitedArraySchema,
   NonEmptyString,
+  limitedArraySchema,
+  limitedStringSchema,
   paginationSchema,
 } from '../../../schema';
 import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
@@ -34,14 +34,14 @@ import {
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
-  CasesRt,
   CaseStatusRt,
+  CasesRt,
   RelatedCaseRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
-import { CasesStatusResponseRt } from '../stats/v1';
 import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
+import { CasesStatusResponseRt } from '../stats/v1';
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,

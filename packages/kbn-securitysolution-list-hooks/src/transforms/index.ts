@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'fp-ts/lib/function';
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import type {
   CreateExceptionListItemSchema,
   EntriesArray,
@@ -15,6 +13,8 @@ import type {
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import { flow } from 'fp-ts/lib/function';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these

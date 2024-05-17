@@ -10,9 +10,9 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 
 import type { SimpleHit } from '../types';
+import { isWrappedDetectionAlert, isWrappedSignalHit } from '../utils/utils';
 import type { ThresholdSignalHistory } from './types';
 import { getThresholdTermsHash } from './utils';
-import { isWrappedDetectionAlert, isWrappedSignalHit } from '../utils/utils';
 
 interface GetThresholdSignalHistoryParams {
   alerts: Array<SearchHit<unknown>>;

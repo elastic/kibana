@@ -11,10 +11,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SAVED_OBJECT_TYPES } from '../../../common';
-import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { CasesConnectorRunParamsSchema } from './schema';
-import { CasesOracleService } from './cases_oracle_service';
-import { CasesService } from './cases_service';
+import { CASES_CONNECTOR_SUB_ACTION, CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClient } from '../../client';
 import {
   CasesConnectorError,
@@ -22,9 +19,12 @@ import {
   isCasesConnectorError,
 } from './cases_connector_error';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CaseConnectorRetryService } from './retry_service';
+import { CasesOracleService } from './cases_oracle_service';
+import { CasesService } from './cases_service';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
-import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
+import { CaseConnectorRetryService } from './retry_service';
+import { CasesConnectorRunParamsSchema } from './schema';
+import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;

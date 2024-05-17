@@ -11,13 +11,13 @@ import { CoreStart, Plugin } from '@kbn/core/public';
 import './index.scss';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { setStartServices } from './kibana_services';
 import {
-  createSavedObjectClass,
-  SavedObjectDecoratorRegistry,
   SavedObjectDecoratorConfig,
+  SavedObjectDecoratorRegistry,
+  createSavedObjectClass,
 } from './saved_object';
 import { SavedObject } from './types';
-import { setStartServices } from './kibana_services';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
@@ -28,7 +28,9 @@ export interface SavedObjectsStart {
    * @deprecated
    * @removeBy 8.8.0
    */
-  SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
+  SavedObjectClass: new (
+    raw: Record<string, any>
+  ) => SavedObject;
 }
 
 export interface SavedObjectsStartDeps {

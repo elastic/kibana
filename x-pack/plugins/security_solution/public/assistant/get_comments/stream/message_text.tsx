@@ -5,26 +5,26 @@
  * 2.0.
  */
 import {
-  EuiTable,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableHeaderCell,
   EuiMarkdownFormat,
   EuiSpacer,
+  EuiTable,
+  EuiTableHeaderCell,
+  EuiTableRow,
+  EuiTableRowCell,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   transparentize,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { Node } from 'unist';
-import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 
 interface Props {
   content: string;

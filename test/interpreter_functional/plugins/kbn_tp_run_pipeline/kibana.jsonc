@@ -6,11 +6,6 @@
     "id": "kbnTpRunPipeline",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "savedObjects",
-      "kibanaUtils",
-      "expressions"
-    ]
+    "requiredPlugins": ["data", "savedObjects", "kibanaUtils", "expressions"]
   }
 }

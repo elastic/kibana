@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   type IndexMapping,
   type IndexMappingMeta,
   getVirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { getBaseMappings, buildTypesMappings } from '../../core';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { cloneDeep } from 'lodash';
+import { buildTypesMappings, getBaseMappings } from '../../core';
 
 interface BuildIndexMappingsOpts {
   types: SavedObjectsType[];

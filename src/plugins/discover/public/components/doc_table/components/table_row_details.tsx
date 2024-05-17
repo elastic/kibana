@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useNavigationProps } from '../../../hooks/use_navigation_props';
 
 interface TableRowDetailsProps {

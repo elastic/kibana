@@ -17,8 +17,9 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
-      .toMatchInlineSnapshot(`
+    expect(
+      routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path)
+    ).toMatchInlineSnapshot(`
       Array [
         "/security/account",
         "/internal/security/capture-url",
@@ -43,8 +44,9 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
-      .toMatchInlineSnapshot(`
+    expect(
+      routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path)
+    ).toMatchInlineSnapshot(`
       Array [
         "/security/account",
         "/internal/security/capture-url",
@@ -71,8 +73,9 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
-      .toMatchInlineSnapshot(`
+    expect(
+      routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path)
+    ).toMatchInlineSnapshot(`
       Array [
         "/security/account",
         "/internal/security/capture-url",
@@ -99,8 +102,9 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
-      .toMatchInlineSnapshot(`
+    expect(
+      routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path)
+    ).toMatchInlineSnapshot(`
       Array [
         "/security/account",
         "/internal/security/capture-url",
@@ -126,8 +130,9 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
-      .toMatchInlineSnapshot(`
+    expect(
+      routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path)
+    ).toMatchInlineSnapshot(`
       Array [
         "/security/account",
         "/internal/security/capture-url",

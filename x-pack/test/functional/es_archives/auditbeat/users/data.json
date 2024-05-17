@@ -28,8 +28,8 @@
         "result": "fail",
         "session": "unset"
       },
-      "destination" : {
-        "ip" : "0.0.0.0"
+      "destination": {
+        "ip": "0.0.0.0"
       },
       "event": {
         "type": "user_err",
@@ -37,13 +37,13 @@
         "module": "auditd",
         "category": "user-login"
       },
-      "user" : {
-        "group" : {
-          "name" : "root",
-          "id" : "0"
+      "user": {
+        "group": {
+          "name": "root",
+          "id": "0"
         },
-        "id" : "0",
-        "name" : "root"
+        "id": "0",
+        "name": "root"
       },
       "process": {
         "exe": "/usr/sbin/sshd",

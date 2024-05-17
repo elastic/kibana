@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { isEmpty } from 'lodash';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 
 export interface DataViewByIdOrTitle {
   type: 'title' | 'id';

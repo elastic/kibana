@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { mapKeys, snakeCase } from 'lodash/fp';
+import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
+import { mapKeys, snakeCase } from 'lodash/fp';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   LEGACY_NOTIFICATIONS_ID,
   SERVER_APP_ID,
 } from '../../../../../../common/constants';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyNotificationRuleTypeDefinition } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRulesNotificationParams } from './legacy_types';
 import type { AlertAttributes } from '../../../rule_types/types';
 import { siemRuleActionGroups } from '../../../rule_types/utils/siem_rule_action_groups';
-import { formatAlertsForNotificationActions } from './schedule_notification_actions';
-import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';
 // eslint-disable-next-line no-restricted-imports
 import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
 // eslint-disable-next-line no-restricted-imports
 import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
+// eslint-disable-next-line no-restricted-imports
+import type { LegacyNotificationRuleTypeDefinition } from './legacy_types';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRulesNotificationParams } from './legacy_types';
+import { formatAlertsForNotificationActions } from './schedule_notification_actions';
+import { getNotificationResultsLink } from './utils';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

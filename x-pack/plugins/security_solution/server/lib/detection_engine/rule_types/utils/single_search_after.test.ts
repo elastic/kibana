@@ -5,16 +5,16 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  sampleDocSearchResultsNoSortId,
-  sampleDocSearchResultsWithSortId,
-} from '../__mocks__/es_results';
-import { singleSearchAfter } from './single_search_after';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import {
+  sampleDocSearchResultsNoSortId,
+  sampleDocSearchResultsWithSortId,
+} from '../__mocks__/es_results';
 import { buildEventsSearchQuery } from './build_events_query';
+import { singleSearchAfter } from './single_search_after';
 
 jest.mock('./build_events_query');
 const mockBuildEventsSearchQuery = buildEventsSearchQuery as jest.Mock;

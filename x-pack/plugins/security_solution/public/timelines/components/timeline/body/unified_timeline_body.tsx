@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ComponentProps, ReactElement } from 'react';
-import React, { useEffect, useState, useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { isEmpty } from 'lodash';
-import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
+import type { ComponentProps, ReactElement } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
-import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
+import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
 
 export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
   header: ReactElement;

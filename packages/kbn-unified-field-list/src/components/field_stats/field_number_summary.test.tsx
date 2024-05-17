@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { FieldNumberSummary } from './field_number_summary';
 
 const dataView = createStubDataView({

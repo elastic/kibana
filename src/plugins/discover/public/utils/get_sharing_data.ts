@@ -13,14 +13,14 @@ import type {
   ISearchSource,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  isNestedFieldParent,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
+  isNestedFieldParent,
 } from '@kbn/discover-utils';
+import type { Filter } from '@kbn/es-query';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   DiscoverAppState,
   isEqualFilters,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isConfigSchema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type {
   KibanaResponseFactory,
@@ -13,14 +14,13 @@ import type {
   RouteConfig,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
+import { CoreVersionedRouter, unwrapVersionedResponseBodyValidation } from '.';
 import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
-import { createRouter } from './mocks';
-import { CoreVersionedRouter, unwrapVersionedResponseBodyValidation } from '.';
 import { passThroughValidation } from './core_versioned_route';
-import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
-import { isConfigSchema } from '@kbn/config-schema';
+import { createRouter } from './mocks';
+import { Method } from './types';
 
 describe('Versioned route', () => {
   let router: Router;

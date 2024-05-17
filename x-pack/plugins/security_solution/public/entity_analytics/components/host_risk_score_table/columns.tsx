@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
+import type { HostRiskScoreColumns } from '.';
+import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../../common/search_strategy';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink } from '../../../common/components/links';
-import type { HostRiskScoreColumns } from '.';
-import * as i18n from './translations';
-import { HostsTableType } from '../../../explore/hosts/store/model';
-import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreFields, RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskScoreLevel } from '../severity/common';
-import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
-import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { HostDetailsLink } from '../../../common/components/links';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
+import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
+import { RiskScoreLevel } from '../severity/common';
+import * as i18n from './translations';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,

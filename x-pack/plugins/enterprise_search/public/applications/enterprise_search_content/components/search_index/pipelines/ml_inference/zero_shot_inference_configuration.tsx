@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 

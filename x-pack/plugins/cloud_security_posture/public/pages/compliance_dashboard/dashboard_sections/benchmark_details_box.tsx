@@ -14,15 +14,15 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
-import { getBenchmarkIdQuery } from './benchmarks_section';
 import { BenchmarkData } from '../../../../common/types_old';
+import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
+import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
+import { getBenchmarkIdQuery } from './benchmarks_section';
 
 interface BenchmarkInfo {
   name: string;

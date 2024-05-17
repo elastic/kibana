@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { EcsFlat } from '@elastic/ecs';
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EcsFlat } from '@elastic/ecs';
 import { omit } from 'lodash/fp';
 
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import {
   FieldType,
+  StorageResult,
   getDocsCount,
-  getErrorSummary,
+  getEnrichedFieldMetadata,
   getErrorSummaries,
   getErrorSummariesForRollup,
-  getEnrichedFieldMetadata,
+  getErrorSummary,
   getFieldTypes,
-  getPatternIlmPhaseDescription,
   getIlmPhaseDescription,
   getIncompatibleStatColor,
   getIndexNames,
@@ -26,8 +28,10 @@ import {
   getMissingTimestampFieldMetadata,
   getPartitionedFieldMetadata,
   getPartitionedFieldMetadataStats,
+  getPatternIlmPhaseDescription,
   getSameFamilyStatColor,
   getSizeInBytes,
+  getStorageResults,
   getTotalDocsCount,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
@@ -36,34 +40,32 @@ import {
   hasValidTimestampMapping,
   isMappingCompatible,
   postStorageResult,
-  getStorageResults,
-  StorageResult,
 } from './helpers';
 import {
-  hostNameWithTextMapping,
+  eventCategoryWithUnallowedValues,
   hostNameKeyword,
+  hostNameWithTextMapping,
   someField,
   someFieldKeyword,
-  sourceIpWithTextMapping,
   sourceIpKeyword,
+  sourceIpWithTextMapping,
   sourcePort,
   timestamp,
-  eventCategoryWithUnallowedValues,
 } from './mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockIlmExplain } from './mock/ilm_explain/mock_ilm_explain';
 import { mockMappingsProperties } from './mock/mappings_properties/mock_mappings_properties';
 import { alertIndexNoResults } from './mock/pattern_rollup/mock_alerts_pattern_rollup';
 import {
-  packetbeatNoResults,
-  packetbeatWithSomeErrors,
-} from './mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import {
   auditbeatNoResults,
   auditbeatWithAllResults,
 } from './mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import {
+  packetbeatNoResults,
+  packetbeatWithSomeErrors,
+} from './mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import { mockStats } from './mock/stats/mock_stats';
-import { mockStatsAuditbeatIndex } from './mock/stats/mock_stats_packetbeat_index';
 import { mockStatsPacketbeatIndex } from './mock/stats/mock_stats_auditbeat_index';
+import { mockStatsAuditbeatIndex } from './mock/stats/mock_stats_packetbeat_index';
 import {
   COLD_DESCRIPTION,
   FROZEN_DESCRIPTION,
@@ -80,8 +82,6 @@ import {
   PatternRollup,
   UnallowedValueCount,
 } from './types';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 import { bulkEditRulesRequestBodySchemaV1 } from '..';
+import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 export type BulkEditRulesRequestBody = TypeOf<typeof bulkEditRulesRequestBodySchemaV1>;
 

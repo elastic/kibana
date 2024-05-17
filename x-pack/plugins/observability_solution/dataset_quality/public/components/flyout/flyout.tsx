@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -14,18 +12,20 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiPanel,
   EuiSkeletonRectangle,
+  EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { Fragment } from 'react';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
+import { FlyoutSummary } from './flyout_summary/flyout_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
-import { FlyoutSummary } from './flyout_summary/flyout_summary';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

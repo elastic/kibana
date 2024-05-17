@@ -6,7 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { isRunningResponse, type ISearchStart } from '@kbn/data-plugin/public';
+import { type ISearchStart, isRunningResponse } from '@kbn/data-plugin/public';
 
 export interface AlertsQueryParams {
   alertIds: string[];

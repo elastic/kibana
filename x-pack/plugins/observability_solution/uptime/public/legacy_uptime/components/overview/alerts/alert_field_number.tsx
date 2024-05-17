@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
+import React, { useState } from 'react';
 
 interface AlertFieldNumberProps {
   'aria-label': string;

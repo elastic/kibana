@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
-import { getArgumentsForCommand } from '../../../service/parsed_command_input';
+import { useEffect, useMemo } from 'react';
 import type { CommandDefinition } from '../../..';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
-import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
-import { useWithInputCommandEntered } from '../../../hooks/state_selectors/use_with_input_command_entered';
 import { useWithCommandList } from '../../../hooks/state_selectors/use_with_command_list';
+import { useWithInputCommandEntered } from '../../../hooks/state_selectors/use_with_input_command_entered';
+import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
+import { getArgumentsForCommand } from '../../../service/parsed_command_input';
 
 const UNKNOWN_COMMAND_HINT = (commandName: string) =>
   i18n.translate('xpack.securitySolution.useInputHints.unknownCommand', {

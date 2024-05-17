@@ -8,11 +8,11 @@
 
 import './json_code_editor.scss';
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import { XJsonLang, monaco } from '@kbn/monaco';
+import React from 'react';
 
 const codeEditorAriaLabel = i18n.translate('unifiedDocViewer.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',

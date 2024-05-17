@@ -27,8 +27,9 @@ describe('config schema', () => {
       }
     `);
 
-    expect(ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true }))
-      .toMatchInlineSnapshot(`
+    expect(
+      ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
+    ).toMatchInlineSnapshot(`
       Object {
         "encryptionKey": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
         "keyRotation": Object {

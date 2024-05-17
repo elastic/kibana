@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getLastMetric } from './get_last_metric';
 import type { Series } from '../../../../common/types';
+import { getLastMetric } from './get_last_metric';
 
 describe('getLastMetric(series)', () => {
   test('returns the last metric', () => {

@@ -11,28 +11,28 @@ import { useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getNestedProperty } from '@kbn/ml-nested-property';
+import { i18n } from '@kbn/i18n';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import {
-  type FeatureImportance,
-  type FeatureImportanceClassName,
-  type TopClasses,
   BASIC_NUMERICAL_TYPES,
   DEFAULT_RESULTS_FIELD,
   EXTENDED_NUMERICAL_TYPES,
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
+  type FeatureImportance,
+  type FeatureImportanceClassName,
   OUTLIER_SCORE,
   TOP_CLASSES,
+  type TopClasses,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { type ErrorType, extractErrorMessage } from '@kbn/ml-error-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getNestedProperty } from '@kbn/ml-nested-property';
 
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 

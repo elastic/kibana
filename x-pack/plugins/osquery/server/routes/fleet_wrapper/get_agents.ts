@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import type { ListWithKuery } from '@kbn/fleet-plugin/server/types';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { filter, map, mapKeys, uniq } from 'lodash';
-import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
-import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { processAggregations } from '../../../common/utils/aggregations';
-import { getInternalSavedObjectsClient } from '../utils';
+import type { IRouter } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ListWithKuery } from '@kbn/fleet-plugin/server/types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
+import { filter, map, mapKeys, uniq } from 'lodash';
+import { satisfies } from 'semver';
+import { PLUGIN_ID } from '../../../common';
 import { getAgentsRequestQuerySchema } from '../../../common/api';
 import type { GetAgentsRequestQuerySchema } from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
-import { PLUGIN_ID } from '../../../common';
+import { processAggregations } from '../../../common/utils/aggregations';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { getInternalSavedObjectsClient } from '../utils';
 
 export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

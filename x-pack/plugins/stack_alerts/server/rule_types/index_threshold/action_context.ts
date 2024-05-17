@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
+import { i18n } from '@kbn/i18n';
 import { Params } from './rule_type_params';
 
 // rule type context provided to actions

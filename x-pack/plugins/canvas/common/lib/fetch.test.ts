@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fetch, arrayBufferFetch } from './fetch';
 import { AxiosInstance, HeadersDefaults } from 'axios';
+import { arrayBufferFetch, fetch } from './fetch';
 
 describe('fetch', () => {
   // WORKAROUND: wrong Axios types, should be fixed in https://github.com/axios/axios/pull/4475

@@ -10,8 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 
-import { NodeService } from './node_service';
 import type { NodeRolesConfig } from './node_config';
+import { NodeService } from './node_service';
 
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';

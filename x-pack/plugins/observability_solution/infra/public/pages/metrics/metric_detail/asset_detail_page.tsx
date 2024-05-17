@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { getAssetDetailsTabs } from '../../../common/asset_details_config/asset_details_tabs';
+import { AssetDetails } from '../../../components/asset_details';
 import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { AssetDetails } from '../../../components/asset_details';
 import { MetricsPageTemplate } from '../page_template';
-import { getAssetDetailsTabs } from '../../../common/asset_details_config/asset_details_tabs';
 
 export const AssetDetailPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();

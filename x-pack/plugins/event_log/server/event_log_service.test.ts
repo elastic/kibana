@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IEventLogConfig } from './types';
-import { EventLogService } from './event_log_service';
-import { contextMock } from './es/context.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { contextMock } from './es/context.mock';
+import { EventLogService } from './event_log_service';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
+import { IEventLogConfig } from './types';
 
 const loggingService = loggingSystemMock.create();
 const systemLogger = loggingService.get();

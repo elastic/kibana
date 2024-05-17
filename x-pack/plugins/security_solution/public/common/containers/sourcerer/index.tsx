@@ -5,42 +5,42 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
-import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import type {
-  SelectedDataView,
-  SourcererDataView,
-  SourcererUrlState,
-  RunTimeMappings,
-} from '../../store/sourcerer/model';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useUserInfo } from '../../../detections/components/user_info';
-import { timelineSelectors } from '../../../timelines/store';
 import {
   ALERTS_PATH,
+  CASES_PATH,
+  DATA_QUALITY_PATH,
   HOSTS_PATH,
-  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  CASES_PATH,
-  DATA_QUALITY_PATH,
+  USERS_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { createSourcererDataView } from './create_sourcerer_data_view';
-import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
-import { useFetchIndex } from '../source';
-import type { State } from '../../store';
-import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
-import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { useUserInfo } from '../../../detections/components/user_info';
+import { timelineSelectors } from '../../../timelines/store';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { useKibana } from '../../lib/kibana';
+import type { State } from '../../store';
+import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
+import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import type {
+  RunTimeMappings,
+  SelectedDataView,
+  SourcererDataView,
+  SourcererUrlState,
+} from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { useFetchIndex } from '../source';
+import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
+import { createSourcererDataView } from './create_sourcerer_data_view';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -162,9 +162,9 @@ export const useInitSourcerer = (
           id === scopeDataViewId
             ? selectedPatterns.length === 0 && missingPatterns.length === 0
             : timelineDataViewId === id
-            ? timelineMissingPatterns.length === 0 &&
-              timelineSelectedDataView?.patternList.length === 0
-            : false;
+              ? timelineMissingPatterns.length === 0 &&
+                timelineSelectedDataView?.patternList.length === 0
+              : false;
 
         indexFieldsSearch({
           dataViewId: id,

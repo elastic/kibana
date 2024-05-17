@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiStat } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiStat, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EMPTY_STAT } from '../../../../common/analytics';
 
 interface Props {

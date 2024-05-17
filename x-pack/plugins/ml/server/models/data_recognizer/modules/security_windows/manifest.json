@@ -33,10 +33,7 @@
       ],
       "must_not": {
         "terms": {
-          "_tier": [
-            "data_frozen",
-            "data_cold"
-          ]
+          "_tier": ["data_frozen", "data_cold"]
         }
       }
     }
@@ -153,7 +150,5 @@
       "job_id": "v3_windows_anomalous_script"
     }
   ],
-  "tags": [
-    "security"
-  ]
+  "tags": ["security"]
 }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 

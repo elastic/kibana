@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import {
-  MULTI_TERMS_AGGREGATE_ROUTE,
-  CURRENT_API_VERSION,
-  ORCHESTRATOR_NAMESPACE,
   CONTAINER_IMAGE_NAME,
+  CURRENT_API_VERSION,
   ENTRY_LEADER_ENTITY_ID,
+  MULTI_TERMS_AGGREGATE_ROUTE,
+  ORCHESTRATOR_NAMESPACE,
 } from '@kbn/kubernetes-security-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 const MOCK_INDEX = 'kubernetes-test-index';

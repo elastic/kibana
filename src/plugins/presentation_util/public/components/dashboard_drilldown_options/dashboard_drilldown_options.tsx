@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import React from 'react';
 
-import { DashboardDrilldownOptions } from './types';
 import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
+import { DashboardDrilldownOptions } from './types';
 
 export interface DashboardDrilldownOptionsProps {
   options: DashboardDrilldownOptions;

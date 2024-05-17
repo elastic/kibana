@@ -68,9 +68,7 @@
             "tags": [],
             "label": "{ disabled, value = null, setValue }",
             "description": [],
-            "signature": [
-              "TruncateLabelsOptionProps"
-            ],
+            "signature": ["TruncateLabelsOptionProps"],
             "path": "src/plugins/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -131,9 +129,7 @@
             "tags": [],
             "label": "position",
             "description": [],
-            "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
-            ],
+            "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -145,9 +141,7 @@
             "tags": [],
             "label": "scale",
             "description": [],
-            "signature": [
-              "Scale"
-            ],
+            "signature": ["Scale"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -170,9 +164,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "{ text?: string | undefined; }"
-            ],
+            "signature": ["{ text?: string | undefined; }"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -414,9 +406,7 @@
             "tags": [],
             "label": "valueAxis",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -442,9 +432,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "{ label: string; id: string; }"
-            ],
+            "signature": ["{ label: string; id: string; }"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -456,9 +444,7 @@
             "tags": [],
             "label": "drawLinesBetweenPoints",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -470,10 +456,7 @@
             "tags": [],
             "label": "interpolate",
             "description": [],
-            "signature": [
-              "InterpolationMode",
-              " | undefined"
-            ],
+            "signature": ["InterpolationMode", " | undefined"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -485,9 +468,7 @@
             "tags": [],
             "label": "lineWidth",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -499,9 +480,7 @@
             "tags": [],
             "label": "mode",
             "description": [],
-            "signature": [
-              "ChartMode"
-            ],
+            "signature": ["ChartMode"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -602,9 +581,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "number | null"
-            ],
+            "signature": ["number | null"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -616,9 +593,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": [
-              "number | null"
-            ],
+            "signature": ["number | null"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -630,9 +605,7 @@
             "tags": [],
             "label": "style",
             "description": [],
-            "signature": [
-              "ThresholdLineStyle"
-            ],
+            "signature": ["ThresholdLineStyle"],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -687,9 +660,7 @@
             "tags": [],
             "label": "setMultipleValidity",
             "description": [],
-            "signature": [
-              "(paramName: string, isValid: boolean) => void"
-            ],
+            "signature": ["(paramName: string, isValid: boolean) => void"],
             "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -701,9 +672,7 @@
                 "tags": [],
                 "label": "paramName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -716,9 +685,7 @@
                 "tags": [],
                 "label": "isValid",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -879,9 +846,7 @@
         "type": "Enum",
         "tags": [],
         "label": "ChartType",
-        "description": [
-          "\nType of charts able to render"
-        ],
+        "description": ["\nType of charts able to render"],
         "path": "src/plugins/vis_types/xy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

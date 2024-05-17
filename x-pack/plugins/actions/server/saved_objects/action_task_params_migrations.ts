@@ -7,16 +7,16 @@
 
 import {
   LogMeta,
-  SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationFn,
   SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
   SavedObjectReference,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
-import { ActionTaskParams, InMemoryConnector } from '../types';
 import { RelatedSavedObjects } from '../lib/related_saved_objects';
+import { ActionTaskParams, InMemoryConnector } from '../types';
 
 interface ActionTaskParamsLogMeta extends LogMeta {
   migrations: { actionTaskParamDocument: SavedObjectUnsanitizedDoc<ActionTaskParams> };

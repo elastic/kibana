@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { AssetDocumentTab } from './asset_document';
-import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { RightPanelContext } from '../../../document_details/right/context';
 import { mockContextValue } from '../../../document_details/right/mocks/mock_context';
-import userEvent from '@testing-library/user-event';
 import {
   JSON_TAB_CONTENT_TEST_ID,
   TABLE_TAB_CONTENT_TEST_ID,
 } from '../../../document_details/right/tabs/test_ids';
+import { AssetDocumentTab } from './asset_document';
+import { FLYOUT_BODY_TEST_ID } from './test_ids';
 
 describe('AssetDocumentTab', () => {
   it('renders', () => {

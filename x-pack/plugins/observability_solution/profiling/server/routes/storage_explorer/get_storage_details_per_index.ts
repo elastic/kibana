@@ -11,9 +11,9 @@ import {
   StorageDetailsPerIndex,
 } from '../../../common/storage_explorer';
 import {
+  getIndicesInfo,
   getIndicesLifecycleStatus,
   getIndicesStats,
-  getIndicesInfo,
   stacktracesIndices,
 } from './get_indices_stats';
 

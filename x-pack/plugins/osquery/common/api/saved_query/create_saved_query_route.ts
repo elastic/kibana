@@ -9,16 +9,16 @@ import * as t from 'io-ts';
 
 import type { Description } from '@kbn/osquery-io-ts-types';
 import {
-  id,
   descriptionOrUndefined,
+  ecsMappingOrUndefined,
+  id,
+  interval,
   platformOrUndefined,
   query,
-  versionOrUndefined,
-  interval,
-  snapshotOrUndefined,
   removedOrUndefined,
-  ecsMappingOrUndefined,
+  snapshotOrUndefined,
   timeoutOrUndefined,
+  versionOrUndefined,
 } from '@kbn/osquery-io-ts-types';
 
 export const createSavedQueryRequestSchema = t.type({

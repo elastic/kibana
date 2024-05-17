@@ -8,11 +8,11 @@
 import React, { useMemo, useContext, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EventStats } from '../../../common/endpoint/types';
-import { useColors } from './use_colors';
-import { useLinkProps } from './use_link_props';
-import { SideEffectContext } from './side_effect_context';
 import { FormattedCount } from '../../common/components/formatted_number';
 import { userSelectedResolverNode } from '../store/actions';
+import { SideEffectContext } from './side_effect_context';
+import { useColors } from './use_colors';
+import { useLinkProps } from './use_link_props';
 
 /**
  * A Submenu that displays a collection of "pills" for each related event

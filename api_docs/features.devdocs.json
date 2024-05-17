@@ -41,9 +41,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -103,9 +101,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -117,9 +113,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -145,9 +139,7 @@
             "tags": [],
             "label": "app",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -159,9 +151,7 @@
             "tags": [],
             "label": "catalogue",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -173,9 +163,7 @@
             "tags": [],
             "label": "management",
             "description": [],
-            "signature": [
-              "Readonly<{ [x: string]: readonly string[]; }> | undefined"
-            ],
+            "signature": ["Readonly<{ [x: string]: readonly string[]; }> | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -215,9 +203,7 @@
             "tags": [],
             "label": "alerting",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -229,9 +215,7 @@
             "tags": [],
             "label": "cases",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -296,9 +280,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FeatureKibanaPrivileges",
-        "description": [
-          "\nFeature privilege definition"
-        ],
+        "description": ["\nFeature privilege definition"],
         "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -312,9 +294,7 @@
             "description": [
               "\nWhether or not this specific privilege should be excluded from the base privileges."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -328,9 +308,7 @@
             "description": [
               "\nWhether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not\nsupport Spaces. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -344,9 +322,7 @@
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -360,9 +336,7 @@
             "description": [
               "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
             ],
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ],
+            "signature": ["{ [sectionId: string]: readonly string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -376,9 +350,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -392,9 +364,7 @@
             "description": [
               "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -408,9 +378,7 @@
             "description": [
               "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -456,9 +424,7 @@
             "description": [
               "\nIf your feature requires access to specific saved objects, then specify your access needs here."
             ],
-            "signature": [
-              "{ all: readonly string[]; read: readonly string[]; }"
-            ],
+            "signature": ["{ all: readonly string[]; read: readonly string[]; }"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -467,16 +433,12 @@
             "parentPluginId": "features",
             "id": "def-public.FeatureKibanaPrivileges.ui",
             "type": "Object",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "ui",
             "description": [
               "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -501,9 +463,7 @@
             "parentPluginId": "features",
             "id": "def-public.KibanaFeatureConfig.id",
             "type": "string",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "id",
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
@@ -534,9 +494,7 @@
             "description": [
               "\nAn optional description that will appear as subtext underneath the feature name"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -572,9 +530,7 @@
             "description": [
               "\nAn ordinal used to sort features relative to one another for display."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -588,9 +544,7 @@
             "description": [
               "\nWhether or not this feature should be excluded from the base privileges.\nThis is primarily helpful when migrating applications with a \"legacy\" privileges model\nto use Kibana privileges. We don't want these features to be considered part of the `all`\nor `read` base privileges in a minor release if the user was previously granted access\nusing an additional reserved role."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -620,9 +574,7 @@
             "description": [
               "\nAn array of app ids that are enabled when this feature is enabled.\nApps specified here will automatically cascade to the privileges defined below, unless specified differently there."
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -636,9 +588,7 @@
             "description": [
               "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on the current space.\n\nItems specified here will automatically cascade to the privileges defined below, unless specified differently there.\n"
             ],
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ],
+            "signature": ["{ [sectionId: string]: readonly string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -652,9 +602,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n\nItems specified here will automatically cascade to the privileges defined below, unless specified differently there."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -668,9 +616,7 @@
             "description": [
               "\nIf your feature grants access to specific Alert Types, you can specify them here to control visibility based on the current space.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -684,9 +630,7 @@
             "description": [
               "\nIf your feature grants access to specific case types, you can specify them here to control visibility based on the current space."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -695,13 +639,9 @@
             "parentPluginId": "features",
             "id": "def-public.KibanaFeatureConfig.privileges",
             "type": "CompoundType",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "privileges",
-            "description": [
-              "\nFeature privilege definition.\n"
-            ],
+            "description": ["\nFeature privilege definition.\n"],
             "signature": [
               "{ all: ",
               {
@@ -758,9 +698,7 @@
             "description": [
               "\nOptional message to display on the Role Management screen when configuring permissions for this feature."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -769,9 +707,7 @@
             "parentPluginId": "features",
             "id": "def-public.KibanaFeatureConfig.reserved",
             "type": "Object",
-            "tags": [
-              "private"
-            ],
+            "tags": ["private"],
             "label": "reserved",
             "description": [],
             "signature": [
@@ -792,9 +728,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SubFeatureConfig",
-        "description": [
-          "\nConfiguration for a sub-feature."
-        ],
+        "description": ["\nConfiguration for a sub-feature."],
         "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -805,9 +739,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "Display name for this sub-feature"
-            ],
+            "description": ["Display name for this sub-feature"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -821,9 +753,7 @@
             "description": [
               "\nWhether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not\nsupport Spaces. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -837,9 +767,7 @@
             "description": [
               "\nOptional message to display on the Role Management screen when configuring permissions for this feature."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -850,9 +778,7 @@
             "type": "Object",
             "tags": [],
             "label": "privilegeGroups",
-            "description": [
-              "Collection of privilege groups"
-            ],
+            "description": ["Collection of privilege groups"],
             "signature": [
               "readonly ",
               {
@@ -877,9 +803,7 @@
             "description": [
               "\nAn optional description that will appear as subtext underneath the sub-feature name"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -893,9 +817,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SubFeaturePrivilegeConfig",
-        "description": [
-          "\nConfiguration for a sub-feature privilege."
-        ],
+        "description": ["\nConfiguration for a sub-feature privilege."],
         "signature": [
           {
             "pluginId": "features",
@@ -937,9 +859,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nThe display name for this privilege."
-            ],
+            "description": ["\nThe display name for this privilege."],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -953,9 +873,7 @@
             "description": [
               "\nDenotes which Primary Feature Privilege this sub-feature privilege should be included in.\n`read` is also included in `all` automatically."
             ],
-            "signature": [
-              "\"none\" | \"read\" | \"all\""
-            ],
+            "signature": ["\"none\" | \"read\" | \"all\""],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -990,9 +908,7 @@
       "tags": [],
       "label": "FeaturesPluginSetup",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "x-pack/plugins/features/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1044,9 +960,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1249,9 +1163,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1311,9 +1223,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1325,9 +1235,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1353,9 +1261,7 @@
             "tags": [],
             "label": "app",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1367,9 +1273,7 @@
             "tags": [],
             "label": "catalogue",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1381,9 +1285,7 @@
             "tags": [],
             "label": "management",
             "description": [],
-            "signature": [
-              "Readonly<{ [x: string]: readonly string[]; }> | undefined"
-            ],
+            "signature": ["Readonly<{ [x: string]: readonly string[]; }> | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1423,9 +1325,7 @@
             "tags": [],
             "label": "alerting",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1437,9 +1337,7 @@
             "tags": [],
             "label": "cases",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1515,9 +1413,7 @@
             "parentPluginId": "features",
             "id": "def-server.ElasticsearchFeatureConfig.id",
             "type": "string",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "id",
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
@@ -1532,12 +1428,8 @@
             "type": "Object",
             "tags": [],
             "label": "management",
-            "description": [
-              "\nManagement sections associated with this feature.\n"
-            ],
-            "signature": [
-              "{ [sectionId: string]: string[]; } | undefined"
-            ],
+            "description": ["\nManagement sections associated with this feature.\n"],
+            "signature": ["{ [sectionId: string]: string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1551,9 +1443,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1562,9 +1452,7 @@
             "parentPluginId": "features",
             "id": "def-server.ElasticsearchFeatureConfig.privileges",
             "type": "Array",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "privileges",
             "description": [
               "\nFeature privilege definition. Specify one or more privileges which grant access to this feature.\nUsers must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.\n"
@@ -1592,9 +1480,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FeatureElasticsearchPrivileges",
-        "description": [
-          "\nElasticsearch Feature privilege definition"
-        ],
+        "description": ["\nElasticsearch Feature privilege definition"],
         "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1608,9 +1494,7 @@
             "description": [
               "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html\n"
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1624,9 +1508,7 @@
             "description": [
               "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices\n"
             ],
-            "signature": [
-              "{ [indexName: string]: string[]; } | undefined"
-            ],
+            "signature": ["{ [indexName: string]: string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1635,16 +1517,12 @@
             "parentPluginId": "features",
             "id": "def-server.FeatureElasticsearchPrivileges.requiredRoles",
             "type": "Array",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "requiredRoles",
             "description": [
               "\nA set of Elasticsearch roles which are required for this feature to be enabled.\n"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
             "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
@@ -1660,16 +1538,12 @@
             "parentPluginId": "features",
             "id": "def-server.FeatureElasticsearchPrivileges.ui",
             "type": "Array",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "ui",
             "description": [
               "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1683,9 +1557,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FeatureKibanaPrivileges",
-        "description": [
-          "\nFeature privilege definition"
-        ],
+        "description": ["\nFeature privilege definition"],
         "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1699,9 +1571,7 @@
             "description": [
               "\nWhether or not this specific privilege should be excluded from the base privileges."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1715,9 +1585,7 @@
             "description": [
               "\nWhether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not\nsupport Spaces. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1731,9 +1599,7 @@
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1747,9 +1613,7 @@
             "description": [
               "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
             ],
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ],
+            "signature": ["{ [sectionId: string]: readonly string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1763,9 +1627,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1779,9 +1641,7 @@
             "description": [
               "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1795,9 +1655,7 @@
             "description": [
               "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1843,9 +1701,7 @@
             "description": [
               "\nIf your feature requires access to specific saved objects, then specify your access needs here."
             ],
-            "signature": [
-              "{ all: readonly string[]; read: readonly string[]; }"
-            ],
+            "signature": ["{ all: readonly string[]; read: readonly string[]; }"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1854,16 +1710,12 @@
             "parentPluginId": "features",
             "id": "def-server.FeatureKibanaPrivileges.ui",
             "type": "Object",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "ui",
             "description": [
               "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1888,9 +1740,7 @@
             "parentPluginId": "features",
             "id": "def-server.KibanaFeatureConfig.id",
             "type": "string",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "id",
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
@@ -1921,9 +1771,7 @@
             "description": [
               "\nAn optional description that will appear as subtext underneath the feature name"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1959,9 +1807,7 @@
             "description": [
               "\nAn ordinal used to sort features relative to one another for display."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1975,9 +1821,7 @@
             "description": [
               "\nWhether or not this feature should be excluded from the base privileges.\nThis is primarily helpful when migrating applications with a \"legacy\" privileges model\nto use Kibana privileges. We don't want these features to be considered part of the `all`\nor `read` base privileges in a minor release if the user was previously granted access\nusing an additional reserved role."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2007,9 +1851,7 @@
             "description": [
               "\nAn array of app ids that are enabled when this feature is enabled.\nApps specified here will automatically cascade to the privileges defined below, unless specified differently there."
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2023,9 +1865,7 @@
             "description": [
               "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on the current space.\n\nItems specified here will automatically cascade to the privileges defined below, unless specified differently there.\n"
             ],
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ],
+            "signature": ["{ [sectionId: string]: readonly string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2039,9 +1879,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n\nItems specified here will automatically cascade to the privileges defined below, unless specified differently there."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2055,9 +1893,7 @@
             "description": [
               "\nIf your feature grants access to specific Alert Types, you can specify them here to control visibility based on the current space.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2071,9 +1907,7 @@
             "description": [
               "\nIf your feature grants access to specific case types, you can specify them here to control visibility based on the current space."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2082,13 +1916,9 @@
             "parentPluginId": "features",
             "id": "def-server.KibanaFeatureConfig.privileges",
             "type": "CompoundType",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "privileges",
-            "description": [
-              "\nFeature privilege definition.\n"
-            ],
+            "description": ["\nFeature privilege definition.\n"],
             "signature": [
               "{ all: ",
               {
@@ -2145,9 +1975,7 @@
             "description": [
               "\nOptional message to display on the Role Management screen when configuring permissions for this feature."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2156,9 +1984,7 @@
             "parentPluginId": "features",
             "id": "def-server.KibanaFeatureConfig.reserved",
             "type": "Object",
-            "tags": [
-              "private"
-            ],
+            "tags": ["private"],
             "label": "reserved",
             "description": [],
             "signature": [
@@ -2282,9 +2108,7 @@
             "parentPluginId": "features",
             "id": "def-server.PluginSetupContract.getKibanaFeatures",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "getKibanaFeatures",
             "description": [
               "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
@@ -2433,9 +2257,7 @@
             "parentPluginId": "features",
             "id": "def-server.PluginSetupContract.getElasticsearchFeatures",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "getElasticsearchFeatures",
             "description": [
               "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
@@ -2473,9 +2295,7 @@
             "description": [
               "\nIn the future, OSS features should register their own subfeature\nprivileges. This can be done when parts of Reporting are moved to\nsrc/plugins. For now, this method exists for `reporting` to tell\n`features` to include Reporting when registering OSS features."
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2544,9 +2364,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "FeaturePrivilegeIteratorOptions"
-                ],
+                "signature": ["FeaturePrivilegeIteratorOptions"],
                 "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2715,9 +2533,7 @@
         "tags": [],
         "label": "uiCapabilitiesRegex",
         "description": [],
-        "signature": [
-          "RegExp"
-        ],
+        "signature": ["RegExp"],
         "path": "x-pack/plugins/features/server/feature_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2745,9 +2561,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2950,9 +2764,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3012,9 +2824,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3026,9 +2836,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3054,9 +2862,7 @@
             "tags": [],
             "label": "app",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3068,9 +2874,7 @@
             "tags": [],
             "label": "catalogue",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3082,9 +2886,7 @@
             "tags": [],
             "label": "management",
             "description": [],
-            "signature": [
-              "Readonly<{ [x: string]: readonly string[]; }> | undefined"
-            ],
+            "signature": ["Readonly<{ [x: string]: readonly string[]; }> | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3124,9 +2926,7 @@
             "tags": [],
             "label": "alerting",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3138,9 +2938,7 @@
             "tags": [],
             "label": "cases",
             "description": [],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3214,9 +3012,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3349,9 +3145,7 @@
             "parentPluginId": "features",
             "id": "def-common.ElasticsearchFeatureConfig.id",
             "type": "string",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "id",
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
@@ -3366,12 +3160,8 @@
             "type": "Object",
             "tags": [],
             "label": "management",
-            "description": [
-              "\nManagement sections associated with this feature.\n"
-            ],
-            "signature": [
-              "{ [sectionId: string]: string[]; } | undefined"
-            ],
+            "description": ["\nManagement sections associated with this feature.\n"],
+            "signature": ["{ [sectionId: string]: string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3385,9 +3175,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3396,9 +3184,7 @@
             "parentPluginId": "features",
             "id": "def-common.ElasticsearchFeatureConfig.privileges",
             "type": "Array",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "privileges",
             "description": [
               "\nFeature privilege definition. Specify one or more privileges which grant access to this feature.\nUsers must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.\n"
@@ -3426,9 +3212,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FeatureElasticsearchPrivileges",
-        "description": [
-          "\nElasticsearch Feature privilege definition"
-        ],
+        "description": ["\nElasticsearch Feature privilege definition"],
         "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3442,9 +3226,7 @@
             "description": [
               "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html\n"
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3458,9 +3240,7 @@
             "description": [
               "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices\n"
             ],
-            "signature": [
-              "{ [indexName: string]: string[]; } | undefined"
-            ],
+            "signature": ["{ [indexName: string]: string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3469,16 +3249,12 @@
             "parentPluginId": "features",
             "id": "def-common.FeatureElasticsearchPrivileges.requiredRoles",
             "type": "Array",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "requiredRoles",
             "description": [
               "\nA set of Elasticsearch roles which are required for this feature to be enabled.\n"
             ],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
             "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
@@ -3494,16 +3270,12 @@
             "parentPluginId": "features",
             "id": "def-common.FeatureElasticsearchPrivileges.ui",
             "type": "Array",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "ui",
             "description": [
               "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
             ],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3517,9 +3289,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FeatureKibanaPrivileges",
-        "description": [
-          "\nFeature privilege definition"
-        ],
+        "description": ["\nFeature privilege definition"],
         "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3533,9 +3303,7 @@
             "description": [
               "\nWhether or not this specific privilege should be excluded from the base privileges."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3549,9 +3317,7 @@
             "description": [
               "\nWhether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not\nsupport Spaces. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3565,9 +3331,7 @@
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3581,9 +3345,7 @@
             "description": [
               "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on user privileges.\n"
             ],
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ],
+            "signature": ["{ [sectionId: string]: readonly string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3597,9 +3359,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3613,9 +3373,7 @@
             "description": [
               "\nIf your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.\n"
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3629,9 +3387,7 @@
             "description": [
               "\nIf your feature exposes a client-side application (most of them do!), then you can control access to them here.\n"
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3677,9 +3433,7 @@
             "description": [
               "\nIf your feature requires access to specific saved objects, then specify your access needs here."
             ],
-            "signature": [
-              "{ all: readonly string[]; read: readonly string[]; }"
-            ],
+            "signature": ["{ all: readonly string[]; read: readonly string[]; }"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3688,16 +3442,12 @@
             "parentPluginId": "features",
             "id": "def-common.FeatureKibanaPrivileges.ui",
             "type": "Object",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "ui",
             "description": [
               "\nA list of UI Capabilities that should be granted to users with this privilege.\nThese capabilities will automatically be namespaces within your feature id.\n"
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3722,9 +3472,7 @@
             "parentPluginId": "features",
             "id": "def-common.KibanaFeatureConfig.id",
             "type": "string",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "id",
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
@@ -3755,9 +3503,7 @@
             "description": [
               "\nAn optional description that will appear as subtext underneath the feature name"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3793,9 +3539,7 @@
             "description": [
               "\nAn ordinal used to sort features relative to one another for display."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3809,9 +3553,7 @@
             "description": [
               "\nWhether or not this feature should be excluded from the base privileges.\nThis is primarily helpful when migrating applications with a \"legacy\" privileges model\nto use Kibana privileges. We don't want these features to be considered part of the `all`\nor `read` base privileges in a minor release if the user was previously granted access\nusing an additional reserved role."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3841,9 +3583,7 @@
             "description": [
               "\nAn array of app ids that are enabled when this feature is enabled.\nApps specified here will automatically cascade to the privileges defined below, unless specified differently there."
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3857,9 +3597,7 @@
             "description": [
               "\nIf this feature includes management sections, you can specify them here to control visibility of those\npages based on the current space.\n\nItems specified here will automatically cascade to the privileges defined below, unless specified differently there.\n"
             ],
-            "signature": [
-              "{ [sectionId: string]: readonly string[]; } | undefined"
-            ],
+            "signature": ["{ [sectionId: string]: readonly string[]; } | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3873,9 +3611,7 @@
             "description": [
               "\nIf this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.\n\nItems specified here will automatically cascade to the privileges defined below, unless specified differently there."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3889,9 +3625,7 @@
             "description": [
               "\nIf your feature grants access to specific Alert Types, you can specify them here to control visibility based on the current space.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3905,9 +3639,7 @@
             "description": [
               "\nIf your feature grants access to specific case types, you can specify them here to control visibility based on the current space."
             ],
-            "signature": [
-              "readonly string[] | undefined"
-            ],
+            "signature": ["readonly string[] | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3916,13 +3648,9 @@
             "parentPluginId": "features",
             "id": "def-common.KibanaFeatureConfig.privileges",
             "type": "CompoundType",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "privileges",
-            "description": [
-              "\nFeature privilege definition.\n"
-            ],
+            "description": ["\nFeature privilege definition.\n"],
             "signature": [
               "{ all: ",
               {
@@ -3979,9 +3707,7 @@
             "description": [
               "\nOptional message to display on the Role Management screen when configuring permissions for this feature."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3990,9 +3716,7 @@
             "parentPluginId": "features",
             "id": "def-common.KibanaFeatureConfig.reserved",
             "type": "Object",
-            "tags": [
-              "private"
-            ],
+            "tags": ["private"],
             "label": "reserved",
             "description": [],
             "signature": [
@@ -4013,9 +3737,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SubFeatureConfig",
-        "description": [
-          "\nConfiguration for a sub-feature."
-        ],
+        "description": ["\nConfiguration for a sub-feature."],
         "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4026,9 +3748,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "Display name for this sub-feature"
-            ],
+            "description": ["Display name for this sub-feature"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4042,9 +3762,7 @@
             "description": [
               "\nWhether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not\nsupport Spaces. Defaults to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4058,9 +3776,7 @@
             "description": [
               "\nOptional message to display on the Role Management screen when configuring permissions for this feature."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4071,9 +3787,7 @@
             "type": "Object",
             "tags": [],
             "label": "privilegeGroups",
-            "description": [
-              "Collection of privilege groups"
-            ],
+            "description": ["Collection of privilege groups"],
             "signature": [
               "readonly ",
               {
@@ -4098,9 +3812,7 @@
             "description": [
               "\nAn optional description that will appear as subtext underneath the sub-feature name"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4114,9 +3826,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SubFeaturePrivilegeConfig",
-        "description": [
-          "\nConfiguration for a sub-feature privilege."
-        ],
+        "description": ["\nConfiguration for a sub-feature privilege."],
         "signature": [
           {
             "pluginId": "features",
@@ -4158,9 +3868,7 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [
-              "\nThe display name for this privilege."
-            ],
+            "description": ["\nThe display name for this privilege."],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4174,9 +3882,7 @@
             "description": [
               "\nDenotes which Primary Feature Privilege this sub-feature privilege should be included in.\n`read` is also included in `all` automatically."
             ],
-            "signature": [
-              "\"none\" | \"read\" | \"all\""
-            ],
+            "signature": ["\"none\" | \"read\" | \"all\""],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4206,9 +3912,7 @@
         "type": "Interface",
         "tags": [],
         "label": "SubFeaturePrivilegeGroupConfig",
-        "description": [
-          "\nConfiguration for a sub-feature privilege group."
-        ],
+        "description": ["\nConfiguration for a sub-feature privilege group."],
         "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4222,9 +3926,7 @@
             "description": [
               "\nThe type of privilege group.\n- `mutually_exclusive`::\n    Users will be able to select at most one privilege within this group.\n    Privileges must be specified in descending order of permissiveness (e.g. `All`, `Read`, not `Read`, `All)\n- `independent`::\n    Users will be able to select any combination of privileges within this group."
             ],
-            "signature": [
-              "\"mutually_exclusive\" | \"independent\""
-            ],
+            "signature": ["\"mutually_exclusive\" | \"independent\""],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4235,9 +3937,7 @@
             "type": "Object",
             "tags": [],
             "label": "privileges",
-            "description": [
-              "\nThe privileges which belong to this group."
-            ],
+            "description": ["\nThe privileges which belong to this group."],
             "signature": [
               "readonly ",
               {
@@ -4268,9 +3968,7 @@
         "description": [
           "\nThe type of privilege group.\n- `mutually_exclusive`::\n    Users will be able to select at most one privilege within this group.\n    Privileges must be specified in descending order of permissiveness (e.g. `All`, `Read`, not `Read`, `All)\n- `independent`::\n    Users will be able to select any combination of privileges within this group."
         ],
-        "signature": [
-          "\"mutually_exclusive\" | \"independent\""
-        ],
+        "signature": ["\"mutually_exclusive\" | \"independent\""],
         "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,

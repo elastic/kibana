@@ -1,3 +1,4 @@
+import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { getPercentileValue } from './percentiles_get_value';
-import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 describe('getPercentileValue', () => {
   test('should return the correct value for an IResponseAggConfig', () => {

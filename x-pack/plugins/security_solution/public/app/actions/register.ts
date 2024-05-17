@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/public';
+import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '@kbn/discover-plugin/public';
 import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { History } from 'history';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '@kbn/discover-plugin/public';
-import type { CoreSetup } from '@kbn/core/public';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
+import {
+  createAddToTimelineCellActionFactory,
+  createAddToTimelineDiscoverCellActionFactory,
+  createAddToTimelineLensAction,
+  createInvestigateInNewTimelineCellActionFactory,
+} from './add_to_timeline';
+import { SecurityCellActionsTrigger } from './constants';
+import {
+  createCopyToClipboardCellActionFactory,
+  createCopyToClipboardDiscoverCellActionFactory,
+  createCopyToClipboardLensAction,
+} from './copy_to_clipboard';
 import {
   createFilterInCellActionFactory,
   createFilterInDiscoverCellActionFactory,
   createFilterOutCellActionFactory,
   createFilterOutDiscoverCellActionFactory,
 } from './filter';
-import {
-  createAddToTimelineLensAction,
-  createAddToTimelineCellActionFactory,
-  createInvestigateInNewTimelineCellActionFactory,
-  createAddToTimelineDiscoverCellActionFactory,
-} from './add_to_timeline';
+import { createFilterInLensAction } from './filter/lens/filter_in';
+import { createFilterOutLensAction } from './filter/lens/filter_out';
+import { registerDiscoverHistogramActions } from './register_discover_histogram_actions';
 import { createShowTopNCellActionFactory } from './show_top_n';
-import {
-  createCopyToClipboardLensAction,
-  createCopyToClipboardCellActionFactory,
-  createCopyToClipboardDiscoverCellActionFactory,
-} from './copy_to_clipboard';
-import { createToggleColumnCellActionFactory } from './toggle_column';
+import { enhanceActionWithTelemetry } from './telemetry';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
-import { SecurityCellActionsTrigger } from './constants';
+import { createToggleColumnCellActionFactory } from './toggle_column';
 import type {
   DiscoverCellActionName,
   DiscoverCellActions,
   SecurityCellActionName,
   SecurityCellActions,
 } from './types';
-import { enhanceActionWithTelemetry } from './telemetry';
-import { registerDiscoverHistogramActions } from './register_discover_histogram_actions';
-import { createFilterInLensAction } from './filter/lens/filter_in';
-import { createFilterOutLensAction } from './filter/lens/filter_out';
 
 export const registerUIActions = (
   store: SecurityAppStore,

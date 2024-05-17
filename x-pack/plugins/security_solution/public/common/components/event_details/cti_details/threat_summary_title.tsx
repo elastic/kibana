@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-import React from 'react';
 import { EuiTitle } from '@elastic/eui';
+import React from 'react';
+import styled from 'styled-components';
 
 const StyledH5 = styled.h5`
   line-height: 1.7rem;

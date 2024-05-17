@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { STACKED_OPTIONS, X_ACCESSOR_INDEX } from '../../../constants';
 import { getStackAccessors } from './stack_format';
-import { X_ACCESSOR_INDEX, STACKED_OPTIONS } from '../../../constants';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/stack_format.js', () => {
   describe('getStackAccessors()', () => {

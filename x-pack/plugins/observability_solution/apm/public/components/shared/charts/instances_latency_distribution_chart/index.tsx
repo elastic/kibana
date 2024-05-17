@@ -14,20 +14,20 @@ import {
   Position,
   ScaleType,
   Settings,
+  Tooltip,
   TooltipInfo,
   TooltipProps,
   TooltipType,
-  Tooltip,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import { asTransactionRate, getDurationFormatter } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import * as urlHelpers from '../../links/url_helpers';

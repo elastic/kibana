@@ -1,3 +1,6 @@
+import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
+import { ComponentMeta } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +9,15 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { STORYBOOK_SECTION } from '../constants';
-import { FormHook } from '../types';
 import { useForm } from '../hooks/use_form';
+import { FormHook } from '../types';
 
+import { useMultiFieldStories } from './__stories__';
 import { Form } from './form';
 import { UseField } from './use_field';
 import { UseMultiFields } from './use_multi_fields';
-import { useMultiFieldStories } from './__stories__';
 
 const { UseMultiFieldBasic } = useMultiFieldStories;
 

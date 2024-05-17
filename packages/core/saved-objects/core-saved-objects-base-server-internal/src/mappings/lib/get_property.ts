@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { toPath } from 'lodash';
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
+import { toPath } from 'lodash';
 import type { IndexMapping } from '../types';
 
 function getPropertyMappingFromObjectMapping(

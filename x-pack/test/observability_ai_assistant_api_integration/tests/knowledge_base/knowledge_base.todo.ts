@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import http, { Server } from 'http';
 import expect from '@kbn/expect';
 import getPort from 'get-port';
-import http, { Server } from 'http';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 /*

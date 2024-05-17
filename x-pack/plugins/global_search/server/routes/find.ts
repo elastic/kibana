@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { reduce, map } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { GlobalSearchRouter } from '../types';
+import { map, reduce } from 'rxjs';
 import { GlobalSearchFindError } from '../../common/errors';
+import { GlobalSearchRouter } from '../types';
 
 export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
   router.post(

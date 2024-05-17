@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AxiosResponse, AxiosError } from 'axios';
-import { isEmpty, isObjectLike, get } from 'lodash';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { AxiosError, AxiosResponse } from 'axios';
+import { get, isEmpty, isObjectLike } from 'lodash';
 import * as i18n from './translations';
 
 export const createServiceError = (error: AxiosError, message: string) => {
@@ -90,8 +90,11 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
 export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
 export const stringifyObjValues = (properties: Record<string, string | string[]>) => ({
-  case: Object.entries(properties).reduce((acc, [key, value]) => {
-    acc[key] = JSON.stringify(value);
-    return acc;
-  }, {} as Record<string, string>),
+  case: Object.entries(properties).reduce(
+    (acc, [key, value]) => {
+      acc[key] = JSON.stringify(value);
+      return acc;
+    },
+    {} as Record<string, string>
+  ),
 });

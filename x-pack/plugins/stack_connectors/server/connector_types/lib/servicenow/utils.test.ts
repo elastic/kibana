@@ -7,19 +7,19 @@
 
 import axios from 'axios';
 
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
+import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  prepareIncident,
-  createServiceError,
-  getPushedDate,
-  throwIfSubActionIsNotSupported,
-  getAxiosInstance,
-} from './utils';
 import type { ResponseError } from './types';
-import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import {
+  createServiceError,
+  getAxiosInstance,
+  getPushedDate,
+  prepareIncident,
+  throwIfSubActionIsNotSupported,
+} from './utils';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),

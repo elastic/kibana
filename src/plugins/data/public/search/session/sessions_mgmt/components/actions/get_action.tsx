@@ -13,8 +13,8 @@ import { UISession } from '../../types';
 import { createDeleteActionDescriptor } from './delete_button';
 import { createExtendActionDescriptor } from './extend_button';
 import { createInspectActionDescriptor } from './inspect_button';
-import { ACTION } from './types';
 import { createRenameActionDescriptor } from './rename_button';
+import { ACTION } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,

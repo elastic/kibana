@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { of } from 'rxjs';
 import { ControlsDataService } from './types';
 
 export type DataServiceFactory = PluginServiceFactory<ControlsDataService>;

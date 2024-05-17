@@ -9,12 +9,12 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
-import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { AlertsAggregation, AlertsBucket, AlertsGroupBucket, HistogramData } from './types';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
 

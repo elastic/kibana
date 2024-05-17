@@ -8,8 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { copyPersistentState } from '../../reducers/copy_persistent_state';
-import { IField } from '../fields/field';
 import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import {
   AbstractSourceDescriptor,
@@ -19,8 +17,10 @@ import {
   StyleDescriptor,
   Timeslice,
 } from '../../../common/descriptor_types';
-import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
+import { IField } from '../fields/field';
+import { IStyle } from '../styles/style';
 
 export type OnSourceChangeArgs = {
   propName: string;

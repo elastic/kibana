@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
 import {
   FIELD_TYPES,
-  UseField,
-  ToggleField,
   FieldConfig,
+  ToggleField,
+  UseField,
 } from '../../../../../../../shared_imports';
 
-import { FieldsConfig, to, from } from '../shared';
+import { FieldsConfig, from, to } from '../shared';
 
 export const fieldsConfig: FieldsConfig = {
   ignore_missing: {

@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
+import {
+  PluginInitializerContext,
+  StartServicesAccessor,
+  ToastsStart as ToastService,
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { ISearchOptions } from '@kbn/search-types';
 import { PublicContract, SerializableRecord } from '@kbn/utility-types';
+import moment from 'moment';
 import {
   distinctUntilChanged,
   filter,
@@ -21,39 +29,31 @@ import {
 } from 'rxjs';
 import {
   BehaviorSubject,
-  combineLatest,
   EMPTY,
+  Observable,
+  Subscription,
+  combineLatest,
   from,
   merge,
-  Observable,
   of,
-  Subscription,
   timer,
 } from 'rxjs';
-import {
-  PluginInitializerContext,
-  StartServicesAccessor,
-  ToastsStart as ToastService,
-} from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { ISearchOptions } from '@kbn/search-types';
 import { SearchUsageCollector } from '../..';
 import { ConfigSchema } from '../../../config';
+import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { formatSessionName } from './lib/session_name_formatter';
 import type {
   SessionMeta,
   SessionStateContainer,
   SessionStateInternal,
 } from './search_session_state';
 import {
-  createSessionStateContainer,
   SearchSessionState,
   TrackedSearchState,
+  createSessionStateContainer,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
-import { NowProviderInternalContract } from '../../now_provider';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
-import { formatSessionName } from './lib/session_name_formatter';
 
 /**
  * Polling interval for keeping completed searches alive
@@ -115,7 +115,7 @@ interface TrackSearchHandler {
    */
   beforePoll(): [
     currentSearchState: { isSearchStored: boolean },
-    afterPoll: (newSearchState: { isSearchStored: boolean }) => void
+    afterPoll: (newSearchState: { isSearchStored: boolean }) => void,
   ];
 }
 

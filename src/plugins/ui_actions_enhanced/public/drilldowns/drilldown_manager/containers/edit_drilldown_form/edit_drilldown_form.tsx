@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { DrilldownManagerTitle } from '../drilldown_manager_title';
-import { useDrilldownManager } from '../context';
-import { ActionFactoryView } from '../action_factory_view';
-import { DrilldownManagerFooter } from '../drilldown_manager_footer';
-import { DrilldownStateForm } from '../drilldown_state_form';
 import { ButtonSubmit } from '../../components/button_submit';
+import { ActionFactoryView } from '../action_factory_view';
+import { useDrilldownManager } from '../context';
+import { DrilldownManagerFooter } from '../drilldown_manager_footer';
+import { DrilldownManagerTitle } from '../drilldown_manager_title';
+import { DrilldownStateForm } from '../drilldown_state_form';
 
 const txtEditDrilldown = i18n.translate(
   'uiActionsEnhanced.drilldowns.containers.editDrilldownForm.title',

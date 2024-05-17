@@ -1,3 +1,5 @@
+import { MockedCodeEditor } from '@kbn/code-editor-mock';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +7,7 @@
  * 2.0.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
-import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

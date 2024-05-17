@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { transformRawCounter } from './register_usage_counters_collector';
 import { rawUsageCounters } from './__fixtures__/usage_counter_saved_objects';
+import { transformRawCounter } from './register_usage_counters_collector';
 
 describe('transformRawCounter', () => {
   it('transforms saved object raw entries', () => {

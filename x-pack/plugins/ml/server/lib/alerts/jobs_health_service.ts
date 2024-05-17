@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { groupBy, keyBy, memoize, partition } from 'lodash';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import type { MlClient } from '../ml_client';
-import type { JobSelection } from '../../routes/schemas/alerting_schema';
-import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
+import { groupBy, keyBy, memoize, partition } from 'lodash';
 import {
   ALERT_DATAFEED_RESULTS,
   ALERT_DELAYED_DATA_RESULTS,
@@ -23,7 +20,22 @@ import {
   HEALTH_CHECK_NAMES,
 } from '../../../common/constants/alerts';
 import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import {
+  getResultJobsHealthRuleConfig,
+  resolveLookbackInterval,
+} from '../../../common/util/alerts';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { annotationServiceProvider } from '../../models/annotation_service';
+import type { AnnotationService } from '../../models/annotation_service/annotation';
+import {
+  type JobAuditMessagesService,
+  jobAuditMessagesProvider,
+} from '../../models/job_audit_messages/job_audit_messages';
+import { type DatafeedsService, datafeedsProvider } from '../../models/job_service/datafeeds';
+import type { JobSelection } from '../../routes/schemas/alerting_schema';
 import type { GetGuards } from '../../shared_services/shared_services';
+import type { MlClient } from '../ml_client';
 import type {
   AnomalyDetectionJobHealthAlertPayload,
   AnomalyDetectionJobsHealthAlertContext,
@@ -33,18 +45,6 @@ import type {
   MmlTestPayloadResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
-import {
-  getResultJobsHealthRuleConfig,
-  resolveLookbackInterval,
-} from '../../../common/util/alerts';
-import type { AnnotationService } from '../../models/annotation_service/annotation';
-import { annotationServiceProvider } from '../../models/annotation_service';
-import { parseInterval } from '../../../common/util/parse_interval';
-import {
-  jobAuditMessagesProvider,
-  type JobAuditMessagesService,
-} from '../../models/job_audit_messages/job_audit_messages';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 export interface TestResult {
   name: string;

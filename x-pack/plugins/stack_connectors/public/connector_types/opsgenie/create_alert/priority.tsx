@@ -10,8 +10,8 @@ import React, { useCallback } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
-import * as i18n from './translations';
 import { EditActionCallback } from '../types';
+import * as i18n from './translations';
 
 interface PriorityComponentProps {
   priority: OpsgenieCreateAlertParams['priority'];

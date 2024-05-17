@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { type EmbeddableApiContext, apiIsOfType } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,

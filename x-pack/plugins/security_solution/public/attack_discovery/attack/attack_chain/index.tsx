@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
-import { Tactic } from './tactic';
 import { getTacticMetadata } from '../../helpers';
 import type { AttackDiscovery } from '../../types';
+import { Tactic } from './tactic';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

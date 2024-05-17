@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
-import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   Alerts,
   createCaseAttachAlertAndDeleteCase,
@@ -15,59 +16,58 @@ import {
   getAlertById,
   getSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
+import {
+  users as api_int_users,
+  secAllUser,
+} from '../../../../../api_integration/apis/cases/common/users';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../common/utils/security_solution';
+import {
+  bulkCreateAttachments,
+  createAndUploadFile,
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  deleteAllFiles,
+  deleteCases,
+  findAttachments,
+  getAllComments,
+  getCase,
+  getCaseUserActions,
+  getComment,
+  listFiles,
+  superUserSpace1Auth,
+} from '../../../../common/lib/api';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
+import { User } from '../../../../common/lib/authentication/types';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsOnlyReadAlerts,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  secOnlyReadAlerts,
+  secSolutionOnlyReadNoIndexAlerts,
+  superUser,
+} from '../../../../common/lib/authentication/users';
+import {
+  OBSERVABILITY_FILE_KIND,
+  SECURITY_SOLUTION_FILE_KIND,
+} from '../../../../common/lib/constants';
 import {
   getFilesAttachmentReq,
   getPostCaseRequest,
   postCommentUserReq,
 } from '../../../../common/lib/mock';
-import {
-  createCase,
-  deleteCases,
-  createComment,
-  getComment,
-  getCase,
-  superUserSpace1Auth,
-  getCaseUserActions,
-  deleteAllCaseItems,
-  createAndUploadFile,
-  deleteAllFiles,
-  listFiles,
-  findAttachments,
-  bulkCreateAttachments,
-  getAllComments,
-} from '../../../../common/lib/api';
-import {
-  secOnly,
-  secOnlyRead,
-  globalRead,
-  obsOnlyRead,
-  obsSecRead,
-  noKibanaPrivileges,
-  obsOnly,
-  superUser,
-  obsOnlyReadAlerts,
-  obsSec,
-  secSolutionOnlyReadNoIndexAlerts,
-  secOnlyReadAlerts,
-} from '../../../../common/lib/authentication/users';
-import {
-  secAllUser,
-  users as api_int_users,
-} from '../../../../../api_integration/apis/cases/common/users';
-import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
-import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import {
-  OBSERVABILITY_FILE_KIND,
-  SECURITY_SOLUTION_FILE_KIND,
-} from '../../../../common/lib/constants';
-import { User } from '../../../../common/lib/authentication/types';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../common/utils/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

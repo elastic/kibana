@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { FC, SyntheticEvent } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
 import {
-  EuiFlyoutHeader,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutHeader,
   useEuiTheme,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC, SyntheticEvent } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
-  HEADER_ACTIONS_TEST_ID,
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
+  HEADER_ACTIONS_TEST_ID,
   HEADER_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 

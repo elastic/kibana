@@ -8,9 +8,9 @@
 
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import type { IBasePath } from '@kbn/core-http-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { IS_IE } from './url_overflow';
 

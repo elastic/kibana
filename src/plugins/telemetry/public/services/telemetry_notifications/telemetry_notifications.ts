@@ -7,8 +7,8 @@
  */
 
 import type { CoreStart, HttpStart, OverlayStart } from '@kbn/core/public';
-import type { TelemetryService } from '../telemetry_service';
 import type { TelemetryConstants } from '../..';
+import type { TelemetryService } from '../telemetry_service';
 import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 
 interface TelemetryNotificationsConstructor

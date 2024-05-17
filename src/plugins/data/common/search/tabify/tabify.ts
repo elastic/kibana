@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { TabbedAggResponseWriter } from './response_writer';
+import { get } from 'lodash';
+import { AggGroupNames, IAggConfigs } from '../aggs';
 import { TabifyBuckets } from './buckets';
+import { TabbedAggResponseWriter } from './response_writer';
 import type { TabbedResponseWriterOptions } from './types';
 import { AggResponseBucket } from './types';
-import { AggGroupNames, IAggConfigs } from '../aggs';
 
 /**
  * read an aggregation from a bucket, which *might* be found at key (if

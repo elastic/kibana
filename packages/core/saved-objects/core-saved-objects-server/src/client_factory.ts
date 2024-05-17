@@ -8,8 +8,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  SavedObjectsClientContract,
   ISavedObjectsRepository,
+  SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectsEncryptionExtension } from './extensions/encryption';
 import type { SavedObjectsExtensions } from './extensions/extensions';

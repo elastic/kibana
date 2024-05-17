@@ -10,13 +10,13 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import {
-  SyncStatus,
+  ConnectorIndex,
   ConnectorStatus,
   ConnectorViewIndex,
-  ConnectorIndex,
   ElasticsearchIndex,
-  IngestionStatus,
   IngestionMethod,
+  IngestionStatus,
+  SyncStatus,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';

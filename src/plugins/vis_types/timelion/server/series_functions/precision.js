@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import reduce from '../lib/reduce';
 import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
+import reduce from '../lib/reduce';
 
 export default new Chainable('precision', {
   args: [

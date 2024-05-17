@@ -12,8 +12,8 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiPortal, // EuiPortal is a temporary requirement to use EuiFlyout with "ownFocus"
   EuiText,
   EuiTextColor,

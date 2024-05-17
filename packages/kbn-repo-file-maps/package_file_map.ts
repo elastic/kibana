@@ -8,17 +8,20 @@
 
 import Path from 'path';
 
-import { SetMap } from '@kbn/set-map';
+import type { LintTarget } from '@kbn/repo-linter';
 import type { Package } from '@kbn/repo-packages';
 import type { RepoPath } from '@kbn/repo-path';
-import type { LintTarget } from '@kbn/repo-linter';
+import { SetMap } from '@kbn/set-map';
 
 export class PackageFileMap {
   private readonly filesByPackage = new SetMap<Package, RepoPath>();
   private readonly packagesByFile = new Map<string, Package>();
   private readonly unassignedFiles: RepoPath[] = [];
 
-  constructor(packages: Package[], private readonly allFiles: Iterable<RepoPath>) {
+  constructor(
+    packages: Package[],
+    private readonly allFiles: Iterable<RepoPath>
+  ) {
     const repoRelCache = new Map<string, Package | null>(
       packages.map((p) => [p.normalizedRepoRelativeDir, p])
     );

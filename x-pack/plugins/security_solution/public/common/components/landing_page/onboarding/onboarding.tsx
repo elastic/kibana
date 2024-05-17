@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React, { useCallback, useMemo } from 'react';
 
 import { TogglePanel } from './toggle_panel';
 
-import { useTogglePanel } from './hooks/use_toggle_panel';
-import { Progress } from './progress_bar';
-import { StepContextProvider } from './context/step_context';
-import { CONTENT_WIDTH } from './helpers';
-import { WelcomeHeader } from './welcome_header';
-import { Footer } from './footer';
-import { useScrollToHash } from './hooks/use_scroll';
 import type { SecurityProductTypes } from './configs';
 import { ProductLine } from './configs';
+import { StepContextProvider } from './context/step_context';
+import { Footer } from './footer';
+import { CONTENT_WIDTH } from './helpers';
+import { useScrollToHash } from './hooks/use_scroll';
+import { useTogglePanel } from './hooks/use_toggle_panel';
+import { Progress } from './progress_bar';
+import { WelcomeHeader } from './welcome_header';
 
-import type { StepId } from './types';
-import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
+import { useOnboardingStyles } from './styles/onboarding.styles';
+import type { StepId } from './types';
 
 interface OnboardingProps {
   indicesExist?: boolean;

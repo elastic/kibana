@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
@@ -42,7 +42,7 @@ export const SplitFieldSelect: FC<Props> = ({
         label: f.name,
         field: f,
         css: optionCss,
-      } as DropDownLabel)
+      }) as DropDownLabel
   );
 
   const selection: EuiComboBoxOptionOption[] = [];

@@ -16,11 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import { getTestRunDetailLink } from '../common/links/test_details_link';
-import { useLocations } from '../../hooks';
-import { useSyntheticsSettingsContext } from '../../contexts';
 import { JourneyStep, Ping } from '../../../../../common/runtime_types';
+import { useSyntheticsSettingsContext } from '../../contexts';
+import { useLocations } from '../../hooks';
 import { formatDuration } from '../../utils/formatting';
+import { getTestRunDetailLink } from '../common/links/test_details_link';
 
 interface Props {
   checkGroupId?: string;

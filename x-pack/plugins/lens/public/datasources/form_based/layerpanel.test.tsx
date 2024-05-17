@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
-import { FormBasedPrivateState } from './types';
-import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { DataViewsList } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
-import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
-import { getFieldByNameFactory } from './pure_helpers';
-import { TermsIndexPatternColumn } from './operations';
+import { ReactWrapper } from 'enzyme';
+import React, { MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
+import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { TriggerButton } from '../../shared_components/dataview_picker/trigger';
+import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
+import { TermsIndexPatternColumn } from './operations';
+import { getFieldByNameFactory } from './pure_helpers';
+import { FormBasedPrivateState } from './types';
 
 jest.mock('@kbn/unified-search-plugin/public', () => {
   const actual = jest.requireActual('@kbn/unified-search-plugin/public');

@@ -11,8 +11,8 @@
  */
 
 import Handlebars from '.';
-import type { HelperOptions, TemplateDelegate } from './src/types';
 import { expectTemplate, forEachCompileFunctionName } from './src/__jest__/test_bench';
+import type { HelperOptions, TemplateDelegate } from './src/types';
 
 it('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
@@ -244,7 +244,9 @@ describe('Handlebars.compileAST', () => {
   });
 
   it('invalid template', () => {
-    expectTemplate('{{value').withInput({ value: 42 }).toThrow(`Parse error on line 1:
+    expectTemplate('{{value')
+      .withInput({ value: 42 })
+      .toThrow(`Parse error on line 1:
 {{value
 --^
 Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'`);

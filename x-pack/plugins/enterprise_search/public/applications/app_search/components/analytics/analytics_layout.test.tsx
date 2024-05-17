@@ -6,7 +6,7 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues, setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 import '../../__mocks__/engine_logic.mock';
 
@@ -15,12 +15,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  rerender,
-  getPageTitle,
   getPageHeaderActions,
   getPageHeaderChildren,
+  getPageTitle,
+  rerender,
 } from '../../../test_helpers';
-import { LogRetentionTooltip, LogRetentionCallout } from '../log_retention';
+import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
 
 import { AnalyticsLayout } from './analytics_layout';
 import { AnalyticsFilters } from './components';

@@ -13,19 +13,19 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { CustomHttpRequestError } from '@kbn/osquery-plugin/server/common/error';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import {
+  createHttpApiTestSetupMock,
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
-  createHttpApiTestSetupMock,
 } from '../../mocks';
-import { registerActionListRoutes } from './list';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { doesLogsEndpointActionsIndexExist } from '../../utils';
 import { getActionList, getActionListByStatus } from '../../services';
-import { CustomHttpRequestError } from '@kbn/osquery-plugin/server/common/error';
+import { doesLogsEndpointActionsIndexExist } from '../../utils';
+import { registerActionListRoutes } from './list';
 
 jest.mock('../../utils');
 const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as jest.Mock;

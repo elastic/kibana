@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ClusterHealthRule } from './cluster_health_rule';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { RULE_CLUSTER_HEALTH } from '../../common/constants';
 import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ClusterHealthRule } from './cluster_health_rule';
 
 const RealDate = Date;
 

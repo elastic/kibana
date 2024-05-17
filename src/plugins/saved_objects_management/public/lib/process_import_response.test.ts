@@ -7,11 +7,11 @@
  */
 
 import type {
-  SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportUnknownError,
+  SavedObjectsImportConflictError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportResponse,
+  SavedObjectsImportUnknownError,
 } from '@kbn/core/public';
 import { processImportResponse } from './process_import_response';
 

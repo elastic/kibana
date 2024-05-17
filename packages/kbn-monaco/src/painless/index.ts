@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ID } from './constants';
-import { lexerRules, languageConfiguration } from './lexer_rules';
-import { getSuggestionProvider, getSyntaxErrors, validation$ } from './language';
 import type { CompleteLangModuleType } from '../types';
+import { ID } from './constants';
+import { getSuggestionProvider, getSyntaxErrors, validation$ } from './language';
+import { languageConfiguration, lexerRules } from './lexer_rules';
 
 export const PainlessLang: CompleteLangModuleType = {
   ID,

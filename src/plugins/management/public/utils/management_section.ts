@@ -8,8 +8,8 @@
 
 import { Assign } from '@kbn/utility-types';
 import { CreateManagementItemArgs, ManagementSectionId } from '../types';
-import { ManagementItem } from './management_item';
 import { ManagementApp, RegisterManagementAppArgs } from './management_app';
+import { ManagementItem } from './management_item';
 
 export type RegisterManagementSectionArgs = Assign<
   CreateManagementItemArgs,

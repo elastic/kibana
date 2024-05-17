@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import moment from 'moment';
-import { FingerprintCol } from './fingerprint_col';
-import { render } from '../../utils/testing';
+import React from 'react';
 import { Cert } from '../../../../../common/runtime_types';
+import { render } from '../../utils/testing';
+import { FingerprintCol } from './fingerprint_col';
 
 describe('FingerprintCol', () => {
   const cert: Cert = {

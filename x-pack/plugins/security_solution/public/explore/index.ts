@@ -6,17 +6,17 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { AnyAction, Reducer } from 'redux';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { HostsState } from './hosts/store';
-import type { UsersState } from './users/store';
+import type { AnyAction, Reducer } from 'redux';
 import type { SecuritySubPluginWithStore } from '../app/types';
-import { routes } from './routes';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
+import type { HostsState } from './hosts/store';
+import { hostsReducer, initialHostsState } from './hosts/store';
 import type { NetworkState } from './network/store';
 import { initialNetworkState, networkReducer } from './network/store';
-import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
-import { makeUsersReducer, getInitialUsersState } from './users/store';
-import { hostsReducer, initialHostsState } from './hosts/store';
+import { routes } from './routes';
+import type { UsersState } from './users/store';
+import { getInitialUsersState, makeUsersReducer } from './users/store';
 
 export interface ExploreState {
   network: NetworkState;

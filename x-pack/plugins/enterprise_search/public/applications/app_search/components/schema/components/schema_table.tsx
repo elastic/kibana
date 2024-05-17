@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
+  EuiHealth,
   EuiTable,
+  EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
-  EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiHealth,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

@@ -7,13 +7,13 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { some } from 'lodash';
-import useDebounce from 'react-use/lib/useDebounce';
-import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { VISUALIZATION } from './translations';
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import { some } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { PREFIX } from './constants';
+import { VISUALIZATION } from './translations';
 
 const DISABLED_CLASSNAME = 'euiButtonIcon-isDisabled';
 

@@ -7,9 +7,9 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-plugin/common';
+import { rgba } from 'polished';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { rgba } from 'polished';
 import * as i18n from './translations';
 
 const JobsUL = styled.ul`

@@ -7,13 +7,13 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
+import { NewsfeedApiEndpoint } from './lib/api';
 import {
+  NewsfeedPublicPlugin,
   NewsfeedPublicPluginSetup,
   NewsfeedPublicPluginStart,
-  NewsfeedPublicPlugin,
 } from './plugin';
 import { FetchResult, NewsfeedItem } from './types';
-import { NewsfeedApiEndpoint } from './lib/api';
 
 export type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart, FetchResult, NewsfeedItem };
 export { NewsfeedApiEndpoint };

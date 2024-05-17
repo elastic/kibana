@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 
 import { ExeptionItemsViewerEmptyPrompts } from './empty_viewer_state';
 import * as i18n from './translations';

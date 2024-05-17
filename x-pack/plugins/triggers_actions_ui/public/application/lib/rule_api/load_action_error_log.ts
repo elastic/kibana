@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IExecutionErrorsResult, ActionErrorLogSortFields } from '@kbn/alerting-plugin/common';
+import { ActionErrorLogSortFields, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
+import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { getFilter } from './get_filter';
 

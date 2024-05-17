@@ -6,11 +6,11 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { RuleTaskState } from '../../types';
-import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { RulesClientContext } from '../types';
 import { getRule } from '../../application/rule/methods/get/get_rule';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
+import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
+import { RuleTaskState } from '../../types';
+import { RulesClientContext } from '../types';
 
 export interface GetAlertStateParams {
   id: string;

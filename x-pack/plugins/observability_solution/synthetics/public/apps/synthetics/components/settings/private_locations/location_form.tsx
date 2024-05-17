@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
   EuiCallOut,
   EuiCode,
-  EuiLink,
+  EuiFieldText,
   EuiFieldTextProps,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Ref } from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
-import { TagsField } from '../components/tags_field';
+import { useSelector } from 'react-redux';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
-import { AgentPolicyNeeded } from './agent_policy_needed';
-import { PolicyHostsField, AGENT_POLICY_FIELD_NAME } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
+import { TagsField } from '../components/tags_field';
+import { AgentPolicyNeeded } from './agent_policy_needed';
+import { AGENT_POLICY_FIELD_NAME, PolicyHostsField } from './policy_hosts';
 
 export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);

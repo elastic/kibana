@@ -7,9 +7,9 @@
 
 import React from 'react';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { useUserData } from '../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useUserData } from '../../../../detections/components/user_info';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
 import { useRuleSnoozeSettings } from './use_rule_snooze_settings';
 

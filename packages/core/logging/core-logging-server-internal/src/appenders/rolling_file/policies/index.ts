@@ -7,15 +7,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import moment from 'moment-timezone';
-import { assertNever } from '@kbn/std';
 import type {
-  TriggeringPolicyConfig,
   TimeIntervalTriggeringPolicyConfig,
+  TriggeringPolicyConfig,
 } from '@kbn/core-logging-server';
-import { TriggeringPolicy } from './policy';
+import { assertNever } from '@kbn/std';
+import moment from 'moment-timezone';
 import { RollingFileContext } from '../rolling_file_context';
-import { sizeLimitTriggeringPolicyConfigSchema, SizeLimitTriggeringPolicy } from './size_limit';
+import { TriggeringPolicy } from './policy';
+import { SizeLimitTriggeringPolicy, sizeLimitTriggeringPolicyConfigSchema } from './size_limit';
 import {
   TimeIntervalTriggeringPolicy,
   timeIntervalTriggeringPolicyConfigSchema,

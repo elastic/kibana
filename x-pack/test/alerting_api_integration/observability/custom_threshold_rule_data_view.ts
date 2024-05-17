@@ -13,7 +13,7 @@ import {
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../common/lib';
+import { ObjectRemover, getUrlPrefix } from '../common/lib';
 import { createRule } from './helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from './helpers/data_view';
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
 import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
-import * as api from './apis/bulk_get_maintenance_windows';
-import { coreMock } from '@kbn/core/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBulkGetMaintenanceWindows } from './use_bulk_get_maintenance_windows';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
-import { useLicense } from '../../../hooks/use_license';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { useLicense } from '../../../hooks/use_license';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import * as api from './apis/bulk_get_maintenance_windows';
+import { useBulkGetMaintenanceWindows } from './use_bulk_get_maintenance_windows';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../common/lib/kibana', () => ({

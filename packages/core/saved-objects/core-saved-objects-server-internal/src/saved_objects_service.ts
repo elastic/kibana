@@ -6,66 +6,66 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs';
-import type { Logger } from '@kbn/logging';
-import { stripVersionQualifier } from '@kbn/std';
-import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
 import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  SavedObjectsRepositoryFactory,
-  SavedObjectStatusMeta,
-  SavedObjectsClientFactoryProvider,
-  ISavedObjectTypeRegistry,
-  SavedObjectsEncryptionExtensionFactory,
-  SavedObjectsSecurityExtensionFactory,
-  SavedObjectsSpacesExtensionFactory,
-  SavedObjectsExtensions,
-} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectConfig,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  type SavedObjectsConfigType,
-  type SavedObjectsMigrationConfigType,
-  type IKibanaMigrator,
-  DEFAULT_INDEX_TYPES_MAP,
-  HASH_TO_VERSION_MAP,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { NodeInfo } from '@kbn/core-node-server';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
 } from '@kbn/core-saved-objects-api-server-internal';
-import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  HASH_TO_VERSION_MAP,
+  type IKibanaMigrator,
+  SavedObjectConfig,
+  SavedObjectTypeRegistry,
+  type SavedObjectsConfigType,
+  type SavedObjectsMigrationConfigType,
+  SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsExporter,
   SavedObjectsImporter,
 } from '@kbn/core-saved-objects-import-export-server-internal';
-import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
-import type { NodeInfo } from '@kbn/core-node-server';
+import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectStatusMeta,
+  SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsExtensions,
+  SavedObjectsRepositoryFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+  SavedObjectsSpacesExtensionFactory,
+} from '@kbn/core-saved-objects-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
+import { Observable, Subject, firstValueFrom, of } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
+import { applyTypeDefaults } from './apply_type_defaults';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { registerCoreObjectTypes } from './object_types';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
-import { registerCoreObjectTypes } from './object_types';
-import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS } from './constants';
 
 /**
  * @internal

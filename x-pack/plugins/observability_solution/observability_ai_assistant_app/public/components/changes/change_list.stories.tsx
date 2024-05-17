@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 
-import { ChangeListProps, ChangeList as Component, ChangeListItemImpact } from './change_list';
+import { ChangeListItemImpact, ChangeListProps, ChangeList as Component } from './change_list';
 
 export default {
   component: Component,

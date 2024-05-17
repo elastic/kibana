@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildNode, KQL_NODE_TYPE_LITERAL, toElasticsearchQuery, toKqlExpression } from './literal';
+import { KQL_NODE_TYPE_LITERAL, buildNode, toElasticsearchQuery, toKqlExpression } from './literal';
 
 describe('kuery node types', () => {
   describe('literal', () => {

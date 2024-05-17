@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 export function generateNodeNoticeText(nodeDir, nodeVersion) {
   const licensePath = resolve(nodeDir, 'LICENSE');

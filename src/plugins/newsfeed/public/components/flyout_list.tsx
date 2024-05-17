@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlyoutProps,
-  EuiTitle,
-  EuiLink,
-  EuiFlyoutFooter,
+  EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
-  EuiBadge,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlyoutProps,
   EuiHeaderAlert,
+  EuiLink,
   EuiPortal,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NewsfeedContext } from './newsfeed_header_nav_button';
+import React, { useCallback, useContext } from 'react';
 import { NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
+import { NewsfeedContext } from './newsfeed_header_nav_button';
 
 export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);

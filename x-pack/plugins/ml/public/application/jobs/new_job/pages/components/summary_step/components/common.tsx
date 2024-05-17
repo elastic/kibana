@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTitle } from '@elastic/eui';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 export interface ListItems {
   title: string;

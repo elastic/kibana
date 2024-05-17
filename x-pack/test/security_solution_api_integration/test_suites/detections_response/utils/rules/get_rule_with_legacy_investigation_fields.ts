@@ -63,7 +63,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFields = (): InternalRuleC
     throttle: null,
     // cast is due to alerting API expecting rule_type_id
     // and our internal schema expecting alertTypeId
-  } as unknown as InternalRuleCreate);
+  }) as unknown as InternalRuleCreate;
 
 export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (): InternalRuleCreate =>
   ({
@@ -121,4 +121,4 @@ export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (): Int
     throttle: null,
     // cast is due to alerting API expecting rule_type_id
     // and our internal schema expecting alertTypeId
-  } as unknown as InternalRuleCreate);
+  }) as unknown as InternalRuleCreate;

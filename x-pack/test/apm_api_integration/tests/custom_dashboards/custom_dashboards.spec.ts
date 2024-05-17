@@ -1,3 +1,4 @@
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  getServiceDashboardApi,
-  getLinkServiceDashboardApi,
   deleteAllServiceDashboard,
+  getLinkServiceDashboardApi,
+  getServiceDashboardApi,
 } from './api_helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

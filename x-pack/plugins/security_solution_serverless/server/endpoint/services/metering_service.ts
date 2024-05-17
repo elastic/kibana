@@ -12,8 +12,8 @@ import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/end
 
 import { ProductLine, ProductTier } from '../../../common/product';
 
-import type { UsageRecord, MeteringCallbackInput, MeteringCallBackResponse } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
+import type { MeteringCallBackResponse, MeteringCallbackInput, UsageRecord } from '../../types';
 
 import { METERING_TASK } from '../constants/metering';
 

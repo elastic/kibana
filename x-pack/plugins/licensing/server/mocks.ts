@@ -6,13 +6,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-  LicensingApiRequestHandlerContext,
-} from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';
+import {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from './types';
 
 const createSetupMock = (): jest.Mocked<LicensingPluginSetup> => {
   const license = licenseMock.createLicense();

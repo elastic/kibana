@@ -7,11 +7,11 @@
 
 import { Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { FindingsBaseURLQuery } from '../../../common/types';
 import { Evaluation } from '../../../../common/types_old';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
+import { FindingsBaseURLQuery } from '../../../common/types';
 import { getFilters } from '../utils/get_filters';
 import { useLatestFindings } from './use_latest_findings';
 

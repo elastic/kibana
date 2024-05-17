@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
-import type { PublishesDataViews } from '@kbn/presentation-publishing';
-import { type MapApi } from '@kbn/maps-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
+import { type MapApi } from '@kbn/maps-plugin/public';
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import { asyncForEach } from '@kbn/std';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 
 export interface LayerResult {

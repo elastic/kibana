@@ -6,8 +6,8 @@
  */
 
 import rison from '@kbn/rison';
-import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
+import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { HostsLocatorDefinition } from './hosts_locator';
 
 const setupAssetDetailsLocator = async () => {

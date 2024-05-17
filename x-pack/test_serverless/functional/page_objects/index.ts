@@ -6,22 +6,22 @@
  */
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { pageObjects as xpackFunctionalPageObjects } from '../../../test/functional/page_objects';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { cloudSecurityPosturePageObjects } from '../../../test/cloud_security_posture_functional/page_objects';
-import { SvlCommonPageProvider } from './svl_common_page';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { pageObjects as xpackFunctionalPageObjects } from '../../../test/functional/page_objects';
 import { SvlCommonNavigationProvider } from './svl_common_navigation';
+import { SvlCommonPageProvider } from './svl_common_page';
+import { SvlIngestPipelines } from './svl_ingest_pipelines';
+import { SvlManagementPageProvider } from './svl_management_page';
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
 import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboarding_stream_log_file';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
+import { SvlPlaygroundPageProvider } from './svl_playground_page';
+import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
+import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { SvlTriggersActionsPageProvider } from './svl_triggers_actions_ui_page';
-import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
-import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
-import { SvlManagementPageProvider } from './svl_management_page';
-import { SvlIngestPipelines } from './svl_ingest_pipelines';
-import { SvlPlaygroundPageProvider } from './svl_playground_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,

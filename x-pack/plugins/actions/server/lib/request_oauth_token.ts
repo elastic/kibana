@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import qs from 'query-string';
+import { Logger } from '@kbn/core/server';
 import axios from 'axios';
 import stringify from 'json-stable-stringify';
-import { Logger } from '@kbn/core/server';
-import { request } from './axios_utils';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import qs from 'query-string';
 import { AsApiContract } from '../../common';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { request } from './axios_utils';
 
 export interface OAuthTokenResponse {
   tokenType: string;

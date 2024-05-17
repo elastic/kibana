@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createMemoryHistory } from 'history';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 import type { AppMountParameters } from '@kbn/core-application-browser';
-import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
+import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { createMemoryHistory } from 'history';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';

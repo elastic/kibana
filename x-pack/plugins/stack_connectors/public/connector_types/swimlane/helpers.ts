@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SwimlaneConnectorType, SwimlaneMappingConfig, MappingConfigurationKeys } from './types';
 import * as i18n from './translations';
+import { MappingConfigurationKeys, SwimlaneConnectorType, SwimlaneMappingConfig } from './types';
 
 const casesRequiredFields: MappingConfigurationKeys[] = [
   'caseNameConfig',
@@ -70,11 +70,14 @@ export const validateMappingForConnector = (
   const requiredFields =
     connectorType === SwimlaneConnectorType.Alerts ? alertsRequiredFields : casesRequiredFields;
 
-  return requiredFields.reduce((errors, field) => {
-    if (mapping?.[field] == null) {
-      errors = { ...errors, [field]: translationMapping[field] };
-    }
+  return requiredFields.reduce(
+    (errors, field) => {
+      if (mapping?.[field] == null) {
+        errors = { ...errors, [field]: translationMapping[field] };
+      }
 
-    return errors;
-  }, {} as Record<string, string>);
+      return errors;
+    },
+    {} as Record<string, string>
+  );
 };

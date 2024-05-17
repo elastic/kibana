@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, act } from '@testing-library/react';
-import { mockAnomalies } from '../mock';
-import { cloneDeep } from 'lodash/fp';
-import { ExplorerLink } from './create_explorer_link';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public/locator';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { act, render } from '@testing-library/react';
+import { cloneDeep } from 'lodash/fp';
+import React from 'react';
+import { mockAnomalies } from '../mock';
+import { ExplorerLink } from './create_explorer_link';
 
 describe('create_explorer_link', () => {
   let anomalies = cloneDeep(mockAnomalies);

@@ -10,12 +10,12 @@ import type { TsProjectRule } from '@kbn/repo-linter';
 
 import { forbiddenCompilerOptions } from './forbidden_compiler_options';
 import { refPkgsIds } from './reference_pkg_ids';
+import { referenceUsedPkgs } from './reference_used_pkgs';
 import { requiredCompilerOptions } from './required_compiler_options';
-import { validBaseTsconfig } from './valid_base_tsconfig';
 import { requiredExcludes } from './required_excludes';
 import { requiredFileSelectors } from './required_file_selectors';
-import { referenceUsedPkgs } from './reference_used_pkgs';
 import { tsconfigIndentation } from './tsconfig_indentation';
+import { validBaseTsconfig } from './valid_base_tsconfig';
 
 export const RULES: TsProjectRule[] = [
   forbiddenCompilerOptions,

@@ -10,8 +10,8 @@ import type { ContextValue } from '../../contexts';
 
 jest.mock('./send_request', () => ({ sendRequest: jest.fn(() => Promise.resolve()) }));
 
-import { sendRequest } from './send_request';
 import { serviceContextMock } from '../../contexts/services_context.mock';
+import { sendRequest } from './send_request';
 
 const mockedSendRequest = sendRequest as jest.Mock;
 

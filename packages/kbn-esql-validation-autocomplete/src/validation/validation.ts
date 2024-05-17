@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import uniqBy from 'lodash/uniqBy';
 import type {
   AstProviderFn,
   ESQLAstItem,
@@ -19,6 +18,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@kbn/esql-ast';
+import uniqBy from 'lodash/uniqBy';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -28,50 +28,50 @@ import {
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
+  columnExists,
   extractSingularType,
   getColumnHit,
   getCommandDefinition,
   getFunctionDefinition,
+  hasCCSSource,
+  hasWildcard,
+  inKnownTimeInterval,
   isArrayType,
+  isAssignment,
   isColumnItem,
   isEqualType,
   isFunctionItem,
   isLiteralItem,
   isOptionItem,
+  isSettingItem,
   isSourceItem,
   isSupportedFunction,
   isTimeIntervalItem,
-  inKnownTimeInterval,
+  isValidLiteralOption,
+  isVariable,
   printFunctionSignature,
   sourceExists,
-  columnExists,
-  hasWildcard,
-  hasCCSSource,
-  isSettingItem,
-  isAssignment,
-  isVariable,
-  isValidLiteralOption,
 } from '../shared/helpers';
+import type { ESQLCallbacks } from '../shared/types';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, getUnknownTypeLabel } from './errors';
+import { collapseWrongArgumentTypeMessages } from './helpers';
+import {
+  retrieveFields,
+  retrieveFieldsFromStringSources,
+  retrieveMetadataFields,
+  retrievePolicies,
+  retrievePoliciesFields,
+  retrieveSources,
+} from './resources';
 import type {
-  ErrorTypes,
   ESQLRealField,
   ESQLVariable,
+  ErrorTypes,
   ReferenceMaps,
   ValidationOptions,
   ValidationResult,
 } from './types';
-import type { ESQLCallbacks } from '../shared/types';
-import {
-  retrieveSources,
-  retrieveFields,
-  retrievePolicies,
-  retrievePoliciesFields,
-  retrieveMetadataFields,
-  retrieveFieldsFromStringSources,
-} from './resources';
-import { collapseWrongArgumentTypeMessages } from './helpers';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -899,17 +899,20 @@ export async function validateQuery(
   }
   const { errors, warnings } = result;
   const finalCallbacks = callbacks || {};
-  const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
-    if (
-      !(key in finalCallbacks) ||
-      (key in finalCallbacks && finalCallbacks[key as keyof ESQLCallbacks] == null)
-    ) {
-      for (const e of errorCodes) {
-        acc[e] = true;
+  const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce(
+    (acc, [key, errorCodes]) => {
+      if (
+        !(key in finalCallbacks) ||
+        (key in finalCallbacks && finalCallbacks[key as keyof ESQLCallbacks] == null)
+      ) {
+        for (const e of errorCodes) {
+          acc[e] = true;
+        }
       }
-    }
-    return acc;
-  }, {} as Partial<Record<ErrorTypes, boolean>>);
+      return acc;
+    },
+    {} as Partial<Record<ErrorTypes, boolean>>
+  );
   const filteredErrors = errors
     .filter((error) => {
       if ('severity' in error) {

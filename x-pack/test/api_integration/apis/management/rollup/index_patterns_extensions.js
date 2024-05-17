@@ -6,13 +6,13 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FIELDS_FOR_WILDCARD_PATH as BASE_URI } from '@kbn/data-views-plugin/common/constants';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
 import { stringify } from 'query-string';
-import { registerHelpers } from './rollup.test_helpers';
 import { getRandomString } from './lib';
-import { DataViewType } from '@kbn/data-views-plugin/common';
+import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

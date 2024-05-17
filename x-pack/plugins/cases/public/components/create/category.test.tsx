@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { FormProps } from './schema';
+import { EuiButton } from '@elastic/eui';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { Category } from './category';
-import { useGetCategories } from '../../containers/use_get_categories';
 import { categories } from '../../containers/mock';
-import { EuiButton } from '@elastic/eui';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { Category } from './category';
+import type { FormProps } from './schema';
 
 jest.mock('../../containers/use_get_categories');
 

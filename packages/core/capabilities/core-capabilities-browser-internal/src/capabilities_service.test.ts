@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
+import { type HttpSetupMock, httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { CapabilitiesService } from './capabilities_service';
 
 const mockedCapabilities = {

@@ -8,10 +8,10 @@
 
 import '../../application/models/sense_editor/sense_editor.test.mocks';
 
-import { looksLikeTypingIn } from './looks_like_typing_in';
 import { create } from '../../application/models';
 import type { SenseEditor } from '../../application/models';
 import type { CoreEditor, Position, Token, TokensProvider } from '../../types';
+import { looksLikeTypingIn } from './looks_like_typing_in';
 
 describe('looksLikeTypingIn', () => {
   let editor: SenseEditor;

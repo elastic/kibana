@@ -7,11 +7,11 @@
  */
 
 import {
-  isVirtualModelVersion,
-  virtualVersionToModelVersion,
-  modelVersionToVirtualVersion,
   assertValidModelVersion,
   assertValidVirtualVersion,
+  isVirtualModelVersion,
+  modelVersionToVirtualVersion,
+  virtualVersionToModelVersion,
 } from './conversion';
 
 describe('isVirtualModelVersion', () => {

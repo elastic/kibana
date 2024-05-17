@@ -12,12 +12,12 @@ import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/pub
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { some } from 'lodash';
-import { useLoadConnectors } from '../use_load_connectors';
+import { useAssistantContext } from '../../assistant_context';
+import { AddConnectorModal } from '../add_connector_modal';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
-import { useAssistantContext } from '../../assistant_context';
-import { getActionTypeTitle, getGenAiConfig } from '../helpers';
-import { AddConnectorModal } from '../add_connector_modal';
+import { useLoadConnectors } from '../use_load_connectors';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 

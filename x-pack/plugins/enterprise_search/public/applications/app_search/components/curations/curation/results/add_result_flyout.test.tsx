@@ -11,9 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFlyout, EuiFieldSearch, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFieldSearch, EuiFlyout } from '@elastic/eui';
 
-import { CurationResult, AddResultFlyout } from '.';
+import { AddResultFlyout, CurationResult } from '.';
 
 describe('AddResultFlyout', () => {
   const values = {

@@ -9,16 +9,16 @@ jest.mock('archiver');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const archiver = require('archiver') as jest.Mock;
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { RequestHandler, RequestHandlerContext, kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { initializeZipShareableWorkpadRoute } from './zip';
-import { getMockedRouterDeps } from '../test_helpers';
 import { API_ROUTE_SHAREABLE_ZIP } from '../../../common/lib';
 import {
   SHAREABLE_RUNTIME_FILE,
-  SHAREABLE_RUNTIME_SRC,
   SHAREABLE_RUNTIME_NAME,
+  SHAREABLE_RUNTIME_SRC,
 } from '../../../shareable_runtime/constants';
+import { getMockedRouterDeps } from '../test_helpers';
+import { initializeZipShareableWorkpadRoute } from './zip';
 
 const mockRouteContext = {} as RequestHandlerContext;
 const mockWorkpad = {};

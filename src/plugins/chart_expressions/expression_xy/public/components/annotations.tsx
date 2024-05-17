@@ -9,8 +9,6 @@
 import './annotations.scss';
 import './reference_lines/reference_lines.scss';
 
-import React, { Fragment } from 'react';
-import { snakeCase } from 'lodash';
 import {
   AnnotationDomainType,
   CustomAnnotationTooltip,
@@ -18,7 +16,6 @@ import {
   Position,
   RectAnnotation,
 } from '@elastic/charts';
-import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,19 +25,22 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
 import type {
   EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
   ManualRangeEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
-import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { snakeCase } from 'lodash';
+import moment from 'moment';
+import React, { Fragment } from 'react';
 import type { MergedAnnotation } from '../../common';
-import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
-import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
+import { AnnotationIcon, Marker, MarkerBody, hasIcon } from '../helpers';
+import { LINES_MARKER_SIZE, mapVerticalToHorizontalPlacement } from '../helpers';
 
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
@@ -341,8 +341,8 @@ export const Annotations = ({
                   annotation.lineStyle === 'dashed'
                     ? [strokeWidth * 3, strokeWidth]
                     : annotation.lineStyle === 'dotted'
-                    ? [strokeWidth, strokeWidth]
-                    : undefined,
+                      ? [strokeWidth, strokeWidth]
+                      : undefined,
                 opacity: 1,
               },
             }}

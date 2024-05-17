@@ -1,3 +1,9 @@
+import {
+  Navigation,
+  type NavigationKibanaDependencies,
+  NavigationKibanaProvider,
+  type NavigationProps,
+} from '@kbn/shared-ux-chrome-navigation';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +11,6 @@
  * 2.0.
  */
 import React, { type FC } from 'react';
-import {
-  Navigation,
-  NavigationKibanaProvider,
-  type NavigationProps,
-  type NavigationKibanaDependencies,
-} from '@kbn/shared-ux-chrome-navigation';
 
 export interface Props {
   navProps: NavigationProps;

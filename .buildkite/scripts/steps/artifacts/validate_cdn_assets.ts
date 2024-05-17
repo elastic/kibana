@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as glob from 'glob';
 import axios from 'axios';
+import * as glob from 'glob';
 
 const CDN_URL_PREFIX = process.argv[2];
 const CDN_ASSETS_FOLDER = process.argv[3];

@@ -8,8 +8,8 @@
 import React from 'react';
 
 import {
-  mockEndpointRegistryModificationEvent,
   TestProviders,
+  mockEndpointRegistryModificationEvent,
 } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { MODIFIED_REGISTRY_KEY } from '../system/translations';

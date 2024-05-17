@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,9 +48,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -65,10 +61,7 @@
             "parentPluginId": "@kbn/es-archiver",
             "id": "def-common.EsArchiver.save",
             "type": "Function",
-            "tags": [
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property"],
             "label": "save",
             "description": [
               "\nExtract data and mappings from an elasticsearch index and store\nit in the baseDir so it can be used later to recreate the index.\n"
@@ -91,9 +84,7 @@
                 "description": [
                   "- relative path to the archive, resolved relative to this.baseDir which defaults to REPO_ROOT"
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -105,12 +96,8 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "indices",
-                "description": [
-                  "- the indices to archive"
-                ],
-                "signature": [
-                  "string | string[]"
-                ],
+                "description": ["- the indices to archive"],
+                "signature": ["string | string[]"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -134,9 +121,7 @@
                     "tags": [],
                     "label": "raw",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -148,9 +133,7 @@
                     "tags": [],
                     "label": "keepIndexNames",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -162,9 +145,7 @@
                     "tags": [],
                     "label": "query",
                     "description": [],
-                    "signature": [
-                      "Record<string, any> | undefined"
-                    ],
+                    "signature": ["Record<string, any> | undefined"],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -178,15 +159,9 @@
             "parentPluginId": "@kbn/es-archiver",
             "id": "def-common.EsArchiver.load",
             "type": "Function",
-            "tags": [
-              "property",
-              "property",
-              "property"
-            ],
+            "tags": ["property", "property", "property"],
             "label": "load",
-            "description": [
-              "\nLoad an index from an archive\n"
-            ],
+            "description": ["\nLoad an index from an archive\n"],
             "signature": [
               "(path: string, { skipExisting, useCreate, docsOnly, performance, }?: { skipExisting?: boolean | undefined; useCreate?: boolean | undefined; docsOnly?: boolean | undefined; performance?: ",
               {
@@ -213,9 +188,7 @@
                 "description": [
                   "- relative path to the archive to load, resolved relative to this.baseDir which defaults to REPO_ROOT"
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -239,9 +212,7 @@
                     "tags": [],
                     "label": "skipExisting",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -253,9 +224,7 @@
                     "tags": [],
                     "label": "useCreate",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -267,9 +236,7 @@
                     "tags": [],
                     "label": "docsOnly",
                     "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
+                    "signature": ["boolean | undefined"],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -309,11 +276,7 @@
             "description": [
               "\nRemove the indexes in elasticsearch that have data in an archive.\n"
             ],
-            "signature": [
-              "(path: string) => Promise<Record<string, ",
-              "IndexStats",
-              ">>"
-            ],
+            "signature": ["(path: string) => Promise<Record<string, ", "IndexStats", ">>"],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -327,9 +290,7 @@
                 "description": [
                   "- relative path to the archive to unload, resolved relative to this.baseDir which defaults to REPO_ROOT"
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -347,9 +308,7 @@
             "description": [
               "\nParse and reformat all of the archives. This is primarily helpful\nfor working on the esArchiver.\n"
             ],
-            "signature": [
-              "(dir: string) => Promise<void>"
-            ],
+            "signature": ["(dir: string) => Promise<void>"],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -363,9 +322,7 @@
                 "description": [
                   "- relative path to a directory which contains archives, resolved relative to this.baseDir which defaults to REPO_ROOT"
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -383,9 +340,7 @@
             "description": [
               "\nExtract the gzipped files in an archive, then call the handler. When it\nresolves re-archive the gzipped files.\n"
             ],
-            "signature": [
-              "(path: string, handler: () => Promise<void>) => Promise<void>"
-            ],
+            "signature": ["(path: string, handler: () => Promise<void>) => Promise<void>"],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -396,12 +351,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "path",
-                "description": [
-                  "optional prefix to limit archives that are extracted"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["optional prefix to limit archives that are extracted"],
+                "signature": ["string"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -414,9 +365,7 @@
                 "tags": [],
                 "label": "handler",
                 "description": [],
-                "signature": [
-                  "() => Promise<void>"
-                ],
+                "signature": ["() => Promise<void>"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -431,9 +380,7 @@
             "type": "Function",
             "tags": [],
             "label": "loadIfNeeded",
-            "description": [
-              "\nJust like load, but skips any existing index\n"
-            ],
+            "description": ["\nJust like load, but skips any existing index\n"],
             "signature": [
               "(name: string, performance?: ",
               {
@@ -458,9 +405,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -500,11 +445,7 @@
             "description": [
               "\nCleanup saved object indices, preserving the space:default saved object."
             ],
-            "signature": [
-              "() => Promise<Record<string, ",
-              "IndexStats",
-              ">>"
-            ],
+            "signature": ["() => Promise<Record<string, ", "IndexStats", ">>"],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -523,9 +464,7 @@
         "tags": [],
         "label": "runCli",
         "description": [],
-        "signature": [
-          "() => void"
-        ],
+        "signature": ["() => void"],
         "path": "packages/kbn-es-archiver/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -553,9 +492,7 @@
             "tags": [],
             "label": "batchSize",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -567,9 +504,7 @@
             "tags": [],
             "label": "concurrency",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
             "deprecated": false,
             "trackAdoption": false

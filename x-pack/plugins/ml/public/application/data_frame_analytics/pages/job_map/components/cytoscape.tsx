@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CSSProperties, PropsWithChildren } from 'react';
-import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import cytoscape, { type Stylesheet } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { getCytoscapeOptions } from './cytoscape_options';
+import type { CSSProperties, PropsWithChildren } from 'react';
+import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import type { EuiThemeType } from '../../../../components/color_range_legend';
+import { getCytoscapeOptions } from './cytoscape_options';
 
 cytoscape.use(dagre);
 

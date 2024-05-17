@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { castArray, reduce } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } from '@elastic/eui';
 import styled from '@emotion/styled';
-import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import deepEqual from 'fast-deep-equal';
+import { castArray, reduce } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { useAgentPolicies } from '../../agent_policies';
 
@@ -36,7 +36,9 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   euiFieldProps,
   options,
 }) => {
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const {
+    data: { agentPoliciesById } = {},
+  } = useAgentPolicies();
 
   const {
     field: { onChange, value },

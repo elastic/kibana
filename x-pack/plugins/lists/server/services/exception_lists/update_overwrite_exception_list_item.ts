@@ -10,12 +10,12 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
+import { getExceptionListItem } from './get_exception_list_item';
+import { UpdateExceptionListItemOptions } from './update_exception_list_item';
 import {
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
 } from './utils';
-import { getExceptionListItem } from './get_exception_list_item';
-import { UpdateExceptionListItemOptions } from './update_exception_list_item';
 
 export const updateOverwriteExceptionListItem = async ({
   _version,

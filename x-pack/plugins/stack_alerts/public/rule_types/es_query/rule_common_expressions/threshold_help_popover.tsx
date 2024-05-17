@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 interface State {
   isPopoverOpen: boolean;
 }

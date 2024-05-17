@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 
-import type { AgentPolicy } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
+import type { AgentPolicy } from '../types';
 
 import { useAuthz } from './use_authz';
 

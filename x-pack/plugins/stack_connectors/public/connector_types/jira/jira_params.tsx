@@ -7,30 +7,30 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFormRow,
   EuiComboBox,
-  EuiSelectOption,
-  EuiHorizontalRule,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiIconTip,
+  EuiSelect,
+  EuiSelectOption,
   EuiSpacer,
   EuiText,
-  EuiIconTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  JsonEditorWithMessageVariables,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
-  JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { JiraActionParams } from './types';
-import { useGetIssueTypes } from './use_get_issue_types';
-import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+import { JiraActionParams } from './types';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssueTypes } from './use_get_issue_types';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,

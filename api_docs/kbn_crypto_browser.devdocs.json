@@ -36,9 +36,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,9 +71,7 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": [
-                  "string | Buffer"
-                ],
+                "signature": ["string | Buffer"],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -88,9 +84,7 @@
                 "tags": [],
                 "label": "encoding",
                 "description": [],
-                "signature": [
-                  "BufferEncoding | undefined"
-                ],
+                "signature": ["BufferEncoding | undefined"],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -106,9 +100,7 @@
             "tags": [],
             "label": "digest",
             "description": [],
-            "signature": [
-              "(encoding: BufferEncoding) => string"
-            ],
+            "signature": ["(encoding: BufferEncoding) => string"],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -120,9 +112,7 @@
                 "tags": [],
                 "label": "encoding",
                 "description": [],
-                "signature": [
-                  "BufferEncoding"
-                ],
+                "signature": ["BufferEncoding"],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -138,9 +128,7 @@
             "tags": [],
             "label": "_update",
             "description": [],
-            "signature": [
-              "(M: Buffer) => void"
-            ],
+            "signature": ["(M: Buffer) => void"],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -152,9 +140,7 @@
                 "tags": [],
                 "label": "M",
                 "description": [],
-                "signature": [
-                  "Buffer"
-                ],
+                "signature": ["Buffer"],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -170,9 +156,7 @@
             "tags": [],
             "label": "_hash",
             "description": [],
-            "signature": [
-              "() => Buffer"
-            ],
+            "signature": ["() => Buffer"],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
             "trackAdoption": false,

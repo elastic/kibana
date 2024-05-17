@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
+import { mockKibanaValues, setMockValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
 jest.mock('../react_router_helpers', () => ({
@@ -16,10 +16,10 @@ import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import {
   Breadcrumb,
-  useGenerateBreadcrumbs,
-  useEuiBreadcrumbs,
-  useEnterpriseSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
+  useEnterpriseSearchBreadcrumbs,
+  useEuiBreadcrumbs,
+  useGenerateBreadcrumbs,
   useSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';

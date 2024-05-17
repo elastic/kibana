@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent, useCallback } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -21,22 +20,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import _ from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco as monacoEditor } from '@kbn/monaco';
+import _ from 'lodash';
+import React, { useState, FunctionComponent, useCallback } from 'react';
 import { IndexSettingsResponse } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
-import { documentationService, updateIndexSettings } from '../../../../services';
-import { notificationService } from '../../../../services/notification';
-import { flattenObject } from '../../../../lib/flatten_object';
+import { AppDependencies, useAppContext } from '../../../../app_context';
 import {
-  readOnlySettings,
   defaultsToDisplay,
   limitedEditableSettings,
+  readOnlySettings,
 } from '../../../../lib/edit_settings';
-import { AppDependencies, useAppContext } from '../../../../app_context';
+import { flattenObject } from '../../../../lib/flatten_object';
+import { documentationService, updateIndexSettings } from '../../../../services';
+import { notificationService } from '../../../../services/notification';
 
 const getEditableSettings = ({
   data,

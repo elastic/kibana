@@ -8,7 +8,7 @@
 import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
-import { useReindexStatus, ReindexState } from './use_reindex_state';
+import { ReindexState, useReindexStatus } from './use_reindex_state';
 
 export interface ReindexStateContext {
   reindexState: ReindexState;

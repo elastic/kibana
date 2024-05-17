@@ -1,3 +1,6 @@
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,28 +8,25 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { ProjectMonitorFormatter } from './project_monitor_formatter';
+import { times } from 'lodash';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
-  MonitorTypeEnum,
-  Locations,
   LocationStatus,
+  Locations,
+  MonitorTypeEnum,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-import { times } from 'lodash';
-import { SyntheticsService } from '../synthetics_service';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { SyntheticsService } from '../synthetics_service';
 import { formatSecrets } from '../utils';
+import { ProjectMonitorFormatter } from './project_monitor_formatter';
 
-import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 import { formatLocation } from '../../../common/utils/location_formatter';
+import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
+import { SyntheticsServerSetup } from '../../types';
 import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
-import { SyntheticsServerSetup } from '../../types';
 
 const testMonitors = [
   {
@@ -160,7 +160,7 @@ describe('ProjectMonitorFormatter', () => {
       ({
         publicLocations,
         privateLocations,
-      } as any)
+      }) as any
   );
 
   it('should return validation errors errors', async () => {

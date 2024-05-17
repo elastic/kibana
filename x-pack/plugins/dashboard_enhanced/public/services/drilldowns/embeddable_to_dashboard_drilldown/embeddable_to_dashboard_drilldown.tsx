@@ -1,3 +1,9 @@
+import {
+  DashboardLocatorParams,
+  cleanEmptyKeys,
+  getDashboardLocatorParamsFromEmbeddable,
+} from '@kbn/dashboard-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,24 +11,18 @@
  * 2.0.
  */
 import { extractTimeRange, isFilterPinned } from '@kbn/es-query';
+import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
-import {
-  cleanEmptyKeys,
-  DashboardLocatorParams,
-  getDashboardLocatorParamsFromEmbeddable,
-} from '@kbn/dashboard-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
+import { createExtract, createInject } from '../../../../common';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
 } from '../abstract_dashboard_drilldown';
-import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { createExtract, createInject } from '../../../../common';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 
 export type Context = ApplyGlobalFilterActionContext & {
   embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;

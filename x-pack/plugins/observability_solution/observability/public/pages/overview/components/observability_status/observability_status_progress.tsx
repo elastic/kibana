@@ -1,3 +1,15 @@
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,18 +17,6 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
 
 interface ObservabilityStatusProgressProps {

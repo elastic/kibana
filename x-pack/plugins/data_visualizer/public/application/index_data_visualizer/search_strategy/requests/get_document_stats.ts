@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { each, get, sortedIndex } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ISearchOptions } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
-import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
+import type { ISearchOptions } from '@kbn/search-types';
+import { each, get, sortedIndex } from 'lodash';
+import seedrandom from 'seedrandom';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
+import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;

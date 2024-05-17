@@ -8,12 +8,12 @@
 import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ServiceList } from '.';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
 import { items, overflowItems } from './__fixtures__/service_api_mock_data';
 

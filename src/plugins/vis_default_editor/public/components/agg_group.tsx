@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
 import {
-  EuiTitle,
-  EuiDragDropContext,
   DragDropContextProps,
-  EuiDroppable,
+  EuiDragDropContext,
   EuiDraggable,
-  EuiSpacer,
-  EuiPanel,
+  EuiDroppable,
   EuiFormErrorText,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
 
+import { AggGroupLabels, AggGroupNames, IAggConfig } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { AggGroupNames, AggGroupLabels, IAggConfig } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
+import { AddSchema, DefaultEditorAggCommonProps, ReorderAggs } from './agg_common_props';
 import {
-  isInvalidAggsTouched,
-  isAggRemovable,
   calcAggIsTooLow,
   getEnabledMetricAggsCount,
+  isAggRemovable,
+  isInvalidAggsTouched,
 } from './agg_group_helper';
-import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
+import { AGGS_ACTION_KEYS, aggGroupReducer, initAggsState } from './agg_group_state';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];

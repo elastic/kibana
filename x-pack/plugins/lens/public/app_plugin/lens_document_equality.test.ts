@@ -6,7 +6,6 @@
  */
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { isLensEqual } from './lens_document_equality';
 import { Document } from '../persistence/saved_object_store';
 import {
   AnnotationGroups,
@@ -15,6 +14,7 @@ import {
   Visualization,
   VisualizationMap,
 } from '../types';
+import { isLensEqual } from './lens_document_equality';
 
 const visualizationType = 'lnsSomeVis';
 

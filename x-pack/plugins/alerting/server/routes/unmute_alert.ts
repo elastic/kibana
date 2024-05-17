@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { MuteOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 
 const paramSchema = schema.object({
   rule_id: schema.string(),

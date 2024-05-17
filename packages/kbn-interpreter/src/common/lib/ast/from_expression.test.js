@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fromExpression } from './from_expression';
 import { getType } from '../get_type';
+import { fromExpression } from './from_expression';
 
 describe('fromExpression', () => {
   describe('invalid expression', () => {

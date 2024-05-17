@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import crypto from 'crypto';
+import moment from 'moment';
 
 export interface TlsProps {
   valid?: boolean;

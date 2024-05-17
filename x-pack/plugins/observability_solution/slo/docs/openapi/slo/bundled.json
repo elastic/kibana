@@ -38,9 +38,7 @@
         "summary": "Creates an SLO.",
         "operationId": "createSloOp",
         "description": "You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -121,9 +119,7 @@
         "summary": "Retrieves a paginated list of SLOs",
         "operationId": "findSlosOp",
         "description": "You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -167,12 +163,7 @@
             "description": "Sort by field",
             "schema": {
               "type": "string",
-              "enum": [
-                "sli_value",
-                "status",
-                "error_budget_consumed",
-                "error_budget_remaining"
-              ],
+              "enum": ["sli_value", "status", "error_budget_consumed", "error_budget_remaining"],
               "default": "status"
             },
             "example": "status"
@@ -183,10 +174,7 @@
             "description": "Sort order",
             "schema": {
               "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
+              "enum": ["asc", "desc"],
               "default": "asc"
             },
             "example": "asc"
@@ -251,9 +239,7 @@
         "summary": "Retrieves a SLO",
         "operationId": "getSloOp",
         "description": "You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -331,9 +317,7 @@
         "summary": "Updates an SLO",
         "operationId": "updateSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -412,9 +396,7 @@
         "summary": "Deletes an SLO",
         "operationId": "deleteSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -478,9 +460,7 @@
         "summary": "Enables an SLO",
         "operationId": "enableSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -544,9 +524,7 @@
         "summary": "Disables an SLO",
         "operationId": "disableSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -610,9 +588,7 @@
         "summary": "Resets an SLO.",
         "operationId": "resetSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -683,9 +659,7 @@
         "summary": "Retrieves the historical summary for a list of SLOs",
         "operationId": "historicalSummaryOp",
         "description": "You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -753,9 +727,7 @@
         "summary": "Get the SLO definitions",
         "operationId": "getDefinitionsOp",
         "description": "You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -851,9 +823,7 @@
         "summary": "Batch delete rollup and summary data for the matching list of sloId and instanceId",
         "operationId": "deleteSloInstancesOp",
         "description": "You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
-        "tags": [
-          "slo"
-        ],
+        "tags": ["slo"],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -962,10 +932,7 @@
     "schemas": {
       "indicator_properties_apm_availability": {
         "title": "APM availability",
-        "required": [
-          "type",
-          "params"
-        ],
+        "required": ["type", "params"],
         "description": "Defines properties for the APM availability indicator type",
         "type": "object",
         "properties": {
@@ -973,13 +940,7 @@
             "description": "An object containing the indicator parameters.",
             "type": "object",
             "nullable": false,
-            "required": [
-              "service",
-              "environment",
-              "transactionType",
-              "transactionName",
-              "index"
-            ],
+            "required": ["service", "environment", "transactionType", "transactionName", "index"],
             "properties": {
               "service": {
                 "description": "The APM service name",
@@ -1101,10 +1062,7 @@
       },
       "indicator_properties_custom_kql": {
         "title": "Custom Query",
-        "required": [
-          "type",
-          "params"
-        ],
+        "required": ["type", "params"],
         "description": "Defines properties for a custom query indicator type",
         "type": "object",
         "properties": {
@@ -1112,12 +1070,7 @@
             "description": "An object containing the indicator parameters.",
             "type": "object",
             "nullable": false,
-            "required": [
-              "index",
-              "timestampField",
-              "good",
-              "total"
-            ],
+            "required": ["index", "timestampField", "good", "total"],
             "properties": {
               "index": {
                 "description": "The index or index pattern to use",
@@ -1154,10 +1107,7 @@
       },
       "indicator_properties_apm_latency": {
         "title": "APM latency",
-        "required": [
-          "type",
-          "params"
-        ],
+        "required": ["type", "params"],
         "description": "Defines properties for the APM latency indicator type",
         "type": "object",
         "properties": {
@@ -1220,10 +1170,7 @@
       },
       "indicator_properties_custom_metric": {
         "title": "Custom metric",
-        "required": [
-          "type",
-          "params"
-        ],
+        "required": ["type", "params"],
         "description": "Defines properties for a custom metric indicator type",
         "type": "object",
         "properties": {
@@ -1231,12 +1178,7 @@
             "description": "An object containing the indicator parameters.",
             "type": "object",
             "nullable": false,
-            "required": [
-              "index",
-              "timestampField",
-              "good",
-              "total"
-            ],
+            "required": ["index", "timestampField", "good", "total"],
             "properties": {
               "index": {
                 "description": "The index or index pattern to use",
@@ -1256,21 +1198,14 @@
               "good": {
                 "description": "An object defining the \"good\" metrics and equation\n",
                 "type": "object",
-                "required": [
-                  "metrics",
-                  "equation"
-                ],
+                "required": ["metrics", "equation"],
                 "properties": {
                   "metrics": {
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": [
-                        "name",
-                        "aggregation",
-                        "field"
-                      ],
+                      "required": ["name", "aggregation", "field"],
                       "properties": {
                         "name": {
                           "description": "The name of the metric. Only valid options are A-Z",
@@ -1282,9 +1217,7 @@
                           "description": "The aggregation type of the metric. Only valid option is \"sum\"",
                           "type": "string",
                           "example": "sum",
-                          "enum": [
-                            "sum"
-                          ]
+                          "enum": ["sum"]
                         },
                         "field": {
                           "description": "The field of the metric.",
@@ -1309,21 +1242,14 @@
               "total": {
                 "description": "An object defining the \"total\" metrics and equation\n",
                 "type": "object",
-                "required": [
-                  "metrics",
-                  "equation"
-                ],
+                "required": ["metrics", "equation"],
                 "properties": {
                   "metrics": {
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": [
-                        "name",
-                        "aggregation",
-                        "field"
-                      ],
+                      "required": ["name", "aggregation", "field"],
                       "properties": {
                         "name": {
                           "description": "The name of the metric. Only valid options are A-Z",
@@ -1335,9 +1261,7 @@
                           "description": "The aggregation type of the metric. Only valid option is \"sum\"",
                           "type": "string",
                           "example": "sum",
-                          "enum": [
-                            "sum"
-                          ]
+                          "enum": ["sum"]
                         },
                         "field": {
                           "description": "The field of the metric.",
@@ -1370,10 +1294,7 @@
       },
       "indicator_properties_histogram": {
         "title": "Histogram indicator",
-        "required": [
-          "type",
-          "params"
-        ],
+        "required": ["type", "params"],
         "description": "Defines properties for a histogram indicator type",
         "type": "object",
         "properties": {
@@ -1381,12 +1302,7 @@
             "description": "An object containing the indicator parameters.",
             "type": "object",
             "nullable": false,
-            "required": [
-              "index",
-              "timestampField",
-              "good",
-              "total"
-            ],
+            "required": ["index", "timestampField", "good", "total"],
             "properties": {
               "index": {
                 "description": "The index or index pattern to use",
@@ -1406,10 +1322,7 @@
               "good": {
                 "description": "An object defining the \"good\" events\n",
                 "type": "object",
-                "required": [
-                  "aggregation",
-                  "field"
-                ],
+                "required": ["aggregation", "field"],
                 "properties": {
                   "field": {
                     "description": "The field use to aggregate the good events.",
@@ -1420,10 +1333,7 @@
                     "description": "The type of aggregation to use.",
                     "type": "string",
                     "example": "value_count",
-                    "enum": [
-                      "value_count",
-                      "range"
-                    ]
+                    "enum": ["value_count", "range"]
                   },
                   "filter": {
                     "description": "The filter for good events.",
@@ -1445,10 +1355,7 @@
               "total": {
                 "description": "An object defining the \"total\" events\n",
                 "type": "object",
-                "required": [
-                  "aggregation",
-                  "field"
-                ],
+                "required": ["aggregation", "field"],
                 "properties": {
                   "field": {
                     "description": "The field use to aggregate the good events.",
@@ -1459,10 +1366,7 @@
                     "description": "The type of aggregation to use.",
                     "type": "string",
                     "example": "value_count",
-                    "enum": [
-                      "value_count",
-                      "range"
-                    ]
+                    "enum": ["value_count", "range"]
                   },
                   "filter": {
                     "description": "The filter for total events.",
@@ -1492,11 +1396,7 @@
       },
       "timeslice_metric_basic_metric_with_field": {
         "title": "Timeslice Metric Basic Metric with Field",
-        "required": [
-          "name",
-          "aggregation",
-          "field"
-        ],
+        "required": ["name", "aggregation", "field"],
         "type": "object",
         "properties": {
           "name": {
@@ -1509,15 +1409,7 @@
             "description": "The aggregation type of the metric.",
             "type": "string",
             "example": "sum",
-            "enum": [
-              "sum",
-              "avg",
-              "min",
-              "max",
-              "std_deviation",
-              "last_value",
-              "cardinality"
-            ]
+            "enum": ["sum", "avg", "min", "max", "std_deviation", "last_value", "cardinality"]
           },
           "field": {
             "description": "The field of the metric.",
@@ -1533,12 +1425,7 @@
       },
       "timeslice_metric_percentile_metric": {
         "title": "Timeslice Metric Percentile Metric",
-        "required": [
-          "name",
-          "aggregation",
-          "field",
-          "percentile"
-        ],
+        "required": ["name", "aggregation", "field", "percentile"],
         "type": "object",
         "properties": {
           "name": {
@@ -1551,9 +1438,7 @@
             "description": "The aggregation type of the metric. Only valid option is \"percentile\"",
             "type": "string",
             "example": "percentile",
-            "enum": [
-              "percentile"
-            ]
+            "enum": ["percentile"]
           },
           "field": {
             "description": "The field of the metric.",
@@ -1574,10 +1459,7 @@
       },
       "timeslice_metric_doc_count_metric": {
         "title": "Timeslice Metric Doc Count Metric",
-        "required": [
-          "name",
-          "aggregation"
-        ],
+        "required": ["name", "aggregation"],
         "type": "object",
         "properties": {
           "name": {
@@ -1590,9 +1472,7 @@
             "description": "The aggregation type of the metric. Only valid option is \"doc_count\"",
             "type": "string",
             "example": "doc_count",
-            "enum": [
-              "doc_count"
-            ]
+            "enum": ["doc_count"]
           },
           "filter": {
             "description": "The filter to apply to the metric.",
@@ -1603,10 +1483,7 @@
       },
       "indicator_properties_timeslice_metric": {
         "title": "Timeslice metric",
-        "required": [
-          "type",
-          "params"
-        ],
+        "required": ["type", "params"],
         "description": "Defines properties for a timeslice metric indicator type",
         "type": "object",
         "properties": {
@@ -1614,11 +1491,7 @@
             "description": "An object containing the indicator parameters.",
             "type": "object",
             "nullable": false,
-            "required": [
-              "index",
-              "timestampField",
-              "metric"
-            ],
+            "required": ["index", "timestampField", "metric"],
             "properties": {
               "index": {
                 "description": "The index or index pattern to use",
@@ -1638,12 +1511,7 @@
               "metric": {
                 "description": "An object defining the metrics, equation, and threshold to determine if it's a good slice or not\n",
                 "type": "object",
-                "required": [
-                  "metrics",
-                  "equation",
-                  "comparator",
-                  "threshold"
-                ],
+                "required": ["metrics", "equation", "comparator", "threshold"],
                 "properties": {
                   "metrics": {
                     "description": "List of metrics with their name, aggregation type, and field.",
@@ -1671,12 +1539,7 @@
                     "description": "The comparator to use to compare the equation to the threshold.",
                     "type": "string",
                     "example": "GT",
-                    "enum": [
-                      "GT",
-                      "GTE",
-                      "LT",
-                      "LTE"
-                    ]
+                    "enum": ["GT", "GTE", "LT", "LTE"]
                   },
                   "threshold": {
                     "description": "The threshold used to determine if the metric is a good slice or not.",
@@ -1696,10 +1559,7 @@
       },
       "time_window": {
         "title": "Time window",
-        "required": [
-          "duration",
-          "type"
-        ],
+        "required": ["duration", "type"],
         "description": "Defines properties for the SLO time window",
         "type": "object",
         "properties": {
@@ -1712,10 +1572,7 @@
             "description": "Indicates weither the time window is a rolling or a calendar aligned time window.",
             "type": "string",
             "example": "rolling",
-            "enum": [
-              "rolling",
-              "calendarAligned"
-            ]
+            "enum": ["rolling", "calendarAligned"]
           }
         }
       },
@@ -1723,17 +1580,12 @@
         "title": "Budgeting method",
         "type": "string",
         "description": "The budgeting method to use when computing the rollup data.",
-        "enum": [
-          "occurrences",
-          "timeslices"
-        ],
+        "enum": ["occurrences", "timeslices"],
         "example": "occurrences"
       },
       "objective": {
         "title": "Objective",
-        "required": [
-          "target"
-        ],
+        "required": ["target"],
         "description": "Defines properties for the SLO objective",
         "type": "object",
         "properties": {
@@ -1780,23 +1632,13 @@
       "summary_status": {
         "title": "summary status",
         "type": "string",
-        "enum": [
-          "NO_DATA",
-          "HEALTHY",
-          "DEGRADING",
-          "VIOLATED"
-        ],
+        "enum": ["NO_DATA", "HEALTHY", "DEGRADING", "VIOLATED"],
         "example": "HEALTHY"
       },
       "error_budget": {
         "title": "Error budget",
         "type": "object",
-        "required": [
-          "initial",
-          "consumed",
-          "remaining",
-          "isEstimated"
-        ],
+        "required": ["initial", "consumed", "remaining", "isEstimated"],
         "properties": {
           "initial": {
             "type": "number",
@@ -1824,11 +1666,7 @@
         "title": "Summary",
         "type": "object",
         "description": "The SLO computed data",
-        "required": [
-          "status",
-          "sliValue",
-          "errorBudget"
-        ],
+        "required": ["status", "sliValue", "errorBudget"],
         "properties": {
           "status": {
             "$ref": "#/components/schemas/summary_status"
@@ -2000,11 +1838,7 @@
       "400_response": {
         "title": "Bad request",
         "type": "object",
-        "required": [
-          "statusCode",
-          "error",
-          "message"
-        ],
+        "required": ["statusCode", "error", "message"],
         "properties": {
           "statusCode": {
             "type": "number",
@@ -2023,11 +1857,7 @@
       "401_response": {
         "title": "Unauthorized",
         "type": "object",
-        "required": [
-          "statusCode",
-          "error",
-          "message"
-        ],
+        "required": ["statusCode", "error", "message"],
         "properties": {
           "statusCode": {
             "type": "number",
@@ -2046,11 +1876,7 @@
       "403_response": {
         "title": "Unauthorized",
         "type": "object",
-        "required": [
-          "statusCode",
-          "error",
-          "message"
-        ],
+        "required": ["statusCode", "error", "message"],
         "properties": {
           "statusCode": {
             "type": "number",
@@ -2069,11 +1895,7 @@
       "404_response": {
         "title": "Not found",
         "type": "object",
-        "required": [
-          "statusCode",
-          "error",
-          "message"
-        ],
+        "required": ["statusCode", "error", "message"],
         "properties": {
           "statusCode": {
             "type": "number",
@@ -2166,9 +1988,7 @@
       "create_slo_response": {
         "title": "Create SLO response",
         "type": "object",
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
         "properties": {
           "id": {
             "type": "string",
@@ -2179,11 +1999,7 @@
       "409_response": {
         "title": "Conflict",
         "type": "object",
-        "required": [
-          "statusCode",
-          "error",
-          "message"
-        ],
+        "required": ["statusCode", "error", "message"],
         "properties": {
           "statusCode": {
             "type": "number",
@@ -2378,9 +2194,7 @@
       "historical_summary_request": {
         "title": "Historical summary request",
         "type": "object",
-        "required": [
-          "list"
-        ],
+        "required": ["list"],
         "properties": {
           "list": {
             "description": "The list of SLO identifiers to get the historical summary for",
@@ -2447,19 +2261,14 @@
         "title": "Delete SLO instances request",
         "description": "The delete SLO instances request takes a list of SLO id and instance id, then delete the rollup and summary data. This API can be used to remove the staled data of an instance SLO that no longer get updated.\n",
         "type": "object",
-        "required": [
-          "list"
-        ],
+        "required": ["list"],
         "properties": {
           "list": {
             "description": "An array of slo id and instance id",
             "type": "array",
             "items": {
               "type": "object",
-              "required": [
-                "sloId",
-                "instanceId"
-              ],
+              "required": ["sloId", "instanceId"],
               "properties": {
                 "sloId": {
                   "description": "The SLO unique identifier",

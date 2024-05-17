@@ -13,11 +13,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { LibraryNotificationPopover } from './library_notification_popover';
 import {
   LegacyUnlinkFromLibraryAction,
   LegacyUnlinkPanelFromLibraryActionApi,
 } from './legacy_unlink_from_library_action';
+import { LibraryNotificationPopover } from './library_notification_popover';
 
 const mockUnlinkFromLibraryAction = {
   execute: jest.fn(),

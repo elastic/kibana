@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiText, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { useStyles } from './styles';
-import type { IndexPattern, GlobalFilter } from '../../types';
+import { COUNT_WIDGET_KEY_PODS } from '../../../common/constants';
+import type { GlobalFilter, IndexPattern } from '../../types';
 import { addCommasToNumber } from '../../utils/add_commas_to_number';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
-import { useFetchCountWidgetData } from './hooks';
 import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
-import { COUNT_WIDGET_KEY_PODS } from '../../../common/constants';
+import { useFetchCountWidgetData } from './hooks';
+import { useStyles } from './styles';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:countWidgetLoading';
 export const TOOLTIP_TEST_ID = 'kubernetesSecurity:countWidgetTooltip';

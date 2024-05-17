@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
-import { AttackChain } from '../../../attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../detections/components/alerts_table/actions';
-import { getTacticMetadata } from '../../../helpers';
+import { AttackChain } from '../../../attack/attack_chain';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
-import * as i18n from './translations';
+import { getTacticMetadata } from '../../../helpers';
 import type { AttackDiscovery } from '../../../types';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
+import * as i18n from './translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

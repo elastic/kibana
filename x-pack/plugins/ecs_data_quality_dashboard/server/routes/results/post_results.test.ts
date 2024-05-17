@@ -6,16 +6,16 @@
  */
 import { RESULTS_ROUTE_PATH } from '../../../common/constants';
 
-import { serverMock } from '../../__mocks__/server';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { postResultsRoute } from './post_results';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
-import { resultDocument } from './results.mock';
-import type { CheckIndicesPrivilegesParam } from './privileges';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { serverMock } from '../../__mocks__/server';
 import { API_CURRENT_USER_ERROR_MESSAGE } from '../../translations';
+import { postResultsRoute } from './post_results';
+import type { CheckIndicesPrivilegesParam } from './privileges';
+import { resultDocument } from './results.mock';
 
 const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))

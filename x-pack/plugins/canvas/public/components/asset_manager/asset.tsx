@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
 import { set } from '@kbn/safer-lodash-set';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
 import { fromExpression, toExpression } from '@kbn/interpreter';
 
+import { AssetType, ExpressionAstExpression, State } from '../../../types';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
 // @ts-expect-error untyped local
+import { removeAsset } from '../../state/actions/assets';
+// @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
-// @ts-expect-error untyped local
-import { removeAsset } from '../../state/actions/assets';
-import { State, ExpressionAstExpression, AssetType } from '../../../types';
 
 import { Asset as Component } from './asset.component';
 

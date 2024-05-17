@@ -8,16 +8,16 @@
 import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual, orderBy } from 'lodash/fp';
 
-import type { IndexSummaryTableItem } from '../summary_table/helpers';
+import { getDocsCount, getSizeInBytes } from '../../helpers';
 import type {
-  IlmPhase,
-  IlmExplainPhaseCounts,
   DataQualityCheckResult,
+  IlmExplainPhaseCounts,
+  IlmPhase,
+  MeteringStatsIndex,
   PatternRollup,
   SortConfig,
-  MeteringStatsIndex,
 } from '../../types';
-import { getDocsCount, getSizeInBytes } from '../../helpers';
+import type { IndexSummaryTableItem } from '../summary_table/helpers';
 
 export const isManaged = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined

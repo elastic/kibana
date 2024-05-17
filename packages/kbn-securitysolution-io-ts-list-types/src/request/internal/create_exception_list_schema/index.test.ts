@@ -9,8 +9,8 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ExceptionListTypeEnum } from '../../../common/exception_list';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { ExceptionListTypeEnum } from '../../../common/exception_list';
 
 import { internalCreateExceptionListSchema } from '.';
 import { getCreateExceptionListSchemaMock } from '../../create_exception_list_schema/index.mock';

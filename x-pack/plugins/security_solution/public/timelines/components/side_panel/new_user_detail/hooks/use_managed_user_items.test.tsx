@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { mockGlobalState, TestProviders, createMockStore } from '../../../../../common/mock';
-import { useManagedUserItems } from './use_managed_user_items';
-import { mockEntraUserFields, mockOktaUserFields } from '../__mocks__';
-import { UserAssetTableType } from '../../../../../explore/users/store/model';
 import React from 'react';
+import { TestProviders, createMockStore, mockGlobalState } from '../../../../../common/mock';
+import { UserAssetTableType } from '../../../../../explore/users/store/model';
+import { mockEntraUserFields, mockOktaUserFields } from '../__mocks__';
+import { useManagedUserItems } from './use_managed_user_items';
 
 const mockState = {
   ...mockGlobalState,

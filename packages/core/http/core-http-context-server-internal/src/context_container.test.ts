@@ -8,9 +8,9 @@
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type {
-  RequestHandlerContextBase,
   KibanaRequest,
   KibanaResponseFactory,
+  RequestHandlerContextBase,
 } from '@kbn/core-http-server';
 import { ContextContainer } from './context_container';
 

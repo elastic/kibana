@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiCard,
   EuiFormRow,
-  EuiTitle,
-  EuiSpacer,
-  EuiSelect,
-  EuiToolTip,
   EuiIcon,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
 
 import { WorkpadColorPicker } from '../workpad_color_picker';
 
@@ -82,7 +82,7 @@ export const PageConfig = ({
             <EuiSelect
               value={transition ? transition.name : ''}
               options={transitions}
-              compressed
+              compressed={true}
               onChange={(e) => setTransition(e.target.value)}
             />
           </EuiFormRow>

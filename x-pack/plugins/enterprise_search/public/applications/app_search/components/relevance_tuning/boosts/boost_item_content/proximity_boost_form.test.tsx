@@ -9,11 +9,11 @@ import { setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
-import { ProximityBoost, BoostType, ProximityBoostFunction } from '../../types';
+import { BoostType, ProximityBoost, ProximityBoostFunction } from '../../types';
 
 import { ProximityBoostForm } from './proximity_boost_form';
 

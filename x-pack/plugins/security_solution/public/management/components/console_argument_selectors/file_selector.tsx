@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFilePicker,
@@ -16,6 +15,7 @@ import {
 } from '@elastic/eui';
 import type { EuiFilePickerProps } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 
 const INITIAL_DISPLAY_LABEL = i18n.translate(

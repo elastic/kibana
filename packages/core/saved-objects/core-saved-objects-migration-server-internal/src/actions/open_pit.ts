@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  catchRetryableEsClientErrors,
   type RetryableEsClientError,
+  catchRetryableEsClientErrors,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */

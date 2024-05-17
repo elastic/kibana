@@ -6,12 +6,12 @@
  */
 
 import { resolve } from 'path';
-import consumeState from './consume_state';
-import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
+import consumeState from './consume_state';
 
 const log = new ToolingLog({
   level: 'info',

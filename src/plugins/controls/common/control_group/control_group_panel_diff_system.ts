@@ -7,11 +7,11 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { omit, isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { OPTIONS_LIST_DEFAULT_SORT } from '../options_list/suggestions_sorting';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
-import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from '../range_slider/types';
-import { TimeSliderControlEmbeddableInput, TIME_SLIDER_CONTROL } from '../time_slider/types';
+import { OPTIONS_LIST_CONTROL, OptionsListEmbeddableInput } from '../options_list/types';
+import { RANGE_SLIDER_CONTROL, RangeSliderEmbeddableInput } from '../range_slider/types';
+import { TIME_SLIDER_CONTROL, TimeSliderControlEmbeddableInput } from '../time_slider/types';
 
 import { ControlPanelState } from './types';
 

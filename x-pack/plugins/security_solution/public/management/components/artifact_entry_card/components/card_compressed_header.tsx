@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo, useCallback } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
-import { CardExpandButton } from './card_expand_button';
-import { TextValueDisplay } from './text_value_display';
-import { EffectScope } from './effect_scope';
-import { CardActionsFlexItem } from './card_actions_flex_item';
-import type { ArtifactInfo } from '../types';
-import type { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible_card';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import type { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible_card';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
+import type { ArtifactInfo } from '../types';
+import { CardActionsFlexItem } from './card_actions_flex_item';
+import { CardExpandButton } from './card_expand_button';
 import { DescriptionField } from './description_field';
+import { EffectScope } from './effect_scope';
+import { TextValueDisplay } from './text_value_display';
 
 export interface CardCompressedHeaderProps
   extends Pick<CommonProps, 'data-test-subj'>,

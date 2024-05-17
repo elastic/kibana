@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiSpacer, EuiText, EuiCheckableCard, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiCheckableCard, EuiSpacer, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 const txtUnknown = i18n.translate('uiActionsEnhanced.components.TriggerPickerItem.unknown', {
   defaultMessage: 'Unknown',

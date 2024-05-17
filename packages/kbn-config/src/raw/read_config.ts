@@ -7,11 +7,11 @@
  */
 
 import { readFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
 import { set } from '@kbn/safer-lodash-set';
-import { isPlainObject } from 'lodash';
 import { ensureValidObjectPath } from '@kbn/std';
-import { splitKey, getUnsplittableKey, replaceEnvVarRefs } from './utils';
+import { safeLoad } from 'js-yaml';
+import { isPlainObject } from 'lodash';
+import { getUnsplittableKey, replaceEnvVarRefs, splitKey } from './utils';
 
 const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
 

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
+import { findLast } from 'lodash';
+import React, { useMemo, useCallback } from 'react';
 
-import type { TimeRange } from '@kbn/es-query';
 import { AggGroupNames, IAggConfig, IMetricAggType, search } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { ISchemas } from '@kbn/visualizations-plugin/public';
+import type { AddSchema, DefaultEditorAggCommonProps, ReorderAggs } from '../agg_common_props';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
   EditorAction,
   addNewAgg,
+  changeAggType,
   removeAgg,
   reorderAggs,
   setAggParamValue,
-  changeAggType,
   toggleEnabledAgg,
 } from './state';
-import type { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
 import type { EditorVisState } from './state/reducers';
 
 export interface DefaultEditorDataTabProps {

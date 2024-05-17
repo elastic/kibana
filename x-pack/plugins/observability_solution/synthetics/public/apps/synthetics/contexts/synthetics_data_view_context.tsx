@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, FC, PropsWithChildren } from 'react';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import React, { createContext, useContext, FC, PropsWithChildren } from 'react';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 export const SyntheticsDataViewContext = createContext({} as DataView);

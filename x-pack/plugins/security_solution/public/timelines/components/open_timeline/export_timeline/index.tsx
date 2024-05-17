@@ -8,8 +8,8 @@
 import React from 'react';
 import type { DeleteTimelines } from '../types';
 
-import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
+import { TimelineDownloader } from './export_timeline';
 
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;

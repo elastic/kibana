@@ -7,9 +7,9 @@
 
 import { forbidden } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { getStatusCode } from './handle_error';
-import { ErrorTypes } from '../../types';
 import { NO_REMOTE_CLIENT_ROLE_ERROR } from '../../routes/api/v1/check_access/check_access';
+import { ErrorTypes } from '../../types';
+import { getStatusCode } from './handle_error';
 
 export function isAuthError(err: ErrorTypes) {
   const statusCode = getStatusCode(err);

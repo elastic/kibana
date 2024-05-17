@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'timeline-bottom-bar';

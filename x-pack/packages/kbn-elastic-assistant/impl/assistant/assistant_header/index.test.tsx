@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import { AssistantHeader } from '.';
-import { TestProviders } from '../../mock/test_providers/test_providers';
-import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
+import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {

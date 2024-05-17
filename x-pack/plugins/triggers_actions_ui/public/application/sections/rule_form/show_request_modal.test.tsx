@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, cleanup } from '@testing-library/react';
-import { ShowRequestModal, ShowRequestModalProps } from './show_request_modal';
+import { cleanup, render } from '@testing-library/react';
+import React from 'react';
 import { Rule, RuleTypeParams, RuleUpdates } from '../../../types';
 import { InitialRule } from './rule_reducer';
+import { ShowRequestModal, ShowRequestModalProps } from './show_request_modal';
 
 const testDate = new Date('2024-04-04T19:34:24.902Z');
 const shared = {

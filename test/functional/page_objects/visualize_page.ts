@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
 import { FtrService } from '../ftr_provider_context';
 
 // TODO: Remove & Refactor to use the TTV page objects

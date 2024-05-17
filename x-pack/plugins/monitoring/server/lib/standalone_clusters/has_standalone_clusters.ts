@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { get } from 'lodash';
-import { LegacyRequest } from '../../types';
+import moment from 'moment';
 import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
 import {
+  getBeatDataset,
   getIndexPatterns,
   getLogstashDataset,
-  getBeatDataset,
 } from '../cluster/get_index_patterns';
 
 export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {

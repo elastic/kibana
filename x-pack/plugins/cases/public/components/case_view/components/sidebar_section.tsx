@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import React from 'react';
 
 interface SidebarSectionProps {
   children: React.ReactNode;

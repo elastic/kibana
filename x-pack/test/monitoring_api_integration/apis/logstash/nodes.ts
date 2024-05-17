@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import allNodesResponse from '../../fixtures/logstash/nodes.json';
 import nodeDetailResponse from '../../fixtures/logstash/node_detail.json';
 import nodeDetailAdvancedResponse from '../../fixtures/logstash/node_detail_advanced.json';
+import allNodesResponse from '../../fixtures/logstash/nodes.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

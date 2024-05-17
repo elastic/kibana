@@ -7,13 +7,13 @@
  */
 
 import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
-import { Filter, isFilterPinned } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { Filter, isFilterPinned } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { stringHash } from '@kbn/ml-string-hash';
-import type { FilterLabelStatus } from '../filter_item/filter_item';
+import React, { FC } from 'react';
 import { FilterBadge } from '../../filter_badge';
+import type { FilterLabelStatus } from '../filter_item/filter_item';
 
 interface Props {
   filter: Filter;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { type Observable, map } from 'rxjs';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { type Observable, map } from 'rxjs';
 
 /**
  * Registers the Analytics context provider to enrich events with the page title.

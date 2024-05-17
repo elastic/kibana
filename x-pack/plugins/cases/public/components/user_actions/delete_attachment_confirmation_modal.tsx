@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiConfirmModal } from '@elastic/eui';
+import React from 'react';
 import { CANCEL_BUTTON } from './property_actions/translations';
 
 type Pros = Pick<EuiConfirmModalProps, 'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'>;

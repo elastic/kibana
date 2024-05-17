@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField, ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React from 'react';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
-import type { CustomFieldType } from '../types';
 import * as i18n from '../translations';
+import type { CustomFieldType } from '../types';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldToggle>['Configure'] = () => {
   return (

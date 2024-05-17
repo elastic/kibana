@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { FormLabelWithIconTip } from './form_label_with_icon_tip';
 
 export function FlexItemSetting(props) {

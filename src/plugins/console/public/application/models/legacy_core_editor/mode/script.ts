@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
 import { ScriptHighlightRules } from '@kbn/ace';
+import ace from 'brace';
 
 const TextMode = ace.acequire('ace/mode/text').Mode;
 const MatchingBraceOutdent = ace.acequire('ace/mode/matching_brace_outdent').MatchingBraceOutdent;
@@ -44,4 +44,4 @@ export class ScriptMode extends TextMode {
   this.autoOutdent = function (state: unknown, doc: string, row: string) {
     this.$outdent.autoOutdent(doc, row);
   };
-}.call(ScriptMode.prototype));
+}).call(ScriptMode.prototype);

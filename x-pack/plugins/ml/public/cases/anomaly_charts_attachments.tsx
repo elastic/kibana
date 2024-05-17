@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import deepEqual from 'fast-deep-equal';
+import { memoize } from 'lodash';
 import type { FC } from 'react';
 import React from 'react';
-import { memoize } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiDescriptionList } from '@elastic/eui';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { EuiDescriptionList } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnomalyChartsEmbeddableInput } from '../embeddables';
 
 export const initComponent = memoize(

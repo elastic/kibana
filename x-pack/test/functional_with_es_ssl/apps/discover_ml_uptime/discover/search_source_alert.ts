@@ -565,9 +565,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
-      const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="search-source*"]`
-      );
+      const sourceDataViewOption =
+        await dataViewsElem.findByCssSelector(`[title="search-source*"]`);
       await sourceDataViewOption.click();
 
       await testSubjects.click('saveRuleButton');

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
 import { get } from 'lodash/fp';
+import { createSelector } from 'reselect';
 
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { State } from '../../../common/store/types';
-import { initialNetworkState } from './reducer';
 import type {
+  HttpQuery,
   NetworkDetailsModel,
   NetworkPageModel,
-  TopCountriesQuery,
   TlsQuery,
-  HttpQuery,
+  TopCountriesQuery,
 } from './model';
 import { NetworkDetailsTableType, NetworkTableType, NetworkType } from './model';
+import { initialNetworkState } from './reducer';
 
 const selectNetwork = (
   state: State,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { ValidatedNumberInput } from './validated_number_input';
 
 test('should render without error', async () => {

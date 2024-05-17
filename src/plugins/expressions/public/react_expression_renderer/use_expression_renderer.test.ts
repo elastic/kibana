@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { RenderHookResult, act, renderHook } from '@testing-library/react-hooks';
 import type { RefObject } from 'react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
-import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
 import * as loader from '../loader';
+import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
 
 describe('useExpressionRenderer', () => {
   const expressionLoaderSpy = jest.spyOn(loader, 'ExpressionLoader');

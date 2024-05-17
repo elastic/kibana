@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiSkeletonText, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 import { PopoverItem } from '.';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

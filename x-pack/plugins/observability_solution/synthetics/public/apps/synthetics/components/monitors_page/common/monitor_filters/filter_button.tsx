@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
+import React, { useState } from 'react';
+import { useGetUrlParams } from '../../../../hooks';
 import {
-  getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterItem,
+  getSyntheticsFilterDisplayValues,
   valueToLabelWithEmptyCount,
 } from '../../../../utils/filters/filter_fields';
-import { useGetUrlParams } from '../../../../hooks';
 import { useMonitorFiltersState } from './use_filters';
 
 export const FilterButton = ({

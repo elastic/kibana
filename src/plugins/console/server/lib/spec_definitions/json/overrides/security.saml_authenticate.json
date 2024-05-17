@@ -1,7 +1,7 @@
 {
   "security.saml_authenticate": {
     "data_autocomplete_rules": {
-     "content": "",
+      "content": "",
       "ids": [],
       "realm": ""
     }

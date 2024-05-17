@@ -13,19 +13,19 @@
  */
 
 import './dimension_editor.scss';
-import React from 'react';
+import { EuiButtonGroup, EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import React from 'react';
 import { nonNullable } from '../../../utils';
 import {
-  operationDefinitionMap,
   type PercentileIndexPatternColumn,
   type PercentileRanksIndexPatternColumn,
   type TermsIndexPatternColumn,
+  operationDefinitionMap,
 } from '../operations';
 import { isColumnOfType } from '../operations/definitions/helpers';
-import { FormBasedLayer } from '../types';
 import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
+import { FormBasedLayer } from '../types';
 
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';
@@ -119,7 +119,7 @@ export function isQuickFunction(operationType: string) {
 
 export function getParamEditor(
   temporaryStaticValue: boolean,
-  selectedOperationDefinition: typeof operationDefinitionMap[string] | undefined,
+  selectedOperationDefinition: (typeof operationDefinitionMap)[string] | undefined,
   showDefaultStaticValue: boolean
 ) {
   if (temporaryStaticValue) {

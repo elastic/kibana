@@ -1,3 +1,4 @@
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import { of } from 'rxjs';
-import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTag } from '../../common/test_utils';
+import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { buildParseSearchQuery } from './parse_search_query';
 
 const tagRef = (id: string) => ({

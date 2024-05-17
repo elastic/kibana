@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { LayerTOC } from './layer_toc';
-import { isScreenshotMode } from '../../../kibana_services';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 import { ILayer } from '../../../classes/layers/layer';
+import { isScreenshotMode } from '../../../kibana_services';
 import { ExpandButton } from './expand_button';
+import { LayerTOC } from './layer_toc';
 
 export interface Props {
   isReadOnly: boolean;

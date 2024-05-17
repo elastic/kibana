@@ -7,13 +7,13 @@
 
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertsTableStorage } from '../../alerts_table_state';
-import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
+import { toggleColumn } from './toggle_column';
 
 export interface UseColumnsArgs {
   featureIds: AlertConsumers[];

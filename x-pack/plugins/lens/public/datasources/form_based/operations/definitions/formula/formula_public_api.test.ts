@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { FormulaPublicApi, createFormulaPublicApi } from './formula_public_api';
 import { insertOrReplaceFormulaColumn } from './parse';
-import { createFormulaPublicApi, FormulaPublicApi } from './formula_public_api';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DateHistogramIndexPatternColumn, PersistedIndexPatternLayer } from '../../../types';
-import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
 import moment from 'moment';
+import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
+import type { DateHistogramIndexPatternColumn, PersistedIndexPatternLayer } from '../../../types';
 import type { FormulaIndexPatternColumn } from './formula';
 
 jest.mock('./parse', () => {

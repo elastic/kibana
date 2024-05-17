@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { useSelector } from 'react-redux';
-import { selectDynamicSettings } from '../state/selectors';
 import { CERT_STATUS } from '../../../common/constants';
+import { selectDynamicSettings } from '../state/selectors';
 
 export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
   const dss = useSelector(selectDynamicSettings);
@@ -38,6 +38,6 @@ export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
   return isExpiringSoon
     ? CERT_STATUS.EXPIRING_SOON
     : isTooOld
-    ? CERT_STATUS.TOO_OLD
-    : CERT_STATUS.OK;
+      ? CERT_STATUS.TOO_OLD
+      : CERT_STATUS.OK;
 };

@@ -1,3 +1,4 @@
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { HealthStatus, RawMonitoringStats } from '../monitoring';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
+import { HealthStatus, RawMonitoringStats } from '../monitoring';
+import { calculateHealthStatus } from './calculate_health_status';
 
 const now = '2023-05-09T13:00:00.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));

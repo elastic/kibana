@@ -8,9 +8,9 @@
 import type { DataViewListItem, DataView as DataViewType } from '@kbn/data-views-plugin/common';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { DEFAULT_TIME_FIELD } from '../../../../common/constants';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../../store/sourcerer/model';
-import { DEFAULT_TIME_FIELD } from '../../../../common/constants';
 
 export interface GetSourcererDataView {
   signal?: AbortSignal;

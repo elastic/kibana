@@ -13,22 +13,22 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { FilterStateStore } from '@kbn/es-query';
 
 import {
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  compareFilters,
   isFilterPinned,
   onlyDisabledFiltersChanged,
-  Filter,
   uniqFilters,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
-import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+import { sortFilters } from './lib/sort_filters';
 
 import { UI_SETTINGS } from '../../../common';
 import {
+  extract,
   getAllMigrations,
   inject,
-  extract,
   telemetry,
 } from '../../../common/query/filters/persistable_state';
 

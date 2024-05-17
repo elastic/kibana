@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { Rule } from '@kbn/alerting-plugin/common';
-import { GetService } from '../../types';
-import { getAlertsTargetIndices } from './get_alerts_target_indices';
 import { BULK_INDEX_DELAY, MAX_POLLS } from '../../constants';
+import { GetService } from '../../types';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
 import { User } from '../authentication/types';
+import { getAlertsTargetIndices } from './get_alerts_target_indices';
 
 export async function waitUntilNextExecution(
   getService: GetService,

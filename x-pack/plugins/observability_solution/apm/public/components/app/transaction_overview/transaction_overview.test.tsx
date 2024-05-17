@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { queryByLabelText } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
 import { CoreStart } from '@kbn/core/public';
-import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { queryByLabelText } from '@testing-library/react';
+import { MemoryHistory, createMemoryHistory } from 'history';
+import React from 'react';
+import { TransactionOverview } from '.';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
-import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import type { ApmUrlParams } from '../../../context/url_params_context/types';
-import * as useFetcherHook from '../../../hooks/use_fetcher';
-import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_fetcher';
+import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
+import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import * as useFetcherHook from '../../../hooks/use_fetcher';
 import { disableConsoleWarning, renderWithTheme } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
-import { TransactionOverview } from '.';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },

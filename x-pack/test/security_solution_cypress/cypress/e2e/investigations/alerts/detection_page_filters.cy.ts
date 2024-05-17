@@ -10,21 +10,19 @@ import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/commo
 
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { getNewRule } from '../../../objects/rule';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { TOASTER } from '../../../screens/alerts_detection_rules';
 import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
   CONTROL_POPOVER,
   FILTER_GROUP_CHANGED_BANNER,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
   OPTION_SELECTABLE_COUNT,
-  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { login } from '../../../tasks/login';
-import { visitWithTimeRange } from '../../../tasks/navigation';
-import { ALERTS_URL, CASES_URL } from '../../../urls/navigation';
 import {
   markAcknowledgedFirstAlert,
   openPageFilterPopover,
@@ -36,21 +34,23 @@ import {
   waitForAlerts,
   waitForPageFilters,
 } from '../../../tasks/alerts';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { kqlSearch, refreshPage } from '../../../tasks/security_header';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addNewFilterGroupControlValues,
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
-  switchFilterGroupControlsToEditMode,
   editSingleFilterControl,
   saveFilterGroupControls,
+  switchFilterGroupControlsToEditMode,
 } from '../../../tasks/common/filter_group';
-import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../tasks/date_picker';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { fillAddFilterForm, openAddFilterPopover } from '../../../tasks/search_bar';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { kqlSearch, refreshPage } from '../../../tasks/security_header';
+import { ALERTS_URL, CASES_URL } from '../../../urls/navigation';
 
 const customFilters = [
   {

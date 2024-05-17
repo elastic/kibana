@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { streamFactory, type StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { type StreamFactoryReturnType, streamFactory } from '@kbn/ml-response-stream/server';
 
 import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/actions';
 
@@ -17,18 +17,18 @@ import type {
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
 
-import { indexInfoHandlerFactory } from './analysis_handlers/index_info_handler';
 import { groupingHandlerFactory } from './analysis_handlers/grouping_handler';
 import { histogramHandlerFactory } from './analysis_handlers/histogram_handler';
+import { indexInfoHandlerFactory } from './analysis_handlers/index_info_handler';
+import { overallHistogramHandlerFactory } from './analysis_handlers/overall_histogram_handler';
 import { overridesHandlerFactory } from './analysis_handlers/overrides_handler';
 import { significantItemsHandlerFactory } from './analysis_handlers/significant_items_handler';
 import { topItemsHandlerFactory } from './analysis_handlers/top_items_handler';
-import { overallHistogramHandlerFactory } from './analysis_handlers/overall_histogram_handler';
 import {
-  logDebugMessageFactory,
   type LogDebugMessage,
+  logDebugMessageFactory,
 } from './response_stream_utils/log_debug_message';
-import { stateHandlerFactory, type StateHandler } from './response_stream_utils/state_handler';
+import { type StateHandler, stateHandlerFactory } from './response_stream_utils/state_handler';
 import { streamEndFactory } from './response_stream_utils/stream_end';
 import { streamEndWithUpdatedLoadingStateFactory } from './response_stream_utils/stream_end_with_updated_loading_state';
 import { streamPushErrorFactory } from './response_stream_utils/stream_push_error';

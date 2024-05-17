@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 import type {
   CreateExceptionListSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { deleteExceptionList } from './delete_exception_list';

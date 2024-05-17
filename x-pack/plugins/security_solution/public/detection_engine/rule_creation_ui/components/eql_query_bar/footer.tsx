@@ -28,9 +28,9 @@ import type {
   EqlOptionsSelected,
   FieldsEqlOptions,
 } from '../../../../../common/search_strategy';
-import * as i18n from './translations';
-import { ErrorsPopover } from './errors_popover';
 import { EqlOverviewLink } from './eql_overview_link';
+import { ErrorsPopover } from './errors_popover';
+import * as i18n from './translations';
 
 export interface Props {
   errors: string[];

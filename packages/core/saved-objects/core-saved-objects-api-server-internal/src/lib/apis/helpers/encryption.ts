@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   AuthorizationTypeMap,
-  ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
+  ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export type IEncryptionHelper = PublicMethodsOf<EncryptionHelper>;
 
@@ -71,7 +71,7 @@ export class EncryptionHelper {
     T,
     R extends { saved_objects: Array<SavedObject<T>> },
     A extends string,
-    O extends Array<{ attributes: T }>
+    O extends Array<{ attributes: T }>,
   >(response: R, typeMap: AuthorizationTypeMap<A> | undefined, originalObjects?: O) {
     const modifiedObjects = await Promise.all(
       response.saved_objects.map(async (object, index) => {

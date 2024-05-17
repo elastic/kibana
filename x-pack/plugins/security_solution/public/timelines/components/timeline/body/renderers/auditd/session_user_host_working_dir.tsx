@@ -9,10 +9,10 @@ import React from 'react';
 
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 
-import * as i18n from './translations';
 import { TokensFlexItem } from '../helpers';
 import { HostWorkingDir } from '../host_working_dir';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
+import * as i18n from './translations';
 
 interface Props {
   eventId: string;

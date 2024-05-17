@@ -6,7 +6,7 @@
  */
 
 import type { Socket } from 'net';
-import { lastValueFrom, Observable, of } from 'rxjs';
+import { Observable, lastValueFrom, of } from 'rxjs';
 
 import type { FakeRawRequest } from '@kbn/core/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
@@ -18,16 +18,16 @@ import {
 } from '@kbn/core/server/mocks';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
-import {
-  AuditService,
-  createLoggingConfig,
-  filterEvent,
-  getForwardedFor,
-  RECORD_USAGE_INTERVAL,
-} from './audit_service';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
+import {
+  AuditService,
+  RECORD_USAGE_INTERVAL,
+  createLoggingConfig,
+  filterEvent,
+  getForwardedFor,
+} from './audit_service';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

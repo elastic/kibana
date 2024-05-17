@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": ".reporting-2022-03-13",
     "mappings": {
       "properties": {

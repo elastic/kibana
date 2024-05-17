@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { useContext, useCallback, useEffect, memo, useState, useRef } from 'react';
 import type { ReactElement } from 'react';
-import classNames from 'classnames';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
+  DragContextState,
+  DragDropAction,
   DragDropIdentifier,
-  ReorderContext,
   DropHandler,
   Ghost,
-  DragDropAction,
-  DragContextState,
+  ReorderContext,
   useDragDropContext,
 } from './providers';
 import { DropType } from './types';

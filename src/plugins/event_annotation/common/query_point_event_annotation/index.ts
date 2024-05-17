@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { AvailableAnnotationIcons } from '@kbn/event-annotation-common';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { AvailableAnnotationIcons } from '@kbn/event-annotation-common';
 
 import type { QueryPointEventAnnotationArgs, QueryPointEventAnnotationOutput } from './types';
 

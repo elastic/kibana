@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { paramContainsSpace, autoCompletei18n } from '@kbn/securitysolution-autocomplete';
+import { autoCompletei18n, paramContainsSpace } from '@kbn/securitysolution-autocomplete';
 
 interface UseValueWithSpaceWarningResult {
   showSpaceWarningIcon: boolean;

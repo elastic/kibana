@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 import { ITagAssignmentService, ITagsCache } from '../../services';
 import { StartServices } from '../../types';
 

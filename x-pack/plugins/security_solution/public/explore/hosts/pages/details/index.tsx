@@ -16,23 +16,11 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
-import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import {
-  useAssetCriticalityData,
-  useAssetCriticalityPrivileges,
-} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import {
-  AssetCriticalitySelector,
-  AssetCriticalityTitle,
-} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { TableId, dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
@@ -41,45 +29,57 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import {
-  HostOverview,
-  HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-} from '../../../../overview/components/host_overview';
-import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
+import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 import { inputsSelectors } from '../../../../common/store';
-import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import {
+  AssetCriticalitySelector,
+  AssetCriticalityTitle,
+} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
+import {
+  HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
+  HostOverview,
+} from '../../../../overview/components/host_overview';
+import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 
-import { HostDetailsTabs } from './details_tabs';
-import { navTabsHostDetails } from './nav_tabs';
-import type { HostDetailsProps } from './types';
-import { HostsType } from '../../store/model';
-import { getHostDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
+import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
+import { manageQuery } from '../../../../common/components/page/manage_query';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { Display } from '../display';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
+import { useLicense } from '../../../../common/hooks/use_license';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { ID, useHostDetails } from '../../containers/hosts/details';
-import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
-import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
+import { ID, useHostDetails } from '../../containers/hosts/details';
+import { HostsType } from '../../store/model';
+import { Display } from '../display';
+import { HostDetailsTabs } from './details_tabs';
+import { getHostDetailsPageFilters } from './helpers';
+import { navTabsHostDetails } from './nav_tabs';
+import type { HostDetailsProps } from './types';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);

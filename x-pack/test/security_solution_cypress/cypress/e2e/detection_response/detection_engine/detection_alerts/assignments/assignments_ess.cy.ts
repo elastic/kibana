@@ -7,16 +7,16 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getNewRule } from '../../../../../objects/rule';
-import { expandFirstAlert } from '../../../../../tasks/alerts';
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { ALERTS_URL } from '../../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
   alertsTableMoreActionsAreNotAvailable,
   cannotAddAssigneesViaDetailsFlyout,
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
+import { expandFirstAlert } from '../../../../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+import { ALERTS_URL } from '../../../../../urls/navigation';
 
 describe('Alert user assignment - ESS', { tags: ['@ess'] }, () => {
   before(() => {

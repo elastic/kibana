@@ -6,15 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  ResolverPaginatedEvents,
-  SafeEndpointEvent,
-} from '@kbn/security-solution-plugin/common/endpoint/types';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   EndpointDocGenerator,
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import {
+  ResolverPaginatedEvents,
+  SafeEndpointEvent,
+} from '@kbn/security-solution-plugin/common/endpoint/types';
 import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';

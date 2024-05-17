@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getSplits, getLastMetric, getSiblingAggValue } from '../../helpers';
+import { getLastMetric, getSiblingAggValue, getSplits } from '../../helpers';
 
 export function stdDeviationSibling(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

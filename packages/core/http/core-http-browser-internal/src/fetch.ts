@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty, omitBy } from 'lodash';
 import { format } from 'url';
-import { BehaviorSubject } from 'rxjs';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
 import type {
-  IBasePath,
-  HttpInterceptor,
-  HttpHandler,
   HttpFetchOptions,
-  HttpResponse,
   HttpFetchOptionsWithPath,
+  HttpHandler,
+  HttpInterceptor,
+  HttpResponse,
+  IBasePath,
 } from '@kbn/core-http-browser';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import { isEmpty, omitBy } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
-import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
+import { interceptRequest, interceptResponse } from './intercept';
 
 interface Params {
   basePath: IBasePath;

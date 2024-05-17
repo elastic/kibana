@@ -5,27 +5,27 @@
  * 2.0.
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
-  IRouter,
   CustomRequestHandlerContext,
+  IRouter,
+  IScopedClusterClient,
   Logger,
   SavedObjectsClientContract,
-  IScopedClusterClient,
 } from '@kbn/core/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  FleetStartContract,
-  FleetRequestHandlerContext,
-  AgentService,
-  PackageService,
-  AgentPolicyServiceInterface,
-  PackagePolicyClient,
-} from '@kbn/fleet-plugin/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  FleetRequestHandlerContext,
+  FleetStartContract,
+  PackagePolicyClient,
+  PackageService,
+} from '@kbn/fleet-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 

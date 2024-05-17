@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import Path from 'path';
 import Fs from 'fs';
-import { JsonObject } from '@kbn/utility-types';
+import Path from 'path';
 import expect from '@kbn/expect';
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { JsonObject } from '@kbn/utility-types';
 
-import { TimelineEdges, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   Direction,
   TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { User } from '../../../../rule_registry/common/lib/authentication/types';
+import { TimelineEdges, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
+import { User } from '../../../../rule_registry/common/lib/authentication/types';
 
 import {
+  obsMinRead,
   obsMinReadAlertsRead,
   obsMinReadAlertsReadSpacesAll,
-  obsMinRead,
   obsMinReadSpacesAll,
   superUser,
 } from '../../../../rule_registry/common/lib/authentication/users';

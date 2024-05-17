@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import dateMath from '@kbn/datemath';
+import { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import moment from 'moment';
+import React, { useCallback, useEffect, useState } from 'react';
+import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
 import { useTemplateHeaderBreadcrumbs } from '../../../../components/asset_details/hooks/use_page_header';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { MetricsPageTemplate } from '../../page_template';
+import { MetadataContext } from '../containers/metadata_context';
+import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { useNodeDetails } from '../hooks/use_node_details';
+import { NavItem, SideNavContext } from '../lib/side_nav_context';
+import { PageBody } from './page_body';
+import { PageError } from './page_error';
 import { MetricsSideNav } from './side_nav';
 import { MetricsTimeControls } from './time_controls';
-import { SideNavContext, NavItem } from '../lib/side_nav_context';
-import { PageBody } from './page_body';
-import { MetricsTimeInput } from '../hooks/use_metrics_time';
-import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
-import { PageError } from './page_error';
-import { MetadataContext } from '../containers/metadata_context';
-import { MetricsPageTemplate } from '../../page_template';
 
 interface Props {
   name: string;

@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { schema, offeringBasedSchema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import {
   CoreStart,
   Plugin,
@@ -16,9 +16,9 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
+import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -36,8 +36,8 @@ import {
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
+import { InfraSources, infraSourceConfigurationSavedObjectType } from './lib/sources';
 import {
   infraCustomDashboardsSavedObjectType,
   inventoryViewSavedObjectType,

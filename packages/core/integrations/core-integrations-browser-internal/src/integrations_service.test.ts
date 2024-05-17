@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { styleServiceMock, momentServiceMock } from './integrations_service.test.mocks';
+import { momentServiceMock, styleServiceMock } from './integrations_service.test.mocks';
 
-import { IntegrationsService } from './integrations_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { IntegrationsService } from './integrations_service';
 
 describe('IntegrationsService', () => {
   test('it wires up styles and moment', async () => {

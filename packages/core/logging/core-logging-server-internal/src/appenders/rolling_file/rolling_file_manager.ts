@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createWriteStream, WriteStream, mkdirSync } from 'fs';
+import { WriteStream, createWriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import { RollingFileContext } from './rolling_file_context';
 

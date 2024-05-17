@@ -6,8 +6,8 @@
  */
 
 import url from 'url';
+import { ApmSynthtraceKibanaClient, LogLevel, createLogger } from '@kbn/apm-synthtrace';
 import { kbnTestConfig } from '@kbn/test';
-import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 
 const getKibanaServerUrlWithAuth = () => {
   const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);

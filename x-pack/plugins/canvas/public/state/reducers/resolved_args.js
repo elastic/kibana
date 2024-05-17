@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { handleActions } from 'redux-actions';
-import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+import immutable from 'object-path-immutable';
+import { handleActions } from 'redux-actions';
 import { prepend } from '../../lib/modify_path';
-import * as actions from '../actions/resolved_args';
 import { flushContext, flushContextAfterIndex } from '../actions/elements';
+import * as actions from '../actions/resolved_args';
 import { setWorkpad } from '../actions/workpad';
 
 const { set, del } = immutable;

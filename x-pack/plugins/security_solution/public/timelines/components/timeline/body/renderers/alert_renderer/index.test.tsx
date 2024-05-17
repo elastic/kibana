@@ -10,6 +10,8 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { alertRenderer } from '.';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { TestProviders } from '../../../../../../common/mock';
 import {
   DESTINATION_IP,
@@ -26,8 +28,6 @@ import {
   USER_NAME,
   WITH_FIELD_NAMES,
 } from './helpers';
-import { alertRenderer } from '.';
-import { TimelineId } from '../../../../../../../common/types/timeline';
 
 const dataWithAllFields: Ecs = {
   _id: 'abcd',

@@ -147,9 +147,7 @@
       "tags": [],
       "label": "ExpressionImagePluginStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "src/plugins/expression_image/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -171,9 +169,7 @@
       "tags": [],
       "label": "ExpressionImagePluginStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "src/plugins/expression_image/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -203,9 +199,7 @@
             "tags": [],
             "label": "dataurl",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -288,9 +282,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"image\""
-            ],
+            "signature": ["\"image\""],
             "path": "src/plugins/expression_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -343,9 +335,7 @@
         "tags": [],
         "label": "BASE64",
         "description": [],
-        "signature": [
-          "\"`base64`\""
-        ],
+        "signature": ["\"`base64`\""],
         "path": "src/plugins/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -358,9 +348,7 @@
         "tags": [],
         "label": "CONTEXT",
         "description": [],
-        "signature": [
-          "\"_context_\""
-        ],
+        "signature": ["\"_context_\""],
         "path": "src/plugins/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -422,9 +410,7 @@
         "tags": [],
         "label": "OriginString",
         "description": [],
-        "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
-        ],
+        "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
         "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -437,9 +423,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"expressionImage\""
-        ],
+        "signature": ["\"expressionImage\""],
         "path": "src/plugins/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -452,9 +436,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"expressionImage\""
-        ],
+        "signature": ["\"expressionImage\""],
         "path": "src/plugins/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -467,9 +449,7 @@
         "tags": [],
         "label": "URL",
         "description": [],
-        "signature": [
-          "\"URL\""
-        ],
+        "signature": ["\"URL\""],
         "path": "src/plugins/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

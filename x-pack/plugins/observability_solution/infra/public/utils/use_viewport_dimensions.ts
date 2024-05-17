@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
 import { throttle } from 'lodash';
+import { useEffect, useState } from 'react';
 
 interface ViewportDimensions {
   width: number;

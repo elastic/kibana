@@ -7,28 +7,28 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import { createSelector } from 'reselect';
-import { matchPath } from 'react-router-dom';
-import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
+import { decode } from '@kbn/rison';
+import { matchPath } from 'react-router-dom';
+import { createSelector } from 'reselect';
 import type {
   EndpointPendingActions,
   EndpointSortableField,
   Immutable,
 } from '../../../../../common/endpoint/types';
-import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
-import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
+import { extractListPaginationParams } from '../../../common/routing';
 import {
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
+import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 
 import type { ServerApiError } from '../../../../common/types';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
@@ -123,8 +123,8 @@ export const uiQueryParams: (
           typeof query[key] === 'string'
             ? (query[key] as string)
             : Array.isArray(query[key])
-            ? (query[key] as string[])[(query[key] as string[]).length - 1]
-            : undefined;
+              ? (query[key] as string[])[(query[key] as string[]).length - 1]
+              : undefined;
 
         if (value !== undefined) {
           if (key === 'show') {

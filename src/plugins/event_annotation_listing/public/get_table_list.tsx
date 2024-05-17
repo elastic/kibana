@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { ISessionService } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
-import { ISessionService } from '@kbn/data-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
+import React, { FC } from 'react';
 import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {

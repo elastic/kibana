@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { BucketAggType, type IBucketAggConfig } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 export const GEOHASH_GRID = 'geohash_grid';
 

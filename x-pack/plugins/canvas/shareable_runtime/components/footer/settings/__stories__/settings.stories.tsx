@@ -9,8 +9,8 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../../../test/context_example';
 
-import { Settings, SettingsComponent } from '../settings';
 import { initialCanvasShareableState } from '../../../../context';
+import { Settings, SettingsComponent } from '../settings';
 
 storiesOf('shareables/Footer/Settings', module)
   .add('contextual', () => (

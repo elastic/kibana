@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { lazy } from 'react';
 import { CasesWebhookActionParams, CasesWebhookConfig, CasesWebhookSecrets } from './types';
 
 export function getConnectorType(): ConnectorTypeModel<

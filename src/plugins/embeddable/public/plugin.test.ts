@@ -7,10 +7,10 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { testPlugin } from './tests/test_plugin';
-import { EmbeddableFactoryProvider } from './types';
 import { defaultEmbeddableFactoryProvider } from './lib';
 import { HelloWorldEmbeddable } from './tests/fixtures';
+import { testPlugin } from './tests/test_plugin';
+import { EmbeddableFactoryProvider } from './types';
 
 test('can set custom embeddable factory provider', async () => {
   const coreSetup = coreMock.createSetup();

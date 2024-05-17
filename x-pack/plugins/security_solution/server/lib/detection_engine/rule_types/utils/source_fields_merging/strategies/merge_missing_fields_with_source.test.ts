@@ -6,9 +6,9 @@
  */
 import { cloneDeep } from 'lodash';
 import { performance } from 'perf_hooks';
-import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
-import type { SignalSourceHit } from '../../../types';
 import { emptyEsResult } from '../../../__mocks__/empty_signal_source_hit';
+import type { SignalSourceHit } from '../../../types';
+import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
 
 /**
  * See ../README.md for the nomenclature of any notes within tests below

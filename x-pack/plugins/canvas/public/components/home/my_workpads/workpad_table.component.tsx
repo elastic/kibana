@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiInMemoryTableProps,
   EuiTableActionsColumnType,
-  EuiBasicTableColumn,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiTableSelectionType,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import React, { useState } from 'react';
 
-import { RoutingLink } from '../../routing';
 import { FoundWorkpad } from '../../../services/workpad';
-import { WorkpadTableTools } from './workpad_table_tools';
+import { RoutingLink } from '../../routing';
 import { WorkpadImport } from './workpad_import';
+import { WorkpadTableTools } from './workpad_table_tools';
 
 export interface Props {
   workpads: FoundWorkpad[];

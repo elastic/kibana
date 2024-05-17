@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import { registerHelpers as registerAutoFollowPatternHelpers } from './auto_follow_pattern.helpers';
 import { REMOTE_CLUSTER_NAME } from './constants';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
-import { registerHelpers as registerAutoFollowPatternHelpers } from './auto_follow_pattern.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

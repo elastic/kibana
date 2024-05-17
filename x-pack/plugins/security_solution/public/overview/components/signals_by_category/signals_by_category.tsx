@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import type { Filter } from '@kbn/es-query';
 
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 

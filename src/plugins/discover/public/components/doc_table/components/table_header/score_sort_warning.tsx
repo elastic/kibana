@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export function DocViewTableScoreSortWarning() {
   const tooltipContent = i18n.translate('discover.docViews.table.scoreSortWarningTooltip', {

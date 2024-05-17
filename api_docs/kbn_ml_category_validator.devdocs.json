@@ -23,9 +23,7 @@
         "parentPluginId": "@kbn/ml-category-validator",
         "id": "def-common.categorizationExamplesProvider",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": ["export"],
         "label": "categorizationExamplesProvider",
         "description": [
           "\nProvides methods for checking whether categories can be\nproduced from a field.\n"
@@ -105,9 +103,7 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [
-              "- IScopedClusterClient"
-            ],
+            "description": ["- IScopedClusterClient"],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
@@ -134,9 +130,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CategoryFieldExample",
-        "description": [
-          "\nField example for a category."
-        ],
+        "description": ["\nField example for a category."],
         "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -147,9 +141,7 @@
             "type": "string",
             "tags": [],
             "label": "text",
-            "description": [
-              "\nThe text of the field example."
-            ],
+            "description": ["\nThe text of the field example."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -160,9 +152,7 @@
             "type": "Array",
             "tags": [],
             "label": "tokens",
-            "description": [
-              "\nThe tokens extracted from the field example."
-            ],
+            "description": ["\nThe tokens extracted from the field example."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-category-validator",
@@ -186,9 +176,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldExampleCheck",
-        "description": [
-          "\nResult of a field example check."
-        ],
+        "description": ["\nResult of a field example check."],
         "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -199,9 +187,7 @@
             "type": "Enum",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nThe ID of the validation result."
-            ],
+            "description": ["\nThe ID of the validation result."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-category-validator",
@@ -221,9 +207,7 @@
             "type": "Enum",
             "tags": [],
             "label": "valid",
-            "description": [
-              "\nThe validation status of the field example."
-            ],
+            "description": ["\nThe validation status of the field example."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-category-validator",
@@ -243,9 +227,7 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [
-              "\nThe message associated with the validation result."
-            ],
+            "description": ["\nThe message associated with the validation result."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -259,9 +241,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldValidationResults",
-        "description": [
-          "\nValidation results for a specific field."
-        ],
+        "description": ["\nValidation results for a specific field."],
         "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -270,13 +250,9 @@
             "parentPluginId": "@kbn/ml-category-validator",
             "id": "def-common.FieldValidationResults.examples",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": ["type"],
             "label": "examples",
-            "description": [
-              "\nAn array of example objects representing category field examples."
-            ],
+            "description": ["\nAn array of example objects representing category field examples."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-category-validator",
@@ -295,13 +271,9 @@
             "parentPluginId": "@kbn/ml-category-validator",
             "id": "def-common.FieldValidationResults.sampleSize",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": ["type"],
             "label": "sampleSize",
-            "description": [
-              "\nThe total number of examples used for validation."
-            ],
+            "description": ["\nThe total number of examples used for validation."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -310,13 +282,9 @@
             "parentPluginId": "@kbn/ml-category-validator",
             "id": "def-common.FieldValidationResults.overallValidStatus",
             "type": "Enum",
-            "tags": [
-              "type"
-            ],
+            "tags": ["type"],
             "label": "overallValidStatus",
-            "description": [
-              "\nThe overall validation status of the category examples."
-            ],
+            "description": ["\nThe overall validation status of the category examples."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-category-validator",
@@ -334,13 +302,9 @@
             "parentPluginId": "@kbn/ml-category-validator",
             "id": "def-common.FieldValidationResults.validationChecks",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": ["type"],
             "label": "validationChecks",
-            "description": [
-              "\nAn array of validation checks performed on each example."
-            ],
+            "description": ["\nAn array of validation checks performed on each example."],
             "signature": [
               {
                 "pluginId": "@kbn/ml-category-validator",
@@ -364,9 +328,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Token",
-        "description": [
-          "\nToken"
-        ],
+        "description": ["\nToken"],
         "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -377,9 +339,7 @@
             "type": "string",
             "tags": [],
             "label": "token",
-            "description": [
-              "\nThe token string."
-            ],
+            "description": ["\nThe token string."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -390,9 +350,7 @@
             "type": "number",
             "tags": [],
             "label": "start_offset",
-            "description": [
-              "\nThe starting offset of the token."
-            ],
+            "description": ["\nThe starting offset of the token."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -403,9 +361,7 @@
             "type": "number",
             "tags": [],
             "label": "end_offset",
-            "description": [
-              "\nThe ending offset of the token."
-            ],
+            "description": ["\nThe ending offset of the token."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -416,9 +372,7 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nThe type of the token."
-            ],
+            "description": ["\nThe type of the token."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -429,9 +383,7 @@
             "type": "number",
             "tags": [],
             "label": "position",
-            "description": [
-              "\nThe position of the token."
-            ],
+            "description": ["\nThe position of the token."],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -447,9 +399,7 @@
         "type": "Enum",
         "tags": [],
         "label": "CATEGORY_EXAMPLES_VALIDATION_STATUS",
-        "description": [
-          "\nEnum representing the validation status of category examples."
-        ],
+        "description": ["\nEnum representing the validation status of category examples."],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -461,9 +411,7 @@
         "type": "Enum",
         "tags": [],
         "label": "VALIDATION_RESULT",
-        "description": [
-          "\nEnum representing the validation results for field examples."
-        ],
+        "description": ["\nEnum representing the validation results for field examples."],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -477,9 +425,7 @@
         "type": "Type",
         "tags": [],
         "label": "CategorizationAnalyzer",
-        "description": [
-          "\nCategorization analyzer with additional properties."
-        ],
+        "description": ["\nCategorization analyzer with additional properties."],
         "signature": [
           "MlCategorizationAnalyzerDefinition",
           " & { analyzer?: string | undefined; }"
@@ -498,9 +444,7 @@
         "description": [
           "\nThe error limit for category examples. If the category examples validation falls below this limit, an error is triggered."
         ],
-        "signature": [
-          "0.02"
-        ],
+        "signature": ["0.02"],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -512,12 +456,8 @@
         "type": "number",
         "tags": [],
         "label": "CATEGORY_EXAMPLES_SAMPLE_SIZE",
-        "description": [
-          "\nThe number of category examples to use for analysis."
-        ],
-        "signature": [
-          "1000"
-        ],
+        "description": ["\nThe number of category examples to use for analysis."],
+        "signature": ["1000"],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -532,9 +472,7 @@
         "description": [
           "\nThe warning limit for category examples. If the category examples validation falls below this limit, a warning is triggered."
         ],
-        "signature": [
-          "0.75"
-        ],
+        "signature": ["0.75"],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -546,12 +484,8 @@
         "type": "number",
         "tags": [],
         "label": "MEDIAN_LINE_LENGTH_LIMIT",
-        "description": [
-          "\nThe limit for the median line length of category examples."
-        ],
-        "signature": [
-          "400"
-        ],
+        "description": ["\nThe limit for the median line length of category examples."],
+        "signature": ["400"],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -563,12 +497,8 @@
         "type": "number",
         "tags": [],
         "label": "NULL_COUNT_PERCENT_LIMIT",
-        "description": [
-          "\nThe limit for the percentage of null values in category examples."
-        ],
-        "signature": [
-          "0.75"
-        ],
+        "description": ["\nThe limit for the percentage of null values in category examples."],
+        "signature": ["0.75"],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -580,12 +510,8 @@
         "type": "number",
         "tags": [],
         "label": "VALID_TOKEN_COUNT",
-        "description": [
-          "\nThe valid token count for category examples."
-        ],
-        "signature": [
-          "3"
-        ],
+        "description": ["\nThe valid token count for category examples."],
+        "signature": ["3"],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -599,9 +525,7 @@
         "type": "Object",
         "tags": [],
         "label": "VALIDATION_CHECK_DESCRIPTION",
-        "description": [
-          "\nDescription for each validation result."
-        ],
+        "description": ["\nDescription for each validation result."],
         "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -612,9 +536,7 @@
             "type": "string",
             "tags": [],
             "label": "[VALIDATION_RESULT.NO_EXAMPLES]",
-            "description": [
-              "/**\n   * Examples were successfully loaded.\n   */"
-            ],
+            "description": ["/**\n   * Examples were successfully loaded.\n   */"],
             "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -625,9 +547,7 @@
             "type": "string",
             "tags": [],
             "label": "[VALIDATION_RESULT.FAILED_TO_TOKENIZE]",
-            "description": [
-              "/**\n   * The loaded examples were tokenized successfully.\n   */"
-            ],
+            "description": ["/**\n   * The loaded examples were tokenized successfully.\n   */"],
             "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false

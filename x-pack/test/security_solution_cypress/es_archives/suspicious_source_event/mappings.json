@@ -5,10 +5,8 @@
       "thread-data": {
         "is_write_index": false
       },
-      "beats": {
-      },
-      "siem-read-alias": {
-      }
+      "beats": {},
+      "siem-read-alias": {}
     },
     "index": "suspicious-source-event-001",
     "mappings": {

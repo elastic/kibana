@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { handleEsaggsRequest, RequestHandlerParams } from '@kbn/data-plugin/common';
+import { RequestHandlerParams, handleEsaggsRequest } from '@kbn/data-plugin/common';
 
 // in a separate file to solve a mocking problem for tests
 export const handleRequest = (args: RequestHandlerParams) => handleEsaggsRequest(args);

@@ -8,24 +8,24 @@
 /* eslint-disable max-classes-per-file */
 
 import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import pMap from 'p-map';
 import moment from 'moment';
-import { registerCleanUpTask } from './private_location/clean_up_task';
-import { SyntheticsServerSetup } from '../types';
+import pMap from 'p-map';
+import { ServiceConfig } from '../../common/config';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
-import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
+import { SyntheticsServerSetup } from '../types';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
-import { ServiceConfig } from '../../common/config';
+import { registerCleanUpTask } from './private_location/clean_up_task';
 import { ServiceAPIClient, ServiceData } from './service_api_client';
 
 import {
@@ -39,13 +39,13 @@ import {
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
-import { normalizeSecrets } from './utils/secrets';
 import {
   ConfigData,
   formatHeartbeatRequest,
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
+import { normalizeSecrets } from './utils/secrets';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FC } from 'react';
 import { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
+import { FC } from 'react';
 
 export enum FilterType {
   luceneQueryString = 'luceneQueryString',

@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   AreaSeries,
   Axis,
@@ -27,18 +24,29 @@ import {
   SeriesNameFn,
   Settings,
   SmallMultiples,
+  Tooltip,
   VerticalAlignment,
   XYChartSeriesIdentifier,
-  Tooltip,
 } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 import { DataLayerConfig } from '../../common';
+import {
+  createArgsWithLayers,
+  createSampleDatatableWithRows,
+  mockPaletteOutput,
+  sampleArgs,
+  sampleLayer,
+} from '../../common/__mocks__';
 import { LayerTypes } from '../../common/constants';
-import { XyEndzones } from './x_domain';
+import { AnnotationLayerConfigResult, ExtendedDataLayerConfig, XYProps } from '../../common/types';
 import {
   chartsActiveCursorService,
   chartsThemeService,
@@ -47,19 +55,11 @@ import {
   paletteService,
   sampleArgsWithReferenceLine,
 } from '../__mocks__';
-import {
-  mockPaletteOutput,
-  sampleArgs,
-  createArgsWithLayers,
-  createSampleDatatableWithRows,
-  sampleLayer,
-} from '../../common/__mocks__';
-import { XYChart, XYChartRenderProps } from './xy_chart';
-import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
+import type { LayerCellValueActions } from '../types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common';
-import type { LayerCellValueActions } from '../types';
+import { XyEndzones } from './x_domain';
+import { XYChart, XYChartRenderProps } from './xy_chart';
 
 const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();

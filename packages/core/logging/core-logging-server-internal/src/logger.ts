@@ -1,3 +1,5 @@
+import { AbstractLogger } from '@kbn/core-logging-common-internal';
+import { LogLevel, LogMeta, LogRecord } from '@kbn/logging';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import apmAgent from 'elastic-apm-node';
-import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
-import { AbstractLogger } from '@kbn/core-logging-common-internal';
 
 function isError(x: any): x is Error {
   return x instanceof Error;

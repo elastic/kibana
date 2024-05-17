@@ -14,9 +14,9 @@ import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_acti
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
+import { createAddSingleMetricViewerPanelAction } from './create_single_metric_viewer';
 import { createAddSwimlanePanelAction } from './create_swim_lane';
 import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
-import { createAddSingleMetricViewerPanelAction } from './create_single_metric_viewer';
 import {
   createCategorizationADJobAction,
   createCategorizationADJobTrigger,
@@ -25,9 +25,9 @@ import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
 import { createOpenInSingleMetricViewerAction } from './open_in_single_metric_viewer_action';
 import { createVisToADJobAction } from './open_vis_in_ml_action';
 import {
-  entityFieldSelectionTrigger,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
+  entityFieldSelectionTrigger,
   swimLaneSelectionTrigger,
 } from './triggers';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';

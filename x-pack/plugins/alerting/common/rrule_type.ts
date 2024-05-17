@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WeekdayStr, Options } from '@kbn/rrule';
+import type { Options, WeekdayStr } from '@kbn/rrule';
 
 export type RRuleParams = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
 

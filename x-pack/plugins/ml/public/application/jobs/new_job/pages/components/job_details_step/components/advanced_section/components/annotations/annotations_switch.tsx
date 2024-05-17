@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiCallOut, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 

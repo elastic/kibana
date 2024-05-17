@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { mockTimelineData } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { TimelineId } from '../../../../../../../common/types/timeline';
+import { suricataRowRenderer } from './suricata_row_renderer';
 
 jest.mock('../../../../../../common/lib/kibana');
 

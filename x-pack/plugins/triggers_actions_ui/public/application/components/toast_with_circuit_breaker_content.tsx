@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, FC, PropsWithChildren } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 const seeFullErrorMessage = i18n.translate(
   'xpack.triggersActionsUI.components.toastWithCircuitBreaker.seeFullError',

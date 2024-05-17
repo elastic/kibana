@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { type Observable, firstValueFrom } from 'rxjs';
-import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler } from '@kbn/core-http-server';
-import { labelsSchema } from '../config/telemetry_labels';
-import type { TelemetryConfigType } from '../config';
-import { v2 } from '../../common/types';
+import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import { type Observable, firstValueFrom } from 'rxjs';
 import {
-  FetchTelemetryConfigRoutePathBasedV2,
   FetchTelemetryConfigRoute,
+  FetchTelemetryConfigRoutePathBasedV2,
 } from '../../common/routes';
+import { v2 } from '../../common/types';
+import type { TelemetryConfigType } from '../config';
+import { labelsSchema } from '../config/telemetry_labels';
 import { getTelemetrySavedObject } from '../saved_objects';
 import {
   getNotifyUserAboutOptInDefault,

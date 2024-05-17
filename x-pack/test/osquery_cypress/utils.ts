@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import semver from 'semver';
-import { map } from 'lodash';
-import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
-import { KbnClient } from '@kbn/test';
+import { API_VERSIONS, CreatePackagePolicyResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  GetEnrollmentAPIKeysResponse,
   CreateAgentPolicyResponse,
+  GetEnrollmentAPIKeysResponse,
 } from '@kbn/fleet-plugin/common/types';
+import { KbnClient } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import axios from 'axios';
+import { map } from 'lodash';
+import semver from 'semver';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',

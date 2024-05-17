@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import {
+  EmbeddablePersistableStateService,
+  EmbeddableStateWithType,
+} from '@kbn/embeddable-plugin/common';
 import { OptionsListEmbeddableInput } from './types';
 
 type OptionsListInputWithType = Partial<OptionsListEmbeddableInput> & { type: string };

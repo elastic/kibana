@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import type {
   ESDistanceSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
-import { getIndexPatternService } from '../../../../../kibana_services';
-import { getGeoFields } from '../../../../../index_pattern_util';
-import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
-import { GeoFieldSelect } from '../../../../../components/geo_field_select';
-import { inputStrings } from '../../../../input_strings';
 import { RelationshipExpression } from '../../../../../classes/layers/wizards/spatial_join_wizard';
 import { DEFAULT_WITHIN_DISTANCE } from '../../../../../classes/sources/join_sources';
+import { GeoFieldSelect } from '../../../../../components/geo_field_select';
+import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
+import { getGeoFields } from '../../../../../index_pattern_util';
+import { getIndexPatternService } from '../../../../../kibana_services';
+import { inputStrings } from '../../../../input_strings';
 
 interface Props {
   sourceDescriptor: Partial<ESDistanceSourceDescriptor>;

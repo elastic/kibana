@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
 import { random } from 'lodash';
+import { Moment } from 'moment';
 
 import { Point, TransitionMethod } from '../../types';
 import { createExponentialFunction } from './create_exponetial_function';

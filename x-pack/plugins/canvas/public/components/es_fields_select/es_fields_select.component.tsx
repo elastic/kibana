@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import React, { FocusEventHandler } from 'react';
 
 export interface ESFieldsSelectProps {
   value: string;

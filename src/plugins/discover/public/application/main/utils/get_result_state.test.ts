@@ -1,3 +1,4 @@
+import { FetchStatus } from '../../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { getResultState, resultStatuses } from './get_result_state';
-import { FetchStatus } from '../../types';
 
 describe('getResultState', () => {
   test(`should return 'uninitialized' when fetching uninitialized`, () => {

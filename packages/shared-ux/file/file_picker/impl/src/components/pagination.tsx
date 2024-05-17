@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EuiPagination } from '@elastic/eui';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { EuiPagination } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useFilePickerContext } from '../context';
 
 export const Pagination: FunctionComponent = () => {

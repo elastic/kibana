@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getRuleTaskTimeout } from './get_rule_task_timeout';
 import { RulesConfig } from '../config';
+import { getRuleTaskTimeout } from './get_rule_task_timeout';
 
 const ruleTypeId = 'test-rule-type-id';
 const config = {

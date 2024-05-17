@@ -22,9 +22,7 @@
             "tags": [],
             "label": "ui",
             "description": [],
-            "signature": [
-              "{ enabled: boolean; }"
-            ],
+            "signature": ["{ enabled: boolean; }"],
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -36,9 +34,7 @@
             "tags": [],
             "label": "serverless",
             "description": [],
-            "signature": [
-              "{ enabled: boolean; }"
-            ],
+            "signature": ["{ enabled: boolean; }"],
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -171,9 +167,7 @@
       "tags": [],
       "label": "ObservabilityOnboardingPluginStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "x-pack/plugins/observability_solution/observability_onboarding/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -246,9 +240,7 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": [
-          "\"observabilityOnboarding\""
-        ],
+        "signature": ["\"observabilityOnboarding\""],
         "path": "x-pack/plugins/observability_solution/observability_onboarding/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -261,9 +253,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"observabilityOnboarding\""
-        ],
+        "signature": ["\"observabilityOnboarding\""],
         "path": "x-pack/plugins/observability_solution/observability_onboarding/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

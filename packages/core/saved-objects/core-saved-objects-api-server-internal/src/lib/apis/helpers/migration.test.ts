@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, AuthorizationTypeMap } from '@kbn/core-saved-objects-server';
+import { AuthorizationTypeMap, SavedObject } from '@kbn/core-saved-objects-server';
 import {
-  createMigratorMock,
   createDocumentMigratorMock,
   createEncryptionHelperMock,
+  createMigratorMock,
 } from '../../../mocks';
 import { MigrationHelper } from './migration';
 

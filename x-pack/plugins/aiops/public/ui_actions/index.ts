@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
-  categorizeFieldTrigger,
   CATEGORIZE_FIELD_TRIGGER,
+  categorizeFieldTrigger,
 } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
 import type { CoreStart } from '@kbn/core/public';
+import { createCategorizeFieldAction } from '../components/log_categorization';
+import type { AiopsPluginStartDeps } from '../types';
 import { createAddChangePointChartAction } from './create_change_point_chart';
 import { createOpenChangePointInMlAppAction } from './open_change_point_ml';
-import type { AiopsPluginStartDeps } from '../types';
-import { createCategorizeFieldAction } from '../components/log_categorization';
 
 export function registerAiopsUiActions(
   uiActions: UiActionsSetup,

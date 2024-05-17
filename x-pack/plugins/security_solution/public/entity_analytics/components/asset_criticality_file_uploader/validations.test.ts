@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateParsedContent, validateFile } from './validations';
+import { validateFile, validateParsedContent } from './validations';
 
 const formatBytes = (bytes: number) => bytes.toString();
 

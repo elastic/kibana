@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { CspVulnerabilityFinding } from '../../../common/schemas';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
+import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
+import { ErrorCallout } from '../configurations/layout/error_callout';
+import { defaultColumns, getDefaultQuery } from './constants';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
-import { getDefaultQuery, defaultColumns } from './constants';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
-import { ErrorCallout } from '../configurations/layout/error_callout';
-import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;

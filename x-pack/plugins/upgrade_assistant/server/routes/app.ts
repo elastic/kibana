@@ -7,9 +7,9 @@
 
 import {
   API_BASE_PATH,
-  DEPRECATION_LOGS_INDEX,
-  APP_LOGS_COUNT_INDEX_PRIVILEGES,
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+  APP_LOGS_COUNT_INDEX_PRIVILEGES,
+  DEPRECATION_LOGS_INDEX,
 } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { Privileges } from '../shared_imports';

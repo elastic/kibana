@@ -5,20 +5,16 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { SearchRequest } from '@kbn/data-plugin/common';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SearchRequest } from '@kbn/data-plugin/common';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
-import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
-import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   CSPM_FINDINGS_STATS_INTERVAL,
@@ -28,15 +24,19 @@ import {
   VULNERABILITIES_SEVERITY,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
-import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
+import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
+import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
+import { removeTaskSafe, scheduleTaskSafe } from '../lib/task_manager_util';
+import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { CspServerPluginStartServices } from '../types';
 import {
-  stateSchemaByVersion,
-  emptyState,
   type LatestTaskStateSchema,
   type TaskHealthStatus,
+  emptyState,
+  stateSchemaByVersion,
 } from './task_state';
-import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
+import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';

@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiCallOut,
   EuiButton,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
+  EuiFormRow,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { BoolQuery, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import {
-  RiskScoreEntity,
   RISK_SCORE_INDEX_PATTERN,
+  RiskScoreEntity,
 } from '../../../common/entity_analytics/risk_engine';
-import { RiskScorePreviewTable } from './risk_score_preview_table';
-import * as i18n from '../translations';
-import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
-import { useKibana } from '../../common/lib/kibana';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
+import { useKibana } from '../../common/lib/kibana';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { userHasRiskEngineReadPermissions } from '../common';
+import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
+import * as i18n from '../translations';
+import { RiskScorePreviewTable } from './risk_score_preview_table';
 interface IRiskScorePreviewPanel {
   showMessage: string;
   hideMessage: string;

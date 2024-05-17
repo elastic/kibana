@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { KBN_CLIENT_API_PREFIX, listHiddenTypes, catchAndReturnBoomErrors } from './utils';
+import type { IRouter } from '@kbn/core/server';
+import { KBN_CLIENT_API_PREFIX, catchAndReturnBoomErrors, listHiddenTypes } from './utils';
 
 export const registerFindRoute = (router: IRouter) => {
   router.get(

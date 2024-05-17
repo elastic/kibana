@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
+import { useCallback, useMemo } from 'react';
 import type { SearchHit } from '../../../common/search_strategy';
 
 /**

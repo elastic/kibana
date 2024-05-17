@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import url from 'url';
-import supertest from 'supertest';
-import { MonitoredUtilization } from '@kbn/task-manager-plugin/server/routes/background_task_utilization';
-import { MonitoredStat } from '@kbn/task-manager-plugin/server/monitoring/monitoring_stats_stream';
+import expect from '@kbn/expect';
 import { BackgroundTaskUtilizationStat } from '@kbn/task-manager-plugin/server/monitoring/background_task_utilization_statistics';
+import { MonitoredStat } from '@kbn/task-manager-plugin/server/monitoring/monitoring_stats_stream';
+import { MonitoredUtilization } from '@kbn/task-manager-plugin/server/routes/background_task_utilization';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

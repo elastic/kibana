@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';

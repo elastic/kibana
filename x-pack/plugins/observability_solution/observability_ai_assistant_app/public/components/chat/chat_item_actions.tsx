@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 
 export function ChatItemActions({
   canCopy,

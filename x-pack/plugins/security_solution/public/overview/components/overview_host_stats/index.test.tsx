@@ -9,8 +9,8 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { OverviewHostStats } from '.';
-import { mockData } from './mock';
 import { TestProviders } from '../../../common/mock/test_providers';
+import { mockData } from './mock';
 
 describe('Overview Host Stat Data', () => {
   describe('rendering', () => {

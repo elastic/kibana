@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
 import type { ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import { asyncForEach } from '@kbn/std';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapAttributes } from '../../common/content_management';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
+import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
 
 import { registerSearchUIRoutes } from './search_ui';
 

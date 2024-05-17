@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { bulkUpdateConversations } from './bulk_update_actions_conversations';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { IToasts } from '@kbn/core-notifications-browser';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { IToasts } from '@kbn/core-notifications-browser';
+import { bulkUpdateConversations } from './bulk_update_actions_conversations';
 
 const conversation1 = {
   id: 'conversation1',

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import { IBasePath } from '@kbn/core/public';
-import { isEmpty, pickBy } from 'lodash';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { Location } from 'history';
+import { isEmpty, pickBy } from 'lodash';
+import moment from 'moment';
 import { Environment } from '../../../../common/environment_rt';
+import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { ApmRouter } from '../../routing/apm_route_config';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
-import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
-import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
-import { ApmRouter } from '../../routing/apm_route_config';
+import { Action, SectionRecord, getNonEmptySections } from './sections_helper';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();

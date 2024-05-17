@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { ReactWrapper } from 'enzyme';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiProgress } from '@elastic/eui';
-import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
-import { act } from 'react-dom/test-utils';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import {
-  DiscoverSidebarResponsive,
-  DiscoverSidebarResponsiveProps,
-} from './discover_sidebar_responsive';
+import { act } from 'react-dom/test-utils';
+import { BehaviorSubject } from 'rxjs';
+import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverServices } from '../../../../build_services';
+import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { FetchStatus, SidebarToggleState } from '../../../types';
+import { DiscoverAppStateProvider } from '../../state_management/discover_app_state_container';
 import {
   AvailableFields$,
   DataDocuments$,
   RecordRawType,
 } from '../../state_management/discover_data_state_container';
-import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../state_management/discover_app_state_container';
-import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
-import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import {
+  DiscoverSidebarResponsive,
+  DiscoverSidebarResponsiveProps,
+} from './discover_sidebar_responsive';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',

@@ -6,8 +6,8 @@
  */
 
 import { SOURCE_TYPES } from '../constants';
-import { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
+import { EMSTMSSourceDescriptor, LayerDescriptor } from '../descriptor_types';
 
 // LightModeDefault added to EMSTMSSourceDescriptor in 8.0.0
 // to avoid changing auto selected light mode tiles for maps created < 8.0.0

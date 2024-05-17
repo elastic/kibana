@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 /**
  * @internal

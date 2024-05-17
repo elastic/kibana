@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Dispatch, useEffect, useState } from 'react';
 import type {
   AddExceptionList,
   PersistHookProps,
   UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { addExceptionList, updateExceptionList } from '@kbn/securitysolution-list-api';
+import { Dispatch, useEffect, useState } from 'react';
 
 interface PersistReturnExceptionList {
   isLoading: boolean;
@@ -21,7 +21,7 @@ interface PersistReturnExceptionList {
 
 export type ReturnPersistExceptionList = [
   PersistReturnExceptionList,
-  Dispatch<AddExceptionList | null>
+  Dispatch<AddExceptionList | null>,
 ];
 
 /**

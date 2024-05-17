@@ -16,14 +16,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { FormProvider, useForm } from 'react-hook-form';
-import React, { useCallback, useMemo } from 'react';
-import { isEmpty, pickBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty, pickBy } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import { OsqueryNotAvailablePrompt } from './not_available_prompt';
-import { useKibana } from '../../../../lib/kibana';
 
 const OsqueryEditorComponent = ({
   node,

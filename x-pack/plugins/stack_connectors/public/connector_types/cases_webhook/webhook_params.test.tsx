@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import WebhookParamsFields from './webhook_params';
+import React from 'react';
 import { CasesWebhookActionConnector } from './types';
+import WebhookParamsFields from './webhook_params';
 
 const actionParams = {
   subAction: 'pushToService',

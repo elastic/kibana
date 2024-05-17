@@ -1295,9 +1295,7 @@
                 "tags": [],
                 "label": "maxRetries",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1309,9 +1307,7 @@
                 "tags": [],
                 "label": "maxRetryDelay",
                 "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1356,9 +1352,7 @@
                 "tags": [],
                 "label": "statusCode",
                 "description": [],
-                "signature": [
-                  "number | null"
-                ],
+                "signature": ["number | null"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1370,9 +1364,7 @@
                 "tags": [],
                 "label": "headers",
                 "description": [],
-                "signature": [
-                  "Record<string, string | string[] | undefined> | null"
-                ],
+                "signature": ["Record<string, string | string[] | undefined> | null"],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1394,11 +1386,7 @@
         "description": [
           "\nReturns true if the given elasticsearch error should be retried\nby retry-based resiliency systems such as the SO migration, false otherwise."
         ],
-        "signature": [
-          "(e: ",
-          "ElasticsearchClientError",
-          ") => boolean"
-        ],
+        "signature": ["(e: ", "ElasticsearchClientError", ") => boolean"],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/retryable_es_client_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1410,9 +1398,7 @@
             "tags": [],
             "label": "e",
             "description": [],
-            "signature": [
-              "ElasticsearchClientError"
-            ],
+            "signature": ["ElasticsearchClientError"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/retryable_es_client_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1444,21 +1430,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": [
-              "Response headers"
-            ],
-            "signature": [
-              "Record<string, string | string[] | undefined> | null | undefined"
-            ],
+            "description": ["Response headers"],
+            "signature": ["Record<string, string | string[] | undefined> | null | undefined"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/supported_server_response_check.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "boolean"
-        ],
+        "returnComment": ["boolean"],
         "initialIsOpen": false
       },
       {
@@ -1524,9 +1504,7 @@
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
         "id": "def-common.ClusterInfo",
         "type": "Interface",
-        "tags": [
-          "private"
-        ],
+        "tags": ["private"],
         "label": "ClusterInfo",
         "description": [],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
@@ -1573,9 +1551,7 @@
             "tags": [],
             "label": "cluster_build_flavor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1623,9 +1599,7 @@
             "tags": [],
             "label": "http",
             "description": [],
-            "signature": [
-              "{ publish_address: string; } | undefined"
-            ],
+            "signature": ["{ publish_address: string; } | undefined"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1709,9 +1683,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1776,9 +1748,7 @@
             "tags": [],
             "label": "nodesInfoRequestError",
             "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
+            "signature": ["Error | undefined"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3093,9 +3063,7 @@
             "tags": [],
             "label": "healthCheckStartupInterval",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false

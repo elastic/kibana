@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { loadRuleTags } from '../lib/rule_api/aggregate';
+import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { LoadRuleTagsProps } from '../lib/rule_api';
+import { loadRuleTags } from '../lib/rule_api/aggregate';
 import { GetRuleTagsResponse } from '../lib/rule_api/aggregate_helpers';
 
 interface UseLoadTagsQueryProps {

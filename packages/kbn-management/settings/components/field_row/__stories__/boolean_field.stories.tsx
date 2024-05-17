@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getStory, getFieldRowStory } from './common';
+import { getFieldRowStory, getStory } from './common';
 
 export default getStory('Boolean Row', 'A setting with a boolean value.');
 export const BooleanRow = getFieldRowStory('boolean' as const);

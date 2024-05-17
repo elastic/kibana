@@ -9,13 +9,13 @@ import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
 import { ID } from './constants';
 
-import type { LangValidation, SyntaxErrors } from '../types';
-import type { PainlessContext, PainlessAutocompleteField } from './types';
-import type { PainlessWorker } from './worker';
-import { EditorStateService } from './lib';
-import { PainlessCompletionAdapter } from './completion_adapter';
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
+import type { LangValidation, SyntaxErrors } from '../types';
+import { PainlessCompletionAdapter } from './completion_adapter';
+import { EditorStateService } from './lib';
+import type { PainlessAutocompleteField, PainlessContext } from './types';
+import type { PainlessWorker } from './worker';
 
 const workerProxyService = new WorkerProxyService<PainlessWorker>();
 const editorStateService = new EditorStateService();

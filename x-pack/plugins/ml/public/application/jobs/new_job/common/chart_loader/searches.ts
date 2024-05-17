@@ -8,8 +8,8 @@
 import { get } from 'lodash';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { ml } from '../../../../services/ml_api_service';
 import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
+import { ml } from '../../../../services/ml_api_service';
 
 interface CategoryResults {
   success: boolean;

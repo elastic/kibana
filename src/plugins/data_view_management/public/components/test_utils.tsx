@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { shallow } from 'enzyme';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 // since the 'shallow' from 'enzyme' doesn't support context API for React 16 and above (https://github.com/facebook/react/pull/14329)
 // we use this workaround where define legacy contextTypes for react class component

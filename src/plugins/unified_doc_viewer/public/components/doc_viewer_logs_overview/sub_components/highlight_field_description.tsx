@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { EcsFlat } from '@elastic/ecs';
+import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 

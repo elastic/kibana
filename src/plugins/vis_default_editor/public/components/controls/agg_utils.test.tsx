@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { ReactWrapper, mount } from 'enzyme';
 import React, { FunctionComponent } from 'react';
-import { mount, ReactWrapper } from 'enzyme';
 
 import { IAggConfig } from '@kbn/data-plugin/public';
 import {
+  CUSTOM_METRIC,
   safeMakeLabel,
   useAvailableOptions,
   useFallbackMetric,
   useValidation,
-  CUSTOM_METRIC,
 } from './utils';
 
 type Callback = () => void;

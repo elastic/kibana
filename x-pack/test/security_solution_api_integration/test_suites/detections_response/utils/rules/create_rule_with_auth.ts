@@ -7,11 +7,11 @@
 
 import type SuperTest from 'supertest';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import type {
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Helper to cut down on the noise in some of the tests.

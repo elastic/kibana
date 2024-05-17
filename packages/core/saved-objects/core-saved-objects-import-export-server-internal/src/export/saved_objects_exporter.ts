@@ -7,30 +7,30 @@
  */
 
 import type { Readable } from 'stream';
-import { createListStream } from '@kbn/utils';
-import type { Logger } from '@kbn/logging';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import type {
-  ISavedObjectsExporter,
   ISavedObjectTypeRegistry,
-  SavedObjectsExportResultDetails,
+  ISavedObjectsExporter,
+  SavedObject,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObject,
+  SavedObjectsExportResultDetails,
 } from '@kbn/core-saved-objects-server';
-import { sortObjects } from './sort_objects';
-import { SavedObjectsExportError } from './errors';
+import type { Logger } from '@kbn/logging';
+import { createListStream } from '@kbn/utils';
 import { collectExportedObjects } from './collect_exported_objects';
+import { EXPORT_ALL_TYPES_TOKEN } from './constants';
+import { SavedObjectsExportError } from './errors';
+import { sortObjects } from './sort_objects';
 import {
+  type SavedObjectComparator,
   byIdAscComparator,
   getPreservedOrderComparator,
-  type SavedObjectComparator,
 } from './utils';
-import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 
 /**
  * @internal

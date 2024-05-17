@@ -12,7 +12,7 @@ import {
 } from '@kbn/management-settings-components-field-input/services';
 import React, { FC, PropsWithChildren, useContext } from 'react';
 
-import type { FieldRowServices, FieldRowKibanaDependencies, Services } from './types';
+import type { FieldRowKibanaDependencies, FieldRowServices, Services } from './types';
 
 const FieldRowContext = React.createContext<Services | null>(null);
 

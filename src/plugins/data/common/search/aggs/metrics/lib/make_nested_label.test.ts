@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { makeNestedLabel } from './make_nested_label';
 import { IMetricAggConfig } from '../metric_agg_type';
+import { makeNestedLabel } from './make_nested_label';
 
 describe('metric agg make_nested_label', () => {
   const generateAggConfig = (metricLabel: string): IMetricAggConfig => {

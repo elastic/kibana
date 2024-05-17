@@ -40,9 +40,7 @@
             "tags": [],
             "label": "{\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<DocumentListProps>"
-            ],
+            "signature": ["React.PropsWithChildren<DocumentListProps>"],
             "path": "packages/kbn-search-index-documents/components/document_list.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,9 +71,7 @@
             "tags": [],
             "label": "{\n  accessControlSwitch,\n  dataTelemetryIdPrefix,\n  documentComponent,\n  searchQueryCallback,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<DocumentsProps>"
-            ],
+            "signature": ["React.PropsWithChildren<DocumentsProps>"],
             "path": "packages/kbn-search-index-documents/components/documents_overview.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -145,9 +141,7 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -160,9 +154,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -175,9 +167,7 @@
             "tags": [],
             "label": "from",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -190,9 +180,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -287,9 +275,7 @@
             "tags": [],
             "label": "{ metaData, fields }",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<ResultProps>"
-            ],
+            "signature": ["React.PropsWithChildren<ResultProps>"],
             "path": "packages/kbn-search-index-documents/components/result/result.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -329,9 +315,7 @@
             "tags": [],
             "label": "_meta",
             "description": [],
-            "signature": [
-              "Meta"
-            ],
+            "signature": ["Meta"],
             "path": "packages/kbn-search-index-documents/types/pagination.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -343,9 +327,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "T[]"
-            ],
+            "signature": ["T[]"],
             "path": "packages/kbn-search-index-documents/types/pagination.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -363,9 +345,7 @@
         "tags": [],
         "label": "DEFAULT_DOCS_PER_PAGE",
         "description": [],
-        "signature": [
-          "25"
-        ],
+        "signature": ["25"],
         "path": "packages/kbn-search-index-documents/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,

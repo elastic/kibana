@@ -6,16 +6,16 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { getCasesFromAlertsUrl } from '../../../common/api';
 import type {
   CasesByAlertIDRequest,
-  GetRelatedCasesByAlertResponse,
   CasesFindRequest,
-  CasesStatusRequest,
   CasesMetricsRequest,
+  CasesStatusRequest,
+  GetRelatedCasesByAlertResponse,
 } from '../../../common/types/api';
-import { getCasesFromAlertsUrl } from '../../../common/api';
+import type { CasesFindResponseUI, CasesMetrics, CasesStatus } from '../../../common/ui';
 import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
-import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '../../../common/ui';
 import type { CasesPublicStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesPublicStart['api'] => {

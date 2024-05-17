@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import React from 'react';
 import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
-import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
-import { render, data as dataMock } from '../../../../../utils/test_helper';
-import { UXSection } from './ux_section';
-import { response } from './mock_data/ux.mock';
+import { data as dataMock, render } from '../../../../../utils/test_helper';
 import {
   LEGEND_GOOD_LABEL,
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_POOR_LABEL,
 } from './core_web_vitals/translations';
+import { response } from './mock_data/ux.mock';
+import { UXSection } from './ux_section';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC } from 'react';
 import {
   Navigation,
+  type NavigationKibanaDependencies,
   NavigationKibanaProvider,
   type NavigationProps,
-  type NavigationKibanaDependencies,
 } from '@kbn/shared-ux-chrome-navigation';
+import React, { type FC } from 'react';
 
 export interface Props {
   navProps: NavigationProps;

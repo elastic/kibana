@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import type { AggFieldPair, SplitField } from '@kbn/ml-anomaly-utils';
-import type { ChartSettings } from '../../../charts/common/settings';
-import type { LineChartData } from '../../../../../common/chart_loader';
-import type { ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import type { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
-import { SplitCards, useAnimateSplit } from '../split_cards';
-import { DetectorTitle } from '../detector_title';
+import type { LineChartData } from '../../../../../common/chart_loader';
+import type { Anomaly, ModelItem } from '../../../../../common/results_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
+import type { ChartSettings } from '../../../charts/common/settings';
+import { DetectorTitle } from '../detector_title';
+import { SplitCards, useAnimateSplit } from '../split_cards';
 
 interface ChartGridProps {
   aggFieldPairList: AggFieldPair[];

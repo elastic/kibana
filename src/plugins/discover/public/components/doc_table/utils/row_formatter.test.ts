@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom/server';
-import { formatRow, formatTopLevelObject } from './row_formatter';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import ReactDOM from 'react-dom/server';
+import { DiscoverServices } from '../../../build_services';
+import { formatRow, formatTopLevelObject } from './row_formatter';
 
 describe('Row formatter', () => {
   let services: DiscoverServices;
@@ -60,8 +60,9 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, dataView, shouldShowField, 100, services.fieldFormats))
-      .toMatchInlineSnapshot(`
+    expect(
+      formatRow(hit, dataView, shouldShowField, 100, services.fieldFormats)
+    ).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -137,8 +138,9 @@ describe('Row formatter', () => {
       dataView
     );
 
-    expect(formatRow(highLightHit, dataView, shouldShowField, 100, services.fieldFormats))
-      .toMatchInlineSnapshot(`
+    expect(
+      formatRow(highLightHit, dataView, shouldShowField, 100, services.fieldFormats)
+    ).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [

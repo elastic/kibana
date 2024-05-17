@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
-import { sourceDestinationFieldMappings } from '../map_config';
+import React, { useMemo } from 'react';
+import type { FlowTarget } from '../../../../../../common/search_strategy';
 import {
   getEmptyTagValue,
   getOrEmptyTagFromValue,
 } from '../../../../../common/components/empty_value';
-import { DescriptionListStyled } from '../../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
+import { DescriptionListStyled } from '../../../../../common/components/page';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/field_renderers';
-import type { FlowTarget } from '../../../../../../common/search_strategy';
+import { sourceDestinationFieldMappings } from '../map_config';
 
 interface PointToolTipContentProps {
   contextId: string;

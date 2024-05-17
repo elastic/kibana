@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { act, render } from '@testing-library/react';
-import { RulePreview } from './rule_preview';
-import { PreviewPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../../common/mock';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { getStepsData } from '../../../../detections/pages/detection_engine/rules/helpers';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
   mockScheduleStepRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+import { getStepsData } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { PreviewPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
+import { RulePreview } from './rule_preview';
 import {
-  RULE_PREVIEW_BODY_TEST_ID,
-  RULE_PREVIEW_ABOUT_HEADER_TEST_ID,
   RULE_PREVIEW_ABOUT_CONTENT_TEST_ID,
-  RULE_PREVIEW_DEFINITION_HEADER_TEST_ID,
-  RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID,
-  RULE_PREVIEW_ACTIONS_HEADER_TEST_ID,
+  RULE_PREVIEW_ABOUT_HEADER_TEST_ID,
   RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID,
+  RULE_PREVIEW_ACTIONS_HEADER_TEST_ID,
+  RULE_PREVIEW_BODY_TEST_ID,
+  RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID,
+  RULE_PREVIEW_DEFINITION_HEADER_TEST_ID,
   RULE_PREVIEW_LOADING_TEST_ID,
+  RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID,
+  RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID,
 } from './test_ids';
 
 jest.mock('../../../../common/lib/kibana');

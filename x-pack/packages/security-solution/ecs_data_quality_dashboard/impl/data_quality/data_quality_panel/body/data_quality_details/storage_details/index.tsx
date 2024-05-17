@@ -8,11 +8,11 @@
 import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useCallback, useMemo } from 'react';
 
-import { getFlattenedBuckets } from './helpers';
-import { StorageTreemap } from '../../../storage_treemap';
-import { DEFAULT_MAX_CHART_HEIGHT, StorageTreemapContainer } from '../../../tabs/styles';
 import { PatternRollup, SelectedIndex } from '../../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';
+import { StorageTreemap } from '../../../storage_treemap';
+import { DEFAULT_MAX_CHART_HEIGHT, StorageTreemapContainer } from '../../../tabs/styles';
+import { getFlattenedBuckets } from './helpers';
 import { DOCS_UNIT } from './translations';
 
 export interface Props {

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiPageSection } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, useLocation } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection } from '@elastic/eui';
-import { parse } from 'query-string';
-import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
-import { TemplateForm } from '../../components';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
-import { saveTemplate } from '../../services/api';
-import { getTemplateDetailsLink } from '../../services/routing';
 import { useAppContext } from '../../app_context';
+import { TemplateForm } from '../../components';
+import { saveTemplate } from '../../services/api';
+import { IndexManagementBreadcrumb, breadcrumbService } from '../../services/breadcrumbs';
+import { getTemplateDetailsLink } from '../../services/routing';
 
 export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);

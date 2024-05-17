@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MlLocatorDefinition } from './ml_locator';
-import { ML_PAGES } from '../../common/constants/locator';
 import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '../../common/constants/locator';
+import { MlLocatorDefinition } from './ml_locator';
 
 describe('ML locator', () => {
   const definition = new MlLocatorDefinition();

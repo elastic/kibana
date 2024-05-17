@@ -6,19 +6,19 @@
  */
 
 import axios, { AxiosResponse } from 'axios';
+import { default as MarkdownIt } from 'markdown-it';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
-import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import {
   getNodeSSLOptions,
   getSSLSettingsFromConfig,
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
-import { ConnectorTokenClientContract, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { ConnectorTokenClientContract, ProxySettings } from '@kbn/actions-plugin/server/types';
+import { Logger } from '@kbn/core/server';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
 

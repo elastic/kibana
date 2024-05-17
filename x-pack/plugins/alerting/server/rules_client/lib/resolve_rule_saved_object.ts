@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsResolveResponse } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
+import { SavedObjectsResolveResponse } from '@kbn/core/server';
 import { resolveRuleSo } from '../../data/rule';
 import { RuleAttributes } from '../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
+import { RulesClientContext } from '../types';
 
 interface ResolveRuleSavedObjectParams {
   ruleId: string;

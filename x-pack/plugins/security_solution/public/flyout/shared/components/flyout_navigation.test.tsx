@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
+import {
+  type ExpandableFlyoutApi,
+  useExpandableFlyoutApi,
+  useExpandableFlyoutState,
+} from '@kbn/expandable-flyout';
+import { act, render } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { act, render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { FlyoutNavigation } from './flyout_navigation';
 import {
@@ -15,12 +21,6 @@ import {
   EXPAND_DETAILS_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
-import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
-import {
-  useExpandableFlyoutApi,
-  type ExpandableFlyoutApi,
-  useExpandableFlyoutState,
-} from '@kbn/expandable-flyout';
 
 const expandDetails = jest.fn();
 

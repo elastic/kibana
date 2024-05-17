@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiLink, EuiButtonEmpty } from '@elastic/eui';
-import React from 'react';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import React from 'react';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../../monitor_details/monitor_errors/errors_list';
 
 export const ErrorDetailsLink = ({

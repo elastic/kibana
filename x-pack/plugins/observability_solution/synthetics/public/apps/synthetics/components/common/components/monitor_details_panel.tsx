@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiLink,
-  EuiText,
-  EuiSpacer,
   EuiDescriptionList,
-  EuiSkeletonText,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiLink,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useDispatch } from 'react-redux';
-import { TagsBadges } from './tag_badges';
-import { PanelWithTitle } from './panel_with_title';
-import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
-import { getMonitorAction } from '../../../state';
-import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
 } from '../../../../../../common/runtime_types';
-import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { getMonitorAction } from '../../../state';
+import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
+import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
+import { MonitorTypeBadge } from './monitor_type_badge';
+import { PanelWithTitle } from './panel_with_title';
+import { TagsBadges } from './tag_badges';
 
 export interface MonitorDetailsPanelProps {
   latestPing?: Ping;

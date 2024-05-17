@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 
 import type { UpdateListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_URL, LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { LIST_INDEX, LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import { getUpdateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_list_schema.mock';
 import {
-  createListsIndex,
-  deleteListsIndex,
-  createListsIndices,
   createListBypassingChecks,
+  createListsIndex,
+  createListsIndices,
+  deleteListsIndex,
 } from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';

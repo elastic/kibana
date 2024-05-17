@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { FilterStateStore } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import type {
   PersistedIndexPatternLayer,
   PieVisualizationState,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
-import { FilterStateStore } from '@kbn/es-query';
-import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
+import React, { useCallback, useMemo } from 'react';
 import type { LogsDataView } from '../common/hooks/use_logs_data_view';
-import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
+import { useKibana } from '../common/lib/kibana';
+import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 
 interface ViewResultsInLensActionProps {
   actionId?: string;

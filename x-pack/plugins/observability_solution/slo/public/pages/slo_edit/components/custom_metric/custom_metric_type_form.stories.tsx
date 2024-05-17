@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import { CustomMetricIndicatorTypeForm as Component } from './custom_metric_type_form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC } from '../../constants';
+import { CustomMetricIndicatorTypeForm as Component } from './custom_metric_type_form';
 
 export default {
   component: Component,

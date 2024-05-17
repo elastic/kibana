@@ -14,7 +14,6 @@ import {
   REPORT_METRIC_FIELD,
   ReportTypes,
 } from '../constants';
-import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
@@ -25,11 +24,12 @@ import {
 } from '../constants/elasticsearch_fieldnames';
 import {
   CPU_USAGE,
-  SYSTEM_MEMORY_USAGE,
   MOBILE_APP,
   RESPONSE_LATENCY,
+  SYSTEM_MEMORY_USAGE,
   TRANSACTIONS_PER_MINUTE,
 } from '../constants/labels';
+import { buildPhrasesFilter } from '../utils';
 import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {

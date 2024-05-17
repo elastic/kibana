@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
-import { EuiPanel } from '@elastic/eui';
 
 export class ParameterForm extends React.Component {
   renderInputs = () => {

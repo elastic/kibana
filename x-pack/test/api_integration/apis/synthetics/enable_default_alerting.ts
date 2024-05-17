@@ -5,13 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
-import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { omit } from 'lodash';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EnableDefaultAlerting', function () {

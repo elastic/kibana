@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  DatasetQualityUsername,
-  DATASET_QUALITY_TEST_PASSWORD,
-} from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
+import { UrlObject, format } from 'url';
+import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
+import {
+  DATASET_QUALITY_TEST_PASSWORD,
+  DatasetQualityUsername,
+} from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { DatasetQualityFtrConfigName } from '../configs';
+import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,
 } from './ftr_provider_context';
-import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import { RegistryProvider } from './registry';
-import { DatasetQualityFtrConfigName } from '../configs';
 
 export interface DatasetQualityFtrConfig {
   name: DatasetQualityFtrConfigName;

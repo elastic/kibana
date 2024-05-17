@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import { search } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { search } from '@kbn/data-plugin/public';
-import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
+import moment from 'moment';
 import { AUTO_INTERVAL } from '../../../../common/constants';
-import { isVisTableData } from '../../../../common/vis_data_utils';
+import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import type { PanelData, TimeseriesVisData } from '../../../../common/types';
+import { isVisTableData } from '../../../../common/vis_data_utils';
 import { TimeseriesVisParams } from '../../../types';
 
 const { parseEsInterval } = search.aggs;

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import moment from 'moment-timezone';
+import React from 'react';
+import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
+import { TestProvidersComponent } from '../../../../common/mock';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { RightPanelContext } from '../context';
+import { AlertHeaderTitle } from './alert_header_title';
 import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  ASSIGNEES_HEADER_TEST_ID,
+  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
-  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
-  ASSIGNEES_HEADER_TEST_ID,
-  ALERT_SUMMARY_PANEL_TEST_ID,
 } from './test_ids';
-import { AlertHeaderTitle } from './alert_header_title';
-import moment from 'moment-timezone';
-import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 

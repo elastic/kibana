@@ -14,8 +14,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { getExceptionList } from './get_exception_list';
 import { deleteExceptionListItemByList } from './delete_exception_list_items_by_list';
+import { getExceptionList } from './get_exception_list';
 
 interface DeleteExceptionListOptions {
   listId: ListIdOrUndefined;

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import type { FC } from 'react';
 import React, { useContext } from 'react';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import {
+  isAdvancedJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
-  isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
-import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
+import { JobCreatorContext } from '../../../job_creator_context';
 import type { ListItems } from '../common';
-import { falseLabel, trueLabel, defaultLabel, Italic } from '../common';
+import { Italic, defaultLabel, falseLabel, trueLabel } from '../common';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);

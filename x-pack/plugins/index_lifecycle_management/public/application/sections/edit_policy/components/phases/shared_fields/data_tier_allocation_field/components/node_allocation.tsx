@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, FunctionComponent } from 'react';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
+import { get } from 'lodash';
+import React, { useState, FunctionComponent } from 'react';
 
 import { SelectField, useFormData, useKibana } from '../../../../../../../../shared_imports';
 

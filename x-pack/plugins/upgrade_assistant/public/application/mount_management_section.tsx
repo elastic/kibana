@@ -9,8 +9,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { RootComponent } from './app';
 import { AppDependencies } from '../types';
+import { RootComponent } from './app';
 
 import { apiService } from './lib/api';
 import { breadcrumbService } from './lib/breadcrumbs';

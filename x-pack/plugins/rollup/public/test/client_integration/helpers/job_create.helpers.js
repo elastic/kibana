@@ -8,8 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { rollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
+import { rollupJobsStore } from '../../../crud_app/store';
 
 import { JOB_TO_CREATE } from './constants';
 

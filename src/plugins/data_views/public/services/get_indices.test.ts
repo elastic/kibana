@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getIndices, getIndicesViaResolve, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
+import { getIndices, getIndicesViaResolve, responseToItemArray } from './get_indices';
 
 export const successfulResolveResponse = {
   indices: [

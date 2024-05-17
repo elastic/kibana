@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { tasks } from './tasks';
-import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { IndicesStatsResponse } from '../telemetry_client';
+import { tasks } from './tasks';
 
 describe('data telemetry collection tasks', () => {
   const indices = {

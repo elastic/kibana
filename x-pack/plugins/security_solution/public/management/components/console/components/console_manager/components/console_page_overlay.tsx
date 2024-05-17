@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ReactNode, MouseEventHandler } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PageLayoutProps } from './page_layout';
-import { PageLayout } from './page_layout';
+import type { MouseEventHandler, ReactNode } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
+import type { PageLayoutProps } from './page_layout';
+import { PageLayout } from './page_layout';
 
 const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.backButtonLabel', {
   defaultMessage: 'Back',

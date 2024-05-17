@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { TimelineSaveStatus } from '.';
 import { TimelineStatus } from '../../../../common/api/timeline';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TimelineId } from '../../../../common/types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 jest.mock('../../../common/hooks/use_selector');
 

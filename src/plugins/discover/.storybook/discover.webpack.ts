@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { defaultConfig, StorybookConfig } from '@kbn/storybook';
+import { StorybookConfig, defaultConfig } from '@kbn/storybook';
 
 export const discoverStorybookConfig: StorybookConfig = {
   ...defaultConfig,

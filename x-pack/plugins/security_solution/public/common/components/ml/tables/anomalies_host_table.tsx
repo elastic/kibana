@@ -7,27 +7,27 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HeaderSection } from '../../header_section';
+import { useDispatch } from 'react-redux';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import * as i18n from './translations';
-import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
-import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
-import { Loader } from '../../loader';
-import type { AnomaliesHostTableProps } from '../types';
-import { useMlCapabilities } from '../hooks/use_ml_capabilities';
-import { BasicTable } from './basic_table';
-import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
-import { Panel } from '../../panel';
+import { hostsActions, hostsSelectors } from '../../../../explore/hosts/store';
 import { useQueryToggle } from '../../../containers/query_toggle';
-import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
+import { HeaderSection } from '../../header_section';
+import { Loader } from '../../loader';
+import { Panel } from '../../panel';
+import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
+import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
+import type { AnomaliesHostTableProps } from '../types';
+import { BasicTable } from './basic_table';
+import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
+import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
-import { hostsActions, hostsSelectors } from '../../../../explore/hosts/store';
+import * as i18n from './translations';
 
 const sorting = {
   sort: {

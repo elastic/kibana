@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
-import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import { AggGroupNames, IAggConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DefaultEditorAggSelect } from './agg_select';
+import { getSchemaByName } from '../schemas';
+import { VisDefaultEditorKibanaServices } from '../types';
+import { DefaultEditorCommonProps } from './agg_common_props';
 import { DefaultEditorAggParam } from './agg_param';
 import {
   getAggParamsToRender,
@@ -25,15 +27,13 @@ import {
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import {
-  aggTypeReducer,
-  aggParamsReducer,
   AGG_PARAMS_ACTION_KEYS,
+  aggParamsReducer,
+  aggTypeReducer,
   initAggParamsState,
 } from './agg_params_state';
-import { DefaultEditorCommonProps } from './agg_common_props';
-import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
-import { getSchemaByName } from '../schemas';
-import { VisDefaultEditorKibanaServices } from '../types';
+import { DefaultEditorAggSelect } from './agg_select';
+import { EditorParamConfig, FixedParam, TimeIntervalParam, getEditorConfig } from './utils';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';

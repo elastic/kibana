@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
+  AppDeepLink,
+  AppMountParameters,
+  AppStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
-  Plugin,
   DEFAULT_APP_CATEGORIES,
+  Plugin,
   PluginInitializerContext,
-  AppMountParameters,
-  AppUpdater,
-  AppStatus,
-  AppDeepLink,
 } from '@kbn/core/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n as kbnI18n } from '@kbn/i18n';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
-import { getDefaultConfigs } from '../configurations/default_configs';
+import React from 'react';
 import { PERCENTILE } from '../configurations/constants';
-import { ReportMetricOptions } from './report_metric_options';
+import { getDefaultConfigs } from '../configurations/default_configs';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
+import { ReportMetricOptions } from './report_metric_options';
 
 describe('ReportMetricOptions', function () {
   const dataViewSeries = getDefaultConfigs({

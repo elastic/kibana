@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedPersistedState,
   FormulaPublicApi,
   PieVisualizationState,
 } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   BuildDependencies,
   DEFAULT_LAYER_ID,
   LensAttributes,
+  LensLegendConfig,
+  LensMosaicConfig,
   LensPieConfig,
   LensTreeMapConfig,
-  LensMosaicConfig,
-  LensLegendConfig,
 } from '../types';
 import {
   addLayerColumn,
@@ -28,7 +29,6 @@ import {
   getAdhocDataviews,
   mapToFormula,
 } from '../utils';
-import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 

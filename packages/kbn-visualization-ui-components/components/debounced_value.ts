@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useState, useMemo, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * Debounces value changes and updates inputValue on root state changes if no debounced changes

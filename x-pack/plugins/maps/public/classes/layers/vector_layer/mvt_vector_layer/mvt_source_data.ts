@@ -8,11 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
 import { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
-import { DataRequest } from '../../../util/data_request';
 import { DataRequestContext } from '../../../../actions';
-import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { IMvtVectorSource } from '../../../sources/vector_source';
 import { isESVectorTileSource } from '../../../sources/es_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
+import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
+import { DataRequest } from '../../../util/data_request';
 
 // shape of sourceDataRequest.getData()
 export interface MvtSourceData {

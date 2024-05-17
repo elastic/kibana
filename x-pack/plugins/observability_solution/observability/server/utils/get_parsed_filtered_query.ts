@@ -7,8 +7,8 @@
 
 import {
   BoolQuery,
-  buildEsQuery,
   Filter,
+  buildEsQuery,
   fromKueryExpression,
   toElasticsearchQuery,
 } from '@kbn/es-query';

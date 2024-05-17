@@ -7,19 +7,19 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
-import { useHighlightedFields } from './use_highlighted_fields';
+import { EventKind } from '../constants/event_kinds';
 import { convertHighlightedFieldsToPrevalenceFilters } from '../utils/highlighted_fields_helpers';
 import type { AggregationValue } from './use_fetch_prevalence';
 import {
   EVENT_KIND_AGG_KEY,
   FIELD_NAMES_AGG_KEY,
-  HOST_NAME_AGG_KEY,
   HOSTS_AGG_KEY,
-  useFetchPrevalence,
-  USER_NAME_AGG_KEY,
+  HOST_NAME_AGG_KEY,
   USERS_AGG_KEY,
+  USER_NAME_AGG_KEY,
+  useFetchPrevalence,
 } from './use_fetch_prevalence';
-import { EventKind } from '../constants/event_kinds';
+import { useHighlightedFields } from './use_highlighted_fields';
 
 export interface PrevalenceData {
   field: string;

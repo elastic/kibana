@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import {
-  METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT,
-  METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
-} from '../../../../../../common/es_fields/apm';
-import { ChartBase } from '../../../types';
-import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { APMConfig } from '../../../../..';
+import {
+  METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
+  METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT,
+} from '../../../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import { ChartBase } from '../../../types';
 
 const series = {
   systemCPUMax: {

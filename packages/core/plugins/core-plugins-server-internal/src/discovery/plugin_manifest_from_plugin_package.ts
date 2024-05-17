@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { snakeCase } from 'lodash';
-import { PluginPackageManifest } from '@kbn/repo-packages';
-import { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginType } from '@kbn/core-base-common';
+import { PluginManifest } from '@kbn/core-plugins-server';
+import { PluginPackageManifest } from '@kbn/repo-packages';
+import { snakeCase } from 'lodash';
 
 export function pluginManifestFromPluginPackage(
   kibanaVersion: string,

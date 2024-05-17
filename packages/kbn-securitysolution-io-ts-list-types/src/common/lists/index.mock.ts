@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { List, ListArray } from '.';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { List, ListArray } from '.';
 
 export const getListMock = (): List => ({
   id: 'some_uuid',

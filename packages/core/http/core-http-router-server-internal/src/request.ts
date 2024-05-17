@@ -7,37 +7,37 @@
  */
 
 import { URL } from 'url';
-import { v4 as uuidv4 } from 'uuid';
 import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
-import { fromEvent, NEVER } from 'rxjs';
-import { shareReplay, first, filter } from 'rxjs';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
-import {
-  KibanaRequest,
-  Headers,
-  RouteMethod,
-  validBodyOutput,
-  IKibanaSocket,
-  RouteValidatorFullConfigRequest,
-  KibanaRequestRoute,
-  KibanaRequestEvents,
-  KibanaRequestAuth,
-  KibanaRequestState,
-  KibanaRouteOptions,
-  KibanaRequestRouteOptions,
-  RawRequest,
-  FakeRawRequest,
-} from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { RouteValidator } from './validator';
+import {
+  FakeRawRequest,
+  Headers,
+  IKibanaSocket,
+  KibanaRequest,
+  KibanaRequestAuth,
+  KibanaRequestEvents,
+  KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  KibanaRequestState,
+  KibanaRouteOptions,
+  RawRequest,
+  RouteMethod,
+  RouteValidatorFullConfigRequest,
+  validBodyOutput,
+} from '@kbn/core-http-server';
+import { deepFreeze } from '@kbn/std';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { NEVER, fromEvent } from 'rxjs';
+import { filter, first, shareReplay } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { patchRequest } from './patch_requests';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
-import { patchRequest } from './patch_requests';
+import { RouteValidator } from './validator';
 
 // patching at module load
 patchRequest();
@@ -54,7 +54,7 @@ export class CoreKibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > implements KibanaRequest<Params, Query, Body, Method>
 {
   /**
@@ -257,7 +257,7 @@ export class CoreKibanaRequest<
             parse,
             maxBytes,
             accepts: allow,
-            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+            output: output as (typeof validBodyOutput)[number], // We do not support all the HAPI-supported outputs and TS complains
           },
     } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 

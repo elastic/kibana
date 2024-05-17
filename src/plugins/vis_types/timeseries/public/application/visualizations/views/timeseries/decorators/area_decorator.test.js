@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { AreaSeriesDecorator } from './area_decorator';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/decorators/area_decorator.js', () => {

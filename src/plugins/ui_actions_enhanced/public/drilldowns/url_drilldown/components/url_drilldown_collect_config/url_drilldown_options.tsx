@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiTextColor } from '@elastic/eui';
+import React from 'react';
 
+import { UrlDrilldownOptions } from '../../types';
 import {
   txtUrlTemplateEncodeDescription,
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateOpenInNewTab,
 } from './i18n';
-import { UrlDrilldownOptions } from '../../types';
 
 export interface UrlDrilldownOptionsProps {
   options: UrlDrilldownOptions;

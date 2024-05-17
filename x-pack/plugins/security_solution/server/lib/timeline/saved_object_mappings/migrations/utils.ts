@@ -10,8 +10,8 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { timelineSavedObjectType } from '../timelines';
 import { TIMELINE_ID_REF_NAME } from '../../constants';
+import { timelineSavedObjectType } from '../timelines';
 import type { TimelineId } from './types';
 
 export function createReference(

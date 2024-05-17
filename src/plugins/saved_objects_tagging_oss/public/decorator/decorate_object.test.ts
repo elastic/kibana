@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { InternalTagDecoratedSavedObject } from './types';
 import { decorateObject } from './decorate_object';
+import { InternalTagDecoratedSavedObject } from './types';
 
 const createObject = (): InternalTagDecoratedSavedObject => {
   // we really just need TS not to complain here.

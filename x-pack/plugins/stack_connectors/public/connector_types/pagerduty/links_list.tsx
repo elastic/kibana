@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -20,6 +19,7 @@ import {
   ActionParamsProps,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 import { PagerDutyActionParams } from '../types';
 import { OPTIONAL_LABEL } from './translations';
 

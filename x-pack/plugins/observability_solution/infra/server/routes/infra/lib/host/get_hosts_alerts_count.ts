@@ -13,8 +13,8 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { INFRA_ALERT_FEATURE_ID } from '../../../../../common/constants';
-import { BUCKET_KEY, MAX_SIZE } from '../constants';
 import { InfraAlertsClient } from '../../../../lib/helpers/get_infra_alerts_client';
+import { BUCKET_KEY, MAX_SIZE } from '../constants';
 
 export async function getHostsAlertsCount({
   alertsClient,

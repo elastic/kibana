@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
 import { useLink, useStartServices } from '../../hooks';
 

@@ -6,8 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN } from '../../../../../common/constants/plugin';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
+import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useBreadcrumbs } from '../../hooks';
 
 export const useSettingsBreadcrumbs = (extraCrumbs?: Array<{ text: string; href?: string }>) => {

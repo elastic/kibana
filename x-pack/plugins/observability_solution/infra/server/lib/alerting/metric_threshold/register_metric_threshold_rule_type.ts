@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
   GetViewInAppRelativeUrlFnOpts,
   PluginSetupContract,
   RuleType,
 } from '@kbn/alerting-plugin/server';
+import { schema } from '@kbn/config-schema';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -39,14 +40,13 @@ import {
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
-import {
-  createMetricThresholdExecutor,
-  FIRED_ACTIONS,
-  WARNING_ACTIONS,
-  NO_DATA_ACTIONS,
-} from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
+import {
+  FIRED_ACTIONS,
+  NO_DATA_ACTIONS,
+  WARNING_ACTIONS,
+  createMetricThresholdExecutor,
+} from './metric_threshold_executor';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS

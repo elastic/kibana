@@ -6,16 +6,16 @@
  */
 
 import type { ReactWrapper } from 'enzyme';
-import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
+import type { SafeResolverEvent } from '../../../common/endpoint/types';
+import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
-import type { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
-import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
-import type { SafeResolverEvent } from '../../../common/endpoint/types';
+import type { AABB, DataAccessLayer, TimeRange, Vector2 } from '../types';
 
 let simulator: Simulator;
 let databaseDocumentID: string;

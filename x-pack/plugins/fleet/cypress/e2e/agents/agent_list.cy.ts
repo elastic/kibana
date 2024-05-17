@@ -7,10 +7,10 @@
 
 import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 
-import { createAgentDoc } from '../../tasks/agents';
-import { setupFleetServer } from '../../tasks/fleet_server';
-import { deleteFleetServerDocs, deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
 import type { CreateAgentPolicyRequest } from '../../../common/types';
+import { createAgentDoc } from '../../tasks/agents';
+import { cleanupAgentPolicies, deleteAgentDocs, deleteFleetServerDocs } from '../../tasks/cleanup';
+import { setupFleetServer } from '../../tasks/fleet_server';
 import { setUISettings } from '../../tasks/ui_settings';
 
 import { API_VERSIONS } from '../../../common/constants';

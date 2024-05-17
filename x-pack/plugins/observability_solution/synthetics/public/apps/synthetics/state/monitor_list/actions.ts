@@ -8,9 +8,9 @@
 import { createAction } from '@reduxjs/toolkit';
 import { UpsertMonitorError, UpsertMonitorRequest } from '..';
 import {
-  MonitorManagementListResult,
-  MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
+  MonitorFiltersResult,
+  MonitorManagementListResult,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 

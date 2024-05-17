@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import * as labels from './translations';
 import { useGetUrlParams } from '../../../hooks';
 import { selectPingHistogram } from '../../../state/selectors';
+import * as labels from './translations';
 import { TroubleshootPopover } from './troubleshoot_popover';
 
 export const NoItemsMessage = ({ loading, filters }: { loading: boolean; filters?: string }) => {

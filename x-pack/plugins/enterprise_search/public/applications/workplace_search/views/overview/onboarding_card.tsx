@@ -12,9 +12,9 @@ import { useActions } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexItem,
   EuiPanel,
-  EuiEmptyPrompt,
   IconType,
 } from '@elastic/eui';
 

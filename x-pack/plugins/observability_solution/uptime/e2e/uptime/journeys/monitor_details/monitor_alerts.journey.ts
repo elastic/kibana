@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import { Page, before, expect, journey, step } from '@elastic/synthetics';
 import { noop } from 'lodash';
-import { byTestId, delay } from '../../../helpers/utils';
 import { recordVideo } from '../../../helpers/record_video';
+import { byTestId, delay } from '../../../helpers/utils';
 import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';

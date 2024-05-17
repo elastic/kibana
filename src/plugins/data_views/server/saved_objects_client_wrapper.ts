@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
   PersistenceAPI,
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
-import { DataViewSavedObjectConflictError } from '../common/errors';
 
-import type { DataViewCrudTypes } from '../common/content_management';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
+import type { DataViewCrudTypes } from '../common/content_management';
 
 export class SavedObjectsClientWrapper implements PersistenceAPI {
   private savedObjectClient: SavedObjectsClientContract;

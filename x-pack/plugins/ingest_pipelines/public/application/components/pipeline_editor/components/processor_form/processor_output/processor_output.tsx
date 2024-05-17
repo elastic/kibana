@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 import {
   EuiAccordion,
   EuiCallOut,
   EuiCodeBlock,
-  EuiText,
-  EuiSpacer,
   EuiSelect,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { SectionLoading } from '../../../../../../shared_imports';
-import { ProcessorResult, Document } from '../../../types';
+import { Document, ProcessorResult } from '../../../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from '../../shared';
 
 import './processor_output.scss';

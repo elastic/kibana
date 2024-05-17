@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mapAndFlattenFilters } from './map_and_flatten_filters';
 import type { Filter } from '@kbn/es-query';
+import { mapAndFlattenFilters } from './map_and_flatten_filters';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {

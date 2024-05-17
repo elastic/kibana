@@ -9,11 +9,11 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import type { OnboardingHubStepLinkClickedParams } from '../../../../lib/telemetry/events/onboarding/types';
 import type {
-  ToggleTaskCompleteStatus,
   CardId,
-  StepId,
   ExpandedCardSteps,
   OnStepClicked,
+  StepId,
+  ToggleTaskCompleteStatus,
 } from '../types';
 
 export interface StepContextType {

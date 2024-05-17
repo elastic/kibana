@@ -6,16 +6,15 @@
  */
 
 import { groupBy } from 'lodash';
-import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
+  FEED_NAME,
   FIRST_SEEN,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_ID,
   MATCHED_TYPE,
-  FEED_NAME,
 } from '../../../../../common/cti/constants';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import type {
@@ -25,6 +24,7 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
+import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;

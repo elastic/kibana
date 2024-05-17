@@ -1,3 +1,5 @@
+import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +7,15 @@
  * 2.0.
  */
 import React, { type PropsWithChildren } from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 
-import { TestProviders } from '../../../../../common/mock';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
+import { TestProviders } from '../../../../../common/mock';
 import { timelineActions } from '../../../../store';
 import { UserName } from './user_name';
-import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
-import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenRightPanel = jest.fn();

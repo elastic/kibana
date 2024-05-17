@@ -147,8 +147,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expectSnapshot(response.body.timeseries.map((serie: { title: string }) => serie.title))
-          .toMatchInline(`
+        expectSnapshot(
+          response.body.timeseries.map((serie: { title: string }) => serie.title)
+        ).toMatchInline(`
           Array [
             "app",
             "http",

@@ -7,8 +7,8 @@
 
 import type { FleetServerAgentComponentUnit } from '@kbn/fleet-plugin/common/types';
 
-import { PackageActionFormatter, titles, descriptions } from './package_action_formatter';
 import { ENDPOINT_ERROR_CODES } from '../../../../common/endpoint/constants';
+import { PackageActionFormatter, descriptions, titles } from './package_action_formatter';
 
 describe('PackageActionFormatter', () => {
   it('correctly formats es connection error', () => {

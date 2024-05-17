@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import * as ace from './ace';
 /**
  * Create a namespace for Forms
  * In the future, each top level folder should be exported like that to avoid naming collision
  */
 import * as Forms from './forms';
-import * as ace from './ace';
 import * as GlobalFlyout from './global_flyout';
 import * as XJson from './xjson';
 

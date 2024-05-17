@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { savedLens } from '../../../canvas_plugin_src/functions/external/saved_lens';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof savedLens>> = {
   help: i18n.translate('xpack.canvas.functions.savedLensHelpText', {

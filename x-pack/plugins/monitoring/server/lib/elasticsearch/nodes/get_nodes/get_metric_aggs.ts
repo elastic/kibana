@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { metrics } from '../../../metrics';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../../common/constants';
+import { metrics } from '../../../metrics';
 import { convertMetricNames } from '../../convert_metric_names';
 
 /*

@@ -6,8 +6,8 @@
  */
 
 import type {
-  Sort,
   FieldSort,
+  Sort,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { urlTemplatesReducer, saveTemplate, loadTemplates } from './url_templates';
-import { requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { UrlTemplate } from '../types';
+import { requestDatasource } from './datasource';
+import { loadTemplates, saveTemplate, urlTemplatesReducer } from './url_templates';
 
 describe('url_templates', () => {
   const addBasePath = (url: string) => `/test/s/custom/${url}`;

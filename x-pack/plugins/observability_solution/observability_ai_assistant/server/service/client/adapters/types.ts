@@ -6,8 +6,8 @@
  */
 
 import type { Readable } from 'node:stream';
-import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
 import type { Message } from '../../../../common';
 import type { ChatEvent } from '../../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../../common/functions/types';

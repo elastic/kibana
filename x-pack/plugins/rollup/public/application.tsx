@@ -11,15 +11,15 @@ import { Provider } from 'react-redux';
 
 import { CoreSetup, ExecutionContextStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+// @ts-ignore
+import { App } from './crud_app/app';
+// @ts-ignore
+import { rollupJobsStore } from './crud_app/store';
 import {
   KibanaContextProvider,
   KibanaRenderContextProvider,
   useExecutionContext,
 } from './shared_imports';
-// @ts-ignore
-import { rollupJobsStore } from './crud_app/store';
-// @ts-ignore
-import { App } from './crud_app/app';
 
 import './index.scss';
 

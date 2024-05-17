@@ -19,8 +19,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 
-import { getList } from './get_list';
 import { createList } from './create_list';
+import { getList } from './get_list';
 
 export interface CreateListIfItDoesNotExistOptions {
   id: Id;

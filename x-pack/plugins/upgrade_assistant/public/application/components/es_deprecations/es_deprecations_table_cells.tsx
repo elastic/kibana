@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
-import { DeprecationTableColumns } from '../types';
 import { DeprecationBadge } from '../shared';
+import { DeprecationTableColumns } from '../types';
 
 interface Props {
   resolutionTableCell?: React.ReactNode;

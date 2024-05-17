@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
+import { ApplicationUsageTracker, Reporter } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import type { Subscription } from 'rxjs';
-import React, { FC, PropsWithChildren } from 'react';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 import type {
-  PluginInitializerContext,
-  Plugin,
   CoreSetup,
   CoreStart,
   HttpSetup,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { createReporter, trackApplicationUsageChange } from './services';
+import React, { FC, PropsWithChildren } from 'react';
+import type { Subscription } from 'rxjs';
 import { ApplicationUsageContext } from './components/track_application_view';
+import { createReporter, trackApplicationUsageChange } from './services';
 
 export interface PublicConfigType {
   uiCounters: {

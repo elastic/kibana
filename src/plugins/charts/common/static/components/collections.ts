@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 
 export const ColorMode = Object.freeze({
   Background: 'Background' as 'Background',

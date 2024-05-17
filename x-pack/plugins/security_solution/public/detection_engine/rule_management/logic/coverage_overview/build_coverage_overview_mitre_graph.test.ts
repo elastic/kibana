@@ -6,9 +6,9 @@
  */
 
 import {
+  getMockCoverageOverviewSubtechniques,
   getMockCoverageOverviewTactics,
   getMockCoverageOverviewTechniques,
-  getMockCoverageOverviewSubtechniques,
 } from '../../model/coverage_overview/__mocks__';
 import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre_graph';
 

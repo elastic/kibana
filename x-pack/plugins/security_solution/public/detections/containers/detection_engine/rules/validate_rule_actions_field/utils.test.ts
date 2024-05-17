@@ -6,7 +6,7 @@
  */
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { getActionTypeName, validateActionParams, validateMustache } from './utils';
 
 describe('stepRuleActions utils', () => {
   describe('getActionTypeName', () => {

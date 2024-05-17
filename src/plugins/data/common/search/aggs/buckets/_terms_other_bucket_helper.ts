@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  Filter,
   buildExistsFilter,
   buildPhrasesFilter,
   buildQueryFromFilters,
-  Filter,
 } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { cloneDeep, each, find, flatten, isNumber, keys, values } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { AggGroupNames } from '../agg_groups';
-import { IAggConfigs } from '../agg_configs';
-import { IAggType } from '../agg_type';
 import { IAggConfig } from '../agg_config';
+import { IAggConfigs } from '../agg_configs';
+import { AggGroupNames } from '../agg_groups';
+import { IAggType } from '../agg_type';
 import { createSamplerAgg } from '../utils/sampler';
 
 const MISSING_KEY_STRING = '__missing__';

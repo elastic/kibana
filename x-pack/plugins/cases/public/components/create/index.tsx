@@ -7,15 +7,15 @@
 
 import React from 'react';
 
+import { EuiPageSection } from '@elastic/eui';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiPageSection } from '@elastic/eui';
-import * as i18n from './translations';
-import type { CreateCaseFormProps } from './form';
-import { CreateCaseForm } from './form';
+import { CasesDeepLinkId } from '../../common/navigation';
 import { HeaderPage } from '../header_page';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
-import { CasesDeepLinkId } from '../../common/navigation';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
+import * as i18n from './translations';
 
 export const CommonUseField = getUseField({ component: Field });
 

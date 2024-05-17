@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { parseMonitorLocations } from './utils';
-import { MonitorValidationError } from '../monitor_validation';
-import { getKqlFilter } from '../../common';
-import { deleteMonitor } from '../delete_monitor';
-import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { v4 as uuidV4 } from 'uuid';
+import {
+  DEFAULT_FIELDS,
+  DEFAULT_NAMESPACE_STRING,
+} from '../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
+import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
@@ -24,22 +23,23 @@ import {
   ServiceLocations,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import {
   getMaxAttempts,
   getMonitorLocations,
   getMonitorSchedule,
 } from '../../../synthetics_service/project_monitor/normalizers/common_fields';
-import {
-  DEFAULT_FIELDS,
-  DEFAULT_NAMESPACE_STRING,
-} from '../../../../common/constants/monitor_defaults';
-import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
-import { DefaultAlertService } from '../../default_alerts/default_alert_service';
-import { RouteContext } from '../../types';
-import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../../synthetics_service/utils';
-import { formatKibanaNamespace } from '../../../../common/formatters';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { getKqlFilter } from '../../common';
+import { DefaultAlertService } from '../../default_alerts/default_alert_service';
+import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
+import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
+import { RouteContext } from '../../types';
+import { deleteMonitor } from '../delete_monitor';
+import { MonitorValidationError } from '../monitor_validation';
+import { parseMonitorLocations } from './utils';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;

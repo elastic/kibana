@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useCurrentThemeVars } from '../contexts/kibana';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 import type { ChartTooltipService } from '../components/chart_tooltip';
+import { useCurrentThemeVars } from '../contexts/kibana';
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
 
 const ANNOTATION_CONTAINER_HEIGHT = 12;

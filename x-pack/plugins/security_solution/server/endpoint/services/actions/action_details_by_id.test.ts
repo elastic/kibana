@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getActionDetailsById } from '..';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getActionDetailsById } from '..';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { NotFoundError } from '../../errors';
+import {
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
 import {
   applyActionsEsSearchMock,
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
 
 describe('When using `getActionDetailsById()', () => {
   let esClient: ElasticsearchClientMock;
@@ -159,9 +159,8 @@ describe('When using `getActionDetailsById()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
@@ -180,9 +179,8 @@ describe('When using `getActionDetailsById()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
 
     await expect(
       getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')

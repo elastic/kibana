@@ -9,14 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
-  onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
-} from '../instructions/filebeat_instructions';
-import {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
+import {
+  cloudInstructions,
+  onPremCloudInstructions,
+  onPremInstructions,
+} from '../instructions/filebeat_instructions';
 
 export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'ibmmq';
@@ -32,7 +32,8 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       defaultMessage: 'Collect and parse logs from IBM MQ with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ibmmqLogs.longDescription', {
-      defaultMessage: 'Collect IBM MQ logs with Filebeat. \
+      defaultMessage:
+        'Collect IBM MQ logs with Filebeat. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-ibmmq.html',

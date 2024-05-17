@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { SetupModeTooltip } from './tooltip';
+import React from 'react';
 import {
+  APM_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
-  APM_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
+import { SetupModeTooltip } from './tooltip';
 
 const SCENARIOS = [
   {

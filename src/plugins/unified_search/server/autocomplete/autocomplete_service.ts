@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-import { clone } from 'lodash';
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { registerRoutes } from './routes';
+import { clone } from 'lodash';
+import moment from 'moment';
 import { ConfigSchema } from '../../config';
+import { registerRoutes } from './routes';
 
 export class AutocompleteService implements Plugin<void> {
   private valueSuggestionsEnabled: boolean = true;

@@ -20,7 +20,6 @@ import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
 import {
   isAWSLambdaAgentName,
   isAzureFunctionsAgentName,
@@ -40,6 +39,7 @@ import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';

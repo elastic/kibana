@@ -11,21 +11,21 @@ import {
   GetMetadataListRequestSchema,
   GetMetadataRequestSchema,
 } from '../../../../common/api/endpoint';
-import { HostStatus } from '../../../../common/endpoint/types';
-import type { EndpointAppContext } from '../../types';
-import {
-  getLogger,
-  getMetadataRequestHandler,
-  getMetadataListRequestHandler,
-  getMetadataTransformStatsHandler,
-} from './handlers';
-import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { HostStatus } from '../../../../common/endpoint/types';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import {
+  getLogger,
+  getMetadataListRequestHandler,
+  getMetadataRequestHandler,
+  getMetadataTransformStatsHandler,
+} from './handlers';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({

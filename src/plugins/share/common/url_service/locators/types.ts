@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { DependencyList } from 'react';
 import {
   MigrateFunction,
   PersistableState,
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { DependencyList } from 'react';
 import type { FormatSearchParamsOptions } from './redirect';
 
 /**

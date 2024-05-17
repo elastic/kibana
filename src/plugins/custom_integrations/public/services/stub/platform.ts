@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { CustomIntegrationsStartDependencies } from '../../types';
 import type { CustomIntegrationsPlatformService } from '../platform';
 import { PluginServiceFactory } from '../types';
-import { CustomIntegrationsStartDependencies } from '../../types';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsPlatformService` with stubbed output.

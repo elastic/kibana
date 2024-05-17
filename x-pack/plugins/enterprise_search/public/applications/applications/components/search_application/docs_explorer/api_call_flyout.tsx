@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
-import { SearchApplicationViewTabs, SEARCH_APPLICATION_TAB_PATH } from '../../../routes';
+import { SEARCH_APPLICATION_TAB_PATH, SearchApplicationViewTabs } from '../../../routes';
 
 export interface APICallData {
   request: SearchRequest;

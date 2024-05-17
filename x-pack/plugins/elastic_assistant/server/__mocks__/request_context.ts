@@ -1,3 +1,5 @@
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +8,15 @@
  */
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { MockedKeys } from '@kbn/utility-types-jest';
 import { AwaitedProperties } from '@kbn/utility-types';
+import { MockedKeys } from '@kbn/utility-types-jest';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { conversationsDataClientMock, dataClientMock } from './data_clients.mock';
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();

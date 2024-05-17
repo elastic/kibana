@@ -1,3 +1,6 @@
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,17 +8,14 @@
  * 2.0.
  */
 import moment from 'moment';
-import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { StatusRuleExecutor } from './status_rule_executor';
-import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import type { PublicLocation } from '../../../common/runtime_types';
 import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
-import type { PublicLocation } from '../../../common/runtime_types';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { StatusRuleExecutor } from './status_rule_executor';
 
 describe('StatusRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();

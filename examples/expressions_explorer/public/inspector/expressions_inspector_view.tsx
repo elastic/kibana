@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { InspectorViewProps, Adapters } from '@kbn/inspector-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Adapters, InspectorViewProps } from '@kbn/inspector-plugin/public';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { AstDebugView } from './ast_debug_view';
 
 interface ExpressionsInspectorViewComponentState {

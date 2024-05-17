@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { IContainer, PanelState } from '../../containers';
 import { PanelNotFoundError } from '../../errors';
 import { isReferenceOrValueEmbeddable } from '../../reference_or_value_embeddable';
 import { ViewMode } from '../../types';
-import { isErrorEmbeddable } from '../is_error_embeddable';
 import { EmbeddableInput } from '../i_embeddable';
+import { isErrorEmbeddable } from '../is_error_embeddable';
 import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 
 export const canUnlinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {

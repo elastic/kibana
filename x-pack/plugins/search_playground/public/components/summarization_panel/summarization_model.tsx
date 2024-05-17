@@ -18,13 +18,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useManagementLink } from '../../hooks/use_management_link';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
-import { useManagementLink } from '../../hooks/use_management_link';
 
 interface SummarizationModelProps {
   selectedModel: LLMModel;

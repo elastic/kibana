@@ -445,9 +445,7 @@
             "tags": [],
             "label": "aiops",
             "description": [],
-            "signature": [
-              "AiopsPluginStart"
-            ],
+            "signature": ["AiopsPluginStart"],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1573,9 +1571,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"SLOs\""
-        ],
+        "signature": ["\"SLOs\""],
         "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1588,9 +1584,7 @@
         "tags": [],
         "label": "sloAppId",
         "description": [],
-        "signature": [
-          "\"slo\""
-        ],
+        "signature": ["\"slo\""],
         "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

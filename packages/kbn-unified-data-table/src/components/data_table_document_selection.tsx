@@ -1,3 +1,19 @@
+import {
+  EuiCheckbox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiCopy,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridToolbarControl,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,22 +22,6 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import {
-  EuiCheckbox,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiCopy,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridToolbarControl,
-  EuiPopover,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '../table_context';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {

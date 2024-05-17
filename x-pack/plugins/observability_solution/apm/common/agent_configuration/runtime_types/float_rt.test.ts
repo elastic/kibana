@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { floatRt } from './float_rt';
 import { isRight } from 'fp-ts/lib/Either';
+import { floatRt } from './float_rt';
 
 describe('floatRt', () => {
   it('does not accept empty values', () => {

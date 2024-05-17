@@ -6,8 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from './services/remote_es/remote_es';
+import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('./config.base.js'));

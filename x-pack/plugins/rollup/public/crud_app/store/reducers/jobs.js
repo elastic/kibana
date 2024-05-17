@@ -6,11 +6,11 @@
  */
 
 import {
+  CREATE_JOB_SUCCESS,
+  LOAD_JOBS_FAILURE,
   LOAD_JOBS_START,
   LOAD_JOBS_SUCCESS,
-  LOAD_JOBS_FAILURE,
   REFRESH_JOBS_SUCCESS,
-  CREATE_JOB_SUCCESS,
 } from '../action_types';
 
 const initialState = {

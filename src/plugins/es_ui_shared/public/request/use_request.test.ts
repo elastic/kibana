@@ -10,8 +10,8 @@ import { act } from 'react-dom/test-utils';
 import sinon from 'sinon';
 
 import {
-  UseRequestHelpers,
   REQUEST_TIME,
+  UseRequestHelpers,
   createUseRequestHelpers,
 } from './use_request.test.helpers';
 

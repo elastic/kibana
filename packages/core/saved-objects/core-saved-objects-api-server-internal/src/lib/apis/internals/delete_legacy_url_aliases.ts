@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
 import { getErrorMessage as getEsErrorMessage } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  type IndexMapping,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  type IndexMapping,
-} from '@kbn/core-saved-objects-base-server-internal';
+import * as esKuery from '@kbn/es-query';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import { getSearchDsl } from '../../search';
 

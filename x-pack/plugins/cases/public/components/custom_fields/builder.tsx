@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CustomFieldBuilderMap } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { configureTextCustomFieldFactory } from './text/configure_text_field';
 import { configureToggleCustomFieldFactory } from './toggle/configure_toggle_field';
+import type { CustomFieldBuilderMap } from './types';
 
 export const builderMap = Object.freeze({
   [CustomFieldTypes.TEXT]: configureTextCustomFieldFactory,

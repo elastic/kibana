@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
-  fetchHistogramsForFields,
   type NumericChartData,
   type NumericHistogramField,
+  fetchHistogramsForFields,
 } from '@kbn/ml-agg-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 

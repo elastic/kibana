@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
 import type {
-  GuideState,
-  GuideId,
-  GuideStepIds,
   GuideConfig,
+  GuideId,
   GuideParams,
+  GuideState,
+  GuideStepIds,
 } from '@kbn/guided-onboarding';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { PluginStatus, PluginState } from '../common';
+import { Observable } from 'rxjs';
+import type { PluginState, PluginStatus } from '../common';
 
 export interface GuidedOnboardingPluginSetup {
   cloud: CloudSetup;

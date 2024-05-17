@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getIndexTemplate, getComponentTemplate } from './resource_installer_utils';
+import { getComponentTemplate, getIndexTemplate } from './resource_installer_utils';
 
 describe('getIndexTemplate', () => {
   const defaultParams = {

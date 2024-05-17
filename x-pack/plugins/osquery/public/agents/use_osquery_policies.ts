@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
-import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@tanstack/react-query';
+import { uniq } from 'lodash';
 import { API_VERSIONS } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { useKibana } from '../common/lib/kibana';
 
 export const useOsqueryPolicies = () => {
   const { http } = useKibana().services;

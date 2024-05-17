@@ -5,62 +5,62 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import { omit } from 'lodash';
-import { ControllerRenderProps } from 'react-hook-form';
 import {
-  EuiFieldText,
-  EuiFieldTextProps,
-  EuiSelect,
-  EuiSelectProps,
+  EuiButtonGroup,
+  EuiButtonGroupProps,
+  EuiCheckbox,
+  EuiCheckboxProps,
+  EuiComboBox,
+  EuiComboBoxProps,
   EuiFieldNumber,
   EuiFieldNumberProps,
   EuiFieldPassword,
   EuiFieldPasswordProps,
-  EuiCheckbox,
-  EuiCheckboxProps,
+  EuiFieldText,
+  EuiFieldTextProps,
+  EuiSelect,
+  EuiSelectProps,
   EuiSwitch,
   EuiSwitchProps,
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiComboBox,
-  EuiComboBoxProps,
   EuiTextArea,
   EuiTextAreaProps,
 } from '@elastic/eui';
+import { omit } from 'lodash';
+import React, { Ref } from 'react';
+import { ControllerRenderProps } from 'react-hook-form';
 import {
-  ThrottlingConfigField,
-  ThrottlingConfigFieldProps,
-} from '../fields/throttling/throttling_config_field';
-import { SourceField, SourceFieldProps } from '../fields/source_field';
+  CodeEditorProps as DefaultCodeEditorProps,
+  JSONEditor as DefaultJSONEditor,
+} from '../fields/code_editor';
 import {
   FormattedComboBox as DefaultFormattedComboBox,
   FormattedComboBoxProps as DefaultFormattedComboBoxProps,
 } from '../fields/combo_box';
 import {
-  JSONEditor as DefaultJSONEditor,
-  CodeEditorProps as DefaultCodeEditorProps,
-} from '../fields/code_editor';
-import {
-  MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup,
-  MonitorTypeRadioGroupProps,
-} from '../fields/monitor_type_radio_group';
-import {
   HeaderField as DefaultHeaderField,
   HeaderFieldProps as DefaultHeaderFieldProps,
 } from '../fields/header_field';
+import {
+  ResponseBodyIndexField as DefaultResponseBodyIndexField,
+  ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
+} from '../fields/index_response_body_field';
 import {
   KeyValuePairsField as DefaultKeyValuePairsField,
   KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps,
 } from '../fields/key_value_field';
 import {
+  MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup,
+  MonitorTypeRadioGroupProps,
+} from '../fields/monitor_type_radio_group';
+import {
   RequestBodyField as DefaultRequestBodyField,
   RequestBodyFieldProps as DefaultRequestBodyFieldProps,
 } from '../fields/request_body_field';
+import { SourceField, SourceFieldProps } from '../fields/source_field';
 import {
-  ResponseBodyIndexField as DefaultResponseBodyIndexField,
-  ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
-} from '../fields/index_response_body_field';
+  ThrottlingConfigField,
+  ThrottlingConfigFieldProps,
+} from '../fields/throttling/throttling_config_field';
 
 // these props are automatically passed through to our controlled components
 // they do not have to be defined specifically on the 'props' field in the

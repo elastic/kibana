@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConsoleDataState } from '../../components/console_state/types';
 import { useConsoleStore } from '../../components/console_state/console_state';
+import type { ConsoleDataState } from '../../components/console_state/types';
 
 export const useWithInputHistory = (): ConsoleDataState['input']['history'] => {
   return useConsoleStore().state.input.history;

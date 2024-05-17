@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { filter } from '../../common/filter';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
 

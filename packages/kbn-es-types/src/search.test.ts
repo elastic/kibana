@@ -36,12 +36,11 @@ xdescribe('AggregateOfMap', () => {
   });
 
   test('aggregations should not assume buckets are there if the bucket name may be undefined', () => {
-    type MyAggregation =
-      | {} & {
-          group_by?: {
-            terms: unknown;
-          };
-        };
+    type MyAggregation = {} & {
+      group_by?: {
+        terms: unknown;
+      };
+    };
 
     const aggregation = {} as unknown as AggregateOfMap<MyAggregation, unknown>;
     aggregation.group_by?.buckets.length.toFixed(); // using a number-specific method

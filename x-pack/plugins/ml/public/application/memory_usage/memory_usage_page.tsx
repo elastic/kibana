@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
-import { MemoryPage, JobMemoryTreeMap } from './memory_tree_map';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { useEnabledFeatures } from '../contexts/ml';
+import { JobMemoryTreeMap, MemoryPage } from './memory_tree_map';
+import { NodesList } from './nodes_overview';
 
 enum TAB {
   NODES,

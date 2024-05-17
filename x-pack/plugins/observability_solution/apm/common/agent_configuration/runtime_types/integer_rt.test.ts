@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getIntegerRt } from './integer_rt';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { getIntegerRt } from './integer_rt';
 
 describe('getIntegerRt', () => {
   describe('with range', () => {

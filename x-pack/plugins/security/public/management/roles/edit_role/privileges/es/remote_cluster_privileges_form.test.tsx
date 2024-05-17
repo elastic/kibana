@@ -12,8 +12,8 @@ import React from 'react';
 import '@kbn/code-editor-mock/jest_helper';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { RemoteClusterPrivilegesForm } from './remote_cluster_privileges_form';
 import { RoleValidator } from '../../validate_role';
+import { RemoteClusterPrivilegesForm } from './remote_cluster_privileges_form';
 
 test('it renders without crashing', () => {
   const wrapper = shallowWithIntl(

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ReactWrapper, ShallowWrapper } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { OperationMetadata } from '../../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
-import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
 import {
-  insertOrReplaceColumn,
   LastValueIndexPatternColumn,
-  operationDefinitionMap,
   TermsIndexPatternColumn,
+  insertOrReplaceColumn,
+  operationDefinitionMap,
 } from '../operations';
-import { FieldSelect } from './field_select';
 import { FormBasedLayer } from '../types';
+import { FieldSelect } from './field_select';
+import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
 
 jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => {

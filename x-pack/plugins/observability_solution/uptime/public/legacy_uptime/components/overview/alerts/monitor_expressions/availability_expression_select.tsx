@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
+import { EuiCheckbox, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { AlertExpressionPopover } from '../alert_expression_popover';
-import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
+import * as labels from '../translations';
 import { TimeRangeOption, TimeUnitSelectable } from './time_unit_selectable';
 
 interface Props {

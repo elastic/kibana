@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LicenseType, LICENSE_TYPE } from '../../../common/types';
+import { LICENSE_TYPE, LicenseType } from '../../../common/types';
 import { FeatureUsageServiceSetup } from '../../services';
 import { LicensingRouter } from '../../types';
 

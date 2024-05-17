@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { Status } from '../../../../../../../common/types/api';
-import { SAVE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
+import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { ConnectorNameAndDescriptionApiLogic } from '../../../../api/connector/update_connector_name_and_description_api_logic';
 
 import { ConnectorNameAndDescriptionFormContent } from './connector_name_and_description_form_content';

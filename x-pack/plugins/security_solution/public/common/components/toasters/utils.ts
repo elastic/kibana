@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { isAppError } from '@kbn/securitysolution-t-grid';
+import { isError } from 'lodash/fp';
 import type React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { isError } from 'lodash/fp';
-import { isAppError } from '@kbn/securitysolution-t-grid';
 
-import type { AppToast, ActionToaster } from '.';
+import type { ActionToaster, AppToast } from '.';
 import { isToasterError } from './errors';
 
 /**

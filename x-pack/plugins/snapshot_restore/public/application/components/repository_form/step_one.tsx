@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,17 +21,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
 
-import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common';
-import { SectionError, Error } from '../../../shared_imports';
+import { EmptyRepository, Repository, RepositoryType } from '../../../../common/types';
+import { Error, SectionError } from '../../../shared_imports';
 
+import { RepositoryTypeLogo, SectionLoading } from '..';
+import { useCore } from '../../app_context';
+import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionLoading, RepositoryTypeLogo } from '..';
-import { useCore } from '../../app_context';
-import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 
 interface Props {
   repository: Repository | EmptyRepository;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useMemo } from 'react';
 
 import { PhaseExceptDelete } from '../../../../../../../common/types';
 
 import { NumericField } from '../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { UseField } from '../../../form';
-import { LearnMoreLink, DescribedFormRow } from '../..';
+import { DescribedFormRow, LearnMoreLink } from '../..';
 import { useKibana } from '../../../../../../shared_imports';
+import { UseField } from '../../../form';
 
 interface Props {
   phase: PhaseExceptDelete;

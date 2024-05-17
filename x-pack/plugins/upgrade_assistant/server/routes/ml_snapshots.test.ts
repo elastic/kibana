@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import { RequestHandler, kibanaResponseFactory } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
+import { createRequestMock } from './__mocks__/request.mock';
 import {
-  createMockRouter,
   MockRouter,
+  createMockRouter,
   routeHandlerContextMock,
   savedObjectsClient,
 } from './__mocks__/routes.mock';
-import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
 jest.mock('../lib/es_version_precheck', () => ({

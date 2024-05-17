@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import { useParams } from 'react-router-dom';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
 export function useFindMyKillerState() {
   const { lastRefresh } = useSyntheticsRefreshContext();

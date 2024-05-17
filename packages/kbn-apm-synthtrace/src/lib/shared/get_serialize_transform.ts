@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
+import { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
 
 export function getSerializeTransform<TFields = ApmFields>() {
   const buffer: TFields[] = [];

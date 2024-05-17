@@ -6,14 +6,14 @@
  */
 
 import {
-  getSelectorConditions,
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
-  validateBlockRestrictions,
+  getSelectorConditions,
   selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar,
+  validateBlockRestrictions,
 } from './utils';
 
-import { Selector, Response } from '../../common';
+import { Response, Selector } from '../../common';
 
 describe('getSelectorConditions', () => {
   it('grabs file conditions for file selectors', () => {

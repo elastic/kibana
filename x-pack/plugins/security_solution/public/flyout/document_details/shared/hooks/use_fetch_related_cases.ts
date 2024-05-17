@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const QUERY_KEY = 'useFetchRelatedCases';
 

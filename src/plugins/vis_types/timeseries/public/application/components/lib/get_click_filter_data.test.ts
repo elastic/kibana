@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import { GeometryValue, XYChartSeriesIdentifier } from '@elastic/charts';
+import { SERIES_SEPARATOR } from '../../../../common/constants';
+import { TimeseriesVisParams } from '../../../types';
 import { getClickFilterData } from './get_click_filter_data';
 import type { TSVBTables } from './types';
-import { TimeseriesVisParams } from '../../../types';
-import { SERIES_SEPARATOR } from '../../../../common/constants';
 
 describe('getClickFilterData', () => {
   test('gets the correct data for a group by everything timeseries chart', () => {

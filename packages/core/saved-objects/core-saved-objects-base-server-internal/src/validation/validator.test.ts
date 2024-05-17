@@ -7,12 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectSanitizedDoc,
-  SavedObjectsValidationSpec,
   SavedObjectsValidationMap,
+  SavedObjectsValidationSpec,
 } from '@kbn/core-saved-objects-server';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsTypeValidator } from './validator';
 
 const defaultVersion = '3.3.0';

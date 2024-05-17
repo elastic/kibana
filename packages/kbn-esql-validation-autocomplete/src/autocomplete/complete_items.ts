@@ -7,15 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
 import { getAllCommands } from '../shared/helpers';
 import {
-  getSuggestionBuiltinDefinition,
-  getSuggestionCommandDefinition,
   TRIGGER_SUGGESTION_COMMAND,
   buildConstantsDefinitions,
+  getSuggestionBuiltinDefinition,
+  getSuggestionCommandDefinition,
 } from './factories';
+import type { SuggestionRawDefinition } from './types';
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;

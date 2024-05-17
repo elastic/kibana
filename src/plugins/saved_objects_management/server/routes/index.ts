@@ -8,12 +8,12 @@
 
 import { HttpServiceSetup } from '@kbn/core/server';
 import { ISavedObjectsManagement } from '../services';
-import { registerFindRoute } from './find';
 import { registerBulkDeleteRoute } from './bulk_delete';
 import { registerBulkGetRoute } from './bulk_get';
-import { registerScrollForCountRoute } from './scroll_count';
-import { registerRelationshipsRoute } from './relationships';
+import { registerFindRoute } from './find';
 import { registerGetAllowedTypesRoute } from './get_allowed_types';
+import { registerRelationshipsRoute } from './relationships';
+import { registerScrollForCountRoute } from './scroll_count';
 
 interface RegisterRouteOptions {
   http: HttpServiceSetup;

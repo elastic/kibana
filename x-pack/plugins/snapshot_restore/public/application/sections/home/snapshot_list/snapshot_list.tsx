@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { parse } from 'query-string';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { parse } from 'query-string';
+import React, { useState, useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import {
-  PageLoading,
-  PageError,
   Error,
+  PageError,
+  PageLoading,
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
+import { useAppContext, useServices } from '../../../app_context';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
+import { DEFAULT_SNAPSHOT_LIST_PARAMS, SnapshotListParams, useDecodedParams } from '../../../lib';
 import { useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
-import { useAppContext, useServices } from '../../../app_context';
-import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
 
-import { SnapshotDetails } from './snapshot_details';
 import {
-  SnapshotTable,
   RepositoryEmptyPrompt,
-  SnapshotEmptyPrompt,
   RepositoryError,
+  SnapshotEmptyPrompt,
+  SnapshotTable,
 } from './components';
+import { SnapshotDetails } from './snapshot_details';
 
 interface MatchParams {
   repositoryName?: string;

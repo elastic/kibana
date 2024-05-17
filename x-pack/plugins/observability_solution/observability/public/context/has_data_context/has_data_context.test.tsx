@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { registerDataHandler, unregisterDataHandler } from './data_handler';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
+import { act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import { createMemoryHistory } from 'history';
+import React from 'react';
+import { ApmIndicesConfig } from '../../../common/typings';
 import { useHasData } from '../../hooks/use_has_data';
 import { HasData, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import { registerDataHandler, unregisterDataHandler } from './data_handler';
 import { HasDataContextProvider } from './has_data_context';
-import { Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
-import { ApmIndicesConfig } from '../../../common/typings';
-import { act } from '@testing-library/react';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
@@ -47,7 +47,7 @@ function registerApps<T extends ObservabilityFetchDataPlugins>(
   apps.forEach(({ appName, hasData }) => {
     registerDataHandler({
       appName,
-      fetchData: () => ({} as any),
+      fetchData: () => ({}) as any,
       hasData,
     });
   });

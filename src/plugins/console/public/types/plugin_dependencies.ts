@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
 import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
+import type { FC } from 'react';
 
-import { ConsoleUILocatorParams } from './locator';
 import { EmbeddedConsoleView } from './embeddable_console';
+import { ConsoleUILocatorParams } from './locator';
 
 export interface ConsoleStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;

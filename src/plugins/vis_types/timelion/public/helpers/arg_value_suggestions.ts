@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { isNestedField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { getIndexPatterns } from './plugin_services';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import { get } from 'lodash';
+import { TimelionExpressionArgument, TimelionExpressionFunction } from '../../common/parser';
 import { TimelionFunctionArgs } from '../../common/types';
-import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
+import { getIndexPatterns } from './plugin_services';
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();

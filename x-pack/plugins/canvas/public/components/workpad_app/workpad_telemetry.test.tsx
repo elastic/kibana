@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { render } from '@testing-library/react';
+import { ExpressionContext, ResolvedArgType } from '../../../types';
+import { METRIC_TYPE } from '../../lib/ui_metric';
 import {
-  withUnconnectedElementsLoadedTelemetry,
   WorkpadLoadedMetric,
   WorkpadLoadedWithErrorsMetric,
+  withUnconnectedElementsLoadedTelemetry,
 } from './workpad_telemetry';
-import { METRIC_TYPE } from '../../lib/ui_metric';
-import { ExpressionContext, ResolvedArgType } from '../../../types';
 
 jest.mock('react-redux', () => {
   const originalModule = jest.requireActual('react-redux');
@@ -50,7 +50,7 @@ const getResolveArgWithState = (state: 'pending' | 'ready' | 'error') =>
   ({
     expressionRenderable: { value: { as: state, type: 'render' }, state, error: null },
     expressionContext: {} as ExpressionContext,
-  } as ResolvedArgType);
+  }) as ResolvedArgType;
 
 const arrayToObject = (array: ResolvedArgType[]) =>
   array.reduce<Record<number, ResolvedArgType>>((acc, el, index) => {

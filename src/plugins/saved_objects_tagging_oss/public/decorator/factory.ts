@@ -7,18 +7,17 @@
  */
 
 import { SavedObjectDecoratorFactory } from '@kbn/saved-objects-plugin/public';
-import { InternalTagDecoratedSavedObject } from './types';
 import { decorateConfig } from './decorate_config';
 import { decorateObject } from './decorate_object';
+import { InternalTagDecoratedSavedObject } from './types';
 
 export const decoratorId = 'tag';
 
-export const tagDecoratorFactory: SavedObjectDecoratorFactory<
-  InternalTagDecoratedSavedObject
-> = () => {
-  return {
-    getId: () => decoratorId,
-    decorateConfig,
-    decorateObject,
+export const tagDecoratorFactory: SavedObjectDecoratorFactory<InternalTagDecoratedSavedObject> =
+  () => {
+    return {
+      getId: () => decoratorId,
+      decorateConfig,
+      decorateObject,
+    };
   };
-};

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
 
 import { AdditionalFiltersAction } from '.';
 import { TestProviders } from '../../../../common/mock/test_providers';

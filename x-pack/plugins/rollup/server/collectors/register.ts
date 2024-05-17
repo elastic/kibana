@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup, CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   fetchRollupIndexPatterns,
   fetchRollupSavedSearches,

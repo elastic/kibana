@@ -6,36 +6,36 @@
  */
 
 import {
-  getKibanaInstructionsForEnablingMetricbeat,
-  getKibanaInstructionsForDisablingInternalCollection,
-} from './kibana';
+  APM_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  ELASTICSEARCH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
+} from '../../../../common/constants';
 import {
-  getElasticsearchInstructionsForEnablingMetricbeat,
-  getElasticsearchInstructionsForDisablingInternalCollection,
-} from './elasticsearch';
-import {
-  getLogstashInstructionsForEnablingMetricbeat,
-  getLogstashInstructionsForDisablingInternalCollection,
-} from './logstash';
-import {
-  getBeatsInstructionsForEnablingMetricbeat,
-  getBeatsInstructionsForDisablingInternalCollection,
-} from './beats';
+  INSTRUCTION_STEP_DISABLE_INTERNAL,
+  INSTRUCTION_STEP_ENABLE_METRICBEAT,
+} from '../constants';
 import {
   getApmInstructionsForDisablingInternalCollection,
   getApmInstructionsForEnablingMetricbeat,
 } from './apm';
 import {
-  INSTRUCTION_STEP_ENABLE_METRICBEAT,
-  INSTRUCTION_STEP_DISABLE_INTERNAL,
-} from '../constants';
+  getBeatsInstructionsForDisablingInternalCollection,
+  getBeatsInstructionsForEnablingMetricbeat,
+} from './beats';
 import {
-  ELASTICSEARCH_SYSTEM_ID,
-  APM_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
-} from '../../../../common/constants';
+  getElasticsearchInstructionsForDisablingInternalCollection,
+  getElasticsearchInstructionsForEnablingMetricbeat,
+} from './elasticsearch';
+import {
+  getKibanaInstructionsForDisablingInternalCollection,
+  getKibanaInstructionsForEnablingMetricbeat,
+} from './kibana';
+import {
+  getLogstashInstructionsForDisablingInternalCollection,
+  getLogstashInstructionsForEnablingMetricbeat,
+} from './logstash';
 
 export function getInstructionSteps(productName, product, step, meta, opts) {
   switch (productName) {

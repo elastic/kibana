@@ -8,15 +8,15 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
 
-import { ValueAxis, SeriesParam } from '../../../../types';
+import { ChangeValueAxis, SetParamByIndex } from '.';
+import { SeriesParam, ValueAxis } from '../../../../types';
 import { ChartOptions } from './chart_options';
-import { SetParamByIndex, ChangeValueAxis } from '.';
 
 export interface SeriesPanelProps {
   changeValueAxis: ChangeValueAxis;

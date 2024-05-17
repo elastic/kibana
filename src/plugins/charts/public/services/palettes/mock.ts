@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PaletteService } from './service';
 
 export const getPaletteRegistry = () => {

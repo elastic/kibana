@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import type {
-  RedirectAppLinksProps,
   RedirectAppLinksKibanaDependencies,
+  RedirectAppLinksProps,
 } from '@kbn/shared-ux-link-redirect-app-types';
+import React, { FC } from 'react';
 
 import { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links.container';
 import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';

@@ -16,12 +16,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
-import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
-import { EMPTY_VALUE } from '../../../../constants/common';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { EMPTY_VALUE } from '../../../../constants/common';
+import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { unwrapValue } from '../../utils/unwrap_value';
-import { IndicatorEmptyPrompt } from './empty_prompt';
 import { IndicatorBlock } from './block';
+import { IndicatorEmptyPrompt } from './empty_prompt';
 import { HighlightedValuesTable } from './highlighted_values_table';
 import {
   INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { DefaultExportFileName } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { DefaultExportFileName } from '.';
 
 describe('default_export_file_name', () => {
   test('it should validate a regular string', () => {

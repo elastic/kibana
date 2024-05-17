@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  ElasticsearchClient,
   CustomRequestHandlerContext,
-  SavedObjectReference,
-  Logger,
+  ElasticsearchClient,
   ISavedObjectsRepository,
+  KibanaRequest,
+  Logger,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AnySchema } from 'joi';
-import { SubActionConnector } from './sub_action_framework/sub_action_connector';
-import { ServiceParams } from './sub_action_framework/types';
-import { ActionTypeRegistry } from './action_type_registry';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
+import { ActionTypeRegistry } from './action_type_registry';
+import { ActionsClient } from './actions_client';
+import { ActionsConfigurationUtilities } from './actions_config';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './lib/connector_token_client';
-import { ActionsConfigurationUtilities } from './actions_config';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { ServiceParams } from './sub_action_framework/types';
 
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -39,8 +39,8 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
-import type { ActionExecutionSource } from './lib';
 import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
+import type { ActionExecutionSource } from './lib';
 export type { ActionExecutionSource } from './lib';
 
 export { ActionExecutionSourceType } from './lib';
@@ -75,7 +75,7 @@ export interface ActionsPlugin {
 export interface ActionTypeExecutorOptions<
   Config extends Record<string, unknown>,
   Secrets extends Record<string, unknown>,
-  Params
+  Params,
 > {
   actionId: string;
   services: Services | UnsecuredServices;
@@ -94,7 +94,7 @@ export type ActionResult = Connector;
 
 export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
 > extends ActionResult {
   secrets: Secrets;
   config: Config;
@@ -107,7 +107,7 @@ export type ExecutorType<
   Config extends Record<string, unknown>,
   Secrets extends Record<string, unknown>,
   Params,
-  ResultData
+  ResultData,
 > = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
@@ -141,7 +141,7 @@ export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 > {
   id: string;
   name: string;

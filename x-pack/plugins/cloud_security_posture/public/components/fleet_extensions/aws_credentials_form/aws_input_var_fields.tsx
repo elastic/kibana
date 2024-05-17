@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { EuiFieldText, EuiFormRow, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
-import { AwsOptions } from './get_aws_credentials_form_options';
+import React, { Suspense } from 'react';
 import { findVariableDef } from '../utils';
+import { AwsOptions } from './get_aws_credentials_form_options';
 
 export const AwsInputVarFields = ({
   fields,

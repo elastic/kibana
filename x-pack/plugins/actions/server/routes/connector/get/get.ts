@@ -6,15 +6,15 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import {
-  getConnectorParamsSchemaV1,
-  GetConnectorParamsV1,
-} from '../../../../common/routes/connector/apis/get';
-import { transformGetConnectorResponseV1 } from './transforms';
-import { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
+import {
+  GetConnectorParamsV1,
+  getConnectorParamsSchemaV1,
+} from '../../../../common/routes/connector/apis/get';
+import { ILicenseState } from '../../../lib';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { transformGetConnectorResponseV1 } from './transforms';
 
 export const getConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,

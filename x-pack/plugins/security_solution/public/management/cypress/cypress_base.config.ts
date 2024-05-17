@@ -8,14 +8,14 @@
 // @ts-expect-error
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
-import { samlAuthentication } from './support/saml_authentication';
-import { getVideosForFailedSpecs } from './support/filter_videos';
-import { setupToolingLogLevel } from './support/setup_tooling_log_level';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
-import { responseActionTasks } from './support/response_actions';
-import { agentActions } from './support/agent_actions';
 import { usageTracker } from '../../../common/endpoint/data_loaders/usage_tracker';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import { agentActions } from './support/agent_actions';
+import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
+import { getVideosForFailedSpecs } from './support/filter_videos';
+import { responseActionTasks } from './support/response_actions';
+import { samlAuthentication } from './support/saml_authentication';
+import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 
 export const getCypressBaseConfig = (
   overrides: Cypress.ConfigOptions = {}

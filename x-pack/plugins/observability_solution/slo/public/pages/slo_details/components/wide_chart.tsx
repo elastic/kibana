@@ -24,10 +24,10 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { ChartData } from '../../../typings';
+import { useKibana } from '../../../utils/kibana_react';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
-import { useKibana } from '../../../utils/kibana_react';
-import { ChartData } from '../../../typings';
 
 type ChartType = 'area' | 'line';
 type State = 'success' | 'error';

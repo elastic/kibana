@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import { merge, of, Observable } from 'rxjs';
-import { map, scan } from 'rxjs';
-import { set } from '@kbn/safer-lodash-set';
 import { Logger } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set';
 import { JsonObject } from '@kbn/utility-types';
-import { TaskStore } from '../task_store';
+import { Observable, merge, of } from 'rxjs';
+import { map, scan } from 'rxjs';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
-import {
-  createWorkloadAggregator,
-  summarizeWorkloadStat,
-  SummarizedWorkloadStat,
-  WorkloadStat,
-} from './workload_statistics';
-import {
-  EphemeralTaskStat,
-  createEphemeralTaskAggregator,
-  SummarizedEphemeralTaskStat,
-  summarizeEphemeralStat,
-} from './ephemeral_task_statistics';
-import {
-  createTaskRunAggregator,
-  summarizeTaskRunStat,
-  TaskRunStat,
-  SummarizedTaskRunStat,
-} from './task_run_statistics';
+import { TaskStore } from '../task_store';
 import {
   BackgroundTaskUtilizationStat,
   createBackgroundTaskUtilizationAggregator,
 } from './background_task_utilization_statistics';
+import {
+  EphemeralTaskStat,
+  SummarizedEphemeralTaskStat,
+  createEphemeralTaskAggregator,
+  summarizeEphemeralStat,
+} from './ephemeral_task_statistics';
+import {
+  SummarizedTaskRunStat,
+  TaskRunStat,
+  createTaskRunAggregator,
+  summarizeTaskRunStat,
+} from './task_run_statistics';
+import {
+  SummarizedWorkloadStat,
+  WorkloadStat,
+  createWorkloadAggregator,
+  summarizeWorkloadStat,
+} from './workload_statistics';
 
-import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
-import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
+import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 
 export interface MonitoringStats {
   last_update: string;

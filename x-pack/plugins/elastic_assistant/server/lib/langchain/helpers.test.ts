@@ -7,15 +7,15 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant-common';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
+import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 import {
   getLangChainMessage,
   getLangChainMessages,
   requestHasRequiredAnonymizationParams,
 } from './helpers';
-import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 
 describe('helpers', () => {
   describe('getLangChainMessage', () => {

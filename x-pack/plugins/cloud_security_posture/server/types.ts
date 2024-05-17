@@ -1,3 +1,5 @@
+import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,36 +8,34 @@
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
+  CoreStart,
+  CustomRequestHandlerContext,
+  IRouter,
+  IScopedClusterClient,
+  KibanaResponseFactory,
+  Logger,
+  RequestHandler,
+  RouteMethod,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+  PackageService,
+} from '@kbn/fleet-plugin/server';
+import type { FleetRequestHandlerContext, FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type {
-  IRouter,
-  CoreStart,
-  CustomRequestHandlerContext,
-  Logger,
-  SavedObjectsClientContract,
-  IScopedClusterClient,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteMethod,
-} from '@kbn/core/server';
-import type {
-  AgentService,
-  PackageService,
-  AgentPolicyServiceInterface,
-  PackagePolicyClient,
-} from '@kbn/fleet-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import { CspStatusCode, IndexDetails } from '../common/types_old';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -95,7 +95,7 @@ export type CspRequestHandler<
   Q = unknown,
   B = unknown,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = RequestHandler<P, Q, B, CspRequestHandlerContext, Method, ResponseFactory>;
 
 /**

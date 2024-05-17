@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { PaletteDefinition } from '@kbn/coloring';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 
 export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {

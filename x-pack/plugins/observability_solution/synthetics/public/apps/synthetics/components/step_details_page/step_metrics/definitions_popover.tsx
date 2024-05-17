@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonEmpty, EuiDescriptionList } from '@elastic/eui';
+import { EuiButtonEmpty, EuiDescriptionList, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import {
   CLS_HELP_LABEL,
   CLS_LABEL,

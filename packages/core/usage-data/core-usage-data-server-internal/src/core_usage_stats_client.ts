@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
+import type { IBasePath, KibanaRequest } from '@kbn/core-http-server';
 import type {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterField,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { CoreUsageStats, CoreIncrementCounterParams } from '@kbn/core-usage-data-server';
 import {
-  type ICoreUsageStatsClient,
   type BaseIncrementOptions,
+  CORE_USAGE_STATS_ID,
+  CORE_USAGE_STATS_TYPE,
+  type ICoreUsageStatsClient,
+  type IncrementSavedObjectsExportOptions,
   type IncrementSavedObjectsImportOptions,
   type IncrementSavedObjectsResolveImportErrorsOptions,
-  type IncrementSavedObjectsExportOptions,
-  CORE_USAGE_STATS_TYPE,
-  CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
+import type { CoreIncrementCounterParams, CoreUsageStats } from '@kbn/core-usage-data-server';
 import {
   type Observable,
+  Subject,
   bufferWhen,
   exhaustMap,
   filter,
@@ -32,7 +33,6 @@ import {
   map,
   merge,
   skip,
-  Subject,
   takeUntil,
   tap,
 } from 'rxjs';

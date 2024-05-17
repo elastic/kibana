@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from '../mock/mock_action_response';
+import { ActionsClientLlm } from './llm';
 
 const connectorId = 'mock-connector-id';
 

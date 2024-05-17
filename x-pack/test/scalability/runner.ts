@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import fs from 'fs';
+import path from 'path';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
-import path from 'path';
-import fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { FtrProviderContext } from './ftr_provider_context';
 import { EventsShipper } from './events_shipper';
+import { FtrProviderContext } from './ftr_provider_context';
 import { getCapacityMetrics } from './report_parser';
-import { ScalabilityJourney, MetricEvent } from './types';
+import { MetricEvent, ScalabilityJourney } from './types';
 
 const telemetryChannel = 'scalability-metrics';
 

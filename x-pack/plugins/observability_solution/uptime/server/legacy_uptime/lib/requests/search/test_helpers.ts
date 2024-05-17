@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
-import { QueryContext } from './query_context';
 import { getUptimeESMockClient } from '../test_helpers';
+import { QueryContext } from './query_context';
+import { CursorPagination } from './types';
 
 export const nextPagination = (key: any): CursorPagination => {
   return {

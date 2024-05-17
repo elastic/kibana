@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export const BETA_LABEL = i18n.translate('securitySolutionPackages.sideNav.betaBadge.label', {
   defaultMessage: 'Beta',

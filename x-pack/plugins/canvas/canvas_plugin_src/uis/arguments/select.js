@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiSelect } from '@elastic/eui';
-import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { ArgumentStrings } from '../../../i18n';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const { Select: strings } = ArgumentStrings;
 
@@ -23,7 +23,13 @@ const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
   };
 
   return (
-    <EuiSelect compressed id={argId} value={argValue} options={choices} onChange={handleChange} />
+    <EuiSelect
+      compressed={true}
+      id={argId}
+      value={argValue}
+      options={choices}
+      onChange={handleChange}
+    />
   );
 };
 

@@ -10,23 +10,23 @@ import React, { FC, PropsWithChildren } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiPortal,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiBadge,
-  EuiHealth,
-  EuiText,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHealth,
+  EuiPortal,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getStatusColor, attemptToFormatJson } from '../utils';
+import { attemptToFormatJson, getStatusColor } from '../utils';
 
 import { ApiLogLogic } from '.';
 

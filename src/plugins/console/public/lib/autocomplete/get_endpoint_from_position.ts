@@ -7,8 +7,8 @@
  */
 
 import { CoreEditor, Position } from '../../types';
-import { getCurrentMethodAndTokenPaths } from './autocomplete';
 import type RowParser from '../row_parser';
+import { getCurrentMethodAndTokenPaths } from './autocomplete';
 
 import { getTopLevelUrlCompleteComponents } from '../kb/kb';
 import { populateContext } from './engine';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
+import * as rt from 'io-ts';
 
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
-  timeRangeRT,
   routeTimingMetadataRT,
+  timeRangeRT,
 } from '../../../shared';
 import { idFormatByJobTypeRT } from '../../id_formats/v1/id_formats';
 
